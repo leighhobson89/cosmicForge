@@ -17,7 +17,7 @@ import {
 import { setAchievementIconImageUrls } from './resourceDataObject.js';
 
 import { showNotification } from './ui.js';
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+import { createClient } from "https://cdn.skypack.dev/@supabase/supabase-js";
 import { getNavigatorLanguage } from './game.js';
 
 const supabaseUrl = 'https://riogcxvtomyjlzkcnujf.supabase.co';
