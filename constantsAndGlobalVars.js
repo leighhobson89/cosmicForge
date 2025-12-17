@@ -364,6 +364,8 @@ let currentTab = [1, 'Resources'];
 let currentOptionPane = null;
 let notationType = 'normalCondensed';
 
+let antimatterDeltaAccumulator = 0;
+
 //STATS PAGE LOGGERS
 let allTimeTotalHydrogen = 0;
 let allTimeTotalHelium = 0;
@@ -1589,6 +1591,14 @@ export function getNotationType() {
 
 export function setNotationType(value) {
     notationType = value;
+}
+
+export function getAntimatterDeltaAccumulator() {
+    return antimatterDeltaAccumulator;
+}
+
+export function setAntimatterDeltaAccumulator(value) {
+    antimatterDeltaAccumulator = value;
 }
 
 export function getIncreaseStorageFactor() {

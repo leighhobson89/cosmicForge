@@ -381,6 +381,7 @@ import {
  import { initializeAutoSave, saveGame } from './saveLoadGame.js';
  import { playClickSfx, sfxPlayer, weatherAmbienceManager, backgroundAudio } from './audioManager.js';
  import { timerManager } from './timerManager.js';
+import { timerManagerDelta } from './timerManagerDelta.js';
  import { initialiseDescriptions, megaStructureTableText } from './descriptions.js';
 
  import { drawTab5Content } from './drawTab5Content.js';
@@ -390,6 +391,7 @@ export function startGame() {
     if (!getGameStartTime()) {
         setGameStartTime();
     }
+
     if (!getRunStartTime()) {
         setRunStartTime();
     }
@@ -408,6 +410,38 @@ export function startGame() {
     gameLoop();
 }
 
+function initialiseAntimatterDeltaTimer() {
+    const timerId = 'antimatterDeltaTimer';
+    if (timerManagerDelta.hasTimer(timerId)) {
+        return;
+    }
+
+    timerManagerDelta.addTimer(timerId, {
+        durationMs: 0,
+        repeat: true,
+        onUpdate: ({ deltaMs }) => updateAntimatterDelta(deltaMs),
+        metadata: { type: 'antimatter' }
+    });
+}
+
+function updateAntimatterDelta(deltaMs) {
+    if (!deltaMs || !getAntimatterUnlocked()) {
+        return;
+    }
+
+    const accumulator = getAntimatterDeltaAccumulator() + deltaMs;
+    const intervalMs = getTimerUpdateInterval();
+
+    if (accumulator >= intervalMs) {
+        const leftover = accumulator % intervalMs;
+        setAntimatterDeltaAccumulator(leftover);
+        updateAntimatterAndDiagram();
+        return;
+    }
+
+    setAntimatterDeltaAccumulator(accumulator);
+}
+
 export function calculateElapsedActiveGameTime() {
     const gameStart = getGameStartTime();
     const totalInactiveTime = getGameActiveCountTime()[1];
@@ -422,6 +456,7 @@ export function calculateElapsedActiveGameTime() {
 
 export async function gameLoop() {
     if (gameState === getGameVisibleActive()) {
+        timerManagerDelta.updateWithTimestamp(performance.now());
         updateAttentionIndicators();
         calculateElapsedActiveGameTime();
         refreshAchievementTooltipDescriptions();
@@ -604,6 +639,106 @@ export async function gameLoop() {
 
         requestAnimationFrame(gameLoop);
     }
+}
+
+function initialiseResearchDeltaTimer() {
+    const researchTimerId = 'researchDeltaTimer';
+    if (timerManagerDelta.hasTimer(researchTimerId)) {
+        return;
+    }
+
+    timerManagerDelta.addTimer(researchTimerId, {
+        durationMs: 0,
+        repeat: true,
+        onUpdate: ({ deltaMs }) => {
+            updateResearchDelta(deltaMs);
+        },
+        metadata: { type: 'research' }
+    });
+}
+
+function updateResearchDelta(deltaMs) {
+    if (!deltaMs) {
+        return;
+    }
+
+    const researchRatePerTick = calculateResearchRatePerTick();
+    updateResearchRateDisplay(researchRatePerTick);
+
+    if (researchRatePerTick <= 0) {
+        return;
+    }
+
+    const researchPerMillisecond = researchRatePerTick / getTimerUpdateInterval();
+    const researchGain = researchPerMillisecond * deltaMs;
+
+    if (researchGain <= 0) {
+        return;
+    }
+
+    const currentResearchQuantity = getResourceDataObject('research', ['quantity']);
+    setResourceDataObject(currentResearchQuantity + researchGain, 'research', ['quantity']);
+    addToResourceAllTimeStat(researchGain, 'researchPoints');
+}
+
+function calculateResearchRatePerTick() {
+    const upgrades = getResourceDataObject('research', ['upgrades']);
+    let poweredRate = 0;
+    let unpoweredRate = 0;
+
+    Object.keys(upgrades).forEach(upgradeKey => {
+        const upgradeData = upgrades[upgradeKey];
+        if (!upgradeData) {
+            return;
+        }
+
+        const buildingRate = (upgradeData.rate || 0) * (upgradeData.quantity || 0);
+        if (upgradeData.active) {
+            poweredRate += buildingRate;
+            if (upgradeKey !== 'scienceLab') {
+                unpoweredRate += buildingRate;
+            }
+        }
+    });
+
+    let finalRate = getPowerOnOff() ? poweredRate : unpoweredRate;
+
+    const megaStructureTechs = getMegaStructureTechsResearched();
+    const isMegaStructureRun = getCurrentRunIsMegaStructureRun();
+    const currentFactoryStar = getStarSystemDataObject('stars', [getCurrentStarSystem(), 'factoryStar'], true);
+
+    if (isMegaStructureRun && currentFactoryStar === 'Celestial Processing Core') {
+        if (megaStructureTechs.some(arr => Array.isArray(arr) && arr[0] === 2 && arr[1] === 1)) {
+            finalRate += 0.5;
+        }
+
+        if (megaStructureTechs.some(arr => Array.isArray(arr) && arr[0] === 2 && arr[1] === 2)) {
+            finalRate += 1;
+        }
+
+        if (megaStructureTechs.some(arr => Array.isArray(arr) && arr[0] === 2 && arr[1] === 4)) {
+            finalRate += 1.5;
+        }
+    }
+
+    if (megaStructureTechs.some(arr => Array.isArray(arr) && arr[0] === 2 && arr[1] === 5)) {
+        if (isMegaStructureRun && getStarSystemDataObject('stars', [getCurrentStarSystem(), 'factoryStar']) === 'Celestial Processing Core') {
+            finalRate += 2;
+        } else {
+            finalRate += 5;
+        }
+    }
+
+    return finalRate;
+}
+
+function updateResearchRateDisplay(researchRatePerTick) {
+    const researchRateElement = getElements().researchRate;
+    if (!researchRateElement) {
+        return;
+    }
+
+    researchRateElement.textContent = `${(researchRatePerTick * getTimerRateRatio()).toFixed(1)} / s`;
 }
 
 export function drawMegaStructureTableText() {
@@ -5843,11 +5978,14 @@ function startInitialTimers() {
     const rockets = Object.fromEntries(Object.entries(getResourceDataObject('space', ['upgrades'])).filter(([key, value]) => key.includes('rocket')));
     const tiers = [1, 2, 3, 4];
 
+    /*
     timerManager.addTimer('antimatter', getTimerUpdateInterval(), () => {
         if (getAntimatterUnlocked()) {
             updateAntimatterAndDiagram();
         }
     });
+    */
+    initialiseAntimatterDeltaTimer();
 
     for (const rocket in rockets) {
         if (rockets.hasOwnProperty(rocket)) {
@@ -6102,6 +6240,7 @@ function startInitialTimers() {
         }
     }
 
+    /*
     timerManager.addTimer('research', getTimerUpdateInterval(), () => {
         const currentResearchQuantity = getResourceDataObject('research', ['quantity']);
 
@@ -6151,6 +6290,8 @@ function startInitialTimers() {
 
         getElements().researchRate.textContent = `${(finalRate * getTimerRateRatio()).toFixed(1)} / s`;
     });    
+    */
+    initialiseResearchDeltaTimer();
     
     timerManager.addTimer('energy', getTimerUpdateInterval(), () => {
         let newEnergyRate = 0;
