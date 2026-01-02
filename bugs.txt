@@ -10,6 +10,7 @@ tech tree reork or fix background
 be able to sell research points after science labs
 consider nerfing research or making more expensive and nerfing offline gains
 compounds stats not reflecting true values
+pondering the heavens tooltip mixed up order
 
 Pioneer-testermanuscript3
 
