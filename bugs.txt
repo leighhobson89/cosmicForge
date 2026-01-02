@@ -9,6 +9,7 @@ change glass req to 12000 for space telescope
 tech tree reork or fix background
 be able to sell research points after science labs
 consider nerfing research or making more expensive and nerfing offline gains
+compounds stats not reflecting true values
 
 Pioneer-testermanuscript3
 
