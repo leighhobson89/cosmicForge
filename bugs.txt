@@ -11,6 +11,7 @@ be able to sell research points after science labs
 consider nerfing research or making more expensive and nerfing offline gains
 compounds stats not reflecting true values
 pondering the heavens tooltip mixed up order
+add a fill to capacity option when creating compounds
 
 Pioneer-testermanuscript3
 
