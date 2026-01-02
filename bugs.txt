@@ -6,6 +6,7 @@ Uncaught TypeError: Cannot read properties of null (reading 'parentElement')
     at HTMLDivElement.<anonymous> (ui.js:4087:25) 
 
 change glass req to 12000 for space telescope
+tech tree reork or fix background
 
 Pioneer-testermanuscript3
 
