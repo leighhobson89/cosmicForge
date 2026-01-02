@@ -174,7 +174,7 @@ export function initialiseDescriptions() {
     modalKnowledgeSharingTabUnlockHeader = `TECH RESEARCH!`;
     modalKnowledgeSharingTabUnlockText = `People are getting together to share knowledge!<br>Scientific research will advance much faster with new Science Clubs where enthusiasts<br>can convene and develop their ideas!<br><br><span class="green-ready-text">Science Clubs Unlocked!</span>`;
     modalScienceLabsTabUnlockHeader = `SCIENCE LABS!`;
-    modalScienceLabsTabUnlockText = `Scientists now have dedicated laboratories to carry out their experiments.<br>Research will rocket with this advancement!<br><br><span class="green-ready-text">Science Clubs Unlocked!</span>`;
+    modalScienceLabsTabUnlockText = `Scientists now have dedicated laboratories to carry out their experiments.<br>Research will rocket with this advancement!<br><br><span class="green-ready-text">Science Labs Unlocked!</span>`;
     modalQuantumComputingTabUnlockHeader = `QUANTUM COMPUTING UNLOCKED!`;
     modalQuantumComputingTabUnlockText = `Your Researchers have breached the boundaries of classical computation.<br>With Quantum Computing, reality itself bends to optimize processes.<br>This advancement will allow us to extract Resources much faster<br><br><span class="green-ready-text">Level 2 AutoBuyers Unlocked!</span>`;
     modalRocketCompositesTabUnlockHeader = `ROCKET COMPOSITES!`;

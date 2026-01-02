@@ -1,4 +1,11 @@
 rare cases where 0 0 0 for enemy in battle but can still click conquest, in this case should say settle always
+when power on with a basic power plant, carbon production severely reduced in reality but appears to only be reduced by 2/s
+
+Uncaught TypeError: Cannot read properties of null (reading 'parentElement')
+    at setSellFuseCreateTextDescriptionClassesBasedOnButtonStates (game.js:5546:39)
+    at HTMLDivElement.<anonymous> (ui.js:4087:25) 
+
+science labs notification says science clubs unlocked
 
 Pioneer-testermanuscript3
 
