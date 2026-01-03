@@ -5,7 +5,8 @@ Uncaught TypeError: Cannot read properties of null (reading 'parentElement')
     at setSellFuseCreateTextDescriptionClassesBasedOnButtonStates (game.js:5546:39)
     at HTMLDivElement.<anonymous> (ui.js:4087:25) 
 
-tech tree reork or fix background
+if switch off autobuyer, power adjusts but number for production still shows as if it is on
+tech tree rework or fix background
 be able to sell research points after science labs
 consider nerfing research or making more expensive and nerfing offline gains
 

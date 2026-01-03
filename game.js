@@ -8804,19 +8804,18 @@ function generateAsteroidData(name) {
 
     let quantity;
     if (rarity === "Common") {
-        quantity = Math.floor(Math.random() * (800 - 300 + 1)) + 300;
-    } else if (rarity === "Uncommon") {
         quantity = Math.floor(Math.random() * (1200 - 700 + 1)) + 700;
+    } else if (rarity === "Uncommon") {
+        quantity = Math.floor(Math.random() * (2000 - 1200 + 1)) + 1200;
     } else if (rarity === "Rare") {
-        quantity = Math.floor(Math.random() * (2000 - 1100 + 1)) + 1100;
+        quantity = Math.floor(Math.random() * (4000 - 2000 + 1)) + 2000;
     } else {
-        quantity = Math.floor(Math.random() * (10000 - 5000 + 1)) + 5000;
+        quantity = Math.floor(Math.random() * (10000 - 4000 + 1)) + 4000;
     }
 
     let quantityClass;
-    const minQuantity = rarity === "Common" ? 300 : (rarity === "Uncommon" ? 700 : (rarity === "Rare" ? 1100 : 5000));
-    const maxQuantity = rarity === "Common" ? 800 : (rarity === "Uncommon" ? 1200 : (rarity === "Rare" ? 2000 : 10000));
-    
+    const minQuantity = rarity === "Common" ? 700 : (rarity === "Uncommon" ? 1200 : (rarity === "Rare" ? 2000 : 4000));
+    const maxQuantity = rarity === "Common" ? 1200 : (rarity === "Uncommon" ? 2000 : (rarity === "Rare" ? 4000 : 10000));
     const quantityPercentile = (quantity - minQuantity) / (maxQuantity - minQuantity);
 
     if (quantityPercentile >= 0.76) {
