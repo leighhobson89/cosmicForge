@@ -1,9 +1,21 @@
 import { getCompoundCreateDropdownRecipeText, getLastSellResourceCompoundDropdownOption, setLastSellResourceCompoundDropdownOption, getImageUrls, getTimerRateRatio, getCompoundSalePreview, getCompoundCreatePreview, setCreateCompoundPreview, setAchievementFlagArray } from './constantsAndGlobalVars.js';
-import { increaseResourceStorage, createCompound, sellCompound, gain } from './game.js';
+import { increaseResourceStorage, createCompound, sellCompound, gain, addToResourceAllTimeStat } from './game.js';
+
 import { setResourceDataObject, getResourceDataObject } from './resourceDataObject.js';
 import { removeTabAttentionIfNoIndicators, createTextElement, createToggleSwitch, createOptionRow, createDropdown, createButton } from './ui.js';
 
 export function drawTab4Content(heading, optionContentElement) {
+    const handleCompoundCreate = (compound) => {
+        const beforeQuantity = getResourceDataObject('compounds', [compound, 'quantity']) || 0;
+        createCompound(compound);
+        const afterQuantity = getResourceDataObject('compounds', [compound, 'quantity']) || 0;
+        const createdAmount = afterQuantity - beforeQuantity;
+
+        if (createdAmount > 0) {
+            addToResourceAllTimeStat(createdAmount, compound);
+        }
+    };
+
     const optionElement = document.getElementById(heading.toLowerCase().replace(/\s(.)/g, (match, group1) => group1.toUpperCase()).replace(/\s+/g, '') + 'Option');
         if (optionElement) {
             const warningIcon = optionElement.querySelector('span.attention-indicator');
@@ -25,6 +37,7 @@ export function drawTab4Content(heading, optionContentElement) {
                 null,
                 'Create Diesel:',
                 createDropdown('dieselCreateSelectQuantity', [
+                    { value: 'fillToCapacity', text: getCompoundCreateDropdownRecipeText('diesel').fillToCapacity?.text || 'Fill To Capacity' },
                     { value: 'max', text: getCompoundCreateDropdownRecipeText('diesel').max.text },
                     { value: 'threeQuarters', text: getCompoundCreateDropdownRecipeText('diesel').threeQuarters.text },
                     { value: 'twoThirds', text: getCompoundCreateDropdownRecipeText('diesel').twoThirds.text },
@@ -36,11 +49,11 @@ export function drawTab4Content(heading, optionContentElement) {
                     { value: '50', text: getCompoundCreateDropdownRecipeText('diesel')[50].text },
                     { value: '5', text: getCompoundCreateDropdownRecipeText('diesel')[5].text },
                     { value: '1', text: getCompoundCreateDropdownRecipeText('diesel')[1].text },
-                ], 'max', (value) => {
+                ], 'fillToCapacity', (value) => {
                     setCreateCompoundPreview('diesel', value);
                 }),                
                 createButton('Create', ['option-button', 'red-disabled-text', 'compound-cost-sell-check', 'create'], () => {
-                    createCompound('diesel');
+                    handleCompoundCreate('diesel');
                 }, 'createCompound', null, null, null, 'diesel', true, null, 'compound'),
                 createTextElement(`Auto:`, '', ['autoBuyer-building-quantity']),
                 createToggleSwitch('autoCreateToggle', false, (isEnabled) => {
@@ -77,9 +90,9 @@ export function drawTab4Content(heading, optionContentElement) {
                     { value: '100', text: '100' },
                     { value: '10', text: '10' },
                     { value: '1', text: '1' },
-            ], getLastSellResourceCompoundDropdownOption('compounds', 'diesel'), (value) => {
-                setLastSellResourceCompoundDropdownOption('compounds', 'diesel', value);
-            }),  
+                ], getLastSellResourceCompoundDropdownOption('compounds', 'diesel'), (value) => {
+                    setLastSellResourceCompoundDropdownOption('compounds', 'diesel', value);
+                }),  
                 createButton('Sell', ['option-button', 'red-disabled-text', 'compound-cost-sell-check', 'sell'], () => {
                     sellCompound('diesel');
                 }, 'sellCompound', null, null, null, 'diesel', true, null, 'compound'),
@@ -253,6 +266,7 @@ export function drawTab4Content(heading, optionContentElement) {
                 null,
                 'Create Glass:',
                 createDropdown('glassCreateSelectQuantity', [
+                    { value: 'fillToCapacity', text: getCompoundCreateDropdownRecipeText('glass').fillToCapacity?.text || 'Fill To Capacity' },
                     { value: 'max', text: getCompoundCreateDropdownRecipeText('glass').max.text },
                     { value: 'threeQuarters', text: getCompoundCreateDropdownRecipeText('glass').threeQuarters.text },
                     { value: 'twoThirds', text: getCompoundCreateDropdownRecipeText('glass').twoThirds.text },
@@ -264,11 +278,11 @@ export function drawTab4Content(heading, optionContentElement) {
                     { value: '50', text: getCompoundCreateDropdownRecipeText('glass')[50].text },
                     { value: '5', text: getCompoundCreateDropdownRecipeText('glass')[5].text },
                     { value: '1', text: getCompoundCreateDropdownRecipeText('glass')[1].text },
-                ], 'max', (value) => {
+                ], 'fillToCapacity', (value) => {
                     setCreateCompoundPreview('glass', value);
                 }),                
                 createButton('Create', ['option-button', 'red-disabled-text', 'compound-cost-sell-check', 'create'], () => {
-                    createCompound('glass');
+                    handleCompoundCreate('glass');
                 }, 'createCompound', null, null, null, 'glass', true, null, 'compound'),
                 createTextElement(`Auto:`, '', ['autoBuyer-building-quantity']),
                 createToggleSwitch('autoCreateToggle', false, (isEnabled) => {
@@ -481,6 +495,7 @@ export function drawTab4Content(heading, optionContentElement) {
                 null,
                 'Create Steel:',
                 createDropdown('steelCreateSelectQuantity', [
+                    { value: 'fillToCapacity', text: getCompoundCreateDropdownRecipeText('steel').fillToCapacity?.text || 'Fill To Capacity' },
                     { value: 'max', text: getCompoundCreateDropdownRecipeText('steel').max.text },
                     { value: 'threeQuarters', text: getCompoundCreateDropdownRecipeText('steel').threeQuarters.text },
                     { value: 'twoThirds', text: getCompoundCreateDropdownRecipeText('steel').twoThirds.text },
@@ -492,11 +507,11 @@ export function drawTab4Content(heading, optionContentElement) {
                     { value: '50', text: getCompoundCreateDropdownRecipeText('steel')[50].text },
                     { value: '5', text: getCompoundCreateDropdownRecipeText('steel')[5].text },
                     { value: '1', text: getCompoundCreateDropdownRecipeText('steel')[1].text },
-                ], 'max', (value) => {
+                ], 'fillToCapacity', (value) => {
                     setCreateCompoundPreview('steel', value);
                 }),                
                 createButton('Create', ['option-button', 'red-disabled-text', 'compound-cost-sell-check', 'create'], () => {
-                    createCompound('steel');
+                    handleCompoundCreate('steel');
                     setAchievementFlagArray('createSteel', 'add');
                 }, 'createCompound', null, null, null, 'steel', true, null, 'compound'),
                 createTextElement(`Auto:`, '', ['autoBuyer-building-quantity']),
@@ -710,6 +725,7 @@ export function drawTab4Content(heading, optionContentElement) {
                 null,
                 'Create Concrete:',
                 createDropdown('concreteCreateSelectQuantity', [
+                    { value: 'fillToCapacity', text: getCompoundCreateDropdownRecipeText('concrete').fillToCapacity?.text || 'Fill To Capacity' },
                     { value: 'max', text: getCompoundCreateDropdownRecipeText('concrete').max.text },
                     { value: 'threeQuarters', text: getCompoundCreateDropdownRecipeText('concrete').threeQuarters.text },
                     { value: 'twoThirds', text: getCompoundCreateDropdownRecipeText('concrete').twoThirds.text },
@@ -721,11 +737,11 @@ export function drawTab4Content(heading, optionContentElement) {
                     { value: '50', text: getCompoundCreateDropdownRecipeText('concrete')[50].text },
                     { value: '5', text: getCompoundCreateDropdownRecipeText('concrete')[5].text },
                     { value: '1', text: getCompoundCreateDropdownRecipeText('concrete')[1].text },
-                ], 'max', (value) => {
+                ], 'fillToCapacity', (value) => {
                     setCreateCompoundPreview('concrete', value);
                 }),                
                 createButton('Create', ['option-button', 'red-disabled-text', 'compound-cost-sell-check', 'create'], () => {
-                    createCompound('concrete');
+                    handleCompoundCreate('concrete');
                 }, 'createCompound', null, null, null, 'concrete', true, null, 'compound'),
                 createTextElement(`Auto:`, '', ['autoBuyer-building-quantity']),
                 createToggleSwitch('autoCreateToggle', false, (isEnabled) => {
@@ -940,6 +956,7 @@ export function drawTab4Content(heading, optionContentElement) {
                 null,
                 'Create Water:',
                 createDropdown('waterCreateSelectQuantity', [
+                    { value: 'fillToCapacity', text: getCompoundCreateDropdownRecipeText('water').fillToCapacity?.text || 'Fill To Capacity' },
                     { value: 'max', text: getCompoundCreateDropdownRecipeText('water').max.text },
                     { value: 'threeQuarters', text: getCompoundCreateDropdownRecipeText('water').threeQuarters.text },
                     { value: 'twoThirds', text: getCompoundCreateDropdownRecipeText('water').twoThirds.text },
@@ -951,11 +968,11 @@ export function drawTab4Content(heading, optionContentElement) {
                     { value: '50', text: getCompoundCreateDropdownRecipeText('water')[50].text },
                     { value: '5', text: getCompoundCreateDropdownRecipeText('water')[5].text },
                     { value: '1', text: getCompoundCreateDropdownRecipeText('water')[1].text },
-                ], 'max', (value) => {
+                ], 'fillToCapacity', (value) => {
                     setCreateCompoundPreview('water', value);
                 }),                
                 createButton('Create', ['option-button', 'red-disabled-text', 'compound-cost-sell-check', 'create'], () => {
-                    createCompound('water');
+                    handleCompoundCreate('water');
                 }, 'createCompound', null, null, null, 'water', true, null, 'compound'),
                 createTextElement(`Auto:`, '', ['autoBuyer-building-quantity']),
                 createToggleSwitch('autoCreateToggle', false, (isEnabled) => {
@@ -1168,6 +1185,7 @@ export function drawTab4Content(heading, optionContentElement) {
                 null,
                 'Create Titanium:',
                 createDropdown('titaniumCreateSelectQuantity', [
+                    { value: 'fillToCapacity', text: getCompoundCreateDropdownRecipeText('titanium').fillToCapacity?.text || 'Fill To Capacity' },
                     { value: 'max', text: getCompoundCreateDropdownRecipeText('titanium').max.text },
                     { value: 'threeQuarters', text: getCompoundCreateDropdownRecipeText('titanium').threeQuarters.text },
                     { value: 'twoThirds', text: getCompoundCreateDropdownRecipeText('titanium').twoThirds.text },
@@ -1179,11 +1197,11 @@ export function drawTab4Content(heading, optionContentElement) {
                     { value: '50', text: getCompoundCreateDropdownRecipeText('titanium')[50].text },
                     { value: '5', text: getCompoundCreateDropdownRecipeText('titanium')[5].text },
                     { value: '1', text: getCompoundCreateDropdownRecipeText('titanium')[1].text },
-                ], 'max', (value) => {
+                ], 'fillToCapacity', (value) => {
                     setCreateCompoundPreview('titanium', value);
                 }),
                 createButton('Create', ['option-button', 'red-disabled-text', 'compound-cost-sell-check', 'create'], () => {
-                    createCompound('titanium');
+                    handleCompoundCreate('titanium');
                     setAchievementFlagArray('createTitanium', 'add');
                 }, 'createCompound', null, null, null, 'titanium', true, null, 'compound'),
                 createTextElement(`Auto:`, '', ['autoBuyer-building-quantity']),

@@ -1001,10 +1001,10 @@ export function setupModalButtonTooltips() {
     document.body.appendChild(tooltip);
 
     const tooltipTextMap = {
-        modalExtraChoice1: modalPlayerLeaderIntroContentText1,
-        modalExtraChoice2: modalPlayerLeaderIntroContentText2,
-        modalConfirm: modalPlayerLeaderIntroContentText3,
-        modalCancel: modalPlayerLeaderIntroContentText4
+        modalConfirm: modalPlayerLeaderIntroContentText1,      // Constructor
+        modalCancel: modalPlayerLeaderIntroContentText2,       // Supremacist
+        modalExtraChoice1: modalPlayerLeaderIntroContentText3, // Voidborn
+        modalExtraChoice2: modalPlayerLeaderIntroContentText4  // Expansionist
     };
 
     modalTooltipHandlers.mouseover = (e) => {

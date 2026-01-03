@@ -94,6 +94,7 @@ export let repeatableTechMultipliers = {
 
 let compoundCreateDropdownRecipeText = {
     diesel: {
+      fillToCapacity: { value: 'fillToCapacity', text: 'Fill To Capacity' },
       max: { value: 'max', text: 'Max Possible' },
       threeQuarters: { value: 'threeQuarters', text: 'Up to 75%' },
       twoThirds: { value: 'twoThirds', text: 'Up to 67%' },
@@ -107,6 +108,7 @@ let compoundCreateDropdownRecipeText = {
       1: { value: '1', text: '1 - 26 Hyd, 12 Crb' }
     },
     glass: {
+      fillToCapacity: { value: 'fillToCapacity', text: 'Fill To Capacity' },
       max: { value: 'max', text: 'Max Possible' },
       threeQuarters: { value: 'threeQuarters', text: 'Up to 75%' },
       twoThirds: { value: 'twoThirds', text: 'Up to 67%' },
@@ -120,6 +122,7 @@ let compoundCreateDropdownRecipeText = {
       1: { value: '1', text: '1 - 4 Sil, 2 Oxy, 1 Sod' }
     },
     steel: {
+      fillToCapacity: { value: 'fillToCapacity', text: 'Fill To Capacity' },
       max: { value: 'max', text: 'Max Possible' },
       threeQuarters: { value: 'threeQuarters', text: 'Up to 75%' },
       twoThirds: { value: 'twoThirds', text: 'Up to 67%' },
@@ -133,6 +136,7 @@ let compoundCreateDropdownRecipeText = {
       1: { value: '1', text: '1 - 4 Irn, 1 Crb' }
     },
     concrete: {
+      fillToCapacity: { value: 'fillToCapacity', text: 'Fill To Capacity' },
       max: { value: 'max', text: 'Max Possible' },
       threeQuarters: { value: 'threeQuarters', text: 'Up to 75%' },
       twoThirds: { value: 'twoThirds', text: 'Up to 67%' },
@@ -146,6 +150,7 @@ let compoundCreateDropdownRecipeText = {
       1: { value: '1', text: '1 - 5 Sil, 2 Sod, 3 Hyd' }
     },
     water: {
+      fillToCapacity: { value: 'fillToCapacity', text: 'Fill To Capacity' },
       max: { value: 'max', text: 'Max Possible' },
       threeQuarters: { value: 'threeQuarters', text: 'Up to 75%' },
       twoThirds: { value: 'twoThirds', text: 'Up to 67%' },
@@ -159,6 +164,7 @@ let compoundCreateDropdownRecipeText = {
       1: { value: '1', text: '1 - 20 Hyd, 10 Oxy' }
     },
     titanium: {
+      fillToCapacity: { value: 'fillToCapacity', text: 'Fill To Capacity' },
       max: { value: 'max', text: 'Max Possible' },
       threeQuarters: { value: 'threeQuarters', text: 'Up to 75%' },
       twoThirds: { value: 'twoThirds', text: 'Up to 67%' },
@@ -839,6 +845,7 @@ export function resetAllVariablesOnRebirth() {
 
     compoundCreateDropdownRecipeText = {
         diesel: {
+          fillToCapacity: { value: 'fillToCapacity', text: 'Fill To Capacity' },
           max: { value: 'max', text: 'Max Possible' },
           threeQuarters: { value: 'threeQuarters', text: 'Up to 75%' },
           twoThirds: { value: 'twoThirds', text: 'Up to 67%' },
@@ -852,6 +859,7 @@ export function resetAllVariablesOnRebirth() {
           1: { value: '1', text: '1 - 26 Hyd, 12 Crb' }
         },
         glass: {
+          fillToCapacity: { value: 'fillToCapacity', text: 'Fill To Capacity' },
           max: { value: 'max', text: 'Max Possible' },
           threeQuarters: { value: 'threeQuarters', text: 'Up to 75%' },
           twoThirds: { value: 'twoThirds', text: 'Up to 67%' },
@@ -865,6 +873,7 @@ export function resetAllVariablesOnRebirth() {
           1: { value: '1', text: '1 - 4 Sil, 2 Oxy, 1 Sod' }
         },
         steel: {
+          fillToCapacity: { value: 'fillToCapacity', text: 'Fill To Capacity' },
           max: { value: 'max', text: 'Max Possible' },
           threeQuarters: { value: 'threeQuarters', text: 'Up to 75%' },
           twoThirds: { value: 'twoThirds', text: 'Up to 67%' },
@@ -878,6 +887,7 @@ export function resetAllVariablesOnRebirth() {
           1: { value: '1', text: '1 - 4 Irn, 1 Crb' }
         },
         concrete: {
+          fillToCapacity: { value: 'fillToCapacity', text: 'Fill To Capacity' },
           max: { value: 'max', text: 'Max Possible' },
           threeQuarters: { value: 'threeQuarters', text: 'Up to 75%' },
           twoThirds: { value: 'twoThirds', text: 'Up to 67%' },
@@ -891,6 +901,7 @@ export function resetAllVariablesOnRebirth() {
           1: { value: '1', text: '1 - 5 Sil, 2 Sod, 3 Hyd' }
         },
         water: {
+          fillToCapacity: { value: 'fillToCapacity', text: 'Fill To Capacity' },
           max: { value: 'max', text: 'Max Possible' },
           threeQuarters: { value: 'threeQuarters', text: 'Up to 75%' },
           twoThirds: { value: 'twoThirds', text: 'Up to 67%' },
@@ -904,6 +915,7 @@ export function resetAllVariablesOnRebirth() {
           1: { value: '1', text: '1 - 20 Hyd, 10 Oxy' }
         },
         titanium: {
+          fillToCapacity: { value: 'fillToCapacity', text: 'Fill To Capacity' },
           max: { value: 'max', text: 'Max Possible' },
           threeQuarters: { value: 'threeQuarters', text: 'Up to 75%' },
           twoThirds: { value: 'twoThirds', text: 'Up to 67%' },
@@ -1846,7 +1858,18 @@ export function setCreateCompoundPreview(compoundToCreate, dropDownString) {
     let constituentPartsQuantityNeeded3 = 0;
     let constituentPartsQuantityNeeded4 = 0;
 
+    const currentQuantity = getResourceDataObject('compounds', [compoundToCreate, 'quantity']) || 0;
+    const storageCapacity = getResourceDataObject('compounds', [compoundToCreate, 'storageCapacity']) || 0;
+    const availableStorage = Math.max(storageCapacity - currentQuantity, 0);
+
     switch (amount) {
+        case 'Fill To Capacity':
+            createAmount = Math.min(maxCompoundToCreate, availableStorage);
+            constituentPartsQuantityNeeded1 = createAmount * constituentPartsRatio1;
+            constituentPartsQuantityNeeded2 = createAmount * constituentPartsRatio2;
+            constituentPartsQuantityNeeded3 = createAmount * constituentPartsRatio3;
+            constituentPartsQuantityNeeded4 = createAmount * constituentPartsRatio4;
+            break;
         case 'Max Possible':
             createAmount = Math.floor(maxCompoundToCreate * 1);
             constituentPartsQuantityNeeded1 = createAmount * constituentPartsRatio1;
