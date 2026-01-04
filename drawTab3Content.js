@@ -1,4 +1,4 @@
-import { getCurrentStarSystem, setCanFuelRockets, setCanTravelToAsteroids, getTechTreeDataAndDraw, getTimerRateRatio, deferredActions, getCanAffordDeferred, setCanAffordDeferred, setTechUnlockedArray, setTemporaryCoreTechRowsRepo, setTechTreeDrawnYet, setRenderedTechTree, setUnlockedCompoundsArray, getTechUnlockedArray, getUnlockedResourcesArray, getPlayerPhilosophy, setRepeatableTechMultipliers, getRepeatableTechMultipliers, setIncreaseStorageFactor, getStatRun, getCurrentRunIsMegaStructureRun, setPermanentAntimatterUnlock, isTechTreeEnabled } from './constantsAndGlobalVars.js';
+import { getCurrentStarSystem, setCanFuelRockets, setCanTravelToAsteroids, getTechTreeDataAndDraw, getTimerRateRatio, deferredActions, getCanAffordDeferred, setCanAffordDeferred, setTechUnlockedArray, setTemporaryCoreTechRowsRepo, setUnlockedCompoundsArray, getTechUnlockedArray, getUnlockedResourcesArray, getPlayerPhilosophy, setRepeatableTechMultipliers, getRepeatableTechMultipliers, setIncreaseStorageFactor, getStatRun, getCurrentRunIsMegaStructureRun, setPermanentAntimatterUnlock, isTechTreeEnabled } from './constantsAndGlobalVars.js';
 import { setAllCompoundsToZeroQuantity, gain, startUpdateTimersAndRates, addToResourceAllTimeStat, setFleetArmorBuffsAfterRepeatables, setFleetSpeedsAfterRepeatables, setFleetAttackDamageAfterRepeatables, setInitialImpressionBaseAfterRepeatables, setStarStudyEfficiencyAfterRepeatables, setAsteroidSearchEfficiencyAfterRepeatables, setRocketTravelTimeReductionAfterRepeatables, setStarshipTravelTimeReductionAfterRepeatables, setResourceAutobuyerPricesAfterRepeatables, setCompoundRecipePricesAfterRepeatables, setEnergyAndResearchBuildingPricesAfterRepeatables, setFleetPricesAfterRepeatables, setStarshipPartPricesAfterRepeatables, setRocketPartPricesAfterRepeatables, applyMegaStructureBonuses } from './game.js';
 import { getStarSystemDataObject, setResourceDataObject, getResourceDataObject, setAutoBuyerTierLevel } from './resourceDataObject.js';
 import { removeTabAttentionIfNoIndicators, createToggleSwitch, createSvgElement, createTextElement, sortTechRows, createOptionRow, createButton, showNotification, updateDescriptionRow, appendAttentionIndicator, callPopupModal, showHideModal } from './ui.js';
@@ -131,7 +131,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('knowledgeSharing');
                         showNotification(techNotificationMessages.knowledgeSharing, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                         appendAttentionIndicator(document.getElementById('researchOption'));
                         if (getStatRun() === 1) {
                             callPopupModal(
@@ -183,7 +182,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('fusionTheory');
                         showNotification(techNotificationMessages.fusionTheory, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                     }, 'techUnlock', '', 'fusionTheory', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -214,7 +212,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         setTechUnlockedArray('hydrogenFusion');
                         updateDescriptionRow('hydrogenSellRow', 'content2');
                         showNotification(techNotificationMessages.hydrogenFusion, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                     }, 'techUnlock', '', 'hydrogenFusion', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -245,7 +242,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         setTechUnlockedArray('heliumFusion');
                         updateDescriptionRow('heliumSellRow', 'content2');
                         showNotification(techNotificationMessages.heliumFusion, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                     }, 'techUnlock', '', 'heliumFusion', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -276,7 +272,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         setTechUnlockedArray('carbonFusion');
                         updateDescriptionRow('carbonSellRow', 'content2');
                         showNotification(techNotificationMessages.carbonFusion, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                     }, 'techUnlock', '', 'carbonFusion', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -311,7 +306,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         if (getTechUnlockedArray().includes('compounds')) {
                             appendAttentionIndicator(document.getElementById(`waterOption`));
                         }
-                        setRenderedTechTree(false);
                     }, 'techUnlock', '', 'neonFusion', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -342,7 +336,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         setTechUnlockedArray('oxygenFusion');
                         updateDescriptionRow('oxygenSellRow', 'content2');
                         showNotification(techNotificationMessages.oxygenFusion, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                     }, 'techUnlock', '', 'oxygenFusion', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -373,7 +366,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         setTechUnlockedArray('siliconFusion');
                         updateDescriptionRow('siliconSellRow', 'content2');
                         showNotification(techNotificationMessages.siliconFusion, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                     }, 'techUnlock', '', 'siliconFusion', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -403,7 +395,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('nobleGasCollection');
                         showNotification(techNotificationMessages.nobleGasCollection, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                     }, 'techUnlock', '', 'nobleGasCollection', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -437,7 +428,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         if (getTechUnlockedArray().includes('compounds')) {
                             appendAttentionIndicator(document.getElementById(`glassOption`));
                         }
-                        setRenderedTechTree(false);
                     }, 'techUnlock', '', 'glassManufacture', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -471,7 +461,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         if (getTechUnlockedArray().includes('compounds')) {
                             appendAttentionIndicator(document.getElementById(`concreteOption`));
                         }
-                        setRenderedTechTree(false);
                     }, 'techUnlock', '', 'aggregateMixing', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -505,7 +494,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         if (getTechUnlockedArray().includes('compounds')) {
                             appendAttentionIndicator(document.getElementById(`titaniumOption`));
                         }
-                        setRenderedTechTree(false);
                     }, 'techUnlock', '', 'neutronCapture', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -541,7 +529,6 @@ export function drawTab3Content(heading, optionContentElement) {
                             }
                         });
                         showNotification(techNotificationMessages.quantumComputing, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                         indicateAllResources();
                         if (getStatRun() === 1) {
                             callPopupModal(
@@ -593,7 +580,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('scienceLaboratories');
                         showNotification(techNotificationMessages.scienceLaboratories, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                         appendAttentionIndicator(document.getElementById('researchOption'));
                         if (getStatRun() === 1) {
                             callPopupModal(
@@ -649,7 +635,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         if (getTechUnlockedArray().includes('compounds')) {
                             appendAttentionIndicator(document.getElementById(`dieselOption`));
                         }
-                        setRenderedTechTree(false);
                     }, 'techUnlock', '', 'hydroCarbons', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -679,7 +664,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('nanoTubeTechnology');
                         showNotification(techNotificationMessages.nanoTubeTechnology, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                     }, 'techUnlock', '', 'nanoTubeTechnology', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -709,7 +693,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('nanoBrokers');
                         showNotification(techNotificationMessages.nanoBrokers, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                         if (getStatRun() === 1) {
                             callPopupModal(
                                 modalNanoBrokersUnlockHeader, 
@@ -760,7 +743,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('stellarCartography');
                         showNotification(techNotificationMessages.stellarCartography, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                         if (getStatRun() === 1) {
                             callPopupModal(
                                 modalInterstellarTabUnlockHeader, 
@@ -811,7 +793,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('basicPowerGeneration');
                         showNotification(techNotificationMessages.basicPowerGeneration, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                         if (getStatRun() === 1) {
                             callPopupModal(
                                 modalEnergyTabUnlockHeader, 
@@ -862,7 +843,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('sodiumIonPowerStorage');
                         showNotification(techNotificationMessages.sodiumIonPowerStorage, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                     }, 'techUnlock', '', 'sodiumIonPowerStorage', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -892,7 +872,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('advancedPowerGeneration');
                         showNotification(techNotificationMessages.advancedPowerGeneration, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                     }, 'techUnlock', '', 'advancedPowerGeneration', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -922,7 +901,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('solarPowerGeneration');
                         showNotification(techNotificationMessages.solarPowerGeneration, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                     }, 'techUnlock', '', 'solarPowerGeneration', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -959,7 +937,6 @@ export function drawTab3Content(heading, optionContentElement) {
                             }
                         });
                         showNotification(techNotificationMessages.rocketComposites, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                         if (!document.getElementById('tab6').innerHTML.includes('???')) {
                             appendAttentionIndicator(document.getElementById(`launchPadOption`)); 
                         } 
@@ -1014,7 +991,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('advancedFuels');
                         showNotification(techNotificationMessages.advancedFuels, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                         setCanFuelRockets(true);
                     }, 'techUnlock', '', 'advancedFuels', null, 'research', true, null, 'tech'),
                     null,
@@ -1045,7 +1021,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('planetaryNavigation');
                         showNotification(techNotificationMessages.planetaryNavigation, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                         setCanTravelToAsteroids(true);
                     }, 'techUnlock', '', 'planetaryNavigation', null, 'research', true, null, 'tech'),
                     null,
@@ -1076,7 +1051,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('compounds');
                         showNotification(techNotificationMessages.compounds, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                         setAllCompoundsToZeroQuantity();
                         if (getStatRun() === 1) {
                             callPopupModal(
@@ -1132,7 +1106,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         if (getTechUnlockedArray().includes('compounds')) {
                             appendAttentionIndicator(document.getElementById(`steelOption`));
                         }
-                        setRenderedTechTree(false);
                     }, 'techUnlock', '', 'steelFoundries', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -1162,7 +1135,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('giganticTurbines');
                         showNotification(techNotificationMessages.giganticTurbines, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                     }, 'techUnlock', '', 'giganticTurbines', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -1192,7 +1164,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('atmosphericTelescopes');
                         showNotification(techNotificationMessages.atmosphericTelescopes, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                         if (!document.getElementById('tab6').innerHTML.includes('???')) {
                             appendAttentionIndicator(document.getElementById(`spaceTelescopeOption`)); 
                         }
@@ -1246,7 +1217,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('fusionEfficiencyI');
                         showNotification(techNotificationMessages.fusionEfficiencyI, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                     }, 'techUnlock', '', 'fusionEfficiencyI', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -1276,7 +1246,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('fusionEfficiencyII');
                         showNotification(techNotificationMessages.fusionEfficiencyII, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                     }, 'techUnlock', '', 'fusionEfficiencyII', null, 'research', true, null, 'tech'), 
                     null,
                     null,
@@ -1306,7 +1275,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('fusionEfficiencyIII');
                         showNotification(techNotificationMessages.fusionEfficiencyIII, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                     }, 'techUnlock', '', 'fusionEfficiencyIII', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -1336,7 +1304,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('orbitalConstruction');
                         showNotification(techNotificationMessages.orbitalConstruction, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                         document.getElementById('starShipOption').parentElement.parentElement.classList.remove('invisible');
                     }, 'techUnlock', '', 'orbitalConstruction', null, 'research', true, null, 'tech'),
                     null,
@@ -1367,7 +1334,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('antimatterEngines');
                         showNotification(techNotificationMessages.antimatterEngines, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                     }, 'techUnlock', '', 'antimatterEngines', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -1397,7 +1363,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('FTLTravelTheory');
                         showNotification(techNotificationMessages.FTLTravelTheory, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                     }, 'techUnlock', '', 'FTLTravelTheory', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -1427,7 +1392,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('lifeSupportSystems');
                         showNotification(techNotificationMessages.lifeSupportSystems, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                     }, 'techUnlock', '', 'lifeSupportSystems', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -1457,7 +1421,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('starshipFleets');
                         showNotification(techNotificationMessages.starshipFleets, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                     }, 'techUnlock', '', 'starshipFleets', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -1487,7 +1450,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('stellarScanners');
                         showNotification(techNotificationMessages.stellarScanners, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                     }, 'techUnlock', '', 'stellarScanners', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -1521,7 +1483,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('dysonSphereUnderstanding');
                         showNotification(techNotificationMessages.dysonSphereUnderstanding, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                         callPopupModal(
                             modalMegaStructureTechDysonSphere1Header, 
                             modalMegaStructureTechDysonSphere1Text, 
@@ -1572,7 +1533,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('dysonSphereCapabilities');
                         showNotification(techNotificationMessages.dysonSphereCapabilities, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                         callPopupModal(
                             modalMegaStructureTechDysonSphere2Header, 
                             modalMegaStructureTechDysonSphere2Text, 
@@ -1623,7 +1583,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('dysonSphereDisconnect');
                         showNotification(techNotificationMessages.dysonSphereDisconnect, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                         callPopupModal(
                             modalMegaStructureTechDysonSphere3Header, 
                             modalMegaStructureTechDysonSphere3Text, 
@@ -1674,7 +1633,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('dysonSpherePower');
                         showNotification(techNotificationMessages.dysonSpherePower, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                         callPopupModal(
                             modalMegaStructureTechDysonSphere4Header, 
                             modalMegaStructureTechDysonSphere4Text, 
@@ -1725,7 +1683,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('dysonSphereConnect');
                         showNotification(techNotificationMessages.dysonSphereConnect, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                         callPopupModal(
                             modalMegaStructureTechDysonSphere5Header, 
                             modalMegaStructureTechDysonSphere5Text, 
@@ -1776,7 +1733,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('celestialProcessingCoreUnderstanding');
                         showNotification(techNotificationMessages.celestialProcessingCoreUnderstanding, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                         callPopupModal(
                             modalMegaStructureTechCelestialProcessingCore1Header, 
                             modalMegaStructureTechCelestialProcessingCore1Text, 
@@ -1827,7 +1783,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('celestialProcessingCoreCapabilities');
                         showNotification(techNotificationMessages.celestialProcessingCoreCapabilities, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                         callPopupModal(
                             modalMegaStructureTechCelestialProcessingCore2Header, 
                             modalMegaStructureTechCelestialProcessingCore2Text, 
@@ -1878,7 +1833,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('celestialProcessingCoreDisconnect');
                         showNotification(techNotificationMessages.celestialProcessingCoreDisconnect, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                         callPopupModal(
                             modalMegaStructureTechCelestialProcessingCore3Header, 
                             modalMegaStructureTechCelestialProcessingCore3Text, 
@@ -1929,7 +1883,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('celestialProcessingCorePower');
                         showNotification(techNotificationMessages.celestialProcessingCorePower, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                         callPopupModal(
                             modalMegaStructureTechCelestialProcessingCore4Header, 
                             modalMegaStructureTechCelestialProcessingCore4Text, 
@@ -1980,7 +1933,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('celestialProcessingCoreConnect');
                         showNotification(techNotificationMessages.celestialProcessingCoreConnect, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                         callPopupModal(
                             modalMegaStructureTechCelestialProcessingCore5Header, 
                             modalMegaStructureTechCelestialProcessingCore5Text, 
@@ -2031,7 +1983,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('plasmaForgeUnderstanding');
                         showNotification(techNotificationMessages.plasmaForgeUnderstanding, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                         callPopupModal(
                             modalMegaStructureTechPlasmaForge1Header, 
                             modalMegaStructureTechPlasmaForge1Text, 
@@ -2082,7 +2033,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('plasmaForgeCapabilities');
                         showNotification(techNotificationMessages.plasmaForgeCapabilities, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                         callPopupModal(
                             modalMegaStructureTechPlasmaForge2Header, 
                             modalMegaStructureTechPlasmaForge2Text, 
@@ -2133,7 +2083,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('plasmaForgeDisconnect');
                         showNotification(techNotificationMessages.plasmaForgeDisconnect, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                         callPopupModal(
                             modalMegaStructureTechPlasmaForge3Header, 
                             modalMegaStructureTechPlasmaForge3Text, 
@@ -2184,7 +2133,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('plasmaForgePower');
                         showNotification(techNotificationMessages.plasmaForgePower, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                         callPopupModal(
                             modalMegaStructureTechPlasmaForge4Header, 
                             modalMegaStructureTechPlasmaForge4Text, 
@@ -2235,7 +2183,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('plasmaForgeConnect');
                         showNotification(techNotificationMessages.plasmaForgeConnect, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                         callPopupModal(
                             modalMegaStructureTechPlasmaForge5Header, 
                             modalMegaStructureTechPlasmaForge5Text, 
@@ -2286,7 +2233,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('galacticMemoryArchiveUnderstanding');
                         showNotification(techNotificationMessages.galacticMemoryArchiveUnderstanding, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                         callPopupModal(
                             modalMegaStructureTechGalacticMemoryArchive1Header, 
                             modalMegaStructureTechGalacticMemoryArchive1Text, 
@@ -2337,7 +2283,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('galacticMemoryArchiveCapabilities');
                         showNotification(techNotificationMessages.galacticMemoryArchiveCapabilities, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                         callPopupModal(
                             modalMegaStructureTechGalacticMemoryArchive2Header, 
                             modalMegaStructureTechGalacticMemoryArchive2Text, 
@@ -2388,7 +2333,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('galacticMemoryArchiveDisconnect');
                         showNotification(techNotificationMessages.galacticMemoryArchiveDisconnect, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                         callPopupModal(
                             modalMegaStructureTechGalacticMemoryArchive3Header, 
                             modalMegaStructureTechGalacticMemoryArchive3Text, 
@@ -2439,7 +2383,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('galacticMemoryArchivePower');
                         showNotification(techNotificationMessages.galacticMemoryArchivePower, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                         callPopupModal(
                             modalMegaStructureTechGalacticMemoryArchive4Header, 
                             modalMegaStructureTechGalacticMemoryArchive4Text, 
@@ -2490,7 +2433,6 @@ export function drawTab3Content(heading, optionContentElement) {
                         event.currentTarget.classList.add('unlocked-tech');
                         setTechUnlockedArray('galacticMemoryArchiveConnect');
                         showNotification(techNotificationMessages.galacticMemoryArchiveConnect, 'info', 3000, 'tech');
-                        setRenderedTechTree(false);
                         callPopupModal(
                             modalMegaStructureTechGalacticMemoryArchive5Header, 
                             modalMegaStructureTechGalacticMemoryArchive5Text, 
@@ -2600,8 +2542,7 @@ export function drawTab3Content(heading, optionContentElement) {
         if (tooltip) {
             tooltip.remove();
         }
-        getTechTreeDataAndDraw(false);
-        setTechTreeDrawnYet(true);   
+        getTechTreeDataAndDraw(false); 
 
     }
 

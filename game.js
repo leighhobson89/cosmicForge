@@ -174,7 +174,6 @@ import {
     getSaveData,
     getNewsTickerSetting,
     getWeatherEffectSetting,
-    setTechTreeDrawnYet,
     setUpcomingTechArray,
     getUpcomingTechArray,
     getSavedYetSinceOpeningSaveDialogue,
@@ -3203,7 +3202,6 @@ function monitorTechTree() {
                         tooltip.remove();
                     }
                     getTechTreeDataAndDraw(true);
-                    setTechTreeDrawnYet(true);
                 }
             }
             if (getResourceDataObject('research', ['quantity']) > (techs[techKey].appearsAt[0] / 2.5) && !getUpcomingTechArray().includes(techKey)) {
@@ -3214,7 +3212,6 @@ function monitorTechTree() {
                         tooltip.remove();
                     }
                     getTechTreeDataAndDraw(true);
-                    setTechTreeDrawnYet(true);
                 }
             }
         }

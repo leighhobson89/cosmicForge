@@ -1,6 +1,6 @@
 import { restoreAchievementsDataObject, restoreAscendencyBuffsDataObject, restoreGalacticMarketDataObject, restoreRocketNamesObject, restoreResourceDataObject, restoreStarSystemsDataObject, resourceData, starSystems, getResourceDataObject, setResourceDataObject, galacticMarket, ascendencyBuffs, achievementsData, getStarSystemDataObject } from "./resourceDataObject.js";
 import { achievementFunctionsMap } from "./achievements.js";
-import { drawTechTree, drawNativeTechTree, selectTheme, startWeatherEffect, stopWeatherEffect } from "./ui.js";
+import { drawNativeTechTree, selectTheme, startWeatherEffect, stopWeatherEffect } from "./ui.js";
 import { capitaliseWordsWithRomanNumerals, capitaliseString } from './utilityFunctions.js';
 import { offlineGains, startNewsTickerTimer } from './game.js';
 import { rocketNames } from './descriptions.js';
@@ -204,7 +204,6 @@ let rocketsBuilt = [];
 let starShipModulesBuilt = [];
 let rocketsFuellerStartedArray = [];
 let launchedRockets = [];
-let cachedRenderedTechTree = null;
 let saveName = null;
 let lastSavedTimeStamp = null;
 let currentTheme = 'terminal';
@@ -452,18 +451,17 @@ let autoSaveToggle = false;
 let newsTickerSetting = true;
 let weatherEffectSettingToggle = true;
 let notificationsToggle = true;
-let techRenderChange = false;
-let losingEnergy = false;
-let powerOnOff = false;
-let trippedStatus = false;
-let savedYetSinceOpeningSaveDialogue = false;
-let techTreeDrawnYet = false;
-let weatherEffectOn = false;
-let weatherEfficiencyApplied = false;
-let currentlySearchingAsteroid = false;
-let currentlyInvestigatingStar = false;
-let currentlyPillagingVoid = false;
-let telescopeReadyToSearch = true;
+let techRenderChange = true;
+let losingEnergy = true;
+let powerOnOff = true;
+let trippedStatus = true;
+let savedYetSinceOpeningSaveDialogue = true;
+let weatherEffectOn = true;
+let weatherEfficiencyApplied = true;
+let currentlySearchingAsteroid = true;
+let currentlyInvestigatingStar = true;
+let currentlyPillagingVoid = true;
+let telescopeReadyToSearch = false;
 let asteroidTimerCanContinue = false;
 let starInvestigationTimerCanContinue = false;
 let pillageVoidTimerCanContinue = false;
@@ -739,7 +737,6 @@ export function resetAllVariablesOnRebirth() {
     starShipModulesBuilt = [];
     rocketsFuellerStartedArray = [];
     launchedRockets = [];
-    cachedRenderedTechTree = null;
     currentStarSystemWeatherEfficiency = [];
     currentPrecipitationRate = 0;
     techRenderCounter = 0;
@@ -981,7 +978,6 @@ export function resetAllVariablesOnRebirth() {
     losingEnergy = false;
     powerOnOff = false;
     trippedStatus = false;
-    techTreeDrawnYet = false;
     weatherEffectOn = false;
     weatherEfficiencyApplied = false;
     currentlySearchingAsteroid = false;
@@ -2454,22 +2450,6 @@ export function setSaveExportCloudFlag(value) {
     saveExportCloudFlag = value;
 }
 
-export function getTechTreeDrawnYet() {
-    return techTreeDrawnYet;
-}
-
-export function setTechTreeDrawnYet(value) {
-    techTreeDrawnYet = value;
-}
-
-export function setRenderedTechTree(renderedTree) {
-    cachedRenderedTechTree = renderedTree;
-}
-
-export function getRenderedTechTree() {
-    return cachedRenderedTechTree;
-}
-
 export async function getTechTreeDataAndDraw(renew) {
     let techData = getResourceDataObject('techs');
     const unlockedTechs = getTechUnlockedArray();
@@ -2500,11 +2480,7 @@ export async function getTechTreeDataAndDraw(renew) {
         );
     }
 
-    if (TECH_TREE_ENABLED) {
-        await drawTechTree(techData, '#techTreeSvg', renew);
-    } else {
-        drawNativeTechTree(techData, '#techTreeNative');
-    }
+    drawNativeTechTree(techData, '#techTreeNative');
 }
 
 export function getOneOffPrizesAlreadyClaimedArray() {
@@ -4335,9 +4311,6 @@ export function populateVariableDebugger() {
         { label: "revealedTechArray", value: revealedTechArray },
         { label: "upcomingTechArray", value: upcomingTechArray },
         { label: "tempRowValue", value: tempRowValue },
-        { label: "cachedRenderedTechTree", value: cachedRenderedTechTree },
-        { label: "techRenderChange", value: techRenderChange },
-        { label: "techTreeDrawnYet", value: techTreeDrawnYet },
 
         { label: "", value: "" },
         { label: "Energy:", value: "" },

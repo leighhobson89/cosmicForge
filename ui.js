@@ -57,9 +57,6 @@ import {
     getOneOffPrizesAlreadyClaimedArray,
     setOneOffPrizesAlreadyClaimedArray,
     deferredActions,
-    setRenderedTechTree,
-    getRenderedTechTree,
-    setTechTreeDrawnYet,
     getUpcomingTechArray,
     setLastSavedTimeStamp,
     setCurrentTheme,
@@ -2811,8 +2808,6 @@ function drawStackedBarChart(canvasId, generationValues, consumptionValues, sola
     ctx.fillText('Con.', consLabelX, height + 20);
 }
 
-
-
 export function removeAllIndicatorIcons(iconText = '⚠️', indicatorClass = 'attention-indicator') {
     const indicators = document.querySelectorAll(`.${indicatorClass}`);
     indicators.forEach(indicator => {
@@ -2836,58 +2831,9 @@ export function updateDynamicUiContent() {
         drawStackedBarChart('powerGenerationConsumptionChart', generationValues, consumptionValues, solarPlantMaxPurchasedRate);
     }
 
-    if (getCurrentOptionPane() !== 'tech tree') {
-        setTechTreeDrawnYet(false);
-    }
-
     if (getCurrentOptionPane() !== 'star map') {
         removeStarConnectionTooltip();
     }
-}
-
-function setupTechTreeTooltip(svgElement) {
-    d3.selectAll('#techTreeTooltip').remove();
-
-    d3.select('body').append('div')
-        .style('position', 'absolute')
-        .style('pointer-events', 'none')
-        .style('padding', '8px')
-        .style('background', 'rgba(0, 0, 0, 0.9)')
-        .style('color', 'var(--text-color)')
-        .style('border', '2px solid var(--text-color)')
-        .style('border-radius', '5px')
-        .style('font-size', '12px')
-        .style('display', 'none')
-        .style('z-index', 1000)
-        .attr('id', 'techTreeTooltip');
-
-    d3.selectAll(`${svgElement} title`).remove();
-
-    d3.selectAll(`${svgElement} .node`)
-        .on('mouseover', function (event, d) {
-            const tooltipElement = d3.select('#techTreeTooltip');
-            const nodeLabel = d3.select(this).select('text').text();
-
-            if (nodeLabel.includes('???')) {
-                tooltipElement.style('display', 'none');
-                return;
-            }
-
-            const descriptionId = 'tech' + capitaliseString(nodeLabel).replace(/\s+/g, '') + 'Row';
-            const tooltipContent = `<br/>${optionDescriptions[descriptionId].content2}`;
-            tooltipElement.html(tooltipContent)
-                .style('left', (event.pageX + 10) + 'px')
-                .style('top', (event.pageY + 10) + 'px')
-                .style('display', 'block');
-        })
-        .on('mousemove', function (event) {
-            d3.select('#techTreeTooltip')
-                .style('left', (event.pageX + 10) + 'px')
-                .style('top', (event.pageY + 10) + 'px');
-        })
-        .on('mouseout', function () {
-            d3.select('#techTreeTooltip').style('display', 'none');
-        });
 }
 
 function drawLeftSideOfAntimatterSvg(asteroidsArray, rocketData, svgElement, svgNS) {
@@ -3232,99 +3178,6 @@ export async function drawAntimatterFlowDiagram(rocketData, svgElement) {
     rightBox.appendChild(boostTextContainer);
 
     svgElement.appendChild(rightBox);
-}
-
-export async function drawTechTree(techData, svgElement, renew) {
-    const cachedTree = getRenderedTechTree();
-    const container = document.querySelector(svgElement);
-    container.innerHTML = '';
-
-    const bgColor = getComputedStyle(container).getPropertyValue('--bg-color').trim();
-    const textColor = getComputedStyle(container).getPropertyValue('--text-color').trim();
-
-    const researchedBgColor = getComputedStyle(container).getPropertyValue('--text-color').trim();
-    const researchedTextColor = getComputedStyle(container).getPropertyValue('--ready-text').trim();
-
-    const researchedTechs = getTechUnlockedArray();
-
-    const svgWidth = container.clientWidth || container.parentNode.clientWidth;
-    const svgHeight = container.clientHeight || container.parentNode.clientHeight;
-
-    if (cachedTree && !renew) {
-        container.innerHTML = '';
-        container.appendChild(cachedTree.cloneNode(true));
-        setupTechTreeTooltip(svgElement);
-        return;
-    }
-
-    let graphDef = `digraph TechTree {
-        graph [bgcolor="${bgColor}", size="${svgWidth / 72},${svgHeight / 72}!", size="10,7!", rankdir="TB"];
-        node [
-            color="${textColor}"
-            style="filled,rounded",
-            shape="box",
-            fontname="Arial",
-            fontsize=24,
-            penwidth=4
-            fixedsize=true,
-            width=4.5,
-            height=1.3
-        ];
-        edge [
-            color="${textColor}",
-            penwidth=2,
-            arrowsize=1.2,
-            fontname="Arial",
-            fontsize=10
-        ];
-    `;
-
-    let title = `<b>???</b><br/>???`;
-
-    for (const [key, value] of Object.entries(techData)) {
-        const isResearched = researchedTechs.includes(key);
-        const nodeBgColor = isResearched ? researchedBgColor : bgColor;
-        const nodeTextColor = isResearched ? researchedTextColor : textColor;
-
-        const capitalisedTechName = capitaliseString(key);
-        const separatedCapitalisedTechNames = capitalisedTechName.replace(/([a-z])([A-Z])/g, '$1 $2');
-        const price = value.price;
-        
-
-        if (getUpcomingTechArray().includes(key) && !getRevealedTechArray().includes(key)) {
-            title = `<b>???</b><br/>Price: ${price}`;
-        } else {
-            title = `<b>${separatedCapitalisedTechNames}</b><br/>Price: ${price}`;
-        }
-        graphDef += `${key} [label=<${title}> shape="box" style="rounded,filled" fontcolor="${nodeTextColor}" fillcolor="${nodeBgColor}" fontname="Arial"];\n`;
-    }
-
-    for (const [key, value] of Object.entries(techData)) {
-        const appearsAt = value.appearsAt || [];
-        if (appearsAt.length > 1) {
-            for (let i = 1; i < appearsAt.length; i++) {
-                const prereq = appearsAt[i];
-                if (prereq) {
-                    graphDef += `${prereq} -> ${key};\n`;
-                }
-            }
-        }
-    }
-
-    graphDef += "}";
-
-    const graphviz = d3.select(svgElement)
-        .graphviz()
-        .zoom(false)
-        .scale(0.7)
-        .fit(false);  
-
-    graphviz.renderDot(graphDef);
-
-    setTimeout(() => {
-        setupTechTreeTooltip(svgElement);
-        setRenderedTechTree(container);
-    }, 50);
 }
 
 export function drawNativeTechTree(techData, containerSelector) {
@@ -6334,7 +6187,6 @@ grantAllTechsButton.addEventListener('click', () => {
     setCanTravelToAsteroids(true);
 
     grantAllTechsButton.classList.add('red-disabled-text');
-    setRenderedTechTree(false);
     showNotification('CHEAT! All techs unlocked!', 'info', 3000, 'debug');
 
     console.log('All techs unlocked!');
