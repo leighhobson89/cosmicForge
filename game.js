@@ -218,6 +218,8 @@ import {
     setRevealedTechArray,
     getTimerRateRatio,
     getTimerUpdateInterval,
+    getAntimatterDeltaAccumulator,
+    setAntimatterDeltaAccumulator,
     getCurrencySymbol,
     setSaleResourcePreview,
     setCreateCompoundPreview,
@@ -3059,6 +3061,7 @@ function updateAntimatterAndDiagram() {
     const antimatterTotalQuantity = getResourceDataObject('antimatter', ['quantity']);
     const miningObject = getMiningObject();
     const asteroidsBeingMined = getAsteroidArray();
+    const elements = getElements();
     
     asteroidsBeingMined.forEach(obj => {
         const asteroidName = Object.keys(obj)[0];
@@ -3098,26 +3101,20 @@ function updateAntimatterAndDiagram() {
                 extractionRate *= getBoostRate();
             }
 
-            totalAntimatterExtractionRate += extractionRate;
-            
-            let newQuantityAntimatterAsteroid = asteroid.quantity[0] - extractionRate;
+            const actualExtraction = Math.min(extractionRate, asteroid.quantity[0]);
+            const newQuantityAntimatterAsteroid = Math.max(0, asteroid.quantity[0] - actualExtraction);
             const quantityPercentage = (newQuantityAntimatterAsteroid / asteroid.originalQuantity) * 100;
-        
-            if (quantityPercentage <= 0) {
-                newQuantityAntimatterAsteroid = 0;
-                totalAntimatterExtractionRate -= extractionRate;
-                rocketData[`rocket${i}`][3] = 0;
+            const asteroidDepleted = newQuantityAntimatterAsteroid === 0 && asteroid.quantity[0] > 0;
 
-                if (!getRocketDirection(`rocket${i}`)) {
-                    setRocketDirection(`rocket${i}`, true); //set rocket returning
-                    sfxPlayer.playAudio('rocketLaunch', false);
-                    startTravelToAndFromAsteroidTimer([0, 'returning'], `rocket${i}`, getRocketDirection(`rocket${i}`));
-                    boostAntimatterRate(false);
-                }
+            totalAntimatterExtractionRate += actualExtraction;
+            rocketData[`rocket${i}`][3] = asteroidDepleted ? 0 : extractionRate;
+
+            if (asteroidDepleted && !getRocketDirection(`rocket${i}`)) {
+                setRocketDirection(`rocket${i}`, true); //set rocket returning
+                sfxPlayer.playAudio('rocketLaunch', false);
+                startTravelToAndFromAsteroidTimer([0, 'returning'], `rocket${i}`, getRocketDirection(`rocket${i}`));
+                boostAntimatterRate(false);
             }
- 
-            getElements().miningRate.innerText = `${(totalAntimatterExtractionRate * getTimerRateRatio()).toFixed(2)} / s`;
-            getElements().miningQuantity.innerText = `${Math.floor(antimatterTotalQuantity)}`;
 
             if (quantityPercentage > 90) {
                 quantityAntimatterClass = 'ready-text';
@@ -3130,18 +3127,27 @@ function updateAntimatterAndDiagram() {
             }
         
             changeAsteroidArray(asteroid.name, "quantity", [newQuantityAntimatterAsteroid, quantityAntimatterClass]);
-
-            if (getAntimatterUnlocked()) {
-                setResourceDataObject(antimatterTotalQuantity + totalAntimatterExtractionRate, 'antimatter', ['quantity']);
-                addToResourceAllTimeStat(totalAntimatterExtractionRate, 'antimatter');
-                addToResourceAllTimeStat(totalAntimatterExtractionRate, 'antimatterThisRun');
-            }
         }
     } 
 
-    //console.log(totalAntimatterExtractionRate);
-    setResourceDataObject(antimatterTotalQuantity + (getMegaStructureAntimatterAmount() / getTimerRateRatio()), 'antimatter', ['quantity']);
+    const megaStructureGainPerTick = getMegaStructureAntimatterAmount() / getTimerRateRatio();
+    const newAntimatterQuantity = antimatterTotalQuantity + totalAntimatterExtractionRate + megaStructureGainPerTick;
+
+    setResourceDataObject(newAntimatterQuantity, 'antimatter', ['quantity']);
     setResourceDataObject(totalAntimatterExtractionRate, 'antimatter', ['rate']);
+
+    if (getAntimatterUnlocked() && totalAntimatterExtractionRate > 0) {
+        addToResourceAllTimeStat(totalAntimatterExtractionRate, 'antimatter');
+        addToResourceAllTimeStat(totalAntimatterExtractionRate, 'antimatterThisRun');
+    }
+
+    if (elements?.miningRate) {
+        elements.miningRate.innerText = `${(totalAntimatterExtractionRate * getTimerRateRatio()).toFixed(2)} / s`;
+    }
+
+    if (elements?.miningQuantity) {
+        elements.miningQuantity.innerText = `${Math.floor(newAntimatterQuantity)}`;
+    }
 
     if (getCurrentOptionPane() === 'mining') {
         const svgElement = document.getElementById('antimatterSvg');
@@ -3222,7 +3228,9 @@ function resourceAndCompoundMonitorRevealRowsChecks(element) {
                 element.classList.add('invisible');
             }
         } else if (getCurrentTab()[1].includes('Compounds') && element.dataset.rowCategory === 'compound')  {
-            if (elementTier > 0 ) {
+            if (element.id === 'dieselAutoBuyer1Row') {
+                element.classList.remove('invisible');
+            } else if (elementTier > 0 ) {
                 if (elementTier <= getAutoBuyerTierLevel(getCurrentOptionPane(), 'compounds')) {
                     element.classList.remove('invisible');
                 } else {
@@ -3599,8 +3607,17 @@ function compoundCostSellCreateChecks(element) {  //to refactor
 
     const checkQuantityString = element.dataset.argumentCheckQuantity;
     const checkQuantityString2 = element.dataset.argumentCheckQuantity2;
+    const isCashOverride = element.dataset.cashOverride === 'true';
+    const cashOverrideResource = element.dataset.cashOverrideResource || 'cash';
 
-    let quantity = getResourceDataObject('compounds', [checkQuantityString, 'quantity']);
+    let quantity;
+    if (isCashOverride) {
+        quantity = getResourceDataObject('currency', [cashOverrideResource]);
+    } else if (checkQuantityString) {
+        quantity = getResourceDataObject('compounds', [checkQuantityString, 'quantity']);
+    } else {
+        quantity = 0;
+    }
     let quantity2;
     compound2 ? quantity2 = getResourceDataObject('compounds', [checkQuantityString2, 'quantity']) : -1;
 
@@ -3680,6 +3697,9 @@ function compoundCostSellCreateChecks(element) {  //to refactor
         const autoBuyerTier = element.dataset.autoBuyerTier;
         if (autoBuyerTier === 'tier0') return;
         price = getResourceDataObject(mainKey, [compound, 'upgrades', 'autoBuyer', autoBuyerTier, 'price']);
+        if (isCashOverride && element.tagName.toLowerCase() !== 'button') {
+            element.textContent = `${getCurrencySymbol()}${price.toFixed(2)}`;
+        }
         price2 = 0;
     } else if (element.dataset.type === "storage") {
         mainKey = 'compounds' //storageCapacity
@@ -5543,7 +5563,13 @@ function checkTravelToDescriptions(element) {
 }
 
 export function setSellFuseCreateTextDescriptionClassesBasedOnButtonStates(element, type) {
-    const accompanyingLabel = element.parentElement.nextElementSibling.querySelector('label');
+    if (!element) return;
+    const inputContainer = element.parentElement;
+    if (!inputContainer) return;
+    const descriptionContainer = inputContainer.nextElementSibling;
+    if (!descriptionContainer) return;
+    const accompanyingLabel = descriptionContainer.querySelector('label');
+    if (!accompanyingLabel) return;
     if (type === 'create') {
         if (accompanyingLabel.textContent.includes('!')) {
             accompanyingLabel.classList.add('warning-orange-text');
@@ -5844,6 +5870,7 @@ export function gain(incrementAmount, elementId, item, ABOrTechPurchase, tierAB,
 
     let itemObject;
     let itemToDeduct1Name;
+    let priceIncreaseName;
 
     if (resourceCategory !== 'techsPhilosophy') {
         if (resourceCategory === 'research') {
@@ -5907,8 +5934,15 @@ export function gain(incrementAmount, elementId, item, ABOrTechPurchase, tierAB,
                 itemCategory3 = itemObject.resource3Price[2];
             }
             resourcePrices = [[resource1ToDeduct, itemToDeduct2Name, itemCategory1], [resource2ToDeduct, itemToDeduct3Name, itemCategory2], [resource3ToDeduct, itemToDeduct4Name, itemCategory3]];
+        } else if (ABOrTechPurchase && resourceCategory === 'diesel' && tierAB === 'tier1') {
+            itemToDeduct1Name = 'cash';
+            amountToDeduct = getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier1', 'price']);
+            priceIncreaseName = resourceCategory;
         } else {
             itemToDeduct1Name = itemObject.screenName;
+        }
+        if (!priceIncreaseName) {
+            priceIncreaseName = itemToDeduct1Name;
         }
     
         let itemToDeduct1NameArray = [itemToDeduct1Name];
@@ -5917,7 +5951,7 @@ export function gain(incrementAmount, elementId, item, ABOrTechPurchase, tierAB,
     
         setItemsToDeduct(itemToDeduct1NameArray, amountToDeductArray, itemTypeArray, resourcePrices);
     }
-    setItemsToIncreasePrice(itemToDeduct1Name, itemSetNewPrice, amountToDeduct, itemType, resourcePrices);
+    setItemsToIncreasePrice(priceIncreaseName || itemToDeduct1Name, itemSetNewPrice, amountToDeduct, itemType, resourcePrices);
 }
 
 export function increaseResourceStorage(elementIds, resource, itemTypeArray) {

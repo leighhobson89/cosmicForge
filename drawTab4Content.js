@@ -1,4 +1,5 @@
-import { getCompoundCreateDropdownRecipeText, getLastSellResourceCompoundDropdownOption, setLastSellResourceCompoundDropdownOption, getImageUrls, getTimerRateRatio, getCompoundSalePreview, getCompoundCreatePreview, setCreateCompoundPreview, setAchievementFlagArray } from './constantsAndGlobalVars.js';
+import { getCompoundCreateDropdownRecipeText, getLastSellResourceCompoundDropdownOption, setLastSellResourceCompoundDropdownOption, getImageUrls, getTimerRateRatio, getCompoundSalePreview, getCompoundCreatePreview, setCreateCompoundPreview, setAchievementFlagArray, getCurrencySymbol } from './constantsAndGlobalVars.js';
+
 import { increaseResourceStorage, createCompound, sellCompound, gain, addToResourceAllTimeStat } from './game.js';
 
 import { setResourceDataObject, getResourceDataObject } from './resourceDataObject.js';
@@ -26,8 +27,11 @@ export function drawTab4Content(heading, optionContentElement) {
         removeTabAttentionIfNoIndicators('tab4');
 
         if (heading === 'Diesel') {
+            const dieselTier1BaseCashCost = getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier1', 'price']);
+            const dieselTier1CashCostDisplay = `${getCurrencySymbol()}${dieselTier1BaseCashCost.toLocaleString()} Cash`;
             let storagePrice = getResourceDataObject('compounds', ['diesel', 'storageCapacity']);
             let autobuyer1Price = getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier1', 'price']);
+
             let autobuyer2Price = getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier2', 'price']);
             let autobuyer3Price = getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier3', 'price']);
             let autobuyer4Price = getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier4', 'price']);
@@ -158,7 +162,7 @@ export function drawTab4Content(heading, optionContentElement) {
                 }, ['toggle-switch-spacing']),
                 null,
                 null,
-                `${autobuyer1Price + " " + getResourceDataObject('compounds', ['diesel', 'nameResource'])}`,
+                `${dieselTier1CashCostDisplay}`,
                 '',
                 'upgradeCheck',
                 'autoBuyer',
@@ -171,6 +175,15 @@ export function drawTab4Content(heading, optionContentElement) {
                 'compound'
             );
             optionContentElement.appendChild(dieselAutoBuyer1Row);
+            const dieselTier1Button = dieselAutoBuyer1Row.querySelector('button[data-auto-buyer-tier="tier1"]');
+            const dieselTier1Description = dieselAutoBuyer1Row.querySelector('.description-container .notation');
+            [dieselTier1Button, dieselTier1Description].forEach(element => {
+                if (element) {
+                    element.dataset.cashOverride = 'true';
+                    element.dataset.cashOverrideAmount = dieselTier1BaseCashCost;
+                    element.dataset.cashOverrideResource = 'cash';
+                }
+            });
     
             const dieselAutoBuyer2Row = createOptionRow(
                 'dieselAutoBuyer2Row',

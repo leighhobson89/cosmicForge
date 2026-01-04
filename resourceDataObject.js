@@ -281,7 +281,7 @@ export let resourceData = {
                 autoBuyer: {
                     currentTierLevel: 0,
                     normalProgression: true,
-                    tier1: { nameUpgrade: 'Backyard Extractor', screen: 'diesel', place: 'dieselAutoBuyer1Row', price: 50000, rate: 0.02, quantity: 0, setPrice: 'dieselAB1Price', energyUse: 0, active: true },
+                    tier1: { nameUpgrade: 'Backyard Extractor', screen: 'diesel', place: 'dieselAutoBuyer1Row', price: 1000, rate: 0.02, quantity: 0, setPrice: 'dieselAB1Price', energyUse: 0, active: true },
                     tier2: { nameUpgrade: 'Advanced Extractor', screen: 'diesel', place: 'dieselAutoBuyer2Row', price: 400000, rate: 0.1, quantity: 0, setPrice: 'dieselAB2Price', energyUse: 0.03, active: true },
                     tier3: { nameUpgrade: 'Industrial Extractor', screen: 'diesel', place: 'dieselAutoBuyer3Row', price: 2000000, rate: 0.5, quantity: 0, setPrice: 'dieselAB3Price', energyUse: 0.12, active: true },
                     tier4: { nameUpgrade: 'Quantum Extractor', screen: 'diesel', place: 'dieselAutoBuyer4Row', price: 10000000, rate: 2.5, quantity: 0, setPrice: 'dieselAB4Price', energyUse: 0.6, active: true }
