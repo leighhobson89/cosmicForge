@@ -3136,7 +3136,8 @@ function updateAntimatterAndDiagram() {
 
         if (asteroid && asteroid.beingMined) {
             let quantityAntimatterClass = 'none';
-            let extractionRate = rocketData[`rocket${i}`][3];
+            const baseExtractionRate = rocketData[`rocket${i}`][3];
+            let extractionRate = baseExtractionRate;
             extractionRate *= (1 + (getBuffEnhancedMiningData()['boughtYet'] * getBuffEnhancedMiningData()['effectCategoryMagnitude']));
             
             if (getIsAntimatterBoostActive()) {
@@ -3149,7 +3150,7 @@ function updateAntimatterAndDiagram() {
             const asteroidDepleted = newQuantityAntimatterAsteroid === 0 && asteroid.quantity[0] > 0;
 
             totalAntimatterExtractionRate += actualExtraction;
-            rocketData[`rocket${i}`][3] = asteroidDepleted ? 0 : extractionRate;
+            rocketData[`rocket${i}`][3] = asteroidDepleted ? 0 : baseExtractionRate;
 
             if (asteroidDepleted && !getRocketDirection(`rocket${i}`)) {
                 setRocketDirection(`rocket${i}`, true); //set rocket returning

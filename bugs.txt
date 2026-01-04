@@ -1,5 +1,4 @@
 when power on with a basic power plant, carbon production severely reduced in reality but appears to only be reduced by 2/s
-antimatter mining values wrong dont match scale when boosting
 there is a subkey error somewhere when accessing getResourceDataObject
 
 Pioneer-testermanuscript3
