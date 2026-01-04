@@ -1,7 +1,5 @@
-rare cases where 0 0 0 for enemy in battle but can still click conquest, in this case should say settle always
 when power on with a basic power plant, carbon production severely reduced in reality but appears to only be reduced by 2/s
 
-if switch off autobuyer, power adjusts but number for production still shows as if it is on
 tech tree rework or fix background
 be able to sell research points after science labs
 consider nerfing research or making more expensive and nerfing offline gains

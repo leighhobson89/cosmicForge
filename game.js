@@ -5334,11 +5334,15 @@ async function coloniseChecks() {
                 document.getElementById('descriptionContentTab5').innerHTML = `Engage in Diplomacy and War to establish your new colony at <span class="green-ready-text">${capitaliseWordsWithRomanNumerals(getDestinationStar())}</span> - Fleet Power: <span class="green-ready-text">${getResourceDataObject('fleets', ['attackPower']).toFixed(0)}</span>`;
             }
 
-            if (civilizationLevel === 'None' || civilizationLevel === 'Unsentient') {
-                if (document.querySelector('button.conquest')) {
-                    document.querySelector('button.conquest').innerHTML = 'Settle';
-                    document.querySelector('button.conquest').classList.remove('red-disabled-text');
-                    document.querySelector('button.conquest').classList.add('green-ready-text');
+            const enemyFleetTotals = getStarSystemDataObject('stars', ['destinationStar', 'enemyFleets']);
+            const enemyFleetSum = (enemyFleetTotals?.air || 0) + (enemyFleetTotals?.land || 0) + (enemyFleetTotals?.sea || 0);
+
+            if (civilizationLevel === 'None' || civilizationLevel === 'Unsentient' || enemyFleetSum === 0) {
+                const conquestButton = document.querySelector('button.conquest');
+                if (conquestButton) {
+                    conquestButton.innerHTML = 'Settle';
+                    conquestButton.classList.remove('red-disabled-text');
+                    conquestButton.classList.add('green-ready-text');
                 }
                 document.getElementById('descriptionContentTab5').innerHTML = `Simply Settle at <span class="green-ready-text">${capitaliseWordsWithRomanNumerals(getDestinationStar())}</span> with no resistance!`;
             }
@@ -5447,7 +5451,8 @@ function checkDiplomacyButtons(element) {
     let active = false;
 
     if (element.classList.contains('conquest')) {
-        if (playerAttackPower > 0 || element.innerHTML === 'Settle') {
+        const enemyFleetSum = Math.floor(starData.enemyFleets.air + starData.enemyFleets.land + starData.enemyFleets.sea);
+        if (playerAttackPower > 0 || element.innerHTML === 'Settle' || enemyFleetSum === 0) {
             active = true;
         }
     }
@@ -9678,7 +9683,8 @@ export function updateDiplomacySituation(buttonPressed, starData) {
             tryToVassalizeEnemy(starData);
             break;
         case 'conquest':
-            if (starData.civilizationLevel === 'None' || starData.civilizationLevel === 'Unsentient') {
+            const enemyFleetSum = (starData.enemyFleets.air || 0) + (starData.enemyFleets.land || 0) + (starData.enemyFleets.sea || 0);
+            if (starData.civilizationLevel === 'None' || starData.civilizationLevel === 'Unsentient' || enemyFleetSum === 0) {
                 
                 if (starData.civilizationLevel === 'None') {
                     setAchievementFlagArray('discoverSystemWithNoLife', 'add');
