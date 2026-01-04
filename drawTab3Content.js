@@ -1,4 +1,4 @@
-import { getCurrentStarSystem, setCanFuelRockets, setCanTravelToAsteroids, getTechTreeDataAndDraw, getTimerRateRatio, deferredActions, getCanAffordDeferred, setCanAffordDeferred, setTechUnlockedArray, setTemporaryCoreTechRowsRepo, setTechTreeDrawnYet, setRenderedTechTree, setUnlockedCompoundsArray, getTechUnlockedArray, getUnlockedResourcesArray, getPlayerPhilosophy, setRepeatableTechMultipliers, getRepeatableTechMultipliers, setIncreaseStorageFactor, getStatRun, getCurrentRunIsMegaStructureRun, setPermanentAntimatterUnlock } from './constantsAndGlobalVars.js';
+import { getCurrentStarSystem, setCanFuelRockets, setCanTravelToAsteroids, getTechTreeDataAndDraw, getTimerRateRatio, deferredActions, getCanAffordDeferred, setCanAffordDeferred, setTechUnlockedArray, setTemporaryCoreTechRowsRepo, setTechTreeDrawnYet, setRenderedTechTree, setUnlockedCompoundsArray, getTechUnlockedArray, getUnlockedResourcesArray, getPlayerPhilosophy, setRepeatableTechMultipliers, getRepeatableTechMultipliers, setIncreaseStorageFactor, getStatRun, getCurrentRunIsMegaStructureRun, setPermanentAntimatterUnlock, isTechTreeEnabled } from './constantsAndGlobalVars.js';
 import { setAllCompoundsToZeroQuantity, gain, startUpdateTimersAndRates, addToResourceAllTimeStat, setFleetArmorBuffsAfterRepeatables, setFleetSpeedsAfterRepeatables, setFleetAttackDamageAfterRepeatables, setInitialImpressionBaseAfterRepeatables, setStarStudyEfficiencyAfterRepeatables, setAsteroidSearchEfficiencyAfterRepeatables, setRocketTravelTimeReductionAfterRepeatables, setStarshipTravelTimeReductionAfterRepeatables, setResourceAutobuyerPricesAfterRepeatables, setCompoundRecipePricesAfterRepeatables, setEnergyAndResearchBuildingPricesAfterRepeatables, setFleetPricesAfterRepeatables, setStarshipPartPricesAfterRepeatables, setRocketPartPricesAfterRepeatables, applyMegaStructureBonuses } from './game.js';
 import { getStarSystemDataObject, setResourceDataObject, getResourceDataObject, setAutoBuyerTierLevel } from './resourceDataObject.js';
 import { removeTabAttentionIfNoIndicators, createToggleSwitch, createSvgElement, createTextElement, sortTechRows, createOptionRow, createButton, showNotification, updateDescriptionRow, appendAttentionIndicator, callPopupModal, showHideModal } from './ui.js';
@@ -2569,6 +2569,32 @@ export function drawTab3Content(heading, optionContentElement) {
     }
     
     if (heading === 'Tech Tree') {
+        if (!isTechTreeEnabled()) {
+            const placeholderRow = createOptionRow(
+                'techTreeUnavailableRow',
+                null,
+                '',
+                createTextElement('Tech tree is temporarily unavailable.', 'techTreeUnavailableText', ['tech-tree-disabled-message']),
+                null,
+                null,
+                null,
+                null,
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                null,
+                false,
+                null,
+                null,
+                'tech-tree-disabled'
+            );
+            optionContentElement.appendChild(placeholderRow);
+            return;
+        }
+
         const techTreeSvgRow = createOptionRow(
             'techTreeSvgRow',
             null,
