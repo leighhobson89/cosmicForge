@@ -120,7 +120,9 @@ import {
     getFactoryStarsArray,
     getMiaplacidusMilestoneLevel,
     getHomeStarName,
-    getInfinitePower
+    getInfinitePower,
+    getRunStartTime,
+    getGameStartTime
 } from './constantsAndGlobalVars.js';
 import {
     getResourceDataObject,
@@ -226,6 +228,7 @@ const closeButton = document.querySelector('.close-btn');
 
 document.addEventListener('DOMContentLoaded', async () => {
     setElements();
+    setupStatTooltips();
 
     setGameState(getGameVisibleActive());
 
@@ -234,6 +237,72 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (localStorage.getItem('saveName')) {
         setSaveName(localStorage.getItem('saveName'));
     }
+
+function setupStatTooltips() {
+    if (document.getElementById('stat-tooltip')) {
+        return;
+    }
+
+    const tooltip = document.createElement('div');
+    tooltip.id = 'stat-tooltip';
+    tooltip.style.position = 'absolute';
+    tooltip.style.padding = '6px 10px';
+    tooltip.style.pointerEvents = 'none';
+    tooltip.style.background = 'rgba(0, 0, 0, 0.9)';
+    tooltip.style.color = 'var(--text-color)';
+    tooltip.style.border = '2px solid var(--text-color)';
+    tooltip.style.borderRadius = '5px';
+    tooltip.style.fontSize = '12px';
+    tooltip.style.zIndex = '100000';
+    tooltip.style.display = 'none';
+    document.body.appendChild(tooltip);
+
+    const statIds = ['cashStat', 'stat2', 'stat3', 'stat4', 'stat5', 'stat6', 'stat7', 'stat8'];
+    const statTargets = statIds
+        .map(id => {
+            const valueElement = document.getElementById(id);
+            const statCell = valueElement?.closest('.stat-cell');
+            return valueElement && statCell ? { valueElement, statCell } : null;
+        })
+        .filter(Boolean);
+
+    const updateTooltipContent = ({ statCell, valueElement }) => {
+        const customContent = valueElement.dataset.tooltipContent;
+
+        if (customContent) {
+            tooltip.innerHTML = customContent;
+            return;
+        }
+
+        const labelText = statCell?.querySelector('.stat-label')?.textContent.trim() ?? '';
+        const valueText = valueElement.innerText.replace(/\s+/g, ' ').trim();
+        tooltip.textContent = `${labelText} ${valueText}`.trim();
+    };
+
+    const moveTooltip = (event) => {
+        tooltip.style.left = `${event.pageX + 10}px`;
+        tooltip.style.top = `${event.pageY + 10}px`;
+    };
+
+    statTargets.forEach(target => {
+        const { statCell, valueElement } = target;
+
+        statCell.addEventListener('mouseenter', (event) => {
+            updateTooltipContent(target);
+            tooltip.style.display = 'block';
+            moveTooltip(event);
+        });
+
+        statCell.addEventListener('mousemove', (event) => {
+            updateTooltipContent(target);
+            moveTooltip(event);
+        });
+
+        statCell.addEventListener('mouseleave', () => {
+            tooltip.style.display = 'none';
+        });
+    });
+}
 
     initialiseDescriptions();
 
@@ -2584,8 +2653,56 @@ export function getTimeInStatCell() {
 
     const statElement = document.getElementById('stat8');
     if (statElement) {
+        const statCell = statElement.closest('.stat-cell');
+        const statLabel = statCell?.querySelector('.stat-label');
+        if (statLabel && !statLabel.textContent.trim()) {
+            statLabel.textContent = '';
+        }
+
+        const runStart = getRunStartTime();
+        const totalStart = getGameStartTime();
+
+        const runDuration = formatDurationSince(runStart);
+        const totalDuration = formatDurationSince(totalStart);
+        const currentRun = getStatRun();
+
         statElement.textContent = timeString;
+        statElement.dataset.tooltipContent = [
+            `<div><strong>${timeString}</strong></div>`,
+            `<div><span class="green-ready-text">Run:</span> ${currentRun}</div>`,
+            `<div><span class="green-ready-text">Run Time:</span> ${runDuration}</div>`,
+            `<div><span class="green-ready-text">Total Time:</span> ${totalDuration}</div>`
+        ].join('');
     }
+}
+
+function formatDurationSince(timestamp) {
+    if (!timestamp) {
+        return 'N/A';
+    }
+
+    const elapsed = Date.now() - timestamp;
+    if (elapsed < 0) {
+        return '0s';
+    }
+
+    return formatDuration(elapsed);
+}
+
+function formatDuration(milliseconds) {
+    const totalSeconds = Math.floor(milliseconds / 1000);
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    const parts = [];
+    if (days > 0) parts.push(`${days}d`);
+    if (hours > 0) parts.push(`${hours}h`);
+    if (minutes > 0) parts.push(`${minutes}m`);
+    if (seconds > 0 || parts.length === 0) parts.push(`${seconds}s`);
+
+    return parts.join(' ');
 }
 
 function drawStackedBarChart(canvasId, generationValues, consumptionValues, solarPlantMaxPurchasedRate) {
