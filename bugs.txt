@@ -1,6 +1,6 @@
 when power on with a basic power plant, carbon production severely reduced in reality but appears to only be reduced by 2/s
-be able to sell research points after science labs
-consider nerfing research or making more expensive and nerfing offline gains
+antimatter mining values wrong dont match scale when boosting
+there is a subkey error somewhere when accessing getResourceDataObject
 
 Pioneer-testermanuscript3
 
