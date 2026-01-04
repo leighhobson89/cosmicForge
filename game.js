@@ -6229,13 +6229,10 @@ function startInitialTimers() {
                                 if (compound === powerPlant3FuelType) {
                                     amountToDeductForConsumption = powerPlant3Consumption;
                                     if (tier === 1) { //not important which tier just has to be one of them to make it run once per loop
-                                        if (allCompoundRatesAddedTogether < amountToDeductForConsumption) {
-                                            setResourceDataObject(allCompoundRatesAddedTogether - amountToDeductForConsumption, 'compounds', [compound, 'rate']);
-                                        } else {
-                                            setResourceDataObject(allCompoundRatesAddedTogether + amountToDeductForConsumption, 'compounds', [compound, 'rate']);
-                                        }
+                                        setResourceDataObject(allCompoundRatesAddedTogether - amountToDeductForConsumption, 'compounds', [compound, 'rate']);
                                         const currentQuantity = getResourceDataObject('compounds', [compound, 'quantity']);
-                                        setResourceDataObject(Math.min(currentQuantity - amountToDeductForConsumption - calculatedCompoundRate, storageCapacity), 'compounds', [compound, 'quantity']);
+                                        const adjustedQuantity = Math.max(0, Math.min(currentQuantity - amountToDeductForConsumption, storageCapacity));
+                                        setResourceDataObject(adjustedQuantity, 'compounds', [compound, 'quantity']);
                                     }
                                 }
                             }
