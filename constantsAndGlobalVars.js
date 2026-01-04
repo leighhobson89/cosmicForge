@@ -186,7 +186,6 @@ let achievementFlagArray = [];
 let megaStructureTechsResearched = [];
 let miaplacidusMilestoneLevel = 0;
 let increaseStorageFactor = 2;
-const TECH_TREE_ENABLED = false;
 let rocketTravelSpeed = 0.2;
 let starShipTravelSpeed = 360000; //3600000 one real hour per light year
 let philosophy = null;
@@ -2450,7 +2449,7 @@ export function setSaveExportCloudFlag(value) {
     saveExportCloudFlag = value;
 }
 
-export async function getTechTreeDataAndDraw(renew) {
+export async function getTechTreeDataAndDraw() {
     let techData = getResourceDataObject('techs');
     const unlockedTechs = getTechUnlockedArray();
     const upcomingTechs = getUpcomingTechArray();
@@ -2853,10 +2852,6 @@ export function getRocketTravelSpeed() {
 
 export function setRocketTravelSpeed(value) {
     rocketTravelSpeed = value;
-}
-
-export function isTechTreeEnabled() {
-    return TECH_TREE_ENABLED;
 }
 
 export function getStarShipTravelSpeed() {
