@@ -3246,6 +3246,7 @@ export function drawNativeTechTree(techData, containerSelector) {
         node.dataset.techKey = techKey;
 
         const formattedName = capitaliseString(techKey).replace(/([a-z])([A-Z])/g, '$1 $2');
+        const canShowDetails = unlockedTechs.includes(techKey) || revealedTechs.includes(techKey);
 
         if (status === 'researched') {
             const statusTag = document.createElement('span');
@@ -3256,17 +3257,33 @@ export function drawNativeTechTree(techData, containerSelector) {
 
         const title = document.createElement('div');
         title.classList.add('native-tech-title');
-        title.textContent = unlockedTechs.includes(techKey) || revealedTechs.includes(techKey)
-            ? formattedName
-            : '???';
+        title.textContent = canShowDetails ? formattedName : '???';
 
         node.appendChild(title);
         const descriptionId = 'tech' + capitaliseString(techKey).replace(/\s+/g, '') + 'Row';
         const descriptionCopy = optionDescriptions[descriptionId]?.content2 || '';
         const descriptionElement = document.createElement('div');
-        descriptionElement.classList.add('native-tech-description', 'ready-text');
-        descriptionElement.innerHTML = descriptionCopy;
+        descriptionElement.classList.add('native-tech-description');
+        if (canShowDetails) {
+            descriptionElement.classList.add('ready-text');
+            descriptionElement.innerHTML = descriptionCopy;
+        } else {
+            descriptionElement.classList.add('red-disabled-text');
+            descriptionElement.textContent = '???';
+        }
         node.appendChild(descriptionElement);
+
+        const priceRaw = getResourceDataObject('techs', [techKey, 'price']);
+        const price = typeof priceRaw === 'number' ? priceRaw : Number(priceRaw) || 0;
+        const currentResearchRaw = getResourceDataObject('research', ['quantity']);
+        const currentResearch = typeof currentResearchRaw === 'number' ? currentResearchRaw : Number(currentResearchRaw) || 0;
+        const meetsCostRequirement = currentResearch >= price || unlockedTechs.includes(techKey);
+        const costElement = document.createElement('div');
+        costElement.classList.add('native-tech-cost', meetsCostRequirement ? 'ready-text' : 'red-disabled-text');
+        costElement.dataset.techKey = techKey;
+        costElement.dataset.price = String(price);
+        costElement.textContent = `${price.toLocaleString()} Research`;
+        node.appendChild(costElement);
 
         nodesLayer.appendChild(node);
         const measuredHeight = node.getBoundingClientRect().height;

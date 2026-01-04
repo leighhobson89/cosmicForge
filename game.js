@@ -554,6 +554,7 @@ export async function gameLoop() {
         checkPowerForSpaceTelescopeTimer(['searchAsteroidTimer', 'investigateStarTimer', 'pillageVoidTimer']);
 
         monitorTechTree();
+        updateNativeTechCostStates();
         
         const revealRowsCheck = document.querySelectorAll('.option-row');
         revealRowsCheck.forEach((revealRowCheck) => {
@@ -1318,6 +1319,33 @@ function handleAutoCreateResourceSellRows() {
                 sellRowElement.style.opacity = '0.5';
             }
         }
+    });
+}
+
+function updateNativeTechCostStates() {
+    if (getCurrentOptionPane() !== 'tech tree') {
+        return;
+    }
+
+    const costElements = document.querySelectorAll('.native-tech-cost');
+    if (!costElements.length) {
+        return;
+    }
+
+    const currentResearchRaw = getResourceDataObject('research', ['quantity']);
+    const currentResearch = typeof currentResearchRaw === 'number' ? currentResearchRaw : Number(currentResearchRaw) || 0;
+    const unlockedTechs = getTechUnlockedArray();
+
+    costElements.forEach(costElement => {
+        const price = Number(costElement.dataset.price ?? 0);
+        const techKey = costElement.dataset.techKey;
+        if (!techKey) {
+            return;
+        }
+
+        const meetsCostRequirement = unlockedTechs.includes(techKey) || currentResearch >= price;
+        costElement.classList.toggle('ready-text', meetsCostRequirement);
+        costElement.classList.toggle('red-disabled-text', !meetsCostRequirement);
     });
 }
 

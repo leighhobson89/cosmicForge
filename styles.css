@@ -1836,11 +1836,17 @@ canvas {
 .tech-tree-native-container {
     height: 720px;
     background-color: var(--container-bg-color);
-    border: 2px solid var(--text-color);
+    border: none;
     position: relative;
     overflow: auto;
     padding: 16px;
     cursor: grab;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE 10+ */
+}
+
+.tech-tree-native-container::-webkit-scrollbar {
+    display: none; /* WebKit */
 }
 
 .tech-tree-native-container.native-tech-dragging {
@@ -1920,6 +1926,12 @@ canvas {
 .native-tech-researched .native-tech-description,
 .native-tech-researched .ready-text {
     color: var(--bg-color);
+}
+
+.native-tech-cost {
+    margin-top: 10px;
+    font-weight: 600;
+    text-align: right;
 }
 
 .native-tech-revealed {
