@@ -3077,7 +3077,8 @@ function updateAntimatterAndDiagram() {
     let totalAntimatterExtractionRate = 0;
 
     for (let i = 1; i <= 4; i++) {
-        const rocketKey = getMiningObject()[`rocket${i}`];
+        const rocketName = `rocket${i}`;
+        const rocketKey = getMiningObject()[rocketName];
         const asteroid = getAsteroidArray().find(asteroid => asteroid[rocketKey])?.[rocketKey];
 
         if (asteroid) {
@@ -3090,6 +3091,20 @@ function updateAntimatterAndDiagram() {
             ];
         } else {
             rocketData[`rocket${i}`] = null;
+        }
+
+        if (
+            rocketKey &&
+            asteroid &&
+            asteroid.quantity[0] <= 0 &&
+            !getRocketDirection(rocketName) &&
+            !getCurrentlyTravellingToAsteroid(rocketName)
+        ) {
+            setRocketDirection(rocketName, true);
+            sfxPlayer.playAudio('rocketLaunch', false);
+            startTravelToAndFromAsteroidTimer([0, 'returning'], rocketName, true);
+            boostAntimatterRate(false);
+            continue;
         }
 
         if (asteroid && asteroid.beingMined) {

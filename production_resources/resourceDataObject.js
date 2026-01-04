@@ -1,7 +1,7 @@
 import { replaceRocketNames } from "./descriptions.js";
 import { migrateResourceData } from "./saveLoadGame.js";
-import { addPermanentBuffsBackInAfterRebirth, setResourceAutobuyerPricesAfterRepeatables, setCompoundRecipePricesAfterRepeatables, setEnergyAndResearchBuildingPricesAfterRepeatables, setFleetPricesAfterRepeatables, setFleetArmorBuffsAfterRepeatables, setFleetSpeedsAfterRepeatables, setFleetAttackDamageAfterRepeatables, setInitialImpressionBaseAfterRepeatables, setStarStudyEfficiencyAfterRepeatables, setAsteroidSearchEfficiencyAfterRepeatables, calculateAndAddExtraAPFromPhilosophyRepeatable, setStarshipPartPricesAfterRepeatables, setRocketPartPricesAfterRepeatables, setRocketTravelTimeReductionAfterRepeatables, setStarshipTravelTimeReductionAfterRepeatables } from './game.js';
-import { getMultiplierPermanentCompounds, getMultiplierPermanentResources, getCurrentTheme, setCompoundCreateDropdownRecipeText, getCompoundCreateDropdownRecipeText, getStatRun, getPlayerPhilosophy, getAllRepeatableTechMultipliersObject, getFactoryStarsArray } from "./constantsAndGlobalVars.js";
+import { addPermanentBuffsBackInAfterRebirth, setResourceAutobuyerPricesAfterRepeatables, setCompoundRecipePricesAfterRepeatables, setEnergyAndResearchBuildingPricesAfterRepeatables, setFleetPricesAfterRepeatables, setFleetArmorBuffsAfterRepeatables, setFleetSpeedsAfterRepeatables, setFleetAttackDamageAfterRepeatables, setInitialImpressionBaseAfterRepeatables, setStarStudyEfficiencyAfterRepeatables, setAsteroidSearchEfficiencyAfterRepeatables, calculateAndAddExtraAPFromPhilosophyRepeatable, setStarshipPartPricesAfterRepeatables, setRocketPartPricesAfterRepeatables, setRocketTravelTimeReductionAfterRepeatables, setStarshipTravelTimeReductionAfterRepeatables, applyRateMultiplierToAllResources, addStorageCapacityAndCompoundsToAllResources } from './game.js';
+import { getMultiplierPermanentCompounds, getMultiplierPermanentResources, getCurrentTheme, setCompoundCreateDropdownRecipeText, getCompoundCreateDropdownRecipeText, getStatRun, getPlayerPhilosophy, getAllRepeatableTechMultipliersObject, getFactoryStarsArray, getMegaStructureTechsResearched, getMegaStructureResourceBonus, getStorageAdderBonus } from "./constantsAndGlobalVars.js";
 import { achievementAchieve100FusionEfficiency, achievementActivateAllWackyNewsTickers, achievementBeatEnemy, achievementCollect100Precipitation, achievementCollect100TitaniumAsPrecipitation, achievementConquerStarSystems, achievementCreateCompound, achievementDiscoverAsteroid, achievementDiscoverLegendaryAsteroid, achievementHave4RocketsMiningAntimatter, achievementHave50HoursWithOnePioneer, achievementInitiateDiplomacyWithAlienRace, achievementLaunchRocket, achievementLaunchStarShip, achievementLiquidateAllAssets, achievementMineAllAntimatterAsteroid, achievementPerformGalaticMarketTransaction, achievementRebirth, achievementResearchAllTechnologies, achievementSeeAllNewsTickers, achievementSpendAp, achievementStudyAllStarsInOneRun, achievementStudyAStar, achievementTrade10APForCash, achievementTripPower } from "./achievements.js";
 import { showNotification } from "./ui.js";
 
@@ -281,7 +281,7 @@ export let resourceData = {
                 autoBuyer: {
                     currentTierLevel: 0,
                     normalProgression: true,
-                    tier1: { nameUpgrade: 'Backyard Extractor', screen: 'diesel', place: 'dieselAutoBuyer1Row', price: 50000, rate: 0.02, quantity: 0, setPrice: 'dieselAB1Price', energyUse: 0, active: true },
+                    tier1: { nameUpgrade: 'Backyard Extractor', screen: 'diesel', place: 'dieselAutoBuyer1Row', price: 1000, rate: 0.02, quantity: 0, setPrice: 'dieselAB1Price', energyUse: 0, active: true },
                     tier2: { nameUpgrade: 'Advanced Extractor', screen: 'diesel', place: 'dieselAutoBuyer2Row', price: 400000, rate: 0.1, quantity: 0, setPrice: 'dieselAB2Price', energyUse: 0.03, active: true },
                     tier3: { nameUpgrade: 'Industrial Extractor', screen: 'diesel', place: 'dieselAutoBuyer3Row', price: 2000000, rate: 0.5, quantity: 0, setPrice: 'dieselAB3Price', energyUse: 0.12, active: true },
                     tier4: { nameUpgrade: 'Quantum Extractor', screen: 'diesel', place: 'dieselAutoBuyer4Row', price: 10000000, rate: 2.5, quantity: 0, setPrice: 'dieselAB4Price', energyUse: 0.6, active: true }
@@ -557,10 +557,10 @@ export let resourceData = {
         upgrades: {
             spaceTelescope: { 
                 spaceTelescopeBoughtYet: false,
-                basePrices: [10000, 20000, 15000, 20000],
+                basePrices: [10000, 20000, 12000, 20000],
                 price: 10000,
                 resource1Price: [20000, 'iron', 'resources'],
-                resource2Price: [15000, 'glass', 'compounds'],
+                resource2Price: [12000, 'glass', 'compounds'],
                 resource3Price: [20000, 'silicon', 'resources'],
                 energyUseSearchAsteroid: 0.4,
                 energyUseInvestigateStar: 0.7,
@@ -568,11 +568,11 @@ export let resourceData = {
             },
             launchPad: { 
                 launchPadBoughtYet: false,
-                basePrices: [40000, 10000, 1000, 20000],
+                basePrices: [40000, 10000, 1000, 12000],
                 price: 40000,
                 resource1Price: [10000, 'iron', 'resources'],
                 resource2Price: [1000, 'titanium', 'compounds'],
-                resource3Price: [20000, 'concrete', 'compounds'],
+                resource3Price: [12000, 'concrete', 'compounds'],
             },
             rocket1: {
                 builtParts: 0,
@@ -2319,6 +2319,119 @@ const achievementPositionDataLinker = {
     have50HoursWithOnePioneer: { id: 'have50HoursWithOnePioneer', gridRow: 4, gridColumn: 9 }
 };
 
+export const megaStructureImageUrls = {
+    forceField0Misty: './images/megaStructure/misty/ForceField0.png',
+    forceField1Misty: './images/megaStructure/misty/ForceField1.png',
+    forceField2Misty: './images/megaStructure/misty/ForceField2.png',
+    forceField3Misty: './images/megaStructure/misty/ForceField3.png',
+    forceField4Misty: './images/megaStructure/misty/ForceField4.png',
+    starSystemActiveMisty: './images/megaStructure/misty/MiaplacidusActive.png',
+    starSystemNotActiveMisty: './images/megaStructure/misty/MiaplacidusNotActive.png',
+    dysonSphereActiveMisty: './images/megaStructure/misty/DysonSphereActive.png',
+    dysonSphereNotActiveMisty: './images/megaStructure/misty/DysonSphereNotActive.png',
+    celestialProcessingCoreActiveMisty: './images/megaStructure/misty/CelestialProcessingCoreActive.png',
+    celestialProcessingCoreNotActiveMisty: './images/megaStructure/misty/CelestialProcessingCoreNotActive.png',
+    plasmaForgeActiveMisty: './images/megaStructure/misty/PlasmaForgeActive.png',
+    plasmaForgeNotActiveMisty: './images/megaStructure/misty/PlasmaForgeNotActive.png',
+    galacticMemoryArchiveActiveMisty: './images/megaStructure/misty/GalacticMemoryArchiveActive.png',
+    galacticMemoryArchiveNotActiveMisty: './images/megaStructure/misty/GalacticMemoryArchiveNotActive.png',
+
+    forceField0Light: './images/megaStructure/light/ForceField0.png',
+    forceField1Light: './images/megaStructure/light/ForceField1.png',
+    forceField2Light: './images/megaStructure/light/ForceField2.png',
+    forceField3Light: './images/megaStructure/light/ForceField3.png',
+    forceField4Light: './images/megaStructure/light/ForceField4.png',
+    starSystemActiveLight: './images/megaStructure/light/MiaplacidusActive.png',
+    starSystemNotActiveLight: './images/megaStructure/light/MiaplacidusNotActive.png',
+    dysonSphereActiveLight: './images/megaStructure/light/DysonSphereActive.png',
+    dysonSphereNotActiveLight: './images/megaStructure/light/DysonSphereNotActive.png',
+    celestialProcessingCoreActiveLight: './images/megaStructure/light/CelestialProcessingCoreActive.png',
+    celestialProcessingCoreNotActiveLight: './images/megaStructure/light/CelestialProcessingCoreNotActive.png',
+    plasmaForgeActiveLight: './images/megaStructure/light/PlasmaForgeActive.png',
+    plasmaForgeNotActiveLight: './images/megaStructure/light/PlasmaForgeNotActive.png',
+    galacticMemoryArchiveActiveLight: './images/megaStructure/light/GalacticMemoryArchiveActive.png',
+    galacticMemoryArchiveNotActiveLight: './images/megaStructure/light/GalacticMemoryArchiveNotActive.png',
+
+    forceField0Frosty: './images/megaStructure/frosty/ForceField0.png',
+    forceField1Frosty: './images/megaStructure/frosty/ForceField1.png',
+    forceField2Frosty: './images/megaStructure/frosty/ForceField2.png',
+    forceField3Frosty: './images/megaStructure/frosty/ForceField3.png',
+    forceField4Frosty: './images/megaStructure/frosty/ForceField4.png',
+    starSystemActiveFrosty: './images/megaStructure/frosty/MiaplacidusActive.png',
+    starSystemNotActiveFrosty: './images/megaStructure/frosty/MiaplacidusNotActive.png',
+    dysonSphereActiveFrosty: './images/megaStructure/frosty/DysonSphereActive.png',
+    dysonSphereNotActiveFrosty: './images/megaStructure/frosty/DysonSphereNotActive.png',
+    celestialProcessingCoreActiveFrosty: './images/megaStructure/frosty/CelestialProcessingCoreActive.png',
+    celestialProcessingCoreNotActiveFrosty: './images/megaStructure/frosty/CelestialProcessingCoreNotActive.png',
+    plasmaForgeActiveFrosty: './images/megaStructure/frosty/PlasmaForgeActive.png',
+    plasmaForgeNotActiveFrosty: './images/megaStructure/frosty/PlasmaForgeNotActive.png',
+    galacticMemoryArchiveActiveFrosty: './images/megaStructure/frosty/GalacticMemoryArchiveActive.png',
+    galacticMemoryArchiveNotActiveFrosty: './images/megaStructure/frosty/GalacticMemoryArchiveNotActive.png',
+
+    forceField0Summer: './images/megaStructure/summer/ForceField0.png',
+    forceField1Summer: './images/megaStructure/summer/ForceField1.png',
+    forceField2Summer: './images/megaStructure/summer/ForceField2.png',
+    forceField3Summer: './images/megaStructure/summer/ForceField3.png',
+    forceField4Summer: './images/megaStructure/summer/ForceField4.png',
+    starSystemActiveSummer: './images/megaStructure/summer/MiaplacidusActive.png',
+    starSystemNotActiveSummer: './images/megaStructure/summer/MiaplacidusNotActive.png',
+    dysonSphereActiveSummer: './images/megaStructure/summer/DysonSphereActive.png',
+    dysonSphereNotActiveSummer: './images/megaStructure/summer/DysonSphereNotActive.png',
+    celestialProcessingCoreActiveSummer: './images/megaStructure/summer/CelestialProcessingCoreActive.png',
+    celestialProcessingCoreNotActiveSummer: './images/megaStructure/summer/CelestialProcessingCoreNotActive.png',
+    plasmaForgeActiveSummer: './images/megaStructure/summer/PlasmaForgeActive.png',
+    plasmaForgeNotActiveSummer: './images/megaStructure/summer/PlasmaForgeNotActive.png',
+    galacticMemoryArchiveActiveSummer: './images/megaStructure/summer/GalacticMemoryArchiveActive.png',
+    galacticMemoryArchiveNotActiveSummer: './images/megaStructure/summer/GalacticMemoryArchiveNotActive.png',
+
+    forceField0Forest: './images/megaStructure/forest/ForceField0.png',
+    forceField1Forest: './images/megaStructure/forest/ForceField1.png',
+    forceField2Forest: './images/megaStructure/forest/ForceField2.png',
+    forceField3Forest: './images/megaStructure/forest/ForceField3.png',
+    forceField4Forest: './images/megaStructure/forest/ForceField4.png',
+    starSystemActiveForest: './images/megaStructure/forest/MiaplacidusActive.png',
+    starSystemNotActiveForest: './images/megaStructure/forest/MiaplacidusNotActive.png',
+    dysonSphereActiveForest: './images/megaStructure/forest/DysonSphereActive.png',
+    dysonSphereNotActiveForest: './images/megaStructure/forest/DysonSphereNotActive.png',
+    celestialProcessingCoreActiveForest: './images/megaStructure/forest/CelestialProcessingCoreActive.png',
+    celestialProcessingCoreNotActiveForest: './images/megaStructure/forest/CelestialProcessingCoreNotActive.png',
+    plasmaForgeActiveForest: './images/megaStructure/forest/PlasmaForgeActive.png',
+    plasmaForgeNotActiveForest: './images/megaStructure/forest/PlasmaForgeNotActive.png',
+    galacticMemoryArchiveActiveForest: './images/megaStructure/forest/GalacticMemoryArchiveActive.png',
+    galacticMemoryArchiveNotActiveForest: './images/megaStructure/forest/GalacticMemoryArchiveNotActive.png',
+
+    forceField0Terminal: './images/megaStructure/terminal/ForceField0.png',
+    forceField1Terminal: './images/megaStructure/terminal/ForceField1.png',
+    forceField2Terminal: './images/megaStructure/terminal/ForceField2.png',
+    forceField3Terminal: './images/megaStructure/terminal/ForceField3.png',
+    forceField4Terminal: './images/megaStructure/terminal/ForceField4.png',
+    starSystemActiveTerminal: './images/megaStructure/terminal/MiaplacidusActive.png',
+    starSystemNotActiveTerminal: './images/megaStructure/terminal/MiaplacidusNotActive.png',
+    dysonSphereActiveTerminal: './images/megaStructure/terminal/DysonSphereActive.png',
+    dysonSphereNotActiveTerminal: './images/megaStructure/terminal/DysonSphereNotActive.png',
+    celestialProcessingCoreActiveTerminal: './images/megaStructure/terminal/CelestialProcessingCoreActive.png',
+    celestialProcessingCoreNotActiveTerminal: './images/megaStructure/terminal/CelestialProcessingCoreNotActive.png',
+    plasmaForgeActiveTerminal: './images/megaStructure/terminal/PlasmaForgeActive.png',
+    plasmaForgeNotActiveTerminal: './images/megaStructure/terminal/PlasmaForgeNotActive.png',
+    galacticMemoryArchiveActiveTerminal: './images/megaStructure/terminal/GalacticMemoryArchiveActive.png',
+    galacticMemoryArchiveNotActiveTerminal: './images/megaStructure/terminal/GalacticMemoryArchiveNotActive.png',
+
+    forceField0Dark: './images/megaStructure/dark/ForceField0.png',
+    forceField1Dark: './images/megaStructure/dark/ForceField1.png',
+    forceField2Dark: './images/megaStructure/dark/ForceField2.png',
+    forceField3Dark: './images/megaStructure/dark/ForceField3.png',
+    forceField4Dark: './images/megaStructure/dark/ForceField4.png',
+    starSystemActiveDark: './images/megaStructure/dark/MiaplacidusActive.png',
+    starSystemNotActiveDark: './images/megaStructure/dark/MiaplacidusNotActive.png',
+    dysonSphereActiveDark: './images/megaStructure/dark/DysonSphereActive.png',
+    dysonSphereNotActiveDark: './images/megaStructure/dark/DysonSphereNotActive.png',
+    celestialProcessingCoreActiveDark: './images/megaStructure/dark/CelestialProcessingCoreActive.png',
+    celestialProcessingCoreNotActiveDark: './images/megaStructure/dark/CelestialProcessingCoreNotActive.png',
+    plasmaForgeActiveDark: './images/megaStructure/dark/PlasmaForgeActive.png',
+    plasmaForgeNotActiveDark: './images/megaStructure/dark/PlasmaForgeNotActive.png',
+    galacticMemoryArchiveActiveDark: './images/megaStructure/dark/GalacticMemoryArchiveActive.png',
+    galacticMemoryArchiveNotActiveDark: './images/megaStructure/dark/GalacticMemoryArchiveNotActive.png',
+};
 
 //----------------------------------------------------------------------------------------------------------
 //GETTER SETTERS
@@ -2596,6 +2709,14 @@ export function resetResourceDataObjectOnRebirthAndAddApAndPermanentBuffsBack() 
 
     Object.assign(resourceData, resourceDataRebirthCopy);
 
+    if (getMegaStructureResourceBonus()) {
+        applyRateMultiplierToAllResources(5);
+    }
+
+    if (getStorageAdderBonus()) {
+        addStorageCapacityAndCompoundsToAllResources(10000000000);
+    }
+    
     addPermanentBuffsBackInAfterRebirth();
     addPermanentResourcesModifiersBackIn();
     addPermanentCompoundsModifiersBackIn();
@@ -2702,7 +2823,7 @@ function addPermanentCompoundsModifiersBackIn() {
         const originalCompoundText = getCompoundCreateDropdownRecipeText(compoundKey);
         const updatedCompoundText = {};
         
-        for (const key of ['max', 'threeQuarters', 'twoThirds', 'half', 'oneThird']) {
+        for (const key of ['max', 'fillToCapacity', 'threeQuarters', 'twoThirds', 'half', 'oneThird']) {
             if (originalCompoundText[key]) {
                 updatedCompoundText[key] = originalCompoundText[key];
             }
@@ -2776,10 +2897,10 @@ function addPermanentResourcesModifiersBackIn() {
     }
 }
 
-export function getStarSystemDataObject(key, subKeys) {
+export function getStarSystemDataObject(key, subKeys, noWarning = false) {
     let current = starSystems[key];
 
-    if (!current) {
+    if (!current && !noWarning) {
         console.warn(`Resource data not found for key: ${key}`);
         return undefined;
     }
@@ -2787,7 +2908,7 @@ export function getStarSystemDataObject(key, subKeys) {
     if (subKeys) {
         for (const subKey of subKeys) {
             current = current?.[subKey];
-            if (current === undefined) {
+            if (current === undefined && !noWarning) {
                 console.warn(`Missing subKey: ${subKey}`);
                 return undefined;
             }
