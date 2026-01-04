@@ -3327,6 +3327,293 @@ export async function drawTechTree(techData, svgElement, renew) {
     }, 50);
 }
 
+export function drawNativeTechTree(techData, containerSelector) {
+    const container = document.querySelector(containerSelector) || document.getElementById('techTreeNativeContainer');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    const unlockedTechs = getTechUnlockedArray();
+    const revealedTechs = getRevealedTechArray();
+    const upcomingTechs = getUpcomingTechArray();
+
+    const stage = document.createElement('div');
+    stage.classList.add('native-tech-stage');
+    const edgesSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    edgesSvg.classList.add('native-tech-edges');
+    const nodesLayer = document.createElement('div');
+    nodesLayer.classList.add('native-tech-nodes');
+
+    stage.style.transformOrigin = '0 0';
+    stage.style.transform = 'scale(1)';
+    stage.style.transition = 'transform 0.2s ease';
+    stage.appendChild(edgesSvg);
+    stage.appendChild(nodesLayer);
+    container.appendChild(stage);
+    setupNativeTechTreeDrag(container);
+    setupNativeTechTreeZoom(container, stage);
+
+    const sortedTechs = Object.entries(techData).sort((a, b) => {
+        const aCost = a[1].appearsAt?.[0] ?? 0;
+        const bCost = b[1].appearsAt?.[0] ?? 0;
+        return aCost - bCost;
+    });
+
+    const colSpacing = 260;
+    const rowSpacing = 180;
+    const nodeWidth = 240;
+    const marginX = 60;
+    const marginY = 60;
+
+    const pathOrder = Array.from(new Set(sortedTechs.map(([_, value]) => value.path || 1))).sort((a, b) => a - b);
+    const columnIndexByPath = new Map(pathOrder.map((path, index) => [path, index]));
+    const pathOffsets = new Map(pathOrder.map(path => [path, marginY]));
+
+    const nodeDataMap = new Map();
+    let maxBottom = marginY;
+
+    sortedTechs.forEach(([techKey, techValue]) => {
+        const path = techValue.path || 1;
+        const columnIndex = columnIndexByPath.get(path) ?? 0;
+        const x = marginX + columnIndex * colSpacing;
+
+        const status = unlockedTechs.includes(techKey)
+            ? 'researched'
+            : revealedTechs.includes(techKey)
+                ? 'revealed'
+                : upcomingTechs.includes(techKey)
+                    ? 'upcoming'
+                    : 'hidden';
+
+        const node = document.createElement('div');
+        node.classList.add('native-tech-node', `native-tech-${status}`);
+        node.style.left = `${x}px`;
+        node.style.top = `${marginY}px`;
+        node.style.width = `${nodeWidth}px`;
+        node.dataset.techKey = techKey;
+
+        const formattedName = capitaliseString(techKey).replace(/([a-z])([A-Z])/g, '$1 $2');
+
+        if (status === 'researched') {
+            const statusTag = document.createElement('span');
+            statusTag.classList.add('native-tech-status');
+            statusTag.textContent = 'RESEARCHED';
+            node.appendChild(statusTag);
+        }
+
+        const title = document.createElement('div');
+        title.classList.add('native-tech-title');
+        title.textContent = unlockedTechs.includes(techKey) || revealedTechs.includes(techKey)
+            ? formattedName
+            : '???';
+
+        node.appendChild(title);
+        const descriptionId = 'tech' + capitaliseString(techKey).replace(/\s+/g, '') + 'Row';
+        const descriptionCopy = optionDescriptions[descriptionId]?.content2 || '';
+        const descriptionElement = document.createElement('div');
+        descriptionElement.classList.add('native-tech-description', 'ready-text');
+        descriptionElement.innerHTML = descriptionCopy;
+        node.appendChild(descriptionElement);
+
+        nodesLayer.appendChild(node);
+        const measuredHeight = node.getBoundingClientRect().height;
+
+        const prereqKeys = (techValue.appearsAt || []).slice(1).filter(Boolean);
+        let requiredY = marginY;
+        if (prereqKeys.length) {
+            const prereqBottom = Math.max(...prereqKeys.map(prereq => {
+                const prereqData = nodeDataMap.get(prereq);
+                return prereqData ? prereqData.y + prereqData.height : marginY;
+            }));
+            requiredY = prereqBottom + rowSpacing;
+        }
+
+        const currentPathOffset = pathOffsets.get(path) ?? marginY;
+        const finalY = Math.max(requiredY, currentPathOffset);
+        node.style.top = `${finalY}px`;
+
+        pathOffsets.set(path, finalY + measuredHeight + rowSpacing);
+        nodeDataMap.set(techKey, {
+            key: techKey,
+            x,
+            y: finalY,
+            width: nodeWidth,
+            height: measuredHeight,
+            path
+        });
+
+        maxBottom = Math.max(maxBottom, finalY + measuredHeight);
+    });
+
+    const svgWidth = (pathOrder.length - 1) * colSpacing + nodeWidth + marginX * 2;
+    const svgHeight = maxBottom + marginY;
+    edgesSvg.setAttribute('width', svgWidth);
+    edgesSvg.setAttribute('height', svgHeight);
+    edgesSvg.style.width = `${svgWidth}px`;
+    edgesSvg.style.height = `${svgHeight}px`;
+    stage.style.width = `${svgWidth}px`;
+    stage.style.height = `${svgHeight}px`;
+    edgesSvg.innerHTML = `
+        <defs>
+            <marker id="nativeTechArrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"></path>
+            </marker>
+        </defs>
+    `;
+
+    sortedTechs.forEach(([techKey, techValue]) => {
+        const targetNode = nodeDataMap.get(techKey);
+        if (!targetNode) return;
+
+        const prereqKeys = (techValue.appearsAt || []).slice(1).filter(Boolean);
+        prereqKeys.forEach(prereqKey => {
+            const sourceNode = nodeDataMap.get(prereqKey);
+            if (!sourceNode) return;
+
+            const startX = sourceNode.x + sourceNode.width / 2;
+            const startY = sourceNode.y + sourceNode.height;
+            const endX = targetNode.x + targetNode.width / 2;
+            const endY = targetNode.y;
+            const verticalPadding = 80;
+            const midY = Math.max(startY + verticalPadding, endY - verticalPadding);
+
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            const pathData = [
+                `M ${startX} ${startY}`,
+                `L ${startX} ${midY}`,
+                `L ${endX} ${midY}`,
+                `L ${endX} ${endY}`
+            ].join(' ');
+            path.setAttribute('d', pathData);
+            path.setAttribute('stroke', 'currentColor');
+            path.setAttribute('fill', 'none');
+            path.setAttribute('marker-end', 'url(#nativeTechArrow)');
+            path.classList.add('native-tech-edge');
+
+            edgesSvg.appendChild(path);
+        });
+    });
+
+    stage.appendChild(edgesSvg);
+    stage.appendChild(nodesLayer);
+    container.appendChild(stage);
+}
+
+function setupNativeTechTreeDrag(container) {
+    if (container.dataset.dragInit === 'true') {
+        return;
+    }
+
+    let isDragging = false;
+    let startX = 0;
+    let startY = 0;
+    let startScrollLeft = 0;
+    let startScrollTop = 0;
+
+    const onMouseMove = (event) => {
+        if (!isDragging) return;
+
+        const deltaX = event.clientX - startX;
+        const deltaY = event.clientY - startY;
+        container.scrollLeft = startScrollLeft - deltaX;
+        container.scrollTop = startScrollTop - deltaY;
+    };
+
+    const endDrag = () => {
+        if (!isDragging) return;
+        isDragging = false;
+        container.classList.remove('native-tech-dragging');
+    };
+
+    container.addEventListener('pointerdown', (event) => {
+        if (event.button !== 0) return;
+        isDragging = true;
+        container.classList.add('native-tech-dragging');
+        startX = event.clientX;
+        startY = event.clientY;
+        startScrollLeft = container.scrollLeft;
+        startScrollTop = container.scrollTop;
+        container.setPointerCapture(event.pointerId);
+        event.preventDefault();
+    });
+
+    container.addEventListener('pointermove', (event) => {
+        if (!isDragging) return;
+        const deltaX = event.clientX - startX;
+        const deltaY = event.clientY - startY;
+        container.scrollLeft = startScrollLeft - deltaX;
+        container.scrollTop = startScrollTop - deltaY;
+    });
+
+    container.addEventListener('pointerup', (event) => {
+        if (!isDragging) return;
+        isDragging = false;
+        container.classList.remove('native-tech-dragging');
+        container.releasePointerCapture(event.pointerId);
+    });
+
+    container.addEventListener('pointerleave', () => {
+        if (!isDragging) return;
+        isDragging = false;
+        container.classList.remove('native-tech-dragging');
+    });
+
+    container.addEventListener('pointercancel', () => {
+        if (!isDragging) return;
+        isDragging = false;
+        container.classList.remove('native-tech-dragging');
+    });
+    container.dataset.dragInit = 'true';
+}
+
+function setupNativeTechTreeZoom(container, stage) {
+    const zoomLevels = [0.4, 0.5, 0.6, 0.75, 0.9, 1, 1.15, 1.35, 1.6];
+
+    if (!container.nativeTechZoom) {
+        container.nativeTechZoom = {
+            levelIndex: 0,
+            applyZoom(targetStage) {
+                const scale = zoomLevels[this.levelIndex];
+                if (targetStage) {
+                    targetStage.style.transform = `scale(${scale})`;
+                }
+            }
+        };
+
+        container.addEventListener('wheel', (event) => {
+            if (event.ctrlKey || event.metaKey) {
+                return;
+            }
+            event.preventDefault();
+            const zoomState = container.nativeTechZoom;
+            const stageRect = zoomState.stage.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            const cursorX = event.clientX - containerRect.left + container.scrollLeft;
+            const cursorY = event.clientY - containerRect.top + container.scrollTop;
+            const prevScale = zoomLevels[zoomState.levelIndex];
+
+            if (event.deltaY > 0) {
+                zoomState.levelIndex = Math.max(0, zoomState.levelIndex - 1);
+            } else {
+                zoomState.levelIndex = Math.min(zoomLevels.length - 1, zoomState.levelIndex + 1);
+            }
+
+            const newScale = zoomLevels[zoomState.levelIndex];
+
+            setTimeout(() => {
+                const scaleRatio = newScale / prevScale;
+                container.scrollLeft = (cursorX * scaleRatio) - (event.clientX - containerRect.left);
+                container.scrollTop = (cursorY * scaleRatio) - (event.clientY - containerRect.top);
+            }, 50);
+
+            zoomState.applyZoom(zoomState.stage);
+        }, { passive: false });
+    }
+
+    container.nativeTechZoom.stage = stage;
+    container.nativeTechZoom.applyZoom(stage);
+}
+
 export function showTabsUponUnlock() {
     const tabs = document.querySelectorAll('.tab');
     const unlockedTechs = getTechUnlockedArray();

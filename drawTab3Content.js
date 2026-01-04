@@ -2569,37 +2569,13 @@ export function drawTab3Content(heading, optionContentElement) {
     }
     
     if (heading === 'Tech Tree') {
-        if (!isTechTreeEnabled()) {
-            const placeholderRow = createOptionRow(
-                'techTreeUnavailableRow',
-                null,
-                '',
-                createTextElement('Tech tree is temporarily unavailable.', 'techTreeUnavailableText', ['tech-tree-disabled-message']),
-                null,
-                null,
-                null,
-                null,
-                '',
-                '',
-                '',
-                '',
-                '',
-                '',
-                null,
-                false,
-                null,
-                null,
-                'tech-tree-disabled'
-            );
-            optionContentElement.appendChild(placeholderRow);
-            return;
-        }
-
-        const techTreeSvgRow = createOptionRow(
-            'techTreeSvgRow',
+        const techTreeContainerRow = createOptionRow(
+            'techTreeContainerRow',
             null,
             '',
-            createSvgElement('techTreeSvg', '100%', '700px', ['tech-tree-svg']),
+            isTechTreeEnabled()
+                ? createSvgElement('techTreeSvg', '100%', '700px', ['tech-tree-svg'])
+                : createTextElement('', 'techTreeNativeContainer', ['tech-tree-native-container']),
             null,
             null,
             null,
@@ -2618,7 +2594,7 @@ export function drawTab3Content(heading, optionContentElement) {
             [true, 'invisible', '100%']
         );
     
-        optionContentElement.appendChild(techTreeSvgRow);
+        optionContentElement.appendChild(techTreeContainerRow);
 
         const tooltip = document.getElementById('techTreeTooltip');
         if (tooltip) {

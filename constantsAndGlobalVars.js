@@ -1,6 +1,6 @@
 import { restoreAchievementsDataObject, restoreAscendencyBuffsDataObject, restoreGalacticMarketDataObject, restoreRocketNamesObject, restoreResourceDataObject, restoreStarSystemsDataObject, resourceData, starSystems, getResourceDataObject, setResourceDataObject, galacticMarket, ascendencyBuffs, achievementsData, getStarSystemDataObject } from "./resourceDataObject.js";
 import { achievementFunctionsMap } from "./achievements.js";
-import { drawTechTree, selectTheme, startWeatherEffect, stopWeatherEffect } from "./ui.js";
+import { drawTechTree, drawNativeTechTree, selectTheme, startWeatherEffect, stopWeatherEffect } from "./ui.js";
 import { capitaliseWordsWithRomanNumerals, capitaliseString } from './utilityFunctions.js';
 import { offlineGains, startNewsTickerTimer } from './game.js';
 import { rocketNames } from './descriptions.js';
@@ -19,7 +19,7 @@ let saveData = null;
 //CONSTANTS
 export const HOMESTAR = 'miaplacidus';
 export const MINIMUM_GAME_VERSION_FOR_SAVES = 0.70;
-export const GAME_VERSION_FOR_SAVES = 0.75;
+export const GAME_VERSION_FOR_SAVES = 0.76;
 export const deferredActions = [];
 
 //NOTIFICATIONS
@@ -2471,9 +2471,6 @@ export function getRenderedTechTree() {
 }
 
 export async function getTechTreeDataAndDraw(renew) {
-    if (!TECH_TREE_ENABLED) {
-        return;
-    }
     let techData = getResourceDataObject('techs');
     const unlockedTechs = getTechUnlockedArray();
     const upcomingTechs = getUpcomingTechArray();
@@ -2503,7 +2500,11 @@ export async function getTechTreeDataAndDraw(renew) {
         );
     }
 
-    await drawTechTree(techData, '#techTreeSvg', renew);
+    if (TECH_TREE_ENABLED) {
+        await drawTechTree(techData, '#techTreeSvg', renew);
+    } else {
+        drawNativeTechTree(techData, '#techTreeNative');
+    }
 }
 
 export function getOneOffPrizesAlreadyClaimedArray() {

@@ -8,7 +8,7 @@ import { showNotification } from "./ui.js";
 export let achievementImageUrls;
 
 export let resourceData = {
-    version: 0.75, //update this whenever changes are made to the structure
+    version: 0.76, //update this whenever changes are made to the structure
     resources: {
         solar: {
             autoSell: false,
@@ -939,7 +939,7 @@ export let resourceData = {
 };
 
 export let starSystems = {
-    version: 0.75,
+    version: 0.76,
     stars: {
         spica: {
             mapSize: 5.504440179536064, //might need to add this to star object when added dynamically for after rebirth
@@ -958,7 +958,7 @@ export let starSystems = {
 };
 
 export let galacticMarket = {
-    version: 0.75,
+    version: 0.76,
     resources: {
         hydrogen: { 
             name: "Hydrogen", 
@@ -1064,7 +1064,7 @@ export let galacticMarket = {
 };
 
 export let ascendencyBuffs = {
-    version: 0.75,
+    version: 0.76,
     "efficientStorage": {  //done
         name: "Efficient Storage",
         description: "buffEfficientStorageRow",

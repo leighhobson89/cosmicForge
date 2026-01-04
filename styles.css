@@ -1833,6 +1833,110 @@ canvas {
     width: 100%;
   }
 
+.tech-tree-native-container {
+    height: 720px;
+    background-color: var(--container-bg-color);
+    border: 2px solid var(--text-color);
+    position: relative;
+    overflow: auto;
+    padding: 16px;
+    cursor: grab;
+}
+
+.tech-tree-native-container.native-tech-dragging {
+    cursor: move;
+}
+
+.native-tech-stage {
+    position: relative;
+    min-height: 600px;
+}
+
+.native-tech-edges {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    color: var(--text-color);
+    opacity: 0.6;
+}
+
+.native-tech-edges .native-tech-edge {
+    stroke: var(--text-color);
+    opacity: 0.5;
+}
+
+.native-tech-nodes {
+    position: relative;
+}
+
+.native-tech-node {
+    position: absolute;
+    padding: 10px 12px 12px;
+    background-color: var(--container-bg-color);
+    border: 2px solid var(--text-color);
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.native-tech-node:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.45);
+}
+
+.native-tech-status {
+    position: absolute;
+    top: -12px;
+    right: 16px;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    letter-spacing: 0.1em;
+    background-color: var(--text-color);
+    color: var(--bg-color);
+}
+
+.native-tech-title {
+    font-weight: 600;
+    font-size: 18px;
+    margin-top: 8px;
+    color: var(--text-color);
+}
+
+.native-tech-unlocked {
+    border-color: var(--ready-text);
+    box-shadow: 0 4px 20px rgba(0, 255, 128, 0.2);
+}
+
+.native-tech-researched {
+    border-color: var(--ready-text);
+    background-color: var(--ready-text);
+    box-shadow: 0 4px 24px rgba(0, 255, 128, 0.25);
+    color: var(--bg-color);
+}
+
+.native-tech-researched .native-tech-title,
+.native-tech-researched .native-tech-description,
+.native-tech-researched .ready-text {
+    color: var(--bg-color);
+}
+
+.native-tech-revealed {
+    border-color: var(--text-color);
+    opacity: 0.95;
+}
+
+.native-tech-upcoming {
+    border-style: dashed;
+    opacity: 0.8;
+}
+
+.native-tech-hidden {
+    filter: grayscale(0.8) blur(0.2px);
+    opacity: 0.6;
+}
+
   svg title {
     font-family: Arial, sans-serif;
     font-size: 14px;
