@@ -2714,13 +2714,18 @@ function buildEnergyTooltipContent(netText) {
     const generatorLines = buildPowerPlantGenerationLines(timerRatio);
     const consumerLines = buildEnergyConsumerLines(timerRatio);
 
+    const generationSubtotalLine = `<div><span class="green-ready-text">Total Generated:</span> <span class="green-ready-text">${formatEnergyValue(totalGeneration, true)}</span></div>`;
+    const consumptionSubtotalLine = `<div><span class="green-ready-text">Total Consumed:</span> <span class="red-disabled-text">${formatEnergyValue(-totalConsumption)}</span></div>`;
+
     return [
         `<div><span class="green-ready-text">Net Energy:</span> <span class="${netClass}">${netDisplay}</span></div>`,
+        generationSubtotalLine,
+        consumptionSubtotalLine,
         `<div class="tooltip-spacer">&nbsp;</div>`,
         `<div><span class="green-ready-text"><strong>Generators</strong></span></div>`,
         generatorLines,
         `<div class="tooltip-spacer">&nbsp;</div>`,
-        `<div><span class="red-disabled-text"><strong>Consumers</strong></span></div>`,
+        `<div><span class="green-ready-text"><strong>Consumers</strong></span></div>`,
         consumerLines
     ].filter(Boolean).join('');
 }
@@ -2738,9 +2743,8 @@ function buildPowerPlantGenerationLines(timerRatio) {
         const isOn = getBuildingTypeOnOff(key);
         const generation = (isOn ? purchasedRate : 0) * timerRatio;
         const generationClass = generation > 0 ? 'green-ready-text' : 'red-disabled-text';
-        const quantityClass = quantity > 0 ? 'green-ready-text' : 'red-disabled-text';
 
-        return `<div><span class="green-ready-text">${label}:</span> <span class="${generationClass}">${formatEnergyValue(generation, true)}</span> <span class="${quantityClass}">(${quantity.toLocaleString()} online)</span></div>`;
+        return `<div><span class="green-ready-text">${label}:</span> <span class="${generationClass}">${formatEnergyValue(generation, true)}</span> (${quantity.toLocaleString()} online)</div>`;
     }).join('');
 }
 
@@ -2791,7 +2795,7 @@ function buildAutoBuyerConsumptionLines(timerRatio) {
         const usageKw = usage * timerRatio;
         const usageClass = usageKw > 0 ? 'red-disabled-text' : 'green-ready-text';
         const countClass = count > 0 ? 'green-ready-text' : 'red-disabled-text';
-        return `<div><span class="green-ready-text">Tier ${tier} Autobuyers:</span> <span class="${usageClass}">${formatEnergyValue(-usageKw)}</span> <span class="${countClass}">(${count.toLocaleString()} active)</span></div>`;
+        return `<div><span class="green-ready-text">Tier ${tier} Autobuyers:</span> <span class="${usageClass}">${formatEnergyValue(-usageKw)}</span> (${count.toLocaleString()} active)</div>`;
     }).join('');
 }
 
@@ -2802,7 +2806,7 @@ function buildScienceLabConsumptionLine(timerRatio) {
     const usageClass = energyUse > 0 ? 'red-disabled-text' : 'green-ready-text';
     const quantityClass = quantity > 0 ? 'green-ready-text' : 'red-disabled-text';
 
-    return `<div><span class="green-ready-text">Science Labs:</span> <span class="${usageClass}">${formatEnergyValue(-energyUse)}</span> <span class="${quantityClass}">(${quantity.toLocaleString()} active)</span></div>`;
+    return `<div><span class="green-ready-text">Science Labs:</span> <span class="${usageClass}">${formatEnergyValue(-energyUse)}</span> (${quantity.toLocaleString()} active)</div>`;
 }
 
 function buildSpaceTelescopeConsumptionLine(timerRatio) {
@@ -3062,6 +3066,7 @@ export function statToolBarCustomizations() {
         const weatherInfo = getCurrentStarSystemWeatherEfficiency() || [];
         const weatherType = weatherInfo[2];
         const weatherCurrentStarSystemObject = getStarSystemWeather(getCurrentStarSystem());
+        const precipitationType = getStarSystemDataObject('stars', [getCurrentStarSystem(), 'precipitationType']) || 'N/A';
 
         let weatherSymbol = weatherCurrentStarSystemObject?.[weatherType]?.[1] ?? '';
         if (!weatherSymbol) {
@@ -3085,8 +3090,9 @@ export function statToolBarCustomizations() {
 
         stat7Element.dataset.tooltipContent = [
             `<div><span class="green-ready-text">System:</span> ${systemName}</div>`,
+                        `<div><span class="green-ready-text">Precipitation Type:</span> ${capitaliseString(precipitationType)}</div>`,
             `<div><span class="green-ready-text">Solar Energy Output:</span> <span class="${weatherClass}">${solarOutput}</span></div>`,
-            `<div><span class="green-ready-text">Weather:</span> ${weatherSymbolHtml}</div>`
+            `<div><span class="green-ready-text">Weather:</span> ${weatherSymbolHtml}</div>`,
         ].join('');
     }
 }

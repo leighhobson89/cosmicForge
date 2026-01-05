@@ -3216,7 +3216,7 @@ function getSpecificAsteroidExtractionRate(asteroid) {
     const maxRate = getNormalMaxAntimatterRate();
     const minRate = 0.0001;
     const maxEase = 1;
-    const minEase = 10;
+    const minEase = 10; //leave as 10 even for new complexity scale up to 6 so rate is higher than before even or bad ones
 
     const normalizedEase = (asteroid.easeOfExtraction[0] - maxEase) / (minEase - maxEase);
     const extractionRate = maxRate - (normalizedEase * (maxRate - minRate));
@@ -8875,16 +8875,16 @@ function generateAsteroidData(name) {
         setAchievementFlagArray('discoverLegendaryAsteroid', 'add');
     }
 
-    const easeOfExtraction = Math.floor(Math.random() * 10) + 1;
+    const easeOfExtraction = Math.floor(Math.random() * 6) + 1; // Now only 1-6
     let easeClass;
-    if (easeOfExtraction <= 2) {
-        easeClass = 'green-ready-text';
-    } else if (easeOfExtraction === 3 || easeOfExtraction === 4) {
-        easeClass = 'none';
-    } else if (easeOfExtraction > 4 && easeOfExtraction <= 8) {
-        easeClass = 'warning-orange-text';
+    if (easeOfExtraction === 1) {
+        easeClass = 'green-ready-text';      // Easiest (1)
+    } else if (easeOfExtraction <= 3) {
+        easeClass = 'none';                 // Moderate (2-3)
+    } else if (easeOfExtraction <= 5) {
+        easeClass = 'warning-orange-text';  // Hard (4-5)
     } else {
-        easeClass = 'red-disabled-text';
+        easeClass = 'red-disabled-text';    // Hardest (6)
     }
 
     let quantity;
