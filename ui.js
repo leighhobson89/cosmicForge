@@ -122,7 +122,15 @@ import {
     getHomeStarName,
     getInfinitePower,
     getRunStartTime,
-    getGameStartTime
+    setRunStartTime,
+    getGameStartTime,
+    getCurrentlySearchingAsteroid,
+    getCurrentlyInvestigatingStar,
+    getCurrentlyPillagingVoid,
+    getTimeLeftUntilAsteroidScannerTimerFinishes,
+    getTimeLeftUntilStarInvestigationTimerFinishes,
+    getTimeLeftUntilPillageVoidTimerFinishes,
+    getTotalEnergyUse
 } from './constantsAndGlobalVars.js';
 import {
     getResourceDataObject,
@@ -131,7 +139,8 @@ import {
     setResourceDataObject,
     setStarSystemDataObject,
     getBuffEnhancedMiningData,
-    getAchievementImageUrl
+    getAchievementImageUrl,
+    getStarSystemWeather
 } from "./resourceDataObject.js";
 import {
     optionDescriptions,
@@ -441,6 +450,21 @@ export function removeTabAttentionIfNoIndicators(tabId) {
             }
         }
     }
+}
+
+function buildPowerPlantStatusLines() {
+    const plants = [
+        { label: 'Basic Power Plant', key: 'powerPlant1' },
+        { label: 'Solar Power Plant', key: 'powerPlant2' },
+        { label: 'Advanced Power Plant', key: 'powerPlant3' }
+    ];
+
+    return plants.map(({ label, key }) => {
+        const isOn = getBuildingTypeOnOff(key);
+        const className = isOn ? 'green-ready-text' : 'red-disabled-text';
+        const statusText = isOn ? 'ON' : 'OFF';
+        return `<div><span class="green-ready-text">${label}:</span> <span class="${className}">${statusText}</span></div>`;
+    }).join('');
 }
 
 export function updateContent(heading, tab, type) {
@@ -2650,10 +2674,11 @@ export function getTimeInStatCell() {
     const timeZone = timeZoneMap[rawTimeZone] || rawTimeZone;
 
     const timeString = `${hours}:${minutes} ${timeZone}`;
-
-    const statElement = document.getElementById('stat8');
-    if (statElement) {
-        const statCell = statElement.closest('.stat-cell');
+    
+    //tooltip
+    const stat8Element = document.getElementById('stat8');
+    if (stat8Element) {
+        const statCell = stat8Element.closest('.stat-cell');
         const statLabel = statCell?.querySelector('.stat-label');
         if (statLabel && !statLabel.textContent.trim()) {
             statLabel.textContent = '';
@@ -2666,12 +2691,391 @@ export function getTimeInStatCell() {
         const totalDuration = formatDurationSince(totalStart);
         const currentRun = getStatRun();
 
-        statElement.textContent = timeString;
-        statElement.dataset.tooltipContent = [
+        stat8Element.textContent = timeString;
+        stat8Element.dataset.tooltipContent = [
             `<div><strong>${timeString}</strong></div>`,
             `<div><span class="green-ready-text">Run:</span> ${currentRun}</div>`,
             `<div><span class="green-ready-text">Run Time:</span> ${runDuration}</div>`,
             `<div><span class="green-ready-text">Total Time:</span> ${totalDuration}</div>`
+        ].join('');
+    }
+}
+
+function buildEnergyTooltipContent(netText) {
+    const timerRatio = getTimerRateRatio() || 1;
+    const totalGeneration = (getResourceDataObject('buildings', ['energy', 'rate']) || 0) * timerRatio;
+    const totalConsumption = (getTotalEnergyUse() || 0) * timerRatio;
+    const infinitePower = getInfinitePower();
+    const netRate = infinitePower ? Infinity : totalGeneration - totalConsumption;
+    const netClass = infinitePower || netRate > 0 ? 'green-ready-text' : 'red-disabled-text';
+    const netDisplay = infinitePower ? '∞ DYSON ∞' : (netText || formatEnergyValue(netRate, true));
+
+    const generatorLines = buildPowerPlantGenerationLines(timerRatio);
+    const consumerLines = buildEnergyConsumerLines(timerRatio);
+
+    return [
+        `<div><span class="green-ready-text">Net Energy:</span> <span class="${netClass}">${netDisplay}</span></div>`,
+        `<div class="tooltip-spacer">&nbsp;</div>`,
+        `<div><span class="green-ready-text"><strong>Generators</strong></span></div>`,
+        generatorLines,
+        `<div class="tooltip-spacer">&nbsp;</div>`,
+        `<div><span class="red-disabled-text"><strong>Consumers</strong></span></div>`,
+        consumerLines
+    ].filter(Boolean).join('');
+}
+
+function buildPowerPlantGenerationLines(timerRatio) {
+    const plants = [
+        { label: 'Basic Power Plant', key: 'powerPlant1' },
+        { label: 'Solar Power Plant', key: 'powerPlant2' },
+        { label: 'Advanced Power Plant', key: 'powerPlant3' }
+    ];
+
+    return plants.map(({ label, key }) => {
+        const quantity = getResourceDataObject('buildings', ['energy', 'upgrades', key, 'quantity']) || 0;
+        const purchasedRate = getResourceDataObject('buildings', ['energy', 'upgrades', key, 'purchasedRate']) || 0;
+        const isOn = getBuildingTypeOnOff(key);
+        const generation = (isOn ? purchasedRate : 0) * timerRatio;
+        const generationClass = generation > 0 ? 'green-ready-text' : 'red-disabled-text';
+        const quantityClass = quantity > 0 ? 'green-ready-text' : 'red-disabled-text';
+
+        return `<div><span class="green-ready-text">${label}:</span> <span class="${generationClass}">${formatEnergyValue(generation, true)}</span> <span class="${quantityClass}">(${quantity.toLocaleString()} online)</span></div>`;
+    }).join('');
+}
+
+function buildEnergyConsumerLines(timerRatio) {
+    const autoBuyerLines = buildAutoBuyerConsumptionLines(timerRatio);
+    const scienceLabLine = buildScienceLabConsumptionLine(timerRatio);
+    const spaceTelescopeLine = buildSpaceTelescopeConsumptionLine(timerRatio);
+    const rocketLines = buildRocketRefuelLines(timerRatio);
+
+    return [
+        autoBuyerLines,
+        scienceLabLine,
+        spaceTelescopeLine,
+        rocketLines
+    ].filter(Boolean).join('');
+}
+
+function buildAutoBuyerConsumptionLines(timerRatio) {
+    const tiers = [2, 3, 4];
+    const tierData = tiers.map(tier => ({ tier, count: 0, usage: 0 }));
+    const collections = ['resources', 'compounds'];
+
+    collections.forEach(collection => {
+        const data = getResourceDataObject(collection);
+        if (!data) return;
+
+        Object.keys(data).forEach(key => {
+            const autoBuyer = data[key]?.upgrades?.autoBuyer;
+            if (!autoBuyer) return;
+
+            tiers.forEach(tier => {
+                const tierKey = `tier${tier}`;
+                const tierInfo = autoBuyer[tierKey];
+                if (!tierInfo || !tierInfo.active) return;
+
+                const quantity = tierInfo.quantity || 0;
+                const energyUse = tierInfo.energyUse || 0;
+                if (!quantity || !energyUse) return;
+
+                const target = tierData[tier - 2];
+                target.count += quantity;
+                target.usage += energyUse * quantity;
+            });
+        });
+    });
+
+    return tierData.map(({ tier, count, usage }) => {
+        const usageKw = usage * timerRatio;
+        const usageClass = usageKw > 0 ? 'red-disabled-text' : 'green-ready-text';
+        const countClass = count > 0 ? 'green-ready-text' : 'red-disabled-text';
+        return `<div><span class="green-ready-text">Tier ${tier} Autobuyers:</span> <span class="${usageClass}">${formatEnergyValue(-usageKw)}</span> <span class="${countClass}">(${count.toLocaleString()} active)</span></div>`;
+    }).join('');
+}
+
+function buildScienceLabConsumptionLine(timerRatio) {
+    const scienceLab = getResourceDataObject('research', ['upgrades', 'scienceLab']) || {};
+    const quantity = scienceLab.quantity || 0;
+    const energyUse = (scienceLab.energyUse || 0) * quantity * timerRatio;
+    const usageClass = energyUse > 0 ? 'red-disabled-text' : 'green-ready-text';
+    const quantityClass = quantity > 0 ? 'green-ready-text' : 'red-disabled-text';
+
+    return `<div><span class="green-ready-text">Science Labs:</span> <span class="${usageClass}">${formatEnergyValue(-energyUse)}</span> <span class="${quantityClass}">(${quantity.toLocaleString()} active)</span></div>`;
+}
+
+function buildSpaceTelescopeConsumptionLine(timerRatio) {
+    const telescope = getResourceDataObject('space', ['upgrades', 'spaceTelescope']);
+    if (!telescope || !telescope.spaceTelescopeBoughtYet) {
+        return `<div><span class="green-ready-text">Space Telescope:</span> <span class="red-disabled-text">Not built</span></div>`;
+    }
+
+    let status = 'Idle';
+    let usage = 0;
+
+    if (getCurrentlySearchingAsteroid() && getTimeLeftUntilAsteroidScannerTimerFinishes() > 0) {
+        status = 'Searching Asteroids';
+        usage = telescope.energyUseSearchAsteroid || 0;
+    } else if (getCurrentlyInvestigatingStar() && getTimeLeftUntilStarInvestigationTimerFinishes() > 0) {
+        status = 'Investigating Stars';
+        usage = telescope.energyUseInvestigateStar || 0;
+    } else if (getCurrentlyPillagingVoid() && getTimeLeftUntilPillageVoidTimerFinishes() > 0) {
+        status = 'Pillaging the Void';
+        usage = telescope.energyUsePhilosophyBoostResourcesAndCompounds || 0;
+    }
+
+    const usageKw = usage * timerRatio;
+    const className = usageKw > 0 ? 'red-disabled-text' : 'green-ready-text';
+    const usageText = usageKw > 0 ? formatEnergyValue(-usageKw) : '0 KW / s';
+
+    return `<div><span class="green-ready-text">Space Telescope (${status}):</span> <span class="${className}">${usageText}</span></div>`;
+}
+
+function buildRocketRefuelLines(timerRatio) {
+    const rockets = getRocketsFuellerStartedArray?.() || [];
+    const activeRockets = rockets.filter(rocket => !rocket.includes('FuelledUp'));
+
+    if (!activeRockets.length) {
+        return `<div><span class="green-ready-text">Rocket Refuelling:</span> <span class="green-ready-text">Idle</span></div>`;
+    }
+
+    return activeRockets.map(rocketKey => {
+        const rocket = getResourceDataObject('space', ['upgrades', rocketKey]);
+        const energyUsePerTick = rocket?.autoBuyer?.tier1?.energyUse || 0;
+        const usageKw = energyUsePerTick * timerRatio;
+        const label = rocketKey.replace('rocket', 'Rocket ');
+        return `<div><span class="green-ready-text">${label} Refuel:</span> <span class="red-disabled-text">${formatEnergyValue(-usageKw)}</span></div>`;
+    }).join('');
+}
+
+function formatEnergyValue(value, isGeneration = false) {
+    if (!isFinite(value)) {
+        return '∞ DYSON ∞';
+    }
+    const rounded = Math.round(Math.abs(value));
+    const formatted = `${rounded.toLocaleString()} KW / s`;
+    if (rounded === 0) {
+        return formatted;
+    }
+    const sign = isGeneration ? '+' : '-';
+    return `${sign}${formatted}`;
+}
+
+function calculateAndShowBatteryPercentage(hasBattery) {
+    if (!hasBattery) {
+        return { text: '0%', className: 'red-disabled-text', value: 0 };
+    }
+
+    const batteryLevel = Math.round(getBatteryLevel() ?? 0);
+
+    let className = 'green-ready-text';
+    if (batteryLevel < 15) {
+        className = 'red-disabled-text';
+    } else if (batteryLevel < 50) {
+        className = 'warning-orange-text';
+    } else if (batteryLevel < 70) {
+        className = '';
+    }
+
+    return { text: `${batteryLevel}%`, className, value: batteryLevel };
+}
+
+function buildBatteryTooltipContent() {
+    const hasBattery = Boolean(getResourceDataObject('buildings', ['energy', 'batteryBoughtYet']));
+    const batteryPercentageInfo = calculateAndShowBatteryPercentage(hasBattery);
+
+    const energyRate = getInfinitePower()
+        ? getInfinitePowerRate()
+        : getResourceDataObject('buildings', ['energy', 'rate']) || 0;
+    const consumption = getResourceDataObject('buildings', ['energy', 'consumption']) || 0;
+    const totalCapacity = getResourceDataObject('buildings', ['energy', 'storageCapacity']) || 0;
+    const energyQuantity = getResourceDataObject('buildings', ['energy', 'quantity']) || 0;
+
+    let statusText = 'NO BATTERY';
+    let statusClass = 'red-disabled-text';
+
+    if (hasBattery) {
+        if (energyRate >= consumption) {
+            statusText = 'BATTERY CHARGING';
+            statusClass = 'green-ready-text';
+        } else {
+            statusText = 'BATTERY DEPLETING';
+            statusClass = 'red-disabled-text';
+        }
+    }
+
+    const percentageSpan = batteryPercentageInfo.className
+        ? `<span class="${batteryPercentageInfo.className}">${batteryPercentageInfo.text}</span>`
+        : `<span>${batteryPercentageInfo.text}</span>`;
+
+    const batteryLines = [
+        { label: 'Sodium Ion Battery', path: ['energy', 'upgrades', 'battery1', 'quantity'] },
+        { label: 'Battery 2', path: ['energy', 'upgrades', 'battery2', 'quantity'] },
+        { label: 'Battery 3', path: ['energy', 'upgrades', 'battery3', 'quantity'] }
+    ].map(({ label, path }) => {
+        const quantity = getResourceDataObject('buildings', path) ?? 0;
+        const quantityClass = quantity > 0 ? 'green-ready-text' : 'red-disabled-text';
+        return `<div><span class="green-ready-text">${label}:</span> <span class="${quantityClass}">${quantity}</span></div>`;
+    });
+
+    const capacityMwh = Math.floor(totalCapacity / 1000);
+    const totalCapacityLine = `<div><span class="green-ready-text">Total Battery Capacity:</span> <span class="green-ready-text">${capacityMwh.toLocaleString()} MWh</span></div>`;
+
+    const depletionInfo = getBatteryDepletionInfo(energyRate, consumption, totalCapacity, energyQuantity, hasBattery);
+    const depletionLabel = depletionInfo.mode === 'charging' ? 'Time until Charged:' : 'Time until Depletion:';
+    const depletionLine = `<div><span class="green-ready-text">${depletionLabel}</span> <span class="${depletionInfo.className}">${depletionInfo.text}</span></div>`;
+
+    return [
+        `<div><span class="${statusClass}">${statusText}</span></div>`,
+        `<div class="tooltip-spacer">&nbsp;</div>`,
+        `<div><span class="green-ready-text">Battery Charge:</span> ${percentageSpan}</div>`,
+        ...batteryLines,
+        `<div class="tooltip-spacer">&nbsp;</div>`,
+        totalCapacityLine,
+        depletionLine
+    ].join('');
+}
+
+function getBatteryDepletionInfo(energyRate, consumption, totalCapacity, energyQuantity, hasBattery) {
+    const netRate = energyRate - consumption;
+
+    if (!hasBattery || totalCapacity <= 0) {
+        return { text: '∞', className: 'green-ready-text', mode: 'neutral' };
+    }
+
+    const timerRatio = getTimerRateRatio() || 1;
+
+    if (netRate > 0) {
+        const perSecondCharge = netRate * timerRatio;
+        if (!perSecondCharge) {
+            return { text: '∞', className: 'green-ready-text', mode: 'charging' };
+        }
+
+        const missingEnergy = Math.max(0, totalCapacity - energyQuantity);
+        const secondsUntilFull = missingEnergy / perSecondCharge;
+        const formatted = formatDepletionDuration(secondsUntilFull, true);
+        return { ...formatted, mode: 'charging' };
+    } else if (netRate < 0) {
+        const perSecondDrain = Math.abs(netRate) * timerRatio;
+        if (!perSecondDrain) {
+            return { text: '∞', className: 'green-ready-text', mode: 'depleting' };
+        }
+
+        const secondsUntilEmpty = energyQuantity / perSecondDrain;
+        const formatted = formatDepletionDuration(secondsUntilEmpty, false);
+        return { ...formatted, mode: 'depleting' };
+    }
+
+    return { text: '∞', className: 'green-ready-text', mode: 'neutral' };
+}
+
+function formatDepletionDuration(seconds, charging = false) {
+    if (!isFinite(seconds) || seconds < 0) {
+        return { text: '∞', className: 'green-ready-text' };
+    }
+
+    const totalSeconds = Math.floor(seconds);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const secs = totalSeconds % 60;
+
+    const parts = [];
+    if (hours > 0) {
+        parts.push(`${hours}h`);
+    }
+
+    if (minutes > 0 || hours > 0) {
+        parts.push(`${minutes}m`);
+    }
+
+    parts.push(`${secs}s`);
+    const formatted = parts.join(' ');
+
+    let className;
+    if (charging) {
+        className = 'green-ready-text';
+    } else {
+        className = totalSeconds < 60 ? 'red-disabled-text' : 'warning-orange-text';
+    }
+
+    return { text: formatted, className };
+}
+
+export function statToolBarCustomizations() {
+    const stat2Element = document.getElementById('stat2');
+    const stat3Element = document.getElementById('stat3');
+    const stat4Element = document.getElementById('stat4');
+    const stat5Element = document.getElementById('stat5');
+    const stat6Element = document.getElementById('stat6');
+    const stat7Element = document.getElementById('stat7');
+
+    if (stat2Element) {
+        stat2Element.dataset.tooltipContent = buildEnergyTooltipContent(stat2Element.textContent.trim());
+    }
+
+    if (stat3Element) {
+        const stat3Text = stat3Element.textContent.trim();
+        const stat3Class = determineStatClassColor(stat3Text);
+        const plantStatusLines = buildPowerPlantStatusLines();
+        stat3Element.dataset.tooltipContent = [
+            `<div><span class="green-ready-text">Power Status:</span> <span class="${stat3Class}">${stat3Text}</span></div>`,
+            `<div class="tooltip-spacer">&nbsp;</div>`,
+            plantStatusLines
+        ].join('');
+    }
+
+    if (stat4Element) {
+        stat4Element.dataset.tooltipContent = buildBatteryTooltipContent();
+    }
+
+    if (stat5Element) {
+        const stat5Value = parseInt(stat5Element.textContent.replace(/\D/g, ''), 10) || 0;
+        const antimatterClass = stat5Value > 0 ? 'green-ready-text' : 'red-disabled-text';
+        const antimatterDisplay = stat5Element.textContent.trim() || '0';
+        stat5Element.dataset.tooltipContent = `<div><span class="green-ready-text">Antimatter Fuel:</span> <span class="${antimatterClass}">${antimatterDisplay}</span></div>`;
+    }
+
+    if (stat6Element) {
+        const stat6Value = parseInt(stat6Element.textContent.replace(/\D/g, ''), 10) || 0;
+        const apClass = stat6Value > 0 ? 'green-ready-text' : 'red-disabled-text';
+        const apDisplay = stat6Element.textContent.trim() || '0';
+        stat6Element.dataset.tooltipContent = `<div><span class="green-ready-text">Ascendency Points:</span> <span class="${apClass}">${apDisplay}</span></div>`;
+    }
+
+    if (stat7Element) {
+        const systemName = capitaliseString(getCurrentStarSystem());
+        const stat7Text = stat7Element.textContent.trim();
+        const solarOutputMatch = stat7Text.match(/(\d+%)/);
+        const solarOutput = solarOutputMatch?.[1] ?? (stat7Text.split(' ')[0] || 'N/A');
+
+        const weatherInfo = getCurrentStarSystemWeatherEfficiency() || [];
+        const weatherType = weatherInfo[2];
+        const weatherCurrentStarSystemObject = getStarSystemWeather(getCurrentStarSystem());
+
+        let weatherSymbol = weatherCurrentStarSystemObject?.[weatherType]?.[1] ?? '';
+        if (!weatherSymbol) {
+            const textParts = stat7Text.split(' ').filter(Boolean);
+            weatherSymbol = textParts.length > 1 ? textParts[textParts.length - 1] : '';
+            if (!weatherSymbol && stat7Text.length === 1) {
+                weatherSymbol = stat7Text;
+            }
+        }
+
+        let weatherClass = 'warning-orange-text';
+        if (weatherType === 'sunny') {
+            weatherClass = 'green-ready-text';
+        } else if (weatherType === 'volcano') {
+            weatherClass = 'red-disabled-text';
+        }
+
+        const weatherSymbolHtml = weatherSymbol
+            ? `<span class="${weatherClass}">${weatherSymbol}</span>`
+            : `<span class="${weatherClass}">N/A</span>`;
+
+        stat7Element.dataset.tooltipContent = [
+            `<div><span class="green-ready-text">System:</span> ${systemName}</div>`,
+            `<div><span class="green-ready-text">Solar Energy Output:</span> <span class="${weatherClass}">${solarOutput}</span></div>`,
+            `<div><span class="green-ready-text">Weather:</span> ${weatherSymbolHtml}</div>`
         ].join('');
     }
 }

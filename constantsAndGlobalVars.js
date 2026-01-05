@@ -36,7 +36,8 @@ export const READY_TO_SORT = 120;
 export const NOW = 30; //READY TO SORT NOW needs total of 150
 export const BUILDING_TYPES = ['energy', 'space', 'starShip', 'fleetHangar', 'colonise', 'philosophy'];
 export const NEWS_TICKER_SCROLL_DURATION = 40000;
-export const GAME_COST_MULTIPLIER = 1.15;
+export const GAME_COST_MULTIPLIER = 1.13;
+export const ASTEROID_COST_MULTIPLIER = 1.07;
 export const NORMAL_MAX_ANTIMATTER_RATE = 0.004;
 export const BOOST_ANTIMATTER_RATE_MULTIPLIER = 2;
 export const STARTING_STAR_SYSTEM = 'spica';
@@ -229,7 +230,7 @@ let unlockedCompoundsArray = [];
 let temporaryCoreTechRowsRepo = null;
 let canAffordDeferred = null;
 let originalFrameNumbers = {};
-let baseSearchAsteroidTimerDuration = 120000;
+let baseSearchAsteroidTimerDuration = 60000;
 let baseInvestigateStarTimerDuration = 400000;
 let basePillageVoidTimerDuration = 500000;
 let currentAsteroidSearchTimerDurationTotal = 0;
@@ -3503,6 +3504,10 @@ export function setStorageAdderBonus(value) {
 
 export function getInfinitePowerRate() {
     return INFINITE_POWER_RATE;
+}
+
+export function getAsteroidCostMultiplier() {
+    return ASTEROID_COST_MULTIPLIER;
 }
 
 //stat retrievers-------------------------------------------------------------------------------------------------------

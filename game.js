@@ -1,4 +1,5 @@
 import {
+    getAsteroidCostMultiplier,
     getMegaStructureAntimatterAmount,
     setMegaStructureAntimatterAmount,
     setPermanentAntimatterUnlock,
@@ -332,6 +333,7 @@ import {
     showNotification,
     showTabsUponUnlock,
     getTimeInStatCell,
+    statToolBarCustomizations,
     updateDynamicUiContent,
     checkOrderOfTabs,
     showNewsTickerMessage,
@@ -372,7 +374,7 @@ import {
     generateStarfield
 } from "./ui.js";
 
-import { 
+import {
     capitaliseString,
     capitaliseWordsWithRomanNumerals
  } from './utilityFunctions.js';
@@ -1559,6 +1561,9 @@ function updateStats() {
     //stat8
     getTimeInStatCell();
 
+    //stat5-7 tooltip + styling
+    statToolBarCustomizations();
+
     //stats page
     if (getCurrentOptionPane() === 'statistics') {
         getStats(statFunctionsGets);
@@ -1580,7 +1585,8 @@ function updateAntimatterStat() {
     if (getAntimatterUnlocked()) {
         statLabelElement.innerHTML = 'Antimatter:'
         const antimatterTotalQuantity = Math.floor(getResourceDataObject('antimatter', ['quantity']));
-        document.getElementById('stat5').innerHTML = `<span class="green-ready-text">${antimatterTotalQuantity}</span>`;
+        const antimatterValueClass = antimatterTotalQuantity > 0 ? 'green-ready-text' : 'red-disabled-text';
+        document.getElementById('stat5').innerHTML = `<span class="${antimatterValueClass}">${antimatterTotalQuantity}</span>`;
     } else {
         statLabelElement.innerHTML = '???';
         document.getElementById('stat5').innerHTML = `<span class="red-disabled-text">???</span>`;
@@ -8760,7 +8766,7 @@ export function discoverAsteroid(debug) {
     const asteroidName = `${starCode}-${randomNumber}${randomLetter}`;
     const asteroid = generateAsteroidData(asteroidName);
     document.getElementById('asteroidsOption').parentElement.parentElement.classList.remove('invisible');
-    setBaseSearchAsteroidTimerDuration(getBaseSearchAsteroidTimerDuration() * getGameCostMultiplier());
+    setBaseSearchAsteroidTimerDuration(getBaseSearchAsteroidTimerDuration() * getAsteroidCostMultiplier());
     setAsteroidArray(asteroid);
 
     const keyName = Object.keys(asteroid)[0];
