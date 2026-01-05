@@ -9193,7 +9193,7 @@ export function calculateAscendencyPoints(distance) {
 export function calculateAntimatterRequired(distance) {
     const MIN_DISTANCE = 1;
     const MAX_DISTANCE = 100;
-    const MIN_COST = Math.floor(Math.random() * (10000 - 9000 + 1)) + 9000;
+    const MIN_COST = Math.floor(Math.random() * (6000 - 4000 + 1)) + 4000;
     const MAX_COST = Math.floor(Math.random() * (160000 - 150000 + 1)) + 150000;
 
     let normalizedDistance = (distance - MIN_DISTANCE) / (MAX_DISTANCE - MIN_DISTANCE);
