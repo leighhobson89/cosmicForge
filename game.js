@@ -10263,6 +10263,10 @@ export async function settleSystemAfterBattle(accessPoint) {
     const isFactoryStar = getFactoryStarsArray().includes(getDestinationStar());
     let apModifier = accessPoint === 'battle' || accessPoint === 'surrender' ? 2 : 1;
     
+    if (accessPoint !== 'battle') {
+        setBattleResolved(true, 'player');
+    }
+
     if (isFactoryStar) {
         apModifier *= 2;
         setMegaStructuresInPossessionArray(getStarSystemDataObject('stars', [getDestinationStar(), 'factoryStar']));
