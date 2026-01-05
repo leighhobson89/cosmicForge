@@ -1,5 +1,6 @@
 when power on with a basic power plant, carbon production severely reduced in reality but appears to only be reduced by 2/s
 there is a subkey error somewhere when accessing getResourceDataObject
+add clue about ancient manuscript locations to news ticker
 
 Pioneer-testermanuscript3
 
