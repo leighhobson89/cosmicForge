@@ -258,13 +258,16 @@ function setupStatTooltips() {
     tooltip.style.position = 'absolute';
     tooltip.style.padding = '6px 10px';
     tooltip.style.pointerEvents = 'none';
-    tooltip.style.background = 'rgba(0, 0, 0, 0.9)';
+    tooltip.style.background = 'var(--bg-color)';
     tooltip.style.color = 'var(--text-color)';
-    tooltip.style.border = '2px solid var(--text-color)';
-    tooltip.style.borderRadius = '5px';
+    tooltip.style.border = '1px solid var(--border-color, #555)';
+    tooltip.style.borderRadius = 'var(--border-radius, 4px)';
     tooltip.style.fontSize = '12px';
     tooltip.style.zIndex = '100000';
     tooltip.style.display = 'none';
+    tooltip.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.2)';
+    tooltip.style.maxWidth = '300px';
+    tooltip.style.wordWrap = 'break-word';
     document.body.appendChild(tooltip);
 
     const statIds = ['cashStat', 'stat2', 'stat3', 'stat4', 'stat5', 'stat6', 'stat7', 'stat8'];
@@ -1018,15 +1021,16 @@ export function setupAchievementTooltip() {
     tooltip.style.position = 'absolute';
     tooltip.style.padding = '6px 10px';
     tooltip.style.pointerEvents = 'none';
-    tooltip.style.background = 'rgba(0, 0, 0, 0.9)';
+    tooltip.style.background = 'var(--bg-color)';
     tooltip.style.color = 'var(--text-color)';
-    tooltip.style.border = '2px solid var(--text-color)';
-    tooltip.style.borderRadius = '5px';
+    tooltip.style.border = '1px solid var(--border-color, #555)';
+    tooltip.style.borderRadius = 'var(--border-radius, 4px)';
     tooltip.style.fontSize = '12px';
-    tooltip.style.pointerEvents = 'none';
     tooltip.style.zIndex = '1000';
     tooltip.style.display = 'none';
-    document.body.appendChild(tooltip);
+    tooltip.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.2)';
+    tooltip.style.maxWidth = '300px';
+    tooltip.style.wordWrap = 'break-word';
     document.body.appendChild(tooltip);
 
     const containerWidth = 200;
@@ -1080,15 +1084,18 @@ export function setupModalButtonTooltips() {
     const tooltip = document.createElement('div');
     tooltip.id = 'modal-button-tooltip';
     tooltip.style.position = 'absolute';
-    tooltip.style.padding = '6px 10px';
+    tooltip.style.padding = '8px 12px';
     tooltip.style.pointerEvents = 'none';
-    tooltip.style.background = 'rgba(0, 0, 0, 0.9)';
+    tooltip.style.background = 'var(--bg-color)';
     tooltip.style.color = 'var(--text-color)';
-    tooltip.style.border = '2px solid var(--text-color)';
-    tooltip.style.borderRadius = '5px';
+    tooltip.style.border = '1px solid var(--border-color, #555)';
+    tooltip.style.borderRadius = 'var(--border-radius, 4px)';
     tooltip.style.fontSize = '12px';
-    tooltip.style.zIndex = '10000000000000000000';
+    tooltip.style.zIndex = '10000';
     tooltip.style.display = 'none';
+    tooltip.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.2)';
+    tooltip.style.maxWidth = '300px';
+    tooltip.style.wordWrap = 'break-word';
     document.body.appendChild(tooltip);
 
     const tooltipTextMap = {

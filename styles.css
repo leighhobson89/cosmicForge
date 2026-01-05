@@ -549,7 +549,7 @@ button {
     --warning-text: orange;
     --stats-this-run-text: #e65100; /* Bright orange for contrast */
     --stats-all-time-text: #6d4c41; /* Dark brown for contrast instead of yellow */
-    --bg-color: #fffae6;
+    --bg-color: #c5c1a0;
     --text-color: rgba(142, 81, 34, 1);
     --text-color-rgb: 142, 81, 34;
     --text-color-hex: #8e5122;
