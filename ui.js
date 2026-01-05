@@ -130,7 +130,8 @@ import {
     getTimeLeftUntilAsteroidScannerTimerFinishes,
     getTimeLeftUntilStarInvestigationTimerFinishes,
     getTimeLeftUntilPillageVoidTimerFinishes,
-    getTotalEnergyUse
+    getTotalEnergyUse,
+    getCurrencySymbol
 } from './constantsAndGlobalVars.js';
 import {
     getResourceDataObject,
@@ -3002,12 +3003,22 @@ function formatDepletionDuration(seconds, charging = false) {
 }
 
 export function statToolBarCustomizations() {
+    const cashStatElement = document.getElementById('cashStat');
     const stat2Element = document.getElementById('stat2');
     const stat3Element = document.getElementById('stat3');
     const stat4Element = document.getElementById('stat4');
     const stat5Element = document.getElementById('stat5');
     const stat6Element = document.getElementById('stat6');
     const stat7Element = document.getElementById('stat7');
+
+    if (cashStatElement) {
+        const cashAmount = Math.floor(getResourceDataObject('currency', ['cash']) ?? 0);
+        const currencySymbol = getCurrencySymbol();
+        const cashDisplay = currencySymbol === '€'
+            ? `${cashAmount.toLocaleString()}${currencySymbol}`
+            : `${currencySymbol}${cashAmount.toLocaleString()}`;
+        cashStatElement.dataset.tooltipContent = `<div><span class="green-ready-text">Cash:</span> ${cashDisplay}</div>`;
+    }
 
     if (stat2Element) {
         stat2Element.dataset.tooltipContent = buildEnergyTooltipContent(stat2Element.textContent.trim());
