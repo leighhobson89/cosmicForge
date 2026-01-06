@@ -345,8 +345,13 @@ const handleCustomPointerMove = (event) => {
         updateCustomPointerImage();
     }
 
-    customPointerElement.style.left = `${event.clientX}px`;
-    customPointerElement.style.top = `${event.clientY}px`;
+    const pointerWidth = customPointerElement.offsetWidth || 0;
+    const pointerHeight = customPointerElement.offsetHeight || 0;
+    const offsetX = pointerWidth / 3;
+    const offsetY = pointerHeight / 3;
+
+    customPointerElement.style.left = `${event.clientX + offsetX}px`;
+    customPointerElement.style.top = `${event.clientY + offsetY}px`;
     customPointerElement.classList.add('visible');
 };
 
