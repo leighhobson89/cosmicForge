@@ -6332,57 +6332,6 @@ function startInitialTimers() {
         }
     }
 
-    /*
-    timerManager.addTimer('research', getTimerUpdateInterval(), () => {
-        const currentResearchQuantity = getResourceDataObject('research', ['quantity']);
-
-        let newRate = 0;  
-        let newRateUnpowered = 0;
-
-        const upgrades = getResourceDataObject('research', ['upgrades']);
-
-        Object.keys(upgrades).forEach((upgradeKey) => {
-            const buildingRate = getResourceDataObject('research', ['upgrades', upgradeKey, 'rate']) * getResourceDataObject('research', ['upgrades', upgradeKey, 'quantity']);
-
-            if (upgrades[upgradeKey].active) { //all buildings
-                newRate += buildingRate;
-            }
-
-            if (upgrades[upgradeKey].active && upgradeKey !== 'scienceLab') { //all buildings except scienceLab
-                newRateUnpowered += buildingRate;
-            }
-        });
-
-        let finalRate = getPowerOnOff() ? newRate : newRateUnpowered;
-        
-        if (getCurrentRunIsMegaStructureRun()) {
-            if (getStarSystemDataObject('stars', [getCurrentStarSystem(), 'factoryStar'], true) === 'Celestial Processing Core' && getMegaStructureTechsResearched().some(arr => Array.isArray(arr) && arr[0] === 2 && arr[1] === 1)) {
-                finalRate += 0.5;
-            }
-
-            if (getStarSystemDataObject('stars', [getCurrentStarSystem(), 'factoryStar'], true) === 'Celestial Processing Core' && getMegaStructureTechsResearched().some(arr => Array.isArray(arr) && arr[0] === 2 && arr[1] === 2)) {
-                finalRate += 1;
-            }
-
-            if (getStarSystemDataObject('stars', [getCurrentStarSystem(), 'factoryStar'], true) === 'Celestial Processing Core' && getMegaStructureTechsResearched().some(arr => Array.isArray(arr) && arr[0] === 2 && arr[1] === 4)) {
-                finalRate += 1.5;
-            }
-        }
-
-        if (getMegaStructureTechsResearched().some(arr => Array.isArray(arr) && arr[0] === 2 && arr[1] === 5)) {
-            if (getCurrentRunIsMegaStructureRun() && getStarSystemDataObject('stars', [getCurrentStarSystem(), 'factoryStar']) === 'Celestial Processing Core') {
-                finalRate += 2;
-            } else {
-                finalRate += 5;
-            }
-        }
-
-        setResourceDataObject(currentResearchQuantity + finalRate, 'research', ['quantity']);
-        addToResourceAllTimeStat(finalRate, 'researchPoints');
-
-        getElements().researchRate.textContent = `${(finalRate * getTimerRateRatio()).toFixed(1)} / s`;
-    });    
-    */
     initialiseResearchDeltaTimer();
     
     timerManager.addTimer('energy', getTimerUpdateInterval(), () => {
