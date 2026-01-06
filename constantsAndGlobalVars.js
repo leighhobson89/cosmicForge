@@ -370,6 +370,8 @@ let currentTab = [1, 'Resources'];
 let currentOptionPane = null;
 let notationType = 'normalCondensed';
 
+let mouseParticleTrailEnabled = true;
+
 let antimatterDeltaAccumulator = 0;
 
 //STATS PAGE LOGGERS
@@ -713,6 +715,14 @@ export const statFunctionsSets = {
 
 export function setGameStateVariable(value) {
     gameState = value;
+}
+
+export function getMouseParticleTrailEnabled() {
+    return mouseParticleTrailEnabled;
+}
+
+export function setMouseParticleTrailEnabled(value) {
+    mouseParticleTrailEnabled = Boolean(value);
 }
 
 export function getGameStateVariable() {

@@ -131,7 +131,8 @@ import {
     getTimeLeftUntilStarInvestigationTimerFinishes,
     getTimeLeftUntilPillageVoidTimerFinishes,
     getTotalEnergyUse,
-    getCurrencySymbol
+    getCurrencySymbol,
+    getMouseParticleTrailEnabled
 } from './constantsAndGlobalVars.js';
 import {
     getResourceDataObject,
@@ -236,9 +237,15 @@ const variableDebuggerWindow = document.getElementById('variableDebuggerWindow')
 const debugWindow = document.getElementById('debugWindow');
 const closeButton = document.querySelector('.close-btn');
 
+const MAX_MOUSE_TRAIL_PARTICLES = 40;
+const PARTICLE_LIFETIME_MS = 800;
+const PARTICLES_PER_EVENT = 3;
+let mouseParticleContainer = null;
+
 document.addEventListener('DOMContentLoaded', async () => {
     setElements();
     setupStatTooltips();
+    setupMouseParticleTrail();
 
     setGameState(getGameVisibleActive());
 
@@ -248,6 +255,54 @@ document.addEventListener('DOMContentLoaded', async () => {
         setSaveName(localStorage.getItem('saveName'));
     }
 
+function setupMouseParticleTrail() {
+    if (mouseParticleContainer || !document.body) {
+        return;
+    }
+
+    mouseParticleContainer = document.createElement('div');
+    mouseParticleContainer.className = 'mouse-particle-container';
+    document.body.appendChild(mouseParticleContainer);
+
+    document.addEventListener('pointermove', handleMouseParticleMove);
+}
+
+function handleMouseParticleMove(event) {
+    if (!getMouseParticleTrailEnabled() || !mouseParticleContainer) {
+        return;
+    }
+
+    for (let i = 0; i < PARTICLES_PER_EVENT; i++) {
+        spawnMouseParticle(event.clientX, event.clientY);
+    }
+}
+
+function spawnMouseParticle(x, y) {
+    const particle = document.createElement('div');
+    particle.className = 'mouse-particle';
+
+    const size = 2 + Math.random() * 2;
+    particle.style.width = `${size}px`;
+    particle.style.height = `${size}px`;
+
+    const angle = Math.random() * Math.PI * 2;
+    const distance = 10 + Math.random() * 25;
+    particle.style.setProperty('--particle-move-x', `${Math.cos(angle) * distance}px`);
+    particle.style.setProperty('--particle-move-y', `${Math.sin(angle) * distance}px`);
+
+    particle.style.left = `${x}px`;
+    particle.style.top = `${y}px`;
+
+    mouseParticleContainer.appendChild(particle);
+
+    while (mouseParticleContainer.childElementCount > MAX_MOUSE_TRAIL_PARTICLES) {
+        mouseParticleContainer.firstElementChild?.remove();
+    }
+
+    setTimeout(() => {
+        particle.remove();
+    }, PARTICLE_LIFETIME_MS);
+}
 function setupStatTooltips() {
     if (document.getElementById('stat-tooltip')) {
         return;

@@ -198,6 +198,38 @@ button {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7);
 }
 
+.mouse-particle-container {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 99999;
+    overflow: hidden;
+}
+
+.mouse-particle {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--text-color);
+    opacity: 0.9;
+    animation: mouseParticleFade 0.5s ease-out forwards;
+    will-change: transform, opacity;
+    --particle-move-x: 10px;
+    --particle-move-y: 10px;
+}
+
+@keyframes mouseParticleFade {
+    0% {
+        opacity: 0.9;
+        transform: translate(0, 0) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(var(--particle-move-x), var(--particle-move-y)) scale(0.5);
+    }
+}
+
 .btn-secondary:active {
     background-color: #4e555b;
     transform: translateY(2px);
