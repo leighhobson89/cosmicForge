@@ -1,6 +1,6 @@
 import { restoreAchievementsDataObject, restoreAscendencyBuffsDataObject, restoreGalacticMarketDataObject, restoreRocketNamesObject, restoreResourceDataObject, restoreStarSystemsDataObject, resourceData, starSystems, getResourceDataObject, setResourceDataObject, galacticMarket, ascendencyBuffs, achievementsData, getStarSystemDataObject } from "./resourceDataObject.js";
 import { achievementFunctionsMap } from "./achievements.js";
-import { drawNativeTechTree, selectTheme, startWeatherEffect, stopWeatherEffect } from "./ui.js";
+import { drawNativeTechTree, selectTheme, startWeatherEffect, stopWeatherEffect, applyCustomPointerSetting } from "./ui.js";
 import { capitaliseWordsWithRomanNumerals, capitaliseString } from './utilityFunctions.js';
 import { offlineGains, startNewsTickerTimer } from './game.js';
 import { rocketNames } from './descriptions.js';
@@ -371,7 +371,7 @@ let currentOptionPane = null;
 let notationType = 'normalCondensed';
 
 let mouseParticleTrailEnabled = false;
-let customPointerEnabled = false;
+let customPointerEnabled = true;
 
 let antimatterDeltaAccumulator = 0;
 
@@ -1437,6 +1437,7 @@ export function restoreGameStatus(gameState, type) {
             permanentAntimatterUnlock = gameState.flags.permanentAntimatterUnlock ?? false;
 
             selectTheme(getCurrentTheme());
+            applyCustomPointerSetting();
             setLastSavedTimeStamp(gameState.timeStamp);
             offlineGains(false);
 

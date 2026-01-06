@@ -18,6 +18,38 @@
     z-index: 9999 !important;
 }
 
+.custom-pointer-hide-cursor,
+.custom-pointer-hide-cursor * {
+    cursor: none !important;
+}
+
+.custom-pointer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 20px;
+    height: 30px;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity 0.08s ease;
+    z-index: 100000;
+}
+
+.custom-pointer.visible {
+    opacity: 1;
+}
+
+.custom-pointer img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    user-select: none;
+    pointer-events: none;
+}
+
 .text-area-height {
     height: 10vh;
 }
