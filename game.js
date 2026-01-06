@@ -8289,15 +8289,16 @@ export function offlineGains(switchedFocus) {
             const quantityAntimatterAsteroid = asteroid[asteroidName].quantity[0];
         
             if (beingMined) {
-                const extractedAmount = Math.min(rateExtractionAsteroid * getTimerRateRatio() * timeDifferenceInSeconds, quantityAntimatterAsteroid);
+                const nerfedExtractionRate = rateExtractionAsteroid * getOfflineGainsRate();
+                const extractedAmount = Math.min(nerfedExtractionRate * getTimerRateRatio() * timeDifferenceInSeconds, quantityAntimatterAsteroid);
                 offlineGainsAntimatter += extractedAmount;
                 changeAsteroidArray(asteroidName, 'quantity', [Math.max(asteroid[asteroidName].quantity[0] - extractedAmount, 0), 'none']);
             }
         });
         
-        setResourceDataObject(Math.floor(currentAntimatterQuantity + (offlineGainsAntimatter * getOfflineGainsRate())), 'antimatter', ['quantity']);
-        addToResourceAllTimeStat(Math.floor(offlineGainsAntimatter * getOfflineGainsRate()), 'antimatter');
-        addToResourceAllTimeStat(Math.floor(offlineGainsAntimatter * getOfflineGainsRate()), 'antimatterThisRun');        
+        setResourceDataObject(Math.floor(currentAntimatterQuantity + offlineGainsAntimatter), 'antimatter', ['quantity']);
+        addToResourceAllTimeStat(Math.floor(offlineGainsAntimatter), 'antimatter');
+        addToResourceAllTimeStat(Math.floor(offlineGainsAntimatter), 'antimatterThisRun');        
         
         if (!switchedFocus) {
             showNotification('Offline Gains Added!', 'info', 3000, 'loadSave');
