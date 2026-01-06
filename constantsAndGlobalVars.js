@@ -36,6 +36,7 @@ export const READY_TO_SORT = 120;
 export const NOW = 30; //READY TO SORT NOW needs total of 150
 export const BUILDING_TYPES = ['energy', 'space', 'starShip', 'fleetHangar', 'colonise', 'philosophy'];
 export const NEWS_TICKER_SCROLL_DURATION = 40000;
+export const NEWS_TICKER_MANUSCRIPT_CLUE_CHANCE = 0.15;
 export const GAME_COST_MULTIPLIER = 1.13;
 export const ASTEROID_COST_MULTIPLIER = 1.07;
 export const NORMAL_MAX_ANTIMATTER_RATE = 0.004;
@@ -263,6 +264,7 @@ let initialImpression = 35;
 let additionalSystemsToSettleThisRun = [];
 let starsWithAncientManuscripts = [];
 let factoryStarsArray = [];
+let manuscriptCluesShown = {};
 let megaStructuresInPossessionArray = [];
 
 let battleUnits = { 
@@ -1154,6 +1156,7 @@ export function captureGameStatusForSaving(type) {
     gameState.additionalSystemsToSettleThisRun = additionalSystemsToSettleThisRun;
     gameState.starsWithAncientManuscripts = starsWithAncientManuscripts;
     gameState.factoryStarsArray = factoryStarsArray;
+    gameState.manuscriptCluesShown = manuscriptCluesShown;
     gameState.megaStructuresInPossessionArray = megaStructuresInPossessionArray;
     gameState.miaplacidusMilestoneLevel = miaplacidusMilestoneLevel;
     gameState.megaStructureTechsResearched = megaStructureTechsResearched;
@@ -1386,6 +1389,7 @@ export function restoreGameStatus(gameState, type) {
             additionalSystemsToSettleThisRun = gameState.additionalSystemsToSettleThisRun ?? [];
             starsWithAncientManuscripts = gameState.starsWithAncientManuscripts ?? [];
             factoryStarsArray = gameState.factoryStarsArray ?? [];
+            manuscriptCluesShown = gameState.manuscriptCluesShown ?? {};
             megaStructuresInPossessionArray = gameState.megaStructuresInPossessionArray ?? [];
             miaplacidusMilestoneLevel = gameState.miaplacidusMilestoneLevel ?? 0;
             megaStructureTechsResearched = gameState.megaStructureTechsResearched ?? [];
@@ -2519,6 +2523,10 @@ export function getNewsTickerScrollDuration() {
     return NEWS_TICKER_SCROLL_DURATION;
 }
 
+export function getNewsTickerManuscriptClueChance() {
+    return NEWS_TICKER_MANUSCRIPT_CLUE_CHANCE;
+}
+
 export function setWeatherEffectSetting(value) {
     weatherEffectSettingToggle = value;
     if (!value) {
@@ -3442,6 +3450,25 @@ export function setStarsWithAncientManuscripts(value) {
 
 export function getMaxAncientManuscripts() {
     return MAX_ANCIENT_MANUSCRIPTS;
+}
+
+export function getManuscriptCluesShown() {
+    return manuscriptCluesShown;
+}
+
+export function markManuscriptClueShown(starName, clueId) {
+    if (!starName || clueId === undefined || clueId === null) {
+        return;
+    }
+
+    const normalizedName = starName.toLowerCase();
+    if (!Array.isArray(manuscriptCluesShown[normalizedName])) {
+        manuscriptCluesShown[normalizedName] = [];
+    }
+
+    if (!manuscriptCluesShown[normalizedName].includes(clueId)) {
+        manuscriptCluesShown[normalizedName].push(clueId);
+    }
 }
 
 export function activateFactoryStar(star) {

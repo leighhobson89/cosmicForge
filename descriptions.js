@@ -1829,6 +1829,48 @@ export function initialiseDescriptions() {
                 id: 2013
             }
         ],
+        manuscriptClues: [
+            {
+                id: 4000,
+                template: "Scholars whisper that the {STAR} System hums with ancient texts."
+            },
+            {
+                id: 4001,
+                template: "Astrometric echoes from {STAR} refuse to align with known models—someone should look closer."
+            },
+            {
+                id: 4002,
+                template: "Fragments of a manuscript allege that {STAR} hides directions to a MegaStructure."
+            },
+            {
+                id: 4003,
+                template: "Explorer logs mention faint harmonic resonances pulsing from deep within {STAR}."
+            },
+            {
+                id: 4004,
+                template: "Quantum cartographers argue the sky near {STAR} folds in on itself every few cycles."
+            },
+            {
+                id: 4005,
+                template: "An intercepted Guardian dispatch labels {STAR} a 'system of architectural interest'."
+            },
+            {
+                id: 4006,
+                template: "Pilgrims etch warnings about luminous storms that only manifest over {STAR}."
+            },
+            {
+                id: 4007,
+                template: "A half-burned parchment lists {STAR} as an ancient meeting place for MegaSructure architects."
+            },
+            {
+                id: 4008,
+                template: "Astronomers swear {STAR} emits coordinates that describe a MegaStructure System."
+            },
+            {
+                id: 4009,
+                template: "Ancient Manuscripts reported in the {STAR} system."
+            }
+        ],
         noPrize: [   //push index as id
             "Hydrogen surpluses spark renewed debate over market regulation.",
             "Research Council debates the ethical limits of compound fusion.",

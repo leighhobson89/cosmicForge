@@ -54,6 +54,7 @@ import {
     setUnlockedResourcesArray,
     setTechUnlockedArray,
     getNewsTickerScrollDuration,
+    getNewsTickerManuscriptClueChance,
     getOneOffPrizesAlreadyClaimedArray,
     setOneOffPrizesAlreadyClaimedArray,
     deferredActions,
@@ -117,7 +118,9 @@ import {
     getStarMapMode,
     getPhilosophyAbilityActive,
     getStarsWithAncientManuscripts,
+    getManuscriptCluesShown,
     getFactoryStarsArray,
+    markManuscriptClueShown,
     getMiaplacidusMilestoneLevel,
     getHomeStarName,
     getInfinitePower,
@@ -5086,9 +5089,32 @@ export async function showNewsTickerMessage(newsTickerContainer) {
         category = "noPrize";
     }
 
-    const randomIndex = Math.floor(Math.random() * newsTickerContainer[category].length);
+    let manuscriptClueSelection = null;
+    if (category === 'noPrize' && Math.random() < getNewsTickerManuscriptClueChance()) {
+        manuscriptClueSelection = getEligibleManuscriptClue(newsTickerContainer);
+        if (manuscriptClueSelection) {
+            category = 'manuscriptClues';
+        }
+    }
 
-    let message = newsTickerContainer[category][randomIndex];
+    let randomIndex = null;
+    let message;
+
+    if (category === 'manuscriptClues') {
+        if (!manuscriptClueSelection) {
+            manuscriptClueSelection = getEligibleManuscriptClue(newsTickerContainer);
+        }
+
+        if (!manuscriptClueSelection) {
+            showNewsTickerMessage(newsTickerContainer);
+            return;
+        }
+
+        ({ message } = manuscriptClueSelection);
+    } else {
+        randomIndex = Math.floor(Math.random() * newsTickerContainer[category].length);
+        message = newsTickerContainer[category][randomIndex];
+    }
     // let message = newsTickerContainer['wackyEffects'][newsTickerContainer['wackyEffects'].length - 1]; //DEBUG MESSAGES
     // category = 'wackyEffects'; //DEBUG
 
@@ -5104,6 +5130,9 @@ export async function showNewsTickerMessage(newsTickerContainer) {
             addMessageToSeenArray(message.id)
            message = await specialMessageBuilder(message, category);
         }
+    } else if (category === 'manuscriptClues') {
+        addMessageToSeenArray(manuscriptClueSelection.templateId);
+        markManuscriptClueShown(manuscriptClueSelection.manuscriptStarName, manuscriptClueSelection.templateId);
     }
 
     if (message === false || message === undefined || message.includes('Wanna Give FeedBack') && !getFeedbackCanBeRequested()) {
@@ -5114,6 +5143,54 @@ export async function showNewsTickerMessage(newsTickerContainer) {
         }
         displayNewsTickerMessage(message);
     }  
+}
+
+function getEligibleManuscriptClue(newsTickerContainer) {
+    const manuscripts = getStarsWithAncientManuscripts();
+    const templates = newsTickerContainer?.manuscriptClues ?? [];
+
+    if (!Array.isArray(manuscripts) || !manuscripts.length || !templates.length) {
+        return null;
+    }
+
+    const cluesShown = getManuscriptCluesShown() ?? {};
+
+    const eligibleEntries = manuscripts
+        .map(entry => {
+            if (!Array.isArray(entry) || entry.length < 4) return null;
+            const [manuscriptStarName, factoryStarName, , reported] = entry;
+            if (reported || !manuscriptStarName || !factoryStarName) return null;
+
+            const starData = getStarSystemDataObject('stars', [manuscriptStarName], true);
+            if (!starData) return null;
+
+            const normalized = manuscriptStarName.toLowerCase();
+            const usedIds = cluesShown[normalized] ?? [];
+            const availableTemplates = templates.filter(template => !usedIds.includes(template.id));
+
+            if (!availableTemplates.length) return null;
+
+            return {
+                manuscriptStarName,
+                availableTemplates
+            };
+        })
+        .filter(Boolean);
+
+    if (!eligibleEntries.length) {
+        return null;
+    }
+
+    const entry = eligibleEntries[Math.floor(Math.random() * eligibleEntries.length)];
+    const template = entry.availableTemplates[Math.floor(Math.random() * entry.availableTemplates.length)];
+    const formattedStarName = capitaliseWordsWithRomanNumerals(entry.manuscriptStarName);
+    const message = template.template.replaceAll('{STAR}', formattedStarName);
+
+    return {
+        message,
+        templateId: template.id,
+        manuscriptStarName: entry.manuscriptStarName
+    };
 }
 
 function addMessageToSeenArray(id) {

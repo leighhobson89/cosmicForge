@@ -1,4 +1,5 @@
 import {
+    getManuscriptCluesShown,
     getAsteroidCostMultiplier,
     getMegaStructureAntimatterAmount,
     setMegaStructureAntimatterAmount,
