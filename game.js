@@ -6456,21 +6456,32 @@ function startInitialTimers() {
         }
         
         const powerOnNow = getPowerOnOff();
-        let powerOnAfterSwitch;
+        let powerOnAfterSwitch = powerOnNow;
+        const anyPlantActive = getBuildingTypeOnOff('powerPlant1') || getBuildingTypeOnOff('powerPlant2') || getBuildingTypeOnOff('powerPlant3');
 
         const initialPowerState = getPowerOnOff();
 
         if (!batteryBought) {
             const totalRate = newEnergyRate - getTotalEnergyUse();
             if (!getInfinitePower()) {
-                setPowerOnOff(totalRate > 0);
-                powerOnAfterSwitch = getPowerOnOff();
+                if (anyPlantActive) {
+                    if (totalRate <= 0 && powerOnNow) {
+                        setPowerOnOff(false);
+                    } else if (totalRate > 0 && !powerOnNow) {
+                        setPowerOnOff(true);
+                    }
+                    powerOnAfterSwitch = getPowerOnOff();
+                }
             } else {
                 powerOnAfterSwitch = true;
             }
         } else {
             if (!getInfinitePower()) {
-                setPowerOnOff(currentEnergyQuantity > 0.00001);
+                if (currentEnergyQuantity <= 0.00001 && powerOnNow) {
+                    setPowerOnOff(false);
+                } else if (currentEnergyQuantity > 0.00001 && !powerOnNow) {
+                    setPowerOnOff(true);
+                }
                 powerOnAfterSwitch = getPowerOnOff();
             } else {
                 powerOnAfterSwitch = true;
@@ -8556,40 +8567,45 @@ export function launchRocket(rocket) {
 }
 
 export function toggleAllPower() {
-    const quantityPowerPlant1 = getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'quantity']);
-    const quantityPowerPlant2 = getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'quantity']);
-    const quantityPowerPlant3 = getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant3', 'quantity']);
-
-    if (!getPowerOnOff()) {
-        if (quantityPowerPlant1 > 0) {
-            toggleBuildingTypeOnOff('powerPlant1', true);
-            startUpdateTimersAndRates('powerPlant1', 'toggle');
+    const plantConfigs = [
+        {
+            key: 'powerPlant1',
+            quantity: getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'quantity'])
+        },
+        {
+            key: 'powerPlant2',
+            quantity: getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'quantity'])
+        },
+        {
+            key: 'powerPlant3',
+            quantity: getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant3', 'quantity'])
         }
-        if (quantityPowerPlant2 > 0) {
-            toggleBuildingTypeOnOff('powerPlant2', true);
-            startUpdateTimersAndRates('powerPlant2', 'toggle');
-        }
-        if (quantityPowerPlant3 > 0) {
-            toggleBuildingTypeOnOff('powerPlant3', true);
-            startUpdateTimersAndRates('powerPlant3', 'toggle');
-        }
+    ];
 
-        setPowerOnOff(true);
-        sfxPlayer.playAudio('powerOn', 'powerOff');
-    } else {
-        toggleBuildingTypeOnOff('powerPlant1', false);
-        startUpdateTimersAndRates('powerPlant1', 'toggle');
+    const hasActivePlant = plantConfigs.some(({ key }) => getBuildingTypeOnOff(key));
 
-        toggleBuildingTypeOnOff('powerPlant2', false);
-        startUpdateTimersAndRates('powerPlant2', 'toggle');
-
-        toggleBuildingTypeOnOff('powerPlant3', false);
-        startUpdateTimersAndRates('powerPlant3', 'toggle');
-
-        if (!getInfinitePower()) {
-            setPowerOnOff(false);
-        }
+    if (hasActivePlant) {
+        plantConfigs.forEach(({ key }) => {
+            if (getBuildingTypeOnOff(key)) {
+                toggleBuildingTypeOnOff(key, false);
+                startUpdateTimersAndRates(key, 'toggle');
+            }
+        });
         sfxPlayer.playAudio('powerOff', 'powerOn');
+        return;
+    }
+
+    let activatedAny = false;
+    plantConfigs.forEach(({ key, quantity }) => {
+        if (quantity > 0) {
+            toggleBuildingTypeOnOff(key, true);
+            startUpdateTimersAndRates(key, 'toggle');
+            activatedAny = true;
+        }
+    });
+
+    if (activatedAny) {
+        sfxPlayer.playAudio('powerOn', 'powerOff');
     }
 }
 
@@ -8602,23 +8618,24 @@ function handlePowerAllButtonState() {
     const powerAllButton = document.getElementById('activateGridButton');
 
     if (!powerColumnElement.classList.contains('invisible')) {
+        const anyPlantsOwned = quantityPowerPlant1 > 0 || quantityPowerPlant2 > 0 || quantityPowerPlant3 > 0;
+        const anyPlantActive = getBuildingTypeOnOff('powerPlant1') || getBuildingTypeOnOff('powerPlant2') || getBuildingTypeOnOff('powerPlant3');
+
         powerAllButton.classList.remove('red-disabled-text');
         powerAllButton.classList.remove('activate-grid-disabled-border');
-        if (getPowerOnOff()) {
-            if (getInfinitePower()) {
-                powerAllButton.textContent = 'Dyson Sphere';
-                powerAllButton.classList.add('power-on-fill-state');
-            } else {
-                powerAllButton.textContent = 'Power Off';
-                powerAllButton.classList.add('power-on-fill-state');
-            }
 
+        if (getInfinitePower()) {
+            powerAllButton.textContent = 'Dyson Sphere';
+            powerAllButton.classList.add('power-on-fill-state');
+        } else if (anyPlantActive) {
+            powerAllButton.textContent = 'Power Off';
+            powerAllButton.classList.add('power-on-fill-state');
         } else {
             powerAllButton.textContent = 'Power On';
             powerAllButton.classList.remove('power-on-fill-state');
         }
 
-        if (quantityPowerPlant1 === 0 && quantityPowerPlant2 === 0 && quantityPowerPlant3 === 0) {
+        if (!anyPlantsOwned) {
             powerAllButton.classList.add('red-disabled-text');
             powerAllButton.classList.add('activate-grid-disabled-border');
         }
