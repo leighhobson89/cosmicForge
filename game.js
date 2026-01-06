@@ -3535,7 +3535,9 @@ function powerGenerationFuelChecks(element) {
             fuelTypeElement.classList.remove('invisible');
             fuelQuantityElement.classList.remove('invisible');
 
-            if (fuelQuantity <= 0) {
+            const shouldDisableForFuel = fuelQuantity <= 0 && buildingNameString !== 'powerPlant2';
+
+            if (shouldDisableForFuel) {
                 element.textContent = 'Activate';
                 element.classList.add('red-disabled-text');
                 fuelTypeElement.classList.add('red-disabled-text');
@@ -4229,7 +4231,11 @@ function setStateOfButtonsBasedOnDescriptionStateForBuildingPurchases(element) {
     const buttons = element.parentElement.parentElement.querySelectorAll('button');
 
     buttons.forEach(buyButton => {
-        if (buyButton.classList.contains('sell-building-button')) return; // Skip sell buttons
+        if (
+            buyButton.classList.contains('sell-building-button') ||
+            buyButton.dataset?.conditionCheck === 'toggle' ||
+            buyButton.classList.contains('toggle-timer')
+        ) return; // Skip sell buttons and building toggles
     
         if (hasRedDisabledText) {
             buyButton.classList.add('red-disabled-text');
