@@ -375,6 +375,46 @@ let notationType = 'normalCondensed';
 let mouseParticleTrailEnabled = false;
 let customPointerEnabled = true;
 
+const MAX_MOUSE_TRAIL_PARTICLES = 40;
+const PARTICLE_LIFETIME_MS = 800;
+const PARTICLES_PER_EVENT = 3;
+let mouseParticleContainer = null;
+
+const CUSTOM_POINTER_THEMES = [
+    'terminal',
+    'dark',
+    'misty',
+    'light',
+    'frosty',
+    'summer',
+    'forest'
+];
+
+const CUSTOM_POINTER_ASSET_KEYS = new Set(
+    CUSTOM_POINTER_THEMES.flatMap((theme) => {
+        const token = theme.charAt(0).toUpperCase() + theme.slice(1);
+        return [
+            `default${token}`,
+            `hand${token}`,
+            `drag${token}`
+        ];
+    })
+);
+
+const CUSTOM_POINTER_FALLBACK_THEME = 'terminal';
+const CURSOR_TYPE_TO_POINTER = {
+    pointer: 'hand',
+    grab: 'drag',
+    grabbing: 'drag',
+    move: 'drag'
+};
+const CUSTOM_POINTER_ENABLED_CLASS = 'custom-pointer-enabled';
+const CUSTOM_POINTER_HIDE_CURSOR_CLASS = 'custom-pointer-hide-cursor';
+let customPointerElement = null;
+let customPointerImageElement = null;
+let pendingCustomPointerType = 'default';
+let customPointerListenersAttached = false;
+
 let antimatterDeltaAccumulator = 0;
 
 //STATS PAGE LOGGERS
@@ -734,6 +774,78 @@ export function getCustomPointerEnabled() {
 
 export function setCustomPointerEnabled(value) {
     customPointerEnabled = Boolean(value);
+}
+
+export function getMaxMouseTrailParticles() {
+    return MAX_MOUSE_TRAIL_PARTICLES;
+}
+
+export function getParticleLifetimeMs() {
+    return PARTICLE_LIFETIME_MS;
+}
+
+export function getParticlesPerEvent() {
+    return PARTICLES_PER_EVENT;
+}
+
+export function getMouseParticleContainer() {
+    return mouseParticleContainer;
+}
+
+export function setMouseParticleContainer(value) {
+    mouseParticleContainer = value ?? null;
+}
+
+export function getCustomPointerAssetKeys() {
+    return CUSTOM_POINTER_ASSET_KEYS;
+}
+
+export function getCustomPointerFallbackTheme() {
+    return CUSTOM_POINTER_FALLBACK_THEME;
+}
+
+export function getCursorTypeToPointerMap() {
+    return CURSOR_TYPE_TO_POINTER;
+}
+
+export function getCustomPointerEnabledClass() {
+    return CUSTOM_POINTER_ENABLED_CLASS;
+}
+
+export function getCustomPointerHideCursorClass() {
+    return CUSTOM_POINTER_HIDE_CURSOR_CLASS;
+}
+
+export function getCustomPointerElement() {
+    return customPointerElement;
+}
+
+export function setCustomPointerElement(element) {
+    customPointerElement = element ?? null;
+}
+
+export function getCustomPointerImageElement() {
+    return customPointerImageElement;
+}
+
+export function setCustomPointerImageElement(element) {
+    customPointerImageElement = element ?? null;
+}
+
+export function getPendingCustomPointerType() {
+    return pendingCustomPointerType;
+}
+
+export function setPendingCustomPointerType(value) {
+    pendingCustomPointerType = typeof value === 'string' && value.length ? value : 'default';
+}
+
+export function getCustomPointerListenersAttached() {
+    return customPointerListenersAttached;
+}
+
+export function setCustomPointerListenersAttached(value) {
+    customPointerListenersAttached = Boolean(value);
 }
 
 export function getGameStateVariable() {

@@ -137,7 +137,25 @@ import {
     getCurrencySymbol,
     getMouseParticleTrailEnabled,
     getCustomPointerEnabled,
-    getCurrentTheme
+    getCurrentTheme,
+    getMaxMouseTrailParticles,
+    getParticleLifetimeMs,
+    getParticlesPerEvent,
+    getMouseParticleContainer,
+    setMouseParticleContainer,
+    getCustomPointerAssetKeys,
+    getCustomPointerFallbackTheme,
+    getCursorTypeToPointerMap,
+    getCustomPointerEnabledClass,
+    getCustomPointerHideCursorClass,
+    getCustomPointerElement,
+    setCustomPointerElement,
+    getCustomPointerImageElement,
+    setCustomPointerImageElement,
+    getPendingCustomPointerType,
+    setPendingCustomPointerType,
+    getCustomPointerListenersAttached,
+    setCustomPointerListenersAttached
 } from './constantsAndGlobalVars.js';
 import {
     getResourceDataObject,
@@ -242,45 +260,6 @@ const variableDebuggerWindow = document.getElementById('variableDebuggerWindow')
 const debugWindow = document.getElementById('debugWindow');
 const closeButton = document.querySelector('.close-btn');
 
-const MAX_MOUSE_TRAIL_PARTICLES = 40;
-const PARTICLE_LIFETIME_MS = 800;
-const PARTICLES_PER_EVENT = 3;
-let mouseParticleContainer = null;
-
-const CUSTOM_POINTER_THEMES = [
-    'terminal',
-    'dark',
-    'misty',
-    'light',
-    'frosty',
-    'summer',
-    'forest'
-];
-
-const CUSTOM_POINTER_ASSET_KEYS = new Set(
-    CUSTOM_POINTER_THEMES.flatMap((theme) => {
-        const token = theme.charAt(0).toUpperCase() + theme.slice(1);
-        return [
-            `default${token}`,
-            `hand${token}`,
-            `drag${token}`
-        ];
-    })
-);
-const CUSTOM_POINTER_FALLBACK_THEME = 'terminal';
-const CURSOR_TYPE_TO_POINTER = {
-    pointer: 'hand',
-    grab: 'drag',
-    grabbing: 'drag',
-    move: 'drag'
-};
-const CUSTOM_POINTER_ENABLED_CLASS = 'custom-pointer-enabled';
-const CUSTOM_POINTER_HIDE_CURSOR_CLASS = 'custom-pointer-hide-cursor';
-let customPointerElement = null;
-let customPointerImageElement = null;
-let pendingCustomPointerType = 'default';
-let customPointerListenersAttached = false;
-
 function shouldUseCustomPointer() {
     return !!getCustomPointerEnabled();
 }
@@ -288,17 +267,30 @@ function shouldUseCustomPointer() {
 function initCustomPointer() {
     if (!document?.body) return;
 
-    if (!customPointerElement) {
-        customPointerElement = document.createElement('div');
-        customPointerElement.className = 'custom-pointer';
+    let pointerElement = getCustomPointerElement();
+    let pointerImageElement = getCustomPointerImageElement();
 
-        customPointerImageElement = document.createElement('img');
-        customPointerImageElement.alt = '';
-        customPointerImageElement.setAttribute('aria-hidden', 'true');
-        customPointerImageElement.draggable = false;
-        customPointerElement.appendChild(customPointerImageElement);
+    if (!pointerElement) {
+        pointerElement = document.createElement('div');
+        pointerElement.className = 'custom-pointer';
 
-        document.body.appendChild(customPointerElement);
+        pointerImageElement = document.createElement('img');
+        pointerImageElement.alt = '';
+        pointerImageElement.setAttribute('aria-hidden', 'true');
+        pointerImageElement.draggable = false;
+        pointerElement.appendChild(pointerImageElement);
+
+        document.body.appendChild(pointerElement);
+
+        setCustomPointerElement(pointerElement);
+        setCustomPointerImageElement(pointerImageElement);
+    } else if (!pointerImageElement) {
+        pointerImageElement = document.createElement('img');
+        pointerImageElement.alt = '';
+        pointerImageElement.setAttribute('aria-hidden', 'true');
+        pointerImageElement.draggable = false;
+        pointerElement.appendChild(pointerImageElement);
+        setCustomPointerImageElement(pointerImageElement);
     }
 
     attachCustomPointerListeners();
@@ -307,56 +299,58 @@ function initCustomPointer() {
 
 function teardownCustomPointer() {
     detachCustomPointerListeners();
-    if (customPointerElement) {
-        customPointerElement.remove();
+    const pointerElement = getCustomPointerElement();
+    if (pointerElement) {
+        pointerElement.remove();
     }
-    customPointerElement = null;
-    customPointerImageElement = null;
-    pendingCustomPointerType = 'default';
+    setCustomPointerElement(null);
+    setCustomPointerImageElement(null);
+    setPendingCustomPointerType('default');
 }
 
 function attachCustomPointerListeners() {
-    if (customPointerListenersAttached) return;
+    if (getCustomPointerListenersAttached()) return;
     document.addEventListener('pointermove', handleCustomPointerMove, true);
     document.addEventListener('pointerleave', handleCustomPointerLeave, true);
-    customPointerListenersAttached = true;
+    setCustomPointerListenersAttached(true);
 }
 
 function detachCustomPointerListeners() {
-    if (!customPointerListenersAttached) return;
+    if (!getCustomPointerListenersAttached()) return;
     document.removeEventListener('pointermove', handleCustomPointerMove, true);
     document.removeEventListener('pointerleave', handleCustomPointerLeave, true);
-    customPointerListenersAttached = false;
+    setCustomPointerListenersAttached(false);
 }
 
 const handleCustomPointerMove = (event) => {
     if (event.pointerType && event.pointerType !== 'mouse') {
-        customPointerElement?.classList.remove('visible');
+        getCustomPointerElement()?.classList.remove('visible');
         return;
     }
 
-    if (!customPointerElement || !shouldUseCustomPointer()) {
+    const pointerElement = getCustomPointerElement();
+    if (!pointerElement || !shouldUseCustomPointer()) {
         return;
     }
 
     const pointerType = resolvePointerType(event);
-    if (pointerType !== pendingCustomPointerType) {
-        pendingCustomPointerType = pointerType;
+    if (pointerType !== getPendingCustomPointerType()) {
+        setPendingCustomPointerType(pointerType);
         updateCustomPointerImage();
     }
 
-    const pointerWidth = customPointerElement.offsetWidth || 0;
-    const pointerHeight = customPointerElement.offsetHeight || 0;
+    const pointerWidth = pointerElement.offsetWidth || 0;
+    const pointerHeight = pointerElement.offsetHeight || 0;
     const offsetX = pointerWidth / 3;
     const offsetY = pointerHeight / 3;
 
-    customPointerElement.style.left = `${event.clientX + offsetX}px`;
-    customPointerElement.style.top = `${event.clientY + offsetY}px`;
-    customPointerElement.classList.add('visible');
+    pointerElement.style.left = `${event.clientX + offsetX}px`;
+    pointerElement.style.top = `${event.clientY + offsetY}px`;
+    pointerElement.classList.add('visible');
 };
 
 const handleCustomPointerLeave = () => {
-    customPointerElement?.classList.remove('visible');
+    getCustomPointerElement()?.classList.remove('visible');
 };
 
 function withCursorProbe(getCursorValue) {
@@ -365,16 +359,17 @@ function withCursorProbe(getCursorValue) {
         return getCursorValue();
     }
 
-    const hadCursorHideClass = body.classList.contains(CUSTOM_POINTER_HIDE_CURSOR_CLASS);
+    const cursorHideClass = getCustomPointerHideCursorClass();
+    const hadCursorHideClass = body.classList.contains(cursorHideClass);
     if (hadCursorHideClass) {
-        body.classList.remove(CUSTOM_POINTER_HIDE_CURSOR_CLASS);
+        body.classList.remove(cursorHideClass);
     }
 
     try {
         return getCursorValue();
     } finally {
         if (hadCursorHideClass) {
-            body.classList.add(CUSTOM_POINTER_HIDE_CURSOR_CLASS);
+            body.classList.add(cursorHideClass);
         }
     }
 }
@@ -394,38 +389,41 @@ function resolvePointerType(event) {
         return 'default';
     }
 
-    return CURSOR_TYPE_TO_POINTER[normalized] ?? 'default';
+    const cursorMap = getCursorTypeToPointerMap();
+    return cursorMap[normalized] ?? 'default';
 }
 
 function updateCustomPointerImage() {
-    if (!customPointerImageElement) {
+    const pointerImageElement = getCustomPointerImageElement();
+    if (!pointerImageElement) {
         return;
     }
 
-    const pointerType = pendingCustomPointerType || 'default';
+    const pointerType = getPendingCustomPointerType() || 'default';
     const themeToken = formatThemeToken(getCurrentTheme());
     const assetKey = resolvePointerAssetKey(pointerType, themeToken);
     const assetPath = `./images/mouse/${assetKey}.png`;
 
-    if (customPointerImageElement.dataset.assetPath !== assetPath) {
-        customPointerImageElement.dataset.assetPath = assetPath;
-        customPointerImageElement.src = assetPath;
+    if (pointerImageElement.dataset.assetPath !== assetPath) {
+        pointerImageElement.dataset.assetPath = assetPath;
+        pointerImageElement.src = assetPath;
     }
 
-    if (customPointerElement?.dataset.pointerType !== pointerType) {
-        customPointerElement.dataset.pointerType = pointerType;
+    const pointerElement = getCustomPointerElement();
+    if (pointerElement?.dataset.pointerType !== pointerType) {
+        pointerElement.dataset.pointerType = pointerType;
     }
 }
 
 function resolvePointerAssetKey(pointerType, themeToken) {
     const keyForTheme = `${pointerType}${themeToken}`;
-    if (CUSTOM_POINTER_ASSET_KEYS.has(keyForTheme)) {
+    if (getCustomPointerAssetKeys().has(keyForTheme)) {
         return keyForTheme;
     }
 
-    const fallbackThemeToken = formatThemeToken(CUSTOM_POINTER_FALLBACK_THEME);
+    const fallbackThemeToken = formatThemeToken(getCustomPointerFallbackTheme());
     const fallbackKey = `${pointerType}${fallbackThemeToken}`;
-    if (CUSTOM_POINTER_ASSET_KEYS.has(fallbackKey)) {
+    if (getCustomPointerAssetKeys().has(fallbackKey)) {
         return fallbackKey;
     }
 
@@ -434,7 +432,7 @@ function resolvePointerAssetKey(pointerType, themeToken) {
 
 function formatThemeToken(theme) {
     if (typeof theme !== 'string' || !theme.length) {
-        return formatThemeToken(CUSTOM_POINTER_FALLBACK_THEME);
+        return formatThemeToken(getCustomPointerFallbackTheme());
     }
     return theme.charAt(0).toUpperCase() + theme.slice(1);
 }
@@ -442,8 +440,8 @@ function formatThemeToken(theme) {
 export function applyCustomPointerSetting() {
     if (!document?.body) return;
     const enabled = shouldUseCustomPointer();
-    document.body.classList.toggle(CUSTOM_POINTER_ENABLED_CLASS, enabled);
-    document.body.classList.toggle(CUSTOM_POINTER_HIDE_CURSOR_CLASS, enabled);
+    document.body.classList.toggle(getCustomPointerEnabledClass(), enabled);
+    document.body.classList.toggle(getCustomPointerHideCursorClass(), enabled);
 
     if (enabled) {
         initCustomPointer();
@@ -467,28 +465,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
 function setupMouseParticleTrail() {
-    if (mouseParticleContainer || !document.body) {
+    if (getMouseParticleContainer() || !document.body) {
         return;
     }
 
-    mouseParticleContainer = document.createElement('div');
-    mouseParticleContainer.className = 'mouse-particle-container';
-    document.body.appendChild(mouseParticleContainer);
+    const container = document.createElement('div');
+    container.className = 'mouse-particle-container';
+    document.body.appendChild(container);
+    setMouseParticleContainer(container);
 
     document.addEventListener('pointermove', handleMouseParticleMove);
 }
 
 function handleMouseParticleMove(event) {
-    if (!getMouseParticleTrailEnabled() || !mouseParticleContainer) {
+    const container = getMouseParticleContainer();
+    if (!getMouseParticleTrailEnabled() || !container) {
         return;
     }
 
-    for (let i = 0; i < PARTICLES_PER_EVENT; i++) {
-        spawnMouseParticle(event.clientX, event.clientY);
+    const particlesPerEvent = getParticlesPerEvent();
+    for (let i = 0; i < particlesPerEvent; i++) {
+        spawnMouseParticle(event.clientX, event.clientY, container);
     }
 }
 
-function spawnMouseParticle(x, y) {
+function spawnMouseParticle(x, y, container) {
     const particle = document.createElement('div');
     particle.className = 'mouse-particle';
 
@@ -504,15 +505,17 @@ function spawnMouseParticle(x, y) {
     particle.style.left = `${x}px`;
     particle.style.top = `${y}px`;
 
-    mouseParticleContainer.appendChild(particle);
+    container.appendChild(particle);
 
-    while (mouseParticleContainer.childElementCount > MAX_MOUSE_TRAIL_PARTICLES) {
-        mouseParticleContainer.firstElementChild?.remove();
+    const maxParticles = getMaxMouseTrailParticles();
+    while (container.childElementCount > maxParticles) {
+        container.firstElementChild?.remove();
     }
 
+    const particleLifetime = getParticleLifetimeMs();
     setTimeout(() => {
         particle.remove();
-    }, PARTICLE_LIFETIME_MS);
+    }, particleLifetime);
 }
 function setupStatTooltips() {
     if (document.getElementById('stat-tooltip')) {
