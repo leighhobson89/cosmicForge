@@ -516,7 +516,7 @@ function setupStatTooltips() {
     tooltip.style.position = 'absolute';
     tooltip.style.padding = '6px 10px';
     tooltip.style.pointerEvents = 'none';
-    tooltip.style.background = 'var(--bg-color)';
+    tooltip.style.background = 'var(--container-bg-color)';
     tooltip.style.color = 'var(--text-color)';
     tooltip.style.border = '1px solid var(--border-color, #555)';
     tooltip.style.borderRadius = 'var(--border-radius, 4px)';
@@ -725,7 +725,7 @@ function buildPowerPlantStatusLines() {
         const isOn = getBuildingTypeOnOff(key);
         const className = isOn ? 'green-ready-text' : 'red-disabled-text';
         const statusText = isOn ? 'ON' : 'OFF';
-        return `<div><span class="green-ready-text">${label}:</span> <span class="${className}">${statusText}</span></div>`;
+        return `<div>${label}: <span class="${className}">${statusText}</span></div>`;
     }).join('');
 }
 
@@ -2960,9 +2960,9 @@ export function getTimeInStatCell() {
         stat8Element.textContent = timeString;
         stat8Element.dataset.tooltipContent = [
             `<div><strong>${timeString}</strong></div>`,
-            `<div><span class="green-ready-text">Run:</span> ${currentRun}</div>`,
-            `<div><span class="green-ready-text">Run Time:</span> ${runDuration}</div>`,
-            `<div><span class="green-ready-text">Total Time:</span> ${totalDuration}</div>`
+            `<div>Run: <span class="green-ready-text">${currentRun}</span></div>`,
+            `<div>Run Time: <span class="green-ready-text">${runDuration}</span></div>`,
+            `<div>Total Time: <span class="green-ready-text">${totalDuration}</span></div>`
         ].join('');
     }
 }
@@ -2979,18 +2979,18 @@ function buildEnergyTooltipContent(netText) {
     const generatorLines = buildPowerPlantGenerationLines(timerRatio);
     const consumerLines = buildEnergyConsumerLines(timerRatio);
 
-    const generationSubtotalLine = `<div><span class="green-ready-text">Total Generated:</span> <span class="green-ready-text">${formatEnergyValue(totalGeneration, true)}</span></div>`;
-    const consumptionSubtotalLine = `<div><span class="green-ready-text">Total Consumed:</span> <span class="red-disabled-text">${formatEnergyValue(-totalConsumption)}</span></div>`;
+    const generationSubtotalLine = `<div>Total Generated: <span class="green-ready-text">${formatEnergyValue(totalGeneration, true)}</span></div>`;
+    const consumptionSubtotalLine = `<div>Total Consumed: <span class="red-disabled-text">${formatEnergyValue(-totalConsumption)}</span></div>`;
 
     return [
-        `<div><span class="green-ready-text">Net Energy:</span> <span class="${netClass}">${netDisplay}</span></div>`,
+        `<div>Net Energy: <span class="${netClass}">${netDisplay}</span></div>`,
         generationSubtotalLine,
         consumptionSubtotalLine,
         `<div class="tooltip-spacer">&nbsp;</div>`,
-        `<div><span class="green-ready-text"><strong>Generators</strong></span></div>`,
+        `<div><strong>Generators</strong></div>`,
         generatorLines,
         `<div class="tooltip-spacer">&nbsp;</div>`,
-        `<div><span class="green-ready-text"><strong>Consumers</strong></span></div>`,
+        `<div><strong>Consumers</strong></div>`,
         consumerLines
     ].filter(Boolean).join('');
 }
@@ -3009,7 +3009,7 @@ function buildPowerPlantGenerationLines(timerRatio) {
         const generation = (isOn ? purchasedRate : 0) * timerRatio;
         const generationClass = generation > 0 ? 'green-ready-text' : 'red-disabled-text';
 
-        return `<div><span class="green-ready-text">${label}:</span> <span class="${generationClass}">${formatEnergyValue(generation, true)}</span> (${quantity.toLocaleString()} online)</div>`;
+        return `<div>${label}: <span class="${generationClass}">${formatEnergyValue(generation, true)}</span> (${quantity.toLocaleString()} online)</div>`;
     }).join('');
 }
 
@@ -3060,7 +3060,7 @@ function buildAutoBuyerConsumptionLines(timerRatio) {
         const usageKw = usage * timerRatio;
         const usageClass = usageKw > 0 ? 'red-disabled-text' : 'green-ready-text';
         const countClass = count > 0 ? 'green-ready-text' : 'red-disabled-text';
-        return `<div><span class="green-ready-text">Tier ${tier} Autobuyers:</span> <span class="${usageClass}">${formatEnergyValue(-usageKw)}</span> (${count.toLocaleString()} active)</div>`;
+        return `<div>Tier ${tier} Autobuyers: <span class="${usageClass}">${formatEnergyValue(-usageKw)}</span> (${count.toLocaleString()} active)</div>`;
     }).join('');
 }
 
@@ -3071,13 +3071,13 @@ function buildScienceLabConsumptionLine(timerRatio) {
     const usageClass = energyUse > 0 ? 'red-disabled-text' : 'green-ready-text';
     const quantityClass = quantity > 0 ? 'green-ready-text' : 'red-disabled-text';
 
-    return `<div><span class="green-ready-text">Science Labs:</span> <span class="${usageClass}">${formatEnergyValue(-energyUse)}</span> (${quantity.toLocaleString()} active)</div>`;
+    return `<div>Science Labs: <span class="${usageClass}">${formatEnergyValue(-energyUse)}</span> (${quantity.toLocaleString()} active)</div>`;
 }
 
 function buildSpaceTelescopeConsumptionLine(timerRatio) {
     const telescope = getResourceDataObject('space', ['upgrades', 'spaceTelescope']);
     if (!telescope || !telescope.spaceTelescopeBoughtYet) {
-        return `<div><span class="green-ready-text">Space Telescope:</span> <span class="red-disabled-text">Not built</span></div>`;
+        return `<div>Space Telescope: <span class="red-disabled-text">Not built</span></div>`;
     }
 
     let status = 'Idle';
@@ -3098,7 +3098,7 @@ function buildSpaceTelescopeConsumptionLine(timerRatio) {
     const className = usageKw > 0 ? 'red-disabled-text' : 'green-ready-text';
     const usageText = usageKw > 0 ? formatEnergyValue(-usageKw) : '0 KW / s';
 
-    return `<div><span class="green-ready-text">Space Telescope (${status}):</span> <span class="${className}">${usageText}</span></div>`;
+    return `<div>Space Telescope (${status}): <span class="${className}">${usageText}</span></div>`;
 }
 
 function buildRocketRefuelLines(timerRatio) {
@@ -3106,7 +3106,7 @@ function buildRocketRefuelLines(timerRatio) {
     const activeRockets = rockets.filter(rocket => !rocket.includes('FuelledUp'));
 
     if (!activeRockets.length) {
-        return `<div><span class="green-ready-text">Rocket Refuelling:</span> <span class="green-ready-text">Idle</span></div>`;
+        return `<div>Rocket Refuelling: <span class="green-ready-text">Idle</span></div>`;
     }
 
     return activeRockets.map(rocketKey => {
@@ -3185,20 +3185,20 @@ function buildBatteryTooltipContent() {
     ].map(({ label, path }) => {
         const quantity = getResourceDataObject('buildings', path) ?? 0;
         const quantityClass = quantity > 0 ? 'green-ready-text' : 'red-disabled-text';
-        return `<div><span class="green-ready-text">${label}:</span> <span class="${quantityClass}">${quantity}</span></div>`;
+        return `<div>${label}: <span class="${quantityClass}">${quantity}</span></div>`;
     });
 
     const capacityMwh = Math.floor(totalCapacity / 1000);
-    const totalCapacityLine = `<div><span class="green-ready-text">Total Battery Capacity:</span> <span class="green-ready-text">${capacityMwh.toLocaleString()} MWh</span></div>`;
+    const totalCapacityLine = `<div>Total Battery Capacity: <span class="green-ready-text">${capacityMwh.toLocaleString()} MWh</span></div>`;
 
     const depletionInfo = getBatteryDepletionInfo(energyRate, consumption, totalCapacity, energyQuantity, hasBattery);
     const depletionLabel = depletionInfo.mode === 'charging' ? 'Time until Charged:' : 'Time until Depletion:';
-    const depletionLine = `<div><span class="green-ready-text">${depletionLabel}</span> <span class="${depletionInfo.className}">${depletionInfo.text}</span></div>`;
+    const depletionLine = `<div>${depletionLabel} <span class="${depletionInfo.className}">${depletionInfo.text}</span></div>`;
 
     return [
         `<div><span class="${statusClass}">${statusText}</span></div>`,
         `<div class="tooltip-spacer">&nbsp;</div>`,
-        `<div><span class="green-ready-text">Battery Charge:</span> ${percentageSpan}</div>`,
+        `<div>Battery Charge: ${percentageSpan}</div>`,
         ...batteryLines,
         `<div class="tooltip-spacer">&nbsp;</div>`,
         totalCapacityLine,
@@ -3286,7 +3286,7 @@ export function statToolBarCustomizations() {
         const cashDisplay = currencySymbol === '€'
             ? `${cashAmount.toLocaleString()}${currencySymbol}`
             : `${currencySymbol}${cashAmount.toLocaleString()}`;
-        cashStatElement.dataset.tooltipContent = `<div><span class="green-ready-text">Cash:</span> ${cashDisplay}</div>`;
+        cashStatElement.dataset.tooltipContent = `<div>Cash: <span class="green-ready-text">${cashDisplay}</span></div>`;
     }
 
     if (stat2Element) {
@@ -3298,7 +3298,7 @@ export function statToolBarCustomizations() {
         const stat3Class = determineStatClassColor(stat3Text);
         const plantStatusLines = buildPowerPlantStatusLines();
         stat3Element.dataset.tooltipContent = [
-            `<div><span class="green-ready-text">Power Status:</span> <span class="${stat3Class}">${stat3Text}</span></div>`,
+            `<div>Power Status: <span class="${stat3Class}">${stat3Text}</span></div>`,
             `<div class="tooltip-spacer">&nbsp;</div>`,
             plantStatusLines
         ].join('');
@@ -3312,14 +3312,14 @@ export function statToolBarCustomizations() {
         const stat5Value = parseInt(stat5Element.textContent.replace(/\D/g, ''), 10) || 0;
         const antimatterClass = stat5Value > 0 ? 'green-ready-text' : 'red-disabled-text';
         const antimatterDisplay = stat5Element.textContent.trim() || '0';
-        stat5Element.dataset.tooltipContent = `<div><span class="green-ready-text">Antimatter Fuel:</span> <span class="${antimatterClass}">${antimatterDisplay}</span></div>`;
+        stat5Element.dataset.tooltipContent = `<div>Antimatter Fuel: <span class="${antimatterClass}">${antimatterDisplay}</span></div>`;
     }
 
     if (stat6Element) {
         const stat6Value = parseInt(stat6Element.textContent.replace(/\D/g, ''), 10) || 0;
         const apClass = stat6Value > 0 ? 'green-ready-text' : 'red-disabled-text';
         const apDisplay = stat6Element.textContent.trim() || '0';
-        stat6Element.dataset.tooltipContent = `<div><span class="green-ready-text">Ascendency Points:</span> <span class="${apClass}">${apDisplay}</span></div>`;
+        stat6Element.dataset.tooltipContent = `<div>Ascendency Points: <span class="${apClass}">${apDisplay}</span></div>`;
     }
 
     if (stat7Element) {
@@ -3354,10 +3354,10 @@ export function statToolBarCustomizations() {
             : `<span class="${weatherClass}">N/A</span>`;
 
         stat7Element.dataset.tooltipContent = [
-            `<div><span class="green-ready-text">System:</span> ${systemName}</div>`,
-                        `<div><span class="green-ready-text">Precipitation Type:</span> ${capitaliseString(precipitationType)}</div>`,
-            `<div><span class="green-ready-text">Solar Energy Output:</span> <span class="${weatherClass}">${solarOutput}</span></div>`,
-            `<div><span class="green-ready-text">Weather:</span> ${weatherSymbolHtml}</div>`,
+            `<div>System: <span class="green-ready-text">${systemName}</span></div>`,
+                        `<div>Precipitation Type: <span class="green-ready-text">${capitaliseString(precipitationType)}</span></div>`,
+            `<div>Solar Energy Output: <span class="${weatherClass}">${solarOutput}</span></div>`,
+            `<div>Weather: ${weatherSymbolHtml}</div>`,
         ].join('');
     }
 }
