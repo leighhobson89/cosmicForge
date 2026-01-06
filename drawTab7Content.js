@@ -268,7 +268,7 @@ export function drawTab7Content(heading, optionContentElement) {
         optionContentElement.appendChild(galacticMarketLiquidateForAPRow);
     }
 
-    if (heading === 'Ascendency') {
+    if (heading === 'Ascendency Perks') {
         const ascendencyBuffsArray = Object.fromEntries(Object.entries(getAscendencyBuffDataObject()).filter(([key]) => key !== "version"));
     
         if (Object.keys(ascendencyBuffsArray).length === 0) {

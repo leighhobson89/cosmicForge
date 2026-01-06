@@ -275,7 +275,7 @@ export function initialiseDescriptions() {
             : `Here you can reset the run at your new system, once settled!`,
 
         'galactic market': "Here you can make various trades in the Galactic Market.",
-        'ascendency': "Here you can spend AP for permanent buffs to speed up your runs!",
+        'ascendency perks': "Here you can spend AP for permanent buffs to speed up your runs!",
         'megastructures': "This shows your progress in harnessing the power of MegaStructures, and the slow dismantling of the Miaplacidus Force Field!",
 
         'contact': "Contact Channels for Feedback and Suggestions",

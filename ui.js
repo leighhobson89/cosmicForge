@@ -4573,10 +4573,10 @@ function initializeTabEventListeners() {
     document.querySelectorAll('[class*="tab7"][class*="option3"]').forEach(function(element) {
         element.addEventListener('click', function() {
             selectRowCss(this);
-            setLastScreenOpenRegister('tab7', 'ascendency');
-            setCurrentOptionPane('ascendency');
-            updateContent('Ascendency', 'tab7', 'content');
-            setFirstAccessArray('ascendency');
+            setLastScreenOpenRegister('tab7', 'ascendency perks');
+            setCurrentOptionPane('ascendency perks');
+            updateContent('Ascendency Perks', 'tab7', 'content');
+            setFirstAccessArray('ascendency perks');
         });
     });
 
