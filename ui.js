@@ -132,7 +132,8 @@ import {
     getTimeLeftUntilPillageVoidTimerFinishes,
     getTotalEnergyUse,
     getCurrencySymbol,
-    getMouseParticleTrailEnabled
+    getMouseParticleTrailEnabled,
+    getCustomPointerEnabled
 } from './constantsAndGlobalVars.js';
 import {
     getResourceDataObject,
@@ -242,10 +243,16 @@ const PARTICLE_LIFETIME_MS = 800;
 const PARTICLES_PER_EVENT = 3;
 let mouseParticleContainer = null;
 
+export function applyCustomPointerSetting() {
+    if (!document?.body) return;
+    document.body.classList.toggle('custom-pointer-enabled', getCustomPointerEnabled());
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     setElements();
     setupStatTooltips();
     setupMouseParticleTrail();
+    applyCustomPointerSetting();
 
     setGameState(getGameVisibleActive());
 

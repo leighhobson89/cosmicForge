@@ -370,7 +370,8 @@ let currentTab = [1, 'Resources'];
 let currentOptionPane = null;
 let notationType = 'normalCondensed';
 
-let mouseParticleTrailEnabled = true;
+let mouseParticleTrailEnabled = false;
+let customPointerEnabled = false;
 
 let antimatterDeltaAccumulator = 0;
 
@@ -723,6 +724,14 @@ export function getMouseParticleTrailEnabled() {
 
 export function setMouseParticleTrailEnabled(value) {
     mouseParticleTrailEnabled = Boolean(value);
+}
+
+export function getCustomPointerEnabled() {
+    return customPointerEnabled;
+}
+
+export function setCustomPointerEnabled(value) {
+    customPointerEnabled = Boolean(value);
 }
 
 export function getGameStateVariable() {
@@ -1177,6 +1186,8 @@ export function captureGameStatusForSaving(type) {
         weatherEffectSettingToggle: weatherEffectSettingToggle,
         newsTickerSetting: newsTickerSetting,
         notificationsToggle: notificationsToggle,
+        customPointerEnabled: customPointerEnabled,
+        mouseParticleTrailEnabled: mouseParticleTrailEnabled,
         techRenderChange: techRenderChange,
         losingEnergy: losingEnergy,
         powerOnOff: powerOnOff,
@@ -1387,6 +1398,8 @@ export function restoreGameStatus(gameState, type) {
             // Flags
             autoSaveToggle = gameState.flags.autoSaveToggle ?? false;
             notificationsToggle = gameState.flags.notificationsToggle ?? true;
+            customPointerEnabled = gameState.flags.customPointerEnabled ?? false;
+            mouseParticleTrailEnabled = gameState.flags.mouseParticleTrailEnabled ?? true;
             weatherEffectSettingToggle = gameState.flags.weatherEffectSettingToggle ?? true;
             newsTickerSetting = gameState.flags.newsTickerSetting ?? true;
             techRenderChange = gameState.flags.techRenderChange ?? false;
