@@ -16,6 +16,7 @@ export function drawTab3Content(heading, optionContentElement) {
 
     sortTechRows(true);
     if (heading === 'Research') {
+
         const autoBuyerEnabled = !!getResourceDataObject('research', ['upgrades', 'autoBuyer', 'enabled']);
 
         const researchAutoBuyerRow = createOptionRow(
