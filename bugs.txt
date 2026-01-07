@@ -3,6 +3,7 @@ there is a subkey error somewhere when accessing getResourceDataObject
 
 subsequent runs show factory stars in the star data but the star map doesnt show them in yellow and they should always be there
 if you buy a resource or compound in the GM befoe it is revealed, could be a better way of handling it than just allowing it and then it showing up when it is revealed
+maybe add a autobuyer for research as it becomes available for a new ascendency perk
 
 REALLY TO DO TO END OF GAME
     - ADD REST OF STATISTICS
