@@ -1961,7 +1961,7 @@ export function generateStarfield(starfieldContainer, numberOfStars = 70, seed =
     if (calculationMode && originStarName) {
         currentStar = stars.find(star => star.name.toLowerCase() === originStarName.toLowerCase());
     } else {
-        currentStar = stars.find(star => star.name === capitaliseString(getCurrentStarSystem()));
+        currentStar = stars.find(star => star.name === capitaliseWordsWithRomanNumerals(getCurrentStarSystem()));
     }
 
     stars.forEach(star => {
@@ -3320,10 +3320,13 @@ export function statToolBarCustomizations() {
     }
 
     if (stat5Element) {
-        const stat5Value = parseInt(stat5Element.textContent.replace(/\D/g, ''), 10) || 0;
+        const stat5Text = stat5Element.textContent.trim() || '0';
+        const isUnknown = stat5Text === '???';
+        const stat5Value = isUnknown ? 0 : (parseInt(stat5Text.replace(/[^\d-]/g, ''), 10) || 0);
         const antimatterClass = stat5Value > 0 ? 'green-ready-text' : 'red-disabled-text';
-        const antimatterDisplay = stat5Element.textContent.trim() || '0';
-        stat5Element.dataset.tooltipContent = `<div>Antimatter Fuel: <span class="${antimatterClass}">${antimatterDisplay}</span></div>`;
+        const labelText = isUnknown ? '???' : 'Antimatter Fuel';
+        const valueClass = isUnknown ? 'red-disabled-text' : antimatterClass;
+        stat5Element.dataset.tooltipContent = `<div>${labelText}: <span class="${valueClass}">${stat5Text}</span></div>`;
     }
 
     if (stat6Element) {
@@ -6019,12 +6022,29 @@ export function getStats(statFunctions) {
 }
 
 function determineStatClassColor(value) {
-    if (value === 'No' || value === 0 || value === 'OFF' || value === '⛰') {
+    const isString = typeof value === 'string';
+    const rawString = isString ? value.trim() : '';
+    const normalized = isString ? rawString.replace(/^•/, '').trim().toUpperCase() : value;
+
+    if (
+        normalized === 'NO' ||
+        normalized === '0' ||
+        normalized === 'OFF' ||
+        rawString === '⛰' ||
+        normalized === 'N/A' ||
+        value === 0
+    ) {
         return 'red-disabled-text';
     }
-    if (value === '☁' || value === '☂' || value === 'TRIPPED') {
+
+    if (
+        rawString === '☁' ||
+        rawString === '☂' ||
+        normalized === 'TRIPPED'
+    ) {
         return 'warning-orange-text';
     }
+
     return 'green-ready-text';
 }
 
