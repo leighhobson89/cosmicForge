@@ -4909,7 +4909,8 @@ function updateAscendencyRowTextFields() {
 }
 
 function ascendencyBuffChecks() {
-    if (getCurrentOptionPane() === 'ascendency') {
+    const pane = getCurrentOptionPane();
+    if (pane === 'ascendency perks') {
         checkAscendencyButtons();
         updateAscendencyRowTextFields();
     }
