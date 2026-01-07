@@ -341,8 +341,8 @@ const handleCustomPointerMove = (event) => {
 
     const pointerWidth = pointerElement.offsetWidth || 0;
     const pointerHeight = pointerElement.offsetHeight || 0;
-    const offsetX = pointerWidth / 3;
-    const offsetY = pointerHeight / 3;
+    const offsetX = pointerWidth / 3 + 2;
+    const offsetY = pointerHeight / 3 - 1;
 
     pointerElement.style.left = `${event.clientX + offsetX}px`;
     pointerElement.style.top = `${event.clientY + offsetY}px`;
