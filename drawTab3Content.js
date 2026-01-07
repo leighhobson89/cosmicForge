@@ -2841,7 +2841,7 @@ export function drawTab3Content(heading, optionContentElement) {
     }
 }
 
-function handleTechnologyButtonClick(techName, event) {
+export function handleTechnologyButtonClick(techName, event) {
     gain(techName, null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
 
     if (event?.currentTarget) {

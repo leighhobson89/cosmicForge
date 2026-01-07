@@ -389,6 +389,7 @@ import { timerManagerDelta } from './timerManagerDelta.js';
  import { initialiseDescriptions, megaStructureTableText } from './descriptions.js';
 
  import { drawTab5Content } from './drawTab5Content.js';
+import { handleTechnologyButtonClick } from './drawTab3Content.js';
 
 //--------------------------------------------------------------------------------------------------------
 export function startGame() {
@@ -466,6 +467,60 @@ function checkResearchAutoBuyerRowVisibility() {
     }
 }
 
+function handleResearchAutoBuyer() {
+    const autoBuyerConfig = getResourceDataObject('research', ['upgrades', 'autoBuyer']);
+    if (!autoBuyerConfig?.active || !autoBuyerConfig?.enabled) {
+        return;
+    }
+
+    const techs = getResourceDataObject('techs');
+    if (!techs) {
+        return;
+    }
+
+    const unlockedTechs = getTechUnlockedArray();
+    const currentResearchRaw = getResourceDataObject('research', ['quantity']);
+    const currentResearch = typeof currentResearchRaw === 'number' ? currentResearchRaw : Number(currentResearchRaw) || 0;
+
+    let cheapestTechName = null;
+    let cheapestTechPrice = Infinity;
+
+    Object.entries(techs).forEach(([techKey, techData]) => {
+        if (techData?.special === 'megastructure') {
+            return;
+        }
+
+        if (unlockedTechs.includes(techKey)) {
+            return;
+        }
+
+        const techPrice = Number(techData?.price) || 0;
+        if (techPrice <= 0 || currentResearch < techPrice) {
+            return;
+        }
+
+        const prerequisites = Array.isArray(techData?.appearsAt)
+            ? techData.appearsAt.slice(1).filter(prereq => prereq !== null && prereq !== '')
+            : [];
+        const prerequisitesMet = prerequisites.every(prereq => unlockedTechs.includes(prereq));
+
+        if (!prerequisitesMet) {
+            return;
+        }
+
+        if (techPrice < cheapestTechPrice) {
+            cheapestTechPrice = techPrice;
+            cheapestTechName = techKey;
+        }
+    });
+
+    if (!cheapestTechName) {
+        return;
+    }
+
+    handleTechnologyButtonClick(cheapestTechName, null);
+}
+
 export async function gameLoop() {
     if (gameState === getGameVisibleActive()) {
         timerManagerDelta.updateWithTimestamp(performance.now());
@@ -535,6 +590,7 @@ export async function gameLoop() {
 
         checkRepeatables();
         checkResearchAutoBuyerRowVisibility();
+        handleResearchAutoBuyer();
 
         const elementsToCheck = [
             ...document.querySelectorAll(
