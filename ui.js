@@ -2007,10 +2007,21 @@ export function generateStarfield(starfieldContainer, numberOfStars = 70, seed =
         return filteredStarData;
     }    
 
+    const factoryStars = getFactoryStarsArray();
+    const ancientManuscripts = getStarsWithAncientManuscripts();
+
     stars.forEach(star => {
         const distance = starDistanceData[star.name];
-        const isInteresting = distance <= getStarVisionDistance() || star.name === currentStar.name || getSettledStars().includes(star.name.toLowerCase());
-        const isFactoryStar = getFactoryStarsArray().includes(star.name.toLowerCase());
+        const normalizedStarName = star.name.toLowerCase();
+        const hasRevealedManuscript = ancientManuscripts.some(
+            entry => Array.isArray(entry) && entry[1] === normalizedStarName && entry[3] === true
+        );
+        const isFactoryStar = factoryStars.includes(normalizedStarName) && hasRevealedManuscript;
+        const isInteresting =
+            isFactoryStar ||
+            distance <= getStarVisionDistance() ||
+            star.name === currentStar.name ||
+            getSettledStars().includes(normalizedStarName);
         const isHomeStar = star.name === 'Miaplacidus';
 
         let starElement = document.createElement('div');
@@ -2055,6 +2066,8 @@ export function generateStarfield(starfieldContainer, numberOfStars = 70, seed =
 
         if (starElement.id.includes("settledStar")) {
             starElement.setAttribute("titler", `${star.name} (SETTLED)`);
+        } else if (star.name.toLowerCase() === getCurrentStarSystem()) {
+            starElement.setAttribute("titler", `${star.name}`);
         } else if (starElement.classList.contains("star-uninteresting") || starElement.id === capitaliseString(getCurrentStarSystem())) {
             starElement.setAttribute("titler", `${star.name}`);
         } else if (starElement.classList.contains("factory-star")) {
@@ -2071,6 +2084,18 @@ export function generateStarfield(starfieldContainer, numberOfStars = 70, seed =
                 starElement.style.width = `${star.width * 4}px`;
                 starElement.style.height = `${star.height * 4}px`;
                 setCurrentStarObject(currentStar);
+            }
+        } else if (isFactoryStar) {
+            starElement.style.width = `${star.width * 2}px`;
+            starElement.style.height = `${star.height * 2}px`;
+            starElement.classList.add('star');
+            if (!checkIfInterestingStarIsInStarDataAlready(starElement.id.toLowerCase())) {
+                generateStarDataAndAddToDataObject(starElement, distance);
+            }
+            if (mapMode === 'distance') {
+                starElement.style.backgroundColor = getStarColorForDistanceFilterButton(distance);
+            } else if (mapMode === 'in range') {
+                starElement.style.backgroundColor = getStarColorForTravel(getStarSystemDataObject('stars', [star.name.toLowerCase()]).fuel, star.name.toLowerCase());
             }
         } else if (isInteresting) {
             starElement.style.width = `${star.width * 2}px`;
