@@ -154,32 +154,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'Knowledge Sharing:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('knowledgeSharing', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('knowledgeSharing');
-                        showNotification(techNotificationMessages.knowledgeSharing, 'info', 3000, 'tech');
-                        appendAttentionIndicator(document.getElementById('researchOption'));
-                        if (getStatRun() === 1) {
-                            callPopupModal(
-                                modalKnowledgeSharingTabUnlockHeader, 
-                                modalKnowledgeSharingTabUnlockText, 
-                                true, 
-                                false, 
-                                false, 
-                                false, 
-                                function() {
-                                    showHideModal();
-                                },
-                                null, 
-                                null, 
-                                null,
-                                'CONFIRM',
-                                null,
-                                null,
-                                null,
-                                false
-                            );
-                        }
+                        handleTechnologyButtonClick('knowledgeSharing', event);
                     }, 'techUnlock', '', 'knowledgeSharing', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -205,10 +180,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'Fusion Theory:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('fusionTheory', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('fusionTheory');
-                        showNotification(techNotificationMessages.fusionTheory, 'info', 3000, 'tech');
+                        handleTechnologyButtonClick('fusionTheory', event);
                     }, 'techUnlock', '', 'fusionTheory', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -234,11 +206,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'Hydrogen Fusion:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('hydrogenFusion', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('hydrogenFusion');
-                        updateDescriptionRow('hydrogenSellRow', 'content2');
-                        showNotification(techNotificationMessages.hydrogenFusion, 'info', 3000, 'tech');
+                        handleTechnologyButtonClick('hydrogenFusion', event);
                     }, 'techUnlock', '', 'hydrogenFusion', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -264,11 +232,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'Helium Fusion:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('heliumFusion', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('heliumFusion');
-                        updateDescriptionRow('heliumSellRow', 'content2');
-                        showNotification(techNotificationMessages.heliumFusion, 'info', 3000, 'tech');
+                        handleTechnologyButtonClick('heliumFusion', event);
                     }, 'techUnlock', '', 'heliumFusion', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -294,11 +258,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'Carbon Fusion:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('carbonFusion', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('carbonFusion');
-                        updateDescriptionRow('carbonSellRow', 'content2');
-                        showNotification(techNotificationMessages.carbonFusion, 'info', 3000, 'tech');
+                        handleTechnologyButtonClick('carbonFusion', event);
                     }, 'techUnlock', '', 'carbonFusion', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -324,15 +284,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'Neon Fusion:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('neonFusion', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('neonFusion');
-                        updateDescriptionRow('neonSellRow', 'content2');
-                        showNotification(techNotificationMessages.neonFusion, 'info', 3000, 'tech');
-                        setUnlockedCompoundsArray('water');
-                        if (getTechUnlockedArray().includes('compounds')) {
-                            appendAttentionIndicator(document.getElementById(`waterOption`));
-                        }
+                        handleTechnologyButtonClick('neonFusion', event);
                     }, 'techUnlock', '', 'neonFusion', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -358,11 +310,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'Oxygen Fusion:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('oxygenFusion', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('oxygenFusion');
-                        updateDescriptionRow('oxygenSellRow', 'content2');
-                        showNotification(techNotificationMessages.oxygenFusion, 'info', 3000, 'tech');
+                        handleTechnologyButtonClick('oxygenFusion', event);
                     }, 'techUnlock', '', 'oxygenFusion', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -388,11 +336,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'Silicon Fusion:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('siliconFusion', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('siliconFusion');
-                        updateDescriptionRow('siliconSellRow', 'content2');
-                        showNotification(techNotificationMessages.siliconFusion, 'info', 3000, 'tech');
+                        handleTechnologyButtonClick('siliconFusion', event);
                     }, 'techUnlock', '', 'siliconFusion', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -418,10 +362,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'Noble Gas Collection:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('nobleGasCollection', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('nobleGasCollection');
-                        showNotification(techNotificationMessages.nobleGasCollection, 'info', 3000, 'tech');
+                        handleTechnologyButtonClick('nobleGasCollection', event);
                     }, 'techUnlock', '', 'nobleGasCollection', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -447,14 +388,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'Glass Manufacture:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('glassManufacture', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('glassManufacture');
-                        showNotification(techNotificationMessages.glassManufacture, 'info', 3000, 'tech');
-                        setUnlockedCompoundsArray('glass');
-                        if (getTechUnlockedArray().includes('compounds')) {
-                            appendAttentionIndicator(document.getElementById(`glassOption`));
-                        }
+                        handleTechnologyButtonClick('glassManufacture', event);
                     }, 'techUnlock', '', 'glassManufacture', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -480,14 +414,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'Aggregate Mixing:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('aggregateMixing', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('aggregateMixing');
-                        showNotification(techNotificationMessages.aggregateMixing, 'info', 3000, 'tech');
-                        setUnlockedCompoundsArray('concrete');
-                        if (getTechUnlockedArray().includes('compounds')) {
-                            appendAttentionIndicator(document.getElementById(`concreteOption`));
-                        }
+                        handleTechnologyButtonClick('aggregateMixing', event);
                     }, 'techUnlock', '', 'aggregateMixing', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -513,14 +440,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'Neutron Capture:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('neutronCapture', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('neutronCapture');
-                        showNotification(techNotificationMessages.neutronCapture, 'info', 3000, 'tech');
-                        setUnlockedCompoundsArray('titanium');
-                        if (getTechUnlockedArray().includes('compounds')) {
-                            appendAttentionIndicator(document.getElementById(`titaniumOption`));
-                        }
+                        handleTechnologyButtonClick('neutronCapture', event);
                     }, 'techUnlock', '', 'neutronCapture', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -546,38 +466,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'Quantum Computing:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('quantumComputing', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('quantumComputing');
-                        const resourceObject = getResourceDataObject('resources');
-                        Object.keys(resourceObject).forEach(key => {
-                            if (getResourceDataObject('resources', [key, 'upgrades', 'autoBuyer', 'normalProgression']) === true) {
-                                setAutoBuyerTierLevel(key, 2, false, 'resources');
-                            }
-                        });
-                        showNotification(techNotificationMessages.quantumComputing, 'info', 3000, 'tech');
-                        indicateAllResources();
-                        if (getStatRun() === 1) {
-                            callPopupModal(
-                                modalQuantumComputingTabUnlockHeader, 
-                                modalQuantumComputingTabUnlockText, 
-                                true, 
-                                false, 
-                                false, 
-                                false, 
-                                function() {
-                                    showHideModal();
-                                },
-                                null, 
-                                null, 
-                                null,
-                                'CONFIRM',
-                                null,
-                                null,
-                                null,
-                                false
-                            );
-                        }
+                        handleTechnologyButtonClick('quantumComputing', event);
                     }, 'techUnlock', '', 'quantumComputing', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -603,32 +492,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'Science Laboratories:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('scienceLaboratories', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('scienceLaboratories');
-                        showNotification(techNotificationMessages.scienceLaboratories, 'info', 3000, 'tech');
-                        appendAttentionIndicator(document.getElementById('researchOption'));
-                        if (getStatRun() === 1) {
-                            callPopupModal(
-                                modalScienceLabsTabUnlockHeader, 
-                                modalScienceLabsTabUnlockText, 
-                                true, 
-                                false, 
-                                false, 
-                                false, 
-                                function() {
-                                    showHideModal();
-                                },
-                                null, 
-                                null, 
-                                null,
-                                'CONFIRM',
-                                null,
-                                null,
-                                null,
-                                false
-                            );
-                        }
+                        handleTechnologyButtonClick('scienceLaboratories', event);
                     }, 'techUnlock', '', 'scienceLaboratories', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -654,14 +518,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'HydroCarbons:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('hydroCarbons', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('hydroCarbons');
-                        showNotification(techNotificationMessages.hydroCarbons, 'info', 3000, 'tech');
-                        setUnlockedCompoundsArray('diesel');
-                        if (getTechUnlockedArray().includes('compounds')) {
-                            appendAttentionIndicator(document.getElementById(`dieselOption`));
-                        }
+                        handleTechnologyButtonClick('hydroCarbons', event);
                     }, 'techUnlock', '', 'hydroCarbons', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -687,10 +544,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'Nano Tube Technology:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('nanoTubeTechnology', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('nanoTubeTechnology');
-                        showNotification(techNotificationMessages.nanoTubeTechnology, 'info', 3000, 'tech');
+                        handleTechnologyButtonClick('nanoTubeTechnology', event);
                     }, 'techUnlock', '', 'nanoTubeTechnology', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -716,31 +570,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'Nano Brokers:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('nanoBrokers', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('nanoBrokers');
-                        showNotification(techNotificationMessages.nanoBrokers, 'info', 3000, 'tech');
-                        if (getStatRun() === 1) {
-                            callPopupModal(
-                                modalNanoBrokersUnlockHeader, 
-                                modalNanoBrokersUnlockText, 
-                                true, 
-                                false, 
-                                false, 
-                                false, 
-                                function() {
-                                    showHideModal();
-                                },
-                                null, 
-                                null, 
-                                null,
-                                'CONFIRM',
-                                null,
-                                null,
-                                null,
-                                false
-                            );
-                        }
+                        handleTechnologyButtonClick('nanoBrokers', event);
                     }, 'techUnlock', '', 'nanoBrokers', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -766,31 +596,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'Stellar Cartography:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('stellarCartography', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('stellarCartography');
-                        showNotification(techNotificationMessages.stellarCartography, 'info', 3000, 'tech');
-                        if (getStatRun() === 1) {
-                            callPopupModal(
-                                modalInterstellarTabUnlockHeader, 
-                                modalInterstellarTabUnlockText, 
-                                true, 
-                                false, 
-                                false, 
-                                false, 
-                                function() {
-                                    showHideModal();
-                                },
-                                null, 
-                                null, 
-                                null,
-                                'CONFIRM',
-                                null,
-                                null,
-                                null,
-                                false
-                            );
-                        }
+                        handleTechnologyButtonClick('stellarCartography', event);
                     }, 'techUnlock', '', 'stellarCartography', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -816,31 +622,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'Basic Power Generation:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('basicPowerGeneration', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('basicPowerGeneration');
-                        showNotification(techNotificationMessages.basicPowerGeneration, 'info', 3000, 'tech');
-                        if (getStatRun() === 1) {
-                            callPopupModal(
-                                modalEnergyTabUnlockHeader, 
-                                modalEnergyTabUnlockText, 
-                                true, 
-                                false, 
-                                false, 
-                                false, 
-                                function() {
-                                    showHideModal();
-                                },
-                                null, 
-                                null, 
-                                null,
-                                'CONFIRM',
-                                null,
-                                null,
-                                null,
-                                false
-                            );
-                        }
+                        handleTechnologyButtonClick('basicPowerGeneration', event);
                     }, 'techUnlock', '', 'basicPowerGeneration', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -866,10 +648,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'Sodium Ion Power Storage:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('sodiumIonPowerStorage', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('sodiumIonPowerStorage');
-                        showNotification(techNotificationMessages.sodiumIonPowerStorage, 'info', 3000, 'tech');
+                        handleTechnologyButtonClick('sodiumIonPowerStorage', event);
                     }, 'techUnlock', '', 'sodiumIonPowerStorage', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -895,10 +674,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'Advanced Power Generation:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('advancedPowerGeneration', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('advancedPowerGeneration');
-                        showNotification(techNotificationMessages.advancedPowerGeneration, 'info', 3000, 'tech');
+                        handleTechnologyButtonClick('advancedPowerGeneration', event);
                     }, 'techUnlock', '', 'advancedPowerGeneration', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -924,10 +700,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'Solar Power Generation:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('solarPowerGeneration', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('solarPowerGeneration');
-                        showNotification(techNotificationMessages.solarPowerGeneration, 'info', 3000, 'tech');
+                        handleTechnologyButtonClick('solarPowerGeneration', event);
                     }, 'techUnlock', '', 'solarPowerGeneration', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -953,42 +726,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'Rocket Composites:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('rocketComposites', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('rocketComposites');
-                        const resourceObject = getResourceDataObject('resources');
-                        Object.keys(resourceObject).forEach(key => {
-                            if (getResourceDataObject('resources', [key, 'upgrades', 'autoBuyer', 'normalProgression']) === true) {
-                                setAutoBuyerTierLevel(key, 4, false, 'resources');
-                                indicateAllResources();
-                            }
-                        });
-                        showNotification(techNotificationMessages.rocketComposites, 'info', 3000, 'tech');
-                        if (!document.getElementById('tab6').innerHTML.includes('???')) {
-                            appendAttentionIndicator(document.getElementById(`launchPadOption`)); 
-                        } 
-                        if (getStatRun() === 1) {
-                            callPopupModal(
-                                modalRocketCompositesTabUnlockHeader, 
-                                modalRocketCompositesTabUnlockText, 
-                                true, 
-                                false, 
-                                false, 
-                                false, 
-                                function() {
-                                    showHideModal();
-                                },
-                                null, 
-                                null, 
-                                null,
-                                'CONFIRM',
-                                null,
-                                null,
-                                null,
-                                false
-                            );
-                        }
-                        document.getElementById('launchPadOption').parentElement.parentElement.classList.remove('invisible');
+                        handleTechnologyButtonClick('rocketComposites', event);
                     }, 'techUnlock', '', 'rocketComposites', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -1014,11 +752,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'Advanced Fuels:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('advancedFuels', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('advancedFuels');
-                        showNotification(techNotificationMessages.advancedFuels, 'info', 3000, 'tech');
-                        setCanFuelRockets(true);
+                        handleTechnologyButtonClick('advancedFuels', event);
                     }, 'techUnlock', '', 'advancedFuels', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -1044,11 +778,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'Planetary Navigation:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('planetaryNavigation', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('planetaryNavigation');
-                        showNotification(techNotificationMessages.planetaryNavigation, 'info', 3000, 'tech');
-                        setCanTravelToAsteroids(true);
+                        handleTechnologyButtonClick('planetaryNavigation', event);
                     }, 'techUnlock', '', 'planetaryNavigation', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -1074,32 +804,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'Compounds:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('compounds', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('compounds');
-                        showNotification(techNotificationMessages.compounds, 'info', 3000, 'tech');
-                        setAllCompoundsToZeroQuantity();
-                        if (getStatRun() === 1) {
-                            callPopupModal(
-                                modalCompoundsTabUnlockHeader, 
-                                modalCompoundsTabUnlockText, 
-                                true, 
-                                false, 
-                                false, 
-                                false, 
-                                function() {
-                                    showHideModal();
-                                },
-                                null, 
-                                null, 
-                                null,
-                                'CONFIRM',
-                                null,
-                                null,
-                                null,
-                                false
-                            );
-                        }
+                        handleTechnologyButtonClick('compounds', event);
                     }, 'techUnlock', '', 'compounds', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -1125,14 +830,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'Steel Foundries:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('steelFoundries', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('steelFoundries');
-                        showNotification(techNotificationMessages.steelFoundries, 'info', 3000, 'tech');
-                        setUnlockedCompoundsArray('steel');
-                        if (getTechUnlockedArray().includes('compounds')) {
-                            appendAttentionIndicator(document.getElementById(`steelOption`));
-                        }
+                        handleTechnologyButtonClick('steelFoundries', event);
                     }, 'techUnlock', '', 'steelFoundries', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -1158,10 +856,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'Gigantic Turbines:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('giganticTurbines', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('giganticTurbines');
-                        showNotification(techNotificationMessages.giganticTurbines, 'info', 3000, 'tech');
+                        handleTechnologyButtonClick('giganticTurbines', event);
                     }, 'techUnlock', '', 'giganticTurbines', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -1187,34 +882,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'Atmospheric Telescopes:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('atmosphericTelescopes', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('atmosphericTelescopes');
-                        showNotification(techNotificationMessages.atmosphericTelescopes, 'info', 3000, 'tech');
-                        if (!document.getElementById('tab6').innerHTML.includes('???')) {
-                            appendAttentionIndicator(document.getElementById(`spaceTelescopeOption`)); 
-                        }
-                        if (getStatRun() === 1) {
-                            callPopupModal(
-                                modalSpaceMiningTabUnlockHeader, 
-                                modalSpaceMiningTabUnlockText, 
-                                true, 
-                                false, 
-                                false, 
-                                false, 
-                                function() {
-                                    showHideModal();
-                                },
-                                null, 
-                                null, 
-                                null,
-                                'CONFIRM',
-                                null,
-                                null,
-                                null,
-                                false
-                            );
-                        }
+                        handleTechnologyButtonClick('atmosphericTelescopes', event);
                     }, 'techUnlock', '', 'atmosphericTelescopes', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -1240,10 +908,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'Fusion Efficiency I:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('fusionEfficiencyI', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('fusionEfficiencyI');
-                        showNotification(techNotificationMessages.fusionEfficiencyI, 'info', 3000, 'tech');
+                        handleTechnologyButtonClick('fusionEfficiencyI', event);
                     }, 'techUnlock', '', 'fusionEfficiencyI', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -1269,10 +934,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'Fusion Efficiency II:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('fusionEfficiencyII', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('fusionEfficiencyII');
-                        showNotification(techNotificationMessages.fusionEfficiencyII, 'info', 3000, 'tech');
+                        handleTechnologyButtonClick('fusionEfficiencyII', event);
                     }, 'techUnlock', '', 'fusionEfficiencyII', null, 'research', true, null, 'tech'), 
                     null,
                     null,
@@ -1298,10 +960,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'Fusion Efficiency III:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('fusionEfficiencyIII', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('fusionEfficiencyIII');
-                        showNotification(techNotificationMessages.fusionEfficiencyIII, 'info', 3000, 'tech');
+                        handleTechnologyButtonClick('fusionEfficiencyIII', event);
                     }, 'techUnlock', '', 'fusionEfficiencyIII', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -1327,11 +986,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'Orbital Construction:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('orbitalConstruction', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('orbitalConstruction');
-                        showNotification(techNotificationMessages.orbitalConstruction, 'info', 3000, 'tech');
-                        document.getElementById('starShipOption').parentElement.parentElement.classList.remove('invisible');
+                        handleTechnologyButtonClick('orbitalConstruction', event);
                     }, 'techUnlock', '', 'orbitalConstruction', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -1357,10 +1012,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'Antimatter Engines:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('antimatterEngines', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('antimatterEngines');
-                        showNotification(techNotificationMessages.antimatterEngines, 'info', 3000, 'tech');
+                        handleTechnologyButtonClick('antimatterEngines', event);
                     }, 'techUnlock', '', 'antimatterEngines', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -1386,10 +1038,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'FTL Travel Theory:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('FTLTravelTheory', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('FTLTravelTheory');
-                        showNotification(techNotificationMessages.FTLTravelTheory, 'info', 3000, 'tech');
+                        handleTechnologyButtonClick('FTLTravelTheory', event);
                     }, 'techUnlock', '', 'FTLTravelTheory', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -1415,10 +1064,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'Life Support Systems:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('lifeSupportSystems', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('lifeSupportSystems');
-                        showNotification(techNotificationMessages.lifeSupportSystems, 'info', 3000, 'tech');
+                        handleTechnologyButtonClick('lifeSupportSystems', event);
                     }, 'techUnlock', '', 'lifeSupportSystems', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -1444,10 +1090,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'Starship Fleets:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('starshipFleets', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('starshipFleets');
-                        showNotification(techNotificationMessages.starshipFleets, 'info', 3000, 'tech');
+                        handleTechnologyButtonClick('starshipFleets', event);
                     }, 'techUnlock', '', 'starshipFleets', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -1473,10 +1116,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     null,
                     'Stellar Scanners:',
                     createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                        gain('stellarScanners', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                        event.currentTarget.classList.add('unlocked-tech');
-                        setTechUnlockedArray('stellarScanners');
-                        showNotification(techNotificationMessages.stellarScanners, 'info', 3000, 'tech');
+                        handleTechnologyButtonClick('stellarScanners', event);
                     }, 'techUnlock', '', 'stellarScanners', null, 'research', true, null, 'tech'),
                     null,
                     null,
@@ -3201,6 +2841,355 @@ export function drawTab3Content(heading, optionContentElement) {
     }
 }
 
+function handleTechnologyButtonClick(techName, event) {
+    gain(techName, null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
+
+    if (event?.currentTarget) {
+        event.currentTarget.classList.add('unlocked-tech');
+    }
+
+    setTechUnlockedArray(techName);
+
+    if (techNotificationMessages[techName]) {
+        showNotification(techNotificationMessages[techName], 'info', 3000, 'tech');
+    }
+
+    switch (techName) {
+        case 'knowledgeSharing':
+            appendAttentionIndicator(document.getElementById('researchOption'));
+            if (getStatRun() === 1) {
+                callPopupModal(
+                    modalKnowledgeSharingTabUnlockHeader,
+                    modalKnowledgeSharingTabUnlockText,
+                    true,
+                    false,
+                    false,
+                    false,
+                    () => {
+                        showHideModal();
+                    },
+                    null,
+                    null,
+                    null,
+                    'CONFIRM',
+                    null,
+                    null,
+                    null,
+                    false
+                );
+            }
+            break;
+        case 'fusionTheory':
+            break;
+        case 'hydrogenFusion':
+            updateDescriptionRow('hydrogenSellRow', 'content2');
+            break;
+        case 'heliumFusion':
+            updateDescriptionRow('heliumSellRow', 'content2');
+            break;
+        case 'carbonFusion':
+            updateDescriptionRow('carbonSellRow', 'content2');
+            break;
+        case 'neonFusion':
+            updateDescriptionRow('neonSellRow', 'content2');
+            setUnlockedCompoundsArray('water');
+            if (getTechUnlockedArray().includes('compounds')) {
+                appendAttentionIndicator(document.getElementById('waterOption'));
+            }
+            break;
+        case 'oxygenFusion':
+            updateDescriptionRow('oxygenSellRow', 'content2');
+            break;
+        case 'siliconFusion':
+            updateDescriptionRow('siliconSellRow', 'content2');
+            break;
+        case 'nobleGasCollection':
+            break;
+        case 'glassManufacture':
+            setUnlockedCompoundsArray('glass');
+            if (getTechUnlockedArray().includes('compounds')) {
+                appendAttentionIndicator(document.getElementById('glassOption'));
+            }
+            break;
+        case 'aggregateMixing':
+            setUnlockedCompoundsArray('concrete');
+            if (getTechUnlockedArray().includes('compounds')) {
+                appendAttentionIndicator(document.getElementById('concreteOption'));
+            }
+            break;
+        case 'neutronCapture':
+            setUnlockedCompoundsArray('titanium');
+            if (getTechUnlockedArray().includes('compounds')) {
+                appendAttentionIndicator(document.getElementById('titaniumOption'));
+            }
+            break;
+        case 'quantumComputing': {
+            const resourceObject = getResourceDataObject('resources');
+            Object.keys(resourceObject).forEach(key => {
+                if (getResourceDataObject('resources', [key, 'upgrades', 'autoBuyer', 'normalProgression']) === true) {
+                    setAutoBuyerTierLevel(key, 2, false, 'resources');
+                }
+            });
+            indicateAllResources();
+            if (getStatRun() === 1) {
+                callPopupModal(
+                    modalQuantumComputingTabUnlockHeader,
+                    modalQuantumComputingTabUnlockText,
+                    true,
+                    false,
+                    false,
+                    false,
+                    () => {
+                        showHideModal();
+                    },
+                    null,
+                    null,
+                    null,
+                    'CONFIRM',
+                    null,
+                    null,
+                    null,
+                    false
+                );
+            }
+            break;
+        }
+        case 'scienceLaboratories':
+            appendAttentionIndicator(document.getElementById('researchOption'));
+            if (getStatRun() === 1) {
+                callPopupModal(
+                    modalScienceLabsTabUnlockHeader,
+                    modalScienceLabsTabUnlockText,
+                    true,
+                    false,
+                    false,
+                    false,
+                    () => {
+                        showHideModal();
+                    },
+                    null,
+                    null,
+                    null,
+                    'CONFIRM',
+                    null,
+                    null,
+                    null,
+                    false
+                );
+            }
+            break;
+        case 'hydroCarbons':
+            setUnlockedCompoundsArray('diesel');
+            if (getTechUnlockedArray().includes('compounds')) {
+                appendAttentionIndicator(document.getElementById('dieselOption'));
+            }
+            break;
+        case 'nanoTubeTechnology':
+            break;
+        case 'nanoBrokers':
+            if (getStatRun() === 1) {
+                callPopupModal(
+                    modalNanoBrokersUnlockHeader,
+                    modalNanoBrokersUnlockText,
+                    true,
+                    false,
+                    false,
+                    false,
+                    () => {
+                        showHideModal();
+                    },
+                    null,
+                    null,
+                    null,
+                    'CONFIRM',
+                    null,
+                    null,
+                    null,
+                    false
+                );
+            }
+            break;
+        case 'stellarCartography':
+            if (getStatRun() === 1) {
+                callPopupModal(
+                    modalInterstellarTabUnlockHeader,
+                    modalInterstellarTabUnlockText,
+                    true,
+                    false,
+                    false,
+                    false,
+                    () => {
+                        showHideModal();
+                    },
+                    null,
+                    null,
+                    null,
+                    'CONFIRM',
+                    null,
+                    null,
+                    null,
+                    false
+                );
+            }
+            break;
+        case 'basicPowerGeneration':
+            if (getStatRun() === 1) {
+                callPopupModal(
+                    modalEnergyTabUnlockHeader,
+                    modalEnergyTabUnlockText,
+                    true,
+                    false,
+                    false,
+                    false,
+                    () => {
+                        showHideModal();
+                    },
+                    null,
+                    null,
+                    null,
+                    'CONFIRM',
+                    null,
+                    null,
+                    null,
+                    false
+                );
+            }
+            break;
+        case 'sodiumIonPowerStorage':
+            break;
+        case 'advancedPowerGeneration':
+            break;
+        case 'solarPowerGeneration':
+            break;
+        case 'rocketComposites': {
+            const resourceObject = getResourceDataObject('resources');
+            Object.keys(resourceObject).forEach(key => {
+                if (getResourceDataObject('resources', [key, 'upgrades', 'autoBuyer', 'normalProgression']) === true) {
+                    setAutoBuyerTierLevel(key, 4, false, 'resources');
+                    indicateAllResources();
+                }
+            });
+            const tab6 = document.getElementById('tab6');
+            if (tab6 && !tab6.innerHTML.includes('???')) {
+                appendAttentionIndicator(document.getElementById('launchPadOption'));
+            }
+            if (getStatRun() === 1) {
+                callPopupModal(
+                    modalRocketCompositesTabUnlockHeader,
+                    modalRocketCompositesTabUnlockText,
+                    true,
+                    false,
+                    false,
+                    false,
+                    () => {
+                        showHideModal();
+                    },
+                    null,
+                    null,
+                    null,
+                    'CONFIRM',
+                    null,
+                    null,
+                    null,
+                    false
+                );
+            }
+            const launchPadOption = document.getElementById('launchPadOption');
+            launchPadOption?.parentElement?.parentElement?.classList.remove('invisible');
+            break;
+        }
+        case 'advancedFuels':
+            setCanFuelRockets(true);
+            break;
+        case 'planetaryNavigation':
+            setCanTravelToAsteroids(true);
+            break;
+        case 'compounds':
+            setAllCompoundsToZeroQuantity();
+            if (getStatRun() === 1) {
+                callPopupModal(
+                    modalCompoundsTabUnlockHeader,
+                    modalCompoundsTabUnlockText,
+                    true,
+                    false,
+                    false,
+                    false,
+                    () => {
+                        showHideModal();
+                    },
+                    null,
+                    null,
+                    null,
+                    'CONFIRM',
+                    null,
+                    null,
+                    null,
+                    false
+                );
+            }
+            break;
+        case 'steelFoundries':
+            setUnlockedCompoundsArray('steel');
+            if (getTechUnlockedArray().includes('compounds')) {
+                appendAttentionIndicator(document.getElementById('steelOption'));
+            }
+            break;
+        case 'giganticTurbines':
+            break;
+        case 'atmosphericTelescopes': {
+            const tab6 = document.getElementById('tab6');
+            if (tab6 && !tab6.innerHTML.includes('???')) {
+                appendAttentionIndicator(document.getElementById('spaceTelescopeOption'));
+            }
+            if (getStatRun() === 1) {
+                callPopupModal(
+                    modalSpaceMiningTabUnlockHeader,
+                    modalSpaceMiningTabUnlockText,
+                    true,
+                    false,
+                    false,
+                    false,
+                    () => {
+                        showHideModal();
+                    },
+                    null,
+                    null,
+                    null,
+                    'CONFIRM',
+                    null,
+                    null,
+                    null,
+                    false
+                );
+            }
+            break;
+        }
+        case 'fusionEfficiencyI':
+            break;
+        case 'fusionEfficiencyII':
+            break;
+        case 'fusionEfficiencyIII':
+            break;
+        case 'orbitalConstruction': {
+            const starShipOption = document.getElementById('starShipOption');
+            starShipOption?.parentElement?.parentElement?.classList.remove('invisible');
+            break;
+        }
+        case 'antimatterEngines':
+            break;
+        case 'FTLTravelTheory':
+            break;
+        case 'lifeSupportSystems':
+            break;
+        case 'starshipFleets':
+            break;
+        case 'stellarScanners':
+            break;
+        default:
+            break;
+    }
+}
+
 function indicateAllResources() {
     const resources = ['hydrogen', 'helium', 'carbon', 'neon', 'oxygen', 'sodium', 'silicon', 'iron'];
 
@@ -3213,4 +3202,3 @@ function indicateAllResources() {
         }
     });
 }
-
