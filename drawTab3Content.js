@@ -16,6 +16,32 @@ export function drawTab3Content(heading, optionContentElement) {
 
     sortTechRows(true);
     if (heading === 'Research') {
+        const autoBuyerEnabled = !!getResourceDataObject('research', ['upgrades', 'autoBuyer', 'enabled']);
+
+        const researchAutoBuyerRow = createOptionRow(
+            'researchAutoBuyerRow',
+            null,
+            'Research AutoBuyer:',
+            createToggleSwitch('scienceAutoBuyerToggle', autoBuyerEnabled, (isEnabled) => {
+                setResourceDataObject(isEnabled, 'research', ['upgrades', 'autoBuyer', 'enabled']);
+            }, ['toggle-switch-spacing']),
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            'science'
+        );
+        researchAutoBuyerRow.classList.add('invisible');
+        optionContentElement.appendChild(researchAutoBuyerRow);
+
         const researchScienceKitRow = createOptionRow(
             'researchScienceKitRow',
             null,

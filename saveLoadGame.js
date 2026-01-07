@@ -451,6 +451,30 @@ export function migrateResourceData(saveData, objectType) {
             }
             saveData.version = 0.76;
         }
+
+        if (saveData.version < 0.77) {
+            if (objectType === 'ascendencyBuffsData') {
+                saveData.roboticResearchAutomation = {
+                    name: "Robotic Research Automation",
+                    description: "buffRoboticResearchAutomationRow",
+                    rebuyable: false,
+                    rebuyableIncreaseMultiple: 1,
+                    baseCostAp: 20,
+                    effectCategoryMagnitude: 1,
+                    boughtYet: 0,
+                    timesRebuyable: 100000
+                };
+            }
+
+            if (objectType === 'resourceData') {
+                saveData.research.upgrades.autoBuyer = {
+                    active: false,
+                    enabled: false
+                }
+            }
+            saveData.version = 0.77;
+        }
+
         saveData.version += 0.001;
     }
 

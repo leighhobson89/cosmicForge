@@ -293,7 +293,7 @@ export function initialiseDescriptions() {
     };
 
     rocketNames = {
-        version: 0.76,
+        version: 0.77,
         rocketDescription: "Build the launch pad to launch built rockets and mine asteroids for Antimatter.",
         [getRocketUserName('rocket1').toLowerCase()]: "Build the launch pad to launch built rockets and mine asteroids for Antimatter.",
         [getRocketUserName('rocket2').toLowerCase()]: "Build the launch pad to launch built rockets and mine asteroids for Antimatter.",
@@ -852,7 +852,12 @@ export function initialiseDescriptions() {
             content1: `Add a Quantum Titanium Synthesizer for cutting-edge Titanium production - Power: ${Math.floor(getResourceDataObject('compounds', ['titanium', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
-        },             
+        }, 
+        researchAutoBuyerRow: {
+            content1: "Toggle the Research AutoBuyer ON and OFF. (Will research the first available tech with all requisites fulfilled)",
+            content2: "",
+            updateAt: ""
+        },            
         researchScienceKitRow: {
             content1: "Purchase a Science Kit to start generating Research points.",
             content2: "",
@@ -1471,6 +1476,11 @@ export function initialiseDescriptions() {
         },
         buffCompoundAutomationRow: {
             content1: "Enable Compound Auto Creation",
+            content2: "",
+            updateAt: ""
+        },
+        buffRoboticResearchAutomationRow: {
+            content1: "Unlock ability to automate tech Research when requisites fulfilled.",
             content2: "",
             updateAt: ""
         },

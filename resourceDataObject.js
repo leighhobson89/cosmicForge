@@ -8,7 +8,7 @@ import { showNotification } from "./ui.js";
 export let achievementImageUrls;
 
 export let resourceData = {
-    version: 0.76, //update this whenever changes are made to the structure
+    version: 0.77, //update this whenever changes are made to the structure
     resources: {
         solar: {
             autoSell: false,
@@ -776,6 +776,10 @@ export let resourceData = {
         rate: 0,
         ratePower: 0,
         upgrades: {
+            autoBuyer: {
+                active: false,
+                enabled: false
+            },
             scienceKit: { 
                 active: true,
                 price: 5,
@@ -943,7 +947,7 @@ export let resourceData = {
 };
 
 export let starSystems = {
-    version: 0.76,
+    version: 0.77,
     stars: {
         spica: {
             mapSize: 5.504440179536064, //might need to add this to star object when added dynamically for after rebirth
@@ -962,7 +966,7 @@ export let starSystems = {
 };
 
 export let galacticMarket = {
-    version: 0.76,
+    version: 0.77,
     resources: {
         hydrogen: { 
             name: "Hydrogen", 
@@ -1068,7 +1072,7 @@ export let galacticMarket = {
 };
 
 export let ascendencyBuffs = {
-    version: 0.76,
+    version: 0.77,
     "efficientStorage": {  //done
         name: "Efficient Storage",
         description: "buffEfficientStorageRow",
@@ -1115,6 +1119,16 @@ export let ascendencyBuffs = {
         rebuyable: false,
         rebuyableIncreaseMultiple: 1,
         baseCostAp: 15,
+        effectCategoryMagnitude: 1,
+        boughtYet: 0,
+        timesRebuyable: 100000
+    },
+    "roboticResearchAutomation": {
+        name: "Robotic Research Automation",
+        description: "buffRoboticResearchAutomationRow",
+        rebuyable: false,
+        rebuyableIncreaseMultiple: 1,
+        baseCostAp: 20,
         effectCategoryMagnitude: 1,
         boughtYet: 0,
         timesRebuyable: 100000
@@ -2462,6 +2476,10 @@ export function getBuffOptimizedPowerGridsData() {
 
 export function getBuffCompoundAutomationData() {
     return ascendencyBuffs["compoundAutomation"];
+}
+
+export function getBuffRoboticResearchAutomationData() {
+    return ascendencyBuffs["roboticResearchAutomation"];
 }
 
 export function getBuffFasterAsteroidScanData() {

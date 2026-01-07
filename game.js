@@ -458,6 +458,14 @@ export function calculateElapsedActiveGameTime() {
     }
 }
 
+function checkResearchAutoBuyerRowVisibility() {
+    const researchAutoBuyerRow = document.getElementById('researchAutoBuyerRow');
+    if (researchAutoBuyerRow) {
+        const autoBuyerActive = !!getResourceDataObject('research', ['upgrades', 'autoBuyer', 'active']);
+        researchAutoBuyerRow.classList.toggle('invisible', !autoBuyerActive);
+    }
+}
+
 export async function gameLoop() {
     if (gameState === getGameVisibleActive()) {
         timerManagerDelta.updateWithTimestamp(performance.now());
@@ -526,6 +534,7 @@ export async function gameLoop() {
         }
 
         checkRepeatables();
+        checkResearchAutoBuyerRowVisibility();
 
         const elementsToCheck = [
             ...document.querySelectorAll(
@@ -6842,6 +6851,10 @@ export function purchaseBuff(buff) {
     if (currentAscendencyPoints >= cost) {
         setResourceDataObject(currentAscendencyPoints - cost, 'ascendencyPoints', ['quantity']);
         setAscendencyBuffDataObject(buffData.boughtYet + 1, buff, ['boughtYet']);
+    }
+
+    if (buff === 'roboticResearchAutomation') {
+        setResourceDataObject(true, 'research', ['upgrades', 'autoBuyer', 'active']);
     }
 
     if (buff === 'smartAutoBuyers') {
