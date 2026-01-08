@@ -351,8 +351,8 @@ export let resourceData = {
                     normalProgression: true,
                     tier1: { nameUpgrade: 'Workshop Steel Fabricator', screen: 'steel', place: 'steelAutoBuyer1Row', price: 80000, rate: 0.02, quantity: 0, setPrice: 'steelAB1Price', energyUse: 0, active: true },
                     tier2: { nameUpgrade: 'Small Steel Factory', screen: 'steel', place: 'steelAutoBuyer2Row', price: 700000, rate: 0.1, quantity: 0, setPrice: 'steelAB2Price', energyUse: 0.1, active: true },
-                    tier3: { nameUpgrade: 'Medium Steel Factory', screen: 'steel', place: 'steelAutoBuyer3Row', price: 3000000, rate: 0.5, quantity: 0, setPrice: 'steelAB3Price', energyUse: 0.35, active: true },
-                    tier4: { nameUpgrade: 'Large Steel Factory', screen: 'steel', place: 'steelAutoBuyer4Row', price: 1500000, rate: 2, quantity: 0, setPrice: 'steelAB4Price', energyUse: 1.8, active: true }
+                    tier3: { nameUpgrade: 'Medium Steel Factory', screen: 'steel', place: 'steelAutoBuyer3Row', price: 1500000, rate: 0.5, quantity: 0, setPrice: 'steelAB3Price', energyUse: 0.35, active: true },
+                    tier4: { nameUpgrade: 'Large Steel Factory', screen: 'steel', place: 'steelAutoBuyer4Row', price: 3000000, rate: 2, quantity: 0, setPrice: 'steelAB4Price', energyUse: 1.8, active: true }
                 },
             },
             revealedBy: 'steelFoundries',
