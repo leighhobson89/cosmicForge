@@ -10,8 +10,8 @@ REALLY TO DO TO END OF GAME
     Timers overview:
 - Resources auto-buyer loops (resourceAB tiers via timerManager) - INTERVAL
 - Compounds auto-buyer loops (compoundAB tiers via timerManager) - INTERVAL
-- Rocket fuel timers (rocketXFuelTimer per rocket) - INTERVAL
 - Energy production/consumption loop (energy timer) - INTERVAL
+- Rocket fuel timers (rocketXFuelTimer per rocket) - DELTA
 - Rocket travel timers (rocketXTravelToAsteroidTimer / rocketXTravelReturnTimer) - DELTA
 - Starship travel timer (starShipTravelToDestinationStarTimer) - DELTA
 - Research delta timer - DELTA

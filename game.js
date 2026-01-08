@@ -811,6 +811,81 @@ function updateResearchRateDisplay(researchRatePerTick) {
     researchRateElement.textContent = `${(researchRatePerTick * getTimerRateRatio()).toFixed(1)} / s`;
 }
 
+function initialiseRocketFuelDeltaTimers() {
+    const spaceUpgrades = getResourceDataObject('space', ['upgrades']);
+    if (!spaceUpgrades) {
+        return;
+    }
+
+    Object.keys(spaceUpgrades)
+        .filter(upgradeKey => upgradeKey.startsWith('rocket'))
+        .forEach(rocketName => {
+            const timerId = `${rocketName}FuelDeltaTimer`;
+            if (timerManagerDelta.hasTimer(timerId)) {
+                return;
+            }
+
+            timerManagerDelta.addTimer(timerId, {
+                durationMs: 0,
+                repeat: true,
+                onUpdate: ({ deltaMs }) => updateRocketFuelDelta(rocketName, deltaMs),
+                metadata: { type: 'rocketFuel', rocket: rocketName }
+            });
+        });
+}
+
+function updateRocketFuelDelta(rocketName, deltaMs) {
+    if (!deltaMs) {
+        return;
+    }
+
+    const fuelingEntries = getRocketsFuellerStartedArray();
+    const isCurrentlyFueling = fuelingEntries.includes(rocketName);
+
+    if (!isCurrentlyFueling) {
+        setCheckRocketFuellingStatus(rocketName, false);
+        return;
+    }
+
+    const canFuelNow = getPowerOnOff() && getCanFuelRockets();
+    setCheckRocketFuellingStatus(rocketName, canFuelNow);
+
+    if (!canFuelNow) {
+        return;
+    }
+
+    const rocketData = getResourceDataObject('space', ['upgrades', rocketName]);
+    if (!rocketData) {
+        return;
+    }
+
+    const fullFuelAmount = rocketData?.fuelQuantityToLaunch ?? 0;
+    const currentFuelAmount = rocketData?.fuelQuantity ?? 0;
+
+    if (fullFuelAmount <= 0 || currentFuelAmount >= fullFuelAmount) {
+        return;
+    }
+
+    const tierConfig = rocketData?.autoBuyer?.tier1 ?? null;
+    const baseFuelRate = tierConfig?.rate ?? 0;
+    const optimisationStacks = (getBuffRocketFuelOptimizationData()?.boughtYet ?? 0) + 1;
+    const effectiveFuelRate = baseFuelRate * optimisationStacks;
+
+    if (effectiveFuelRate <= 0) {
+        return;
+    }
+
+    const secondsElapsed = deltaMs / 10;
+    const fuelToAdd = effectiveFuelRate * secondsElapsed * getTimerRateRatio();
+
+    if (fuelToAdd <= 0) {
+        return;
+    }
+
+    const nextFuelAmount = Math.min(fullFuelAmount, currentFuelAmount + fuelToAdd);
+    setResourceDataObject(nextFuelAmount, 'space', ['upgrades', rocketName, 'fuelQuantity']);
+}
+
 export function drawMegaStructureTableText() {
     const tableContainer = document.getElementById('tableContainer');
     if (!tableContainer) return;
@@ -6144,7 +6219,6 @@ export function startUpdateTimersAndRates(elementName, action) {
 function startInitialTimers() {
     const resources = getResourceDataObject('resources');
     const compounds = getResourceDataObject('compounds');
-    const rockets = Object.fromEntries(Object.entries(getResourceDataObject('space', ['upgrades'])).filter(([key, value]) => key.includes('rocket')));
     const tiers = [1, 2, 3, 4];
 
     /*
@@ -6156,24 +6230,7 @@ function startInitialTimers() {
     */
     initialiseAntimatterDeltaTimer();
 
-    for (const rocket in rockets) {
-        if (rockets.hasOwnProperty(rocket)) {
-            const timerName = `${rocket}FuelTimer`;
-            
-            if (!timerManager.getTimer(timerName)) {
-                let counter = 0;
-                
-                timerManager.addTimer(timerName, getTimerUpdateInterval(), () => {
-                    counter += getTimerUpdateInterval();
-                    
-                    if (counter >= 1000) {
-                        setCheckRocketFuellingStatus(rocket, true);
-                        counter = 0;
-                    }
-                });
-            }
-        }
-    }
+    initialiseRocketFuelDeltaTimers();
     
     for (const resource in resources) {
         if (resources.hasOwnProperty(resource)) {
@@ -8485,7 +8542,6 @@ export function fuelRockets() {
 
     rocketsToFuel.forEach((rocket, index) => {
         const rocketLaunchButton = document.querySelector('button.rocket-fuelled-check');
-        const fuelRate = getResourceDataObject('space', ['upgrades', rocket, 'autoBuyer', 'tier1', 'rate']) * (getBuffRocketFuelOptimizationData()['boughtYet'] + 1);
         const fuelQuantity = getResourceDataObject('space', ['upgrades', rocket, 'fuelQuantity']);
         const fullLevel = getResourceDataObject('space', ['upgrades', rocket, 'fuelQuantityToLaunch']);
 
@@ -8493,7 +8549,7 @@ export function fuelRockets() {
             rocketLaunchButton.classList.remove('invisible');
         }
 
-        let newFuelQuantity = fuelQuantity;
+        const newFuelQuantity = fuelQuantity;
         const fuelQuantityProgressBarElement = document.getElementById(rocket + 'FuellingProgressBar');
 
         if (newFuelQuantity >= fullLevel) {
@@ -8520,10 +8576,6 @@ export function fuelRockets() {
         }
 
         if (getCheckRocketFuellingStatus(rocket) && getPowerOnOff() && getCanFuelRockets()) {
-            newFuelQuantity = fuelQuantity + fuelRate * getTimerRateRatio();
-
-            setResourceDataObject(newFuelQuantity, 'space', ['upgrades', rocket, 'fuelQuantity']);
-
             if (getCurrentOptionPane() === rocket) {
                 const progressBarPercentage = getFuelLevel(rocket);
 
