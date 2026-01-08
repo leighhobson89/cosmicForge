@@ -3341,6 +3341,11 @@ function resourceAndCompoundMonitorRevealRowsChecks(element) {
                 element.classList.add('invisible');
             }
         } else if (getCurrentTab()[1].includes('Compounds') && element.dataset.rowCategory === 'compound')  {
+            if (getTechUnlockedArray().includes('compoundMachining')) {
+                element.classList.remove('invisible');
+                return;
+            }
+
             if (element.id === 'dieselAutoBuyer1Row') {
                 element.classList.remove('invisible');
             } else if (elementTier > 0 ) {
