@@ -4687,7 +4687,7 @@ function initializeTabEventListeners() {
             setCurrentOptionPane('concrete');
             updateContent('Concrete', 'tab4', 'content');
             setAutoSellToggleState('concrete', 'compounds');
-            setAutoCreateToggleState('compounds');
+            setAutoCreateToggleState('concrete');
             setFirstAccessArray('concrete');
         });
     });

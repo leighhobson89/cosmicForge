@@ -1,6 +1,7 @@
 import { getCurrentlyPillagingVoid, getTimeLeftUntilPillageVoidTimerFinishes, getTimeLeftUntilStarInvestigationTimerFinishes, getCurrentlyInvestigatingStar, getRocketUserName, setRocketUserName, setRocketDirection, getRocketDirection, getDestinationAsteroid, deferredActions, getSortAsteroidMethod, getAsteroidArray, setCheckRocketFuellingStatus, getCurrencySymbol, setRocketsFuellerStartedArray, getLaunchedRockets, getRocketsFuellerStartedArray, getCurrentlySearchingAsteroid, getTimeLeftUntilAsteroidScannerTimerFinishes, setDestinationAsteroid, getMiningObject, setAsteroidArray, getCurrentStarSystemWeatherEfficiency, getPlayerPhilosophy, getPhilosophyAbilityActive, getStatRun } from './constantsAndGlobalVars.js';
 import { startTravelToAndFromAsteroidTimer, startInvestigateStarTimer, startSearchAsteroidTimer, launchRocket, gain, startUpdateTimersAndRates, addBuildingPotentialRate, buildSpaceMiningBuilding, addToResourceAllTimeStat, startPillageVoidTimer } from './game.js';
-import { timerManager } from './timerManager.js';
+import { timerManagerDelta } from './timerManagerDelta.js';
+
 import { getRocketPartsNeededInTotalPerRocket, getRocketParts, getResourceDataObject } from './resourceDataObject.js';
 import { removeTabAttentionIfNoIndicators, createSvgElement, createDropdown, handleSortAsteroidClick, sortAsteroidTable, switchFuelGaugeWhenFuellerBought, createTextElement, createOptionRow, createButton, showNotification, renameRocket } from './ui.js';
 import { capitaliseString } from './utilityFunctions.js';
@@ -149,7 +150,7 @@ export function drawTab6Content(heading, optionContentElement) {
                     spaceBuildTelescopeRow.classList.add('invisible');
                     
                     if (getCurrentlySearchingAsteroid()) {
-                        timerManager.removeTimer('searchAsteroidTimer');
+                        timerManagerDelta.removeTimer('searchAsteroidTimer');
                         deferredActions.push(() => {
                             const timeRemaining = getTimeLeftUntilAsteroidScannerTimerFinishes();
                             startSearchAsteroidTimer([timeRemaining, 'reEnterSpaceTelescopeScreen']);
@@ -157,7 +158,7 @@ export function drawTab6Content(heading, optionContentElement) {
                     }
                     
                     if (getCurrentlyInvestigatingStar()) {
-                        timerManager.removeTimer('investigateStarTimer');
+                        timerManagerDelta.removeTimer('investigateStarTimer');
                         deferredActions.push(() => {
                             const timeRemaining = getTimeLeftUntilStarInvestigationTimerFinishes();
                             startInvestigateStarTimer([timeRemaining, 'reEnterSpaceTelescopeScreen']);
@@ -165,7 +166,7 @@ export function drawTab6Content(heading, optionContentElement) {
                     }
 
                     if (getCurrentlyPillagingVoid()) {
-                        timerManager.removeTimer('pillageVoidTimer');
+                        timerManagerDelta.removeTimer('pillageVoidTimer');
                         deferredActions.push(() => {
                             const timeRemaining = getTimeLeftUntilPillageVoidTimerFinishes();
                             startPillageVoidTimer([timeRemaining, 'reEnterSpaceTelescopeScreen']);

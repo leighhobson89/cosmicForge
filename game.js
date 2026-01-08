@@ -3363,15 +3363,29 @@ function resourceAndCompoundMonitorRevealRowsChecks(element) {
 
 export function checkPowerForSpaceTelescopeTimer(timers) {
     timers.forEach(timerName => {
-        const timer = timerManager.getTimer(timerName);
-        if (timer) {
-            if (timerName === 'searchAsteroidTimer' && getAsteroidTimerCanContinue()) {
-                timer.resume();
-            } else if (timerName === 'investigateStarTimer' && getStarInvestigationTimerCanContinue()) {
-                timer.resume();
-            } else if (timerName === 'pillageVoidTimer' && getPillageVoidTimerCanContinue()) {
-                timer.resume();
+        const deltaTimerContinuations = {
+            searchAsteroidTimer: getAsteroidTimerCanContinue(),
+            investigateStarTimer: getStarInvestigationTimerCanContinue(),
+            pillageVoidTimer: getPillageVoidTimerCanContinue()
+        };
+
+        const isDeltaTimer = Object.prototype.hasOwnProperty.call(deltaTimerContinuations, timerName);
+
+        if (isDeltaTimer) {
+            if (!timerManagerDelta.hasTimer(timerName)) {
+                return;
+            }
+
+            const canContinue = deltaTimerContinuations[timerName];
+
+            if (canContinue) {
+                timerManagerDelta.resumeTimer(timerName);
             } else {
+                timerManagerDelta.pauseTimer(timerName);
+            }
+        } else {
+            const timer = timerManager.getTimer(timerName);
+            if (timer) {
                 timer.pause();
             }
         }
@@ -7202,202 +7216,233 @@ export function resetRocketForNextJourney(rocket) {
 }
 
 export function startPillageVoidTimer(adjustment) {
-    if (getPillageVoidTimerCanContinue()) {
-        if (adjustment[1] === 'offlineGains' && !getCurrentlyPillagingVoid()) {
-            return;
-        }
-        setTelescopeReadyToSearch(false);
-        setCurrentlyPillagingVoid(true);
-        const timerName = 'pillageVoidTimer';
-        
-        if (!timerManager.getTimer(timerName)) {
-            let counter = 0;
-            const pillageInterval = getTimerUpdateInterval();
-            let pillageDuration = adjustment[0] === 0 ? getPillageVoidDuration() : adjustment[0];
-    
-            // pillageDuration = 8000; //DEBUG
-    
-            if (adjustment[0] === 0) {
-                setCurrentPillageVoidTimerDurationTotal(pillageDuration);
-            }
-            
-            timerManager.addTimer(timerName, pillageInterval, () => {
-                const pillageVoidTimerDescriptionElement = document.getElementById('pillageTheVoidDescription');
-                counter += pillageInterval;
-    
-                const timeLeft = Math.max(pillageDuration - counter, 0);
-                const timeLeftUI = Math.max(Math.floor((pillageDuration - counter) / 1000), 0);
-                
-                if (counter >= pillageDuration) {
-                    gainPillageVoidResourcesAndCompounds();
-                    timerManager.removeTimer(timerName);
-                    if (pillageVoidTimerDescriptionElement) {             
-                        pillageVoidTimerDescriptionElement.innerText = 'Ready To Pillage';
-                    }
-                    setTelescopeReadyToSearch(true);
-                    setCurrentlyPillagingVoid(false);
-                    setTimeLeftUntilPillageVoidTimerFinishes(0);
-                } else {
-                    setTimeLeftUntilPillageVoidTimerFinishes(timeLeft); 
-                    if (pillageVoidTimerDescriptionElement) {
-                        pillageVoidTimerDescriptionElement.classList.add('green-ready-text');
-                        pillageVoidTimerDescriptionElement.innerText = `Pillaging ... ${timeLeftUI}s`;
-                        const elapsedTime = getCurrentPillageVoidTimerDurationTotal() - getTimeLeftUntilPillageVoidTimerFinishes();
-                        const progressBarPercentage = (elapsedTime / getCurrentPillageVoidTimerDurationTotal()) * 100;
-                        document.getElementById('spaceTelescopePillageVoidProgressBar').style.width = `${progressBarPercentage}%`;
-                    }
-                }
-            });
-        }
+    if (!getPillageVoidTimerCanContinue()) {
+        return;
     }
+
+    if (adjustment[1] === 'offlineGains' && !getCurrentlyPillagingVoid()) {
+        return;
+    }
+
+    setTelescopeReadyToSearch(false);
+    setCurrentlyPillagingVoid(true);
+    const timerName = 'pillageVoidTimer';
+
+    if (timerManagerDelta.hasTimer(timerName)) {
+        return;
+    }
+
+    let totalDuration = getCurrentPillageVoidTimerDurationTotal();
+    if (adjustment[0] === 0 || !totalDuration) {
+        totalDuration = getPillageVoidDuration();
+        setCurrentPillageVoidTimerDurationTotal(totalDuration);
+    }
+
+    let timeRemaining = adjustment[0] === 0 ? totalDuration : adjustment[0];
+    setTimeLeftUntilPillageVoidTimerFinishes(timeRemaining);
+
+    timerManagerDelta.addTimer(timerName, {
+        durationMs: 0,
+        repeat: true,
+        onUpdate: ({ deltaMs }) => {
+            if (!getPillageVoidTimerCanContinue()) {
+                timerManagerDelta.pauseTimer(timerName);
+                return;
+            }
+
+            timeRemaining = Math.max(timeRemaining - deltaMs, 0);
+            setTimeLeftUntilPillageVoidTimerFinishes(timeRemaining);
+            const pillageVoidTimerDescriptionElement = document.getElementById('pillageTheVoidDescription');
+            const timeLeftUI = Math.max(Math.floor(timeRemaining / 1000), 0);
+
+            if (timeRemaining <= 0) {
+                gainPillageVoidResourcesAndCompounds();
+                timerManagerDelta.removeTimer(timerName);
+                if (pillageVoidTimerDescriptionElement) {             
+                    pillageVoidTimerDescriptionElement.innerText = 'Ready To Pillage';
+                }
+                setTelescopeReadyToSearch(true);
+                setCurrentlyPillagingVoid(false);
+                setTimeLeftUntilPillageVoidTimerFinishes(0);
+            } else if (pillageVoidTimerDescriptionElement) {
+                pillageVoidTimerDescriptionElement.classList.add('green-ready-text');
+                pillageVoidTimerDescriptionElement.innerText = `Pillaging ... ${timeLeftUI}s`;
+                const elapsedTime = getCurrentPillageVoidTimerDurationTotal() - getTimeLeftUntilPillageVoidTimerFinishes();
+                const progressBarPercentage = (elapsedTime / getCurrentPillageVoidTimerDurationTotal()) * 100;
+                document.getElementById('spaceTelescopePillageVoidProgressBar').style.width = `${progressBarPercentage}%`;
+            }
+        },
+        metadata: { type: 'spaceTelescope', action: 'pillage-void' }
+    });
 }
 
 export function startInvestigateStarTimer(adjustment) {
-    if (getStarInvestigationTimerCanContinue()) {
-        if (adjustment[1] === 'offlineGains' && !getCurrentlyInvestigatingStar()) {
-            return;
-        }
-        setTelescopeReadyToSearch(false);
-        setCurrentlyInvestigatingStar(true);
-        const timerName = 'investigateStarTimer';
-        
-        if (!timerManager.getTimer(timerName)) {
-            let counter = 0;
-            const searchInterval = getTimerUpdateInterval();
-            let searchDuration = adjustment[0] === 0 ? getStarInvestigationDuration() : adjustment[0];
-    
-            //searchDuration = 8000; //DEBUG
-    
-            if (adjustment[0] === 0) {
-                setCurrentInvestigateStarTimerDurationTotal(searchDuration);
-            }
-            
-            timerManager.addTimer(timerName, searchInterval, () => {
-                const searchTimerDescriptionElement = document.getElementById('studyStarsDescription');
-                counter += searchInterval;
-    
-                const timeLeft = Math.max(searchDuration - counter, 0);
-                const timeLeftUI = Math.max(Math.floor((searchDuration - counter) / 1000), 0);
-                
-                if (counter >= searchDuration) {
-                    extendStarDataRange(false);
-                    if (!getPlayerPhilosophy()) {
-                        callPopupModal(
-                            modalPlayerLeaderPhilosophyHeaderText, 
-                            modalPlayerLeaderPhilosophyContentText, 
-                            true, 
-                            true, 
-                            true, 
-                            true, 
-                            function() {  
-                                setPlayerPhilosophy('constructor');
-                                showNotification('You are a CONSTRUCTOR!', 'warning', 3000, 'special');
-                                showHideModal();
-                                removeModalButtonTooltips();
-                            }, 
-                            function() {  
-                                setPlayerPhilosophy('supremacist');
-                                showNotification('You are a SUPREMACIST!', 'warning', 3000, 'special');
-                                showHideModal();
-                                removeModalButtonTooltips();
-                            }, 
-                            function() {  
-                                setPlayerPhilosophy('voidborn');
-                                showNotification('You are VOIDBORN!', 'warning', 3000, 'special');
-                                showHideModal();
-                                removeModalButtonTooltips();
-                            }, 
-                            function() {  
-                                setPlayerPhilosophy('expansionist');
-                                showNotification('You are an EXPANSIONIST!', 'warning', 3000, 'special');
-                                showHideModal();
-                                removeModalButtonTooltips();
-                            }, 
-                            'CONSTRUCTOR', 
-                            'SUPREMACIST', 
-                            'VOIDBORN', 
-                            'EXPANSIONIST',
-                            true
-                        );
-                    }
-                    timerManager.removeTimer(timerName);
-                    if (searchTimerDescriptionElement) {             
-                        searchTimerDescriptionElement.innerText = 'Ready To Study';
-                    }
-                    setTelescopeReadyToSearch(true);
-                    setCurrentlyInvestigatingStar(false);
-                    setTimeLeftUntilStarInvestigationTimerFinishes(0);
-                } else {
-                    setTimeLeftUntilStarInvestigationTimerFinishes(timeLeft); 
-                    if (searchTimerDescriptionElement) {
-                        searchTimerDescriptionElement.classList.add('green-ready-text');
-                        searchTimerDescriptionElement.innerText = `Studying ... ${timeLeftUI}s`;
-                        const elapsedTime = getCurrentInvestigateStarTimerDurationTotal() - getTimeLeftUntilStarInvestigationTimerFinishes();
-                        const progressBarPercentage = (elapsedTime / getCurrentInvestigateStarTimerDurationTotal()) * 100;
-                        document.getElementById('spaceTelescopeInvestigateStarProgressBar').style.width = `${progressBarPercentage}%`;
-                    }
-                }
-            });
-        }
+    if (!getStarInvestigationTimerCanContinue()) {
+        return;
     }
+
+    if (adjustment[1] === 'offlineGains' && !getCurrentlyInvestigatingStar()) {
+        return;
+    }
+
+    setTelescopeReadyToSearch(false);
+    setCurrentlyInvestigatingStar(true);
+
+    const timerName = 'investigateStarTimer';
+    if (timerManagerDelta.hasTimer(timerName)) {
+        return;
+    }
+
+    let totalDuration = getCurrentInvestigateStarTimerDurationTotal();
+    if (adjustment[0] === 0 || !totalDuration) {
+        totalDuration = getStarInvestigationDuration();
+        setCurrentInvestigateStarTimerDurationTotal(totalDuration);
+    }
+
+    let timeRemaining = adjustment[0] === 0 ? totalDuration : adjustment[0];
+    setTimeLeftUntilStarInvestigationTimerFinishes(timeRemaining);
+
+    timerManagerDelta.addTimer(timerName, {
+        durationMs: 0,
+        repeat: true,
+        onUpdate: ({ deltaMs }) => {
+            if (!getStarInvestigationTimerCanContinue()) {
+                timerManagerDelta.pauseTimer(timerName);
+                return;
+            }
+
+            timeRemaining = Math.max(timeRemaining - deltaMs, 0);
+            setTimeLeftUntilStarInvestigationTimerFinishes(timeRemaining);
+
+            const searchTimerDescriptionElement = document.getElementById('studyStarsDescription');
+            const timeLeftUI = Math.max(Math.floor(timeRemaining / 1000), 0);
+
+            if (timeRemaining <= 0) {
+                extendStarDataRange(false);
+                if (!getPlayerPhilosophy()) {
+                    callPopupModal(
+                        modalPlayerLeaderPhilosophyHeaderText, 
+                        modalPlayerLeaderPhilosophyContentText, 
+                        true, 
+                        true, 
+                        true, 
+                        true, 
+                        function() {  
+                            setPlayerPhilosophy('constructor');
+                            showNotification('You are a CONSTRUCTOR!', 'warning', 3000, 'special');
+                            showHideModal();
+                            removeModalButtonTooltips();
+                        }, 
+                        function() {  
+                            setPlayerPhilosophy('supremacist');
+                            showNotification('You are a SUPREMACIST!', 'warning', 3000, 'special');
+                            showHideModal();
+                            removeModalButtonTooltips();
+                        }, 
+                        function() {  
+                            setPlayerPhilosophy('voidborn');
+                            showNotification('You are VOIDBORN!', 'warning', 3000, 'special');
+                            showHideModal();
+                            removeModalButtonTooltips();
+                        }, 
+                        function() {  
+                            setPlayerPhilosophy('expansionist');
+                            showNotification('You are an EXPANSIONIST!', 'warning', 3000, 'special');
+                            showHideModal();
+                            removeModalButtonTooltips();
+                        }, 
+                        'CONSTRUCTOR', 
+                        'SUPREMACIST', 
+                        'VOIDBORN', 
+                        'EXPANSIONIST',
+                        true
+                    );
+                }
+
+                timerManagerDelta.removeTimer(timerName);
+                if (searchTimerDescriptionElement) {             
+                    searchTimerDescriptionElement.innerText = 'Ready To Study';
+                }
+                setTelescopeReadyToSearch(true);
+                setCurrentlyInvestigatingStar(false);
+                setTimeLeftUntilStarInvestigationTimerFinishes(0);
+            } else if (searchTimerDescriptionElement) {
+                searchTimerDescriptionElement.classList.add('green-ready-text');
+                searchTimerDescriptionElement.innerText = `Studying ... ${timeLeftUI}s`;
+                const elapsedTime = getCurrentInvestigateStarTimerDurationTotal() - getTimeLeftUntilStarInvestigationTimerFinishes();
+                const progressBarPercentage = (elapsedTime / getCurrentInvestigateStarTimerDurationTotal()) * 100;
+                document.getElementById('spaceTelescopeInvestigateStarProgressBar').style.width = `${progressBarPercentage}%`;
+            }
+        },
+        metadata: { type: 'spaceTelescope', action: 'investigate-star' }
+    });
 }
 
 export function startSearchAsteroidTimer(adjustment) {
+    if (!getAsteroidTimerCanContinue()) {
+        return;
+    }
+
+    if (adjustment[1] === 'offlineGains' && !getCurrentlySearchingAsteroid()) {
+        return;
+    }
+
     const fasterAsteroidScanBuffAdjustment = getBuffFasterAsteroidScanData()['boughtYet'];
     const fasterAsteroidsScanBuffMultiplier = getBuffFasterAsteroidScanData()['effectCategoryMagnitude'];
 
-    if (getAsteroidTimerCanContinue()) {
-        if (adjustment[1] === 'offlineGains' && !getCurrentlySearchingAsteroid()) {
-            return;
-        }
-        setTelescopeReadyToSearch(false);
-        setCurrentlySearchingAsteroid(true);
-        const timerName = 'searchAsteroidTimer';
-        
-        if (!timerManager.getTimer(timerName)) {
-            let counter = 0;
-            const searchInterval = getTimerUpdateInterval();
-            let searchDuration = adjustment[0] === 0 ? getAsteroidSearchDuration() : adjustment[0];
-    
-            //searchDuration = 12000; //DEBUG
+    setTelescopeReadyToSearch(false);
+    setCurrentlySearchingAsteroid(true);
+    const timerName = 'searchAsteroidTimer';
 
-            if (fasterAsteroidScanBuffAdjustment > 0) {
-                searchDuration = searchDuration * (1 - (fasterAsteroidsScanBuffMultiplier * fasterAsteroidScanBuffAdjustment));
-            }
-    
-            if (adjustment[0] === 0) {
-                setCurrentAsteroidSearchTimerDurationTotal(searchDuration);
-            }
-            
-            timerManager.addTimer(timerName, searchInterval, () => {
-                const searchTimerDescriptionElement = document.getElementById('scanAsteroidsDescription');
-                counter += searchInterval;
-    
-                const timeLeft = Math.max(searchDuration - counter, 0);
-                const timeLeftUI = Math.max(Math.floor((searchDuration - counter) / 1000), 0);
-                
-                if (counter >= searchDuration) {
-                    discoverAsteroid(false);
-                    timerManager.removeTimer(timerName);
-                    if (searchTimerDescriptionElement) {             
-                        searchTimerDescriptionElement.innerText = 'Ready To Search';
-                    }
-                    setTelescopeReadyToSearch(true);
-                    setCurrentlySearchingAsteroid(false);
-                    setTimeLeftUntilAsteroidScannerTimerFinishes(0);
-                } else {
-                    setTimeLeftUntilAsteroidScannerTimerFinishes(timeLeft); 
-                    if (searchTimerDescriptionElement) { 
-                        searchTimerDescriptionElement.classList.add('green-ready-text');
-                        searchTimerDescriptionElement.innerText = `Searching ... ${timeLeftUI}s`;
-                        const elapsedTime = getCurrentAsteroidSearchTimerDurationTotal() - getTimeLeftUntilAsteroidScannerTimerFinishes();
-                        const progressBarPercentage = (elapsedTime / getCurrentAsteroidSearchTimerDurationTotal()) * 100;
-                        document.getElementById('spaceTelescopeSearchAsteroidProgressBar').style.width = `${progressBarPercentage}%`;
-                    }
-                }
-            });
-        }
+    if (timerManagerDelta.hasTimer(timerName)) {
+        return;
     }
+
+    let totalDuration = getCurrentAsteroidSearchTimerDurationTotal();
+    if (adjustment[0] === 0 || !totalDuration) {
+        totalDuration = getAsteroidSearchDuration();
+        if (fasterAsteroidScanBuffAdjustment > 0) {
+            totalDuration = totalDuration * (1 - (fasterAsteroidsScanBuffMultiplier * fasterAsteroidScanBuffAdjustment));
+        }
+        setCurrentAsteroidSearchTimerDurationTotal(totalDuration);
+    }
+
+    let timeRemaining = adjustment[0] === 0 ? totalDuration : adjustment[0];
+    setTimeLeftUntilAsteroidScannerTimerFinishes(timeRemaining);
+
+    timerManagerDelta.addTimer(timerName, {
+        durationMs: 0,
+        repeat: true,
+        onUpdate: ({ deltaMs }) => {
+            if (!getAsteroidTimerCanContinue()) {
+                timerManagerDelta.pauseTimer(timerName);
+                return;
+            }
+
+            timeRemaining = Math.max(timeRemaining - deltaMs, 0);
+            setTimeLeftUntilAsteroidScannerTimerFinishes(timeRemaining);
+            const searchTimerDescriptionElement = document.getElementById('scanAsteroidsDescription');
+            const timeLeftUI = Math.max(Math.floor(timeRemaining / 1000), 0);
+
+            if (timeRemaining <= 0) {
+                discoverAsteroid(false);
+                timerManagerDelta.removeTimer(timerName);
+                if (searchTimerDescriptionElement) {             
+                    searchTimerDescriptionElement.innerText = 'Ready To Search';
+                }
+                setTelescopeReadyToSearch(true);
+                setCurrentlySearchingAsteroid(false);
+                setTimeLeftUntilAsteroidScannerTimerFinishes(0);
+            } else if (searchTimerDescriptionElement) { 
+                searchTimerDescriptionElement.classList.add('green-ready-text');
+                searchTimerDescriptionElement.innerText = `Searching ... ${timeLeftUI}s`;
+                const elapsedTime = getCurrentAsteroidSearchTimerDurationTotal() - getTimeLeftUntilAsteroidScannerTimerFinishes();
+                const progressBarPercentage = (elapsedTime / getCurrentAsteroidSearchTimerDurationTotal()) * 100;
+                document.getElementById('spaceTelescopeSearchAsteroidProgressBar').style.width = `${progressBarPercentage}%`;
+            }
+        },
+        metadata: { type: 'spaceTelescope', action: 'search-asteroid' }
+    });
 }
 
 function getAsteroidSearchDuration() {
@@ -8270,20 +8315,20 @@ export function offlineGains(switchedFocus) {
         if (getCurrentlySearchingAsteroid() && getAsteroidTimerCanContinue()) {
             const timeLeft = getTimeLeftUntilAsteroidScannerTimerFinishes();
             const offlineTimeInMilliseconds = timeDifferenceInSeconds * 1000;
-    
+        
             const remainingTime = Math.max(timeLeft - offlineTimeInMilliseconds, 100);
-    
-            timerManager.removeTimer('searchAsteroidTimer');
+        
+            timerManagerDelta.removeTimer('searchAsteroidTimer');
             startSearchAsteroidTimer([remainingTime, 'offlineGains']);
         }
 
         if (getCurrentlyInvestigatingStar() && getStarInvestigationTimerCanContinue()) {
             const timeLeft = getTimeLeftUntilStarInvestigationTimerFinishes();
             const offlineTimeInMilliseconds = timeDifferenceInSeconds * 1000;
-    
+        
             const remainingTime = Math.max(timeLeft - offlineTimeInMilliseconds, 100);
-    
-            timerManager.removeTimer('investigateStarTimer');
+        
+            timerManagerDelta.removeTimer('investigateStarTimer');
             startInvestigateStarTimer([remainingTime, 'offlineGains']);
         }
 
@@ -8293,7 +8338,7 @@ export function offlineGains(switchedFocus) {
         
             const remainingTime = Math.max(timeLeft - offlineTimeInMilliseconds, 100);
         
-            timerManager.removeTimer('pillageVoidTimer');
+            timerManagerDelta.removeTimer('pillageVoidTimer');
             startPillageVoidTimer([remainingTime, 'offlineGains']);
         }        
 
