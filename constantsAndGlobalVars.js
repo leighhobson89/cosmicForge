@@ -4416,6 +4416,8 @@ const IMAGE_URLS = {
 
 export function populateVariableDebugger() {
     const debugTextAreaContainer = document.getElementById('debugTextAreaContainer');
+    const researchAutoBuyerConfig = getResourceDataObject('research', ['upgrades', 'autoBuyer']);
+    const philosophyTechData = getResourceDataObject('philosophyRepeatableTechs');
     
     const variables = [
         { label: "", value: "" },
@@ -4464,6 +4466,14 @@ export function populateVariableDebugger() {
         { label: "temporaryCoreTechsRowsRepo", value: temporaryCoreTechRowsRepo },
         { label: "canAffordDeferred", value: canAffordDeferred },
         { label: "originalFrameNumbers", value: originalFrameNumbers },
+
+        { label: "", value: "" },
+        { label: "Research AutoBuyer:", value: "" },
+        { label: "", value: "" },
+
+        { label: "researchAutoBuyerActive", value: researchAutoBuyerConfig?.active ?? null },
+        { label: "researchAutoBuyerEnabled", value: researchAutoBuyerConfig?.enabled ?? null },
+        { label: "researchAutoBuyerConfig", value: researchAutoBuyerConfig },
 
         { label: "", value: "" },
         { label: "Tech:", value: "" },
@@ -4630,6 +4640,31 @@ export function populateVariableDebugger() {
         { label: "inFormation", value: inFormation },
         { label: "wasAutoSaveToggled", value: wasAutoSaveToggled },
         { label: "enemyFleetAdjustedForDiplomacy", value: enemyFleetAdjustedForDiplomacy },
+
+        { label: "", value: "" },
+        { label: "Philosophy:", value: "" },
+        { label: "", value: "" },
+
+        { label: "philosophy", value: philosophy },
+        { label: "philosophyAbilityActive", value: philosophyAbilityActive },
+        { label: "repeatableTechMultipliers", value: repeatableTechMultipliers },
+        { label: "philosophyRepeatableTechs", value: philosophyTechData },
+
+        { label: "", value: "" },
+        { label: "MegaStructures:", value: "" },
+        { label: "", value: "" },
+
+        { label: "starsWithAncientManuscripts", value: starsWithAncientManuscripts },
+        { label: "factoryStarsArray", value: factoryStarsArray },
+        { label: "manuscriptCluesShown", value: manuscriptCluesShown },
+        { label: "megaStructuresInPossessionArray", value: megaStructuresInPossessionArray },
+        { label: "megaStructureTechsResearched", value: megaStructureTechsResearched },
+        { label: "megaStructureAntimatterAmount", value: megastructureAntimatterAmount },
+        { label: "miaplacidusMilestoneLevel", value: miaplacidusMilestoneLevel },
+        { label: "factoryStarMap", value: factoryStarMap },
+        { label: "currentRunIsMegaStructureRun", value: currentRunIsMegaStructureRun },
+        { label: "megaStructureResourceBonus", value: megaStructureResourceBonus },
+        { label: "infinitePower", value: infinitePower },
     ];    
 
     debugTextAreaContainer.innerHTML = "";

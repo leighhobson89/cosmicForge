@@ -6,3 +6,16 @@ REALLY TO DO TO END OF GAME
     - ADD MEGA BATTLE AT MIAPLACIDUS
     - TELL A STORY IN THE INTRO POPUPS AND ADD MORE OF THIS THROUGHOUT ALL THE GAME
     - HAVE AN ENDING AFTER CONQUERING HOME SYSTEM
+
+    Timers overview:
+- Resources auto-buyer loops (resourceAB tiers via timerManager) - INTERVAL
+- Compounds auto-buyer loops (compoundAB tiers via timerManager) - INTERVAL
+- Rocket fuel timers (rocketXFuelTimer per rocket) - INTERVAL
+- Energy production/consumption loop (energy timer) - INTERVAL
+- Rocket travel timers (rocketXTravelToAsteroidTimer / rocketXTravelReturnTimer) - DELTA
+- Starship travel timer (starShipTravelToDestinationStarTimer) - DELTA
+- Research delta timer - DELTA
+- Antimatter delta timer - DELTA
+- Search Asteroid timer - DELTA
+- Study Star timer - DELTA
+- Pillage Void timer - DELTA

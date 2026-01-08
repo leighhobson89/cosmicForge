@@ -5684,25 +5684,16 @@ function checkTravelToStarElements(element) {
 function checkTravelToDescriptions(element) {
     const rocket = getCurrentOptionPane();
     if (getCurrentlyTravellingToAsteroid(rocket)) {
-        if (getRocketDirection(rocket)) {
-            const timerElement = timerManager.getTimer(`${rocket}TravelReturnTimer`);
-            if (timerElement) {
-                const timeLeft = Math.floor(getTimeLeftUntilRocketTravelToAsteroidTimerFinishes(rocket) / 1000);
-                const labelElement = element.parentElement.parentElement.querySelector('div.description-container label');
-                labelElement.classList.add('green-ready-text');
-                labelElement.classList.remove('red-disabled-text');
-                labelElement.innerHTML = `Returning ... ${timeLeft}s`;
-            }
-        } else {
-            const timerElement = timerManager.getTimer(`${rocket}TravelToAsteroidTimer`);
-            if (timerElement) {
-                const timeLeft = Math.floor(getTimeLeftUntilRocketTravelToAsteroidTimerFinishes(rocket) / 1000);
-                const labelElement = element.parentElement.parentElement.querySelector('div.description-container label');
-                labelElement.classList.add('green-ready-text');
-                labelElement.classList.remove('red-disabled-text');
-                labelElement.innerHTML = `Travelling ... ${timeLeft}s`;
-            }
+        const timeLeft = Math.floor(getTimeLeftUntilRocketTravelToAsteroidTimerFinishes(rocket) / 1000);
+        const labelElement = element.parentElement.parentElement.querySelector('div.description-container label');
+        if (!labelElement) {
+            return;
         }
+        labelElement.classList.add('green-ready-text');
+        labelElement.classList.remove('red-disabled-text');
+        labelElement.innerHTML = getRocketDirection(rocket)
+            ? `Returning ... ${timeLeft}s`
+            : `Travelling ... ${timeLeft}s`;
     }
 }
 
@@ -6994,82 +6985,78 @@ export function startTravelToAndFromAsteroidTimer(adjustment, rocket, direction)
     setRocketReadyToTravel(rocket, false);
     setCurrentlyTravellingToAsteroid(rocket, true);
 
-    let destination;
-    let timerName;
+    const timerName = direction ? `${rocket}TravelReturnTimer` : `${rocket}TravelToAsteroidTimer`;
+    const destination = getDestinationAsteroid(rocket);
 
     if (direction) {
         setAchievementFlagArray('mineAllAntimatterAsteroid', 'add');
         setMiningObject(rocket, null);
-        timerName = `${rocket}TravelReturnTimer`;
-        destination = getDestinationAsteroid(rocket);
-    } else {
-        timerName = `${rocket}TravelToAsteroidTimer`;
-        destination = getDestinationAsteroid(rocket);
     }
-    
-    if (!timerManager.getTimer(timerName)) {
-        let counter = 0;
-        const travelInterval = getTimerUpdateInterval();
-        let travelDuration = adjustment[0] === 0 ? calculateRocketTravelDuration(destination) : adjustment[0];
 
-        if (adjustment[0] === 0) {
-            setRocketTravelDuration(rocket, travelDuration);
-        }
-        
-        timerManager.addTimer(timerName, travelInterval, () => {
+    if (timerManagerDelta.hasTimer(timerName)) {
+        return;
+    }
+
+    let totalDuration = getRocketTravelDuration()[rocket];
+    if (adjustment[0] === 0 || !totalDuration) {
+        totalDuration = calculateRocketTravelDuration(destination);
+        setRocketTravelDuration(rocket, totalDuration);
+    }
+
+    let timeRemaining = adjustment[0] === 0 ? totalDuration : adjustment[0];
+    setTimeLeftUntilRocketTravelToAsteroidTimerFinishes(rocket, timeRemaining);
+
+    timerManagerDelta.addTimer(timerName, {
+        durationMs: 0,
+        repeat: true,
+        onUpdate: ({ deltaMs }) => {
+            timeRemaining = Math.max(timeRemaining - deltaMs, 0);
+            setTimeLeftUntilRocketTravelToAsteroidTimerFinishes(rocket, timeRemaining);
+
             const travelTimerDescriptionElement = document.getElementById('travelToDescription');
-            counter += travelInterval;
+            const timeLeftUI = Math.max(Math.floor(timeRemaining / 1000), 0);
 
-            const timeLeft = Math.max(travelDuration - counter, 0);
-            const timeLeftUI = `${Math.floor(Math.max(Math.floor((travelDuration - counter) / 1000), 0))}`;
-            
-            if (counter >= travelDuration) {
+            if (timeRemaining <= 0) {
+                timerManagerDelta.removeTimer(timerName);
+
                 if (direction) {
-                    sfxPlayer.playAudio("rocketLand", false);
-                    showNotification(`${
-                        getRocketUserName(rocket)} has returned to be refuelled!`, 'info', 3000, 'rocket');
+                    sfxPlayer.playAudio('rocketLand', false);
+                    showNotification(`${getRocketUserName(rocket)} has returned to be refuelled!`, 'info', 3000, 'rocket');
                     resetRocketForNextJourney(rocket);
-                    timerManager.removeTimer(timerName);
-
-                    setCurrentlyTravellingToAsteroid(rocket, false);
-                    setTimeLeftUntilRocketTravelToAsteroidTimerFinishes(0);
                 } else {
                     showNotification(`${getRocketUserName(rocket)} has reached ${destination} and started mining Antimatter!`, 'info', 3000, 'rocket');
                     addToResourceAllTimeStat(1, 'asteroidsMined');
-                    timerManager.removeTimer(timerName);
-    
-                    if (travelTimerDescriptionElement) {             
+
+                    if (travelTimerDescriptionElement) {
                         travelTimerDescriptionElement.innerText = 'Mining Antimatter at ' + destination;
                     }
-    
+
                     if (!getAntimatterUnlocked()) {
                         setAntimatterUnlocked(true);
                     }
-    
-                    setMiningObject(rocket, destination); //leave travelling to array true until mining finishes
-                    setTimeLeftUntilRocketTravelToAsteroidTimerFinishes(0);
-                    setCurrentlyTravellingToAsteroid(rocket, false);
+
+                    setMiningObject(rocket, destination);
                 }
-            } else {
-                setTimeLeftUntilRocketTravelToAsteroidTimerFinishes(rocket, timeLeft); 
-                if (travelTimerDescriptionElement) { 
-                    travelTimerDescriptionElement.classList.remove('red-disabled-text');
-                    travelTimerDescriptionElement.classList.add('green-ready-text');
-                    if (direction) {
-                        travelTimerDescriptionElement.innerText = `Returning ... ${timeLeftUI}s`;
-                    } else {
-                        travelTimerDescriptionElement.innerText = `Travelling ... ${timeLeftUI}s`;
-                    }
-                    
-                    const elapsedTime = getRocketTravelDuration()[rocket] - getTimeLeftUntilRocketTravelToAsteroidTimerFinishes(rocket);
-                    const progressBarPercentage = (elapsedTime / getRocketTravelDuration()[rocket]) * 100;
-                    if (document.getElementById(`spaceTravelToAsteroidProgressBar${capitaliseString(rocket)}`)) {
-                        document.getElementById(`spaceTravelToAsteroidProgressBar${capitaliseString(rocket)}`).style.width = `${progressBarPercentage}%`;
-                    }
+
+                setTimeLeftUntilRocketTravelToAsteroidTimerFinishes(rocket, 0);
+                setCurrentlyTravellingToAsteroid(rocket, false);
+            } else if (travelTimerDescriptionElement) {
+                travelTimerDescriptionElement.classList.remove('red-disabled-text');
+                travelTimerDescriptionElement.classList.add('green-ready-text');
+                travelTimerDescriptionElement.innerText = direction
+                    ? `Returning ... ${timeLeftUI}s`
+                    : `Travelling ... ${timeLeftUI}s`;
+
+                const elapsedTime = getRocketTravelDuration()[rocket] - getTimeLeftUntilRocketTravelToAsteroidTimerFinishes(rocket);
+                const progressBarPercentage = (elapsedTime / getRocketTravelDuration()[rocket]) * 100;
+                const progressBar = document.getElementById(`spaceTravelToAsteroidProgressBar${capitaliseString(rocket)}`);
+                if (progressBar) {
+                    progressBar.style.width = `${progressBarPercentage}%`;
                 }
             }
-        });
-    }
+        },
+        metadata: { type: 'spaceTravel', action: direction ? 'returnRocket' : 'travelToAsteroid', rocket }
+    });
 }
 
 export function startTravelToDestinationStarTimer(adjustment) {
@@ -7081,89 +7068,66 @@ export function startTravelToDestinationStarTimer(adjustment) {
 
     setStarShipTravelling(true);
 
-    let destination = getDestinationStar();
-    let timerName = 'starShipTravelToDestinationStarTimer';
+    const destination = getDestinationStar();
+    const timerName = 'starShipTravelToDestinationStarTimer';
     setStarShipStatus(['travelling', destination]);
-    
-    if (!timerManager.getTimer(timerName)) {
-        let counter = 0;
-        const travelInterval = getTimerUpdateInterval();
-        let travelDuration = adjustment[0] === 0 ? calculateStarTravelDuration(destination) : adjustment[0];
 
+    if (timerManagerDelta.hasTimer(timerName)) {
+        return;
+    }
+
+    let totalDuration = getStarTravelDuration();
+    if (adjustment[0] === 0 || !totalDuration) {
+        totalDuration = calculateStarTravelDuration(destination);
         for (let i = 1; i < quantumEngineBuffAdjustment; i++) {
-            travelDuration /= 2;
+            totalDuration /= 2;
         }
+        setStarTravelDuration(totalDuration);
+    }
 
-        if (adjustment[0] === 0) {
-            setStarTravelDuration(travelDuration);
-        }
-        
-        timerManager.addTimer(timerName, travelInterval, () => {
+    let timeRemaining = adjustment[0] === 0 ? totalDuration : adjustment[0];
+    setTimeLeftUntilTravelToDestinationStarTimerFinishes(timeRemaining);
+
+    timerManagerDelta.addTimer(timerName, {
+        durationMs: 0,
+        repeat: true,
+        onUpdate: ({ deltaMs }) => {
+            timeRemaining = Math.max(timeRemaining - deltaMs, 0);
+            setTimeLeftUntilTravelToDestinationStarTimerFinishes(timeRemaining);
+
             const travelTimerDescriptionElement = document.getElementById('travellingToDescription');
-            counter += travelInterval;
-        
-            const timeLeft = Math.max(travelDuration - counter, 0);
-            const timeLeftUI = `${Math.floor(Math.max(Math.floor((travelDuration - counter) / 1000), 0))}`;
-
+            const timeLeftUI = Math.max(Math.floor(timeRemaining / 1000), 0);
             const starData = getStarSystemDataObject('stars', [destination]);
-            const distance = starData.distance;    
-            let distanceTravelled;    
-            
-            if (counter >= travelDuration) {
+            const distance = starData.distance;
+
+            if (timeRemaining <= 0) {
+                timerManagerDelta.removeTimer(timerName);
                 showNotification(`StarShip has reached orbit of the ${capitaliseWordsWithRomanNumerals(destination)} system!`, 'info', 3000, 'starShip');
-                timerManager.removeTimer(timerName);
-        
-                if (travelTimerDescriptionElement) {             
+
+                if (travelTimerDescriptionElement) {
                     travelTimerDescriptionElement.innerText = 'Orbiting ' + capitaliseWordsWithRomanNumerals(destination);
                 }
-        
+
                 setTimeLeftUntilTravelToDestinationStarTimerFinishes(0);
                 setStarShipStatus(['orbiting', destination]);
-                distanceTravelled = distance;
+
                 if (getStatRun() === 1) {
                     if (!getTechUnlockedArray().includes('apAwardedThisRun')) {
                         setTechUnlockedArray('apAwardedThisRun');
                     }
-                    if (getStatRun() === 1) {
-                        callPopupModal(
-                            modalGalacticTabUnlockHeader, 
-                            modalGalacticTabUnlockText, 
-                            true, 
-                            false, 
-                            false, 
-                            false, 
-                            function() {
-                                showHideModal();
-                                showNotification('Galactic Tab Unlocked!', 'warning', 3000, 'special');
-                            },
-                            null, 
-                            null, 
-                            null,
-                            'CONFIRM',
-                            null,
-                            null,
-                            null,
-                            false
-                        );
-                    }
-                }
-
-                if (getFactoryStarsArray().includes(getDestinationStar())) {
-                    const header = 'MEGASTRUCTURE';
-                    const content = `Your Starship arrived at the <span class="factory-star-text">${capitaliseWordsWithRomanNumerals(getDestinationStar())}</span> System!<br>You gasp at what you see! The main star has been completely enveloped by a gigantic structure!<br>It looks to be some kind of <span class="factory-star-text">${getStarSystemDataObject('stars', [getDestinationStar(), 'factoryStar'])}</span><br>No wonder we didn't discover this System before,<br>the star is not visible due to the size of this structure!<br>This system is going to be heavily defended for sure, but if we can conquer it,<br>for sure it will open up vast opportunities for us...`;
                     callPopupModal(
-                        header, 
-                        content, 
-                        true, 
-                        false, 
-                        false, 
-                        false, 
+                        modalGalacticTabUnlockHeader,
+                        modalGalacticTabUnlockText,
+                        true,
+                        false,
+                        false,
+                        false,
                         function() {
                             showHideModal();
                             showNotification('Galactic Tab Unlocked!', 'warning', 3000, 'special');
                         },
-                        null, 
-                        null, 
+                        null,
+                        null,
                         null,
                         'CONFIRM',
                         null,
@@ -7172,26 +7136,55 @@ export function startTravelToDestinationStarTimer(adjustment) {
                         false
                     );
                 }
+
+                if (getFactoryStarsArray().includes(getDestinationStar())) {
+                    const header = 'MEGASTRUCTURE';
+                    const content = `Your Starship arrived at the <span class="factory-star-text">${capitaliseWordsWithRomanNumerals(getDestinationStar())}</span> System!<br>You gasp at what you see! The main star has been completely enveloped by a gigantic structure!<br>It looks to be some kind of <span class="factory-star-text">${getStarSystemDataObject('stars', [getDestinationStar(), 'factoryStar'])}</span><br>No wonder we didn't discover this System before,<br>the star is not visible due to the size of this structure!<br>This system is going to be heavily defended for sure, but if we can conquer it,<br>for sure it will open up vast opportunities for us...`;
+                    callPopupModal(
+                        header,
+                        content,
+                        true,
+                        false,
+                        false,
+                        false,
+                        function() {
+                            showHideModal();
+                            showNotification('Galactic Tab Unlocked!', 'warning', 3000, 'special');
+                        },
+                        null,
+                        null,
+                        null,
+                        'CONFIRM',
+                        null,
+                        null,
+                        null,
+                        false
+                    );
+                }
+
+                addToResourceAllTimeStat(distance, 'starShipTravelDistance');
             } else {
-                setTimeLeftUntilTravelToDestinationStarTimerFinishes(timeLeft);
                 const elapsedTime = getStarTravelDuration() - getTimeLeftUntilTravelToDestinationStarTimerFinishes();
                 const normalizedElapsedTime = elapsedTime / getStarTravelDuration();
 
-                if (travelTimerDescriptionElement) { 
+                if (travelTimerDescriptionElement) {
                     travelTimerDescriptionElement.classList.remove('red-disabled-text');
                     travelTimerDescriptionElement.classList.add('green-ready-text');
                     travelTimerDescriptionElement.innerText = `Travelling ... ${timeLeftUI}s`;
 
-                    if (document.getElementById(`spaceTravelToStarProgressBar`)) {
-                        document.getElementById(`spaceTravelToStarProgressBar`).style.width = `${normalizedElapsedTime * 100}%`;
+                    const progressBar = document.getElementById('spaceTravelToStarProgressBar');
+                    if (progressBar) {
+                        progressBar.style.width = `${normalizedElapsedTime * 100}%`;
                     }
                 }
+
                 setStarShipArrowPosition(normalizedElapsedTime);
-                distanceTravelled = ((distance * (normalizedElapsedTime * 100)) / 100).toFixed(2);
+                const distanceTravelled = ((distance * normalizedElapsedTime * 100) / 100).toFixed(2);
+                addToResourceAllTimeStat(distanceTravelled, 'starShipTravelDistance');
             }
-            addToResourceAllTimeStat(distanceTravelled, 'starShipTravelDistance');
-        });        
-    }
+        },
+        metadata: { type: 'spaceTravel', action: 'travelToStar' }
+    });
 }
 
 export function resetRocketForNextJourney(rocket) {
@@ -7206,12 +7199,12 @@ export function resetRocketForNextJourney(rocket) {
     setRocketReadyToTravel(rocket, true);
     switchFuelGaugeWhenFuellerBought(rocket, 'reset');
 
-    if (timerManager.getTimer(`${rocket}TravelToAsteroidTimer`)) {
-        timerManager.removeTimer(`${rocket}TravelToAsteroidTimer`);
+    if (timerManagerDelta.hasTimer(`${rocket}TravelToAsteroidTimer`)) {
+        timerManagerDelta.removeTimer(`${rocket}TravelToAsteroidTimer`);
     }
     
-    if (timerManager.getTimer(`${rocket}TravelReturnTimer`)) {
-        timerManager.removeTimer(`${rocket}TravelReturnTimer`);
+    if (timerManagerDelta.hasTimer(`${rocket}TravelReturnTimer`)) {
+        timerManagerDelta.removeTimer(`${rocket}TravelReturnTimer`);
     }
 }
 
@@ -8348,7 +8341,7 @@ export function offlineGains(switchedFocus) {
     
             const remainingTime = Math.max(timeLeft - offlineTimeInMilliseconds, 100);
     
-            timerManager.removeTimer('starShipTravelToDestinationStarTimer');
+            timerManagerDelta.removeTimer('starShipTravelToDestinationStarTimer');
             startTravelToDestinationStarTimer([remainingTime, 'offlineGains']);
         }
     
@@ -8360,8 +8353,8 @@ export function offlineGains(switchedFocus) {
         
             const remainingTime = Math.max(timeLeft - offlineTimeInMilliseconds, 1);
         
-            timerManager.removeTimer(`${rocketKey}TravelToAsteroidTimer`);
-            timerManager.removeTimer(`${rocketKey}TravelReturnTimer`);
+            timerManagerDelta.removeTimer(`${rocketKey}TravelToAsteroidTimer`);
+            timerManagerDelta.removeTimer(`${rocketKey}TravelReturnTimer`);
             startTravelToAndFromAsteroidTimer([remainingTime, 'offlineGains'], rocketKey, getRocketDirection(rocketKey));
         });  
         
