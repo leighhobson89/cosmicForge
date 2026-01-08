@@ -304,17 +304,18 @@ export function achievementCollect100Precipitation() {
 
 
 export function achievementCreateCompound() {
-    let achievement;
-    if (getAchievementFlagArray().includes('createSteel')) {
-        achievement = getAchievementDataObject('createSteel');
+    const achievementFlags = getAchievementFlagArray();
+
+    const steelAchievement = getAchievementDataObject('createSteel');
+    if (!steelAchievement?.active && achievementFlags.includes('createSteel')) {
         setAchievementFlagArray('createSteel', 'remove');
-        grantAchievement(achievement);
+        grantAchievement(steelAchievement);
     }
 
-    if (getAchievementFlagArray().includes('createTitanium')) {
-        achievement = getAchievementDataObject('createTitanium');
+    const titaniumAchievement = getAchievementDataObject('createTitanium');
+    if (!titaniumAchievement?.active && achievementFlags.includes('createTitanium')) {
         setAchievementFlagArray('createTitanium', 'remove');
-        grantAchievement(achievement);
+        grantAchievement(titaniumAchievement);
     }
 }
 
