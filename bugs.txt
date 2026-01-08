@@ -7,7 +7,7 @@ REALLY TO DO TO END OF GAME
     - TELL A STORY IN THE INTRO POPUPS AND ADD MORE OF THIS THROUGHOUT ALL THE GAME
     - HAVE AN ENDING AFTER CONQUERING HOME SYSTEM
 
-    Timers overview:
+Timer refactor checklist:
 - Resources auto-buyer loops (resourceAB tiers via timerManager) - INTERVAL
 - Compounds auto-buyer loops (compoundAB tiers via timerManager) - INTERVAL
 - Energy production/consumption loop (energy timer) - INTERVAL
