@@ -1842,43 +1842,43 @@ export function initialiseDescriptions() {
         manuscriptClues: [
             {
                 id: 4000,
-                template: "Scholars whisper that the {STAR} System hums with ancient texts."
+                template: "Scholars whisper that the {STAR} System hums with ancient texts. A closer investigation may reveal their secrets."
             },
             {
                 id: 4001,
-                template: "Astrometric echoes from {STAR} refuse to align with known models—someone should look closer."
+                template: "Astrometric echoes from {STAR} refuse to align with known models—a thorough scan might uncover what's hidden there."
             },
             {
                 id: 4002,
-                template: "Fragments of a manuscript allege that {STAR} hides directions to a MegaStructure."
+                template: "Fragments of a manuscript allege that {STAR} hides directions to a MegaStructure. It would be wise to investigate this claim."
             },
             {
                 id: 4003,
-                template: "Explorer logs mention faint harmonic resonances pulsing from deep within {STAR}."
+                template: "Explorer logs mention faint harmonic resonances pulsing from deep within {STAR}. Such anomalies often precede great discoveries."
             },
             {
                 id: 4004,
-                template: "Quantum cartographers argue the sky near {STAR} folds in on itself every few cycles."
+                template: "Quantum cartographers argue the sky near {STAR} folds in on itself every few cycles. This phenomenon demands further study."
             },
             {
                 id: 4005,
-                template: "An intercepted Guardian dispatch labels {STAR} a 'system of architectural interest'."
+                template: "An intercepted Guardian dispatch labels {STAR} a 'system of architectural interest'. Their attention suggests something valuable lies within."
             },
             {
                 id: 4006,
-                template: "Pilgrims etch warnings about luminous storms that only manifest over {STAR}."
+                template: "Pilgrims etch warnings about luminous storms that only manifest over {STAR}. Such rare phenomena often guard great treasures."
             },
             {
                 id: 4007,
-                template: "A half-burned parchment lists {STAR} as an ancient meeting place for MegaSructure architects."
+                template: "A half-burned parchment lists {STAR} as an ancient meeting place for MegaStructure architects. Their legacy may still linger there."
             },
             {
                 id: 4008,
-                template: "Astronomers swear {STAR} emits coordinates that describe a MegaStructure System."
+                template: "Astronomers swear {STAR} emits coordinates that describe a MegaStructure System. Deciphering these signals could lead to a major breakthrough."
             },
             {
                 id: 4009,
-                template: "Ancient Manuscripts reported in the {STAR} system."
+                template: "Ancient Manuscripts reported in the {STAR} system. Their contents could prove invaluable to the right explorer."
             }
         ],
         noPrize: [   //push index as id
