@@ -250,7 +250,7 @@ export function initialiseDescriptions() {
         'research': "Here you can buy upgrades to generate research points for unlocking new technology.",
         'technology': "Here you can unlock new technologies to improve your game, provided you have enough research points!",
         'tech tree': 'Here you can see a visual representation of technologies and what they provide.',
-        'philosophy': 'Here you can unlock special abilities for your philosophy, and research repeatble techs that improve your game.',
+        'philosophy': 'Here you can unlock special abilities for your philosophy, and research repeatable techs that improve your game.',
     
         'diesel': 'The first compound created by your hands, it is a useful early fuel.',
         'glass': 'This is reinforced specialist glass and is great for solar applications.',

@@ -3749,6 +3749,10 @@ function updateAntimatterAndDiagram() {
     const miningObject = getMiningObject();
     const asteroidsBeingMined = getAsteroidArray();
     const elements = getElements();
+
+    if (getPermanentAntimatterUnlock() && !getAntimatterUnlocked()) {
+        setAntimatterUnlocked(true);
+    }
     
     asteroidsBeingMined.forEach(obj => {
         const asteroidName = Object.keys(obj)[0];
@@ -3834,18 +3838,19 @@ function updateAntimatterAndDiagram() {
     } 
 
     const megaStructureGainPerTick = getMegaStructureAntimatterAmount() / getTimerRateRatio();
-    const newAntimatterQuantity = antimatterTotalQuantity + totalAntimatterExtractionRate + megaStructureGainPerTick;
+    const totalAntimatterGainPerTick = totalAntimatterExtractionRate + megaStructureGainPerTick;
+    const newAntimatterQuantity = antimatterTotalQuantity + totalAntimatterGainPerTick;
 
     setResourceDataObject(newAntimatterQuantity, 'antimatter', ['quantity']);
-    setResourceDataObject(totalAntimatterExtractionRate, 'antimatter', ['rate']);
+    setResourceDataObject(totalAntimatterGainPerTick, 'antimatter', ['rate']);
 
-    if (getAntimatterUnlocked() && totalAntimatterExtractionRate > 0) {
-        addToResourceAllTimeStat(totalAntimatterExtractionRate, 'antimatter');
-        addToResourceAllTimeStat(totalAntimatterExtractionRate, 'antimatterThisRun');
+    if (getAntimatterUnlocked() && totalAntimatterGainPerTick > 0) {
+        addToResourceAllTimeStat(totalAntimatterGainPerTick, 'antimatter');
+        addToResourceAllTimeStat(totalAntimatterGainPerTick, 'antimatterThisRun');
     }
 
     if (elements?.miningRate) {
-        elements.miningRate.innerText = `${(totalAntimatterExtractionRate * getTimerRateRatio()).toFixed(2)} / s`;
+        elements.miningRate.innerText = `${(totalAntimatterGainPerTick * getTimerRateRatio()).toFixed(2)} / s`;
     }
 
     if (elements?.miningQuantity) {
