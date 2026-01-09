@@ -814,6 +814,182 @@ function updateResearchRateDisplay(researchRatePerTick) {
     researchRateElement.textContent = `${(researchRatePerTick * getTimerRateRatio()).toFixed(1)} / s`;
 }
 
+function initialiseEnergyDeltaTimer() {
+    const energyTimerId = 'energyDeltaTimer';
+    if (timerManagerDelta.hasTimer(energyTimerId)) {
+        return;
+    }
+
+    timerManagerDelta.addTimer(energyTimerId, {
+        durationMs: 0,
+        repeat: true,
+        onUpdate: ({ deltaMs }) => updateEnergyDelta(deltaMs),
+        metadata: { type: 'energy' }
+    });
+}
+
+function updateEnergyDelta(deltaMs) {
+    if (!deltaMs) {
+        return;
+    }
+
+    const tickInterval = getTimerUpdateInterval();
+    if (!tickInterval) {
+        return;
+    }
+
+    const tickMultiplier = deltaMs / tickInterval;
+    if (tickMultiplier <= 0) {
+        return;
+    }
+
+    let newEnergyRate = 0;
+    let currentEnergyQuantity = getResourceDataObject('buildings', ['energy', 'quantity']);
+    const batteryBought = getResourceDataObject('buildings', ['energy', 'batteryBoughtYet']);
+    const energyStorageCapacity = getResourceDataObject('buildings', ['energy', 'storageCapacity']);
+
+    if (!getWeatherEfficiencyApplied()) {
+        setResourceDataObject(
+            getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'purchasedRate']) * getCurrentStarSystemWeatherEfficiency()[1],
+            'buildings',
+            ['energy', 'upgrades', 'powerPlant2', 'purchasedRate']
+        );
+        setWeatherEfficiencyApplied(true);
+    }
+
+    if (Math.floor(currentEnergyQuantity) <= energyStorageCapacity) {
+        if (getPowerOnOff()) {
+            if (getBuildingTypeOnOff('powerPlant1')) {
+                newEnergyRate += getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'purchasedRate']);
+            }
+            if (getBuildingTypeOnOff('powerPlant2')) {
+                newEnergyRate += getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'purchasedRate']);
+            }
+            if (getBuildingTypeOnOff('powerPlant3')) {
+                newEnergyRate += getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant3', 'purchasedRate']);
+            }
+
+            let totalRate = getInfinitePower() ? getInfinitePowerRate() : newEnergyRate - getTotalEnergyUse();
+
+            if (batteryBought) {
+                if (Math.floor(currentEnergyQuantity) === energyStorageCapacity) {
+                    if (totalRate >= 0) {
+                        setResourceDataObject(currentEnergyQuantity, 'buildings', ['energy', 'quantity']);
+                        getElements().energyQuantity.classList.remove('red-disabled-text');
+                        getElements().energyQuantity.classList.add('green-ready-text');
+                        totalRate = 0;
+                    } else {
+                        const energyDelta = totalRate * tickMultiplier;
+                        setResourceDataObject(currentEnergyQuantity + energyDelta, 'buildings', ['energy', 'quantity']);
+                        getElements().energyQuantity.classList.add('red-disabled-text');
+                        getElements().energyQuantity.classList.remove('green-ready-text');
+                    }
+                } else {
+                    const energyDelta = totalRate * tickMultiplier;
+                    setResourceDataObject(
+                        Math.min(currentEnergyQuantity + energyDelta, getResourceDataObject('buildings', ['energy', 'storageCapacity'])),
+                        'buildings',
+                        ['energy', 'quantity']
+                    );
+                    getElements().energyQuantity.classList.remove('red-disabled-text');
+                    getElements().energyQuantity.classList.remove('green-ready-text');
+                }
+            }
+            if (getInfinitePower()) {
+                getElements().energyRate.textContent = `∞ DYSON ∞`;
+            } else {
+                getElements().energyRate.textContent = `${Math.floor(totalRate * getTimerRateRatio())} KW / s`;
+            }
+        } else {
+            getElements().energyQuantity.classList.remove('red-disabled-text');
+            getElements().energyQuantity.classList.remove('green-ready-text');
+            getElements().energyRate.textContent = `0 KW / s`;
+        }
+    } else {
+        getElements().energyQuantity.classList.add('green-ready-text');
+        getElements().energyQuantity.classList.remove('red-disabled-text');
+    }
+
+    currentEnergyQuantity = getResourceDataObject('buildings', ['energy', 'quantity']);
+
+    if (currentEnergyQuantity < 0) {
+        setResourceDataObject(0, 'buildings', ['energy', 'quantity']);
+    }
+
+    if (getInfinitePower()) {
+        setResourceDataObject(getInfinitePowerRate(), 'buildings', ['energy', 'rate']);
+    } else {
+        setResourceDataObject(newEnergyRate, 'buildings', ['energy', 'rate']);
+    }
+
+    const powerOnNow = getPowerOnOff();
+    let powerOnAfterSwitch = powerOnNow;
+    const anyPlantActive = getBuildingTypeOnOff('powerPlant1') || getBuildingTypeOnOff('powerPlant2') || getBuildingTypeOnOff('powerPlant3');
+
+    const initialPowerState = getPowerOnOff();
+    const graceActive = isPowerGracePeriodActive();
+
+    if (!batteryBought) {
+        const totalRate = newEnergyRate - getTotalEnergyUse();
+        if (!getInfinitePower()) {
+            if (anyPlantActive) {
+                const shouldForceOff = totalRate <= 0 && powerOnNow && !graceActive;
+                const shouldForceOn = totalRate > 0 && !powerOnNow;
+
+                if (shouldForceOff) {
+                    setPowerOnOff(false);
+                } else if (shouldForceOn) {
+                    setPowerOnOff(true);
+                }
+                powerOnAfterSwitch = getPowerOnOff();
+            }
+        } else {
+            powerOnAfterSwitch = true;
+        }
+    } else {
+        if (!getInfinitePower()) {
+            const shouldForceOff = currentEnergyQuantity <= 0.00001 && powerOnNow && !graceActive;
+            const shouldForceOn = currentEnergyQuantity > 0.00001 && !powerOnNow;
+
+            if (shouldForceOff) {
+                setPowerOnOff(false);
+            } else if (shouldForceOn) {
+                setPowerOnOff(true);
+            }
+            powerOnAfterSwitch = getPowerOnOff();
+        } else {
+            powerOnAfterSwitch = true;
+        }
+    }
+
+    if (powerOnAfterSwitch !== initialPowerState) {
+        if (!getPowerOnOff()) {
+            sfxPlayer.playAudio('powerOff', 'powerOn');
+            sfxPlayer.playAudio('powerTripped', false);
+            addToResourceAllTimeStat(1, 'allTimesTripped');
+        }
+    }
+
+    if (!getPowerOnOff() && powerOnNow !== powerOnAfterSwitch) {
+        const powerBuildings = Object.fromEntries(
+            Object.entries(getResourceDataObject('buildings', ['energy', 'upgrades'])).filter(([key]) => key.startsWith('power'))
+        );
+
+        Object.keys(powerBuildings).forEach(powerBuilding => {
+            const fuelType = getResourceDataObject('buildings', ['energy', 'upgrades', powerBuilding, 'fuel'])[0];
+            const fuelCategory = getResourceDataObject('buildings', ['energy', 'upgrades', powerBuilding, 'fuel'])[2];
+
+            toggleBuildingTypeOnOff(powerBuilding, false);
+            startUpdateTimersAndRates(powerBuilding, 'toggle');
+            addOrRemoveUsedPerSecForFuelRate(fuelType, null, fuelCategory, powerBuilding, true);
+        });
+    }
+
+    setAsteroidTimerCanContinue(getPowerOnOff() && !getCurrentlyInvestigatingStar() && !getCurrentlyPillagingVoid());
+    setStarInvestigationTimerCanContinue(getPowerOnOff() && !getCurrentlySearchingAsteroid() && !getCurrentlyPillagingVoid());
+    setPillageVoidTimerCanContinue(getPowerOnOff() && !getCurrentlySearchingAsteroid() && !getCurrentlyInvestigatingStar());
+}
+
 function initialiseRocketFuelDeltaTimers() {
     const spaceUpgrades = getResourceDataObject('space', ['upgrades']);
     if (!spaceUpgrades) {
@@ -6481,141 +6657,7 @@ function startInitialTimers() {
 
     initialiseResearchDeltaTimer();
     
-    timerManager.addTimer('energy', getTimerUpdateInterval(), () => {
-        let newEnergyRate = 0;
-        let currentEnergyQuantity = getResourceDataObject('buildings', ['energy', 'quantity']);
-        const batteryBought = getResourceDataObject('buildings', ['energy', 'batteryBoughtYet']);
-        const energyStorageCapacity = getResourceDataObject('buildings', ['energy', 'storageCapacity']);
-
-        if (!getWeatherEfficiencyApplied()) {
-            setResourceDataObject(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'purchasedRate']) * getCurrentStarSystemWeatherEfficiency()[1], 'buildings', ['energy', 'upgrades', 'powerPlant2', 'purchasedRate']);
-            setWeatherEfficiencyApplied(true);
-        }
-        
-        if (Math.floor(currentEnergyQuantity) <= energyStorageCapacity) {
-            if (getPowerOnOff()) {   
-                if (getBuildingTypeOnOff('powerPlant1')) {
-                    newEnergyRate += getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'purchasedRate'])
-                }
-                if (getBuildingTypeOnOff('powerPlant2')) {
-                    newEnergyRate += getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'purchasedRate']);
-                }
-                if (getBuildingTypeOnOff('powerPlant3')) {
-                    newEnergyRate += getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant3', 'purchasedRate'])
-                }
-
-                let totalRate = getInfinitePower() ? getInfinitePowerRate() : newEnergyRate - getTotalEnergyUse();
-
-                if (batteryBought) {
-                    if (Math.floor(currentEnergyQuantity) === energyStorageCapacity) {
-                        if (totalRate >= 0) { //max energy
-                            setResourceDataObject(currentEnergyQuantity, 'buildings', ['energy', 'quantity']);
-                            getElements().energyQuantity.classList.remove('red-disabled-text');
-                            getElements().energyQuantity.classList.add('green-ready-text');
-                            totalRate = 0;
-                        } else { //energy falling
-                            setResourceDataObject(currentEnergyQuantity + totalRate, 'buildings', ['energy', 'quantity']);
-                            getElements().energyQuantity.classList.add('red-disabled-text');
-                            getElements().energyQuantity.classList.remove('green-ready-text');
-                        }
-                    } else { //energy climbing
-                        setResourceDataObject(Math.min(currentEnergyQuantity + totalRate, getResourceDataObject('buildings', ['energy', 'storageCapacity'])), 'buildings', ['energy', 'quantity']);
-                        getElements().energyQuantity.classList.remove('red-disabled-text');
-                        getElements().energyQuantity.classList.remove('green-ready-text');
-                    }
-                }
-                if (getInfinitePower()) {
-                    getElements().energyRate.textContent = `∞ DYSON ∞`;     
-                } else {
-                    getElements().energyRate.textContent = `${Math.floor(totalRate * getTimerRateRatio())} KW / s`;
-                }
-            } else {
-                getElements().energyQuantity.classList.remove('red-disabled-text');
-                getElements().energyQuantity.classList.remove('green-ready-text');
-                getElements().energyRate.textContent = `0 KW / s`;
-            }
-        } else {
-            getElements().energyQuantity.classList.add('green-ready-text');
-            getElements().energyQuantity.classList.remove('red-disabled-text');
-        }
-
-        currentEnergyQuantity = getResourceDataObject('buildings', ['energy', 'quantity']);
-
-        if (currentEnergyQuantity < 0) {
-            setResourceDataObject(0, 'buildings', ['energy', 'quantity']);
-        }
-
-        if (getInfinitePower()) {
-            setResourceDataObject(getInfinitePowerRate(), 'buildings', ['energy', 'rate']); 
-        } else {
-            setResourceDataObject(newEnergyRate, 'buildings', ['energy', 'rate']); 
-        }
-        
-        const powerOnNow = getPowerOnOff();
-        let powerOnAfterSwitch = powerOnNow;
-        const anyPlantActive = getBuildingTypeOnOff('powerPlant1') || getBuildingTypeOnOff('powerPlant2') || getBuildingTypeOnOff('powerPlant3');
-
-        const initialPowerState = getPowerOnOff();
-        const graceActive = isPowerGracePeriodActive();
-
-        if (!batteryBought) {
-            const totalRate = newEnergyRate - getTotalEnergyUse();
-            if (!getInfinitePower()) {
-                if (anyPlantActive) {
-                    const shouldForceOff = totalRate <= 0 && powerOnNow && !graceActive;
-                    const shouldForceOn = totalRate > 0 && !powerOnNow;
-
-                    if (shouldForceOff) {
-                        setPowerOnOff(false);
-                    } else if (shouldForceOn) {
-                        setPowerOnOff(true);
-                    }
-                    powerOnAfterSwitch = getPowerOnOff();
-                }
-            } else {
-                powerOnAfterSwitch = true;
-            }
-        } else {
-            if (!getInfinitePower()) {
-                const shouldForceOff = currentEnergyQuantity <= 0.00001 && powerOnNow && !graceActive;
-                const shouldForceOn = currentEnergyQuantity > 0.00001 && !powerOnNow;
-
-                if (shouldForceOff) {
-                    setPowerOnOff(false);
-                } else if (shouldForceOn) {
-                    setPowerOnOff(true);
-                }
-                powerOnAfterSwitch = getPowerOnOff();
-            } else {
-                powerOnAfterSwitch = true;
-            }
-        }
-
-        if (powerOnAfterSwitch !== initialPowerState) {
-            if (!getPowerOnOff()) {
-                sfxPlayer.playAudio("powerOff", "powerOn");
-                sfxPlayer.playAudio("powerTripped", false);
-                addToResourceAllTimeStat(1, 'allTimesTripped');
-            }
-        }
-
-        if (!getPowerOnOff() && powerOnNow !== powerOnAfterSwitch) {
-            const powerBuildings = Object.fromEntries(Object.entries(getResourceDataObject('buildings', ['energy', 'upgrades'])).filter(([key]) => key.startsWith('power')));
-
-            Object.keys(powerBuildings).forEach(powerBuilding => {
-                const fuelType = getResourceDataObject('buildings', ['energy', 'upgrades', powerBuilding, 'fuel'])[0];
-                const fuelCategory = getResourceDataObject('buildings', ['energy', 'upgrades', powerBuilding, 'fuel'])[2];
-
-                toggleBuildingTypeOnOff(powerBuilding, false);
-                startUpdateTimersAndRates(powerBuilding, 'toggle');
-                addOrRemoveUsedPerSecForFuelRate(fuelType, null, fuelCategory, powerBuilding, true);
-            });
-        }
-
-        setAsteroidTimerCanContinue(getPowerOnOff() && !getCurrentlyInvestigatingStar() && !getCurrentlyPillagingVoid());
-        setStarInvestigationTimerCanContinue(getPowerOnOff() && !getCurrentlySearchingAsteroid() && !getCurrentlyPillagingVoid());
-        setPillageVoidTimerCanContinue(getPowerOnOff() && !getCurrentlySearchingAsteroid() && !getCurrentlyInvestigatingStar());        
-    });
+    initialiseEnergyDeltaTimer();
 
     let weatherCountDownToChangeInterval;
 
