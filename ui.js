@@ -234,7 +234,8 @@ import {
     settleSystemAfterBattle,
     setAutoSellToggleState,
     setAutoCreateToggleState,
-    calculateStarTravelDuration
+    calculateStarTravelDuration,
+    getAscendencyPointsWithRepeatableBonus
 } from './game.js';
 
 import { 
@@ -2746,8 +2747,9 @@ export function drawStarConnectionDrawings(fromStar, toStar, isInteresting) {
             labelElement = document.createElement('div');
             labelElement.id = 'star-connection-label';
             labelElement.classList.add('star-connection-label');
+            const displayAp = isInteresting ? getAscendencyPointsWithRepeatableBonus(apGranted) : null;
             labelElement.innerHTML = isInteresting 
-                ? `Antimatter: ${fuelNeeded}<br>AP: ${apGranted}` 
+                ? `Antimatter: ${fuelNeeded}<br>AP: ${displayAp}` 
                 : `??? <br> ???`;
             labelElement.style.color = labelColor;
             labelElement.style.textAlign = 'center';

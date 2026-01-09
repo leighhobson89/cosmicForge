@@ -217,13 +217,16 @@ import {
     getUnlockedResourcesArray,
     setUnlockedResourcesArray,
     setRevealedTechArray,
-    getTimerRateRatio,
     getTimerUpdateInterval,
+    getTimerRateRatio,
+    getPowerGracePeriodEnd,
+    isPowerGracePeriodActive,
+    setPowerGracePeriodEnd,
     getAntimatterDeltaAccumulator,
     setAntimatterDeltaAccumulator,
-    getCurrencySymbol,
     setSaleResourcePreview,
     setCreateCompoundPreview,
+    getCurrencySymbol,
     setSaleCompoundPreview,
     getItemsToIncreasePrice,
     setItemsToIncreasePrice,
@@ -1368,6 +1371,17 @@ export function setAsteroidSearchEfficiencyAfterRepeatables() {
 
 export function calculateAndAddExtraAPFromPhilosophyRepeatable(amountToAdd = 0) {
     return amountToAdd;
+}
+
+export function getAscendencyPointsWithRepeatableBonus(baseAscendencyPoints = 0) {
+    const base = Number(baseAscendencyPoints) || 0;
+
+    if (getPlayerPhilosophy() === 'voidborn' && getStatRun() > 1) {
+        const bonus = calculateAndAddExtraAPFromPhilosophyRepeatable(getRepeatableTechMultipliers('4'));
+        return base + bonus;
+    }
+
+    return base;
 }
 
 export function setStarshipPartPricesAfterRepeatables() {
@@ -6542,14 +6556,18 @@ function startInitialTimers() {
         const anyPlantActive = getBuildingTypeOnOff('powerPlant1') || getBuildingTypeOnOff('powerPlant2') || getBuildingTypeOnOff('powerPlant3');
 
         const initialPowerState = getPowerOnOff();
+        const graceActive = isPowerGracePeriodActive();
 
         if (!batteryBought) {
             const totalRate = newEnergyRate - getTotalEnergyUse();
             if (!getInfinitePower()) {
                 if (anyPlantActive) {
-                    if (totalRate <= 0 && powerOnNow) {
+                    const shouldForceOff = totalRate <= 0 && powerOnNow && !graceActive;
+                    const shouldForceOn = totalRate > 0 && !powerOnNow;
+
+                    if (shouldForceOff) {
                         setPowerOnOff(false);
-                    } else if (totalRate > 0 && !powerOnNow) {
+                    } else if (shouldForceOn) {
                         setPowerOnOff(true);
                     }
                     powerOnAfterSwitch = getPowerOnOff();
@@ -6559,9 +6577,12 @@ function startInitialTimers() {
             }
         } else {
             if (!getInfinitePower()) {
-                if (currentEnergyQuantity <= 0.00001 && powerOnNow) {
+                const shouldForceOff = currentEnergyQuantity <= 0.00001 && powerOnNow && !graceActive;
+                const shouldForceOn = currentEnergyQuantity > 0.00001 && !powerOnNow;
+
+                if (shouldForceOff) {
                     setPowerOnOff(false);
-                } else if (currentEnergyQuantity > 0.00001 && !powerOnNow) {
+                } else if (shouldForceOn) {
                     setPowerOnOff(true);
                 }
                 powerOnAfterSwitch = getPowerOnOff();
@@ -8681,42 +8702,64 @@ export function launchRocket(rocket) {
 }
 
 export function toggleAllPower() {
-    const plantConfigs = [
-        {
-            key: 'powerPlant1',
-            quantity: getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'quantity'])
-        },
-        {
-            key: 'powerPlant2',
-            quantity: getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'quantity'])
-        },
-        {
-            key: 'powerPlant3',
-            quantity: getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant3', 'quantity'])
-        }
-    ];
+    const plantKeys = ['powerPlant1', 'powerPlant2', 'powerPlant3'];
+    const plantConfigs = plantKeys.map(key => {
+        const upgradeData = getResourceDataObject('buildings', ['energy', 'upgrades', key]);
+        const fuelData = upgradeData.fuel || [];
+        return {
+            key,
+            quantity: upgradeData.quantity || 0,
+            fuelType: fuelData[0],
+            fuelCategory: fuelData[2],
+            toggleButton: document.getElementById(`${key}Toggle`)
+        };
+    });
 
     const hasActivePlant = plantConfigs.some(({ key }) => getBuildingTypeOnOff(key));
 
     if (hasActivePlant) {
-        plantConfigs.forEach(({ key }) => {
+        let deactivatedAny = false;
+        plantConfigs.forEach(({ key, fuelType, fuelCategory, toggleButton }) => {
             if (getBuildingTypeOnOff(key)) {
+                if (toggleButton) {
+                    addOrRemoveUsedPerSecForFuelRate(fuelType, toggleButton, fuelCategory, key, false);
+                }
                 toggleBuildingTypeOnOff(key, false);
                 startUpdateTimersAndRates(key, 'toggle');
+                deactivatedAny = true;
             }
         });
+
+        if (deactivatedAny && !getInfinitePower()) {
+            setPowerOnOff(false);
+        }
+
+        handlePowerAllButtonState();
         sfxPlayer.playAudio('powerOff', 'powerOn');
         return;
     }
 
     let activatedAny = false;
-    plantConfigs.forEach(({ key, quantity }) => {
-        if (quantity > 0) {
-            toggleBuildingTypeOnOff(key, true);
-            startUpdateTimersAndRates(key, 'toggle');
-            activatedAny = true;
+    plantConfigs.forEach(({ key, quantity, fuelType, fuelCategory, toggleButton }) => {
+        if (quantity > 0 && !getBuildingTypeOnOff(key)) {
+            let shouldActivate = true;
+            if (toggleButton) {
+                shouldActivate = addOrRemoveUsedPerSecForFuelRate(fuelType, toggleButton, fuelCategory, key, false);
+            }
+
+            if (shouldActivate) {
+                toggleBuildingTypeOnOff(key, true);
+                startUpdateTimersAndRates(key, 'toggle');
+                activatedAny = true;
+            }
         }
     });
+
+    if (activatedAny && !getInfinitePower()) {
+        setPowerOnOff(true);
+    }
+
+    handlePowerAllButtonState();
 
     if (activatedAny) {
         sfxPlayer.playAudio('powerOn', 'powerOff');
@@ -9321,10 +9364,7 @@ export function calculateAscendencyPoints(distance) {
         }
     }
 
-    if (getPlayerPhilosophy() === 'voidborn' && getStatRun() > 1) {
-        const amountOfAPToAddFromRepeatables = calculateAndAddExtraAPFromPhilosophyRepeatable(getRepeatableTechMultipliers('4'));
-        modifiedAP += amountOfAPToAddFromRepeatables;
-    }
+    modifiedAP = getAscendencyPointsWithRepeatableBonus(modifiedAP);
 
     return modifiedAP;
 }

@@ -2,7 +2,7 @@ import { removeTabAttentionIfNoIndicators, createColoniseOpinionProgressBar, set
 import { getFactoryStarsArray, setInFormation, setRedrawBattleDescription, setFleetChangedSinceLastDiplomacy, setDestinationStarScanned, getDestinationStarScanned, getStellarScannerBuilt, getStarShipTravelling, getDestinationStar, getCurrencySymbol, getSortStarMethod, getCurrentStarSystem, STAR_FIELD_SEED, NUMBER_OF_STARS, getStarMapMode, setStarMapMode, getWarMode, replaceBattleUnits, setNeedNewBattleCanvas, setFormationGoal, setBattleResolved, getBelligerentEnemyFlag, setAchievementFlagArray, getStarsWithAncientManuscripts } from './constantsAndGlobalVars.js';
 import { getMaxFleetShip, getFleetShips, copyStarDataToDestinationStarField, getResourceDataObject, getStarShipParts, getStarShipPartsNeededInTotalPerModule, getStarSystemDataObject, setStarSystemDataObject } from './resourceDataObject.js';
 import { capitaliseString, capitaliseWordsWithRomanNumerals } from './utilityFunctions.js';
-import { updateDiplomacySituation, calculateModifiedAttitude, increaseAttackAndDefensePower, generateDestinationStarData, gain } from './game.js';
+import { updateDiplomacySituation, calculateModifiedAttitude, increaseAttackAndDefensePower, generateDestinationStarData, gain, getAscendencyPointsWithRepeatableBonus } from './game.js';
 
 export async function drawTab5Content(heading, optionContentElement, starDestinationInfoRedraw, diplomacyRedraw) {
     const optionElement = document.getElementById(heading.toLowerCase().replace(/\s(.)/g, (match, group1) => group1.toUpperCase()).replace(/\s+/g, '') + 'Option');
@@ -127,6 +127,8 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             : false;
 
             const { distance, fuel, ascendencyPoints, name, weatherTendency, precipitationType } = star;
+            const displayAscendencyPoints = getAscendencyPointsWithRepeatableBonus(ascendencyPoints);
+
             const starRowName = `starRow_${name}`;
             const weatherIconSpan = `<span class="${weatherTendency[2]}">${weatherTendency[0]}</span>`;
             const weatherText = `${weatherIconSpan} (${weatherTendency[1]}%)`;
@@ -172,7 +174,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                     ['value-star', 'fuel-star', 'notation', fuelClass]
                 ),
                 createTextElement(
-                    `${ascendencyPoints}`,
+                    `${displayAscendencyPoints}`,
                     'starInfoContainerAscendencyPoints',
                     ['value-star', 'fuel-star', 'notation']
                 ),
@@ -299,6 +301,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
 
         function drawLifeformData(optionContentElement) {
             const starData = getStarSystemDataObject('stars', ['destinationStar']);
+            const displayAscendencyPoints = getAscendencyPointsWithRepeatableBonus(starData.ascendencyPoints);
         
             const starNameRow = createOptionRow(
                 'starNameRow',
@@ -310,7 +313,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                     ['value-text']
                 ),
                 createTextElement(
-                    `<span class="ap-destination-star-element-right">AP: <span class="green-ready-text">${starData.ascendencyPoints}</span></span>
+                    `<span class="ap-destination-star-element-right">AP: <span class="green-ready-text">${displayAscendencyPoints}</span></span>
                     Life: <span class="${getStellarScannerBuilt() ? (starData.lifeDetected ? 'green-ready-text' : 'red-disabled-text') : 'red-disabled-text'}">
                         ${getStellarScannerBuilt() ? (starData.lifeDetected ? 'Yes' : 'No') : '???'}
                     </span>`,

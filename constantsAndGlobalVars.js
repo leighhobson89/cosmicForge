@@ -54,6 +54,7 @@ export const AP_BASE_SELL_PRICE = 100000;
 export const AP_BASE_BUY_PRICE = 1000000;
 export const CASH_LIQUIDATION_MODIFIER = 10;
 export const MAX_ANCIENT_MANUSCRIPTS = 4;
+export const POWER_GRACE_PERIOD_MS = 5000;
 
 export const factoryStarMap = {
     1: "Dyson Sphere",
@@ -358,6 +359,8 @@ let ranOutOfFuelWhenOn = {
     powerPlant2: false,
     powerPlant3: false,
 }
+
+let powerGracePeriodEnd = 0;
 
 let battleResolved = [false, null];
 
@@ -2410,6 +2413,7 @@ export function setPowerOnOff(value) {
     }
 
     if (!value) { //if power cuts off set all buttons to Activate mode ie deactivated.
+        setPowerGracePeriodEnd(0);
         const powerBuildings = getResourceDataObject('buildings', ['energy', 'upgrades']);
 
         Object.keys(powerBuildings).forEach(powerBuilding => {
@@ -2453,19 +2457,46 @@ export function setBuildingTypeOnOff(building, value) {
         setTrippedStatus(false);
     }
 
+    const now = Date.now();
+    if (value && !getInfinitePower()) {
+        setPowerGracePeriodEnd(now + POWER_GRACE_PERIOD_MS);
+    } else if (!value && !getInfinitePower() && buildingTypeOnOff[building]) {
+        const anyOtherActive = Object.entries(buildingTypeOnOff).some(([key, active]) => {
+            if (key === building) return false;
+            return active;
+        });
+        if (!anyOtherActive) {
+            setPowerGracePeriodEnd(0);
+        }
+    }
+
+    const graceActive = isPowerGracePeriodActive(now);
+
     const powerPlant1PurchasedRate = getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'purchasedRate']);
     const powerPlant2PurchasedRate = getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'purchasedRate']);
     const powerPlant3PurchasedRate = getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant3', 'purchasedRate']);
     
-    const totalRate = powerPlant1PurchasedRate + powerPlant2PurchasedRate + powerPlant3PurchasedRate;
+    const buildingActivationStates = {
+        powerPlant1: building === 'powerPlant1' ? value : buildingTypeOnOff['powerPlant1'],
+        powerPlant2: building === 'powerPlant2' ? value : buildingTypeOnOff['powerPlant2'],
+        powerPlant3: building === 'powerPlant3' ? value : buildingTypeOnOff['powerPlant3'],
+    };
+
+    const totalActiveRate =
+        (buildingActivationStates.powerPlant1 ? powerPlant1PurchasedRate : 0) +
+        (buildingActivationStates.powerPlant2 ? powerPlant2PurchasedRate : 0) +
+        (buildingActivationStates.powerPlant3 ? powerPlant3PurchasedRate : 0);
 
     const batteryBought = getResourceDataObject('buildings', ['energy', 'batteryBoughtYet']);
     const energyConsumption = getResourceDataObject('buildings', ['energy', 'consumption']);
     const energyQuantity = getResourceDataObject('buildings', ['energy', 'quantity']);
     
     if (
-        (!getInfinitePower() && !batteryBought && energyConsumption > totalRate) ||
-        (batteryBought && energyQuantity === 0 && energyConsumption > totalRate)
+        !graceActive &&
+        (
+            (!getInfinitePower() && !batteryBought && energyConsumption > totalActiveRate) ||
+            (batteryBought && energyQuantity === 0 && energyConsumption > totalActiveRate)
+        )
     ) {
         setTrippedStatus(true);
         setAchievementFlagArray('tripPower', 'add');
@@ -2488,6 +2519,24 @@ export function getTrippedStatus() {
 
 export function setTrippedStatus(value) {
     trippedStatus = value;
+}
+
+export function getPowerGracePeriodEnd() {
+    return powerGracePeriodEnd;
+}
+
+export function setPowerGracePeriodEnd(value) {
+    powerGracePeriodEnd = value;
+}
+
+export function isPowerGracePeriodActive(referenceTime = Date.now()) {
+    if (!powerGracePeriodEnd) {
+        return false;
+    }
+    if (getInfinitePower()) {
+        return false;
+    }
+    return referenceTime < powerGracePeriodEnd;
 }
 
 export function getCurrentStarSystem() {
