@@ -990,6 +990,329 @@ function updateEnergyDelta(deltaMs) {
     setPillageVoidTimerCanContinue(getPowerOnOff() && !getCurrentlySearchingAsteroid() && !getCurrentlyInvestigatingStar());
 }
 
+function initialiseResourceAutoBuyerDeltaTimers() {
+    const resources = getResourceDataObject('resources');
+    if (!resources) {
+        return;
+    }
+
+    const tiers = [1, 2, 3, 4];
+
+    Object.keys(resources).forEach(resource => {
+        tiers.forEach(tier => {
+            const timerId = `${resource}AB${tier}`;
+            if (timerManagerDelta.hasTimer(timerId)) {
+                return;
+            }
+
+            timerManagerDelta.addTimer(timerId, {
+                durationMs: 0,
+                repeat: true,
+                onUpdate: ({ deltaMs }) => updateResourceAutoBuyerDelta(resource, tier, deltaMs),
+                metadata: { type: 'resourceAutoBuyer', resource, tier }
+            });
+        });
+    });
+}
+
+function updateResourceAutoBuyerDelta(resource, tier, deltaMs) {
+    if (!deltaMs) {
+        return;
+    }
+
+    const tickInterval = getTimerUpdateInterval();
+    if (!tickInterval) {
+        return;
+    }
+
+    const tickMultiplier = deltaMs / tickInterval;
+    if (tickMultiplier <= 0) {
+        return;
+    }
+
+    const storageCapacity = getResourceDataObject('resources', [resource, 'storageCapacity']);
+    if (typeof storageCapacity !== 'number' || Number.isNaN(storageCapacity)) {
+        return;
+    }
+
+    let currentQuantity = getResourceDataObject('resources', [resource, 'quantity']) || 0;
+
+    if (getPowerOnOff()) {
+        const autoBuyerExtractionRate = getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', `tier${tier}`, 'rate']) || 0;
+        const currentTierAutoBuyerQuantity = getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', `tier${tier}`, 'quantity']) || 0;
+        const activeAutoBuyer = getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', `tier${tier}`, 'active']);
+        const calculatedResourceRate = activeAutoBuyer ? autoBuyerExtractionRate * currentTierAutoBuyerQuantity : 0;
+
+        const productionAmount = calculatedResourceRate * tickMultiplier;
+        const updatedQuantity = Math.min(currentQuantity + productionAmount, storageCapacity);
+        const actualGain = Math.max(0, Math.min(storageCapacity - currentQuantity, productionAmount));
+
+        setResourceDataObject(updatedQuantity, 'resources', [resource, 'quantity']);
+        addToResourceAllTimeStat(actualGain, resource);
+        currentQuantity = updatedQuantity;
+
+        const getResourceTierContribution = tierIndex => {
+            const isActive = getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', `tier${tierIndex}`, 'active']);
+            if (!isActive) return 0;
+            return (
+                (getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', `tier${tierIndex}`, 'rate']) || 0) *
+                (getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', `tier${tierIndex}`, 'quantity']) || 0)
+            );
+        };
+
+        const allResourceRatesAddedTogether =
+            getResourceTierContribution(1) +
+            getResourceTierContribution(2) +
+            getResourceTierContribution(3) +
+            getResourceTierContribution(4);
+
+        const powerPlant1FuelType = 'carbon';
+        const powerPlant1ConsumptionPerTick =
+            (getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'fuel'])?.[1] || 0) *
+            (getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'quantity']) || 0);
+
+        let amountToDeductForConsumption = 0;
+
+        if (getBuildingTypeOnOff('powerPlant1') && resource === powerPlant1FuelType) {
+            amountToDeductForConsumption = powerPlant1ConsumptionPerTick;
+            if (tier === 1) {
+                const consumptionAmount = amountToDeductForConsumption * tickMultiplier;
+                setCanAffordDeferred(true);
+                deferredActions.push(() => {
+                    if (getCanAffordDeferred()) {
+                        const netResourceRate = allResourceRatesAddedTogether - amountToDeductForConsumption;
+                        setResourceDataObject(netResourceRate, 'resources', [resource, 'rate']);
+                        const currentQuantityDeferred = getResourceDataObject('resources', [resource, 'quantity']) || 0;
+                        const newQuantity = Math.max(currentQuantityDeferred - consumptionAmount, 0);
+                        setResourceDataObject(newQuantity, 'resources', [resource, 'quantity']);
+                    }
+                    setCanAffordDeferred(null);
+                });
+            }
+        }
+
+        if (resource !== 'solar') {
+            getElements()[`${resource}Rate`].textContent = `${((allResourceRatesAddedTogether - amountToDeductForConsumption) * getTimerRateRatio()).toFixed(1)} / s`;
+        }
+    } else if (tier === 1) {
+        const autoBuyerExtractionRate = getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', 'tier1', 'rate']) || 0;
+        const currentTierAutoBuyerQuantity = getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', 'tier1', 'quantity']) || 0;
+        const activeAutoBuyer = getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', 'tier1', 'active']);
+
+        const calculatedResourceRate = activeAutoBuyer ? autoBuyerExtractionRate * currentTierAutoBuyerQuantity : 0;
+        const productionAmount = calculatedResourceRate * tickMultiplier;
+        const updatedQuantity = Math.min(currentQuantity + productionAmount, storageCapacity);
+        const actualGain = Math.max(0, Math.min(storageCapacity - currentQuantity, productionAmount));
+
+        setResourceDataObject(updatedQuantity, 'resources', [resource, 'quantity']);
+        addToResourceAllTimeStat(actualGain, resource);
+
+        const resourceTier1Rate = calculatedResourceRate;
+        setResourceDataObject(resourceTier1Rate, 'resources', [resource, 'rate']);
+        if (resource !== 'solar') {
+            getElements()[`${resource}Rate`].textContent = `${(resourceTier1Rate * getTimerRateRatio()).toFixed(1)} / s`;
+        }
+    }
+
+    if (getResourceDataObject('resources', [resource, 'autoSell'])) {
+        const updatedQuantity = getResourceDataObject('resources', [resource, 'quantity']) || 0;
+
+        if (updatedQuantity > 100) {
+            const autoSellQuantity = updatedQuantity - 100;
+            setResourceDataObject(100, 'resources', [resource, 'quantity']);
+            processAutoSell(resource, autoSellQuantity, 'resources');
+        }
+    }
+}
+
+function initialiseCompoundAutoBuyerDeltaTimers() {
+    const compounds = getResourceDataObject('compounds');
+    if (!compounds) {
+        return;
+    }
+
+    const tiers = [1, 2, 3, 4];
+
+    Object.keys(compounds).forEach(compound => {
+        tiers.forEach(tier => {
+            const timerId = `${compound}AB${tier}`;
+            if (timerManagerDelta.hasTimer(timerId)) {
+                return;
+            }
+
+            timerManagerDelta.addTimer(timerId, {
+                durationMs: 0,
+                repeat: true,
+                onUpdate: ({ deltaMs }) => updateCompoundAutoBuyerDelta(compound, tier, deltaMs),
+                metadata: { type: 'compoundAutoBuyer', compound, tier }
+            });
+        });
+    });
+}
+
+function updateCompoundAutoBuyerDelta(compound, tier, deltaMs) {
+    if (!deltaMs) {
+        return;
+    }
+
+    const tickInterval = getTimerUpdateInterval();
+    if (!tickInterval) {
+        return;
+    }
+
+    const tickMultiplier = deltaMs / tickInterval;
+    if (tickMultiplier <= 0) {
+        return;
+    }
+
+    const storageCapacity = getResourceDataObject('compounds', [compound, 'storageCapacity']);
+    if (typeof storageCapacity !== 'number' || Number.isNaN(storageCapacity)) {
+        return;
+    }
+
+    let currentQuantity = getResourceDataObject('compounds', [compound, 'quantity']) || 0;
+
+    if (getPowerOnOff()) {
+        const autoBuyerExtractionRate = getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', `tier${tier}`, 'rate']) || 0;
+        const currentTierAutoBuyerQuantity = getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', `tier${tier}`, 'quantity']) || 0;
+        const activeAutoBuyer = getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', `tier${tier}`, 'active']);
+        const calculatedCompoundRate = activeAutoBuyer ? autoBuyerExtractionRate * currentTierAutoBuyerQuantity : 0;
+
+        const productionAmount = calculatedCompoundRate * tickMultiplier;
+        const updatedQuantity = Math.min(currentQuantity + productionAmount, storageCapacity);
+        const actualGain = Math.max(0, Math.min(storageCapacity - currentQuantity, productionAmount));
+
+        setResourceDataObject(updatedQuantity, 'compounds', [compound, 'quantity']);
+        addToResourceAllTimeStat(actualGain, compound);
+        currentQuantity = updatedQuantity;
+
+        if (
+            getCurrentStarSystemWeatherEfficiency()[2] === 'rain' &&
+            compound === getStarSystemDataObject('stars', [getCurrentStarSystem(), 'precipitationType']) &&
+            getUnlockedCompoundsArray().includes(getStarSystemDataObject('stars', [getCurrentStarSystem(), 'precipitationType']))
+        ) {
+            const precipitationGain = currentQuantity >= storageCapacity ? 0 : autoBuyerExtractionRate * tickMultiplier;
+            setCollectedPrecipitationQuantityThisRun(getCollectedPrecipitationQuantityThisRun() + precipitationGain);
+        }
+
+        const getCompoundTierContribution = tierIndex => {
+            const isActive = getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', `tier${tierIndex}`, 'active']);
+            if (!isActive) return 0;
+            return (
+                (getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', `tier${tierIndex}`, 'rate']) || 0) *
+                (getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', `tier${tierIndex}`, 'quantity']) || 0)
+            );
+        };
+
+        let allCompoundRatesAddedTogether =
+            getCompoundTierContribution(1) +
+            getCompoundTierContribution(2) +
+            getCompoundTierContribution(3) +
+            getCompoundTierContribution(4);
+
+        if (compound === getStarSystemDataObject('stars', [getCurrentStarSystem(), 'precipitationType'])) {
+            allCompoundRatesAddedTogether += getCurrentPrecipitationRate();
+        }
+
+        const powerPlant3FuelType = 'diesel';
+        const powerPlant3ConsumptionPerTick =
+            (getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant3', 'fuel'])?.[1] || 0) *
+            (getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant3', 'quantity']) || 0);
+
+        let amountToDeductForConsumption = 0;
+
+        if (getBuildingTypeOnOff('powerPlant3') && compound === powerPlant3FuelType) {
+            amountToDeductForConsumption = powerPlant3ConsumptionPerTick;
+            if (tier === 1) {
+                const consumptionAmount = amountToDeductForConsumption * tickMultiplier;
+                setResourceDataObject(allCompoundRatesAddedTogether - amountToDeductForConsumption, 'compounds', [compound, 'rate']);
+                const currentQuantityTier1 = getResourceDataObject('compounds', [compound, 'quantity']) || 0;
+                const adjustedQuantity = Math.max(0, Math.min(currentQuantityTier1 - consumptionAmount, storageCapacity));
+                setResourceDataObject(adjustedQuantity, 'compounds', [compound, 'quantity']);
+                currentQuantity = adjustedQuantity;
+            }
+        }
+
+        getElements()[`${compound}Rate`].textContent = `${((allCompoundRatesAddedTogether - amountToDeductForConsumption) * getTimerRateRatio()).toFixed(1)} / s`;
+    } else if (tier === 1) {
+        const autoBuyerExtractionRate = getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', 'tier1', 'rate']) || 0;
+        const currentTierAutoBuyerQuantity = getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', 'tier1', 'quantity']) || 0;
+        const activeAutoBuyer = getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', 'tier1', 'active']);
+        const calculatedCompoundRate = activeAutoBuyer ? autoBuyerExtractionRate * currentTierAutoBuyerQuantity : 0;
+
+        const productionAmount = calculatedCompoundRate * tickMultiplier;
+        const updatedQuantity = Math.min(currentQuantity + productionAmount, storageCapacity);
+        const actualGain = Math.max(0, Math.min(storageCapacity - currentQuantity, productionAmount));
+
+        setResourceDataObject(updatedQuantity, 'compounds', [compound, 'quantity']);
+        addToResourceAllTimeStat(actualGain, compound);
+
+        if (
+            compound === getStarSystemDataObject('stars', [getCurrentStarSystem(), 'precipitationType']) &&
+            getUnlockedCompoundsArray().includes(getStarSystemDataObject('stars', [getCurrentStarSystem(), 'precipitationType']))
+        ) {
+            const precipitationGain = activeAutoBuyer ? autoBuyerExtractionRate * tickMultiplier : 0;
+            setCollectedPrecipitationQuantityThisRun(getCollectedPrecipitationQuantityThisRun() + precipitationGain);
+        }
+
+        let compoundTier1Rate = calculatedCompoundRate;
+
+        if (compound === getStarSystemDataObject('stars', [getCurrentStarSystem(), 'precipitationType'])) {
+            compoundTier1Rate += getCurrentPrecipitationRate();
+        }
+
+        if (!activeAutoBuyer) {
+            compoundTier1Rate = 0;
+        }
+
+        setResourceDataObject(compoundTier1Rate, 'compounds', [compound, 'rate']);
+        getElements()[`${compound}Rate`].textContent = `${(compoundTier1Rate * getTimerRateRatio()).toFixed(1)} / s`;
+    } else if (
+        compound === getStarSystemDataObject('stars', [getCurrentStarSystem(), 'precipitationType'])
+    ) {
+        setResourceDataObject(getCurrentPrecipitationRate(), 'compounds', [compound, 'rate']);
+        getElements()[`${compound}Rate`].textContent = `${(getCurrentPrecipitationRate() * getTimerRateRatio()).toFixed(1)} / s`;
+    }
+
+    if (getResourceDataObject('compounds', [compound, 'autoSell'])) {
+        const updatedQuantity = getResourceDataObject('compounds', [compound, 'quantity']) || 0;
+
+        if (updatedQuantity > 100) {
+            const autoSellQuantity = updatedQuantity - 100;
+            setResourceDataObject(100, 'compounds', [compound, 'quantity']);
+            processAutoSell(compound, autoSellQuantity, 'compounds');
+        }
+    }
+
+    if (getResourceDataObject('compounds', [compound, 'autoCreate'])) {
+        const resources = [1, 2, 3, 4].map(i => getResourceDataObject('compounds', [compound, `createsFrom${i}`])?.[0]);
+
+        resources.forEach(resourceName => {
+            if (resourceName !== '' && resourceName !== undefined) {
+                setResourceDataObject(false, 'resources', [resourceName, 'autoSell']);
+            }
+        });
+
+        currentQuantity = getResourceDataObject('compounds', [compound, 'quantity']) || 0;
+
+        if (currentQuantity < storageCapacity) {
+            const amountToCreateArray = calculateCreatableCompoundAmount(compound);
+            const availableStorage = Math.floor(storageCapacity - currentQuantity);
+            const amountToCreate = Math.min(amountToCreateArray[0], availableStorage);
+
+            setResourceDataObject(currentQuantity + amountToCreate, 'compounds', [compound, 'quantity']);
+
+            amountToCreateArray.slice(1).forEach(([amountPerUnit, resourceName]) => {
+                if (resourceName && amountPerUnit > 0) {
+                    const currentResourceQuantity = getResourceDataObject('resources', [resourceName, 'quantity']) || 0;
+                    const newResourceQuantity = currentResourceQuantity - Math.floor((amountToCreate / amountToCreateArray[0]) * amountPerUnit);
+                    setResourceDataObject(newResourceQuantity, 'resources', [resourceName, 'quantity']);
+                }
+            });
+        }
+    }
+}
+
 function initialiseRocketFuelDeltaTimers() {
     const spaceUpgrades = getResourceDataObject('space', ['upgrades']);
     if (!spaceUpgrades) {
@@ -6411,252 +6734,13 @@ function startInitialTimers() {
     const compounds = getResourceDataObject('compounds');
     const tiers = [1, 2, 3, 4];
 
-    /*
-    timerManager.addTimer('antimatter', getTimerUpdateInterval(), () => {
-        if (getAntimatterUnlocked()) {
-            updateAntimatterAndDiagram();
-        }
-    });
-    */
     initialiseAntimatterDeltaTimer();
-
     initialiseRocketFuelDeltaTimers();
     
-    for (const resource in resources) {
-        if (resources.hasOwnProperty(resource)) {
-            tiers.forEach(tier => {
-                const timerName = `${resource}AB${tier}`;
-                if (!timerManager.getTimer(timerName)) {
-                    timerManager.addTimer(timerName, getTimerUpdateInterval(), () => {
-                        const currentQuantity = getResourceDataObject('resources', [resource, 'quantity']);
-                        const storageCapacity = getResourceDataObject('resources', [resource, 'storageCapacity']);
-                        if (getPowerOnOff()) {
-                            const autoBuyerExtractionRate = getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', `tier${tier}`, 'rate']);
-                            const currentTierAutoBuyerQuantity = getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', `tier${tier}`, 'quantity']);
-                            const activeAutoBuyer = getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', `tier${tier}`, 'active']);
-                            const calculatedResourceRate = activeAutoBuyer
-                              ? autoBuyerExtractionRate * currentTierAutoBuyerQuantity
-                              : 0;
-                            const amountToAdd = Math.min(currentQuantity + calculatedResourceRate, storageCapacity);
-                            setResourceDataObject(amountToAdd, 'resources', [resource, 'quantity']);
-                            addToResourceAllTimeStat((currentQuantity >= storageCapacity) ? 0 : calculatedResourceRate, resource);
-                            const getResourceTierContribution = tierIndex => {
-                                const isActive = getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', `tier${tierIndex}`, 'active']);
-                                if (!isActive) return 0;
-                                return getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', `tier${tierIndex}`, 'rate']) *
-                                    getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', `tier${tierIndex}`, 'quantity']);
-                            };
-                            const allResourceRatesAddedTogether = 
-                                getResourceTierContribution(1) +
-                                getResourceTierContribution(2) +
-                                getResourceTierContribution(3) +
-                                getResourceTierContribution(4);
-
-                            const powerPlant1FuelType = 'carbon'; 
-                            const powerPlant1Consumption = getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'fuel'])[1] * getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'quantity']);
-
-                            let amountToDeductForConsumption = 0;
-
-                            if (getBuildingTypeOnOff('powerPlant1')) {
-                                if (resource === powerPlant1FuelType) {
-                                    amountToDeductForConsumption = powerPlant1Consumption;
-                                    if (tier === 1) { //not important which tier just has to be one of them to make it run once per loop
-                                        setCanAffordDeferred(true);
-                                        deferredActions.push(() => {
-                                            if (getCanAffordDeferred()) { 
-                                            const netResourceRate = allResourceRatesAddedTogether - amountToDeductForConsumption;
-                                            setResourceDataObject(netResourceRate, 'resources', [resource, 'rate']);
-                                            const currentQuantity = getResourceDataObject('resources', [resource, 'quantity']);
-                                            const newQuantity = Math.max(currentQuantity - amountToDeductForConsumption, 0);
-                                            setResourceDataObject(newQuantity, 'resources', [resource, 'quantity']);
-                                            }
-                                            setCanAffordDeferred(null);
-                                        });
-                                    }
-                                }
-                            }
-                            if (resource !== 'solar') {
-                                getElements()[`${resource}Rate`].textContent = `${((allResourceRatesAddedTogether - amountToDeductForConsumption) * getTimerRateRatio()).toFixed(1)} / s`;
-                            }
-
-                        } else { //if power off
-                            if (tier === 1) {
-                                const autoBuyerExtractionRate = getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', `tier1`, 'rate']);
-                                const currentTierAutoBuyerQuantity = getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', `tier1`, 'quantity']);
-                                const activeAutoBuyer = getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', `tier1`, 'active']);
-                                const calculatedResourceRate = activeAutoBuyer
-                                  ? autoBuyerExtractionRate * currentTierAutoBuyerQuantity
-                                  : 0;
-                                const amountToAdd = Math.min(currentQuantity + calculatedResourceRate, storageCapacity);
-                                setResourceDataObject(amountToAdd, 'resources', [resource, 'quantity']);
-                                addToResourceAllTimeStat((currentQuantity >= storageCapacity) ? 0 : calculatedResourceRate, resource);
-
-                                const resourceTier1Rate = 
-                                    getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', 'tier1', 'rate']) * 
-                                    getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', 'tier1', 'quantity']);
-
-                                setResourceDataObject(resourceTier1Rate, 'resources', [resource, 'rate']);
-                                if (resource !== 'solar') {
-                                    getElements()[`${resource}Rate`].textContent = `${(resourceTier1Rate * getTimerRateRatio()).toFixed(1)} / s`;
-                                }
-                            }
-                        }
-
-                        if (getResourceDataObject('resources', [resource, 'autoSell'])) {
-                            const currentQuantity = getResourceDataObject('resources', [resource, 'quantity']);
-                        
-                            if (currentQuantity > 100) {
-                                const autoSellQuantity = currentQuantity - 100;
-                                setResourceDataObject(100, 'resources', [resource, 'quantity']);
-                                processAutoSell(resource, autoSellQuantity, 'resources');
-                            }
-                        }
-                    });
-                }
-            });
-        }
-    }
-
-    for (const compound in compounds) {
-        if (compounds.hasOwnProperty(compound)) {
-            tiers.forEach(tier => {
-                const timerName = `${compound}AB${tier}`;
-                if (!timerManager.getTimer(timerName)) {
-                    timerManager.addTimer(timerName, getTimerUpdateInterval(), () => {
-                        const currentQuantity = getResourceDataObject('compounds', [compound, 'quantity']);
-                        const storageCapacity = getResourceDataObject('compounds', [compound, 'storageCapacity']);
-                        if (getPowerOnOff()) {
-                            const autoBuyerExtractionRate = getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', `tier${tier}`, 'rate']);
-                            const currentTierAutoBuyerQuantity = getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', `tier${tier}`, 'quantity']);
-                            const activeAutoBuyer = getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', `tier${tier}`, 'active']);
-                            const calculatedCompoundRate = activeAutoBuyer
-                              ? autoBuyerExtractionRate * currentTierAutoBuyerQuantity
-                              : 0;                            
-                            const amountToAdd = Math.min(currentQuantity + calculatedCompoundRate, storageCapacity);
-                            setResourceDataObject(amountToAdd, 'compounds', [compound, 'quantity']);
-                            addToResourceAllTimeStat((currentQuantity >= storageCapacity) ? 0 : calculatedCompoundRate, compound);
-
-                            if (getCurrentStarSystemWeatherEfficiency()[2] === 'rain' && compound === getStarSystemDataObject('stars', [getCurrentStarSystem(), 'precipitationType']) && getUnlockedCompoundsArray().includes(getStarSystemDataObject('stars', [getCurrentStarSystem(), 'precipitationType']))) {
-                                const amountOfPrecipitationThisTimerIteration = (currentQuantity >= storageCapacity) ? 0 : autoBuyerExtractionRate;
-                                setCollectedPrecipitationQuantityThisRun(getCollectedPrecipitationQuantityThisRun() + amountOfPrecipitationThisTimerIteration);
-                            }
-                            
-                            const getCompoundTierContribution = tierIndex => {
-                                const isActive = getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', `tier${tierIndex}`, 'active']);
-                                if (!isActive) return 0;
-                                return getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', `tier${tierIndex}`, 'rate']) *
-                                    getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', `tier${tierIndex}`, 'quantity']);
-                            };
-                            let allCompoundRatesAddedTogether = 
-                                getCompoundTierContribution(1) +
-                                getCompoundTierContribution(2) +
-                                getCompoundTierContribution(3) +
-                                getCompoundTierContribution(4);
-
-                            if (compound === getStarSystemDataObject('stars', [getCurrentStarSystem(), 'precipitationType'])) {
-                                allCompoundRatesAddedTogether += getCurrentPrecipitationRate();
-                            }
-    
-                            const powerPlant3FuelType = 'diesel';                    
-                            const powerPlant3Consumption = getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant3', 'fuel'])[1] * getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant3', 'quantity']);
-    
-                            let amountToDeductForConsumption = 0;
-                            
-                            if (getBuildingTypeOnOff('powerPlant3')) {
-                                if (compound === powerPlant3FuelType) {
-                                    amountToDeductForConsumption = powerPlant3Consumption;
-                                    if (tier === 1) { //not important which tier just has to be one of them to make it run once per loop
-                                        setResourceDataObject(allCompoundRatesAddedTogether - amountToDeductForConsumption, 'compounds', [compound, 'rate']);
-                                        const currentQuantity = getResourceDataObject('compounds', [compound, 'quantity']);
-                                        const adjustedQuantity = Math.max(0, Math.min(currentQuantity - amountToDeductForConsumption, storageCapacity));
-                                        setResourceDataObject(adjustedQuantity, 'compounds', [compound, 'quantity']);
-                                    }
-                                }
-                            }
-                            getElements()[`${compound}Rate`].textContent = `${((allCompoundRatesAddedTogether - amountToDeductForConsumption) * getTimerRateRatio()).toFixed(1)} / s`;
-                        } else { //if power off
-                            if (tier === 1) {
-                                const autoBuyerExtractionRate = getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', `tier1`, 'rate']);
-                                const currentTierAutoBuyerQuantity = getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', `tier1`, 'quantity']);
-                                const activeAutoBuyer = getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', `tier1`, 'active']);
-                                const calculatedCompoundRate = activeAutoBuyer
-                                  ? autoBuyerExtractionRate * currentTierAutoBuyerQuantity
-                                  : 0; 
-                                const amountToAdd = Math.min(currentQuantity + calculatedCompoundRate, storageCapacity);
-                                setResourceDataObject(amountToAdd, 'compounds', [compound, 'quantity']);
-                                addToResourceAllTimeStat((currentQuantity >= storageCapacity) ? 0 : calculatedCompoundRate, compound);
-                                
-                                if (compound === getStarSystemDataObject('stars', [getCurrentStarSystem(), 'precipitationType']) && getUnlockedCompoundsArray().includes(getStarSystemDataObject('stars', [getCurrentStarSystem(), 'precipitationType']))) {
-                                    const amountOfPrecipitationThisTimerIteration = (currentQuantity >= storageCapacity) ? 0 : autoBuyerExtractionRate;
-                                    setCollectedPrecipitationQuantityThisRun(getCollectedPrecipitationQuantityThisRun() + amountOfPrecipitationThisTimerIteration);
-                                }
-
-                                let compoundTier1Rate = 
-                                    getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', 'tier1', 'rate']) * 
-                                    getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', 'tier1', 'quantity']);
-                                
-                                if (compound === getStarSystemDataObject('stars', [getCurrentStarSystem(), 'precipitationType'])) {
-                                    compoundTier1Rate += getCurrentPrecipitationRate();
-                                }
-
-                                if (!activeAutoBuyer) compoundTier1Rate = 0;
-
-                                setResourceDataObject(compoundTier1Rate, 'compounds', [compound, 'rate']);
-                                getElements()[`${compound}Rate`].textContent = `${(compoundTier1Rate * getTimerRateRatio()).toFixed(1)} / s`;
-                            } else {
-                                if (compound === getStarSystemDataObject('stars', [getCurrentStarSystem(), 'precipitationType'])) {
-                                    setResourceDataObject(getCurrentPrecipitationRate(), 'compounds', [compound, 'rate']);
-                                    getElements()[`${compound}Rate`].textContent = `${(getCurrentPrecipitationRate() * getTimerRateRatio()).toFixed(1)} / s`;
-                                }
-                            }
-                        }
-
-                        if (getResourceDataObject('compounds', [compound, 'autoSell'])) {
-                            const currentQuantity = getResourceDataObject('compounds', [compound, 'quantity']);
-                        
-                            if (currentQuantity > 100) {
-                                const autoSellQuantity = currentQuantity - 100;
-                                setResourceDataObject(100, 'compounds', [compound, 'quantity']);
-                                processAutoSell(compound, autoSellQuantity, 'compounds');
-                            }
-                        }
-
-                        if (getResourceDataObject('compounds', [compound, 'autoCreate'])) {
-                            const resources = [1, 2, 3, 4].map(i =>
-                                getResourceDataObject('compounds', [compound, `createsFrom${i}`])[0]
-                            );
-                        
-                            resources.forEach(resource => {
-                                if (resource !== '' && resource !== undefined) setResourceDataObject(false, 'resources', [resource, 'autoSell']);
-                            });
-                        
-                            const currentQuantity = getResourceDataObject('compounds', [compound, 'quantity']);
-                            const storageCapacity = getResourceDataObject('compounds', [compound, 'storageCapacity']);
-                        
-                            if (currentQuantity < storageCapacity) {
-                                const amountToCreateArray = calculateCreatableCompoundAmount(compound);
-                                const availableStorage = Math.floor(storageCapacity - currentQuantity);
-                                const amountToCreate = Math.min(amountToCreateArray[0], availableStorage);
-                        
-                                setResourceDataObject(currentQuantity + amountToCreate, 'compounds', [compound, 'quantity']);
-                        
-                                amountToCreateArray.slice(1).forEach(([amountPerUnit, resource]) => {
-                                    if (resource && amountPerUnit > 0) setResourceDataObject(
-                                        (getResourceDataObject('resources', [resource, 'quantity']) || 0) - Math.floor((amountToCreate / amountToCreateArray[0]) * amountPerUnit),
-                                        'resources',
-                                        [resource, 'quantity']
-                                    );
-                                });
-                            }
-                        }                        
-                    });
-                }
-            });
-        }
-    }
+    initialiseResourceAutoBuyerDeltaTimers();
+    initialiseCompoundAutoBuyerDeltaTimers();
 
     initialiseResearchDeltaTimer();
-    
     initialiseEnergyDeltaTimer();
 
     let weatherCountDownToChangeInterval;
