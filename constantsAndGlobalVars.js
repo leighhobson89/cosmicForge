@@ -2657,7 +2657,7 @@ export async function getTechTreeDataAndDraw() {
             Object.entries(techData).filter(([key, tech]) => {
                 if (tech.special === 'megastructure') {
                     const techName = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
-                    console.log(techName, systemMegaStructure);
+                    //console.log(techName, systemMegaStructure);
                     return techName.includes(systemMegaStructure);
                 }
                 return true;
@@ -4192,7 +4192,7 @@ export function setActivatedWackyNewsEffectsArray(value, extra = null) {
 
         if (extra !== null) {
             setFeedbackGiven(extra);
-            console.log('FeedBack Given: ' + extra);
+            //console.log('FeedBack Given: ' + extra);
         }
     }
 }

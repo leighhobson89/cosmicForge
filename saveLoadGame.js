@@ -33,12 +33,12 @@ let autoSaveTimer = null;
 
 export function initializeAutoSave() {
     if (autoSaveTimer) {
-        console.log("Clearing existing auto-save timer.");
+        //console.log("Clearing existing auto-save timer.");
         clearTimeout(autoSaveTimer);
     }
 
     const frequency = getAutoSaveFrequency();
-    console.log("Auto-save initialized with frequency:", frequency, "ms");
+    //console.log("Auto-save initialized with frequency:", frequency, "ms");
 
     let timeLeft = frequency / 1000;
 
