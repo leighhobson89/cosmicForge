@@ -5337,14 +5337,6 @@ function disableTabsLinksAndAutoSaveDuringBattle(battleStart) {
     document.querySelectorAll("[id*='Option'], #starMapOption").forEach(element => {
         element.classList.toggle("tab-not-yet", battleStart);
     });    
-
-    if (battleStart) {
-        setAutoSaveToggle(false);
-    } else {
-        if (getWasAutoSaveToggled() && !getAutoSaveToggle()) {
-            setAutoSaveToggle(true);
-        }
-    }
 }
 
 export function updateFleetsAfterDestroyingAUnit(unit) {
@@ -10577,7 +10569,8 @@ export async function settleSystemAfterBattle(accessPoint) {
         setMegaStructuresInPossessionArray(getStarSystemDataObject('stars', [getDestinationStar(), 'factoryStar']));
     }
 
-    const apGain = Math.floor(getStarSystemDataObject('stars', ['destinationStar', 'ascendencyPoints']) * apModifier);
+    const baseApGain = Math.floor(getStarSystemDataObject('stars', ['destinationStar', 'ascendencyPoints']) * apModifier);
+    const apGain = getAscendencyPointsWithRepeatableBonus(baseApGain);
     
     if (!getApAwardedThisRun()) {   
         setResourceDataObject(Math.floor(apGain + getResourceDataObject('ascendencyPoints', ['quantity'])), 'ascendencyPoints', ['quantity']);

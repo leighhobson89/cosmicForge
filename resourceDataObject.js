@@ -2719,17 +2719,20 @@ export function resetResourceDataObjectOnRebirthAndAddApAndPermanentBuffsBack() 
     const currentPricesForRepeatables = {};
     const playerPhilosophy = getPlayerPhilosophy();
     const allPhilosophyTechs = getResourceDataObject('philosophyRepeatableTechs');
+    const researchAutoBuyerEnabled = !!getResourceDataObject('research', ['upgrades', 'autoBuyer', 'enabled']);
     
     const philosophyTechs = allPhilosophyTechs[playerPhilosophy];
     
     Object.values(philosophyTechs).forEach(tech => {
         const id = tech.idWithinCategory;
+
         if (tech.repeatable && id >= 1 && id <= 4) {
             currentPricesForRepeatables[id] = tech.price;
         }
     });
 
     Object.assign(resourceData, resourceDataRebirthCopy);
+    setResourceDataObject(researchAutoBuyerEnabled, 'research', ['upgrades', 'autoBuyer', 'enabled']);
 
     if (getMegaStructureResourceBonus()) {
         applyRateMultiplierToAllResources(5);

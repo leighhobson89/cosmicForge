@@ -11,7 +11,8 @@ import {
     getSaveData,
     getUserPlatform,
     getFeedbackGiven,
-    getFeedbackContent
+    getFeedbackContent,
+    getBattleOngoing
 } from './constantsAndGlobalVars.js';
 
 import { setAchievementIconImageUrls } from './resourceDataObject.js';
@@ -43,7 +44,9 @@ export function initializeAutoSave() {
 
     const autoSaveHandler = () => {
 
-        if (getAutoSaveToggle()) {
+        const canAutoSave = getAutoSaveToggle() && !getBattleOngoing();
+
+        if (canAutoSave) {
             saveGame('autoSave');
 
             if (getSaveData()) {
