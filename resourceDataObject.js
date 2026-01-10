@@ -2719,7 +2719,7 @@ export function resetResourceDataObjectOnRebirthAndAddApAndPermanentBuffsBack() 
     const currentPricesForRepeatables = {};
     const playerPhilosophy = getPlayerPhilosophy();
     const allPhilosophyTechs = getResourceDataObject('philosophyRepeatableTechs');
-    const researchAutoBuyerEnabled = !!getResourceDataObject('research', ['upgrades', 'autoBuyer', 'enabled']);
+    const researchAutoBuyerEnabled = !!getResourceDataObject('research', ['upgrades', 'autoBuyer', 'active']);
     
     const philosophyTechs = allPhilosophyTechs[playerPhilosophy];
     
@@ -2732,7 +2732,7 @@ export function resetResourceDataObjectOnRebirthAndAddApAndPermanentBuffsBack() 
     });
 
     Object.assign(resourceData, resourceDataRebirthCopy);
-    setResourceDataObject(researchAutoBuyerEnabled, 'research', ['upgrades', 'autoBuyer', 'enabled']);
+    setResourceDataObject(researchAutoBuyerEnabled, 'research', ['upgrades', 'autoBuyer', 'active']);
 
     if (getMegaStructureResourceBonus()) {
         applyRateMultiplierToAllResources(5);
