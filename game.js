@@ -1,4 +1,6 @@
 import {
+    getMegaStructureTabNotificationShown,
+    setMegaStructureTabNotificationShown,
     getManuscriptCluesShown,
     getAsteroidCostMultiplier,
     getMegaStructureAntimatterAmount,
@@ -1483,11 +1485,19 @@ export function drawMegaStructureTableText() {
 
 
 function megastructureUIChecks() {
-    if (getCurrentRunIsMegaStructureRun() || getPermanentAntimatterUnlock()) {
+    const isMegaStructureRun = getCurrentRunIsMegaStructureRun();
+
+    if (isMegaStructureRun) {
         const optionElement = document.getElementById('megastructuresOption');
-        if (optionElement?.parentElement?.parentElement.classList.contains('invisible')) {
+        const optionContainer = optionElement?.parentElement?.parentElement;
+
+        if (optionContainer?.classList.contains('invisible')) {
+            optionContainer.classList.remove('invisible');
+        }
+
+        if (!getMegaStructureTabNotificationShown()) {
             showNotification(`The MegaStructure Option is now available in the Galactic Tab!`, 'info', 3000, 'tech');
-            optionElement.parentElement.parentElement.classList.remove('invisible');
+            setMegaStructureTabNotificationShown(true);
         }
     }
 

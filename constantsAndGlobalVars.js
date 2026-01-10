@@ -491,6 +491,7 @@ let storageAdderBonus = false;
 let megaStructureResourceBonus = false;
 let infinitePower = false;
 let currentRunIsMegaStructureRun = false;
+let megaStructureTabNotificationShown = false;
 let rebirthPossible = false;
 let sfx = false;
 let backgroundAudio = false;
@@ -1110,6 +1111,7 @@ export function resetAllVariablesOnRebirth() {
     }
     
     currentRunIsMegaStructureRun = false;
+    megaStructureTabNotificationShown = false;
     techRenderChange = false;
     losingEnergy = false;
     powerOnOff = false;
@@ -1335,6 +1337,7 @@ export function captureGameStatusForSaving(type) {
         feedbackCanBeRequested: feedbackCanBeRequested,
         philosophyAbilityActive: philosophyAbilityActive,
         currentRunIsMegaStructureRun: currentRunIsMegaStructureRun,
+        megaStructureTabNotificationShown: megaStructureTabNotificationShown,
         infinitePower: infinitePower,
         megaStructureResourceBonus: megaStructureResourceBonus,
         storageAdderBonus: storageAdderBonus,
@@ -1550,6 +1553,7 @@ export function restoreGameStatus(gameState, type) {
             feedbackCanBeRequested = gameState.flags.feedbackCanBeRequested ?? true;
             philosophyAbilityActive = gameState.flags.philosophyAbilityActive ?? false;
             currentRunIsMegaStructureRun = gameState.flags.currentRunIsMegaStructureRun ?? false;
+            megaStructureTabNotificationShown = gameState.flags.megaStructureTabNotificationShown ?? false;
             infinitePower = gameState.flags.infinitePower ?? false;
             megaStructureResourceBonus = gameState.flags.megaStructureResourceBonus ?? false;
             storageAdderBonus = gameState.flags.storageAdderBonus ?? false;
@@ -3672,6 +3676,14 @@ export function getCurrentRunIsMegaStructureRun() {
 
 export function setCurrentRunIsMegaStructureRun(value) {
     currentRunIsMegaStructureRun = value;
+}
+
+export function getMegaStructureTabNotificationShown() {
+    return megaStructureTabNotificationShown;
+}
+
+export function setMegaStructureTabNotificationShown(value) {
+    megaStructureTabNotificationShown = value;
 }
 
 export function setMiaplacidusMilestoneLevel(value) {
