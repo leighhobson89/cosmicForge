@@ -1114,7 +1114,7 @@ export function resetAllVariablesOnRebirth() {
     megaStructureTabNotificationShown = false;
     techRenderChange = false;
     losingEnergy = false;
-    powerOnOff = false;
+    powerOnOff = getInfinitePower();
     trippedStatus = false;
     weatherEffectOn = false;
     weatherEfficiencyApplied = false;
