@@ -1,4 +1,4 @@
-import { getAchievementFlagArray, getActivatedWackyNewsEffectsArray, getAlreadySeenNewsTickerArray, getCollectedPrecipitationQuantityThisRun, getCompoundCreateDropdownRecipeText, getCurrentOptionPane, getCurrentStarSystem, getGameActiveCountTime, getMiningObject, getMultiplierPermanentResources, getStarVisionDistance, getStatRun, getTechUnlockedArray, getUnlockedResourcesArray, setAchievementFlagArray, setCompoundCreateDropdownRecipeText, setMultiplierPermanentCompounds, setMultiplierPermanentResources } from "./constantsAndGlobalVars.js";
+import { getAchievementFlagArray, getActivatedWackyNewsEffectsArray, getAlreadySeenNewsTickerArray, getCollectedPrecipitationQuantityThisRun, getCompoundCreateDropdownRecipeText, getCurrentOptionPane, getCurrentStarSystem, getGameActiveCountTime, getInfinitePower, getMiningObject, getMultiplierPermanentResources, getStarVisionDistance, getStatRun, getTechUnlockedArray, getUnlockedResourcesArray, setAchievementFlagArray, setCompoundCreateDropdownRecipeText, setMultiplierPermanentCompounds, setMultiplierPermanentResources } from "./constantsAndGlobalVars.js";
 import { getAchievementNotification, newsTickerContent, refreshAchievementTooltipDescriptions } from "./descriptions.js";
 import { achievementsData, getAchievementDataObject, getResourceDataObject, getStarSystemDataObject, setAchievementDataObject, setResourceDataObject } from "./resourceDataObject.js";
 import { showNotification } from "./ui.js";
@@ -129,6 +129,27 @@ export function grantAchievement(achievement) {
 
     refreshAchievementTooltipDescriptions();
     addAchievementBonus(achievement);
+}
+
+function grantAchievementsById(achievementIds) {
+    if (!Array.isArray(achievementIds) || achievementIds.length === 0) return;
+
+    achievementIds.forEach(id => {
+        const achievement = getAchievementDataObject(id);
+        if (achievement && achievement.active === false) {
+            grantAchievement(achievement);
+        }
+    });
+}
+
+export function autoGrantAchievementsOnRebirth() {
+    const achievementsToGrant = [];
+
+    if (getInfinitePower()) {
+        achievementsToGrant.push('buildPowerPlant', 'buildSolarPowerPlant', 'tripPower');
+    }
+
+    grantAchievementsById(achievementsToGrant);
 }
 
 export function addAchievementBonus(achievement) {

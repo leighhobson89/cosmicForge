@@ -331,7 +331,7 @@ import {
     megaStructureImageUrls 
 } from "./resourceDataObject.js";
 
-import { checkForAchievements, resetAchievementsOnRebirth } from "./achievements.js";
+import { autoGrantAchievementsOnRebirth, checkForAchievements, resetAchievementsOnRebirth } from "./achievements.js";
 
 import { 
     updateContent,
@@ -10791,6 +10791,7 @@ export function rebirth() {
     setRebirthPossible(false);
     resetAllVariablesOnRebirth();
     resetAchievementsOnRebirth();
+    autoGrantAchievementsOnRebirth();
     resetResourceDataObjectOnRebirthAndAddApAndPermanentBuffsBack(); //resets resource data, adds permanent buffs, and adds AP back in
     resetTabsOnRebirth();
     resetUIElementsOnRebirth();
