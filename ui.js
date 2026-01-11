@@ -1948,6 +1948,8 @@ export function generateStarfield(starfieldContainer, numberOfStars = 70, seed =
     const containerLeft = containerRect.left;
     const containerTop = containerRect.top;
     const starNames = getStarNames();
+    const settledStarsList = getSettledStars();
+    const currentStarSystemLower = getCurrentStarSystem();
     let currentStar = null;
 
     for (let i = 0; i < numberOfStars; i++) {
@@ -1983,7 +1985,7 @@ export function generateStarfield(starfieldContainer, numberOfStars = 70, seed =
     if (factoryStarChooserMode) {
         const destination = getDestinationStar();
         const current = getCurrentStarSystem();
-        const settled = getSettledStars();
+        const settled = settledStarsList;
         const visionDistance = getStarVisionDistance();
         const ancientManuscriptStars = getStarsWithAncientManuscripts();
     
@@ -2018,12 +2020,16 @@ export function generateStarfield(starfieldContainer, numberOfStars = 70, seed =
             entry => Array.isArray(entry) && entry[1] === normalizedStarName && entry[3] === true
         );
         const isFactoryStar = factoryStars.includes(normalizedStarName) && hasRevealedManuscript;
+        const isSettled = settledStarsList.includes(normalizedStarName);
+        const isCurrentStarSystem = normalizedStarName === currentStarSystemLower;
+        const isSettledNonCurrent = isSettled && !isCurrentStarSystem;
         const isInteresting =
             isFactoryStar ||
             distance <= getStarVisionDistance() ||
             star.name === currentStar.name ||
-            getSettledStars().includes(normalizedStarName);
+            isSettled;
         const isHomeStar = star.name === 'Miaplacidus';
+        const showFactoryAppearance = isFactoryStar && !isSettledNonCurrent;
 
         let starElement = document.createElement('div');
 
@@ -2034,16 +2040,12 @@ export function generateStarfield(starfieldContainer, numberOfStars = 70, seed =
                 starElement.classList.add('star', 'home-star');
             }
             starElement.id = star.name;
-        } else if (isFactoryStar) {
+        } else if (showFactoryAppearance) {
             starElement.classList.add('star', 'factory-star');
             starElement.id = star.name;
         } else {
             starElement.id = isInteresting ? star.name : `noneInterestingStar${star.name}`;
-            if (
-                isInteresting &&
-                getCurrentStarSystem() !== star.name.toLowerCase() &&
-                getSettledStars().includes(star.name.toLowerCase())
-            ) {
+            if (isInteresting && isSettledNonCurrent) {
                 starElement.id = `settledStar${star.name}`;
             }
 
@@ -2066,7 +2068,12 @@ export function generateStarfield(starfieldContainer, numberOfStars = 70, seed =
         }
 
         if (starElement.id.includes("settledStar")) {
-            starElement.setAttribute("titler", `${star.name} (SETTLED)`);
+            const tags = [];
+            if (isFactoryStar) {
+                tags.push('(MEGASTRUCTURE)');
+            }
+            tags.push('(SETTLED)');
+            starElement.setAttribute("titler", `${star.name} ${tags.join(' ')}`.trim());
         } else if (star.name.toLowerCase() === getCurrentStarSystem()) {
             starElement.setAttribute("titler", `${star.name}`);
         } else if (starElement.classList.contains("star-uninteresting") || starElement.id === capitaliseString(getCurrentStarSystem())) {

@@ -1766,7 +1766,8 @@ button.red-disabled-text {
 .factory-star::after,
 .home-star::after,
 .current-star::after,
-.star::after {
+.star::after,
+.settled-star::after {
     content: attr(titler);
     position: absolute;
     bottom: 120%;
@@ -1793,6 +1794,10 @@ button.red-disabled-text {
 
 .home-star-accessible::after {
     color: var(--ready-text);
+}
+
+.settled-star::after {
+    color: var(--star-color-settled);
 }
 
 
