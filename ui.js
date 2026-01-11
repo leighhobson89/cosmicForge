@@ -2097,9 +2097,8 @@ export function generateStarfield(starfieldContainer, numberOfStars = 70, seed =
             starElement.style.width = `${star.width * 2}px`;
             starElement.style.height = `${star.height * 2}px`;
             starElement.classList.add('star');
-            if (!checkIfInterestingStarIsInStarDataAlready(starElement.id.toLowerCase())) {
-                generateStarDataAndAddToDataObject(starElement, distance);
-            }
+            // Always register factory stars so their data appears in the Star Data table
+            generateStarDataAndAddToDataObject(starElement, distance);
             if (mapMode === 'distance') {
                 starElement.style.backgroundColor = getStarColorForDistanceFilterButton(distance);
             } else if (mapMode === 'in range') {
