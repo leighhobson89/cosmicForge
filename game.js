@@ -1,4 +1,6 @@
 import {
+    setMegaStructureTabUnlocked,
+    getMegaStructureTabUnlocked,
     getMegaStructureTabNotificationShown,
     setMegaStructureTabNotificationShown,
     getManuscriptCluesShown,
@@ -1486,15 +1488,25 @@ export function drawMegaStructureTableText() {
 
 function megastructureUIChecks() {
     const isMegaStructureRun = getCurrentRunIsMegaStructureRun();
+    const optionElement = document.getElementById('megastructuresOption');
+    const optionContainer = optionElement?.parentElement?.parentElement;
+    const shouldShowOption = isMegaStructureRun || getMegaStructureTabUnlocked();
+
+    if (optionContainer) {
+        if (shouldShowOption) {
+            if (optionContainer.classList.contains('invisible')) {
+                optionContainer.classList.remove('invisible');
+            }
+
+            if (isMegaStructureRun && !getMegaStructureTabUnlocked()) {
+                setMegaStructureTabUnlocked(true);
+            }
+        } else if (!optionContainer.classList.contains('invisible')) {
+            optionContainer.classList.add('invisible');
+        }
+    }
 
     if (isMegaStructureRun) {
-        const optionElement = document.getElementById('megastructuresOption');
-        const optionContainer = optionElement?.parentElement?.parentElement;
-
-        if (optionContainer?.classList.contains('invisible')) {
-            optionContainer.classList.remove('invisible');
-        }
-
         if (!getMegaStructureTabNotificationShown()) {
             showNotification(`The MegaStructure Option is now available in the Galactic Tab!`, 'info', 3000, 'tech');
             setMegaStructureTabNotificationShown(true);

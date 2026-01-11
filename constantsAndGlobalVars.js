@@ -492,6 +492,7 @@ let megaStructureResourceBonus = false;
 let infinitePower = false;
 let currentRunIsMegaStructureRun = false;
 let megaStructureTabNotificationShown = false;
+let megaStructureTabUnlocked = false;
 let rebirthPossible = false;
 let sfx = false;
 let backgroundAudio = false;
@@ -1338,6 +1339,7 @@ export function captureGameStatusForSaving(type) {
         philosophyAbilityActive: philosophyAbilityActive,
         currentRunIsMegaStructureRun: currentRunIsMegaStructureRun,
         megaStructureTabNotificationShown: megaStructureTabNotificationShown,
+        megaStructureTabUnlocked: megaStructureTabUnlocked,
         infinitePower: infinitePower,
         megaStructureResourceBonus: megaStructureResourceBonus,
         storageAdderBonus: storageAdderBonus,
@@ -1554,6 +1556,7 @@ export function restoreGameStatus(gameState, type) {
             philosophyAbilityActive = gameState.flags.philosophyAbilityActive ?? false;
             currentRunIsMegaStructureRun = gameState.flags.currentRunIsMegaStructureRun ?? false;
             megaStructureTabNotificationShown = gameState.flags.megaStructureTabNotificationShown ?? false;
+            megaStructureTabUnlocked = gameState.flags.megaStructureTabUnlocked ?? false;
             infinitePower = gameState.flags.infinitePower ?? false;
             megaStructureResourceBonus = gameState.flags.megaStructureResourceBonus ?? false;
             storageAdderBonus = gameState.flags.storageAdderBonus ?? false;
@@ -3684,6 +3687,14 @@ export function getMegaStructureTabNotificationShown() {
 
 export function setMegaStructureTabNotificationShown(value) {
     megaStructureTabNotificationShown = value;
+}
+
+export function getMegaStructureTabUnlocked() {
+    return megaStructureTabUnlocked;
+}
+
+export function setMegaStructureTabUnlocked(value) {
+    megaStructureTabUnlocked = value;
 }
 
 export function setMiaplacidusMilestoneLevel(value) {
