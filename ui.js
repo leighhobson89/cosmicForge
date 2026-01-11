@@ -5433,6 +5433,15 @@ function specialMessageBuilder(message, prizeCategory) {
     }
 }
 
+function multiplyAndRound(value, multiplier, precision = 6) {
+    if (!Number.isFinite(value) || !Number.isFinite(multiplier)) {
+        return 0;
+    }
+
+    const factor = Math.pow(10, precision);
+    return Math.round(value * multiplier * factor) / factor;
+}
+
 function addOneOffEventListeners() {
     const oneOffElement = document.getElementById('prizeTickerSpan');
 
@@ -5502,24 +5511,28 @@ function addOneOffEventListeners() {
                     if (category === 'resources' || category === 'compounds') {
                         const categoryTypeToUse = category === 'resources' ? resourcesToInclude : compoundsToInclude;
                         Object.keys(categoryTypeToUse).forEach(element => { //set future purchase rate * multiplier
-                            setResourceDataObject(getResourceDataObject(category, [element, 'upgrades', 'autoBuyer', item[1], 'rate']) * multiplier, category, [element, 'upgrades', 'autoBuyer', item[1], 'rate']
-                            );
-    
+                            const currentRate = getResourceDataObject(category, [element, 'upgrades', 'autoBuyer', item[1], 'rate']);
+                            const newRate = multiplyAndRound(currentRate, multiplier);
+
+                            setResourceDataObject(newRate, category, [element, 'upgrades', 'autoBuyer', item[1], 'rate']);
+
                             if (getCurrentOptionPane() === element) { //set autobuyer button text if on that screen at the moment prize is clicked
                                 const buyBuildingButtonElement = document.querySelector(`#${element}AutoBuyer${item[1].replace(/^\D+/g, '')}Row .option-row-main .input-container button[data-auto-buyer-tier="${item[1]}`);
-                                buyBuildingButtonElement.innerHTML = `Add ${getResourceDataObject(category, [element, 'upgrades', 'autoBuyer', item[1], 'rate']) * getTimerRateRatio()} ${capitaliseString(element)} /s`;
+                                if (buyBuildingButtonElement) {
+                                    buyBuildingButtonElement.innerHTML = `Add ${newRate * getTimerRateRatio()} ${capitaliseString(element)} /s`;
+                                }
                             }
                         });
                     } else if (category === 'buildings') { // building rate multiplier e.g. Power Plants
                         const buyBuildingButtonElement = document.querySelector(`#${item[0]}${capitaliseString(item[1])}Row .option-row-main .input-container .building-purchase-button`);
                         const rateElement = document.getElementById(`${item[1]}Rate`);
-                        
+
                         const currentPurchasedRateOfBuilding = getResourceDataObject('buildings', [item[0], 'upgrades', item[1], 'purchasedRate']);
-                        const newPurchasedRateOfBuilding = (currentPurchasedRateOfBuilding * multiplier);
-    
+                        const newPurchasedRateOfBuilding = multiplyAndRound(currentPurchasedRateOfBuilding, multiplier);
+
                         const currentRatePerBuilding = getResourceDataObject('buildings', [item[0], 'upgrades', item[1], 'rate']);
-                        const newRateOfBuilding = (currentRatePerBuilding * multiplier);
-    
+                        const newRateOfBuilding = multiplyAndRound(currentRatePerBuilding, multiplier);
+
                         setResourceDataObject(newPurchasedRateOfBuilding, 'buildings', [item[0], 'upgrades', item[1], 'purchasedRate']);
                         setResourceDataObject(newRateOfBuilding, 'buildings', [item[0], 'upgrades', item[1], 'rate']);
             

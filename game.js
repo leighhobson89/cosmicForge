@@ -2147,7 +2147,10 @@ function checkAndRevealNewBuildings(type) {
                 
                 const stellarScannerRow = document.getElementById(`spaceSsStellarScannerBuildRow`);
                 if (stellarScannerRow) {
-                    if (getStellarScannerBuilt() || (getStarShipStatus()[0] !== 'readyForTravel' && getStarShipStatus()[0] !== 'preconstruction')) {
+                    const stellarScannerTechUnlocked = getTechUnlockedArray().includes('stellarScanners');
+                    const starShipInBuildPhase = getStarShipStatus()[0] === 'readyForTravel' || getStarShipStatus()[0] === 'preconstruction';
+
+                    if (!stellarScannerTechUnlocked || getStellarScannerBuilt() || !starShipInBuildPhase) {
                         stellarScannerRow.classList.add('invisible');
                     } else {
                         stellarScannerRow.classList.remove('invisible');
