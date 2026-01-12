@@ -5279,8 +5279,6 @@ async function playCosmicForgeIntermission(direction) {
         if (direction === 'in') {
             banner.classList.add('cosmic-banner-active');
             spans.forEach(span => span.classList.remove('cosmic-letter-in', 'cosmic-letter-out'));
-        } else {
-            spans.forEach(span => span.classList.remove('cosmic-letter-out'));
         }
 
         const sequencedSpans = [...spans].reverse();
