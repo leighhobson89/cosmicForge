@@ -5185,6 +5185,7 @@ export async function showNewsTickerMessage(newsTickerContainer) {
         if (category === 'noPrize') {
             addMessageToSeenArray(randomIndex);
         }
+        await playCosmicForgeIntermission('out');
         displayNewsTickerMessage(message);
     }  
 }
@@ -5243,10 +5244,74 @@ function addMessageToSeenArray(id) {
     }
 }
 
-function displayNewsTickerMessage(message) {
+async function playCosmicForgeIntermission(direction) {
+    return new Promise(resolve => {
+        const banner = document.getElementById('cosmicForgeBanner');
+        if (!banner) {
+            resolve();
+            return;
+        }
+
+        if (direction === 'out' && !banner.classList.contains('cosmic-banner-active')) {
+            resolve();
+            return;
+        }
+
+        if (!banner.dataset.cosmicForgeReady) {
+            const letters = 'COSMIC FORGE'.split('');
+            banner.innerHTML = letters
+                .map(letter => {
+                    const displayLetter = letter === ' ' ? '&nbsp;' : letter;
+                    return `<span class="cosmic-letter">${displayLetter}</span>`;
+                })
+                .join('');
+            banner.dataset.cosmicForgeReady = 'true';
+        }
+
+        const spans = Array.from(banner.querySelectorAll('.cosmic-letter'));
+        if (!spans.length) {
+            resolve();
+            return;
+        }
+
+        const baseDelay = 70;
+
+        if (direction === 'in') {
+            banner.classList.add('cosmic-banner-active');
+            spans.forEach(span => span.classList.remove('cosmic-letter-in', 'cosmic-letter-out'));
+        } else {
+            spans.forEach(span => span.classList.remove('cosmic-letter-out'));
+        }
+
+        const sequencedSpans = [...spans].reverse();
+
+        sequencedSpans.forEach((span, index) => {
+            const delay = index * baseDelay;
+            setTimeout(() => {
+                if (direction === 'in') {
+                    span.classList.add('cosmic-letter-in');
+                } else {
+                    span.classList.add('cosmic-letter-out');
+                }
+            }, delay);
+        });
+
+        const totalDelay = spans.length * baseDelay + 500;
+        setTimeout(() => {
+            if (direction === 'out') {
+                spans.forEach(span => span.classList.remove('cosmic-letter-in', 'cosmic-letter-out'));
+                banner.classList.remove('cosmic-banner-active');
+            }
+            resolve();
+        }, totalDelay);
+    });
+}
+
+async function displayNewsTickerMessage(message) {
     const newsTicker = document.querySelector('.news-ticker-content');
     const container = document.querySelector('.news-ticker-container');
 
+    newsTicker.classList.remove('invisible');
     newsTicker.innerHTML = '';
 
     const textElement = document.createElement('div');
@@ -5302,7 +5367,7 @@ function displayNewsTickerMessage(message) {
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    timeoutId = setTimeout(() => {
+    timeoutId = setTimeout(async () => {
         newsTicker.classList.add('invisible');
         if (prizeElement) {
             document.querySelector('.news-ticker-content').style.animation = 'none';
@@ -5312,7 +5377,11 @@ function displayNewsTickerMessage(message) {
             document.querySelector('.news-ticker-content').style.animation = 'none';
             prizeElement2.remove();
         }       
-        document.head.removeChild(styleTag);
+        newsTicker.innerHTML = '';
+        if (styleTag.parentNode) {
+            styleTag.parentNode.removeChild(styleTag);
+        }
+        await playCosmicForgeIntermission('in');
         startNewsTickerTimer();
         clearTimeout(timeoutId);
     }, scrollDuration);

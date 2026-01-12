@@ -1606,6 +1606,9 @@ button.red-disabled-text {
     top: 30px;
     z-index: 1000;
     overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .news-ticker-content {
@@ -1620,6 +1623,59 @@ button.red-disabled-text {
     position: absolute;
     animation-timing-function: linear;
     animation-fill-mode: forwards;
+}
+
+.cosmic-banner {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 60%;
+    height: 100%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    gap: clamp(0.4rem, 1.4vw, 1.6rem);
+    letter-spacing: 0.35rem;
+    font-weight: 900;
+    font-size: 1.25rem;
+    font-family: 'Antonio', 'Space Grotesk', 'Futura', sans-serif;
+    font-style: italic;
+    color: var(--text-color);
+    text-transform: uppercase;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.35);
+    opacity: 0;
+    mix-blend-mode: screen;
+    transition: opacity 0.25s ease-in-out;
+    z-index: 2;
+}
+
+.cosmic-banner,
+.cosmic-banner * {
+    pointer-events: none;
+}
+
+.cosmic-banner.cosmic-banner-active {
+    opacity: 1;
+}
+
+.cosmic-letter {
+    opacity: 0;
+    transform: translateX(-130%) skewX(-8deg) scaleX(1.1);
+    display: inline-block;
+    will-change: transform, opacity;
+    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
+    font-stretch: expanded;
+}
+
+.cosmic-letter-in {
+    opacity: 1;
+    transform: translateX(0) skewX(-8deg) scaleX(1.1);
+}
+
+.cosmic-letter-out {
+    opacity: 0;
+    transform: translateX(130%) skewX(-8deg) scaleX(1.1);
 }
 
 #prizeTickerSpan {
