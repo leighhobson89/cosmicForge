@@ -5536,6 +5536,8 @@ function checkAscendencyButtons() {
             calculatedCost *= Math.pow(buff.rebuyableIncreaseMultiple, buff.boughtYet);
         }
 
+        calculatedCost = Math.round(calculatedCost);
+
         if (getAscendencyPoints() >= calculatedCost && ((buff.rebuyable && buff.timesRebuyable > buff.boughtYet) || (!buff.rebuyable && buff.boughtYet === 0))) {
             button.classList.add('green-ready-text');
             button.classList.remove('red-disabled-text');
@@ -5575,6 +5577,7 @@ function updateAscendencyRowTextFields() {
         const cost = rebuyable
             ? buff.baseCostAp * Math.pow(buff.rebuyableIncreaseMultiple, buff.boughtYet)
             : buff.baseCostAp;
+        const roundedCost = Math.round(cost);
 
         const costTextElement = document.getElementById(costTextId);
 
@@ -5588,9 +5591,9 @@ function updateAscendencyRowTextFields() {
                 costTextElement.classList.add("green-ready-text");
                 costTextElement.classList.remove("red-disabled-text");
             } else {
-                costTextElement.innerHTML = `${Math.floor(cost)} AP`;
+                costTextElement.innerHTML = `${roundedCost} AP`;
 
-                if (getAscendencyPoints() >= cost) {
+                if (getAscendencyPoints() >= roundedCost) {
                     costTextElement.classList.add("green-ready-text");
                     costTextElement.classList.remove("red-disabled-text");
                 } else {
@@ -7136,12 +7139,14 @@ export function purchaseBuff(buff) {
     const currentAscendencyPoints = getResourceDataObject('ascendencyPoints', ['quantity']);
 
     const buffData = ascendencyBuffDataObject[buff];
-    const cost = buffData.rebuyable
+    const baseCost = buffData.rebuyable
         ? buffData.baseCostAp * Math.pow(buffData.rebuyableIncreaseMultiple, buffData.boughtYet)
         : buffData.baseCostAp;
+    const cost = Math.round(baseCost);
 
     if (currentAscendencyPoints >= cost) {
-        setResourceDataObject(currentAscendencyPoints - cost, 'ascendencyPoints', ['quantity']);
+        const updatedAp = Math.max(0, Math.round(currentAscendencyPoints - cost));
+        setResourceDataObject(updatedAp, 'ascendencyPoints', ['quantity']);
         setAscendencyBuffDataObject(buffData.boughtYet + 1, buff, ['boughtYet']);
     }
 
