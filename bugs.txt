@@ -1,7 +1,9 @@
 when power on with a basic power plant, carbon production severely reduced in reality but appears to only be reduced by 2/s
 if you buy a resource or compound in the GM befoe it is revealed, could be a better way of handling it than just allowing it and then it showing up when it is revealed
 think about tooltip for hovering resource generation to cover scenarios like using fuel for power plants
-antimatter needs to check after dyson run that ??? no longer on stat5
+
+price of fleet can change ie after a battle, where all fleet types want the resource type of the first one in order to build
+message popup modal might not have one for each megastructure and it discovers a 2 rather than its name
 
 REALLY TO DO TO END OF GAME
     - ADD REST OF STATISTICS

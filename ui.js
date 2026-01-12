@@ -5317,6 +5317,9 @@ async function displayNewsTickerMessage(message) {
     textElement.innerHTML = message;
 
     newsTicker.appendChild(textElement);
+    addPrizeEventListeners();
+    addOneOffEventListeners();
+    addWackyEffectsEventListeners();
 
     const containerWidth = container.offsetWidth;
     const additionalOffset = containerWidth * 0.3;
@@ -5652,6 +5655,9 @@ function filterObjectsByCondition(dataObject) {
 function addPrizeEventListeners() {
     const prizeElement = document.getElementById('prizeTickerSpan');
     if (prizeElement) {
+        if (prizeElement.hasAttribute('data-effect-item')) {
+            return;
+        }
         prizeElement.addEventListener('click', function () {
             sfxPlayer.playAudio('goodPrize');
             const prizeType = this.getAttribute('data-prize-type');
