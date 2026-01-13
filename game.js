@@ -7219,6 +7219,23 @@ export function calculateStarTravelDuration(destination) {
     return distance * getStarShipTravelSpeed();
 }
 
+function getQuantumEngineTravelTimeModifier() {
+    const buffData = getBuffQuantumEnginesData();
+    if (!buffData) {
+        return 1;
+    }
+
+    const purchases = Math.max(0, Number(buffData.boughtYet) || 0);
+    return Math.pow(0.5, purchases);
+}
+
+export function calculateStarTravelDurationWithModifiers(destination) {
+    const baseDuration = calculateStarTravelDuration(destination);
+    if (baseDuration === undefined) return;
+
+    return baseDuration * getQuantumEngineTravelTimeModifier();
+}
+
 
 function calculateRocketTravelDuration(destinationAsteroid) {
     const asteroidsArray = getAsteroidArray();
@@ -7316,8 +7333,6 @@ export function startTravelToAndFromAsteroidTimer(adjustment, rocket, direction)
 }
 
 export function startTravelToDestinationStarTimer(adjustment) {
-    const quantumEngineBuffAdjustment = getBuffQuantumEnginesData()['boughtYet'] + 1;
-
     if (adjustment[1] === 'offlineGains' && !getStarShipTravelling()) {
         return;
     }
@@ -7334,10 +7349,7 @@ export function startTravelToDestinationStarTimer(adjustment) {
 
     let totalDuration = getStarTravelDuration();
     if (adjustment[0] === 0 || !totalDuration) {
-        totalDuration = calculateStarTravelDuration(destination);
-        for (let i = 1; i < quantumEngineBuffAdjustment; i++) {
-            totalDuration /= 2;
-        }
+        totalDuration = calculateStarTravelDurationWithModifiers(destination);
         setStarTravelDuration(totalDuration);
     }
 

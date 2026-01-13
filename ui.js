@@ -234,7 +234,7 @@ import {
     settleSystemAfterBattle,
     setAutoSellToggleState,
     setAutoCreateToggleState,
-    calculateStarTravelDuration,
+    calculateStarTravelDurationWithModifiers,
     getAscendencyPointsWithRepeatableBonus
 } from './game.js';
 
@@ -2213,12 +2213,12 @@ export function createStarDestinationRow(starData, isInteresting) {
 
         content += `<br><br><span class="${
             (() => {
-                const s = Math.floor(calculateStarTravelDuration(getDestinationStar()) / 1000);
+                const s = Math.floor(calculateStarTravelDurationWithModifiers(getDestinationStar()) / 1000);
                 return s >= 10800 ? 'red-disabled-text' : s >= 3600 ? 'warning-orange-text' : 'green-ready-text';
             })()
         }">Real Time Flight Time to ${capitaliseWordsWithRomanNumerals(getDestinationStar())} approximately: ${
             (() => {
-                const s = Math.floor(calculateStarTravelDuration(getDestinationStar()) / 1000);
+                const s = Math.floor(calculateStarTravelDurationWithModifiers(getDestinationStar()) / 1000);
                 return s >= 3600
                     ? `${Math.floor(s / 3600)}h ${Math.floor((s % 3600) / 60)}m ${s % 60}s`
                     : s >= 60
