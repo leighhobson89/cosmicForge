@@ -5502,13 +5502,38 @@ function autoSelectOption(option) {
 }
 
 function resetFleetPrices() {
-    const fleetTypes = ['fleetScout', 'fleetMarauder', 'fleetLandStalker', 'fleetNavalStrafer'];
+    const fleetBaseCosts = {
+        fleetScout: {
+            price: 5000,
+            resource1Price: [14000, 'hydrogen', 'resources'],
+            resource2Price: [1000, 'silicon', 'resources'],
+            resource3Price: [300, 'titanium', 'compounds']
+        },
+        fleetMarauder: {
+            price: 7500,
+            resource1Price: [14000, 'helium', 'resources'],
+            resource2Price: [2000, 'silicon', 'resources'],
+            resource3Price: [600, 'titanium', 'compounds']
+        },
+        fleetLandStalker: {
+            price: 9000,
+            resource1Price: [22000, 'helium', 'resources'],
+            resource2Price: [3000, 'silicon', 'resources'],
+            resource3Price: [900, 'titanium', 'compounds']
+        },
+        fleetNavalStrafer: {
+            price: 8000,
+            resource1Price: [26000, 'hydrogen', 'resources'],
+            resource2Price: [4000, 'silicon', 'resources'],
+            resource3Price: [1200, 'titanium', 'compounds']
+        }
+    };
 
-    fleetTypes.forEach(fleetType => {
-        setResourceDataObject(2000, 'space', ['upgrades', fleetType, 'price']);
-        setResourceDataObject([8000, 'hydrogen', 'resources'], 'space', ['upgrades', fleetType, 'resource1Price']);
-        setResourceDataObject([300, 'silicon', 'resources'], 'space', ['upgrades', fleetType, 'resource2Price']);
-        setResourceDataObject([120, 'titanium', 'compounds'], 'space', ['upgrades', fleetType, 'resource3Price']);
+    Object.entries(fleetBaseCosts).forEach(([fleetType, costs]) => {
+        setResourceDataObject(costs.price, 'space', ['upgrades', fleetType, 'price']);
+        setResourceDataObject([...costs.resource1Price], 'space', ['upgrades', fleetType, 'resource1Price']);
+        setResourceDataObject([...costs.resource2Price], 'space', ['upgrades', fleetType, 'resource2Price']);
+        setResourceDataObject([...costs.resource3Price], 'space', ['upgrades', fleetType, 'resource3Price']);
     });
 }
 

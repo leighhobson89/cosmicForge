@@ -2,7 +2,6 @@ when power on with a basic power plant, carbon production severely reduced in re
 if you buy a resource or compound in the GM befoe it is revealed, could be a better way of handling it than just allowing it and then it showing up when it is revealed
 think about tooltip for hovering resource generation to cover scenarios like using fuel for power plants
 
-price of fleet can change ie after a battle, where all fleet types want the resource type of the first one in order to build
 message popup modal might not have one for each megastructure and it discovers a 2 rather than its name
 
 REALLY TO DO TO END OF GAME
@@ -11,16 +10,3 @@ REALLY TO DO TO END OF GAME
     - ADD MEGA BATTLE AT MIAPLACIDUS
     - TELL A STORY IN THE INTRO POPUPS AND ADD MORE OF THIS THROUGHOUT ALL THE GAME
     - HAVE AN ENDING AFTER CONQUERING HOME SYSTEM
-
-Timer refactor checklist:
-- Resources auto-buyer loops (resourceAB tiers via timerManager) - INTERVAL
-- Compounds auto-buyer loops (compoundAB tiers via timerManager) - INTERVAL
-- Energy production/consumption loop (energy timer) - INTERVAL
-- Rocket fuel timers (rocketXFuelTimer per rocket) - DELTA
-- Rocket travel timers (rocketXTravelToAsteroidTimer / rocketXTravelReturnTimer) - DELTA
-- Starship travel timer (starShipTravelToDestinationStarTimer) - DELTA
-- Research delta timer - DELTA
-- Antimatter delta timer - DELTA
-- Search Asteroid timer - DELTA
-- Study Star timer - DELTA
-- Pillage Void timer - DELTA
