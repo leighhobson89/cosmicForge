@@ -1,7 +1,8 @@
 import { replaceRocketNames } from "./descriptions.js";
 import { migrateResourceData } from "./saveLoadGame.js";
 import { addPermanentBuffsBackInAfterRebirth, setResourceAutobuyerPricesAfterRepeatables, setCompoundRecipePricesAfterRepeatables, setEnergyAndResearchBuildingPricesAfterRepeatables, setFleetPricesAfterRepeatables, setFleetArmorBuffsAfterRepeatables, setFleetSpeedsAfterRepeatables, setFleetAttackDamageAfterRepeatables, setInitialImpressionBaseAfterRepeatables, setStarStudyEfficiencyAfterRepeatables, setAsteroidSearchEfficiencyAfterRepeatables, calculateAndAddExtraAPFromPhilosophyRepeatable, setStarshipPartPricesAfterRepeatables, setRocketPartPricesAfterRepeatables, setRocketTravelTimeReductionAfterRepeatables, setStarshipTravelTimeReductionAfterRepeatables, applyRateMultiplierToAllResources, addStorageCapacityAndCompoundsToAllResources } from './game.js';
-import { getMultiplierPermanentCompounds, getMultiplierPermanentResources, getCurrentTheme, setCompoundCreateDropdownRecipeText, getCompoundCreateDropdownRecipeText, getStatRun, getPlayerPhilosophy, getAllRepeatableTechMultipliersObject, getFactoryStarsArray, getMegaStructureTechsResearched, getMegaStructureResourceBonus, getStorageAdderBonus } from "./constantsAndGlobalVars.js";
+import { getMultiplierPermanentCompounds, getMultiplierPermanentResources, getCurrentTheme, setCompoundCreateDropdownRecipeText, getCompoundCreateDropdownRecipeText, getStatRun, getPlayerPhilosophy, getAllRepeatableTechMultipliersObject, getFactoryStarsArray, getMegaStructureTechsResearched, getMegaStructureResourceBonus, getStorageAdderBonus, mapFactoryStarValue } from "./constantsAndGlobalVars.js";
+
 import { achievementAchieve100FusionEfficiency, achievementActivateAllWackyNewsTickers, achievementBeatEnemy, achievementCollect100Precipitation, achievementCollect100TitaniumAsPrecipitation, achievementConquerStarSystems, achievementCreateCompound, achievementDiscoverAsteroid, achievementDiscoverLegendaryAsteroid, achievementHave4RocketsMiningAntimatter, achievementHave50HoursWithOnePioneer, achievementInitiateDiplomacyWithAlienRace, achievementLaunchRocket, achievementLaunchStarShip, achievementLiquidateAllAssets, achievementMineAllAntimatterAsteroid, achievementPerformGalaticMarketTransaction, achievementRebirth, achievementResearchAllTechnologies, achievementSeeAllNewsTickers, achievementSpendAp, achievementStudyAllStarsInOneRun, achievementStudyAStar, achievementTrade10APForCash, achievementTripPower } from "./achievements.js";
 import { showNotification } from "./ui.js";
 
@@ -2937,6 +2938,14 @@ export function getStarSystemDataObject(key, subKeys, noWarning = false) {
                 console.warn(`Missing subKey: ${subKey}`);
                 return undefined;
             }
+        }
+    }
+
+    if (Array.isArray(subKeys) && subKeys[subKeys.length - 1] === 'factoryStar') {
+        const mappedValue = mapFactoryStarValue(current);
+        if (mappedValue !== current) {
+            setStarSystemDataObject(mappedValue, key, subKeys);
+            current = mappedValue;
         }
     }
 

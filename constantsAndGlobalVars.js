@@ -63,6 +63,32 @@ export const factoryStarMap = {
     4: "Galactic Memory Archive"
 };
 
+export function mapFactoryStarValue(value) {
+    if (value === null || value === undefined || value === false) {
+        return value;
+    }
+
+    if (typeof value === 'string') {
+        const trimmed = value.trim();
+        if (trimmed === '') {
+            return value;
+        }
+
+        const parsed = Number(trimmed);
+        if (!Number.isNaN(parsed) && factoryStarMap[parsed]) {
+            return factoryStarMap[parsed];
+        }
+
+        return trimmed;
+    }
+
+    if (typeof value === 'number' && factoryStarMap[value]) {
+        return factoryStarMap[value];
+    }
+
+    return value;
+}
+
 export const enemyFleetData = {
     air: {
         speed: ENEMY_FLEET_SPEED_AIR,
@@ -3643,7 +3669,7 @@ export function activateFactoryStar(star) {
     const factoryStarName = star[1];
     const factoryStarId = starSystems.stars[factoryStarName].factoryStar
 
-    const mappedFactoryStarString = factoryStarMap[factoryStarId];
+    const mappedFactoryStarString = mapFactoryStarValue(factoryStarId);
     starSystems.stars[factoryStarName].factoryStar = mappedFactoryStarString;
     
     for (let i = 0; i < starsWithAncientManuscripts.length; i++) {
