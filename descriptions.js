@@ -3126,7 +3126,7 @@ export const megaStructureTableText = {
     researchGalacticMemoryArchive5: `GMA Connect`,
     effectGalacticMemoryArchive1: `All Res. & Cmp. Storage Cap. +100K`,
     effectGalacticMemoryArchive2: `All Res. & Cmp. Storage Cap. +1M`,
-    effectGalacticMemoryArchive3: `+0.15 Antimatter/s + Force Field Destroyed`,
+    effectGalacticMemoryArchive3: `+0.15 Antimatter/s + Force Field Reduced`,
     effectGalacticMemoryArchive4: `All Res. & Cmp. Storage Cap. +1B`,
     effectGalacticMemoryArchive5: `All Res. & Cmp. Storage Cap. +10B<br>All Res. & Cmp. Storage Cap. starts at 10B /System`
 };
