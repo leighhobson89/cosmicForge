@@ -947,6 +947,40 @@ export let resourceData = {
     }
 };
 
+export const miaplacidus = {
+    name: 'Miaplacidus',
+    lifeDetected: true,
+    lifeformTraits: [
+        ['Aggressive', 'red-disabled-text'],
+        ['Mechanized', ''],
+        ['Armored', 'red-disabled-text']
+    ],
+    civilizationLevel: 'Robotic',
+    populationEstimate: 95000000,
+    raceName: 'Miaplacidus Wardens',
+    threatLevel: 'Extreme',
+    defenseRating: 100,
+    enemyFleets: {
+        air: 100,
+        land: 100,
+        sea: 100,
+        fleetPower: 100 * 2 + 100 * 4 + 100 * 6,
+        fleetChanges: {
+            air: { value: 0, class: 'red-disabled-text' },
+            land: { value: 0, class: 'red-disabled-text' },
+            sea: { value: 0, class: 'red-disabled-text' }
+        }
+    },
+    anomalies: ['Stalwart'],
+    initialImpression: 0,
+    currentImpression: 0,
+    latestDifferenceInImpression: 0,
+    attitude: 'Belligerent',
+    triedToBully: false,
+    patience: 0
+};
+
+
 export let starSystems = {
     version: 0.77,
     stars: {

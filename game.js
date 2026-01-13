@@ -260,6 +260,7 @@ import {
     setStarVisionDistance,
     getStarShipBuilt,
     getDestinationStar,
+    getHomeStarName,
     setStarShipArrowPosition,
     getStarShipArrowPosition,
     getCurrentStarObject,
@@ -330,7 +331,8 @@ import {
     getBuffEnhancedMiningData,
     getBuffQuantumEnginesData,
     setAchievementIconImageUrls,
-    megaStructureImageUrls 
+    megaStructureImageUrls,
+    miaplacidus 
 } from "./resourceDataObject.js";
 
 import { autoGrantAchievementsOnRebirth, checkForAchievements, resetAchievementsOnRebirth } from "./achievements.js";
@@ -9600,6 +9602,18 @@ export function calculatePrecipitationType() {
 
 export function generateDestinationStarData() {
     const existingData = getStarSystemDataObject('stars', ['destinationStar']) || {};
+    const destinationStar = getDestinationStar();
+
+    if (destinationStar && destinationStar.toLowerCase() === getHomeStarName()) {
+        const miaplacidusData = JSON.parse(JSON.stringify(miaplacidus));
+        const updatedData = {
+            ...existingData,
+            ...miaplacidusData
+        };
+
+        setStarSystemDataObject(updatedData, 'stars', ['destinationStar']);
+        return;
+    }
 
     const lifeDetected = generateLifeDetection();
     //const lifeDetected = false; 
