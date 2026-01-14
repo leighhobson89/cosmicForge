@@ -3,6 +3,7 @@ import {
     setAutoSpaceTelescopeRowEnabled,
     getAutoSpaceTelescopeEnabled,
     setAutoSpaceTelescopeEnabled,
+    getAutoSpaceTelescopeMode,
     setMegaStructureTabUnlocked,
     getMegaStructureTabUnlocked,
     getMegaStructureTabNotificationShown,
@@ -635,6 +636,7 @@ export async function gameLoop() {
         handlePowerAllButtonState();
         checkPowerBuildingsFuelLevels();
         checkPowerForSpaceTelescopeTimer(['searchAsteroidTimer', 'investigateStarTimer', 'pillageVoidTimer']);
+        checkAndStartAutoTelescopeAction();
 
         monitorTechTree();
         updateNativeTechCostStates();
@@ -3988,6 +3990,42 @@ function resourceAndCompoundMonitorRevealRowsChecks(element) {
     }
 }
 
+export function checkAndStartAutoTelescopeAction() {
+    if (!getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'spaceTelescopeBoughtYet']) || 
+        !getAutoSpaceTelescopeEnabled() || 
+        !getAutoSpaceTelescopeRowEnabled()) {
+        return;
+    }
+
+    const timerManagerDlta = window.timerManagerDelta || timerManagerDelta;
+    const hasActiveTimer = 
+        timerManagerDlta.hasTimer('searchAsteroidTimer') ||
+        timerManagerDlta.hasTimer('investigateStarTimer') ||
+        timerManagerDlta.hasTimer('pillageVoidTimer');
+
+    const hasPendingRestoration =
+        (getCurrentlySearchingAsteroid() && getTimeLeftUntilAsteroidScannerTimerFinishes() > 0) ||
+        (getCurrentlyInvestigatingStar() && getTimeLeftUntilStarInvestigationTimerFinishes() > 0) ||
+        (getCurrentlyPillagingVoid() && getTimeLeftUntilPillageVoidTimerFinishes() > 0);
+
+    if (hasActiveTimer || hasPendingRestoration) {
+        return;
+    }
+
+    const mode = getAutoSpaceTelescopeMode();
+    
+    if (mode === 'studyAsteroid') {
+        startSearchAsteroidTimer([0, 'autoTelescope']);
+    } else if (mode === 'studyStars') {
+        startInvestigateStarTimer([0, 'autoTelescope']);
+    } else if (mode === 'pillageVoid' && 
+               getPlayerPhilosophy() === 'voidborn' && 
+               getPhilosophyAbilityActive() && 
+               getStatRun() > 1) {
+        startPillageVoidTimer([0, 'autoTelescope']);
+    }
+}
+
 export function checkPowerForSpaceTelescopeTimer(timers) {
     timers.forEach(timerName => {
         const deltaTimerContinuations = {
@@ -3999,17 +4037,16 @@ export function checkPowerForSpaceTelescopeTimer(timers) {
         const isDeltaTimer = Object.prototype.hasOwnProperty.call(deltaTimerContinuations, timerName);
 
         if (isDeltaTimer) {
-            if (!timerManagerDelta.hasTimer(timerName)) {
-                return;
+            // Check if the timer exists before trying to manage it
+            if (timerManagerDelta.hasTimer(timerName)) {
+                const canContinue = deltaTimerContinuations[timerName];
+                if (canContinue) {
+                    timerManagerDelta.resumeTimer(timerName);
+                } else {
+                    timerManagerDelta.pauseTimer(timerName);
+                }
             }
-
-            const canContinue = deltaTimerContinuations[timerName];
-
-            if (canContinue) {
-                timerManagerDelta.resumeTimer(timerName);
-            } else {
-                timerManagerDelta.pauseTimer(timerName);
-            }
+            // Continue to the next timer instead of returning
         } else {
             const timer = timerManager.getTimer(timerName);
             if (timer) {
