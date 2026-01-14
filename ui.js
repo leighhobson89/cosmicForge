@@ -2714,17 +2714,26 @@ export function drawStarConnectionDrawings(fromStar, toStar, isInteresting) {
         }
     
         const currentAntimatter = getResourceDataObject('antimatter', ['quantity']);
+        const isTravellingLine = isInteresting === 'travelling';
         const canTravel = isInteresting && fuelNeeded <= currentAntimatter;
     
         const themeElement = document.querySelector('[data-theme]') || document.documentElement;
         const themeStyles = getComputedStyle(themeElement);
-        let lineColor = canTravel ? themeStyles.getPropertyValue('--ready-text') : themeStyles.getPropertyValue('--disabled-text');
+        const arrowColor = themeStyles.getPropertyValue('--text-color');
+        let lineColor = isTravellingLine
+            ? arrowColor
+            : (canTravel ? themeStyles.getPropertyValue('--ready-text') : themeStyles.getPropertyValue('--disabled-text'));
         const labelColor = lineColor;
     
-        const fromX = fromStar.left + fromStar.width * 2;
-        const fromY = fromStar.top + fromStar.height * 2;
-        const toX = toStar.left + toStar.width;
-        const toY = toStar.top + toStar.height;
+        const fromPosition = getStarCenterCoordinates(fromStar);
+        const toPosition = getStarCenterCoordinates(toStar);
+
+        if (!fromPosition || !toPosition) {
+            return;
+        }
+
+        const { x: fromX, y: fromY } = fromPosition;
+        const { x: toX, y: toY } = toPosition;
     
         const distance = Math.sqrt((toX - fromX) ** 2 + (toY - fromY) ** 2);
         const angle = Math.atan2(toY - fromY, toX - fromX) * (180 / Math.PI);
@@ -2737,16 +2746,13 @@ export function drawStarConnectionDrawings(fromStar, toStar, isInteresting) {
         lineElement.style.left = `${fromX}px`;
         lineElement.style.top = `${fromY}px`;
     
-        if (getStarShipTravelling()) {
-            lineColor = themeStyles.getPropertyValue('--text-color');
+        if (isTravellingLine || getStarShipTravelling()) {
             lineElement.style.borderTop = `1px dashed ${lineColor}`;
-    
-            lineElement.style.maskImage = `linear-gradient(to right, 
-                transparent 14px, 
-                black 14px, 
-                black calc(100% - 10px), 
-                transparent calc(100% - 10px)
-            )`;
+            lineElement.style.background = 'none';
+            lineElement.style.maskImage = 'none';
+            if (isTravellingLine) {
+                lineElement.style.zIndex = '-1';
+            }
         } else {
             lineElement.style.background = `linear-gradient(to right, 
                 transparent 14px, 
@@ -2756,7 +2762,7 @@ export function drawStarConnectionDrawings(fromStar, toStar, isInteresting) {
             )`;
         }
     
-        if (!getStarShipTravelling()) {
+        if (!(isTravellingLine || getStarShipTravelling())) {
             labelElement = document.createElement('div');
             labelElement.id = 'star-connection-label';
             labelElement.classList.add('star-connection-label');
@@ -2843,10 +2849,15 @@ export function drawStarShipArrowhead(fromStar, toStar, isInteresting, orbitCirc
     arrowHead.id = 'arrowheadStarship';
     arrowHead.classList.add('arrowhead-starship');
 
-    const fromX = fromStar.left + fromStar.width * 2;
-    const fromY = fromStar.top + fromStar.height * 2;
-    const toX = toStar.left + toStar.width;
-    const toY = toStar.top + toStar.height;
+    const fromPosition = getStarCenterCoordinates(fromStar);
+    const toPosition = getStarCenterCoordinates(toStar);
+
+    if (!fromPosition || !toPosition) {
+        return arrowHead;
+    }
+
+    const { x: fromX, y: fromY } = fromPosition;
+    const { x: toX, y: toY } = toPosition;
 
     const angle = Math.atan2(toY - fromY, toX - fromX) * (180 / Math.PI);
 
@@ -2887,6 +2898,49 @@ export function drawStarShipArrowhead(fromStar, toStar, isInteresting, orbitCirc
     }
 
     return arrowHead;
+}
+
+function getStarCenterCoordinates(star) {
+    if (!star) {
+        return null;
+    }
+
+    const starName = typeof star === 'string'
+        ? capitaliseWordsWithRomanNumerals(star)
+        : star.name;
+
+    const candidateIds = [
+        starName,
+        `settledStar${starName}`,
+        `noneInterestingStar${starName}`
+    ].filter(Boolean);
+
+    let element = null;
+    for (const id of candidateIds) {
+        element = document.getElementById(id);
+        if (element) {
+            break;
+        }
+    }
+
+    if (element) {
+        const rect = element.getBoundingClientRect();
+        return {
+            x: rect.left + rect.width / 2,
+            y: rect.top + rect.height / 2
+        };
+    }
+
+    if (star.left !== undefined && star.top !== undefined) {
+        const width = star.width ?? 0;
+        const height = star.height ?? 0;
+        return {
+            x: star.left + width,
+            y: star.top + height
+        };
+    }
+
+    return null;
 }
 
 export function removeOrbitCircle() {
