@@ -1,4 +1,6 @@
 import {
+    getAutoSpaceTelescopeEnabled,
+    setAutoSpaceTelescopeEnabled,
     setMegaStructureTabUnlocked,
     getMegaStructureTabUnlocked,
     getMegaStructureTabNotificationShown,
