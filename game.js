@@ -7224,6 +7224,53 @@ export function calculateStarTravelDuration(destination) {
     return distance * getStarShipTravelSpeed();
 }
 
+function hasStudiedAllRelevantStars() {
+    const dummyContainer = document.createElement('div');
+    const { stars, starDistanceData } = generateStarfield(
+        dummyContainer,
+        NUMBER_OF_STARS,
+        STAR_FIELD_SEED,
+        null,
+        true,
+        getCurrentStarSystem(),
+        false
+    ) || { stars: [], starDistanceData: {} };
+
+    if (!Array.isArray(stars) || stars.length === 0) {
+        return false;
+    }
+
+    const starVisionDistance = getStarVisionDistance();
+    const settledStars = new Set((getSettledStars() || []).map(name => name?.toLowerCase()));
+    const factoryStars = new Set((getFactoryStarsArray() || []).map(name => name?.toLowerCase()).filter(Boolean));
+    const homeStarName = getHomeStarName()?.toLowerCase();
+    const currentStarLower = getCurrentStarSystem()?.toLowerCase();
+
+    return stars.every(star => {
+        const normalizedName = star.name.toLowerCase();
+
+        if (factoryStars.has(normalizedName)) {
+            return true;
+        }
+
+        if (homeStarName !== undefined && normalizedName !== homeStarName && settledStars.has(normalizedName)) {
+            return true;
+        }
+
+        const distance = starDistanceData?.[star.name];
+
+        if (typeof distance !== 'number') {
+            return false;
+        }
+
+        if (normalizedName === currentStarLower) {
+            return true;
+        }
+
+        return distance <= starVisionDistance;
+    });
+}
+
 function getQuantumEngineTravelTimeModifier() {
     const buffData = getBuffQuantumEnginesData();
     if (!buffData) {
@@ -9112,7 +9159,7 @@ export function extendStarDataRange(debug) {
 
     setStarVisionDistance(currentRange + increment);
 
-    if (getStarVisionDistance() >= 100) {
+    if (hasStudiedAllRelevantStars()) {
         setAchievementFlagArray('studyAllStarsInOneRun', 'add');
     }
 
