@@ -2751,7 +2751,7 @@ export function drawStarConnectionDrawings(fromStar, toStar, isInteresting) {
             lineElement.style.background = 'none';
             lineElement.style.maskImage = 'none';
             if (isTravellingLine) {
-                lineElement.style.zIndex = '-1';
+                lineElement.style.zIndex = '1';
             }
         } else {
             lineElement.style.background = `linear-gradient(to right, 
