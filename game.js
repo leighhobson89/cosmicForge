@@ -7419,7 +7419,9 @@ export function startTravelToDestinationStarTimer(adjustment) {
                         false,
                         function() {
                             showHideModal();
-                            showNotification('Galactic Tab Unlocked!', 'warning', 3000, 'special');
+                            if (getStatRun() === 1) {
+                                showNotification('Galactic Tab Unlocked!', 'warning', 3000, 'special');
+                            }
                         },
                         null,
                         null,
