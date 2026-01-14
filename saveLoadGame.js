@@ -478,6 +478,23 @@ export function migrateResourceData(saveData, objectType) {
             saveData.version = 0.77;
         }
 
+        if (saveData.version < 0.78) {
+            if (objectType === 'ascendencyBuffsData') {
+                saveData.autoSpaceTelescope = {
+                    name: "Auto Space Telescope",
+                    description: "buffAutoSpaceTelescopeRow",
+                    rebuyable: false,
+                    rebuyableIncreaseMultiple: 1,
+                    baseCostAp: 40,
+                    effectCategoryMagnitude: 1,
+                    boughtYet: 0,
+                    timesRebuyable: 1
+                };
+            }
+
+            saveData.version = 0.78;
+        }
+
         saveData.version += 0.001;
     }
 

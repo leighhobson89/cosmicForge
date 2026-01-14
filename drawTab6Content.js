@@ -1,4 +1,4 @@
-import { getCurrentlyPillagingVoid, getTimeLeftUntilPillageVoidTimerFinishes, getTimeLeftUntilStarInvestigationTimerFinishes, getCurrentlyInvestigatingStar, getRocketUserName, setRocketUserName, setRocketDirection, getRocketDirection, getDestinationAsteroid, deferredActions, getSortAsteroidMethod, getAsteroidArray, setCheckRocketFuellingStatus, getCurrencySymbol, setRocketsFuellerStartedArray, getLaunchedRockets, getRocketsFuellerStartedArray, getCurrentlySearchingAsteroid, getTimeLeftUntilAsteroidScannerTimerFinishes, setDestinationAsteroid, getMiningObject, setAsteroidArray, getCurrentStarSystemWeatherEfficiency, getPlayerPhilosophy, getPhilosophyAbilityActive, getStatRun, getAutoSpaceTelescopeMode, setAutoSpaceTelescopeMode, getAutoSpaceTelescopeRowEnabled, setAutoSpaceTelescopeRowEnabled } from './constantsAndGlobalVars.js';
+import { getCurrentlyPillagingVoid, getTimeLeftUntilPillageVoidTimerFinishes, getTimeLeftUntilStarInvestigationTimerFinishes, getCurrentlyInvestigatingStar, getRocketUserName, setRocketUserName, setRocketDirection, getRocketDirection, getDestinationAsteroid, deferredActions, getSortAsteroidMethod, getAsteroidArray, setCheckRocketFuellingStatus, getCurrencySymbol, setRocketsFuellerStartedArray, getLaunchedRockets, getRocketsFuellerStartedArray, getCurrentlySearchingAsteroid, getTimeLeftUntilAsteroidScannerTimerFinishes, setDestinationAsteroid, getMiningObject, setAsteroidArray, getCurrentStarSystemWeatherEfficiency, getPlayerPhilosophy, getPhilosophyAbilityActive, getStatRun, getAutoSpaceTelescopeMode, setAutoSpaceTelescopeMode, getAutoSpaceTelescopeRowEnabled, setAutoSpaceTelescopeRowEnabled, getAutoSpaceTelescopeEnabled, setAutoSpaceTelescopeEnabled } from './constantsAndGlobalVars.js';
 import { startTravelToAndFromAsteroidTimer, startInvestigateStarTimer, startSearchAsteroidTimer, launchRocket, gain, startUpdateTimersAndRates, addBuildingPotentialRate, buildSpaceMiningBuilding, addToResourceAllTimeStat, startPillageVoidTimer } from './game.js';
 import { timerManagerDelta } from './timerManagerDelta.js';
 
@@ -76,9 +76,9 @@ export function drawTab6Content(heading, optionContentElement) {
             ),
             createToggleSwitch(
                 'autoTelescopeToggle',
-                getAutoSpaceTelescopeRowEnabled(),
+                getAutoSpaceTelescopeEnabled(),
                 (isEnabled) => {
-                    setAutoSpaceTelescopeRowEnabled(isEnabled);
+                    setAutoSpaceTelescopeEnabled(isEnabled);
                 },
                 ['toggle-switch-spacing']
             ),

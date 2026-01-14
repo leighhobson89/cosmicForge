@@ -293,7 +293,7 @@ export function initialiseDescriptions() {
     };
 
     rocketNames = {
-        version: 0.77,
+        version: 0.78,
         rocketDescription: "Build the launch pad to launch built rockets and mine asteroids for Antimatter.",
         [getRocketUserName('rocket1').toLowerCase()]: "Build the launch pad to launch built rockets and mine asteroids for Antimatter.",
         [getRocketUserName('rocket2').toLowerCase()]: "Build the launch pad to launch built rockets and mine asteroids for Antimatter.",
@@ -1511,6 +1511,11 @@ export function initialiseDescriptions() {
         },
         buffQuantumEnginesRow: {
             content1: "Upgrades starship engines, halving travel time per purchase.",
+            content2: "",
+            updateAt: ""
+        },
+        buffAutoSpaceTelescopeRow: {
+            content1: "Enables the Auto Telescope feature, allowing automatic star studying.",
             content2: "",
             updateAt: ""
         }
