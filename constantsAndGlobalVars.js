@@ -529,6 +529,7 @@ let newsTickerSetting = true;
 let weatherEffectSettingToggle = true;
 let notificationsToggle = true;
 let techRenderChange = false;
+let suppressUiClickSfx = false;
 let losingEnergy = false;
 let powerOnOff = false;
 let trippedStatus = false;
@@ -1140,6 +1141,7 @@ export function resetAllVariablesOnRebirth() {
     
     currentRunIsMegaStructureRun = false;
     techRenderChange = false;
+    suppressUiClickSfx = false;
     losingEnergy = false;
     powerOnOff = getInfinitePower();
     trippedStatus = false;
@@ -1336,6 +1338,7 @@ export function captureGameStatusForSaving(type) {
         customPointerEnabled: customPointerEnabled,
         mouseParticleTrailEnabled: mouseParticleTrailEnabled,
         techRenderChange: techRenderChange,
+        suppressUiClickSfx: suppressUiClickSfx,
         losingEnergy: losingEnergy,
         powerOnOff: powerOnOff,
         trippedStatus: trippedStatus,
@@ -1554,6 +1557,7 @@ export function restoreGameStatus(gameState, type) {
             weatherEffectSettingToggle = gameState.flags.weatherEffectSettingToggle ?? true;
             newsTickerSetting = gameState.flags.newsTickerSetting ?? true;
             techRenderChange = gameState.flags.techRenderChange ?? false;
+            suppressUiClickSfx = gameState.flags.suppressUiClickSfx ?? false;
             losingEnergy = gameState.flags.losingEnergy ?? false;
             powerOnOff = gameState.flags.powerOnOff ?? false;
             trippedStatus = gameState.flags.trippedStatus ?? false;
@@ -2410,6 +2414,14 @@ export function getTechRenderChange() {
 
 export function setTechRenderChange(value) {
     techRenderChange = value;
+}
+
+export function getSuppressUiClickSfx() {
+    return suppressUiClickSfx;
+}
+
+export function setSuppressUiClickSfx(value) {
+    suppressUiClickSfx = value;
 }
 
 export function getTechRenderCounter() {

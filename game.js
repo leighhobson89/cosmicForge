@@ -3,6 +3,8 @@ import {
     getMegaStructureTabUnlocked,
     getMegaStructureTabNotificationShown,
     setMegaStructureTabNotificationShown,
+    getHasVisitedMegaStructure,
+    setHasVisitedMegaStructure,
     getManuscriptCluesShown,
     getAsteroidCostMultiplier,
     getMegaStructureAntimatterAmount,
@@ -1509,9 +1511,10 @@ function megastructureUIChecks() {
     }
 
     if (isMegaStructureRun) {
-        if (!getMegaStructureTabNotificationShown()) {
+        if (!getMegaStructureTabNotificationShown() && !getHasVisitedMegaStructure()) {
             showNotification(`The MegaStructure Option is now available in the Galactic Tab!`, 'info', 3000, 'tech');
             setMegaStructureTabNotificationShown(true);
+            setHasVisitedMegaStructure(true);
         }
     }
 

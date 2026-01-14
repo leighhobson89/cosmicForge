@@ -155,7 +155,9 @@ import {
     getPendingCustomPointerType,
     setPendingCustomPointerType,
     getCustomPointerListenersAttached,
-    setCustomPointerListenersAttached
+    setCustomPointerListenersAttached,
+    getSuppressUiClickSfx,
+    setSuppressUiClickSfx
 } from './constantsAndGlobalVars.js';
 import {
     getResourceDataObject,
@@ -245,8 +247,6 @@ import {
 } from './utilityFunctions.js';
 
 import { playClickSfx, playSwipeSfx, sfxPlayer } from './audioManager.js';
-
-let suppressUiClickSfx = false;
 
 import { drawTab1Content } from './drawTab1Content.js';
 import { drawTab2Content } from './drawTab2Content.js';
@@ -743,13 +743,10 @@ function buildPowerPlantStatusLines() {
     }).join('');
 }
 
-export function setSuppressUiClickSfx(flag) {
-    suppressUiClickSfx = flag;
-}
 
 export function updateContent(heading, tab, type) {
-    if (suppressUiClickSfx) {
-        suppressUiClickSfx = false;
+    if (getSuppressUiClickSfx()) {
+        setSuppressUiClickSfx(false);
     } else {
         playClickSfx();
     }
