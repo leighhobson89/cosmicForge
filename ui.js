@@ -91,6 +91,8 @@ import {
     getCurrentStarSystem,
     setSortAsteroidMethod,
     getAsteroidArray,
+    getMegaStructureTechsResearched,
+    getCurrentRunIsMegaStructureRun,
     getIsAntimatterBoostActive,
     setRocketsBuilt,
     setAntimatterUnlocked,
@@ -650,6 +652,64 @@ function setupProductionRateTooltips() {
 
     resources.forEach(resource => attachTooltip(resource, 'resources'));
     compounds.forEach(compound => attachTooltip(compound, 'compounds'));
+
+    const researchElement = document.getElementById('researchRate');
+    if (researchElement && !researchElement.dataset.productionTooltipAttached) {
+        researchElement.dataset.productionTooltipAttached = 'true';
+
+        const updateResearchTooltip = event => {
+            if (!shouldShowProductionTooltip('research')) {
+                tooltip.style.display = 'none';
+                return;
+            }
+
+            const content = buildResearchTooltipContent();
+            if (!content) {
+                tooltip.style.display = 'none';
+                return;
+            }
+
+            tooltip.innerHTML = content;
+            tooltip.style.display = 'block';
+            tooltip.style.left = `${event.pageX + 10}px`;
+            tooltip.style.top = `${event.pageY + 10}px`;
+        };
+
+        researchElement.addEventListener('mouseenter', updateResearchTooltip);
+        researchElement.addEventListener('mousemove', updateResearchTooltip);
+        researchElement.addEventListener('mouseleave', () => {
+            tooltip.style.display = 'none';
+        });
+    }
+
+    const miningElement = document.getElementById('miningRate');
+    if (miningElement && !miningElement.dataset.productionTooltipAttached) {
+        miningElement.dataset.productionTooltipAttached = 'true';
+
+        const updateMiningTooltip = event => {
+            if (!shouldShowProductionTooltip('antimatter')) {
+                tooltip.style.display = 'none';
+                return;
+            }
+
+            const content = buildAntimatterTooltipContent();
+            if (!content) {
+                tooltip.style.display = 'none';
+                return;
+            }
+
+            tooltip.innerHTML = content;
+            tooltip.style.display = 'block';
+            tooltip.style.left = `${event.pageX + 10}px`;
+            tooltip.style.top = `${event.pageY + 10}px`;
+        };
+
+        miningElement.addEventListener('mouseenter', updateMiningTooltip);
+        miningElement.addEventListener('mousemove', updateMiningTooltip);
+        miningElement.addEventListener('mouseleave', () => {
+            tooltip.style.display = 'none';
+        });
+    }
 }
 
 function shouldShowProductionTooltip(category) {
@@ -662,6 +722,14 @@ function shouldShowProductionTooltip(category) {
 
     if (category === 'compounds') {
         return tabLabel.includes('Compounds');
+    }
+
+    if (category === 'research') {
+        return tabLabel.includes('Research');
+    }
+
+    if (category === 'antimatter') {
+        return tabLabel.includes('Space Mining');
     }
 
     return false;
@@ -698,6 +766,233 @@ function buildProductionTooltipContent(resourceKey, category) {
     }
 
     return lines.join('');
+}
+
+function buildResearchTooltipContent() {
+    const timerRatio = getTimerRateRatio() || 1;
+    const rateElement = document.getElementById('researchRate');
+    const fallbackRate = `${formatProductionRateValue(calculateResearchTooltipRatePerTick() * timerRatio)} / s`;
+    const netRateDisplay = (rateElement?.textContent?.trim()) || fallbackRate;
+
+    const lines = [
+        `<div><strong>Research</strong>: <span class="green-ready-text">${netRateDisplay}</span></div>`
+    ];
+
+    const { lines: generationLines, total: generationTotal } = buildResearchGenerationLines(timerRatio);
+    if (generationLines.length > 0) {
+        lines.push('<div class="tooltip-spacer">&nbsp;</div>');
+        lines.push('<div><strong>Generation</strong></div>');
+        lines.push(...generationLines);
+    }
+
+    const { lines: bonusLines } = buildResearchBonusLines(timerRatio);
+    if (bonusLines.length > 0) {
+        lines.push('<div class="tooltip-spacer">&nbsp;</div>');
+        lines.push('<div><strong>MegaStructure Bonuses</strong></div>');
+        lines.push(...bonusLines);
+    }
+
+    return lines.join('');
+}
+
+function calculateResearchTooltipRatePerTick() {
+    const generationData = buildResearchGenerationLines(1);
+    const bonusData = buildResearchBonusLines(1);
+    return generationData.total + bonusData.total;
+}
+
+function buildResearchGenerationLines(timerRatio) {
+    const powerOn = getPowerOnOff();
+    const upgrades = getResourceDataObject('research', ['upgrades']) || {};
+    const researchSources = [
+        { key: 'scienceKit', label: 'Science Kit' },
+        { key: 'scienceClub', label: 'Science Club' },
+        { key: 'scienceLab', label: 'Science Lab', requiresPower: true }
+    ];
+
+    const lines = [];
+    let total = 0;
+
+    researchSources.forEach(({ key, label, requiresPower }) => {
+        const upgradeData = upgrades[key];
+        if (!upgradeData) {
+            return;
+        }
+
+        const baseRate = (upgradeData.rate || 0) * (upgradeData.quantity || 0);
+        const isActive = upgradeData.active !== false;
+        const contributes = isActive && baseRate > 0 && (powerOn || !requiresPower);
+        if (!contributes) {
+            return;
+        }
+
+        total += baseRate;
+        const perSecond = baseRate * timerRatio;
+        const formatted = formatProductionRateValue(perSecond);
+        lines.push(`<div>${label}: <span class="green-ready-text">${formatted} / s</span></div>`);
+    });
+
+    return { lines, total };
+}
+
+function buildAntimatterTooltipContent() {
+    const timerRatio = getTimerRateRatio() || 1;
+    const rateElement = document.getElementById('miningRate');
+    const antimatterRate = (getResourceDataObject('antimatter', ['rate']) || 0) * timerRatio;
+    const fallbackRate = `${formatProductionRateValue(antimatterRate)} / s`;
+    const netRateDisplay = (rateElement?.textContent?.trim()) || fallbackRate;
+
+    const lines = [
+        `<div><strong>Antimatter</strong>: <span class="green-ready-text">${netRateDisplay}</span></div>`
+    ];
+
+    const { lines: rocketLines } = buildAntimatterRocketLines(timerRatio);
+    if (rocketLines.length > 0) {
+        lines.push('<div class="tooltip-spacer">&nbsp;</div>');
+        lines.push('<div><strong>Rockets</strong></div>');
+        lines.push(...rocketLines);
+    }
+
+    const { lines: megaLines } = buildAntimatterMegaStructureLines(timerRatio);
+    if (megaLines.length > 0) {
+        lines.push('<div class="tooltip-spacer">&nbsp;</div>');
+        lines.push('<div><strong>MegaStructure Bonuses</strong></div>');
+        lines.push(...megaLines);
+    }
+
+    return lines.join('');
+}
+
+function buildAntimatterRocketLines(timerRatio) {
+    const miningAssignments = getMiningObject?.() || {};
+    const asteroids = getAsteroidArray?.() || [];
+    const buffData = getBuffEnhancedMiningData?.();
+    const buffMultiplier = 1 + ((buffData?.boughtYet ?? 0) * (buffData?.effectCategoryMagnitude ?? 0));
+    const boostMultiplier = getIsAntimatterBoostActive?.() ? getBoostRate?.() : 1;
+
+    const lines = [];
+    let total = 0;
+
+    for (let i = 1; i <= 4; i++) {
+        const rocketKey = `rocket${i}`;
+        const rocketName = getRocketUserName?.(rocketKey) || `Rocket ${i}`;
+        const asteroidName = miningAssignments?.[rocketKey];
+        const asteroid = findAsteroidByName(asteroids, asteroidName);
+        const perTick = calculateRocketExtractionPerTick(asteroid, buffMultiplier, boostMultiplier);
+        total += perTick;
+        const perSecond = perTick * timerRatio;
+        const formatted = formatProductionRateValue(perSecond);
+        lines.push(`<div>${rocketName}: <span class="green-ready-text">${formatted} / s</span></div>`);
+    }
+
+    return { lines, total };
+}
+
+function buildAntimatterMegaStructureLines(timerRatio) {
+    const megaStructureTechs = getMegaStructureTechsResearched?.() || [];
+    const techLabels = {
+        1: 'Dyson Tech 3',
+        2: 'CPC Tech 3',
+        3: 'Plasma Tech 3',
+        4: 'GMA Tech 3'
+    };
+    const perSecondValue = 0.15;
+
+    const lines = [];
+    let total = 0;
+
+    Object.entries(techLabels).forEach(([structureId, label]) => {
+        if (hasMegaStructureTech(megaStructureTechs, Number(structureId), 3)) {
+            total += perSecondValue / timerRatio;
+            const formatted = formatProductionRateValue(perSecondValue);
+            lines.push(`<div>${label}: <span class="green-ready-text">${formatted} / s</span></div>`);
+        }
+    });
+
+    return { lines, total };
+}
+
+function hasMegaStructureTech(techList, structureId, techIndex) {
+    return Array.isArray(techList) && techList.some(entry => Array.isArray(entry) && entry[0] === structureId && entry[1] === techIndex);
+}
+
+function findAsteroidByName(asteroids, targetName) {
+    if (!targetName || !Array.isArray(asteroids)) {
+        return null;
+    }
+
+    const entry = asteroids.find(obj => Object.prototype.hasOwnProperty.call(obj, targetName));
+    return entry ? entry[targetName] : null;
+}
+
+function calculateRocketExtractionPerTick(asteroid, buffMultiplier, boostMultiplier) {
+    if (!asteroid || !asteroid.beingMined) {
+        return 0;
+    }
+
+    const baseRate = calculateAsteroidExtractionRate(asteroid);
+    let extractionRate = baseRate * buffMultiplier * boostMultiplier;
+    const available = Math.max(0, asteroid.quantity?.[0] ?? 0);
+    return Math.min(extractionRate, available);
+}
+
+function calculateAsteroidExtractionRate(asteroid) {
+    if (!asteroid) {
+        return 0;
+    }
+
+    const maxRate = getNormalMaxAntimatterRate?.() || 0;
+    const minRate = 0.0001;
+    const maxEase = 1;
+    const minEase = 10;
+    const easeValueRaw = Array.isArray(asteroid.easeOfExtraction) ? asteroid.easeOfExtraction[0] : asteroid.easeOfExtraction;
+    const easeValue = Math.max(maxEase, Math.min(minEase, easeValueRaw ?? minEase));
+    const normalizedEase = (easeValue - maxEase) / (minEase - maxEase);
+    return maxRate - (normalizedEase * (maxRate - minRate));
+}
+
+function buildResearchBonusLines(timerRatio) {
+    const megaStructureTechs = getMegaStructureTechsResearched?.() || [];
+    const isMegaStructureRun = getCurrentRunIsMegaStructureRun?.();
+    const currentFactoryStar = getStarSystemDataObject('stars', [getCurrentStarSystem(), 'factoryStar'], true);
+    const inCelestialProcessingCore = currentFactoryStar === 'Celestial Processing Core';
+
+    const hasMegaResearch = index =>
+        Array.isArray(megaStructureTechs) &&
+        megaStructureTechs.some(entry => Array.isArray(entry) && entry[0] === 2 && entry[1] === index);
+
+    const bonusEntries = [];
+
+    if (isMegaStructureRun && inCelestialProcessingCore) {
+        const cpcBonuses = [
+            { index: 1, amount: 0.5, label: 'CPC Tech I' },
+            { index: 2, amount: 1, label: 'CPC Tech II' },
+            { index: 4, amount: 1.5, label: 'CPC Tech IV' }
+        ];
+
+        cpcBonuses.forEach(({ index, amount, label }) => {
+            if (hasMegaResearch(index)) {
+                bonusEntries.push({ label, amount });
+            }
+        });
+    }
+
+    if (hasMegaResearch(5)) {
+        const amount = isMegaStructureRun && inCelestialProcessingCore ? 2 : 5;
+        bonusEntries.push({ label: 'CPC Tech V', amount });
+    }
+
+    const lines = [];
+    let total = 0;
+
+    bonusEntries.forEach(({ label, amount }) => {
+        total += amount;
+        const perSecond = amount * timerRatio;
+        const formatted = formatProductionRateValue(perSecond);
+        lines.push(`<div>${label}: <span class="green-ready-text">+${formatted} / s</span></div>`);
+    });
+
+    return { lines, total };
 }
 
 function buildAutoBuyerGenerationLines(resourceKey, category, timerRatio) {
