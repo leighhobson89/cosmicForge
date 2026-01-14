@@ -479,6 +479,23 @@ export function migrateResourceData(saveData, objectType) {
         }
 
         if (saveData.version < 0.78) {
+            if (objectType === 'resourceData') {
+                saveData.space.upgrades.spaceTelescope = {
+                    spaceTelescopeBoughtYet: false,
+                    basePrices: [10000, 20000, 12000, 20000],
+                    price: 10000,
+                    resource1Price: [20000, 'iron', 'resources'],
+                    resource2Price: [12000, 'glass', 'compounds'],
+                    resource3Price: [20000, 'silicon', 'resources'],
+                    energyUseSearchAsteroid: 0.4,
+                    energyUseInvestigateStar: 0.7,
+                    energyUsePhilosophyBoostResourcesAndCompounds: 1.1,
+                    autoSpaceTelescopeMode: 'studyAsteroid',
+                    autoSpaceTelescopeEnabled: false,
+                    autoSpaceTelescopeRowEnabled: false,
+                }
+            }
+            
             if (objectType === 'ascendencyBuffsData') {
                 saveData.autoSpaceTelescope = {
                     name: "Auto Space Telescope",

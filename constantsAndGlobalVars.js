@@ -572,9 +572,6 @@ let liquidatedThisRun = false;
 let belligerentEnemyFlag = false;
 let feedbackCanBeRequested = true;
 let philosophyAbilityActive = false;
-let autoSpaceTelescopeMode = 'studyAsteroid';
-let autoSpaceTelescopeRowEnabled = false;
-let autoSpaceTelescopeEnabled = false;
 
 //GETTER SETTER METHODS
 export function setElements() {
@@ -1376,10 +1373,7 @@ export function captureGameStatusForSaving(type) {
         infinitePower: infinitePower,
         megaStructureResourceBonus: megaStructureResourceBonus,
         storageAdderBonus: storageAdderBonus,
-        permanentAntimatterUnlock: permanentAntimatterUnlock,
-        autoSpaceTelescopeMode: autoSpaceTelescopeMode,
-        autoSpaceTelescopeRowEnabled: autoSpaceTelescopeRowEnabled,
-        autoSpaceTelescopeEnabled: autoSpaceTelescopeEnabled
+        permanentAntimatterUnlock: permanentAntimatterUnlock
     }
 
     return gameState;
@@ -1599,9 +1593,6 @@ export function restoreGameStatus(gameState, type) {
             megaStructureResourceBonus = gameState.flags.megaStructureResourceBonus ?? false;
             storageAdderBonus = gameState.flags.storageAdderBonus ?? false;
             permanentAntimatterUnlock = gameState.flags.permanentAntimatterUnlock ?? false;
-            autoSpaceTelescopeMode = gameState.flags.autoSpaceTelescopeMode ?? 'studyAsteroid';
-            autoSpaceTelescopeRowEnabled = gameState.flags.autoSpaceTelescopeRowEnabled ?? false;
-            autoSpaceTelescopeEnabled = gameState.flags.autoSpaceTelescopeEnabled ?? false;
 
             selectTheme(getCurrentTheme());
             applyCustomPointerSetting();
@@ -1783,31 +1774,6 @@ export function getWasAutoSaveToggled() {
 export function setWasAutoSaveToggled(value) {
     wasAutoSaveToggled = value;
 }
-
-export function getAutoSpaceTelescopeMode() {
-    return autoSpaceTelescopeMode;
-}
-
-export function setAutoSpaceTelescopeMode(value) {
-    autoSpaceTelescopeMode = value;
-}
-
-export function getAutoSpaceTelescopeRowEnabled() {
-    return autoSpaceTelescopeRowEnabled;
-}
-
-export function setAutoSpaceTelescopeRowEnabled(value) {
-    autoSpaceTelescopeRowEnabled = value;
-}
-
-export function getAutoSpaceTelescopeEnabled() {
-    return autoSpaceTelescopeEnabled;
-}
-
-export function setAutoSpaceTelescopeEnabled(value) {
-    autoSpaceTelescopeEnabled = value;
-}
-
 
 export function getNotationType() {
     return notationType;

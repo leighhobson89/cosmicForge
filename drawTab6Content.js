@@ -1,8 +1,8 @@
-import { getCurrentlyPillagingVoid, getTimeLeftUntilPillageVoidTimerFinishes, getTimeLeftUntilStarInvestigationTimerFinishes, getCurrentlyInvestigatingStar, getRocketUserName, setRocketUserName, setRocketDirection, getRocketDirection, getDestinationAsteroid, deferredActions, getSortAsteroidMethod, getAsteroidArray, setCheckRocketFuellingStatus, getCurrencySymbol, setRocketsFuellerStartedArray, getLaunchedRockets, getRocketsFuellerStartedArray, getCurrentlySearchingAsteroid, getTimeLeftUntilAsteroidScannerTimerFinishes, setDestinationAsteroid, getMiningObject, setAsteroidArray, getCurrentStarSystemWeatherEfficiency, getPlayerPhilosophy, getPhilosophyAbilityActive, getStatRun, getAutoSpaceTelescopeMode, setAutoSpaceTelescopeMode, getAutoSpaceTelescopeRowEnabled, setAutoSpaceTelescopeRowEnabled, getAutoSpaceTelescopeEnabled, setAutoSpaceTelescopeEnabled } from './constantsAndGlobalVars.js';
+import { getCurrentlyPillagingVoid, getTimeLeftUntilPillageVoidTimerFinishes, getTimeLeftUntilStarInvestigationTimerFinishes, getCurrentlyInvestigatingStar, getRocketUserName, setRocketUserName, setRocketDirection, getRocketDirection, getDestinationAsteroid, deferredActions, getSortAsteroidMethod, getAsteroidArray, setCheckRocketFuellingStatus, getCurrencySymbol, setRocketsFuellerStartedArray, getLaunchedRockets, getRocketsFuellerStartedArray, getCurrentlySearchingAsteroid, getTimeLeftUntilAsteroidScannerTimerFinishes, setDestinationAsteroid, getMiningObject, setAsteroidArray, getCurrentStarSystemWeatherEfficiency, getPlayerPhilosophy, getPhilosophyAbilityActive, getStatRun } from './constantsAndGlobalVars.js';
+import { getRocketPartsNeededInTotalPerRocket, getRocketParts, getResourceDataObject, setResourceDataObject } from './resourceDataObject.js';
 import { startTravelToAndFromAsteroidTimer, startInvestigateStarTimer, startSearchAsteroidTimer, launchRocket, gain, startUpdateTimersAndRates, addBuildingPotentialRate, buildSpaceMiningBuilding, addToResourceAllTimeStat, startPillageVoidTimer } from './game.js';
 import { timerManagerDelta } from './timerManagerDelta.js';
 
-import { getRocketPartsNeededInTotalPerRocket, getRocketParts, getResourceDataObject } from './resourceDataObject.js';
 import { removeTabAttentionIfNoIndicators, createSvgElement, createDropdown, createToggleSwitch, handleSortAsteroidClick, sortAsteroidTable, switchFuelGaugeWhenFuellerBought, createTextElement, createOptionRow, createButton, showNotification, renameRocket } from './ui.js';
 import { capitaliseString } from './utilityFunctions.js';
 import { sfxPlayer } from './audioManager.js'
@@ -69,16 +69,16 @@ export function drawTab6Content(heading, optionContentElement) {
             createDropdown(
                 'autoSpaceTelescopeModeDropdown',
                 autoTelescopeOptions,
-                getAutoSpaceTelescopeMode(),
+                getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'autoSpaceTelescopeMode']),
                 (value) => {
-                    setAutoSpaceTelescopeMode(value);
+                    setResourceDataObject(value, 'space', ['upgrades', 'spaceTelescope', 'autoSpaceTelescopeMode']);
                 }
             ),
             createToggleSwitch(
                 'autoTelescopeToggle',
-                getAutoSpaceTelescopeEnabled(),
+                getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'autoSpaceTelescopeEnabled']),
                 (isEnabled) => {
-                    setAutoSpaceTelescopeEnabled(isEnabled);
+                    setResourceDataObject(isEnabled, 'space', ['upgrades', 'spaceTelescope', 'autoSpaceTelescopeEnabled']);
                 },
                 ['toggle-switch-spacing']
             ),
@@ -99,7 +99,7 @@ export function drawTab6Content(heading, optionContentElement) {
         );
         
         // Only show the auto telescope row if the space telescope is built and autoSpaceTelescopeRowEnabled is true
-        if (getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'spaceTelescopeBoughtYet']) && getAutoSpaceTelescopeRowEnabled()) {
+        if (getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'spaceTelescopeBoughtYet']) && getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'autoSpaceTelescopeRowEnabled'])) {
             optionContentElement.appendChild(spaceTelescopeAutoRow);
         }
 

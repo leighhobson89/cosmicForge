@@ -1,9 +1,4 @@
 import {
-    getAutoSpaceTelescopeRowEnabled,
-    setAutoSpaceTelescopeRowEnabled,
-    getAutoSpaceTelescopeEnabled,
-    setAutoSpaceTelescopeEnabled,
-    getAutoSpaceTelescopeMode,
     setMegaStructureTabUnlocked,
     getMegaStructureTabUnlocked,
     getMegaStructureTabNotificationShown,
@@ -3991,9 +3986,11 @@ function resourceAndCompoundMonitorRevealRowsChecks(element) {
 }
 
 export function checkAndStartAutoTelescopeAction() {
-    if (!getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'spaceTelescopeBoughtYet']) || 
-        !getAutoSpaceTelescopeEnabled() || 
-        !getAutoSpaceTelescopeRowEnabled()) {
+    const telescopeData = getResourceDataObject('space', ['upgrades', 'spaceTelescope']);
+
+    if (!telescopeData?.spaceTelescopeBoughtYet ||
+        !telescopeData?.autoSpaceTelescopeEnabled ||
+        !telescopeData?.autoSpaceTelescopeRowEnabled) {
         return;
     }
 
@@ -4012,7 +4009,7 @@ export function checkAndStartAutoTelescopeAction() {
         return;
     }
 
-    const mode = getAutoSpaceTelescopeMode();
+    const mode = telescopeData.autoSpaceTelescopeMode ?? 'studyAsteroid';
     
     if (mode === 'studyAsteroid') {
         startSearchAsteroidTimer([0, 'autoTelescope']);

@@ -566,6 +566,9 @@ export let resourceData = {
                 energyUseSearchAsteroid: 0.4,
                 energyUseInvestigateStar: 0.7,
                 energyUsePhilosophyBoostResourcesAndCompounds: 1.1,
+                autoSpaceTelescopeMode: 'studyAsteroid',
+                autoSpaceTelescopeEnabled: false,
+                autoSpaceTelescopeRowEnabled: false,
             },
             launchPad: { 
                 launchPadBoughtYet: false,
