@@ -237,7 +237,8 @@ import {
     setAutoSellToggleState,
     setAutoCreateToggleState,
     calculateStarTravelDurationWithModifiers,
-    getAscendencyPointsWithRepeatableBonus
+    getAscendencyPointsWithRepeatableBonus,
+    formatProductionRateValue
 } from './game.js';
 
 import { 
@@ -456,6 +457,7 @@ export function applyCustomPointerSetting() {
 document.addEventListener('DOMContentLoaded', async () => {
     setElements();
     setupStatTooltips();
+    setupProductionRateTooltips();
     setupMouseParticleTrail();
     applyCustomPointerSetting();
 
@@ -587,6 +589,182 @@ function setupStatTooltips() {
             tooltip.style.display = 'none';
         });
     });
+}
+
+function setupProductionRateTooltips() {
+    let tooltip = document.getElementById('production-rate-tooltip');
+    if (!tooltip) {
+        tooltip = document.createElement('div');
+        tooltip.id = 'production-rate-tooltip';
+        tooltip.style.position = 'absolute';
+        tooltip.style.padding = '6px 10px';
+        tooltip.style.pointerEvents = 'none';
+        tooltip.style.background = 'var(--container-bg-color)';
+        tooltip.style.color = 'var(--text-color)';
+        tooltip.style.border = '1px solid var(--border-color, #555)';
+        tooltip.style.borderRadius = 'var(--border-radius, 4px)';
+        tooltip.style.fontSize = '12px';
+        tooltip.style.zIndex = '100000';
+        tooltip.style.display = 'none';
+        tooltip.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.2)';
+        tooltip.style.maxWidth = '320px';
+        tooltip.style.wordWrap = 'break-word';
+        document.body.appendChild(tooltip);
+    }
+
+    const resources = Object.keys(getResourceDataObject('resources') || {});
+    const compounds = Object.keys(getResourceDataObject('compounds') || {});
+
+    const attachTooltip = (resourceKey, category) => {
+        const element = document.getElementById(`${resourceKey}Rate`);
+        if (!element || element.dataset.productionTooltipAttached) {
+            return;
+        }
+
+        element.dataset.productionTooltipAttached = 'true';
+
+        const updateTooltip = (event) => {
+            if (!shouldShowProductionTooltip(category)) {
+                tooltip.style.display = 'none';
+                return;
+            }
+
+            const content = buildProductionTooltipContent(resourceKey, category);
+            if (!content) {
+                tooltip.style.display = 'none';
+                return;
+            }
+
+            tooltip.innerHTML = content;
+            tooltip.style.display = 'block';
+            tooltip.style.left = `${event.pageX + 10}px`;
+            tooltip.style.top = `${event.pageY + 10}px`;
+        };
+
+        element.addEventListener('mouseenter', updateTooltip);
+        element.addEventListener('mousemove', updateTooltip);
+        element.addEventListener('mouseleave', () => {
+            tooltip.style.display = 'none';
+        });
+    };
+
+    resources.forEach(resource => attachTooltip(resource, 'resources'));
+    compounds.forEach(compound => attachTooltip(compound, 'compounds'));
+}
+
+function shouldShowProductionTooltip(category) {
+    const currentTab = getCurrentTab?.();
+    const tabLabel = currentTab?.[1] ?? '';
+
+    if (category === 'resources') {
+        return tabLabel.includes('Resources');
+    }
+
+    if (category === 'compounds') {
+        return tabLabel.includes('Compounds');
+    }
+
+    return false;
+}
+
+function buildProductionTooltipContent(resourceKey, category) {
+    const resourceData = getResourceDataObject(category, [resourceKey]);
+    if (!resourceData) {
+        return '';
+    }
+
+    const timerRatio = getTimerRateRatio() || 1;
+    const displayName = capitaliseString(resourceData.nameResource || resourceData.nameCompound || resourceKey);
+    const rateElement = document.getElementById(`${resourceKey}Rate`);
+    const fallbackRate = `${formatProductionRateValue(((getResourceDataObject(category, [resourceKey, 'rate']) || 0) * timerRatio))} / s`;
+    const netRateDisplay = (rateElement?.textContent?.trim()) || fallbackRate;
+
+    const lines = [
+        `<div><strong>${displayName}</strong>: <span class="green-ready-text">${netRateDisplay}</span></div>`
+    ];
+
+    const generationLines = buildAutoBuyerGenerationLines(resourceKey, category, timerRatio);
+    if (generationLines) {
+        lines.push('<div class="tooltip-spacer">&nbsp;</div>');
+        lines.push('<div><strong>Generation</strong></div>');
+        lines.push(generationLines);
+    }
+
+    const consumptionLines = buildFuelConsumptionLines(resourceKey, category, timerRatio);
+    if (consumptionLines) {
+        lines.push('<div class="tooltip-spacer">&nbsp;</div>');
+        lines.push('<div><strong>Consumption</strong></div>');
+        lines.push(consumptionLines);
+    }
+
+    return lines.join('');
+}
+
+function buildAutoBuyerGenerationLines(resourceKey, category, timerRatio) {
+    const autoBuyer = getResourceDataObject(category, [resourceKey, 'upgrades', 'autoBuyer']);
+    if (!autoBuyer) {
+        return '';
+    }
+
+    const tierNumbers = [1, 2, 3, 4];
+    const tierLines = tierNumbers.map(tier => {
+        const tierData = autoBuyer[`tier${tier}`];
+        if (!tierData) {
+            return null;
+        }
+
+        const quantity = tierData.quantity ?? 0;
+        if (quantity <= 0) {
+            return null;
+        }
+
+        const active = Boolean(tierData.active);
+        const perUnitRate = tierData.rate ?? 0;
+        const contribution = active ? perUnitRate * quantity * timerRatio : 0;
+        const className = contribution > 0 ? 'green-ready-text' : 'red-disabled-text';
+        const label = tierData.nameUpgrade || `Tier ${tier}`;
+        const tierLabel = `${label} (Tier ${tier})`;
+        const formattedContribution = formatProductionRateValue(contribution);
+
+        return `<div>${tierLabel}: <span class="${className}">${formattedContribution} / s</span></div>`;
+    }).filter(Boolean);
+
+    return tierLines.join('');
+}
+
+const fuelConsumptionMap = {
+    resources: {
+        carbon: [{ buildingKey: 'powerPlant1', label: 'Basic Power Plant' }]
+    },
+    compounds: {
+        diesel: [{ buildingKey: 'powerPlant3', label: 'Advanced Power Plant' }]
+    }
+};
+
+function buildFuelConsumptionLines(resourceKey, category, timerRatio) {
+    const consumptionEntries = fuelConsumptionMap?.[category]?.[resourceKey];
+    if (!consumptionEntries) {
+        return '';
+    }
+
+    const powerOn = getPowerOnOff();
+
+    const lines = consumptionEntries.map(({ buildingKey, label }) => {
+        const buildingData = getResourceDataObject('buildings', ['energy', 'upgrades', buildingKey]);
+        if (!buildingData) {
+            return null;
+        }
+
+        const quantity = buildingData.quantity ?? 0;
+        const fuelRate = buildingData.fuel?.[1] ?? 0;
+        const isActive = powerOn && getBuildingTypeOnOff(buildingKey);
+        const consumption = isActive ? fuelRate * quantity * timerRatio : 0;
+        const className = consumption > 0 ? 'red-disabled-text' : 'green-ready-text';
+
+        return `<div>${label}: <span class="${className}">${consumption.toFixed(2)} / s</span></div>`;
+    }).filter(Boolean);
+
+    return lines.join('');
 }
 
     initialiseDescriptions();

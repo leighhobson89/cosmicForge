@@ -402,6 +402,45 @@ import { timerManagerDelta } from './timerManagerDelta.js';
  import { drawTab5Content } from './drawTab5Content.js';
 import { handleTechnologyButtonClick } from './drawTab3Content.js';
 
+function updateProductionRateText(elementId, rateValue) {
+    if (!isFinite(rateValue)) {
+        rateValue = 0;
+    }
+
+    const elements = getElements?.();
+    const rateElement = elements?.[elementId] || document.getElementById(elementId);
+    if (!rateElement) {
+        return;
+    }
+
+    const formattedValue = formatProductionRateValue(rateValue);
+    rateElement.textContent = `${formattedValue} / s`;
+
+    rateElement.classList.remove('green-ready-text', 'red-disabled-text', 'warning-orange-text');
+    if (rateValue > 0) {
+        rateElement.classList.add('green-ready-text');
+    } else if (rateValue < 0) {
+        rateElement.classList.add('red-disabled-text');
+    } else {
+        rateElement.classList.add('warning-orange-text');
+    }
+}
+
+export function formatProductionRateValue(rateValue) {
+    const sign = rateValue < 0 ? '-' : '';
+    const absValue = Math.abs(rateValue);
+
+    if (absValue >= 1000) {
+        return `${sign}${formatNumber(absValue)}`;
+    }
+
+    if (absValue >= 1) {
+        return `${sign}${absValue.toFixed(1)}`;
+    }
+
+    return `${sign}${absValue.toFixed(2)}`;
+}
+
 //--------------------------------------------------------------------------------------------------------
 export function startGame() {
     if (!getGameStartTime()) {
@@ -1101,7 +1140,8 @@ function updateResourceAutoBuyerDelta(resource, tier, deltaMs) {
         }
 
         if (resource !== 'solar') {
-            getElements()[`${resource}Rate`].textContent = `${((allResourceRatesAddedTogether - amountToDeductForConsumption) * getTimerRateRatio()).toFixed(1)} / s`;
+            const netRateDisplay = (allResourceRatesAddedTogether - amountToDeductForConsumption) * getTimerRateRatio();
+            updateProductionRateText(`${resource}Rate`, netRateDisplay);
         }
     } else if (tier === 1) {
         const autoBuyerExtractionRate = getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', 'tier1', 'rate']) || 0;
@@ -1119,7 +1159,7 @@ function updateResourceAutoBuyerDelta(resource, tier, deltaMs) {
         const resourceTier1Rate = calculatedResourceRate;
         setResourceDataObject(resourceTier1Rate, 'resources', [resource, 'rate']);
         if (resource !== 'solar') {
-            getElements()[`${resource}Rate`].textContent = `${(resourceTier1Rate * getTimerRateRatio()).toFixed(1)} / s`;
+            updateProductionRateText(`${resource}Rate`, resourceTier1Rate * getTimerRateRatio());
         }
     }
 
@@ -1242,7 +1282,8 @@ function updateCompoundAutoBuyerDelta(compound, tier, deltaMs) {
             }
         }
 
-        getElements()[`${compound}Rate`].textContent = `${((allCompoundRatesAddedTogether - amountToDeductForConsumption) * getTimerRateRatio()).toFixed(1)} / s`;
+        const netCompoundRateDisplay = (allCompoundRatesAddedTogether - amountToDeductForConsumption) * getTimerRateRatio();
+        updateProductionRateText(`${compound}Rate`, netCompoundRateDisplay);
     } else if (tier === 1) {
         const autoBuyerExtractionRate = getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', 'tier1', 'rate']) || 0;
         const currentTierAutoBuyerQuantity = getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', 'tier1', 'quantity']) || 0;
@@ -1275,12 +1316,12 @@ function updateCompoundAutoBuyerDelta(compound, tier, deltaMs) {
         }
 
         setResourceDataObject(compoundTier1Rate, 'compounds', [compound, 'rate']);
-        getElements()[`${compound}Rate`].textContent = `${(compoundTier1Rate * getTimerRateRatio()).toFixed(1)} / s`;
+        updateProductionRateText(`${compound}Rate`, compoundTier1Rate * getTimerRateRatio());
     } else if (
         compound === getStarSystemDataObject('stars', [getCurrentStarSystem(), 'precipitationType'])
     ) {
         setResourceDataObject(getCurrentPrecipitationRate(), 'compounds', [compound, 'rate']);
-        getElements()[`${compound}Rate`].textContent = `${(getCurrentPrecipitationRate() * getTimerRateRatio()).toFixed(1)} / s`;
+        updateProductionRateText(`${compound}Rate`, getCurrentPrecipitationRate() * getTimerRateRatio());
     }
 
     if (getResourceDataObject('compounds', [compound, 'autoSell'])) {
@@ -7985,7 +8026,7 @@ function complexPurchaseBuildingFormatter(element, notationType) {
     }    
 }
 
-function formatNumber(value) {
+export function formatNumber(value) {
     const number = parseFloat(value);
     if (isNaN(number)) return value;
 
