@@ -518,6 +518,7 @@ let megaStructureResourceBonus = false;
 let infinitePower = false;
 let currentRunIsMegaStructureRun = false;
 let megaStructureTabNotificationShown = false;
+let hasVisitedMegaStructure = false;
 let megaStructureTabUnlocked = false;
 let rebirthPossible = false;
 let sfx = false;
@@ -1138,7 +1139,6 @@ export function resetAllVariablesOnRebirth() {
     }
     
     currentRunIsMegaStructureRun = false;
-    megaStructureTabNotificationShown = false;
     techRenderChange = false;
     losingEnergy = false;
     powerOnOff = getInfinitePower();
@@ -1365,6 +1365,7 @@ export function captureGameStatusForSaving(type) {
         philosophyAbilityActive: philosophyAbilityActive,
         currentRunIsMegaStructureRun: currentRunIsMegaStructureRun,
         megaStructureTabNotificationShown: megaStructureTabNotificationShown,
+        hasVisitedMegaStructure: hasVisitedMegaStructure,
         megaStructureTabUnlocked: megaStructureTabUnlocked,
         infinitePower: infinitePower,
         megaStructureResourceBonus: megaStructureResourceBonus,
@@ -1582,6 +1583,7 @@ export function restoreGameStatus(gameState, type) {
             philosophyAbilityActive = gameState.flags.philosophyAbilityActive ?? false;
             currentRunIsMegaStructureRun = gameState.flags.currentRunIsMegaStructureRun ?? false;
             megaStructureTabNotificationShown = gameState.flags.megaStructureTabNotificationShown ?? false;
+            hasVisitedMegaStructure = gameState.flags.hasVisitedMegaStructure ?? false;
             megaStructureTabUnlocked = gameState.flags.megaStructureTabUnlocked ?? false;
             infinitePower = gameState.flags.infinitePower ?? false;
             megaStructureResourceBonus = gameState.flags.megaStructureResourceBonus ?? false;
@@ -3713,6 +3715,14 @@ export function getMegaStructureTabNotificationShown() {
 
 export function setMegaStructureTabNotificationShown(value) {
     megaStructureTabNotificationShown = value;
+}
+
+export function getHasVisitedMegaStructure() {
+    return hasVisitedMegaStructure;
+}
+
+export function setHasVisitedMegaStructure(value) {
+    hasVisitedMegaStructure = value;
 }
 
 export function getMegaStructureTabUnlocked() {

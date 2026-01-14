@@ -246,6 +246,8 @@ import {
 
 import { playClickSfx, playSwipeSfx, sfxPlayer } from './audioManager.js';
 
+let suppressUiClickSfx = false;
+
 import { drawTab1Content } from './drawTab1Content.js';
 import { drawTab2Content } from './drawTab2Content.js';
 import { drawTab3Content } from './drawTab3Content.js';
@@ -741,8 +743,16 @@ function buildPowerPlantStatusLines() {
     }).join('');
 }
 
+export function setSuppressUiClickSfx(flag) {
+    suppressUiClickSfx = flag;
+}
+
 export function updateContent(heading, tab, type) {
-    playClickSfx();
+    if (suppressUiClickSfx) {
+        suppressUiClickSfx = false;
+    } else {
+        playClickSfx();
+    }
     const optionDescriptionElements = getElements().optionPaneDescriptions;
     let optionDescription;
 

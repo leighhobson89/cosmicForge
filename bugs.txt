@@ -2,6 +2,8 @@ when power on with a basic power plant, carbon production severely reduced in re
 if you buy a resource or compound in the GM befoe it is revealed, could be a better way of handling it than just allowing it and then it showing up when it is revealed
 think about tooltip for hovering resource generation to cover scenarios like using fuel for power plants
 
+add qol to select to constantly study asteroids and stars and pillage the void as a ascendency perk drop down menu and toggle switch on a row at top of space telescope
+
 REALLY TO DO TO END OF GAME
     - ADD REST OF STATISTICS
     - ADD ACHIEVEMENTS TO INCLUDE PHILOSOPHIES AND MEGASTRUCTURE STORY ARC
