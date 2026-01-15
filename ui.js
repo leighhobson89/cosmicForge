@@ -4215,9 +4215,85 @@ export function updateDynamicUiContent() {
         drawStackedBarChart('powerGenerationConsumptionChart', generationValues, consumptionValues, solarPlantMaxPurchasedRate);
     }
 
+    updateSidebarStatusDisplays();
+
     if (getCurrentOptionPane() !== 'star map') {
         removeStarConnectionTooltip();
     }
+}
+
+const sidebarStatusHighlightClasses = ['green-ready-text', 'red-disabled-text', 'warning-orange-text'];
+
+const sidebarStatusUpdaters = [
+    {
+        elementId: 'spaceTelescopeOption2',
+        builder: buildSpaceTelescopeSidebarStatus
+    }
+];
+
+function updateSidebarStatusDisplays() {
+    sidebarStatusUpdaters.forEach(({ elementId, builder }) => {
+        const element = document.getElementById(elementId);
+        if (!element || typeof builder !== 'function') {
+            return;
+        }
+
+        const result = builder();
+        const text = result?.text ?? '';
+        const className = result?.className ?? '';
+
+        if (element.textContent !== text) {
+            element.textContent = text;
+        }
+
+        sidebarStatusHighlightClasses.forEach(highlightClass => {
+            if (className === highlightClass) {
+                element.classList.add(highlightClass);
+            } else {
+                element.classList.remove(highlightClass);
+            }
+        });
+    });
+}
+
+function buildSpaceTelescopeSidebarStatus() {
+    const optionElement = document.getElementById('spaceTelescopeOption');
+    const optionRow = optionElement?.closest('.row-side-menu');
+    if (optionRow?.classList.contains('invisible')) {
+        return { text: '', className: '' };
+    }
+
+    const telescopeData = getResourceDataObject('space', ['upgrades', 'spaceTelescope']);
+    if (!telescopeData?.spaceTelescopeBoughtYet) {
+        return { text: 'Not Built', className: 'warning-orange-text' };
+    }
+
+    const activeTasks = [
+        {
+            isActive: () => getCurrentlySearchingAsteroid() && (getTimeLeftUntilAsteroidScannerTimerFinishes() > 0),
+            label: 'Scanning Asteroids'
+        },
+        {
+            isActive: () => getCurrentlyInvestigatingStar() && (getTimeLeftUntilStarInvestigationTimerFinishes() > 0),
+            label: 'Studying Stars'
+        },
+        {
+            isActive: () => getCurrentlyPillagingVoid() && (getTimeLeftUntilPillageVoidTimerFinishes() > 0),
+            label: 'Pillaging The Void'
+        }
+    ];
+
+    const activeTask = activeTasks.find(task => task.isActive());
+
+    if (!activeTask) {
+        return { text: 'Idle', className: '' };
+    }
+
+    if (!getPowerOnOff()) {
+        return { text: 'No Power', className: 'red-disabled-text' };
+    }
+
+    return { text: activeTask.label, className: 'green-ready-text' };
 }
 
 function drawLeftSideOfAntimatterSvg(asteroidsArray, rocketData, svgElement, svgNS) {
