@@ -4867,16 +4867,31 @@ function buildMegastructuresSidebarStatus() {
 
     // Create tooltip content
     let tooltipContent = '<div class="tooltip-section">';
-    tooltipContent += '<div class="tooltip-heading">Megastructures Status</div>';
+    tooltipContent += '<div class="tooltip-heading">Megastructures Status</div><br>';
 
+    // Separate captured and non-captured megastructures
+    const captured = [];
+    const notCaptured = [];
+    
     megastructures.forEach(ms => {
         const isCaptured = capturedMegastructures.some(item => 
             typeof item === 'string' ? item === ms.name : item === ms.id
         );
-        const statusClass = isCaptured ? 'green-ready-text' : 'red-disabled-text';
+        if (isCaptured) {
+            captured.push(ms);
+        } else {
+            notCaptured.push(ms);
+        }
+    });
+
+    // Add captured megastructures section
+    if (captured.length > 0) {
+        tooltipContent += '<div class="tooltip-subheading">Captured Megastructures:</div>';
+        captured.forEach(ms => {
+        const statusClass = 'green-ready-text'; // Captured are always green
         
         tooltipContent += `<div class="megastructure-status ${statusClass}">`;
-        tooltipContent += `<strong>${ms.name}:</strong> ${isCaptured ? 'Captured' : 'Not Captured'}`;
+        tooltipContent += `<strong>${ms.name}:</strong> Captured`;
         
         // Add tech status with actual tech names
         const techsResearched = getMegaStructureTechsResearched() || [];
@@ -4893,7 +4908,40 @@ function buildMegastructuresSidebarStatus() {
         });
         
         tooltipContent += '</div>';
-    });
+        });
+    }
+
+    // Add spacing between sections if both exist
+    if (captured.length > 0 && notCaptured.length > 0) {
+        tooltipContent += '<br>';
+    }
+
+    // Add non-captured megastructures section
+    if (notCaptured.length > 0) {
+        tooltipContent += '<div class="tooltip-subheading">Non-Captured Megastructures:</div>';
+        notCaptured.forEach(ms => {
+            const statusClass = 'red-disabled-text'; // Non-captured are always red
+            
+            tooltipContent += `<div class="megastructure-status ${statusClass}">`;
+            tooltipContent += `<strong>${ms.name}:</strong> Not Captured`;
+            
+            // Add tech status with actual tech names
+            const techsResearched = getMegaStructureTechsResearched() || [];
+            ms.techs.forEach((techName, index) => {
+                const techId = index + 1;
+                const isResearched = techsResearched.some(([msId, tId]) => 
+                    msId === ms.id && tId === techId
+                );
+                const techStatus = isResearched ? '✓' : '✗';
+                const techClass = isResearched ? 'green-ready-text' : 'red-disabled-text';
+                tooltipContent += `<div class="tech-status ${techClass}" style="margin-left: 10px;">`;
+                tooltipContent += `${techName}: ${techStatus}`;
+                tooltipContent += '</div>';
+            });
+            
+            tooltipContent += '</div>';
+        });
+    }
 
     tooltipContent += '</div>';
 
