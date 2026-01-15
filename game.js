@@ -1,4 +1,11 @@
 import {
+    setSuppressUiClickSfx,
+    setFirstAccessArray,
+    setCurrentOptionPane,
+    setLastScreenOpenRegister,
+    getLastScreenOpenRegister,
+    getStarShipDestinationReminderVisible,
+    setStarShipDestinationReminderVisible,
     setMegaStructureTabUnlocked,
     getMegaStructureTabUnlocked,
     getMegaStructureTabNotificationShown,
@@ -5414,13 +5421,41 @@ function starShipUiChecks() {
         tooltipLayer.appendChild(arrowHead);
     }
 
-    if (getResourceDataObject('space', ['upgrades']) && !getStarShipTravelling() && getStarShipStatus()[0] !== 'readyForTravel' && 
-        Object.entries(getResourceDataObject('space', ['upgrades']))
-            .filter(([key]) => key.startsWith('ss'))
-            .every(([, upgrade]) => upgrade.finished === true)
-    ) {
+    const allModulesFinished = Object.entries(getResourceDataObject('space', ['upgrades']))
+        .filter(([key]) => key.startsWith('ss') && !key.startsWith('ssStellarScanner'))
+        .every(([, upgrade]) => upgrade.finished === true);
+
+    let shipStatus = getStarShipStatus()[0];
+    let shouldShowDestinationReminder = allModulesFinished && shipStatus === 'readyForTravel';
+    setStarShipDestinationReminderVisible(shouldShowDestinationReminder);
+
+    if (getResourceDataObject('space', ['upgrades']) && !getStarShipTravelling() && shipStatus !== 'readyForTravel' && allModulesFinished) {
         setStarShipStatus(['readyForTravel', null]);
+        shipStatus = 'readyForTravel';
+        shouldShowDestinationReminder = true;
+        setStarShipDestinationReminderVisible(true);
+
+        selectStarShipSidebarOption();
     }
+}
+
+function selectStarShipSidebarOption(retryCount = 0) {
+    const starShipOptionElement = document.getElementById('starShipOption');
+    if (!starShipOptionElement) {
+        if (retryCount < 5) {
+            setTimeout(() => selectStarShipSidebarOption(retryCount + 1), 100 * (retryCount + 1));
+        }
+        return;
+    }
+
+    document.querySelectorAll('.row-side-menu').forEach(row => row.classList.remove('row-side-menu-selected'));
+    starShipOptionElement.closest('.row-side-menu')?.classList.add('row-side-menu-selected');
+
+    setLastScreenOpenRegister('tab5', 'star ship');
+    setCurrentOptionPane('star ship');
+    setSuppressUiClickSfx(true);
+    updateContent('Star Ship', 'tab5', 'content');
+    setFirstAccessArray('star ship');
 }
 
 function fleetHangarChecks() {

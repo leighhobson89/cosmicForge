@@ -278,6 +278,7 @@ let fromStarObject = null;
 let toStarObject = null;
 let currentStarObject = null;
 let starShipStatus = ['preconstruction', null];
+let starShipDestinationReminderVisible = false;
 let runNumber = 1;
 let settledStars = [STARTING_STAR_SYSTEM];
 let apSellForCashPrice = AP_BASE_SELL_PRICE;
@@ -3300,6 +3301,14 @@ export function getStarShipStatus() {
 
 export function setStarShipStatus(value) {
     starShipStatus = value;
+}
+
+export function getStarShipDestinationReminderVisible() {
+    return starShipDestinationReminderVisible;
+}
+
+export function setStarShipDestinationReminderVisible(value) {
+    starShipDestinationReminderVisible = Boolean(value);
 }
 
 export function getStellarScannerBuilt() {

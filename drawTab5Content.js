@@ -1,5 +1,5 @@
 import { removeTabAttentionIfNoIndicators, createColoniseOpinionProgressBar, setColoniseOpinionProgressBar, spaceTravelButtonHideAndShowDescription, drawStarConnectionDrawings, createStarDestinationRow, sortStarTable, handleSortStarClick, createTextElement, createOptionRow, createButton, generateStarfield, showNotification, showEnterWarModeModal, setWarUI } from './ui.js';
-import { getFactoryStarsArray, getSettledStars, setInFormation, setRedrawBattleDescription, setFleetChangedSinceLastDiplomacy, setDestinationStarScanned, getDestinationStarScanned, getStellarScannerBuilt, getStarShipTravelling, getDestinationStar, getCurrencySymbol, getSortStarMethod, getCurrentStarSystem, STAR_FIELD_SEED, NUMBER_OF_STARS, getStarMapMode, setStarMapMode, getWarMode, replaceBattleUnits, setNeedNewBattleCanvas, setFormationGoal, setBattleResolved, getBelligerentEnemyFlag, setAchievementFlagArray, getStarsWithAncientManuscripts } from './constantsAndGlobalVars.js';
+import { getFactoryStarsArray, getSettledStars, setInFormation, setRedrawBattleDescription, setFleetChangedSinceLastDiplomacy, setDestinationStarScanned, getDestinationStarScanned, getStellarScannerBuilt, getStarShipTravelling, getDestinationStar, getCurrencySymbol, getSortStarMethod, getCurrentStarSystem, STAR_FIELD_SEED, NUMBER_OF_STARS, getStarMapMode, setStarMapMode, getWarMode, replaceBattleUnits, setNeedNewBattleCanvas, setFormationGoal, setBattleResolved, getBelligerentEnemyFlag, setAchievementFlagArray, getStarsWithAncientManuscripts, getStarShipDestinationReminderVisible } from './constantsAndGlobalVars.js';
 
 import { getMaxFleetShip, getFleetShips, copyStarDataToDestinationStarField, getResourceDataObject, getStarShipParts, getStarShipPartsNeededInTotalPerModule, getStarSystemDataObject, setStarSystemDataObject } from './resourceDataObject.js';
 import { capitaliseString, capitaliseWordsWithRomanNumerals } from './utilityFunctions.js';
@@ -239,6 +239,40 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
 
     if (heading === 'Star Ship') {
         if (!starDestinationInfoRedraw) {
+            const destinationStar = getDestinationStar();
+            const destinationReminderRow = createOptionRow(
+                `spaceStarShipDestinationReminderRow`,
+                null,
+                '',
+                null,
+                null,
+                null,
+                null,
+                null,
+                '',
+                '',
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            );
+
+            const reminderMainRow = destinationReminderRow.querySelector('.option-row-main');
+            if (reminderMainRow) {
+                reminderMainRow.remove();
+            }
+
+            if (!getStarShipDestinationReminderVisible()) {
+                destinationReminderRow.classList.add('invisible');
+            }
+
+            optionContentElement.appendChild(destinationReminderRow);
+
             const starShipModules = [
                 { id: 'ssStructural', label: 'Structural' },
                 { id: 'ssLifeSupport', label: 'Life Support Module' },
@@ -246,14 +280,14 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                 { id: 'ssFleetHangar', label: 'Fleet Hangar' },
                 { id: 'ssStellarScanner', label: 'Stellar Scanner' }
             ];
-    
+
             starShipModules.forEach(module => {
                 const starshipComponentBuildRow = createOptionRow(
                     `space${capitaliseString(module.id)}BuildRow`,
                     null,
                     `${module.label}:`,
                     createButton(`Build Module`, ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check'], () => {
-                        gain(1, `${module.id}BuiltPartsQuantity`, module.id, false, null, 'space', 'space')
+                        gain(1, `${module.id}BuiltPartsQuantity`, module.id, false, null, 'space', 'space');
                     }, 'upgradeCheck', '', 'spaceUpgrade', module.id, 'cash', true, null, 'starShipPurchase'),
                     createTextElement(
                         `Built: <span id="${module.id}BuiltPartsQuantity">${getStarShipParts(module.id)}</span> / <span id="${module.id}TotalPartsQuantity">${getStarShipPartsNeededInTotalPerModule(module.id)}</span>`,
@@ -278,17 +312,17 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                     null,
                     'starShipPurchase'
                 );
+
                 optionContentElement.appendChild(starshipComponentBuildRow);
             });
-    
-            const destinationStar = getDestinationStar();
+
             const starShipTravelRow = createOptionRow(
                 `spaceStarShipTravelRow`,
                 null,
                 `Travelling To:`,
                 createTextElement(`${capitaliseWordsWithRomanNumerals(destinationStar || '')}`, `starShipDestinationStar`, ['green-ready-text', 'destination-text']),
                 createTextElement(`<div id="spaceTravelToStarProgressBar">`, `spaceTravelToStarProgressBarContainer`, ['progress-bar-container']),
-                null,                               
+                null,
                 null,
                 null,
                 `Travelling...`,
@@ -304,7 +338,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                 'travel'
             );
             optionContentElement.appendChild(starShipTravelRow);
-    
+
             const starShipStellarScannerRow = createOptionRow(
                 `spaceStarShipStellarScannerRow`,
                 null,
@@ -314,11 +348,11 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                     copyStarDataToDestinationStarField(destinationStar);
                     generateDestinationStarData();
                     showNotification(`${capitaliseWordsWithRomanNumerals(destinationStar)} System Scanned!`, 'info', 3000, 'starShip');
-    
+
                     drawTab5Content('Star Ship', optionContentElement, true, false);
                 }, '', '', '', null, '', true, null, ''),
                 null,
-                null,                               
+                null,
                 null,
                 null,
                 `Scan ${capitaliseWordsWithRomanNumerals(destinationStar)} System`,
