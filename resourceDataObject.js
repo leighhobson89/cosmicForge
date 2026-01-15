@@ -7,7 +7,6 @@ import { achievementAchieve100FusionEfficiency, achievementActivateAllWackyNewsT
 import { showNotification } from "./ui.js";
 
 export let achievementImageUrls;
-
 export let resourceData = {
     version: 0.78, //update this whenever changes are made to the structure
     resources: {

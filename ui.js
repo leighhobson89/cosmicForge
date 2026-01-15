@@ -167,7 +167,8 @@ import {
     setCustomPointerListenersAttached,
     getSuppressUiClickSfx,
     setSuppressUiClickSfx,
-    getRebirthPossible
+    getRebirthPossible,
+    getMegaStructuresInPossessionArray
 } from './constantsAndGlobalVars.js';
 import {
     getResourceDataObject,
@@ -4434,6 +4435,12 @@ const galacticMarketSidebarStatusEntries = [
     }
 ];
 
+// Add the megastructure sidebar status entry
+const megastructureSidebarStatusEntry = {
+    elementId: 'megastructuresOption2',
+    builder: buildMegastructuresSidebarStatus
+};
+
 const sidebarStatusUpdaters = [
     {
         elementId: 'spaceTelescopeOption2',
@@ -4442,7 +4449,8 @@ const sidebarStatusUpdaters = [
     ...rocketSidebarStatusEntries,
     ...launchPadSidebarStatusEntries,
     ...starShipSidebarStatusEntries,
-    ...galacticMarketSidebarStatusEntries
+    ...galacticMarketSidebarStatusEntries,
+    megastructureSidebarStatusEntry  // Add the megastructure status
 ];
 
 function updateSidebarStatusDisplays() {
@@ -4789,6 +4797,69 @@ function buildGalacticMarketSidebarStatus() {
             }
             return outgoingBias ?? incomingBias;
         })())
+    };
+}
+
+function buildMegastructuresSidebarStatus() {
+    const statusElement = document.getElementById('megastructuresOption2');
+    const optionRow = statusElement?.closest('.row-side-menu');
+    if (optionRow?.classList.contains('invisible')) {
+        return { text: '', className: '' };
+    }
+
+    const capturedMegastructures = getMegaStructuresInPossessionArray() || [];
+    const totalMegastructures = 4; // Total number of megastructures
+    const capturedCount = capturedMegastructures.length;
+
+    // Create tooltip content
+    let tooltipContent = '<div class="tooltip-section">';
+    tooltipContent += '<div class="tooltip-heading">Megastructures Status</div>';
+
+    // Define megastructure data
+    const megastructures = [
+        { id: 1, name: 'Dyson Sphere' },
+        { id: 2, name: 'Celestial Processing Core' }, 
+        { id: 3, name: 'Plasma Forge' },
+        { id: 4, name: 'Galactic Memory Archive' }
+    ];
+
+    megastructures.forEach(ms => {
+        const isCaptured = capturedMegastructures.includes(ms.id);
+        const statusClass = isCaptured ? 'green-ready-text' : 'red-disabled-text';
+        
+        tooltipContent += `<div class="megastructure-status ${statusClass}">`;
+        tooltipContent += `<strong>${ms.name}:</strong> ${isCaptured ? 'Captured' : 'Not Captured'}`;
+        
+        // Add tech status
+        const techsResearched = getMegaStructureTechsResearched() || [];
+        for (let i = 1; i <= 5; i++) {
+            const isResearched = techsResearched.some(([msId, techId]) => 
+                msId === ms.id && techId === i
+            );
+            const techStatus = isResearched ? '✓' : '✗';
+            const techClass = isResearched ? 'green-ready-text' : 'red-disabled-text';
+            tooltipContent += `<div class="tech-status ${techClass}" style="margin-left: 10px;">`;
+            tooltipContent += `Tech ${i}: ${techStatus}`;
+            tooltipContent += '</div>';
+        }
+        
+        tooltipContent += '</div>';
+    });
+
+    tooltipContent += '</div>';
+
+    // Store tooltip content in data attribute
+    statusElement.dataset.megastructureTooltipContent = tooltipContent;
+
+    // Set up tooltip if not already done
+    if (!statusElement.dataset.tooltipInitialized) {
+        attachSharedTooltip(statusElement, () => statusElement.dataset.megastructureTooltipContent || '');
+        statusElement.dataset.tooltipInitialized = 'true';
+    }
+
+    return {
+        text: `Captured: ${capturedCount}/${totalMegastructures}`,
+        className: capturedCount > 0 ? 'green-ready-text' : ''
     };
 }
 
