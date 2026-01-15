@@ -164,7 +164,8 @@ import {
     getCustomPointerListenersAttached,
     setCustomPointerListenersAttached,
     getSuppressUiClickSfx,
-    setSuppressUiClickSfx
+    setSuppressUiClickSfx,
+    getRebirthPossible
 } from './constantsAndGlobalVars.js';
 import {
     getResourceDataObject,
@@ -273,6 +274,23 @@ const closeButton = document.querySelector('.close-btn');
 
 function shouldUseCustomPointer() {
     return !!getCustomPointerEnabled();
+}
+
+function buildLaunchPadSidebarStatus() {
+    const statusElement = document.getElementById('launchPadOption2');
+    const optionRow = statusElement?.closest('.row-side-menu');
+    if (!statusElement || optionRow?.classList.contains('invisible')) {
+        return { text: '', className: '' };
+    }
+
+    const launchPadData = getResourceDataObject('space', ['upgrades', 'launchPad']);
+    const built = launchPadData?.launchPadBoughtYet;
+
+    if (built) {
+        return { text: 'Built', className: 'green-ready-text' };
+    }
+
+    return { text: 'Not Built', className: 'red-disabled-text' };
 }
 
 function attachEnergyTooltipMirrors() {
@@ -4281,12 +4299,28 @@ const rocketSidebarStatusEntries = ['rocket1', 'rocket2', 'rocket3', 'rocket4'].
     builder: () => buildRocketSidebarStatus(rocketKey)
 }));
 
+const launchPadSidebarStatusEntries = [
+    {
+        elementId: 'launchPadOption2',
+        builder: buildLaunchPadSidebarStatus
+    }
+];
+
+const starShipSidebarStatusEntries = [
+    {
+        elementId: 'starShipOption2',
+        builder: buildStarShipSidebarStatus
+    }
+];
+
 const sidebarStatusUpdaters = [
     {
         elementId: 'spaceTelescopeOption2',
         builder: buildSpaceTelescopeSidebarStatus
     },
-    ...rocketSidebarStatusEntries
+    ...rocketSidebarStatusEntries,
+    ...launchPadSidebarStatusEntries,
+    ...starShipSidebarStatusEntries
 ];
 
 function updateSidebarStatusDisplays() {
@@ -4323,7 +4357,7 @@ function buildSpaceTelescopeSidebarStatus() {
 
     const telescopeData = getResourceDataObject('space', ['upgrades', 'spaceTelescope']);
     if (!telescopeData?.spaceTelescopeBoughtYet) {
-        return { text: 'Not Built', className: 'warning-orange-text' };
+        return { text: 'Not Built', className: 'red-disabled-text' };
     }
 
     const activeTasks = [
@@ -4355,7 +4389,7 @@ function buildSpaceTelescopeSidebarStatus() {
 }
 
 const rocketStatusClassMap = {
-    'Not Built': 'warning-orange-text',
+    'Not Built': 'red-disabled-text',
     'Ready For Refuel': 'green-ready-text',
     'Fuelling': 'warning-orange-text',
     'Ready To Fuel': 'green-ready-text',
@@ -4420,6 +4454,46 @@ function buildRocketSidebarStatus(rocketKey) {
     }
 
     return { text: 'Idle', className: rocketStatusClassMap['Idle'] };
+}
+
+const starShipStatusClassMap = {
+    'Not Built': 'red-disabled-text',
+    'Ready To Depart': 'green-ready-text',
+    'Travelling': 'green-ready-text',
+    'Orbiting Destination': 'green-ready-text',
+    'Colonised Destination': 'green-ready-text'
+};
+
+function buildStarShipSidebarStatus() {
+    const statusElement = document.getElementById('starShipOption2');
+    const optionRow = statusElement?.closest('.row-side-menu');
+    if (!statusElement || optionRow?.classList.contains('invisible')) {
+        return { text: '', className: '' };
+    }
+
+    if (!getStarShipBuilt()) {
+        return { text: 'Not Built', className: starShipStatusClassMap['Not Built'] };
+    }
+
+    const [starShipState] = getStarShipStatus() || [];
+
+    if (getRebirthPossible()) {
+        return { text: 'Colonised', className: starShipStatusClassMap['Colonised Destination'] };
+    }
+
+    if (starShipState === 'orbiting') {
+        return { text: 'Orbiting Destination', className: starShipStatusClassMap['Orbiting Destination'] };
+    }
+
+    if (starShipState === 'travelling' || getStarShipTravelling()) {
+        return { text: 'Travelling', className: starShipStatusClassMap['Travelling'] };
+    }
+
+    if (starShipState === 'readyForTravel') {
+        return { text: 'Ready To Depart', className: starShipStatusClassMap['Ready To Depart'] };
+    }
+
+    return { text: 'Ready To Depart', className: starShipStatusClassMap['Ready To Depart'] };
 }
 
 function drawLeftSideOfAntimatterSvg(asteroidsArray, rocketData, svgElement, svgNS) {
