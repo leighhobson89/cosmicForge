@@ -3922,7 +3922,16 @@ function updateAntimatterAndDiagram() {
     }
 
     if (elements?.miningRate) {
-        elements.miningRate.innerText = `${(totalAntimatterGainPerTick * getTimerRateRatio()).toFixed(2)} / s`;
+        const miningRateElement = elements.miningRate;
+        const formattedMiningRate = `${(totalAntimatterGainPerTick * getTimerRateRatio()).toFixed(2)} / s`;
+        miningRateElement.innerText = formattedMiningRate;
+
+        miningRateElement.classList.remove('green-ready-text', 'warning-orange-text');
+        if (totalAntimatterGainPerTick > 0) {
+            miningRateElement.classList.add('green-ready-text');
+        } else {
+            miningRateElement.classList.add('warning-orange-text');
+        }
     }
 
     if (elements?.miningQuantity) {

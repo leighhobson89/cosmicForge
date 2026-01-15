@@ -87,6 +87,11 @@ import {
     getNewsTickerSetting,
     getPowerOnOff,
     getRocketsFuellerStartedArray,
+    getRocketsBuilt,
+    getLaunchedRockets,
+    getDestinationAsteroid,
+    getCurrentlyTravellingToAsteroid,
+    getRocketDirection,
     getCurrentStarSystemWeatherEfficiency,
     getCurrentStarSystem,
     setSortAsteroidMethod,
@@ -4224,11 +4229,17 @@ export function updateDynamicUiContent() {
 
 const sidebarStatusHighlightClasses = ['green-ready-text', 'red-disabled-text', 'warning-orange-text'];
 
+const rocketSidebarStatusEntries = ['rocket1', 'rocket2', 'rocket3', 'rocket4'].map(rocketKey => ({
+    elementId: `${rocketKey}PartsQuantity`,
+    builder: () => buildRocketSidebarStatus(rocketKey)
+}));
+
 const sidebarStatusUpdaters = [
     {
         elementId: 'spaceTelescopeOption2',
         builder: buildSpaceTelescopeSidebarStatus
-    }
+    },
+    ...rocketSidebarStatusEntries
 ];
 
 function updateSidebarStatusDisplays() {
@@ -4294,6 +4305,74 @@ function buildSpaceTelescopeSidebarStatus() {
     }
 
     return { text: activeTask.label, className: 'green-ready-text' };
+}
+
+const rocketStatusClassMap = {
+    'Not Built': 'warning-orange-text',
+    'Ready For Refuel': 'green-ready-text',
+    'Fuelling': 'warning-orange-text',
+    'Ready To Fuel': 'green-ready-text',
+    'Ready For Launch': 'green-ready-text',
+    'Select Destination': 'warning-orange-text',
+    'Travelling': 'green-ready-text',
+    'Mining': 'green-ready-text',
+    'Returning': 'green-ready-text',
+    'Idle': ''
+};
+
+function buildRocketSidebarStatus(rocketKey) {
+    const statusElement = document.getElementById(`${rocketKey}PartsQuantity`);
+    const optionRow = statusElement?.closest('.row-side-menu');
+    if (optionRow?.classList.contains('invisible')) {
+        return { text: '', className: '' };
+    }
+
+    const builtRockets = getRocketsBuilt() || [];
+    if (!builtRockets.includes(rocketKey)) {
+        return { text: 'Not Built', className: rocketStatusClassMap['Not Built'] };
+    }
+
+    const fuelingEntries = getRocketsFuellerStartedArray() || [];
+    const launched = (getLaunchedRockets() || []).includes(rocketKey);
+    const miningTarget = (getMiningObject() || {})[rocketKey];
+    const isTravelling = getCurrentlyTravellingToAsteroid(rocketKey);
+    const isReturning = isTravelling && !!getRocketDirection(rocketKey);
+    const destination = getDestinationAsteroid(rocketKey);
+
+    if (miningTarget) {
+        return { text: 'Mining', className: rocketStatusClassMap['Mining'] };
+    }
+
+    if (isTravelling) {
+        const status = isReturning ? 'Returning' : 'Travelling';
+        return { text: status, className: rocketStatusClassMap[status] };
+    }
+
+    if (launched) {
+        if (destination) {
+            return { text: 'Ready To Travel', className: 'green-ready-text' };
+        }
+
+        return { text: 'Select Destination', className: rocketStatusClassMap['Select Destination'] };
+    }
+
+    if (fuelingEntries.includes(rocketKey)) {
+        return { text: 'Fuelling', className: rocketStatusClassMap['Fuelling'] };
+    }
+
+    if (fuelingEntries.includes(`${rocketKey}FuelledUp`)) {
+        return { text: 'Ready For Launch', className: rocketStatusClassMap['Ready For Launch'] };
+    }
+
+    if (!fuelingEntries.includes(rocketKey) && !fuelingEntries.includes(`${rocketKey}FuelledUp`) && destination) {
+        return { text: 'Ready To Travel', className: 'green-ready-text' };
+    }
+
+    if (!fuelingEntries.length) {
+        return { text: 'Ready For Refuel', className: rocketStatusClassMap['Ready For Refuel'] };
+    }
+
+    return { text: 'Idle', className: rocketStatusClassMap['Idle'] };
 }
 
 function drawLeftSideOfAntimatterSvg(asteroidsArray, rocketData, svgElement, svgNS) {
