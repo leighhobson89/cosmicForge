@@ -275,6 +275,52 @@ function shouldUseCustomPointer() {
     return !!getCustomPointerEnabled();
 }
 
+function attachEnergyTooltipMirrors() {
+    const tooltip = document.getElementById('stat-tooltip');
+    if (!tooltip) {
+        return;
+    }
+
+    const stat2Element = document.getElementById('stat2');
+    const getTooltipContent = () => {
+        const referenceText = stat2Element?.textContent.trim() || '';
+        return buildEnergyTooltipContent(referenceText);
+    };
+
+    const energyElements = ['energyRate', 'powerPlant1Rate', 'powerPlant2Rate', 'powerPlant3Rate']
+        .map(id => document.getElementById(id))
+        .filter(Boolean);
+
+    energyElements.forEach(element => {
+        if (element.dataset.energyTooltipAttached) {
+            return;
+        }
+
+        const showTooltip = event => {
+            tooltip.innerHTML = getTooltipContent();
+            tooltip.style.display = 'block';
+            tooltip.style.left = `${event.pageX + 10}px`;
+            tooltip.style.top = `${event.pageY + 10}px`;
+        };
+
+        const moveTooltip = event => {
+            tooltip.innerHTML = getTooltipContent();
+            tooltip.style.left = `${event.pageX + 10}px`;
+            tooltip.style.top = `${event.pageY + 10}px`;
+        };
+
+        const hideTooltip = () => {
+            tooltip.style.display = 'none';
+        };
+
+        element.addEventListener('mouseenter', showTooltip);
+        element.addEventListener('mousemove', moveTooltip);
+        element.addEventListener('mouseleave', hideTooltip);
+
+        element.dataset.energyTooltipAttached = 'true';
+    });
+}
+
 function initCustomPointer() {
     if (!document?.body) return;
 
@@ -464,6 +510,7 @@ export function applyCustomPointerSetting() {
 document.addEventListener('DOMContentLoaded', async () => {
     setElements();
     setupStatTooltips();
+    attachEnergyTooltipMirrors();
     setupProductionRateTooltips();
     setupMouseParticleTrail();
     applyCustomPointerSetting();
