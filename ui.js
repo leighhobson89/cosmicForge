@@ -4807,41 +4807,90 @@ function buildMegastructuresSidebarStatus() {
         return { text: '', className: '' };
     }
 
+    // Define megastructure data with tech names first
+    const megastructures = [
+        { 
+            id: 1, 
+            name: 'Dyson Sphere',
+            techs: [
+                'Dyson Sphere Understanding',
+                'Dyson Sphere Capabilities',
+                'Dyson Sphere Disconnect',
+                'Dyson Sphere Power',
+                'Dyson Sphere Connect'
+            ]
+        },
+        { 
+            id: 2, 
+            name: 'Celestial Processing Core',
+            techs: [
+                'CPC Understanding',
+                'CPC Capabilities',
+                'CPC Disconnect',
+                'CPC Power',
+                'CPC Connect'
+            ]
+        },
+        { 
+            id: 3, 
+            name: 'Plasma Forge',
+            techs: [
+                'Plasma Forge Understanding',
+                'Plasma Forge Capabilities',
+                'Plasma Forge Disconnect',
+                'Plasma Forge Power',
+                'Plasma Forge Connect'
+            ]
+        },
+        { 
+            id: 4, 
+            name: 'Galactic Memory Archive',
+            techs: [
+                'GMA Understanding',
+                'GMA Capabilities',
+                'GMA Disconnect',
+                'GMA Power',
+                'GMA Connect'
+            ]
+        }
+    ];
+
     const capturedMegastructures = getMegaStructuresInPossessionArray() || [];
-    const totalMegastructures = 4; // Total number of megastructures
-    const capturedCount = capturedMegastructures.length;
+    const totalMegastructures = megastructures.length;
+    
+    // Count how many of our known megastructures are in the captured list
+    const capturedCount = megastructures.filter(ms => 
+        capturedMegastructures.some(item => 
+            typeof item === 'string' ? item === ms.name : item === ms.id
+        )
+    ).length;
 
     // Create tooltip content
     let tooltipContent = '<div class="tooltip-section">';
     tooltipContent += '<div class="tooltip-heading">Megastructures Status</div>';
 
-    // Define megastructure data
-    const megastructures = [
-        { id: 1, name: 'Dyson Sphere' },
-        { id: 2, name: 'Celestial Processing Core' }, 
-        { id: 3, name: 'Plasma Forge' },
-        { id: 4, name: 'Galactic Memory Archive' }
-    ];
-
     megastructures.forEach(ms => {
-        const isCaptured = capturedMegastructures.includes(ms.id);
+        const isCaptured = capturedMegastructures.some(item => 
+            typeof item === 'string' ? item === ms.name : item === ms.id
+        );
         const statusClass = isCaptured ? 'green-ready-text' : 'red-disabled-text';
         
         tooltipContent += `<div class="megastructure-status ${statusClass}">`;
         tooltipContent += `<strong>${ms.name}:</strong> ${isCaptured ? 'Captured' : 'Not Captured'}`;
         
-        // Add tech status
+        // Add tech status with actual tech names
         const techsResearched = getMegaStructureTechsResearched() || [];
-        for (let i = 1; i <= 5; i++) {
-            const isResearched = techsResearched.some(([msId, techId]) => 
-                msId === ms.id && techId === i
+        ms.techs.forEach((techName, index) => {
+            const techId = index + 1;
+            const isResearched = techsResearched.some(([msId, tId]) => 
+                msId === ms.id && tId === techId
             );
             const techStatus = isResearched ? '✓' : '✗';
             const techClass = isResearched ? 'green-ready-text' : 'red-disabled-text';
             tooltipContent += `<div class="tech-status ${techClass}" style="margin-left: 10px;">`;
-            tooltipContent += `Tech ${i}: ${techStatus}`;
+            tooltipContent += `${techName}: ${techStatus}`;
             tooltipContent += '</div>';
-        }
+        });
         
         tooltipContent += '</div>';
     });
@@ -4857,8 +4906,10 @@ function buildMegastructuresSidebarStatus() {
         statusElement.dataset.tooltipInitialized = 'true';
     }
 
+    const text = `Captured: ${capturedCount}/${totalMegastructures}`;
     return {
-        text: `Captured: ${capturedCount}/${totalMegastructures}`,
+        text: text,
+        html: `<div style="text-align: center;">${text}</div>`,
         className: capturedCount > 0 ? 'green-ready-text' : ''
     };
 }
