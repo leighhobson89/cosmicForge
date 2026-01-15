@@ -9,6 +9,7 @@ export let gameSaveNameCollect;
 export let headerDescriptions;
 export let techNotificationMessages;
 export let optionDescriptions;
+export let galacticMarketTooltipDescriptions;
 export let newsTickerContent;
 export let helpContent;
 export let statisticsContent;
@@ -360,6 +361,17 @@ export function initialiseDescriptions() {
         galacticMemoryArchiveDisconnect: 'Galactic Memory Archive Disconnect Researched\n\nYou have disconnected the Galactic Memory Archive from the Miaplacidus System Force Field.',
         galacticMemoryArchivePower: 'Galactic Memory Archive Power Researched\n\nYou can now harness the Galactic Memory Archive\'s power for use within the system.',
         galacticMemoryArchiveConnect: 'Galactic Memory Archive Connect Researched\n\nYou can now connect the Galactic Memory Archive\'s power across the galaxy.'
+    };
+
+    galacticMarketTooltipDescriptions = {
+        outgoingTitle: 'Outgoing Bias',
+        outgoingText: 'Positive: this resource will be priced lower in the future (you\'ll get less when selling). Negative: this resource will be priced higher in the future (you\'ll get more when selling).',
+        incomingTitle: 'Incoming Bias',
+        incomingText: 'Positive: this resource costs less than baseline to buy right now. Negative: this resource costs more than baseline to buy right now.',
+        comparisonTitle: 'Market Outlook',
+        comparisonHigherOutgoing: 'Outgoing bias higher → future selling prices for your exports are trending down.',
+        comparisonHigherIncoming: 'Incoming bias higher → good time to buy imports as prices are favorable.',
+        comparisonBalanced: 'Market is stable with no strong price trends in either direction.'
     };
 
     optionDescriptions = {

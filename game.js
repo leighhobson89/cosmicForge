@@ -6933,9 +6933,10 @@ function startInitialTimers() {
             clearInterval(marketBiasAdjustmentInterval);
         }
 
+        const adjustmentIntervalMs = 10000;
         marketBiasAdjustmentInterval = setInterval(() => {
             adjustMarketBiases();
-        }, 1000);
+        }, adjustmentIntervalMs);
     }
 
     let marketCycleCountDownToChangeInterval;
@@ -7255,24 +7256,25 @@ function adjustMarketBiases() {
         }
 
         if (currentBias !== undefined) {
-            let adjustmentStep = 0.1;
+            const biasMagnitude = Math.abs(currentBias);
+            let adjustmentStep = 0.05;
 
-            if (Math.abs(currentBias) > 1000) {
-                adjustmentStep = 100;
-            } else if (Math.abs(currentBias) > 100) {
-                adjustmentStep = 10;
-            } else if (Math.abs(currentBias) > 10) {
-                adjustmentStep = 1;
+            if (biasMagnitude > 1000) {
+                adjustmentStep = 50;
+            } else if (biasMagnitude > 100) {
+                adjustmentStep = 5;
+            } else if (biasMagnitude > 10) {
+                adjustmentStep = 0.5;
             }
 
             let newBias = currentBias;
 
-            if (newBias < 0) {
+            if (biasMagnitude <= adjustmentStep) {
+                newBias = 0;
+            } else if (newBias < 0) {
                 newBias += adjustmentStep;
-                if (newBias > 0) newBias = 0;
             } else if (newBias > 0) {
                 newBias -= adjustmentStep;
-                if (newBias < 0) newBias = 0;
             }
 
             setGalacticMarketDataObject(newBias, (typesResources.includes(itemType) ? 'resources' : 'compounds'), [itemType, 'marketBias']);

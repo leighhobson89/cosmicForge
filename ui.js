@@ -142,6 +142,8 @@ import {
     getTimeLeftUntilPillageVoidTimerFinishes,
     getTotalEnergyUse,
     getCurrencySymbol,
+    getGalacticMarketOutgoingStockType,
+    getGalacticMarketIncomingStockType,
     getMouseParticleTrailEnabled,
     getCustomPointerEnabled,
     getCurrentTheme,
@@ -173,6 +175,7 @@ import {
     setAutoBuyerTierLevel,
     setResourceDataObject,
     setStarSystemDataObject,
+    getGalacticMarketDataObject,
     getBuffEnhancedMiningData,
     getAchievementImageUrl,
     getStarSystemWeather
@@ -218,7 +221,8 @@ import {
     modalPlayerLeaderIntroContentText1,
     modalPlayerLeaderIntroContentText2,
     modalPlayerLeaderIntroContentText3,
-    modalPlayerLeaderIntroContentText4
+    modalPlayerLeaderIntroContentText4,
+    galacticMarketTooltipDescriptions
 } from "./descriptions.js";
 
 import { saveGame, loadGameFromCloud, generateRandomPioneerName, saveGameToCloud } from './saveLoadGame.js';
@@ -274,6 +278,111 @@ const closeButton = document.querySelector('.close-btn');
 
 function shouldUseCustomPointer() {
     return !!getCustomPointerEnabled();
+}
+
+function adjustGalacticSidebarWidths() {
+    const entries = [
+        ['galacticMarketOption2', 'galacticMarketOption3'],
+        ['ascendencyOption2', 'ascendencyOption3'],
+        ['megastructuresOption2', 'megastructuresOption3']
+    ];
+
+    entries.forEach(([expandId, collapseId]) => {
+        const expandContainer = document.getElementById(expandId)?.closest('.row-side-menu-item');
+        const collapseContainer = document.getElementById(collapseId)?.closest('.row-side-menu-item');
+
+        if (expandContainer) {
+            if (expandId === 'galacticMarketOption2') {
+                expandContainer.style.flex = '1 1 auto';
+                expandContainer.style.maxWidth = '80%';
+                expandContainer.style.width = '80%';
+                expandContainer.style.textAlign = 'center';
+            } else {
+                expandContainer.style.flex = '1 1 auto';
+                expandContainer.style.maxWidth = '100%';
+                expandContainer.style.width = '100%';
+            }
+        }
+
+        if (collapseContainer) {
+            collapseContainer.style.flex = '0 0 0';
+            collapseContainer.style.maxWidth = '0';
+            collapseContainer.style.width = '0';
+            collapseContainer.style.padding = '0';
+            collapseContainer.style.margin = '0';
+            collapseContainer.style.overflow = 'hidden';
+        }
+    });
+}
+
+function getOrCreateStatTooltip() {
+    let tooltip = document.getElementById('stat-tooltip');
+    if (!tooltip) {
+        setupStatTooltips();
+        tooltip = document.getElementById('stat-tooltip');
+    }
+    return tooltip;
+}
+
+function attachSharedTooltip(element, getContent) {
+    if (!element || element.dataset.sharedTooltipAttached) {
+        return;
+    }
+
+    element.dataset.sharedTooltipAttached = 'true';
+
+    const showOrMove = (event) => {
+        const tooltip = getOrCreateStatTooltip();
+        if (!tooltip) {
+            return;
+        }
+
+        const content = getContent?.();
+        if (!content) {
+            tooltip.style.display = 'none';
+            return;
+        }
+
+        tooltip.innerHTML = content;
+        tooltip.style.display = 'block';
+
+        const pointerOffset = 12;
+        const scrollX = window.scrollX ?? document.documentElement.scrollLeft ?? 0;
+        const scrollY = window.scrollY ?? document.documentElement.scrollTop ?? 0;
+
+        let left = event.pageX + pointerOffset;
+        let top = event.pageY + pointerOffset;
+
+        tooltip.style.left = `${left}px`;
+        tooltip.style.top = `${top}px`;
+
+        const tooltipWidth = tooltip.offsetWidth;
+        const tooltipHeight = tooltip.offsetHeight;
+        const viewportRight = scrollX + window.innerWidth;
+        const viewportBottom = scrollY + window.innerHeight;
+
+        if (left + tooltipWidth > viewportRight) {
+            left = Math.max(scrollX + 8, event.pageX - tooltipWidth - pointerOffset);
+        }
+
+        if (top + tooltipHeight > viewportBottom) {
+            top = Math.max(scrollY + 8, event.pageY - tooltipHeight - pointerOffset);
+        }
+
+        tooltip.style.left = `${left}px`;
+        tooltip.style.top = `${top}px`;
+    };
+
+    const hide = () => {
+        const tooltip = getOrCreateStatTooltip();
+        if (tooltip) {
+            tooltip.style.display = 'none';
+        }
+    };
+
+    element.addEventListener('mouseenter', showOrMove);
+    element.addEventListener('mousemove', showOrMove);
+    element.addEventListener('mouseleave', hide);
 }
 
 function buildLaunchPadSidebarStatus() {
@@ -531,6 +640,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     attachEnergyTooltipMirrors();
     setupProductionRateTooltips();
     setupMouseParticleTrail();
+    adjustGalacticSidebarWidths();
     applyCustomPointerSetting();
 
     setGameState(getGameVisibleActive());
@@ -612,8 +722,11 @@ function setupStatTooltips() {
     tooltip.style.zIndex = '100000';
     tooltip.style.display = 'none';
     tooltip.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.2)';
-    tooltip.style.maxWidth = '300px';
+    tooltip.style.maxWidth = '380px';
+    tooltip.style.maxHeight = '80vh';
+    tooltip.style.overflowY = 'auto';
     tooltip.style.wordWrap = 'break-word';
+    tooltip.style.whiteSpace = 'normal';
     document.body.appendChild(tooltip);
 
     const statIds = ['cashStat', 'stat2', 'stat3', 'stat4', 'stat5', 'stat6', 'stat7', 'stat8'];
@@ -662,6 +775,7 @@ function setupStatTooltips() {
         });
     });
 }
+
 
 function setupProductionRateTooltips() {
     let tooltip = document.getElementById('production-rate-tooltip');
@@ -4313,6 +4427,13 @@ const starShipSidebarStatusEntries = [
     }
 ];
 
+const galacticMarketSidebarStatusEntries = [
+    {
+        elementId: 'galacticMarketOption2',
+        builder: buildGalacticMarketSidebarStatus
+    }
+];
+
 const sidebarStatusUpdaters = [
     {
         elementId: 'spaceTelescopeOption2',
@@ -4320,7 +4441,8 @@ const sidebarStatusUpdaters = [
     },
     ...rocketSidebarStatusEntries,
     ...launchPadSidebarStatusEntries,
-    ...starShipSidebarStatusEntries
+    ...starShipSidebarStatusEntries,
+    ...galacticMarketSidebarStatusEntries
 ];
 
 function updateSidebarStatusDisplays() {
@@ -4333,8 +4455,13 @@ function updateSidebarStatusDisplays() {
         const result = builder();
         const text = result?.text ?? '';
         const className = result?.className ?? '';
+        const html = result?.html;
 
-        if (element.textContent !== text) {
+        if (typeof html === 'string') {
+            if (element.innerHTML !== html) {
+                element.innerHTML = html;
+            }
+        } else if (element.textContent !== text) {
             element.textContent = text;
         }
 
@@ -4463,6 +4590,207 @@ const starShipStatusClassMap = {
     'Orbiting Destination': 'green-ready-text',
     'Colonised Destination': 'green-ready-text'
 };
+
+const galacticMarketResourceKeys = ['hydrogen', 'helium', 'carbon', 'neon', 'oxygen', 'sodium', 'silicon', 'iron'];
+const galacticMarketCompoundKeys = ['diesel', 'glass', 'steel', 'concrete', 'water', 'titanium'];
+
+const GALACTIC_BIAS_GREEN_THRESHOLD = 3;
+const GALACTIC_BIAS_ORANGE_THRESHOLD = 10;
+
+function formatMarketBiasValue(bias) {
+    if (typeof bias !== 'number' || Number.isNaN(bias)) {
+        return '--';
+    }
+
+    const absolute = Math.abs(bias);
+    const decimals = absolute >= 10 ? 0 : 1;
+    const formatted = bias.toFixed(decimals);
+    return `${bias > 0 ? '+' : ''}${formatted}%`;
+}
+
+function getMarketTypeForItem(item) {
+    if (!item || item === 'select') {
+        return null;
+    }
+
+    if (galacticMarketResourceKeys.includes(item)) {
+        return 'resources';
+    }
+
+    if (galacticMarketCompoundKeys.includes(item)) {
+        return 'compounds';
+    }
+
+    return null;
+}
+
+function getMarketBiasValue(item) {
+    const type = getMarketTypeForItem(item);
+    if (!type) {
+        return null;
+    }
+
+    const bias = getGalacticMarketDataObject(type, [item, 'marketBias']);
+    return typeof bias === 'number' ? bias : 0;
+}
+
+function getBiasSeverityClass(bias) {
+    if (typeof bias !== 'number' || Number.isNaN(bias)) {
+        return 'green-ready-text';
+    }
+
+    const magnitude = Math.abs(bias);
+    if (magnitude <= GALACTIC_BIAS_GREEN_THRESHOLD) {
+        return 'green-ready-text';
+    }
+
+    if (magnitude <= GALACTIC_BIAS_ORANGE_THRESHOLD) {
+        return 'warning-orange-text';
+    }
+
+    return 'red-disabled-text';
+}
+
+function buildBiasHtmlSegment(label, bias) {
+    if (bias === null) {
+        return '';
+    }
+
+    const className = getBiasSeverityClass(bias);
+    return `<span class="${className}">${label}:${formatMarketBiasValue(bias)}</span>`;
+}
+
+function getMarketTooltipSection(sectionKey, item, bias) {
+    const type = getMarketTypeForItem(item);
+    if (!type) {
+        return '';
+    }
+
+    const isOutgoing = sectionKey === 'Outgoing';
+    const title = isOutgoing ? galacticMarketTooltipDescriptions.outgoingTitle : galacticMarketTooltipDescriptions.incomingTitle;
+
+    const baseValue = getGalacticMarketDataObject(type, [item, 'baseValue']) ?? 0;
+    const tradeVolume = getGalacticMarketDataObject(type, [item, 'tradeVolume']) ?? 0;
+    const adjustedPrice = Math.max(0, baseValue * (1 + (bias / 100)));
+    const biasClass = getBiasSeverityClass(bias);
+
+    return [
+        '<div class="tooltip-section">',
+        `<div class="tooltip-heading">${title}</div>`,
+        `<div><strong>Item:</strong> ${capitaliseString(item)}</div>`,
+        `<div>Bias: <span class="${biasClass}">${formatMarketBiasValue(bias)}</span></div>`,
+        `<div>Base Price: ${baseValue.toFixed(2)}</div>`,
+        `<div>Adjusted Price: ${adjustedPrice.toFixed(2)}</div>`,
+        `<div>Trade Volume: ${tradeVolume.toLocaleString()}</div>`,
+        '</div>'
+    ].join('');
+}
+
+function buildBiasExplanation(outgoingBias, incomingBias) {
+    const sections = [];
+
+    if (outgoingBias !== null) {
+        sections.push([
+            '<div class="tooltip-section">',
+            `<div class="tooltip-heading">${galacticMarketTooltipDescriptions.outgoingTitle}</div>`,
+            `<div class="tooltip-body">${galacticMarketTooltipDescriptions.outgoingText}</div>`,
+            '</div>'
+        ].join(''));
+    }
+
+    if (incomingBias !== null) {
+        sections.push([
+            '<div class="tooltip-section">',
+            `<div class="tooltip-heading">${galacticMarketTooltipDescriptions.incomingTitle}</div>`,
+            `<div class="tooltip-body">${galacticMarketTooltipDescriptions.incomingText}</div>`,
+            '</div>'
+        ].join(''));
+    }
+
+    if (outgoingBias !== null && incomingBias !== null) {
+        const outgoingMagnitude = Math.abs(outgoingBias);
+        const incomingMagnitude = Math.abs(incomingBias);
+        let comparisonText = galacticMarketTooltipDescriptions.comparisonBalanced;
+
+        if (outgoingMagnitude > incomingMagnitude) {
+            comparisonText = galacticMarketTooltipDescriptions.comparisonHigherOutgoing;
+        } else if (incomingMagnitude > outgoingMagnitude) {
+            comparisonText = galacticMarketTooltipDescriptions.comparisonHigherIncoming;
+        }
+
+        sections.push([
+            '<div class="tooltip-section">',
+            `<div class="tooltip-heading">${galacticMarketTooltipDescriptions.comparisonTitle}</div>`,
+            `<div class="tooltip-body">${comparisonText}</div>`,
+            '</div>'
+        ].join(''));
+    }
+
+    return sections.join('');
+}
+
+function deriveMarketBiasClass(bias) {
+    if (typeof bias !== 'number' || Number.isNaN(bias)) {
+        return '';
+    }
+
+    return getBiasSeverityClass(bias);
+}
+
+function buildGalacticMarketSidebarStatus() {
+    const statusElement = document.getElementById('galacticMarketOption2');
+    const optionRow = statusElement?.closest('.row-side-menu');
+    if (!statusElement || optionRow?.classList.contains('invisible')) {
+        return { text: '', className: '' };
+    }
+
+    attachSharedTooltip(statusElement, () => statusElement.dataset.galacticTooltipContent || '');
+
+    const outgoingSelection = getGalacticMarketOutgoingStockType();
+    const incomingSelection = getGalacticMarketIncomingStockType();
+    const outgoingBias = getMarketBiasValue(outgoingSelection);
+    const incomingBias = getMarketBiasValue(incomingSelection);
+
+    if (outgoingBias === null && incomingBias === null) {
+        delete statusElement.dataset.galacticTooltipContent;
+        return { text: 'Bias --', className: '' };
+    }
+
+    const textSegments = [];
+    const htmlSegments = [];
+    const tooltipSegments = [];
+
+    if (outgoingBias !== null) {
+        textSegments.push(`O:${formatMarketBiasValue(outgoingBias)}`);
+        htmlSegments.push(buildBiasHtmlSegment('O', outgoingBias));
+        tooltipSegments.push(getMarketTooltipSection('Outgoing', outgoingSelection, outgoingBias));
+    }
+
+    if (incomingBias !== null) {
+        textSegments.push(`I:${formatMarketBiasValue(incomingBias)}`);
+        htmlSegments.push(buildBiasHtmlSegment('I', incomingBias));
+        tooltipSegments.push(getMarketTooltipSection('Incoming', incomingSelection, incomingBias));
+    }
+
+    const explanation = buildBiasExplanation(outgoingBias, incomingBias);
+    const tooltipContent = [...tooltipSegments];
+    if (explanation) {
+        tooltipContent.push(explanation);
+    }
+
+    statusElement.dataset.galacticTooltipContent = tooltipContent.join('<div class="tooltip-spacer">&nbsp;</div>');
+
+    return {
+        text: `Bias ${textSegments.join(' | ')}`,
+        html: `Bias ${htmlSegments.join(' | ')}`,
+        className: deriveMarketBiasClass((() => {
+            if (outgoingBias !== null && incomingBias !== null) {
+                return Math.abs(outgoingBias) >= Math.abs(incomingBias) ? outgoingBias : incomingBias;
+            }
+            return outgoingBias ?? incomingBias;
+        })())
+    };
+}
 
 function buildStarShipSidebarStatus() {
     const statusElement = document.getElementById('starShipOption2');
