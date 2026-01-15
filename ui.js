@@ -295,13 +295,13 @@ function adjustGalacticSidebarWidths() {
         if (expandContainer) {
             if (expandId === 'galacticMarketOption2') {
                 expandContainer.style.flex = '1 1 auto';
-                expandContainer.style.maxWidth = '80%';
-                expandContainer.style.width = '80%';
+                expandContainer.style.maxWidth = '85%';
+                expandContainer.style.width = '85%';
                 expandContainer.style.textAlign = 'center';
             } else {
                 expandContainer.style.flex = '1 1 auto';
-                expandContainer.style.maxWidth = '100%';
-                expandContainer.style.width = '100%';
+                expandContainer.style.maxWidth = '85%';
+                expandContainer.style.width = '85%';
             }
         }
 
@@ -4307,13 +4307,11 @@ function drawStackedBarChart(canvasId, generationValues, consumptionValues, sola
     }
 
     if (getInfinitePower()) {
-        // Draw only the infinite power bar
         const infinitePowerValue = getInfinitePowerRate();
-        maxValue = infinitePowerValue; // Override maxValue to infinite power for consistent scaling
+        maxValue = infinitePowerValue;
 
         drawBar((gap * 6), [infinitePowerValue], ['yellow'], [true], getPowerOnOff(), 'generation', solarPlantMaxPurchasedRate);
 
-        // Draw axis line
         ctx.beginPath();
         ctx.moveTo(0, height - 10);
         ctx.lineTo(width, height - 10);
@@ -4321,7 +4319,6 @@ function drawStackedBarChart(canvasId, generationValues, consumptionValues, sola
         ctx.lineWidth = 4;
         ctx.stroke();
 
-        // Draw infinity symbols as vertical labels
         ctx.fillStyle = 'yellow';
         ctx.font = '30px Arial';
 
@@ -4333,11 +4330,9 @@ function drawStackedBarChart(canvasId, generationValues, consumptionValues, sola
         const genLabelX = (gap * 4) + barWidth / 2 - 10;
         ctx.fillText('Gen.', genLabelX, height + 20);
 
-        // Don't draw any other bars or labels
         return;
     }
 
-    // Normal drawing (no infinite power)
     if (generationData.length > 0 && generationData[0].originalIndex === 1) {
         drawBar((gap * 6), sortedGenerationValues, generationColors, sortedGenerationStatuses, getPowerOnOff(), 'generation', solarPlantMaxPurchasedRate);
     } else {
@@ -4807,7 +4802,6 @@ function buildMegastructuresSidebarStatus() {
         return { text: '', className: '' };
     }
 
-    // Define megastructure data with tech names first
     const megastructures = [
         { 
             id: 1, 
@@ -4858,18 +4852,15 @@ function buildMegastructuresSidebarStatus() {
     const capturedMegastructures = getMegaStructuresInPossessionArray() || [];
     const totalMegastructures = megastructures.length;
     
-    // Count how many of our known megastructures are in the captured list
     const capturedCount = megastructures.filter(ms => 
         capturedMegastructures.some(item => 
             typeof item === 'string' ? item === ms.name : item === ms.id
         )
     ).length;
 
-    // Create tooltip content
     let tooltipContent = '<div class="tooltip-section">';
     tooltipContent += '<div class="tooltip-heading">Megastructures Status</div><br>';
 
-    // Separate captured and non-captured megastructures
     const captured = [];
     const notCaptured = [];
     
@@ -4884,16 +4875,14 @@ function buildMegastructuresSidebarStatus() {
         }
     });
 
-    // Add captured megastructures section
     if (captured.length > 0) {
         tooltipContent += '<div class="tooltip-subheading">Captured Megastructures:</div>';
         captured.forEach(ms => {
-        const statusClass = 'green-ready-text'; // Captured are always green
+        const statusClass = 'green-ready-text';
         
         tooltipContent += `<div class="megastructure-status ${statusClass}">`;
         tooltipContent += `<strong>${ms.name}:</strong> Captured`;
         
-        // Add tech status with actual tech names
         const techsResearched = getMegaStructureTechsResearched() || [];
         ms.techs.forEach((techName, index) => {
             const techId = index + 1;
@@ -4911,21 +4900,18 @@ function buildMegastructuresSidebarStatus() {
         });
     }
 
-    // Add spacing between sections if both exist
     if (captured.length > 0 && notCaptured.length > 0) {
         tooltipContent += '<br>';
     }
 
-    // Add non-captured megastructures section
     if (notCaptured.length > 0) {
         tooltipContent += '<div class="tooltip-subheading">Non-Captured Megastructures:</div>';
         notCaptured.forEach(ms => {
-            const statusClass = 'red-disabled-text'; // Non-captured are always red
+            const statusClass = 'red-disabled-text';
             
             tooltipContent += `<div class="megastructure-status ${statusClass}">`;
             tooltipContent += `<strong>${ms.name}:</strong> Not Captured`;
             
-            // Add tech status with actual tech names
             const techsResearched = getMegaStructureTechsResearched() || [];
             ms.techs.forEach((techName, index) => {
                 const techId = index + 1;
