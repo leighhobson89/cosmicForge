@@ -535,12 +535,12 @@ function updateAntimatterDelta(deltaMs) {
     }
 
     const ticksToRun = Math.floor(accumulator / intervalMs);
-    const leftover = accumulator % intervalMs;
+    const maxTicksPerUpdate = 5;
+    const ticksToProcess = Math.min(ticksToRun, maxTicksPerUpdate);
+    const processedMs = ticksToProcess * intervalMs;
+    const leftover = accumulator - processedMs;
     setAntimatterDeltaAccumulator(leftover);
-
-    for (let i = 0; i < ticksToRun; i++) {
-        updateAntimatterAndDiagram();
-    }
+    updateAntimatterAndDiagram(ticksToProcess);
 }
 
 export function calculateElapsedActiveGameTime() {
@@ -3958,7 +3958,10 @@ function monitorRevealCompoundsCheck() {
     }
 }
 
-function updateAntimatterAndDiagram() {
+function updateAntimatterAndDiagram(ticks = 1) {
+    const tickCount = (typeof ticks === 'number' && Number.isFinite(ticks) && ticks > 0)
+        ? Math.max(1, Math.floor(ticks))
+        : 1;
     const antimatterTotalQuantity = getResourceDataObject('antimatter', ['quantity']);
     const miningObject = getMiningObject();
     const asteroidsBeingMined = getAsteroidArray();
@@ -3979,7 +3982,7 @@ function updateAntimatterAndDiagram() {
     });
 
     const rocketData = {};
-    let totalAntimatterExtractionRate = 0;
+    let totalAntimatterExtractionGained = 0;
 
     for (let i = 1; i <= 4; i++) {
         const rocketName = `rocket${i}`;
@@ -4022,12 +4025,13 @@ function updateAntimatterAndDiagram() {
                 extractionRate *= getBoostRate();
             }
 
-            const actualExtraction = Math.min(extractionRate, asteroid.quantity[0]);
+            const potentialExtraction = extractionRate * tickCount;
+            const actualExtraction = Math.min(potentialExtraction, asteroid.quantity[0]);
             const newQuantityAntimatterAsteroid = Math.max(0, asteroid.quantity[0] - actualExtraction);
             const quantityPercentage = (newQuantityAntimatterAsteroid / asteroid.originalQuantity) * 100;
             const asteroidDepleted = newQuantityAntimatterAsteroid === 0 && asteroid.quantity[0] > 0;
 
-            totalAntimatterExtractionRate += actualExtraction;
+            totalAntimatterExtractionGained += actualExtraction;
             rocketData[`rocket${i}`][3] = asteroidDepleted ? 0 : baseExtractionRate;
 
             if (asteroidDepleted && !getRocketDirection(`rocket${i}`)) {
@@ -4052,15 +4056,17 @@ function updateAntimatterAndDiagram() {
     } 
 
     const megaStructureGainPerTick = getMegaStructureAntimatterAmount() / getTimerRateRatio();
+    const totalAntimatterExtractionRate = totalAntimatterExtractionGained / tickCount;
     const totalAntimatterGainPerTick = totalAntimatterExtractionRate + megaStructureGainPerTick;
-    const newAntimatterQuantity = antimatterTotalQuantity + totalAntimatterGainPerTick;
+    const totalAntimatterGainThisUpdate = totalAntimatterExtractionGained + (megaStructureGainPerTick * tickCount);
+    const newAntimatterQuantity = antimatterTotalQuantity + totalAntimatterGainThisUpdate;
 
     setResourceDataObject(newAntimatterQuantity, 'antimatter', ['quantity']);
     setResourceDataObject(totalAntimatterGainPerTick, 'antimatter', ['rate']);
 
-    if (getAntimatterUnlocked() && totalAntimatterGainPerTick > 0) {
-        addToResourceAllTimeStat(totalAntimatterGainPerTick, 'antimatter');
-        addToResourceAllTimeStat(totalAntimatterGainPerTick, 'antimatterThisRun');
+    if (getAntimatterUnlocked() && totalAntimatterGainThisUpdate > 0) {
+        addToResourceAllTimeStat(totalAntimatterGainThisUpdate, 'antimatter');
+        addToResourceAllTimeStat(totalAntimatterGainThisUpdate, 'antimatterThisRun');
     }
 
     if (elements?.miningRate) {
