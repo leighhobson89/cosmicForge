@@ -12,6 +12,9 @@ export let debugOptionFlag = false;
 export let stateLoading = false;
 export const debugVisibilityArray = ['settingsNotificationTestRow'];
 
+var debugTimeWarpDurationMs = 1000;
+var debugTimeWarpMultiplier = 2;
+
 //ELEMENTS
 let elements;
 let saveData = null;
@@ -446,6 +449,10 @@ let pendingCustomPointerType = 'default';
 let customPointerListenersAttached = false;
 
 let antimatterDeltaAccumulator = 0;
+
+let timeWarpMultiplier = 1;
+let timeWarpEndTimestampMs = 0;
+let timeWarpTimeoutId = null;
 
 //STATS PAGE LOGGERS
 let allTimeTotalHydrogen = 0;
@@ -1790,6 +1797,52 @@ export function getAntimatterDeltaAccumulator() {
 
 export function setAntimatterDeltaAccumulator(value) {
     antimatterDeltaAccumulator = value;
+}
+
+export function getTimeWarpMultiplier() {
+    return timeWarpMultiplier;
+}
+
+export function setTimeWarpMultiplier(value) {
+    timeWarpMultiplier = (typeof value === 'number' && Number.isFinite(value) && value > 0) ? value : 1;
+}
+
+export function getTimeWarpEndTimestampMs() {
+    return timeWarpEndTimestampMs;
+}
+
+export function setTimeWarpEndTimestampMs(value) {
+    timeWarpEndTimestampMs = (typeof value === 'number' && Number.isFinite(value)) ? value : 0;
+}
+
+export function getTimeWarpTimeoutId() {
+    return timeWarpTimeoutId;
+}
+
+export function setTimeWarpTimeoutId(value) {
+    timeWarpTimeoutId = value ?? null;
+}
+
+export function getDebugTimeWarpDurationMs() {
+    return debugTimeWarpDurationMs;
+}
+
+export function setDebugTimeWarpDurationMs(value) {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed) && parsed >= 0) {
+        debugTimeWarpDurationMs = parsed;
+    }
+}
+
+export function getDebugTimeWarpMultiplier() {
+    return debugTimeWarpMultiplier;
+}
+
+export function setDebugTimeWarpMultiplier(value) {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed) && parsed > 0) {
+        debugTimeWarpMultiplier = parsed;
+    }
 }
 
 export function getIncreaseStorageFactor() {

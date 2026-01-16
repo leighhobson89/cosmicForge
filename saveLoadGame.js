@@ -12,7 +12,8 @@ import {
     getUserPlatform,
     getFeedbackGiven,
     getFeedbackContent,
-    getBattleOngoing
+    getBattleOngoing,
+    getTimeWarpMultiplier
 } from './constantsAndGlobalVars.js';
 
 import { setAchievementIconImageUrls } from './resourceDataObject.js';
@@ -43,6 +44,12 @@ export function initializeAutoSave() {
     let timeLeft = frequency / 1000;
 
     const autoSaveHandler = () => {
+
+        if (getTimeWarpMultiplier() !== 1) {
+            timeLeft = frequency / 1000;
+            autoSaveTimer = setTimeout(autoSaveHandler, frequency);
+            return;
+        }
 
         const canAutoSave = getAutoSaveToggle() && !getBattleOngoing();
 
@@ -167,6 +174,10 @@ export async function saveGameToCloud(gameData, type) {
 }
 
 export function saveGame(type) {
+    if (getTimeWarpMultiplier() !== 1) {
+        return;
+    }
+
     const gameState = captureGameStatusForSaving(type);
     gameState.timeStamp = new Date().toISOString();
 

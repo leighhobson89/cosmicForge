@@ -898,6 +898,26 @@
         </div>
         <div class="debug-content">
             <div class="debug-row">
+                <div class="debug-label">Timewarp:</div>
+                <div class="debug-inputs">
+                    <select id="debugTimeWarpDurationSelect" class="debug-select">
+                        <option value="1000">1000 ms</option>
+                        <option value="2000">2000 ms</option>
+                        <option value="3000">3000 ms</option>
+                        <option value="4000">4000 ms</option>
+                        <option value="5000">5000 ms</option>
+                    </select>
+                    <select id="debugTimeWarpMultiplierSelect" class="debug-select">
+                        <option value="2">×2</option>
+                        <option value="5">×5</option>
+                        <option value="10">×10</option>
+                        <option value="20">×20</option>
+                        <option value="50">×50</option>
+                    </select>
+                    <button id="debugTimeWarpButton" class="option-button">Timewarp</button>
+                </div>
+            </div>
+            <div class="debug-row">
                 <div class="debug-label">Give $1B</div>
                 <div class="button-column">
                     <button id="give1BButton" class="option-button">Gain</button>

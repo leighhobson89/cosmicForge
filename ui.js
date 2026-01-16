@@ -168,7 +168,11 @@ import {
     getSuppressUiClickSfx,
     setSuppressUiClickSfx,
     getRebirthPossible,
-    getMegaStructuresInPossessionArray
+    getMegaStructuresInPossessionArray,
+    getDebugTimeWarpDurationMs,
+    setDebugTimeWarpDurationMs,
+    getDebugTimeWarpMultiplier,
+    setDebugTimeWarpMultiplier
 } from './constantsAndGlobalVars.js';
 import {
     getResourceDataObject,
@@ -251,7 +255,8 @@ import {
     setAutoCreateToggleState,
     calculateStarTravelDurationWithModifiers,
     getAscendencyPointsWithRepeatableBonus,
-    formatProductionRateValue
+    formatProductionRateValue,
+    timeWarp
 } from './game.js';
 
 import { 
@@ -8819,6 +8824,30 @@ addStarButton.addEventListener('click', () => {
         extendStarDataRange(true);
     // }
     showNotification('CHEAT! Discovered Star Data!', 'info', 3000, 'debug');
+});
+
+const debugTimeWarpDurationSelect = document.getElementById('debugTimeWarpDurationSelect');
+const debugTimeWarpMultiplierSelect = document.getElementById('debugTimeWarpMultiplierSelect');
+const debugTimeWarpButton = document.getElementById('debugTimeWarpButton');
+
+if (debugTimeWarpDurationSelect) {
+    debugTimeWarpDurationSelect.value = String(getDebugTimeWarpDurationMs());
+    debugTimeWarpDurationSelect.addEventListener('change', event => {
+        setDebugTimeWarpDurationMs(Number(event.target.value));
+    });
+}
+
+if (debugTimeWarpMultiplierSelect) {
+    debugTimeWarpMultiplierSelect.value = String(getDebugTimeWarpMultiplier());
+    debugTimeWarpMultiplierSelect.addEventListener('change', event => {
+        setDebugTimeWarpMultiplier(Number(event.target.value));
+    });
+}
+
+debugTimeWarpButton?.addEventListener('click', () => {
+    const duration = getDebugTimeWarpDurationMs();
+    const multiplier = getDebugTimeWarpMultiplier();
+    timeWarp(duration, multiplier);
 });
 
 const buildLaunchPadScannerAndAllRocketsButton = document.getElementById('buildLaunchPadScannerAndAllRocketsButton');

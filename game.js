@@ -309,7 +309,12 @@ import {
     getSettledStars,
     getBasePillageVoidTimerDuration,
     getInfinitePowerRate,
-    getCurrentTheme
+    getCurrentTheme,
+    getTimeWarpMultiplier,
+    setTimeWarpMultiplier,
+    getTimeWarpTimeoutId,
+    setTimeWarpTimeoutId,
+    setTimeWarpEndTimestampMs,
 } from './constantsAndGlobalVars.js';
 
 import {
@@ -433,6 +438,36 @@ function updateProductionRateText(elementId, rateValue) {
     }
 }
 
+export function timeWarp(lengthOfTimeInMs, multiplyRateBy) {
+    const durationMs = (typeof lengthOfTimeInMs === 'number' && Number.isFinite(lengthOfTimeInMs))
+        ? Math.max(0, lengthOfTimeInMs)
+        : 0;
+    const multiplier = (typeof multiplyRateBy === 'number' && Number.isFinite(multiplyRateBy) && multiplyRateBy > 0)
+        ? multiplyRateBy
+        : 1;
+
+    if (durationMs <= 0) {
+        return;
+    }
+
+    const existingTimeout = getTimeWarpTimeoutId();
+    if (existingTimeout) {
+        clearTimeout(existingTimeout);
+        setTimeWarpTimeoutId(null);
+    }
+
+    setTimeWarpMultiplier(multiplier);
+    setTimeWarpEndTimestampMs(Date.now() + durationMs);
+
+    const timeoutId = setTimeout(() => {
+        setTimeWarpMultiplier(1);
+        setTimeWarpEndTimestampMs(0);
+        setTimeWarpTimeoutId(null);
+    }, durationMs);
+
+    setTimeWarpTimeoutId(timeoutId);
+}
+
 export function formatProductionRateValue(rateValue) {
     const sign = rateValue < 0 ? '-' : '';
     const absValue = Math.abs(rateValue);
@@ -494,14 +529,18 @@ function updateAntimatterDelta(deltaMs) {
     const accumulator = getAntimatterDeltaAccumulator() + deltaMs;
     const intervalMs = getTimerUpdateInterval();
 
-    if (accumulator >= intervalMs) {
-        const leftover = accumulator % intervalMs;
-        setAntimatterDeltaAccumulator(leftover);
-        updateAntimatterAndDiagram();
+    if (accumulator < intervalMs) {
+        setAntimatterDeltaAccumulator(accumulator);
         return;
     }
 
-    setAntimatterDeltaAccumulator(accumulator);
+    const ticksToRun = Math.floor(accumulator / intervalMs);
+    const leftover = accumulator % intervalMs;
+    setAntimatterDeltaAccumulator(leftover);
+
+    for (let i = 0; i < ticksToRun; i++) {
+        updateAntimatterAndDiagram();
+    }
 }
 
 export function calculateElapsedActiveGameTime() {
@@ -580,7 +619,8 @@ function handleResearchAutoBuyer() {
 
 export async function gameLoop() {
     if (gameState === getGameVisibleActive()) {
-        timerManagerDelta.updateWithTimestamp(performance.now());
+        const effectiveMultiplier = (document.hidden || !document.hasFocus()) ? 1 : getTimeWarpMultiplier();
+        timerManagerDelta.updateWithTimestamp(performance.now(), effectiveMultiplier);
         updateAttentionIndicators();
         calculateElapsedActiveGameTime();
         refreshAchievementTooltipDescriptions();

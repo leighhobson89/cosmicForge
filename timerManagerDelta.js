@@ -137,14 +137,19 @@ class TimerManagerDelta {
     /**
      * Update all timers with the provided delta (in milliseconds).
      */
-    update(deltaMs) {
-        if (deltaMs <= 0 || this.timers.size === 0) {
+    update(deltaMs, multiplier = 1) {
+        const effectiveMultiplier = (typeof multiplier === 'number' && Number.isFinite(multiplier) && multiplier > 0)
+            ? multiplier
+            : 1;
+        const effectiveDeltaMs = deltaMs * effectiveMultiplier;
+
+        if (effectiveDeltaMs <= 0 || this.timers.size === 0) {
             return;
         }
 
         const timersToRemove = [];
         this.timers.forEach((timer, id) => {
-            const completed = timer.update(deltaMs);
+            const completed = timer.update(effectiveDeltaMs);
             if (completed || timer.markedForRemoval) {
                 timersToRemove.push(id);
             }
@@ -156,7 +161,7 @@ class TimerManagerDelta {
     /**
      * Helper for driving the manager using performance.now() timestamps.
      */
-    updateWithTimestamp(currentTime) {
+    updateWithTimestamp(currentTime, multiplier = 1) {
         if (this.lastUpdateTime === null) {
             this.lastUpdateTime = currentTime;
             return;
@@ -164,7 +169,7 @@ class TimerManagerDelta {
 
         const deltaMs = Math.max(0, currentTime - this.lastUpdateTime);
         this.lastUpdateTime = currentTime;
-        this.update(deltaMs);
+        this.update(deltaMs, multiplier);
     }
 }
 
