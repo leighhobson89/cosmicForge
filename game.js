@@ -314,9 +314,11 @@ import {
     setTimeWarpMultiplier,
     getTimeWarpTimeoutId,
     setTimeWarpTimeoutId,
-    setTimeWarpEndTimestampMs,
+    getTimeWarpEndTimestampMs,
     getBlackHoleDiscovered,
-    setBlackHoleOptionVisible
+    setBlackHoleDiscovered,
+    getBlackHoleDiscoveryProbability,
+    setBlackHoleDiscoveryProbability
 } from './constantsAndGlobalVars.js';
 
 import {
@@ -1776,17 +1778,15 @@ function megastructureUIChecks() {
 }
 
 function blackHoleUIChecks() {
-    const rowElement = document.getElementById('blackHoleOptionRow');
+    const rowElement = document.getElementById('blackholeOption');
     if (!rowElement) {
         return;
     }
 
     if (getBlackHoleDiscovered()) {
-        rowElement.classList.remove('invisible');
-        setBlackHoleOptionVisible(true);
+        rowElement.parentElement.parentElement.classList.remove('invisible');
     } else {
-        rowElement.classList.add('invisible');
-        setBlackHoleOptionVisible(false);
+        rowElement.parentElement.parentElement.classList.add('invisible');
     }
 }
 
@@ -9450,6 +9450,29 @@ export function extendStarDataRange(debug) {
 
     if (!debug) {
         showNotification('Star Study Complete!</br></br>Take a look at the Star Map!', 'info', 3000, 'special');
+        handleBlackHoleDiscoveryRoll();
+    }
+}
+
+function handleBlackHoleDiscoveryRoll() {
+    if (getBlackHoleDiscovered()) {
+        return;
+    }
+
+    if (getStatRun() < 2) {
+        return;
+    }
+    
+    const currentProbability = getBlackHoleDiscoveryProbability();
+    console.log(`[Black Hole] Current discovery probability: ${currentProbability}%`);
+
+    const updatedProbability = Math.min(100, getBlackHoleDiscoveryProbability() + 3);
+    setBlackHoleDiscoveryProbability(updatedProbability);
+
+    const roll = Math.random() * 100;
+    if (roll < updatedProbability) {
+        setBlackHoleDiscovered(true);
+        showNotification('You have discovered a Black Hole - interact with it in the Galactic Tab!', 'info', 3000, 'special');
     }
 }
 

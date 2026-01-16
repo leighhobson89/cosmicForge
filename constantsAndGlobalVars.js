@@ -14,8 +14,8 @@ export const debugVisibilityArray = ['settingsNotificationTestRow'];
 
 var debugTimeWarpDurationMs = 5000;
 var debugTimeWarpMultiplier = 10;
-let blackHoleOptionVisible = false;
 let blackHoleDiscovered = false;
+let blackHoleDiscoveryProbability = 0;
 
 //ELEMENTS
 let elements;
@@ -1338,6 +1338,8 @@ export function captureGameStatusForSaving(type) {
     gameState.multiplierPermanentCompounds = multiplierPermanentCompounds;
     gameState.feedbackGiven = feedbackGiven;
     gameState.feedbackContent = feedbackContent;
+    gameState.blackHoleDiscovered = blackHoleDiscovered;
+    gameState.blackHoleDiscoveryProbability = blackHoleDiscoveryProbability;
 
     // Flags
     gameState.flags = {
@@ -1444,6 +1446,8 @@ export function restoreGameStatus(gameState, type) {
             setCurrentStarSystem(gameState.currentStarSystem);
             setCurrencySymbol(gameState.currencySymbol);
             setConstituentPartsObject(gameState.constituentPartsObject);
+            blackHoleDiscovered = gameState.blackHoleDiscovered ?? false;
+            blackHoleDiscoveryProbability = gameState.blackHoleDiscoveryProbability ?? 0;
             techUnlockedArray = gameState.techUnlockedArray;
             revealedTechArray = gameState.revealedTechArray;
             upcomingTechArray = gameState.upcomingTechArray;
@@ -2432,20 +2436,23 @@ export function setOriginalFrameNumbers(value) {
     originalFrameNumbers = value;
 }
 
-export function getBlackHoleOptionVisible() {
-    return blackHoleOptionVisible;
-}
-
-export function setBlackHoleOptionVisible(value) {
-    blackHoleOptionVisible = Boolean(value);
-}
-
 export function getBlackHoleDiscovered() {
     return blackHoleDiscovered;
 }
 
 export function setBlackHoleDiscovered(value) {
     blackHoleDiscovered = Boolean(value);
+}
+
+export function getBlackHoleDiscoveryProbability() {
+    return blackHoleDiscoveryProbability;
+}
+
+export function setBlackHoleDiscoveryProbability(value) {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed) && parsed >= 0) {
+        blackHoleDiscoveryProbability = Math.min(100, parsed);
+    }
 }
 
 export function getTemporaryCoreTechRowsRepo(key) {
