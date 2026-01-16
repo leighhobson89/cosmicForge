@@ -936,11 +936,13 @@ function buildProductionTooltipContent(resourceKey, category) {
         `<div><strong>${displayName}</strong>: <span class="green-ready-text">${netRateDisplay}</span></div>`
     ];
 
-    const generationLines = buildAutoBuyerGenerationLines(resourceKey, category, timerRatio);
-    if (generationLines) {
+    const autoBuyerGenerationLines = buildAutoBuyerGenerationLines(resourceKey, category, timerRatio);
+    const autoCreateGenerationLine = buildAutoCreateGenerationLine(resourceKey, category, timerRatio);
+    const generationBlock = [autoBuyerGenerationLines, autoCreateGenerationLine].filter(Boolean).join('');
+    if (generationBlock) {
         lines.push('<div class="tooltip-spacer">&nbsp;</div>');
         lines.push('<div><strong>Generation</strong></div>');
-        lines.push(generationLines);
+        lines.push(generationBlock);
     }
 
     const consumptionLines = buildFuelConsumptionLines(resourceKey, category, timerRatio);
@@ -948,6 +950,12 @@ function buildProductionTooltipContent(resourceKey, category) {
         lines.push('<div class="tooltip-spacer">&nbsp;</div>');
         lines.push('<div><strong>Consumption</strong></div>');
         lines.push(consumptionLines);
+    }
+
+    const diversionLines = buildAutoCreateDiversionLines(resourceKey, category);
+    if (diversionLines) {
+        lines.push('<div class="tooltip-spacer">&nbsp;</div>');
+        lines.push(diversionLines);
     }
 
     return lines.join('');
@@ -1199,8 +1207,12 @@ function buildAutoBuyerGenerationLines(resourceKey, category, timerRatio) {
         }
 
         const active = Boolean(tierData.active);
+        if (!active) {
+            return null;
+        }
+
         const perUnitRate = tierData.rate ?? 0;
-        const contribution = active ? perUnitRate * quantity * timerRatio : 0;
+        const contribution = perUnitRate * quantity * timerRatio;
         const className = contribution > 0 ? 'green-ready-text' : 'red-disabled-text';
         const label = tierData.nameUpgrade || `Tier ${tier}`;
         const tierLabel = `${label} (Tier ${tier})`;
@@ -1210,6 +1222,135 @@ function buildAutoBuyerGenerationLines(resourceKey, category, timerRatio) {
     }).filter(Boolean);
 
     return tierLines.join('');
+}
+
+function buildAutoCreateGenerationLine(resourceKey, category, timerRatio) {
+    if (category !== 'compounds') {
+        return '';
+    }
+
+    const compoundData = getResourceDataObject('compounds', [resourceKey]);
+    if (!compoundData?.autoCreate) {
+        return '';
+    }
+
+    const autoCreateRate = calculateAutoCreateRatePerSecond(resourceKey, timerRatio);
+    if (autoCreateRate <= 0) {
+        return '';
+    }
+
+    const formatted = formatProductionRateValue(autoCreateRate);
+    return `<div class="stats-text">Auto Creation: ${formatted} / s</div>`;
+}
+
+function buildAutoCreateDiversionLines(resourceKey, category) {
+    if (category !== 'resources') {
+        return '';
+    }
+
+    const compounds = getResourceDataObject('compounds') || {};
+    const diversionTargets = Object.entries(compounds)
+        .filter(([, data]) => data?.autoCreate)
+        .filter(([, data]) => compoundUsesResource(data, resourceKey));
+
+    if (diversionTargets.length === 0) {
+        return '';
+    }
+
+    const lines = diversionTargets.map(([compoundKey, data]) => {
+        const name = capitaliseString(data?.nameCompound || data?.nameResource || compoundKey);
+        return `<div class="stats-text">Resources diverted to create ${name}</div>`;
+    });
+
+    return lines.join('');
+}
+
+function calculateAutoCreateRatePerSecond(compoundKey, timerRatio) {
+    const compoundData = getResourceDataObject('compounds', [compoundKey]);
+    if (!compoundData) {
+        return 0;
+    }
+
+    if (isCompoundStorageFull(compoundData)) {
+        return 0;
+    }
+
+    const perIngredientRates = getCompoundIngredientEntries(compoundData)
+        .map(({ resourceName, category, ratio }) => {
+            if (!resourceName || ratio <= 0) {
+                return 0;
+            }
+
+            const sourceCategory = category || 'resources';
+            const perSecond = calculateGrossAutoBuyerGenerationPerSecond(sourceCategory, resourceName, timerRatio);
+            return Math.max(0, perSecond / ratio);
+        })
+        .filter(rate => rate >= 0);
+
+    if (perIngredientRates.length === 0) {
+        return 0;
+    }
+
+    return Math.min(...perIngredientRates);
+}
+
+function compoundUsesResource(compoundData, resourceKey) {
+    return getCompoundIngredientEntries(compoundData).some(({ resourceName }) => resourceName === resourceKey);
+}
+
+function isCompoundStorageFull(compoundData) {
+    const quantity = compoundData.quantity ?? 0;
+    const capacity = compoundData.storageCapacity ?? Infinity;
+    return quantity >= capacity;
+}
+
+function calculateGrossAutoBuyerGenerationPerSecond(category, resourceKey, timerRatio) {
+    const autoBuyer = getResourceDataObject(category, [resourceKey, 'upgrades', 'autoBuyer']);
+    if (!autoBuyer) {
+        return 0;
+    }
+
+    return [1, 2, 3, 4].reduce((total, tier) => {
+        const tierData = autoBuyer[`tier${tier}`];
+        if (!tierData) {
+            return total;
+        }
+
+        const quantity = tierData.quantity ?? 0;
+        if (quantity <= 0) {
+            return total;
+        }
+
+        const active = tierData.active !== false;
+        if (!active) {
+            return total;
+        }
+
+        const rate = tierData.rate ?? 0;
+        if (rate <= 0) {
+            return total;
+        }
+
+        return total + (rate * quantity * timerRatio);
+    }, 0);
+}
+
+function getCompoundIngredientEntries(compoundData) {
+    return [1, 2, 3, 4]
+        .map(index => {
+            const resourceEntry = compoundData[`createsFrom${index}`];
+            const ratio = compoundData[`createsFromRatio${index}`] || 0;
+            if (!Array.isArray(resourceEntry) || !resourceEntry[0]) {
+                return null;
+            }
+
+            return {
+                resourceName: resourceEntry[0],
+                category: resourceEntry[1],
+                ratio
+            };
+        })
+        .filter(Boolean);
 }
 
 const fuelConsumptionMap = {

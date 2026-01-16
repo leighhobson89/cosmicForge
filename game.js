@@ -1289,6 +1289,8 @@ function updateCompoundAutoBuyerDelta(compound, tier, deltaMs) {
             allCompoundRatesAddedTogether += getCurrentPrecipitationRate();
         }
 
+        allCompoundRatesAddedTogether += calculateCompoundAutoCreateRatePerInterval(compound);
+
         const powerPlant3FuelType = 'diesel';
         const powerPlant3ConsumptionPerTick =
             (getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant3', 'fuel'])?.[1] || 0) *
@@ -1300,12 +1302,15 @@ function updateCompoundAutoBuyerDelta(compound, tier, deltaMs) {
             amountToDeductForConsumption = powerPlant3ConsumptionPerTick;
             if (tier === 1) {
                 const consumptionAmount = amountToDeductForConsumption * tickMultiplier;
-                setResourceDataObject(allCompoundRatesAddedTogether - amountToDeductForConsumption, 'compounds', [compound, 'rate']);
                 const currentQuantityTier1 = getResourceDataObject('compounds', [compound, 'quantity']) || 0;
                 const adjustedQuantity = Math.max(0, Math.min(currentQuantityTier1 - consumptionAmount, storageCapacity));
                 setResourceDataObject(adjustedQuantity, 'compounds', [compound, 'quantity']);
                 currentQuantity = adjustedQuantity;
             }
+        }
+
+        if (tier === 1) {
+            setResourceDataObject(allCompoundRatesAddedTogether - amountToDeductForConsumption, 'compounds', [compound, 'rate']);
         }
 
         const netCompoundRateDisplay = (allCompoundRatesAddedTogether - amountToDeductForConsumption) * getTimerRateRatio();
@@ -1337,9 +1342,7 @@ function updateCompoundAutoBuyerDelta(compound, tier, deltaMs) {
             compoundTier1Rate += getCurrentPrecipitationRate();
         }
 
-        if (!activeAutoBuyer) {
-            compoundTier1Rate = 0;
-        }
+        compoundTier1Rate += calculateCompoundAutoCreateRatePerInterval(compound);
 
         setResourceDataObject(compoundTier1Rate, 'compounds', [compound, 'rate']);
         updateProductionRateText(`${compound}Rate`, compoundTier1Rate * getTimerRateRatio());
@@ -1387,6 +1390,72 @@ function updateCompoundAutoBuyerDelta(compound, tier, deltaMs) {
             });
         }
     }
+}
+
+function calculateGrossAutoBuyerGenerationPerInterval(category, resourceKey) {
+    const autoBuyer = getResourceDataObject(category, [resourceKey, 'upgrades', 'autoBuyer']);
+    if (!autoBuyer) {
+        return 0;
+    }
+
+    return [1, 2, 3, 4].reduce((total, tier) => {
+        const tierData = autoBuyer[`tier${tier}`];
+        if (!tierData) {
+            return total;
+        }
+
+        const quantity = tierData.quantity ?? 0;
+        if (quantity <= 0) {
+            return total;
+        }
+
+        const active = tierData.active !== false;
+        if (!active) {
+            return total;
+        }
+
+        const rate = tierData.rate ?? 0;
+        if (rate <= 0) {
+            return total;
+        }
+
+        return total + (rate * quantity);
+    }, 0);
+}
+
+function calculateCompoundAutoCreateRatePerInterval(compoundKey) {
+    const compoundData = getResourceDataObject('compounds', [compoundKey]);
+    if (!compoundData?.autoCreate) {
+        return 0;
+    }
+
+    const quantity = compoundData.quantity ?? 0;
+    const storageCapacity = compoundData.storageCapacity ?? Infinity;
+    if (quantity >= storageCapacity) {
+        return 0;
+    }
+
+    const perIngredientRates = [1, 2, 3, 4]
+        .map(index => {
+            const ingredientEntry = compoundData[`createsFrom${index}`];
+            const ratio = compoundData[`createsFromRatio${index}`] || 0;
+
+            if (!Array.isArray(ingredientEntry) || !ingredientEntry[0] || ratio <= 0) {
+                return null;
+            }
+
+            const resourceName = ingredientEntry[0];
+            const category = ingredientEntry[1] || 'resources';
+            const grossPerInterval = calculateGrossAutoBuyerGenerationPerInterval(category, resourceName);
+            return Math.max(0, grossPerInterval / ratio);
+        })
+        .filter(rate => typeof rate === 'number');
+
+    if (perIngredientRates.length === 0) {
+        return 0;
+    }
+
+    return Math.min(...perIngredientRates);
 }
 
 function initialiseRocketFuelDeltaTimers() {

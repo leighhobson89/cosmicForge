@@ -1473,6 +1473,10 @@ button.red-disabled-text {
     pointer-events: none;
 }
 
+.notation.red-disabled-text {
+    pointer-events: auto !important;
+}
+
 .green-ready-text {
     color: var(--ready-text) !important;
     font-weight: bold;
