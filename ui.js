@@ -1076,10 +1076,10 @@ function buildAntimatterRocketLines(timerRatio) {
 function buildAntimatterMegaStructureLines(timerRatio) {
     const megaStructureTechs = getMegaStructureTechsResearched?.() || [];
     const techLabels = {
-        1: 'Dyson Tech 3',
-        2: 'CPC Tech 3',
-        3: 'Plasma Tech 3',
-        4: 'GMA Tech 3'
+        1: 'Dyson Sphere',
+        2: 'Celestial Proc. Core',
+        3: 'Plasma Forge',
+        4: 'Galactic Mem. Arch.'
     };
     const perSecondValue = 0.15;
 
