@@ -407,7 +407,7 @@ import {
     capitaliseWordsWithRomanNumerals
  } from './utilityFunctions.js';
 
- import { modalCompoundMachiningTabUnlockHeader, modalCompoundMachiningTabUnlockText, modalPlayerLeaderPhilosophyHeaderText, modalPlayerLeaderPhilosophyContentText, modalPlayerLeaderIntroHeaderText, modalPlayerLeaderIntroContentText1, modalPlayerLeaderIntroContentText2, modalPlayerLeaderIntroContentText3, modalPlayerLeaderIntroContentText4, modalGalacticTabUnlockHeader, modalGalacticTabUnlockText, newsTickerContent, refreshAchievementTooltipDescriptions } from './descriptions.js';
+ import { modalCompoundMachiningTabUnlockHeader, modalCompoundMachiningTabUnlockText, modalPlayerLeaderPhilosophyHeaderText, modalPlayerLeaderPhilosophyContentText, modalPlayerLeaderIntroHeaderText, modalPlayerLeaderIntroContentText1, modalPlayerLeaderIntroContentText2, modalPlayerLeaderIntroContentText3, modalPlayerLeaderIntroContentText4, modalGalacticTabUnlockHeader, modalGalacticTabUnlockText, newsTickerContent, refreshAchievementTooltipDescriptions, modalBlackHoleDiscoveredHeader, modalBlackHoleDiscoveredText } from './descriptions.js';
 
  import { initializeAutoSave, saveGame } from './saveLoadGame.js';
  import { playClickSfx, sfxPlayer, weatherAmbienceManager, backgroundAudio } from './audioManager.js';
@@ -9472,6 +9472,25 @@ function handleBlackHoleDiscoveryRoll() {
     const roll = Math.random() * 100;
     if (roll < updatedProbability) {
         setBlackHoleDiscovered(true);
+        callPopupModal(
+            modalBlackHoleDiscoveredHeader,
+            modalBlackHoleDiscoveredText,
+            true,
+            false,
+            false,
+            false,
+            () => {
+                showHideModal();
+            },
+            null,
+            null,
+            null,
+            'This should be interesting!',
+            null,
+            null,
+            null,
+            false
+        );
         showNotification('You have discovered a Black Hole - interact with it in the Galactic Tab!', 'info', 3000, 'special');
     }
 }

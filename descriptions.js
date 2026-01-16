@@ -116,6 +116,8 @@ export let modalMegaStructureTechGalacticMemoryArchive4Header;
 export let modalMegaStructureTechGalacticMemoryArchive4Text;
 export let modalMegaStructureTechGalacticMemoryArchive5Header;
 export let modalMegaStructureTechGalacticMemoryArchive5Text;
+export let modalBlackHoleDiscoveredHeader;
+export let modalBlackHoleDiscoveredText;
 
 export function initialiseDescriptions() {
     gameIntroHeader = 'Welcome to the Cosmic Forge!';
@@ -224,6 +226,8 @@ export function initialiseDescriptions() {
     modalMegaStructureTechGalacticMemoryArchive4Text = `You have harnessed the Galactic Memory Archive for the benefit of this System,<br>its huge power will benefit you as it provides the following bonus:<br><br><span class="green-ready-text">All Resource And Compound Storage Capacity + 1B!</span>`;
     modalMegaStructureTechGalacticMemoryArchive5Header = `CONNECTING THE GALACTIC MEMORY ARCHIVE TO THE FABRIC`;
     modalMegaStructureTechGalacticMemoryArchive5Text = `You have connected this Galactic Memory Archive into the fabric of the galaxy<br>meaning its benefits are now permanently available in whichever<br>system you might one day settle. This has enormous potential.<br><br><span class="green-ready-text">All Resource And Compound Storage Capacity + 10B!<br>All Resource And Compound Storage Capacity starts at 10B in every new System!</span>`;
+    modalBlackHoleDiscoveredHeader = 'Black Hole Discovered';
+    modalBlackHoleDiscoveredText = `While studying the stars with the Space Telescope, you stumbled upon a Black Hole!<br>Time Dilation is a feature of these objects, and maybe we can harness its power for our own uses!<br><br><span class="green-ready-text">Take a look in the Galactic tab to interact with it.</span>`;
 
     headerDescriptions = {
         'Resources': 'Here you can gain and sell resources. You can also upgrade your storage capacity and automate resource harvesting.  When you discover fusion, you will also handle that here.',
