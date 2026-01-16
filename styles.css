@@ -2477,6 +2477,27 @@ canvas {
     gap: 5px;
 }
 
+.timewarp-row {
+    column-gap: 10px;
+}
+
+.timewarp-row .debug-label {
+    flex: 0 0 auto;
+}
+
+.timewarp-inputs {
+    flex: 1 1 auto;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.timewarp-actions {
+    flex: 0 0 auto;
+    display: flex;
+    justify-content: flex-end;
+}
+
 body.debug-window-open {
     overflow: hidden;
 }

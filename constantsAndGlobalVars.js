@@ -12,8 +12,8 @@ export let debugOptionFlag = false;
 export let stateLoading = false;
 export const debugVisibilityArray = ['settingsNotificationTestRow'];
 
-var debugTimeWarpDurationMs = 1000;
-var debugTimeWarpMultiplier = 2;
+var debugTimeWarpDurationMs = 5000;
+var debugTimeWarpMultiplier = 10;
 
 //ELEMENTS
 let elements;

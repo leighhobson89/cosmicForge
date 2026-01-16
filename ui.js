@@ -8831,14 +8831,26 @@ const debugTimeWarpMultiplierSelect = document.getElementById('debugTimeWarpMult
 const debugTimeWarpButton = document.getElementById('debugTimeWarpButton');
 
 if (debugTimeWarpDurationSelect) {
-    debugTimeWarpDurationSelect.value = String(getDebugTimeWarpDurationMs());
+    const durationOptions = Array.from(debugTimeWarpDurationSelect.options).map(option => option.value);
+    let durationValue = String(getDebugTimeWarpDurationMs());
+    if (!durationOptions.includes(durationValue)) {
+        durationValue = durationOptions[durationOptions.length - 1];
+        setDebugTimeWarpDurationMs(Number(durationValue));
+    }
+    debugTimeWarpDurationSelect.value = durationValue;
     debugTimeWarpDurationSelect.addEventListener('change', event => {
         setDebugTimeWarpDurationMs(Number(event.target.value));
     });
 }
 
 if (debugTimeWarpMultiplierSelect) {
-    debugTimeWarpMultiplierSelect.value = String(getDebugTimeWarpMultiplier());
+    const multiplierOptions = Array.from(debugTimeWarpMultiplierSelect.options).map(option => option.value);
+    let multiplierValue = String(getDebugTimeWarpMultiplier());
+    if (!multiplierOptions.includes(multiplierValue)) {
+        multiplierValue = multiplierOptions[2]; // default ×10
+        setDebugTimeWarpMultiplier(Number(multiplierValue));
+    }
+    debugTimeWarpMultiplierSelect.value = multiplierValue;
     debugTimeWarpMultiplierSelect.addEventListener('change', event => {
         setDebugTimeWarpMultiplier(Number(event.target.value));
     });
