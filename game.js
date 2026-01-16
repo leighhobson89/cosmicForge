@@ -315,6 +315,7 @@ import {
     getTimeWarpTimeoutId,
     setTimeWarpTimeoutId,
     getTimeWarpEndTimestampMs,
+    setTimeWarpEndTimestampMs,
     getBlackHoleDiscovered,
     setBlackHoleDiscovered,
     getBlackHoleDiscoveryProbability,
@@ -620,6 +621,18 @@ function handleResearchAutoBuyer() {
 
 export async function gameLoop() {
     if (gameState === getGameVisibleActive()) {
+        const timeWarpEndTimestampMs = getTimeWarpEndTimestampMs();
+        if (timeWarpEndTimestampMs > 0 && Date.now() >= timeWarpEndTimestampMs) {
+            const existingTimeout = getTimeWarpTimeoutId();
+            if (existingTimeout) {
+                clearTimeout(existingTimeout);
+                setTimeWarpTimeoutId(null);
+            }
+
+            setTimeWarpMultiplier(1);
+            setTimeWarpEndTimestampMs(0);
+        }
+
         const effectiveMultiplier = (document.hidden || !document.hasFocus()) ? 1 : getTimeWarpMultiplier();
         timerManagerDelta.updateWithTimestamp(performance.now(), effectiveMultiplier);
         updateAttentionIndicators();
