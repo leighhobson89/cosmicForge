@@ -535,12 +535,9 @@ function updateAntimatterDelta(deltaMs) {
     }
 
     const ticksToRun = Math.floor(accumulator / intervalMs);
-    const maxTicksPerUpdate = 5;
-    const ticksToProcess = Math.min(ticksToRun, maxTicksPerUpdate);
-    const processedMs = ticksToProcess * intervalMs;
-    const leftover = accumulator - processedMs;
+    const leftover = accumulator % intervalMs;
     setAntimatterDeltaAccumulator(leftover);
-    updateAntimatterAndDiagram(ticksToProcess);
+    updateAntimatterAndDiagram(ticksToRun);
 }
 
 export function calculateElapsedActiveGameTime() {
