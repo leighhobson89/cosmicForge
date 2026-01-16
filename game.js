@@ -866,7 +866,14 @@ function updateResearchRateDisplay(researchRatePerTick) {
         return;
     }
 
-    researchRateElement.textContent = `${(researchRatePerTick * getTimerRateRatio()).toFixed(1)} / s`;
+    const displayRate = researchRatePerTick * getTimerRateRatio();
+    researchRateElement.textContent = `${displayRate.toFixed(1)} / s`;
+
+    if (displayRate > 0) {
+        researchRateElement.classList.add('green-ready-text');
+    } else {
+        researchRateElement.classList.remove('green-ready-text');
+    }
 }
 
 function initialiseEnergyDeltaTimer() {
@@ -950,15 +957,27 @@ function updateEnergyDelta(deltaMs) {
                     getElements().energyQuantity.classList.remove('green-ready-text');
                 }
             }
+            const energyRateElement = getElements().energyRate;
             if (getInfinitePower()) {
-                getElements().energyRate.textContent = `∞ DYSON ∞`;
+                energyRateElement.textContent = `∞ DYSON ∞`;
             } else {
-                getElements().energyRate.textContent = `${Math.floor(totalRate * getTimerRateRatio())} KW / s`;
+                energyRateElement.textContent = `${Math.floor(totalRate * getTimerRateRatio())} KW / s`;
+            }
+
+            if (totalRate > 0 || getInfinitePower()) {
+                energyRateElement.classList.add('green-ready-text');
+                energyRateElement.classList.remove('red-disabled-text');
+            } else {
+                energyRateElement.classList.add('red-disabled-text');
+                energyRateElement.classList.remove('green-ready-text');
             }
         } else {
             getElements().energyQuantity.classList.remove('red-disabled-text');
             getElements().energyQuantity.classList.remove('green-ready-text');
-            getElements().energyRate.textContent = `0 KW / s`;
+            const energyRateElement = getElements().energyRate;
+            energyRateElement.textContent = `0 KW / s`;
+            energyRateElement.classList.add('red-disabled-text');
+            energyRateElement.classList.remove('green-ready-text');
         }
     } else {
         getElements().energyQuantity.classList.add('green-ready-text');
@@ -2091,7 +2110,14 @@ function updateAllPowerPlantRates() {
       
           const energyRateElement = getElements()[building + 'Rate'];
           if (energyRateElement) {
-            energyRateElement.innerHTML = `${Math.floor(rateBuilding * newQuantityBuilding * getTimerRateRatio())} KW / s`;
+            const totalRate = rateBuilding * newQuantityBuilding * getTimerRateRatio();
+            energyRateElement.innerHTML = `${Math.floor(totalRate)} KW / s`;
+
+            if (totalRate > 0) {
+                energyRateElement.classList.add('green-ready-text');
+            } else {
+                energyRateElement.classList.remove('green-ready-text');
+            }
           }
         });
     }
