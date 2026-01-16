@@ -184,8 +184,8 @@ import {
     getRocketsBuilt,
     getWeatherEffectOn,
     setWeatherEffectOn,
-    getSaveExportCloudFlag,
     setSaveExportCloudFlag,
+    getSaveExportCloudFlag,
     getSaveData,
     getNewsTickerSetting,
     getWeatherEffectSetting,
@@ -315,6 +315,8 @@ import {
     getTimeWarpTimeoutId,
     setTimeWarpTimeoutId,
     setTimeWarpEndTimestampMs,
+    getBlackHoleDiscovered,
+    setBlackHoleOptionVisible
 } from './constantsAndGlobalVars.js';
 
 import {
@@ -708,6 +710,7 @@ export async function gameLoop() {
         galacticMarketChecks();
         ascendencyBuffChecks();
         megastructureUIChecks();
+        blackHoleUIChecks();
         rebirthChecks();
         calculateLiquidationValue();
 
@@ -1670,18 +1673,14 @@ function megastructureUIChecks() {
     const optionContainer = optionElement?.parentElement?.parentElement;
     const shouldShowOption = isMegaStructureRun || getMegaStructureTabUnlocked();
 
-    if (optionContainer) {
-        if (shouldShowOption) {
-            if (optionContainer.classList.contains('invisible')) {
-                optionContainer.classList.remove('invisible');
-            }
+    if (!optionContainer) {
+        return;
+    }
 
-            if (isMegaStructureRun && !getMegaStructureTabUnlocked()) {
-                setMegaStructureTabUnlocked(true);
-            }
-        } else if (!optionContainer.classList.contains('invisible')) {
-            optionContainer.classList.add('invisible');
-        }
+    if (shouldShowOption) {
+        optionContainer.classList.remove('invisible');
+    } else {
+        optionContainer.classList.add('invisible');
     }
 
     if (isMegaStructureRun) {
@@ -1773,6 +1772,21 @@ function megastructureUIChecks() {
                 forceFieldContainer.appendChild(img);
             }
         }
+    }
+}
+
+function blackHoleUIChecks() {
+    const rowElement = document.getElementById('blackHoleOptionRow');
+    if (!rowElement) {
+        return;
+    }
+
+    if (getBlackHoleDiscovered()) {
+        rowElement.classList.remove('invisible');
+        setBlackHoleOptionVisible(true);
+    } else {
+        rowElement.classList.add('invisible');
+        setBlackHoleOptionVisible(false);
     }
 }
 

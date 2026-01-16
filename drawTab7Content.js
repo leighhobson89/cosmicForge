@@ -374,4 +374,8 @@ export function drawTab7Content(heading, optionContentElement) {
     
         optionContentElement.appendChild(megastructureTableRow);
     }
+
+    if (heading === 'Black Hole') {
+        
+    }
 }

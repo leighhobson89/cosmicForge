@@ -14,6 +14,8 @@ export const debugVisibilityArray = ['settingsNotificationTestRow'];
 
 var debugTimeWarpDurationMs = 5000;
 var debugTimeWarpMultiplier = 10;
+let blackHoleOptionVisible = false;
+let blackHoleDiscovered = false;
 
 //ELEMENTS
 let elements;
@@ -2428,6 +2430,22 @@ export function getOriginalFrameNumbers() {
 
 export function setOriginalFrameNumbers(value) {
     originalFrameNumbers = value;
+}
+
+export function getBlackHoleOptionVisible() {
+    return blackHoleOptionVisible;
+}
+
+export function setBlackHoleOptionVisible(value) {
+    blackHoleOptionVisible = Boolean(value);
+}
+
+export function getBlackHoleDiscovered() {
+    return blackHoleDiscovered;
+}
+
+export function setBlackHoleDiscovered(value) {
+    blackHoleDiscovered = Boolean(value);
 }
 
 export function getTemporaryCoreTechRowsRepo(key) {

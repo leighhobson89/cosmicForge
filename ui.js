@@ -6334,6 +6334,16 @@ function initializeTabEventListeners() {
             setFirstAccessArray('megastructures');
         });
     });
+
+    document.querySelectorAll('[class*="tab7"][class*="option5"]').forEach(function(element) {
+        element.addEventListener('click', function() {
+            selectRowCss(this);
+            setLastScreenOpenRegister('tab7', 'black hole');
+            setCurrentOptionPane('black hole');
+            updateContent('Black Hole', 'tab7', 'content');
+            setFirstAccessArray('black hole');
+        });
+    });
     
     document.querySelectorAll('[class*="tab8"][class*="option1"]').forEach(function(element) {
         element.addEventListener('click', function() {

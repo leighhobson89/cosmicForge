@@ -278,6 +278,7 @@ export function initialiseDescriptions() {
         'galactic market': "Here you can make various trades in the Galactic Market.",
         'ascendency perks': "Here you can spend AP for permanent buffs to speed up your runs!",
         'megastructures': "This shows your progress in harnessing the power of MegaStructures, and the slow dismantling of the Miaplacidus Force Field!",
+        'black hole': "This shows the Black Hole time warp feature, once unlocked.",
 
         'contact': "Contact Channels for Feedback and Suggestions",
         'get started': "Learn how to get started in Cosmic Forge.",
