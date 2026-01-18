@@ -266,13 +266,16 @@ let originalFrameNumbers = {};
 let baseSearchAsteroidTimerDuration = 60000;
 let baseInvestigateStarTimerDuration = 400000;
 let basePillageVoidTimerDuration = 500000;
+let baseBlackHoleChargeTimerDuration = 60000;
 let currentAsteroidSearchTimerDurationTotal = 0;
 let currentInvestigateStarTimerDurationTotal = 0;
 let currentPillageVoidTimerDurationTotal = 0;
+let currentBlackHoleChargeTimerDurationTotal = 0;
 let timeLeftUntilAsteroidScannerTimerFinishes = 0;
 let timeLeftUntilTravelToDestinationStarTimerFinishes = 0;
 let timeLeftUntilPillageVoidTimerFinishes = 0;
 let timeLeftUntilStarInvestigationTimerFinishes = 0;
+let timeLeftUntilBlackHoleChargeTimerFinishes = 0;
 let oldAntimatterRightBoxSvgData = null;
 let currentDestinationDropdownText = 'Select an option';
 let starVisionDistance = 0;
@@ -550,6 +553,8 @@ let currentlySearchingAsteroid = false;
 let currentlyInvestigatingStar = false;
 let currentlyPillagingVoid = false;
 let telescopeReadyToSearch = true;
+let currentlyChargingBlackHole = false;
+let blackHoleChargeReady = false;
 let asteroidTimerCanContinue = false;
 let starInvestigationTimerCanContinue = false;
 let pillageVoidTimerCanContinue = false;
@@ -1161,6 +1166,8 @@ export function resetAllVariablesOnRebirth() {
     currentlyInvestigatingStar = false;
     currentlyPillagingVoid = false;
     telescopeReadyToSearch = true;
+    currentlyChargingBlackHole = false;
+    blackHoleChargeReady = false;
     asteroidTimerCanContinue = false;
     starInvestigationTimerCanContinue = false;
     pillageVoidTimerCanContinue = false;
@@ -1240,13 +1247,16 @@ export function captureGameStatusForSaving(type) {
     gameState.rocketsFuellerStartedArray = rocketsFuellerStartedArray;
     gameState.launchedRockets = launchedRockets;
     gameState.baseSearchAsteroidTimerDuration = baseSearchAsteroidTimerDuration;
+    gameState.baseBlackHoleChargeTimerDuration = baseBlackHoleChargeTimerDuration;
     gameState.timeLeftUntilAsteroidScannerTimerFinishes = timeLeftUntilAsteroidScannerTimerFinishes;
+    gameState.timeLeftUntilBlackHoleChargeTimerFinishes = timeLeftUntilBlackHoleChargeTimerFinishes;
     gameState.timeLeftUntilStarInvestigationTimerFinishes = timeLeftUntilStarInvestigationTimerFinishes;
     gameState.timeLeftUntilPillageVoidTimerFinishes = timeLeftUntilPillageVoidTimerFinishes;
     gameState.timeLeftUntilTravelToDestinationStarTimerFinishes = timeLeftUntilTravelToDestinationStarTimerFinishes;
     gameState.currentAsteroidSearchTimerDurationTotal = currentAsteroidSearchTimerDurationTotal;
     gameState.currentInvestigateStarTimerDurationTotal = currentInvestigateStarTimerDurationTotal;
     gameState.currentPillageVoidTimerDurationTotal = currentPillageVoidTimerDurationTotal;
+    gameState.currentBlackHoleChargeTimerDurationTotal = currentBlackHoleChargeTimerDurationTotal;
     gameState.timeLeftUntilRocketTravelToAsteroidTimerFinishes = timeLeftUntilRocketTravelToAsteroidTimerFinishes;
     gameState.asteroidArray = asteroidArray;
     gameState.rocketTravelDuration = rocketTravelDuration;
@@ -1358,6 +1368,8 @@ export function captureGameStatusForSaving(type) {
         currentlyInvestigatingStar: currentlyInvestigatingStar,
         currentlyPillagingVoid: currentlyPillagingVoid,
         telescopeReadyToSearch: telescopeReadyToSearch,
+        currentlyChargingBlackHole: currentlyChargingBlackHole,
+        blackHoleChargeReady: blackHoleChargeReady,
         currentlyTravellingToAsteroid: currentlyTravellingToAsteroid,
         rocketReadyToTravel: rocketReadyToTravel,
         antimatterUnlocked: antimatterUnlocked,
@@ -1463,7 +1475,9 @@ export function restoreGameStatus(gameState, type) {
             rocketsFuellerStartedArray = gameState.rocketsFuellerStartedArray ?? [''];
             launchedRockets = gameState.launchedRockets ?? [''];
             baseSearchAsteroidTimerDuration = gameState.baseSearchAsteroidTimerDuration ?? 120000;
+            baseBlackHoleChargeTimerDuration = gameState.baseBlackHoleChargeTimerDuration ?? 60000;
             timeLeftUntilAsteroidScannerTimerFinishes = gameState.timeLeftUntilAsteroidScannerTimerFinishes ?? 0;
+            timeLeftUntilBlackHoleChargeTimerFinishes = gameState.timeLeftUntilBlackHoleChargeTimerFinishes ?? 0;
             timeLeftUntilStarInvestigationTimerFinishes = gameState.timeLeftUntilStarInvestigationTimerFinishes ?? 0;
             timeLeftUntilPillageVoidTimerFinishes = gameState.timeLeftUntilPillageVoidTimerFinishes ?? 0;
             timeLeftUntilRocketTravelToAsteroidTimerFinishes = gameState.timeLeftUntilRocketTravelToAsteroidTimerFinishes ?? {rocket1: 0, rocket2: 0, rocket3: 0, rocket4: 0};
@@ -1471,6 +1485,7 @@ export function restoreGameStatus(gameState, type) {
             currentAsteroidSearchTimerDurationTotal = gameState.currentAsteroidSearchTimerDurationTotal ?? 0;
             currentInvestigateStarTimerDurationTotal = gameState.currentInvestigateStarTimerDurationTotal ?? 0;
             currentPillageVoidTimerDurationTotal = gameState.currentPillageVoidTimerDurationTotal ?? 0;
+            currentBlackHoleChargeTimerDurationTotal = gameState.currentBlackHoleChargeTimerDurationTotal ?? 0;
             asteroidArray = (gameState.asteroidArray ?? []).filter(item => item !== '') || null;
             rocketTravelDuration = gameState.rocketTravelDuration ?? {rocket1: 0, rocket2: 0, rocket3: 0, rocket4: 0};
             starTravelDuration = gameState.starTravelDuration ?? 0;
@@ -1579,6 +1594,8 @@ export function restoreGameStatus(gameState, type) {
             currentlyInvestigatingStar = gameState.flags.currentlyInvestigatingStar ?? false;
             currentlyPillagingVoid = gameState.flags.currentlyPillagingVoid ?? false;
             telescopeReadyToSearch = gameState.flags.telescopeReadyToSearch ?? true;            
+            currentlyChargingBlackHole = gameState.flags.currentlyChargingBlackHole ?? false;
+            blackHoleChargeReady = gameState.flags.blackHoleChargeReady ?? false;
             currentlyTravellingToAsteroid = gameState.flags.currentlyTravellingToAsteroid ?? { rocket1: false, rocket2: false, rocket3: false, rocket4: false };
             rocketReadyToTravel = gameState.flags.rocketReadyToTravel ?? { rocket1: true, rocket2: true, rocket3: true, rocket4: true };
             antimatterUnlocked = gameState.flags.antimatterUnlocked ?? false;
@@ -3039,6 +3056,46 @@ export function getTimeLeftUntilStarInvestigationTimerFinishes() {
 
 export function setTimeLeftUntilStarInvestigationTimerFinishes(value) {
     timeLeftUntilStarInvestigationTimerFinishes = value ?? 0;
+}
+
+export function getTimeLeftUntilBlackHoleChargeTimerFinishes() {
+    return timeLeftUntilBlackHoleChargeTimerFinishes;
+}
+
+export function setTimeLeftUntilBlackHoleChargeTimerFinishes(value) {
+    timeLeftUntilBlackHoleChargeTimerFinishes = value ?? 0;
+}
+
+export function getBaseBlackHoleChargeTimerDuration() {
+    return baseBlackHoleChargeTimerDuration;
+}
+
+export function setBaseBlackHoleChargeTimerDuration(value) {
+    baseBlackHoleChargeTimerDuration = value;
+}
+
+export function getCurrentBlackHoleChargeTimerDurationTotal() {
+    return currentBlackHoleChargeTimerDurationTotal;
+}
+
+export function setCurrentBlackHoleChargeTimerDurationTotal(value) {
+    currentBlackHoleChargeTimerDurationTotal = value ?? 0;
+}
+
+export function getCurrentlyChargingBlackHole() {
+    return currentlyChargingBlackHole;
+}
+
+export function setCurrentlyChargingBlackHole(value) {
+    currentlyChargingBlackHole = value ?? false;
+}
+
+export function getBlackHoleChargeReady() {
+    return blackHoleChargeReady;
+}
+
+export function setBlackHoleChargeReady(value) {
+    blackHoleChargeReady = value ?? false;
 }
 
 export function getTimeLeftUntilRocketTravelToAsteroidTimerFinishes(key) {

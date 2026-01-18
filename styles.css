@@ -1568,7 +1568,8 @@ button.red-disabled-text {
 #spaceTelescopeSearchAsteroidProgressBarContainer,
 #spaceTelescopeInvestigateStarProgressBarContainer,
 #spaceTelescopePillageVoidProgressBarContainer,
-#spaceTravelToStarProgressBarContainer
+#spaceTravelToStarProgressBarContainer,
+#blackHoleChargeProgressBarContainer
  {
     background-color: var(--disabled-text);
     height: 25px;
@@ -1587,13 +1588,31 @@ button.red-disabled-text {
  #spaceTelescopeSearchAsteroidProgressBar,
  #spaceTelescopeInvestigateStarProgressBar,
  #spaceTelescopePillageVoidProgressBar,
- #spaceTravelToStarProgressBar
+ #spaceTravelToStarProgressBar,
+ #blackHoleChargeProgressBar
  {
     background-color: var(--text-color);
     width: 0%;
     height: 25px;
     z-index: 1000
  }
+
+@keyframes black-hole-charge-pulse {
+    0% {
+        box-shadow: 0 0 10px rgba(0, 255, 153, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 24px rgba(0, 255, 153, 0.8);
+    }
+    100% {
+        box-shadow: 0 0 10px rgba(0, 255, 153, 0.4);
+    }
+}
+
+.black-hole-charge-ready-button {
+    animation: black-hole-charge-pulse 1.4s ease-in-out infinite;
+    border-color: var(--ready-text);
+}
 
  .label-star,
  .label-asteroid {

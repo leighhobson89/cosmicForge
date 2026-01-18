@@ -1,9 +1,26 @@
 import { removeTabAttentionIfNoIndicators, createOptionRow, createButton, createDropdown, createTextElement, createTextFieldArea, callPopupModal, showHideModal, createMegaStructureDiagram, createMegaStructureTable, createBlackHole } from './ui.js';
-import { setApLiquidationQuantity, setGalacticMarketIncomingQuantity, setHasClickedOutgoingOptionGalacticMarket, setGalacticMarketOutgoingStockType, setGalacticMarketIncomingStockType, setGalacticMarketOutgoingQuantitySelectionType, setGalacticMarketOutgoingQuantitySelectionTypeDisabledStatus, setGalacticMarketSellApForCashQuantity, getGalacticMarketSellApForCashQuantity, setGalacticMarketLiquidationAuthorization, getApLiquidationQuantity } from './constantsAndGlobalVars.js';
-import { purchaseBuff, galacticMarketLiquidateForAp, galacticMarketSellApForCash, galacticMarketTrade, rebirth } from './game.js';
+import {
+    setApLiquidationQuantity,
+    setGalacticMarketIncomingQuantity,
+    setHasClickedOutgoingOptionGalacticMarket,
+    setGalacticMarketOutgoingStockType,
+    setGalacticMarketIncomingStockType,
+    setGalacticMarketOutgoingQuantitySelectionType,
+    setGalacticMarketOutgoingQuantitySelectionTypeDisabledStatus,
+    setGalacticMarketSellApForCashQuantity,
+    getGalacticMarketSellApForCashQuantity,
+    setGalacticMarketLiquidationAuthorization,
+    getApLiquidationQuantity,
+    getCurrentlyChargingBlackHole,
+    getTimeLeftUntilBlackHoleChargeTimerFinishes,
+    getBlackHoleChargeReady,
+    deferredActions
+} from './constantsAndGlobalVars.js';
+import { purchaseBuff, galacticMarketLiquidateForAp, galacticMarketSellApForCash, galacticMarketTrade, rebirth, startBlackHoleChargeTimer } from './game.js';
 import { getAscendencyBuffDataObject, getResourceDataObject, setResourceDataObject, getBlackHoleResearchDone, getBlackHoleResearchPrice, setBlackHoleResearchDone } from './resourceDataObject.js';
 import { capitaliseString } from './utilityFunctions.js';
 import { modalRebirthText, modalRebirthHeader } from './descriptions.js';
+import { timerManagerDelta } from './timerManagerDelta.js';
 
 export function drawTab7Content(heading, optionContentElement) {
     const optionElement = document.getElementById(heading.toLowerCase().replace(/\s(.)/g, (match, group1) => group1.toUpperCase()).replace(/\s+/g, '') + 'Option');
@@ -376,6 +393,43 @@ export function drawTab7Content(heading, optionContentElement) {
     }
     
     if (heading === 'Black Hole') {
+        const blackHoleChargeProgressRow = createOptionRow(
+            'blackHoleChargeProgressRow',
+            null,
+            null,
+            createTextElement(
+                `<div id="blackHoleChargeProgressBar">`,
+                'blackHoleChargeProgressBarContainer',
+                ['progress-bar-container', 'invisible']
+            ),
+            null,
+            null,
+            null,
+            null,
+            '',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            false,
+            null,
+            null,
+            '',
+            [true, '0', '100%'],
+            ['no-left-margin']
+        );
+        optionContentElement.appendChild(blackHoleChargeProgressRow);
+
+        if (getCurrentlyChargingBlackHole()) {
+            timerManagerDelta.removeTimer('blackHoleChargeTimer');
+            deferredActions.push(() => {
+                const timeRemaining = getTimeLeftUntilBlackHoleChargeTimerFinishes();
+                startBlackHoleChargeTimer([timeRemaining, 'reEnterBlackHoleScreen']);
+            });
+        }
+
         const blackHoleRow2Container = document.createElement('div');
         blackHoleRow2Container.style.display = 'flex';
         blackHoleRow2Container.style.alignItems = 'center';
@@ -416,7 +470,20 @@ export function drawTab7Content(heading, optionContentElement) {
         });
         const blackHoleButton2 = createButton('Button 2', ['option-button'], () => {});
         const blackHoleButton3 = createButton('Button 3', ['option-button'], () => {});
-        const blackHoleButton4 = createButton('Button 4', ['option-button'], () => {});
+        const blackHoleButton4 = createButton('Charge', ['id_blackHoleChargeButton', 'option-button'], () => {
+            if (getCurrentlyChargingBlackHole()) {
+                return;
+            }
+
+            if (getBlackHoleChargeReady()) {
+                const progressBar = document.getElementById('blackHoleChargeProgressBar');
+                if (progressBar) {
+                    progressBar.style.width = '0%';
+                }
+            }
+
+            startBlackHoleChargeTimer([0, 'buttonClick']);
+        });
 
         blackHoleButton1.style.width = '120px';
         blackHoleButton2.style.width = '120px';
@@ -436,7 +503,7 @@ export function drawTab7Content(heading, optionContentElement) {
         blackHoleRow2Container.appendChild(blackHoleRow2RightButtons);
 
         optionContentElement.appendChild(createOptionRow(
-            'blackHoleRow2',
+            'blackHoleInteractionRow',
             null,
             null,
             blackHoleRow2Container,
@@ -459,7 +526,7 @@ export function drawTab7Content(heading, optionContentElement) {
             ['no-left-margin']
         ));
         optionContentElement.appendChild(createOptionRow(
-            'blackHoleRow5',
+            'blackHoleActivationRow',
             null,
             null,
             null,
@@ -481,7 +548,7 @@ export function drawTab7Content(heading, optionContentElement) {
             [true, '0', '100%']
         ));
         optionContentElement.appendChild(createOptionRow(
-            'blackHoleRow3',
+            'blackHoleFeedRow',
             null,
             null,
             null,
@@ -503,7 +570,7 @@ export function drawTab7Content(heading, optionContentElement) {
             [true, '0', '100%']
         ));
         optionContentElement.appendChild(createOptionRow(
-            'blackHoleRow4',
+            'blackHoleStatsRow',
             null,
             null,
             null,

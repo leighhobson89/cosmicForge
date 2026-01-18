@@ -319,7 +319,16 @@ import {
     getBlackHoleDiscovered,
     setBlackHoleDiscovered,
     getBlackHoleDiscoveryProbability,
-    setBlackHoleDiscoveryProbability
+    setBlackHoleDiscoveryProbability,
+    getBaseBlackHoleChargeTimerDuration,
+    setCurrentBlackHoleChargeTimerDurationTotal,
+    getCurrentBlackHoleChargeTimerDurationTotal,
+    setTimeLeftUntilBlackHoleChargeTimerFinishes,
+    getTimeLeftUntilBlackHoleChargeTimerFinishes,
+    setCurrentlyChargingBlackHole,
+    getCurrentlyChargingBlackHole,
+    setBlackHoleChargeReady,
+    getBlackHoleChargeReady,
 } from './constantsAndGlobalVars.js';
 
 import {
@@ -1805,33 +1814,71 @@ function blackHoleUIChecks() {
     }
 
     const researchButton = document.getElementById('blackHoleResearchButton');
-    if (!researchButton) {
-        return;
+    if (researchButton) {
+        if (getBlackHoleResearchDone()) {
+            researchButton.textContent = 'RESEARCHED';
+            researchButton.classList.remove('red-disabled-text');
+            researchButton.classList.add('green-ready-text');
+            researchButton.disabled = true;
+            researchButton.style.pointerEvents = 'none';
+        } else {
+            const price = getBlackHoleResearchPrice();
+            const currentResearch = getResourceDataObject('research', ['quantity']);
+
+            researchButton.textContent = 'Research';
+            researchButton.disabled = true;
+            researchButton.style.pointerEvents = 'none';
+            researchButton.classList.add('red-disabled-text');
+            researchButton.classList.remove('green-ready-text');
+
+            if (currentResearch >= price) {
+                researchButton.disabled = false;
+                researchButton.style.pointerEvents = 'auto';
+                researchButton.classList.remove('red-disabled-text');
+                researchButton.classList.add('green-ready-text');
+            }
+        }
     }
 
-    if (getBlackHoleResearchDone()) {
-        researchButton.textContent = 'RESEARCHED';
-        researchButton.classList.remove('red-disabled-text');
-        researchButton.classList.add('green-ready-text');
-        researchButton.disabled = true;
-        researchButton.style.pointerEvents = 'none';
-        return;
+    const chargeButton = document.getElementById('blackHoleChargeButton');
+    const chargeProgressBar = document.getElementById('blackHoleChargeProgressBar');
+    const chargeProgressBarContainer = document.getElementById('blackHoleChargeProgressBarContainer');
+
+    if (chargeProgressBarContainer) {
+        chargeProgressBarContainer.classList.remove('invisible');
     }
 
-    const price = getBlackHoleResearchPrice();
-    const currentResearch = getResourceDataObject('research', ['quantity']);
+    if (chargeProgressBar) {
+        if (getBlackHoleChargeReady()) {
+            chargeProgressBar.style.width = '100%';
+        } else if (getCurrentlyChargingBlackHole() && getCurrentBlackHoleChargeTimerDurationTotal() > 0) {
+            const elapsed = getCurrentBlackHoleChargeTimerDurationTotal() - getTimeLeftUntilBlackHoleChargeTimerFinishes();
+            chargeProgressBar.style.width = `${(elapsed / getCurrentBlackHoleChargeTimerDurationTotal()) * 100}%`;
+        } else {
+            chargeProgressBar.style.width = '0%';
+        }
+    }
 
-    researchButton.textContent = 'Research';
-    researchButton.disabled = true;
-    researchButton.style.pointerEvents = 'none';
-    researchButton.classList.add('red-disabled-text');
-    researchButton.classList.remove('green-ready-text');
+    if (chargeButton) {
+        const ready = getBlackHoleChargeReady();
+        const charging = getCurrentlyChargingBlackHole();
 
-    if (currentResearch >= price) {
-        researchButton.disabled = false;
-        researchButton.style.pointerEvents = 'auto';
-        researchButton.classList.remove('red-disabled-text');
-        researchButton.classList.add('green-ready-text');
+        if (charging) {
+            chargeButton.textContent = 'Charging...';
+            chargeButton.disabled = true;
+            chargeButton.style.pointerEvents = 'none';
+            chargeButton.classList.remove('green-ready-text', 'black-hole-charge-ready-button');
+        } else if (ready) {
+            chargeButton.textContent = 'Charge Ready';
+            chargeButton.disabled = false;
+            chargeButton.style.pointerEvents = 'auto';
+            chargeButton.classList.add('green-ready-text', 'black-hole-charge-ready-button');
+        } else {
+            chargeButton.textContent = 'Charge';
+            chargeButton.disabled = false;
+            chargeButton.style.pointerEvents = 'auto';
+            chargeButton.classList.remove('green-ready-text', 'black-hole-charge-ready-button');
+        }
     }
 }
 
@@ -7708,6 +7755,64 @@ export function startTravelToAndFromAsteroidTimer(adjustment, rocket, direction)
     });
 }
 
+export function startBlackHoleChargeTimer(adjustment) {
+    if (adjustment[1] === 'offlineGains' && !getCurrentlyChargingBlackHole()) {
+        return;
+    }
+
+    setBlackHoleChargeReady(false);
+    setCurrentlyChargingBlackHole(true);
+
+    const timerName = 'blackHoleChargeTimer';
+    if (timerManagerDelta.hasTimer(timerName)) {
+        return;
+    }
+
+    let totalDuration = getCurrentBlackHoleChargeTimerDurationTotal();
+    if (adjustment[0] === 0 || !totalDuration) {
+        totalDuration = getBaseBlackHoleChargeTimerDuration();
+        setCurrentBlackHoleChargeTimerDurationTotal(totalDuration);
+    }
+
+    let timeRemaining = adjustment[0] === 0 ? totalDuration : adjustment[0];
+    setTimeLeftUntilBlackHoleChargeTimerFinishes(timeRemaining);
+
+    timerManagerDelta.addTimer(timerName, {
+        durationMs: 0,
+        repeat: true,
+        onUpdate: ({ deltaMs }) => {
+            timeRemaining = Math.max(timeRemaining - deltaMs, 0);
+            setTimeLeftUntilBlackHoleChargeTimerFinishes(timeRemaining);
+
+            const progressBar = document.getElementById('blackHoleChargeProgressBar');
+            const progressBarContainer = document.getElementById('blackHoleChargeProgressBarContainer');
+            if (progressBarContainer) {
+                progressBarContainer.classList.remove('invisible');
+            }
+
+            if (timeRemaining <= 0) {
+                timerManagerDelta.removeTimer(timerName);
+                setCurrentlyChargingBlackHole(false);
+                setBlackHoleChargeReady(true);
+                setTimeLeftUntilBlackHoleChargeTimerFinishes(0);
+
+                if (progressBar) {
+                    progressBar.style.width = '100%';
+                }
+
+                return;
+            }
+
+            const elapsedTime = getCurrentBlackHoleChargeTimerDurationTotal() - getTimeLeftUntilBlackHoleChargeTimerFinishes();
+            const progressBarPercentage = (elapsedTime / getCurrentBlackHoleChargeTimerDurationTotal()) * 100;
+            if (progressBar) {
+                progressBar.style.width = `${progressBarPercentage}%`;
+            }
+        },
+        metadata: { type: 'blackHole', action: 'charge' }
+    });
+}
+
 export function startTravelToDestinationStarTimer(adjustment) {
     if (adjustment[1] === 'offlineGains' && !getStarShipTravelling()) {
         return;
@@ -9001,6 +9106,15 @@ export function offlineGains(switchedFocus) {
             timerManagerDelta.removeTimer(`${rocketKey}TravelReturnTimer`);
             startTravelToAndFromAsteroidTimer([remainingTime, 'offlineGains'], rocketKey, getRocketDirection(rocketKey));
         });  
+
+        if (getCurrentlyChargingBlackHole()) {
+            const timeLeft = getTimeLeftUntilBlackHoleChargeTimerFinishes();
+            const offlineTimeInMilliseconds = timeDifferenceInSeconds * 1000;
+            const remainingTime = Math.max(timeLeft - offlineTimeInMilliseconds, 100);
+
+            timerManagerDelta.removeTimer('blackHoleChargeTimer');
+            startBlackHoleChargeTimer([remainingTime, 'offlineGains']);
+        }
         
         const currentAntimatterQuantity = combinedValues.quantity.antimatter;
         const asteroidArray = getAsteroidArray();
