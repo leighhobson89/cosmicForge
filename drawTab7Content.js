@@ -468,8 +468,8 @@ export function drawTab7Content(heading, optionContentElement) {
             setResourceDataObject(currentResearch - price, 'research', ['quantity']);
             setBlackHoleResearchDone(true);
         });
-        const blackHoleButton2 = createButton('Button 2', ['option-button'], () => {});
-        const blackHoleButton3 = createButton('Button 3', ['option-button'], () => {});
+        const blackHoleButton2 = createButton('Button 2', ['id_blackHoleButton2', 'option-button'], () => {});
+        const blackHoleButton3 = createButton('Button 3', ['id_blackHoleButton3', 'option-button'], () => {});
         const blackHoleButton4 = createButton('Charge', ['id_blackHoleChargeButton', 'option-button'], () => {
             if (getCurrentlyChargingBlackHole()) {
                 return;
@@ -483,6 +483,12 @@ export function drawTab7Content(heading, optionContentElement) {
             }
 
             startBlackHoleChargeTimer([0, 'buttonClick']);
+        });
+
+        [blackHoleButton2, blackHoleButton3, blackHoleButton4].forEach(button => {
+            button.disabled = true;
+            button.style.pointerEvents = 'none';
+            button.classList.add('red-disabled-text');
         });
 
         blackHoleButton1.style.width = '120px';

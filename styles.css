@@ -1597,23 +1597,6 @@ button.red-disabled-text {
     z-index: 1000
  }
 
-@keyframes black-hole-charge-pulse {
-    0% {
-        box-shadow: 0 0 10px rgba(0, 255, 153, 0.4);
-    }
-    50% {
-        box-shadow: 0 0 24px rgba(0, 255, 153, 0.8);
-    }
-    100% {
-        box-shadow: 0 0 10px rgba(0, 255, 153, 0.4);
-    }
-}
-
-.black-hole-charge-ready-button {
-    animation: black-hole-charge-pulse 1.4s ease-in-out infinite;
-    border-color: var(--ready-text);
-}
-
  .label-star,
  .label-asteroid {
     margin-right: 10px;
@@ -2259,6 +2242,28 @@ canvas {
     100% {
         transform: translate(0, 0);
     }
+}
+
+@keyframes black-hole-charge-pulse {
+    0% {
+        box-shadow: 0 0 10px rgba(0, 255, 153, 0.35);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 26px rgba(0, 255, 153, 0.9);
+        transform: scale(1.03);
+    }
+    100% {
+        box-shadow: 0 0 10px rgba(0, 255, 153, 0.35);
+        transform: scale(1);
+    }
+}
+
+.black-hole-charge-ready-button {
+    animation: black-hole-charge-pulse 1.3s ease-in-out infinite;
+    border: 2px solid var(--ready-text) !important;
+    color: var(--ready-text) !important;
+    box-shadow: 0 0 20px rgba(0, 255, 153, 0.75);
 }
 
 .feedbackGood {

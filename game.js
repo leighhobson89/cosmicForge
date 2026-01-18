@@ -1841,6 +1841,8 @@ function blackHoleUIChecks() {
     }
 
     const chargeButton = document.getElementById('blackHoleChargeButton');
+    const secondaryButton2 = document.getElementById('blackHoleButton2');
+    const secondaryButton3 = document.getElementById('blackHoleButton3');
     const chargeProgressBar = document.getElementById('blackHoleChargeProgressBar');
     const chargeProgressBarContainer = document.getElementById('blackHoleChargeProgressBarContainer');
 
@@ -1859,25 +1861,41 @@ function blackHoleUIChecks() {
         }
     }
 
+    const secondaryButtons = [secondaryButton2, secondaryButton3, chargeButton].filter(Boolean);
+    if (!getBlackHoleResearchDone()) {
+        secondaryButtons.forEach(button => {
+            button.disabled = true;
+            button.style.pointerEvents = 'none';
+            button.classList.add('red-disabled-text');
+            button.classList.remove('green-ready-text', 'black-hole-charge-ready-button');
+            if (button === chargeButton) {
+                button.textContent = 'Charge';
+            }
+        });
+        return;
+    }
+
+    secondaryButtons.forEach(button => {
+        button.disabled = false;
+        button.style.pointerEvents = 'auto';
+        button.classList.remove('red-disabled-text');
+    });
+
     if (chargeButton) {
-        const ready = getBlackHoleChargeReady();
         const charging = getCurrentlyChargingBlackHole();
 
         if (charging) {
             chargeButton.textContent = 'Charging...';
+            chargeButton.classList.remove('black-hole-charge-ready-button');
             chargeButton.disabled = true;
-            chargeButton.style.pointerEvents = 'none';
-            chargeButton.classList.remove('green-ready-text', 'black-hole-charge-ready-button');
-        } else if (ready) {
-            chargeButton.textContent = 'Charge Ready';
+        } else if (getBlackHoleChargeReady()) {
+            chargeButton.textContent = 'ACTIVATE';
+            chargeButton.classList.add('black-hole-charge-ready-button');
             chargeButton.disabled = false;
-            chargeButton.style.pointerEvents = 'auto';
-            chargeButton.classList.add('green-ready-text', 'black-hole-charge-ready-button');
         } else {
             chargeButton.textContent = 'Charge';
+            chargeButton.classList.remove('black-hole-charge-ready-button');
             chargeButton.disabled = false;
-            chargeButton.style.pointerEvents = 'auto';
-            chargeButton.classList.remove('green-ready-text', 'black-hole-charge-ready-button');
         }
     }
 }
