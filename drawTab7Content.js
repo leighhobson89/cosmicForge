@@ -1,7 +1,7 @@
 import { removeTabAttentionIfNoIndicators, createOptionRow, createButton, createDropdown, createTextElement, createTextFieldArea, callPopupModal, showHideModal, createMegaStructureDiagram, createMegaStructureTable, createBlackHole } from './ui.js';
 import { setApLiquidationQuantity, setGalacticMarketIncomingQuantity, setHasClickedOutgoingOptionGalacticMarket, setGalacticMarketOutgoingStockType, setGalacticMarketIncomingStockType, setGalacticMarketOutgoingQuantitySelectionType, setGalacticMarketOutgoingQuantitySelectionTypeDisabledStatus, setGalacticMarketSellApForCashQuantity, getGalacticMarketSellApForCashQuantity, setGalacticMarketLiquidationAuthorization, getApLiquidationQuantity } from './constantsAndGlobalVars.js';
 import { purchaseBuff, galacticMarketLiquidateForAp, galacticMarketSellApForCash, galacticMarketTrade, rebirth } from './game.js';
-import { getAscendencyBuffDataObject, getResourceDataObject } from './resourceDataObject.js';
+import { getAscendencyBuffDataObject, getResourceDataObject, setResourceDataObject, getBlackHoleResearchDone, getBlackHoleResearchPrice, setBlackHoleResearchDone } from './resourceDataObject.js';
 import { capitaliseString } from './utilityFunctions.js';
 import { modalRebirthText, modalRebirthHeader } from './descriptions.js';
 
@@ -400,7 +400,20 @@ export function drawTab7Content(heading, optionContentElement) {
         blackHoleRow2RightButtons.style.height = '220px';
         blackHoleRow2RightButtons.style.width = '120px';
 
-        const blackHoleButton1 = createButton('Button 1', ['option-button'], () => {});
+        const blackHoleButton1 = createButton('Research', ['id_blackHoleResearchButton', 'option-button', 'red-disabled-text'], () => {
+            if (getBlackHoleResearchDone()) {
+                return;
+            }
+
+            const price = getBlackHoleResearchPrice();
+            const currentResearch = getResourceDataObject('research', ['quantity']);
+            if (currentResearch < price) {
+                return;
+            }
+
+            setResourceDataObject(currentResearch - price, 'research', ['quantity']);
+            setBlackHoleResearchDone(true);
+        });
         const blackHoleButton2 = createButton('Button 2', ['option-button'], () => {});
         const blackHoleButton3 = createButton('Button 3', ['option-button'], () => {});
         const blackHoleButton4 = createButton('Button 4', ['option-button'], () => {});

@@ -523,6 +523,27 @@ export function migrateResourceData(saveData, objectType) {
             saveData.version = 0.78;
         }
 
+        if (saveData.version < 0.79) {
+            if (objectType === 'resourceData') {
+                if (!saveData.blackHole) {
+                    saveData.blackHole = {
+                        researchPrice: 1000000,
+                        blackHoleResearchDone: false
+                    };
+                }
+
+                if (saveData.blackHole.researchPrice === undefined) {
+                    saveData.blackHole.researchPrice = 1000000;
+                }
+
+                if (saveData.blackHole.blackHoleResearchDone === undefined) {
+                    saveData.blackHole.blackHoleResearchDone = false;
+                }
+            }
+
+            saveData.version = 0.79;
+        }
+
         saveData.version += 0.001;
     }
 

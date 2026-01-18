@@ -349,6 +349,8 @@ import {
     getBuffRocketFuelOptimizationData,
     getBuffEnhancedMiningData,
     getBuffQuantumEnginesData,
+    getBlackHoleResearchPrice,
+    getBlackHoleResearchDone,
     setAchievementIconImageUrls,
     megaStructureImageUrls,
     miaplacidus 
@@ -1800,6 +1802,36 @@ function blackHoleUIChecks() {
         rowElement.parentElement.parentElement.classList.remove('invisible');
     } else {
         rowElement.parentElement.parentElement.classList.add('invisible');
+    }
+
+    const researchButton = document.getElementById('blackHoleResearchButton');
+    if (!researchButton) {
+        return;
+    }
+
+    if (getBlackHoleResearchDone()) {
+        researchButton.textContent = 'RESEARCHED';
+        researchButton.classList.remove('red-disabled-text');
+        researchButton.classList.add('green-ready-text');
+        researchButton.disabled = true;
+        researchButton.style.pointerEvents = 'none';
+        return;
+    }
+
+    const price = getBlackHoleResearchPrice();
+    const currentResearch = getResourceDataObject('research', ['quantity']);
+
+    researchButton.textContent = 'Research';
+    researchButton.disabled = true;
+    researchButton.style.pointerEvents = 'none';
+    researchButton.classList.add('red-disabled-text');
+    researchButton.classList.remove('green-ready-text');
+
+    if (currentResearch >= price) {
+        researchButton.disabled = false;
+        researchButton.style.pointerEvents = 'auto';
+        researchButton.classList.remove('red-disabled-text');
+        researchButton.classList.add('green-ready-text');
     }
 }
 
