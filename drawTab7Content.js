@@ -376,11 +376,57 @@ export function drawTab7Content(heading, optionContentElement) {
     }
     
     if (heading === 'Black Hole') {
+        const blackHoleRow2Container = document.createElement('div');
+        blackHoleRow2Container.style.display = 'flex';
+        blackHoleRow2Container.style.alignItems = 'center';
+        blackHoleRow2Container.style.justifyContent = 'space-between';
+        blackHoleRow2Container.style.gap = '18px';
+        blackHoleRow2Container.style.width = '100%';
+        blackHoleRow2Container.style.padding = '40px 60px';
+
+        const blackHoleRow2LeftButtons = document.createElement('div');
+        blackHoleRow2LeftButtons.style.display = 'flex';
+        blackHoleRow2LeftButtons.style.flexDirection = 'column';
+        blackHoleRow2LeftButtons.style.justifyContent = 'space-between';
+        blackHoleRow2LeftButtons.style.alignItems = 'flex-start';
+        blackHoleRow2LeftButtons.style.height = '220px';
+        blackHoleRow2LeftButtons.style.width = '120px';
+
+        const blackHoleRow2RightButtons = document.createElement('div');
+        blackHoleRow2RightButtons.style.display = 'flex';
+        blackHoleRow2RightButtons.style.flexDirection = 'column';
+        blackHoleRow2RightButtons.style.justifyContent = 'space-between';
+        blackHoleRow2RightButtons.style.alignItems = 'flex-end';
+        blackHoleRow2RightButtons.style.height = '220px';
+        blackHoleRow2RightButtons.style.width = '120px';
+
+        const blackHoleButton1 = createButton('Button 1', ['option-button'], () => {});
+        const blackHoleButton2 = createButton('Button 2', ['option-button'], () => {});
+        const blackHoleButton3 = createButton('Button 3', ['option-button'], () => {});
+        const blackHoleButton4 = createButton('Button 4', ['option-button'], () => {});
+
+        blackHoleButton1.style.width = '120px';
+        blackHoleButton2.style.width = '120px';
+        blackHoleButton3.style.width = '120px';
+        blackHoleButton4.style.width = '120px';
+
+        blackHoleRow2LeftButtons.appendChild(blackHoleButton1);
+        blackHoleRow2LeftButtons.appendChild(blackHoleButton2);
+
+        blackHoleRow2RightButtons.appendChild(blackHoleButton3);
+        blackHoleRow2RightButtons.appendChild(blackHoleButton4);
+
+        const blackHoleCanvas = createBlackHole(0);
+
+        blackHoleRow2Container.appendChild(blackHoleRow2LeftButtons);
+        blackHoleRow2Container.appendChild(blackHoleCanvas);
+        blackHoleRow2Container.appendChild(blackHoleRow2RightButtons);
+
         optionContentElement.appendChild(createOptionRow(
             'blackHoleRow2',
             null,
             null,
-            createBlackHole(0),
+            blackHoleRow2Container,
             null,
             null,
             null,
@@ -396,32 +442,11 @@ export function drawTab7Content(heading, optionContentElement) {
             null,
             null,
             '',
-            [true, '0', '100%']
+            [true, '0', '100%'],
+            ['no-left-margin']
         ));
         optionContentElement.appendChild(createOptionRow(
             'blackHoleRow5',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            '',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            false,
-            null,
-            null,
-            '',
-            [true, '0', '100%']
-        ));
-        optionContentElement.appendChild(createOptionRow(
-            'blackHoleRow1',
             null,
             null,
             null,
