@@ -2490,7 +2490,7 @@ export function createSvgElement(id, width = "100%", height = "100%", additional
      const ctx = canvas.getContext('2d');
      if (!ctx) return canvas;
 
-     const stage = Number.isFinite(defaultStage) ? Math.max(0, Math.floor(defaultStage)) : 0;
+     const baseStage = Number.isFinite(defaultStage) ? Math.max(0, Math.floor(defaultStage)) : 0;
      const dpr = Math.max(1, Math.floor(window.devicePixelRatio || 1));
      canvas.width = size * dpr;
      canvas.height = size * dpr;
@@ -2499,8 +2499,22 @@ export function createSvgElement(id, width = "100%", height = "100%", additional
      const c = size / 2;
      const coreRadius = 34;
      const ringRadius = 62;
-     const arms = 2 + Math.min(3, stage);
-     const spin = 0.00055 + stage * 0.00012;
+     const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
+
+     const getChargePercent = () => {
+         const raw = Number.parseFloat(canvas?.dataset?.chargePercent);
+         if (!Number.isFinite(raw)) {
+             return null;
+         }
+         return clamp(raw, 0, 100);
+     };
+
+     const getStageFromChargePercent = (chargePercent) => {
+         if (chargePercent >= 100) return 3;
+         if (chargePercent >= 66) return 2;
+         if (chargePercent >= 33) return 1;
+         return 0;
+     };
 
      const getTextColor = () => {
         const themeElement = document.querySelector('[data-theme]') || document.body || document.documentElement;
@@ -2522,23 +2536,137 @@ export function createSvgElement(id, width = "100%", height = "100%", additional
      const draw = (now) => {
          if (!canvas.isConnected) return;
 
+         const chargePercent = getChargePercent();
+         const stage = Math.max(baseStage, chargePercent === null ? baseStage : getStageFromChargePercent(chargePercent));
+
+         const arms = 2 + Math.min(3, stage);
+         const spin = 0.00055 + stage * 0.00012 + (chargePercent === null ? 0 : (chargePercent / 100) * 0.00008);
          const t = now * spin;
+
+         const pulseSpeed = 0.0022 + stage * 0.00045;
+         const pulse = Math.sin(now * pulseSpeed);
+         const pulseScale = 1 + pulse * (0.006 + stage * 0.002);
          const textColor = getTextColor();
 
          ctx.clearRect(0, 0, size, size);
 
          ctx.save();
          ctx.translate(c, c);
+         ctx.scale(pulseScale, pulseScale);
          ctx.scale(1, 0.82);
 
-         ctx.globalCompositeOperation = 'source-over';
+         ctx.globalCompositeOperation = stage >= 3 ? 'lighter' : 'source-over';
          for (let k = 0; k < 3; k += 1) {
-             ctx.globalAlpha = 0.65 - k * 0.18;
-             ctx.lineWidth = 10 + k * 10;
+             ctx.globalAlpha = (0.65 - k * 0.18) * (1 + pulse * (stage * 0.03));
+             ctx.lineWidth = (10 + k * 10) * (1 + stage * 0.06 + pulse * (stage * 0.02));
              ctx.strokeStyle = textColor;
              ctx.beginPath();
              ctx.arc(0, 0, ringRadius + k * 1.5, 0, Math.PI * 2);
              ctx.stroke();
+         }
+
+         if (stage >= 1) {
+             const chargeFactor = chargePercent === null ? (stage / 3) : (chargePercent / 100);
+             const strength = clamp(stage / 3, 0, 1) * (0.55 + chargeFactor * 0.45);
+             const cornerInset = size * 0.47;
+             const corners = [
+                 [-cornerInset, -cornerInset],
+                 [cornerInset, -cornerInset],
+                 [-cornerInset, cornerInset],
+                 [cornerInset, cornerInset]
+             ];
+
+             const basePhase = (now * (0.00025 + stage * 0.00022)) % 1;
+             const streaksPerCorner = 4 + stage * 4;
+             const segmentLength = 18 + stage * 10;
+             const maxOffset = 6 + stage * 4;
+
+             ctx.save();
+             ctx.globalCompositeOperation = stage >= 3 ? 'lighter' : 'source-over';
+             ctx.strokeStyle = textColor;
+             ctx.lineCap = 'round';
+
+             for (let cornerIndex = 0; cornerIndex < corners.length; cornerIndex += 1) {
+                 const cornerX = corners[cornerIndex][0];
+                 const cornerY = corners[cornerIndex][1];
+                 const dirXRaw = -cornerX;
+                 const dirYRaw = -cornerY;
+                 const cornerDist = Math.hypot(dirXRaw, dirYRaw);
+                 if (!cornerDist) continue;
+
+                 const dirX = dirXRaw / cornerDist;
+                 const dirY = dirYRaw / cornerDist;
+                 const perpX = -dirY;
+                 const perpY = dirX;
+
+                 const travelDistance = cornerDist - coreRadius - segmentLength;
+                 if (travelDistance <= 1) continue;
+
+                 for (let s = 0; s < streaksPerCorner; s += 1) {
+                     const lane = (s / (streaksPerCorner - 1)) * 2 - 1;
+                     const laneOffset = lane * maxOffset;
+
+                     const p = (basePhase + cornerIndex * 0.21 + s * 0.17) % 1;
+                     const dist = p * travelDistance;
+                     const wobble = Math.sin((basePhase + s) * 8 + cornerIndex) * (1 + stage * 0.35);
+
+                     const startX = cornerX + dirX * dist + perpX * (laneOffset + wobble);
+                     const startY = cornerY + dirY * dist + perpY * (laneOffset + wobble);
+                     const endX = startX + dirX * segmentLength;
+                     const endY = startY + dirY * segmentLength;
+
+                     const fade = (1 - p) * (0.35 + stage * 0.12);
+                     ctx.globalAlpha = strength * fade;
+                     ctx.lineWidth = (0.9 + stage * 0.45) * (0.9 + pulse * 0.08);
+                     ctx.beginPath();
+                     ctx.moveTo(startX, startY);
+                     ctx.lineTo(endX, endY);
+                     ctx.stroke();
+                 }
+             }
+
+             ctx.restore();
+         }
+
+         if (stage >= 1) {
+             const outerSwirlRadius = ringRadius + 18;
+             const swirlCount = 6 + stage * 6;
+             const swirlLength = 32 + stage * 12;
+             const swirlThickness = 1 + stage * 0.6;
+             const swirlAlphaBase = 0.18 + stage * 0.08;
+             const swirlSpeed = 0.00016 + stage * 0.00012;
+             const swirlPhase = now * swirlSpeed;
+
+             ctx.save();
+             ctx.globalCompositeOperation = stage >= 2 ? 'lighter' : 'source-over';
+             for (let s = 0; s < swirlCount; s += 1) {
+                 const progress = (swirlPhase + s / swirlCount) % 1;
+                 const angle = progress * Math.PI * 2;
+                 const spiralTightness = 14 + stage * 4;
+                 const radiusOffset = Math.sin(progress * Math.PI * 2 + stage) * (4 + stage * 2);
+                 const startRadius = outerSwirlRadius + radiusOffset;
+                 const endRadius = startRadius - spiralTightness;
+
+                 ctx.beginPath();
+                 for (let i = 0; i <= swirlLength; i += 1) {
+                     const tSegment = i / swirlLength;
+                     const localAngle = angle - tSegment * 1.2;
+                     const localRadius = startRadius - tSegment * (startRadius - endRadius);
+                     const x = Math.cos(localAngle) * localRadius;
+                     const y = Math.sin(localAngle) * localRadius * 0.82;
+                     if (i === 0) {
+                         ctx.moveTo(x, y);
+                     } else {
+                         ctx.lineTo(x, y);
+                     }
+                 }
+
+                 ctx.lineWidth = swirlThickness * (0.9 + pulse * 0.1);
+                 ctx.strokeStyle = textColor;
+                 ctx.globalAlpha = swirlAlphaBase * (1 - progress * 0.65);
+                 ctx.stroke();
+             }
+             ctx.restore();
          }
 
          for (let arm = 0; arm < arms; arm += 1) {
@@ -2547,7 +2675,7 @@ export function createSvgElement(id, width = "100%", height = "100%", additional
                  const p = i / 220;
                  const r = coreRadius + p * 44;
                  const angle = armOffset + t * 6.0 + p * 10.0;
-                 const wobble = Math.sin(p * 18 + t * 2.5 + armOffset) * (1.4 + stage * 0.2);
+                 const wobble = Math.sin(p * 18 + t * 2.5 + armOffset) * (1.4 + stage * 0.35 + pulse * (stage * 0.15));
                  const x = Math.cos(angle) * r;
                  const y = Math.sin(angle) * (r * 0.65 + wobble);
                  const a = 0.35 + (1 - p) * 0.45;

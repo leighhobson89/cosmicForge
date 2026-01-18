@@ -1845,6 +1845,7 @@ function blackHoleUIChecks() {
     const secondaryButton3 = document.getElementById('blackHoleButton3');
     const chargeProgressBar = document.getElementById('blackHoleChargeProgressBar');
     const chargeProgressBarContainer = document.getElementById('blackHoleChargeProgressBarContainer');
+    const blackHoleCanvas = document.getElementById('blackHoleCanvas');
 
     if (chargeProgressBarContainer) {
         chargeProgressBarContainer.classList.remove('invisible');
@@ -1859,6 +1860,18 @@ function blackHoleUIChecks() {
         } else {
             chargeProgressBar.style.width = '0%';
         }
+    }
+
+    if (blackHoleCanvas) {
+        let chargePercent = 0;
+        if (getBlackHoleChargeReady()) {
+            chargePercent = 100;
+        } else if (getCurrentlyChargingBlackHole() && getCurrentBlackHoleChargeTimerDurationTotal() > 0) {
+            const elapsed = getCurrentBlackHoleChargeTimerDurationTotal() - getTimeLeftUntilBlackHoleChargeTimerFinishes();
+            chargePercent = (elapsed / getCurrentBlackHoleChargeTimerDurationTotal()) * 100;
+        }
+
+        blackHoleCanvas.dataset.chargePercent = String(Math.max(0, Math.min(100, chargePercent)));
     }
 
     const secondaryButtons = [secondaryButton2, secondaryButton3, chargeButton].filter(Boolean);
@@ -7804,6 +7817,7 @@ export function startBlackHoleChargeTimer(adjustment) {
 
             const progressBar = document.getElementById('blackHoleChargeProgressBar');
             const progressBarContainer = document.getElementById('blackHoleChargeProgressBarContainer');
+            const blackHoleCanvas = document.getElementById('blackHoleCanvas');
             if (progressBarContainer) {
                 progressBarContainer.classList.remove('invisible');
             }
@@ -7818,6 +7832,10 @@ export function startBlackHoleChargeTimer(adjustment) {
                     progressBar.style.width = '100%';
                 }
 
+                if (blackHoleCanvas) {
+                    blackHoleCanvas.dataset.chargePercent = '100';
+                }
+
                 return;
             }
 
@@ -7825,6 +7843,10 @@ export function startBlackHoleChargeTimer(adjustment) {
             const progressBarPercentage = (elapsedTime / getCurrentBlackHoleChargeTimerDurationTotal()) * 100;
             if (progressBar) {
                 progressBar.style.width = `${progressBarPercentage}%`;
+            }
+
+            if (blackHoleCanvas) {
+                blackHoleCanvas.dataset.chargePercent = String(Math.max(0, Math.min(100, progressBarPercentage)));
             }
         },
         metadata: { type: 'blackHole', action: 'charge' }

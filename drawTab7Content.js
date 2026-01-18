@@ -503,6 +503,8 @@ export function drawTab7Content(heading, optionContentElement) {
         blackHoleRow2RightButtons.appendChild(blackHoleButton4);
 
         const blackHoleCanvas = createBlackHole(0);
+        blackHoleCanvas.id = 'blackHoleCanvas';
+        blackHoleCanvas.dataset.chargePercent = '0';
 
         blackHoleRow2Container.appendChild(blackHoleRow2LeftButtons);
         blackHoleRow2Container.appendChild(blackHoleCanvas);
