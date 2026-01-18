@@ -2478,6 +2478,120 @@ export function createSvgElement(id, width = "100%", height = "100%", additional
     return svgElement;
 }
 
+ export function createBlackHole(defaultStage = 0) {
+     const size = 220;
+     const canvas = document.createElement('canvas');
+     canvas.width = size;
+     canvas.height = size;
+     canvas.style.width = `${size}px`;
+     canvas.style.height = `${size}px`;
+     canvas.style.margin = '0 auto';
+
+     const ctx = canvas.getContext('2d');
+     if (!ctx) return canvas;
+
+     const stage = Number.isFinite(defaultStage) ? Math.max(0, Math.floor(defaultStage)) : 0;
+     const dpr = Math.max(1, Math.floor(window.devicePixelRatio || 1));
+     canvas.width = size * dpr;
+     canvas.height = size * dpr;
+     ctx.scale(dpr, dpr);
+
+     const c = size / 2;
+     const coreRadius = 34;
+     const ringRadius = 62;
+     const arms = 2 + Math.min(3, stage);
+     const spin = 0.00055 + stage * 0.00012;
+
+     const getTextColor = () => {
+        const themeElement = document.querySelector('[data-theme]') || document.body || document.documentElement;
+        const themeColor = getComputedStyle(themeElement)
+            .getPropertyValue('--text-color')
+            .trim();
+
+        if (themeColor) {
+            return themeColor;
+        }
+
+        const rootColor = getComputedStyle(document.documentElement)
+            .getPropertyValue('--text-color')
+            .trim();
+
+        return rootColor || '#ffffff';
+    };
+
+     const draw = (now) => {
+         if (!canvas.isConnected) return;
+
+         const t = now * spin;
+         const textColor = getTextColor();
+
+         ctx.clearRect(0, 0, size, size);
+
+         ctx.save();
+         ctx.translate(c, c);
+         ctx.scale(1, 0.82);
+
+         ctx.globalCompositeOperation = 'source-over';
+         for (let k = 0; k < 3; k += 1) {
+             ctx.globalAlpha = 0.65 - k * 0.18;
+             ctx.lineWidth = 10 + k * 10;
+             ctx.strokeStyle = textColor;
+             ctx.beginPath();
+             ctx.arc(0, 0, ringRadius + k * 1.5, 0, Math.PI * 2);
+             ctx.stroke();
+         }
+
+         for (let arm = 0; arm < arms; arm += 1) {
+             const armOffset = (arm / arms) * Math.PI * 2;
+             for (let i = 0; i < 220; i += 1) {
+                 const p = i / 220;
+                 const r = coreRadius + p * 44;
+                 const angle = armOffset + t * 6.0 + p * 10.0;
+                 const wobble = Math.sin(p * 18 + t * 2.5 + armOffset) * (1.4 + stage * 0.2);
+                 const x = Math.cos(angle) * r;
+                 const y = Math.sin(angle) * (r * 0.65 + wobble);
+                 const a = 0.35 + (1 - p) * 0.45;
+                ctx.globalAlpha = Math.min(1, a);
+                ctx.fillStyle = textColor;
+                ctx.beginPath();
+                ctx.arc(x, y, 1.25 + (1 - p) * 1.4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+         }
+
+         ctx.restore();
+
+         ctx.save();
+         ctx.translate(c, c);
+
+         ctx.globalCompositeOperation = 'source-over';
+         ctx.globalAlpha = 1;
+         ctx.fillStyle = '#000000';
+         ctx.beginPath();
+         ctx.arc(0, 0, coreRadius, 0, Math.PI * 2);
+         ctx.fill();
+
+         const ringGradient = ctx.createRadialGradient(0, 0, coreRadius - 2, 0, 0, coreRadius + 10);
+         ringGradient.addColorStop(0, 'rgba(0,0,0,0)');
+         ringGradient.addColorStop(0.55, textColor);
+         ringGradient.addColorStop(1, 'rgba(0,0,0,0)');
+
+         ctx.globalAlpha = 1;
+         ctx.strokeStyle = ringGradient;
+         ctx.lineWidth = 3;
+         ctx.beginPath();
+         ctx.arc(0, 0, coreRadius + 3, t * 2.0, t * 2.0 + Math.PI * 1.55);
+         ctx.stroke();
+
+         ctx.restore();
+
+         requestAnimationFrame(draw);
+     };
+
+     requestAnimationFrame(draw);
+     return canvas;
+ }
+
 export function selectTheme(theme) {
     const body = document.body;
     body.setAttribute('data-theme', theme);

@@ -1131,10 +1131,35 @@ export function initialiseDescriptions() {
             updateAt: ""
         },
 
-        techPlasmaForgeUnderstandingRow: {
-            content1: "Unlock Plasma Forge Understanding to comprehend the Plasma Forge’s nature.",
-            content2: "Unlock Plasma Forge Understanding to learn what a Plasma Forge is and how it plays a critical role in your technological future.<br><br><span class='green-ready-text'>???</span>",
+        techPlasmaForgeCapabilitiesRow: {
+            content1: "Unlock Plasma Forge Capabilities to comprehend the Plasma Forge’s nature.",
+            content2: "Unlock Plasma Forge Capabilities to learn what a Plasma Forge is and how it plays a critical role in your technological future.<br><br><span class='green-ready-text'>???</span>",
             updateAt: ""
+        },
+        blackHoleRow1: {
+            content1: 'Here you can research and upgrade your interaction power with the Black Hole',
+            content2: '',
+            updateAt: ''
+        },
+        blackHoleRow2: {
+            content1: '',
+            content2: '',
+            updateAt: ''
+        },
+        blackHoleRow3: {
+            content1: 'Here you can feed the Black Hole and increase its power',
+            content2: '',
+            updateAt: ''
+        },
+        blackHoleRow4: {
+            content1: 'Here you can see the Black Hole charge and power stats',
+            content2: '',
+            updateAt: ''
+        },
+        blackHoleRow5: {
+            content1: 'Activate the Black Hole!',
+            content2: '',
+            updateAt: ''
         },
         techPlasmaForgeCapabilitiesRow: {
             content1: "Unlock Plasma Forge Capabilities to understand its potential uses and abilities.",

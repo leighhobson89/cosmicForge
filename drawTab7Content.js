@@ -1,4 +1,4 @@
-import { removeTabAttentionIfNoIndicators, createOptionRow, createButton, createDropdown, createTextElement, createTextFieldArea, callPopupModal, showHideModal, createMegaStructureDiagram, createMegaStructureTable } from './ui.js';
+import { removeTabAttentionIfNoIndicators, createOptionRow, createButton, createDropdown, createTextElement, createTextFieldArea, callPopupModal, showHideModal, createMegaStructureDiagram, createMegaStructureTable, createBlackHole } from './ui.js';
 import { setApLiquidationQuantity, setGalacticMarketIncomingQuantity, setHasClickedOutgoingOptionGalacticMarket, setGalacticMarketOutgoingStockType, setGalacticMarketIncomingStockType, setGalacticMarketOutgoingQuantitySelectionType, setGalacticMarketOutgoingQuantitySelectionTypeDisabledStatus, setGalacticMarketSellApForCashQuantity, getGalacticMarketSellApForCashQuantity, setGalacticMarketLiquidationAuthorization, getApLiquidationQuantity } from './constantsAndGlobalVars.js';
 import { purchaseBuff, galacticMarketLiquidateForAp, galacticMarketSellApForCash, galacticMarketTrade, rebirth } from './game.js';
 import { getAscendencyBuffDataObject, getResourceDataObject } from './resourceDataObject.js';
@@ -374,8 +374,118 @@ export function drawTab7Content(heading, optionContentElement) {
     
         optionContentElement.appendChild(megastructureTableRow);
     }
-
+    
     if (heading === 'Black Hole') {
-        
+        optionContentElement.appendChild(createOptionRow(
+            'blackHoleRow2',
+            null,
+            null,
+            createBlackHole(0),
+            null,
+            null,
+            null,
+            null,
+            '',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            false,
+            null,
+            null,
+            '',
+            [true, '0', '100%']
+        ));
+        optionContentElement.appendChild(createOptionRow(
+            'blackHoleRow5',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            '',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            false,
+            null,
+            null,
+            '',
+            [true, '0', '100%']
+        ));
+        optionContentElement.appendChild(createOptionRow(
+            'blackHoleRow1',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            '',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            false,
+            null,
+            null,
+            '',
+            [true, '0', '100%']
+        ));
+        optionContentElement.appendChild(createOptionRow(
+            'blackHoleRow3',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            '',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            false,
+            null,
+            null,
+            '',
+            [true, '0', '100%']
+        ));
+        optionContentElement.appendChild(createOptionRow(
+            'blackHoleRow4',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            '',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            false,
+            null,
+            null,
+            '',
+            [true, '0', '100%']
+        ));
     }
+
 }
