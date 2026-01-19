@@ -528,12 +528,32 @@ export function migrateResourceData(saveData, objectType) {
                 if (!saveData.blackHole) {
                     saveData.blackHole = {
                         researchPrice: 1000000,
+                        durationPrice: 600000,
+                        powerPrice: 850000,
+                        duration: 3000,
+                        power: 5,
                         blackHoleResearchDone: false
                     };
                 }
 
                 if (saveData.blackHole.researchPrice === undefined) {
                     saveData.blackHole.researchPrice = 1000000;
+                }
+
+                if (saveData.blackHole.durationPrice === undefined) {
+                    saveData.blackHole.durationPrice = 600000;
+                }
+
+                if (saveData.blackHole.powerPrice === undefined) {
+                    saveData.blackHole.powerPrice = 850000;
+                }
+
+                if (saveData.blackHole.duration === undefined) {
+                    saveData.blackHole.duration = 3000;
+                }
+
+                if (saveData.blackHole.power === undefined) {
+                    saveData.blackHole.power = 5;
                 }
 
                 if (saveData.blackHole.blackHoleResearchDone === undefined) {
@@ -545,6 +565,38 @@ export function migrateResourceData(saveData, objectType) {
         }
 
         saveData.version += 0.001;
+    }
+
+    if (objectType === 'resourceData') {
+        if (!saveData.blackHole) {
+            saveData.blackHole = {
+                researchPrice: 1000000,
+                durationPrice: 600000,
+                powerPrice: 850000,
+                duration: 3000,
+                power: 5,
+                blackHoleResearchDone: false
+            };
+        }
+
+        if (saveData.blackHole.researchPrice === undefined) {
+            saveData.blackHole.researchPrice = 1000000;
+        }
+        if (saveData.blackHole.durationPrice === undefined) {
+            saveData.blackHole.durationPrice = 600000;
+        }
+        if (saveData.blackHole.powerPrice === undefined) {
+            saveData.blackHole.powerPrice = 850000;
+        }
+        if (saveData.blackHole.duration === undefined) {
+            saveData.blackHole.duration = 3000;
+        }
+        if (saveData.blackHole.power === undefined) {
+            saveData.blackHole.power = 5;
+        }
+        if (saveData.blackHole.blackHoleResearchDone === undefined) {
+            saveData.blackHole.blackHoleResearchDone = false;
+        }
     }
 
     return saveData;

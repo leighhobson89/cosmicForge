@@ -1136,6 +1136,11 @@ export function initialiseDescriptions() {
             content2: '',
             updateAt: ''
         },
+        blackHoleTimeWarpProgressRow: {
+            content1: 'BLACK HOLE ACTIVATED',
+            content2: '',
+            updateAt: ''
+        },
         blackHoleInteractionRow: {
             content1: 'Here you can research and upgrade your interaction power with the Black Hole',
             content2: '',

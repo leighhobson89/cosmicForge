@@ -368,6 +368,7 @@ import {
     getBlackHoleResearchDone,
     getBlackHolePowerPrice,
     getBlackHoleDurationPrice,
+    getBlackHolePower,
     setBlackHoleResearchDone,
     setAchievementIconImageUrls,
     megaStructureImageUrls,
@@ -467,6 +468,7 @@ function updateProductionRateText(elementId, rateValue) {
 }
 
 export function timeWarp(lengthOfTimeInMs, multiplyRateBy) {
+    //console.log('timeWarp invoked with:', lengthOfTimeInMs, multiplyRateBy);
     const durationMs = (typeof lengthOfTimeInMs === 'number' && Number.isFinite(lengthOfTimeInMs))
         ? Math.max(0, lengthOfTimeInMs)
         : 0;
@@ -1819,6 +1821,8 @@ function blackHoleUIChecks() {
         return;
     }
 
+    const timeMultiplierElement = document.getElementById('blackholeOption2');
+
     if (getBlackHoleDiscovered()) {
         rowElement.parentElement.parentElement.classList.remove('invisible');
     } else {
@@ -1871,6 +1875,15 @@ function blackHoleUIChecks() {
     const blackHoleCanvas = document.getElementById('blackHoleCanvas');
 
     const timeWarping = getCurrentlyTimeWarpingBlackHole();
+    if (timeMultiplierElement) {
+        if (timeWarping) {
+            timeMultiplierElement.textContent = `Time ${getBlackHolePower()}x`;
+            timeMultiplierElement.classList.add('green-ready-text');
+        } else {
+            timeMultiplierElement.textContent = 'Time 1x';
+            timeMultiplierElement.classList.remove('green-ready-text');
+        }
+    }
     const totalTimeWarpDurationMs = getCurrentBlackHoleTimeWarpDurationTotal();
     const timeWarpEndTimestampMs = getBlackHoleTimeWarpEndTimestampMs();
     const timeWarpRemainingMs = timeWarping ? Math.max(timeWarpEndTimestampMs - Date.now(), 0) : 0;

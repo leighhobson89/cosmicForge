@@ -951,6 +951,8 @@ export let resourceData = {
         researchPrice: 1000000,
         durationPrice: 600000,
         powerPrice: 850000,
+        duration: 3000,
+        power: 5,
         blackHoleResearchDone: false
     }
 };
@@ -2585,7 +2587,7 @@ export function getBlackHoleResearchPrice() {
 
 export function setBlackHoleResearchPrice(value) {
     setResourceDataObject(value, 'blackHole', ['researchPrice']);
-}
+    }
 
 export function getBlackHoleResearchDone() {
     return getResourceDataObject('blackHole', ['blackHoleResearchDone']);
@@ -2598,6 +2600,32 @@ export function setBlackHoleResearchDone(value) {
 export function restoreRocketNamesObject(value) {
     value = migrateResourceData(value, 'rocketNames');
     replaceRocketNames(value);
+}
+
+export function getBlackHoleDuration() {
+    const value = getResourceDataObject('blackHole', ['duration'], true);
+    if (value === undefined) {
+        setBlackHoleDuration(3000);
+        return 3000;
+    }
+    return value;
+}
+
+export function setBlackHoleDuration(value) {
+    setResourceDataObject(value, 'blackHole', ['duration']);
+}
+
+export function getBlackHolePower() {
+    const value = getResourceDataObject('blackHole', ['power'], true);
+    if (value === undefined) {
+        setBlackHolePower(5);
+        return 5;
+    }
+    return value;
+}
+
+export function setBlackHolePower(value) {
+    setResourceDataObject(value, 'blackHole', ['power']);
 }
 
 export function getBlackHoleDurationPrice() {

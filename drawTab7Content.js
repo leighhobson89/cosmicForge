@@ -23,8 +23,6 @@ import {
     getBlackHoleChargeReady,
     setBlackHoleChargeReady,
     setCurrentBlackHoleChargeTimerDurationTotal,
-    getCurrentBlackHoleDuration,
-    getCurrentBlackHolePower,
     getGameCostMultiplier,
     deferredActions
 } from './constantsAndGlobalVars.js';
@@ -36,6 +34,10 @@ import {
     getBlackHoleResearchDone,
     getBlackHoleResearchPrice,
     setBlackHoleResearchDone,
+    getBlackHoleDuration,
+    setBlackHoleDuration,
+    getBlackHolePower,
+    setBlackHolePower,
     getBlackHolePowerPrice,
     setBlackHolePowerPrice,
     getBlackHoleDurationPrice,
@@ -556,6 +558,7 @@ export function drawTab7Content(heading, optionContentElement) {
 
             setResourceDataObject(currentResearch - price, 'research', ['quantity']);
             setBlackHolePowerPrice(Math.ceil(price * getGameCostMultiplier()));
+            setBlackHolePower(getBlackHolePower() + 2);
         });
         const blackHoleButton3 = createButton('Duration +', ['id_blackHoleButton3', 'option-button', 'wide-option-button'], () => {
             if (!getBlackHoleResearchDone()) {
@@ -570,6 +573,7 @@ export function drawTab7Content(heading, optionContentElement) {
 
             setResourceDataObject(currentResearch - price, 'research', ['quantity']);
             setBlackHoleDurationPrice(Math.ceil(price * getGameCostMultiplier()));
+            setBlackHoleDuration(getBlackHoleDuration() + 3000);
         });
         const blackHoleActivateChargeButton = createButton('Charge', ['id_blackHoleChargeButton', 'option-button'], () => {
             if (getCurrentlyChargingBlackHole() || getCurrentlyTimeWarpingBlackHole()) {
@@ -599,7 +603,7 @@ export function drawTab7Content(heading, optionContentElement) {
                     timeWarpProgressBar.style.width = '100%';
                 }
 
-                const durationMs = getCurrentBlackHoleDuration();
+                const durationMs = getBlackHoleDuration();
                 const endTimestampMs = Date.now() + durationMs;
                 setCurrentlyTimeWarpingBlackHole(true);
                 setCurrentBlackHoleTimeWarpDurationTotal(durationMs);
@@ -635,7 +639,7 @@ export function drawTab7Content(heading, optionContentElement) {
                     }
                 }, durationMs);
 
-                timeWarp(durationMs, getCurrentBlackHolePower());
+                timeWarp(durationMs, getBlackHolePower());
                 return;
             }
 
