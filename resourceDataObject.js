@@ -949,6 +949,8 @@ export let resourceData = {
     },
     blackHole: {
         researchPrice: 1000000,
+        durationPrice: 600000,
+        powerPrice: 850000,
         blackHoleResearchDone: false
     }
 };
@@ -1981,7 +1983,7 @@ export let achievementsData = {
         name: "Bully an Enemy into Submission",
         specialConditionName: 'achievementBeatEnemy',
         specialCondition: achievementBeatEnemy,
-        specialConditionArguments:  ['bully'],
+        specialConditionArguments: ['bully'],
         resetOnRebirth: false,
         active: false,
         requirements: {
@@ -2001,7 +2003,7 @@ export let achievementsData = {
         name: "Vassalize an Enemy",
         specialConditionName: 'achievementBeatEnemy',
         specialCondition: achievementBeatEnemy,
-        specialConditionArguments:  ['vassalize'],
+        specialConditionArguments: ['vassalize'],
         resetOnRebirth: false,
         active: false,
         requirements: {
@@ -2596,6 +2598,32 @@ export function setBlackHoleResearchDone(value) {
 export function restoreRocketNamesObject(value) {
     value = migrateResourceData(value, 'rocketNames');
     replaceRocketNames(value);
+}
+
+export function getBlackHoleDurationPrice() {
+    const value = getResourceDataObject('blackHole', ['durationPrice'], true);
+    if (value === undefined) {
+        setBlackHoleDurationPrice(600000);
+        return 600000;
+    }
+    return value;
+}
+
+export function setBlackHoleDurationPrice(value) {
+    setResourceDataObject(value, 'blackHole', ['durationPrice']);
+}
+
+export function getBlackHolePowerPrice() {
+    const value = getResourceDataObject('blackHole', ['powerPrice'], true);
+    if (value === undefined) {
+        setBlackHolePowerPrice(850000);
+        return 850000;
+    }
+    return value;
+}
+
+export function setBlackHolePowerPrice(value) {
+    setResourceDataObject(value, 'blackHole', ['powerPrice']);
 }
 
 export function restoreGalacticMarketDataObject(value) {

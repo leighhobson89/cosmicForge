@@ -25,10 +25,22 @@ import {
     setCurrentBlackHoleChargeTimerDurationTotal,
     getCurrentBlackHoleDuration,
     getCurrentBlackHolePower,
+    getGameCostMultiplier,
     deferredActions
 } from './constantsAndGlobalVars.js';
 import { purchaseBuff, galacticMarketLiquidateForAp, galacticMarketSellApForCash, galacticMarketTrade, rebirth, startBlackHoleChargeTimer, timeWarp } from './game.js';
-import { getAscendencyBuffDataObject, getResourceDataObject, setResourceDataObject, getBlackHoleResearchDone, getBlackHoleResearchPrice, setBlackHoleResearchDone } from './resourceDataObject.js';
+import {
+    getAscendencyBuffDataObject,
+    getResourceDataObject,
+    setResourceDataObject,
+    getBlackHoleResearchDone,
+    getBlackHoleResearchPrice,
+    setBlackHoleResearchDone,
+    getBlackHolePowerPrice,
+    setBlackHolePowerPrice,
+    getBlackHoleDurationPrice,
+    setBlackHoleDurationPrice
+} from './resourceDataObject.js';
 import { capitaliseString } from './utilityFunctions.js';
 import { modalRebirthText, modalRebirthHeader } from './descriptions.js';
 import { timerManagerDelta } from './timerManagerDelta.js';
@@ -496,7 +508,7 @@ export function drawTab7Content(heading, optionContentElement) {
         blackHoleRow2LeftButtons.style.justifyContent = 'space-between';
         blackHoleRow2LeftButtons.style.alignItems = 'flex-start';
         blackHoleRow2LeftButtons.style.height = '220px';
-        blackHoleRow2LeftButtons.style.width = '120px';
+        blackHoleRow2LeftButtons.style.width = '240px';
 
         const blackHoleRow2RightButtons = document.createElement('div');
         blackHoleRow2RightButtons.style.display = 'flex';
@@ -531,8 +543,34 @@ export function drawTab7Content(heading, optionContentElement) {
             setTimeLeftUntilBlackHoleChargeTimerFinishes(0);
             startBlackHoleChargeTimer([0, 'researchComplete']);
         });
-        const blackHoleButton2 = createButton('Power +', ['id_blackHoleButton2', 'option-button'], () => {});
-        const blackHoleButton3 = createButton('Duration +', ['id_blackHoleButton3', 'option-button'], () => {});
+        const blackHoleButton2 = createButton('Power +', ['id_blackHoleButton2', 'option-button', 'wide-option-button'], () => {
+            if (!getBlackHoleResearchDone()) {
+                return;
+            }
+
+            const price = getBlackHolePowerPrice();
+            const currentResearch = getResourceDataObject('research', ['quantity']);
+            if (currentResearch < price) {
+                return;
+            }
+
+            setResourceDataObject(currentResearch - price, 'research', ['quantity']);
+            setBlackHolePowerPrice(Math.ceil(price * getGameCostMultiplier()));
+        });
+        const blackHoleButton3 = createButton('Duration +', ['id_blackHoleButton3', 'option-button', 'wide-option-button'], () => {
+            if (!getBlackHoleResearchDone()) {
+                return;
+            }
+
+            const price = getBlackHoleDurationPrice();
+            const currentResearch = getResourceDataObject('research', ['quantity']);
+            if (currentResearch < price) {
+                return;
+            }
+
+            setResourceDataObject(currentResearch - price, 'research', ['quantity']);
+            setBlackHoleDurationPrice(Math.ceil(price * getGameCostMultiplier()));
+        });
         const blackHoleActivateChargeButton = createButton('Charge', ['id_blackHoleChargeButton', 'option-button'], () => {
             if (getCurrentlyChargingBlackHole() || getCurrentlyTimeWarpingBlackHole()) {
                 return;
@@ -610,8 +648,6 @@ export function drawTab7Content(heading, optionContentElement) {
             button.classList.add('red-disabled-text');
         });
 
-        blackHoleButton2.style.width = '120px';
-        blackHoleButton3.style.width = '120px';
         blackHoleActivateChargeButton.style.width = '120px';
 
         blackHoleResearchGateContainer.appendChild(blackHoleButton1);
@@ -661,72 +697,6 @@ export function drawTab7Content(heading, optionContentElement) {
             '',
             [true, '0', '100%'],
             ['no-left-margin']
-        ));
-        optionContentElement.appendChild(createOptionRow(
-            'blackHoleActivationRow',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            '',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            false,
-            null,
-            null,
-            '',
-            [true, '0', '100%']
-        ));
-        optionContentElement.appendChild(createOptionRow(
-            'blackHoleFeedRow',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            '',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            false,
-            null,
-            null,
-            '',
-            [true, '0', '100%']
-        ));
-        optionContentElement.appendChild(createOptionRow(
-            'blackHoleStatsRow',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            '',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            false,
-            null,
-            null,
-            '',
-            [true, '0', '100%']
         ));
     }
 

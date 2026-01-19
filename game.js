@@ -366,6 +366,8 @@ import {
     getBuffQuantumEnginesData,
     getBlackHoleResearchPrice,
     getBlackHoleResearchDone,
+    getBlackHolePowerPrice,
+    getBlackHoleDurationPrice,
     setBlackHoleResearchDone,
     setAchievementIconImageUrls,
     megaStructureImageUrls,
@@ -1864,6 +1866,8 @@ function blackHoleUIChecks() {
     const chargeProgressBarContainer = document.getElementById('blackHoleChargeProgressBarContainer');
     const timeWarpProgressBar = document.getElementById('blackHoleTimeWarpProgressBar');
     const timeWarpProgressBarContainer = document.getElementById('blackHoleTimeWarpProgressBarContainer');
+    const chargeProgressRow = document.getElementById('blackHoleChargeProgressRow');
+    const timeWarpProgressRow = document.getElementById('blackHoleTimeWarpProgressRow');
     const blackHoleCanvas = document.getElementById('blackHoleCanvas');
 
     const timeWarping = getCurrentlyTimeWarpingBlackHole();
@@ -1876,20 +1880,37 @@ function blackHoleUIChecks() {
         blackHoleCanvas.dataset.timeWarpDurationMs = String(totalTimeWarpDurationMs || 0);
     }
 
-    if (researchDone) {
-        if (timeWarpProgressBarContainer) {
-            timeWarpProgressBarContainer.classList.toggle('invisible', !timeWarping);
+    const charging = getCurrentlyChargingBlackHole();
+    const chargeReady = getBlackHoleChargeReady();
+
+    if (!researchDone) {
+        if (timeWarpProgressRow) {
+            timeWarpProgressRow.classList.add('invisible');
         }
-        if (chargeProgressBarContainer) {
-            chargeProgressBarContainer.classList.toggle('invisible', timeWarping);
+        if (chargeProgressRow) {
+            chargeProgressRow.classList.add('invisible');
+        }
+    } else if (timeWarping) {
+        if (timeWarpProgressRow) {
+            timeWarpProgressRow.classList.remove('invisible');
+        }
+        if (chargeProgressRow) {
+            chargeProgressRow.classList.add('invisible');
         }
     } else {
-        if (timeWarpProgressBarContainer) {
-            timeWarpProgressBarContainer.classList.add('invisible');
+        if (timeWarpProgressRow) {
+            timeWarpProgressRow.classList.add('invisible');
         }
-        if (chargeProgressBarContainer) {
-            chargeProgressBarContainer.classList.add('invisible');
+        if (chargeProgressRow) {
+            chargeProgressRow.classList.toggle('invisible', !(charging || chargeReady));
         }
+    }
+
+    if (timeWarpProgressBarContainer) {
+        timeWarpProgressBarContainer.classList.toggle('invisible', !timeWarping);
+    }
+    if (chargeProgressBarContainer) {
+        chargeProgressBarContainer.classList.toggle('invisible', !(charging || chargeReady));
     }
 
     if (timeWarping) {
@@ -1949,15 +1970,41 @@ function blackHoleUIChecks() {
         return;
     }
 
-    secondaryButtons.forEach(button => {
-        button.disabled = false;
-        button.style.pointerEvents = 'auto';
-        button.classList.remove('red-disabled-text');
-    });
+    const currentResearch = getResourceDataObject('research', ['quantity']);
+
+    if (secondaryButton2) {
+        const price = getBlackHolePowerPrice();
+        secondaryButton2.textContent = `Power +\n(${formatNumber(price)} Research)`;
+        if (currentResearch >= price) {
+            secondaryButton2.disabled = false;
+            secondaryButton2.style.pointerEvents = 'auto';
+            secondaryButton2.classList.remove('red-disabled-text');
+            secondaryButton2.classList.add('green-ready-text');
+        } else {
+            secondaryButton2.disabled = true;
+            secondaryButton2.style.pointerEvents = 'none';
+            secondaryButton2.classList.add('red-disabled-text');
+            secondaryButton2.classList.remove('green-ready-text');
+        }
+    }
+
+    if (secondaryButton3) {
+        const price = getBlackHoleDurationPrice();
+        secondaryButton3.textContent = `Duration +\n(${formatNumber(price)} Research)`;
+        if (currentResearch >= price) {
+            secondaryButton3.disabled = false;
+            secondaryButton3.style.pointerEvents = 'auto';
+            secondaryButton3.classList.remove('red-disabled-text');
+            secondaryButton3.classList.add('green-ready-text');
+        } else {
+            secondaryButton3.disabled = true;
+            secondaryButton3.style.pointerEvents = 'none';
+            secondaryButton3.classList.add('red-disabled-text');
+            secondaryButton3.classList.remove('green-ready-text');
+        }
+    }
 
     if (chargeButton) {
-        const charging = getCurrentlyChargingBlackHole();
-
         if (timeWarping) {
             chargeButton.textContent = 'Time Warp...';
             chargeButton.classList.remove('black-hole-charge-ready-button');
@@ -1970,7 +2017,7 @@ function blackHoleUIChecks() {
             chargeButton.classList.add('red-disabled-text');
             chargeButton.disabled = true;
             chargeButton.style.pointerEvents = 'none';
-        } else if (getBlackHoleChargeReady()) {
+        } else if (chargeReady) {
             chargeButton.textContent = 'ACTIVATE';
             chargeButton.classList.add('black-hole-charge-ready-button');
             chargeButton.classList.remove('red-disabled-text');
