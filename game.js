@@ -335,6 +335,8 @@ import {
     getCurrentlyChargingBlackHole,
     setBlackHoleChargeReady,
     getBlackHoleChargeReady,
+    getBlackHoleDurationUpgradeIncrementMs,
+    getBlackHolePowerUpgradeIncrement,
 } from './constantsAndGlobalVars.js';
 
 import {
@@ -369,6 +371,7 @@ import {
     getBlackHolePowerPrice,
     getBlackHoleDurationPrice,
     getBlackHolePower,
+    getBlackHoleDuration,
     setBlackHoleResearchDone,
     setAchievementIconImageUrls,
     megaStructureImageUrls,
@@ -1987,7 +1990,9 @@ function blackHoleUIChecks() {
 
     if (secondaryButton2) {
         const price = getBlackHolePowerPrice();
-        secondaryButton2.textContent = `Power +\n(${formatNumber(price)} Research)`;
+        const currentPower = getBlackHolePower();
+        const nextPower = currentPower + getBlackHolePowerUpgradeIncrement();
+        secondaryButton2.textContent = `Power\nx${currentPower} -> x${nextPower}\n${formatNumber(price)} Research Points`;
         if (currentResearch >= price) {
             secondaryButton2.disabled = false;
             secondaryButton2.style.pointerEvents = 'auto';
@@ -2003,7 +2008,11 @@ function blackHoleUIChecks() {
 
     if (secondaryButton3) {
         const price = getBlackHoleDurationPrice();
-        secondaryButton3.textContent = `Duration +\n(${formatNumber(price)} Research)`;
+        const currentDurationMs = getBlackHoleDuration();
+        const nextDurationMs = currentDurationMs + getBlackHoleDurationUpgradeIncrementMs();
+        const currentDurationSeconds = Math.round(currentDurationMs / 1000);
+        const nextDurationSeconds = Math.round(nextDurationMs / 1000);
+        secondaryButton3.textContent = `Duration\n${currentDurationSeconds}s -> ${nextDurationSeconds}s\n${formatNumber(price)} Research Points`;
         if (currentResearch >= price) {
             secondaryButton3.disabled = false;
             secondaryButton3.style.pointerEvents = 'auto';

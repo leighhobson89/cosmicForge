@@ -24,6 +24,8 @@ import {
     setBlackHoleChargeReady,
     setCurrentBlackHoleChargeTimerDurationTotal,
     getGameCostMultiplier,
+    getBlackHoleDurationUpgradeIncrementMs,
+    getBlackHolePowerUpgradeIncrement,
     deferredActions
 } from './constantsAndGlobalVars.js';
 import { purchaseBuff, galacticMarketLiquidateForAp, galacticMarketSellApForCash, galacticMarketTrade, rebirth, startBlackHoleChargeTimer, timeWarp } from './game.js';
@@ -545,7 +547,7 @@ export function drawTab7Content(heading, optionContentElement) {
             setTimeLeftUntilBlackHoleChargeTimerFinishes(0);
             startBlackHoleChargeTimer([0, 'researchComplete']);
         });
-        const blackHoleButton2 = createButton('Power +', ['id_blackHoleButton2', 'option-button', 'wide-option-button'], () => {
+        const blackHoleButton2 = createButton('Power', ['id_blackHoleButton2', 'option-button', 'wide-option-button'], () => {
             if (!getBlackHoleResearchDone()) {
                 return;
             }
@@ -558,9 +560,9 @@ export function drawTab7Content(heading, optionContentElement) {
 
             setResourceDataObject(currentResearch - price, 'research', ['quantity']);
             setBlackHolePowerPrice(Math.ceil(price * getGameCostMultiplier()));
-            setBlackHolePower(getBlackHolePower() + 2);
+            setBlackHolePower(getBlackHolePower() + getBlackHolePowerUpgradeIncrement());
         });
-        const blackHoleButton3 = createButton('Duration +', ['id_blackHoleButton3', 'option-button', 'wide-option-button'], () => {
+        const blackHoleButton3 = createButton('Duration', ['id_blackHoleButton3', 'option-button', 'wide-option-button'], () => {
             if (!getBlackHoleResearchDone()) {
                 return;
             }
@@ -573,7 +575,7 @@ export function drawTab7Content(heading, optionContentElement) {
 
             setResourceDataObject(currentResearch - price, 'research', ['quantity']);
             setBlackHoleDurationPrice(Math.ceil(price * getGameCostMultiplier()));
-            setBlackHoleDuration(getBlackHoleDuration() + 3000);
+            setBlackHoleDuration(getBlackHoleDuration() + getBlackHoleDurationUpgradeIncrementMs());
         });
         const blackHoleActivateChargeButton = createButton('Charge', ['id_blackHoleChargeButton', 'option-button'], () => {
             if (getCurrentlyChargingBlackHole() || getCurrentlyTimeWarpingBlackHole()) {

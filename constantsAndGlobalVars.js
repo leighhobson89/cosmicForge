@@ -267,6 +267,8 @@ let baseSearchAsteroidTimerDuration = 60000;
 let baseInvestigateStarTimerDuration = 400000;
 let basePillageVoidTimerDuration = 500000;
 let baseBlackHoleChargeTimerDuration = 60000;
+let blackHoleDurationUpgradeIncrementMs = 3000;
+let blackHolePowerUpgradeIncrement = 2;
 let currentAsteroidSearchTimerDurationTotal = 0;
 let currentInvestigateStarTimerDurationTotal = 0;
 let currentPillageVoidTimerDurationTotal = 0;
@@ -3075,6 +3077,14 @@ export function getBaseBlackHoleChargeTimerDuration() {
 
 export function setBaseBlackHoleChargeTimerDuration(value) {
     baseBlackHoleChargeTimerDuration = value;
+}
+
+export function getBlackHoleDurationUpgradeIncrementMs() {
+    return blackHoleDurationUpgradeIncrementMs;
+}
+
+export function getBlackHolePowerUpgradeIncrement() {
+    return blackHolePowerUpgradeIncrement;
 }
 
 export function getCurrentBlackHoleChargeTimerDurationTotal() {
