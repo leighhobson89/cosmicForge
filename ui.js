@@ -2486,11 +2486,16 @@ export function createSvgElement(id, width = "100%", height = "100%", additional
          : baseSize;
      const size = baseSize;
      const canvas = document.createElement('canvas');
-     canvas.width = renderSize;
+
+     const horizontalPaddingPercent = 0.05;
+     const paddedWidth = Math.round(renderSize * (1 + horizontalPaddingPercent * 2));
+     const horizontalPaddingPx = (paddedWidth - renderSize) / 2;
+
+     canvas.width = paddedWidth;
      canvas.height = renderSize;
-     canvas.style.width = `${renderSize}px`;
+     canvas.style.width = `${paddedWidth}px`;
      canvas.style.height = `${renderSize}px`;
-     canvas.style.margin = '0 auto';
+     canvas.style.margin = '0 0 0 100px';
 
      const ctx = canvas.getContext('2d');
      if (!ctx) return canvas;
@@ -2498,9 +2503,14 @@ export function createSvgElement(id, width = "100%", height = "100%", additional
      const baseStage = Number.isFinite(defaultStage) ? Math.max(0, Math.floor(defaultStage)) : 0;
      const dpr = Math.max(1, Math.floor(window.devicePixelRatio || 1));
      const scaleFactor = renderSize / baseSize;
-     canvas.width = renderSize * dpr;
+     canvas.width = paddedWidth * dpr;
      canvas.height = renderSize * dpr;
+
+     const horizontalOffsetUnits = horizontalPaddingPx / scaleFactor;
+     const clearWidth = size + horizontalOffsetUnits * 2;
+
      ctx.scale(dpr * scaleFactor, dpr * scaleFactor);
+     ctx.translate(horizontalOffsetUnits, 0);
 
      const c = size / 2;
      const coreRadius = 34;
@@ -2539,21 +2549,21 @@ export function createSvgElement(id, width = "100%", height = "100%", additional
      };
 
      const getTextColor = () => {
-        const themeElement = document.querySelector('[data-theme]') || document.body || document.documentElement;
-        const themeColor = getComputedStyle(themeElement)
-            .getPropertyValue('--text-color')
-            .trim();
+         const themeElement = document.querySelector('[data-theme]') || document.body || document.documentElement;
+         const themeColor = getComputedStyle(themeElement)
+             .getPropertyValue('--text-color')
+             .trim();
 
-        if (themeColor) {
-            return themeColor;
-        }
+         if (themeColor) {
+             return themeColor;
+         }
 
-        const rootColor = getComputedStyle(document.documentElement)
-            .getPropertyValue('--text-color')
-            .trim();
+         const rootColor = getComputedStyle(document.documentElement)
+             .getPropertyValue('--text-color')
+             .trim();
 
-        return rootColor || '#ffffff';
-    };
+         return rootColor || '#ffffff';
+     };
 
      const draw = (now) => {
          if (!canvas.isConnected) return;
@@ -2577,7 +2587,7 @@ export function createSvgElement(id, width = "100%", height = "100%", additional
          const pulseScale = 1 + pulse * pulseAmplitude * (isFullyCharged ? 1.75 : 1) * (1 + (1.2 - 1) * timeWarpStrength);
          const textColor = getTextColor();
 
-         ctx.clearRect(0, 0, size, size);
+         ctx.clearRect(-horizontalOffsetUnits, 0, clearWidth, size);
 
          ctx.save();
          ctx.translate(c, c);
