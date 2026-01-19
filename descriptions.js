@@ -335,7 +335,7 @@ export function initialiseDescriptions() {
         rocketComposites: 'Rocket Composites Researched\n\nYou can now build Rocket Parts and Level 3 and 4 AutoBuyers!',
         advancedFuels: 'Advanced Fuels Researched\n\nYou can now fuel Rockets!',
         planetaryNavigation: 'Planetary Navigation Researched\n\nYou can now travel to Asteroids!',
-        advancedPowerGeneration: 'Advanced Power Generation Researched\n\nBuild Advanced Power Plants!',
+        advancedPowerGeneration: 'Advanced Power Generation \n\nBuild Advanced Power Plants!',
         basicPowerGeneration: 'Basic Power Generation Researched\n\nYou can now build basic Power Stations!',
         solarPowerGeneration: 'Solar Power Generation Researched\n\nYou can now build Solar Panels to generate power!',
         compounds: 'Compounds Researched\n\nUnlocks the Compounds tab!',

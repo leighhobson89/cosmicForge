@@ -366,6 +366,7 @@ import {
     getBuffQuantumEnginesData,
     getBlackHoleResearchPrice,
     getBlackHoleResearchDone,
+    setBlackHoleResearchDone,
     setAchievementIconImageUrls,
     megaStructureImageUrls,
     miaplacidus 
@@ -1822,19 +1823,26 @@ function blackHoleUIChecks() {
         rowElement.parentElement.parentElement.classList.add('invisible');
     }
 
+    const researchDone = getBlackHoleResearchDone();
+    const researchGateContainer = document.getElementById('blackHoleResearchGateContainer');
+    const unlockedContainer = document.getElementById('blackHoleUnlockedContainer');
+    if (researchGateContainer) {
+        researchGateContainer.classList.toggle('invisible', researchDone);
+    }
+    if (unlockedContainer) {
+        unlockedContainer.classList.toggle('invisible', !researchDone);
+    }
+
     const researchButton = document.getElementById('blackHoleResearchButton');
     if (researchButton) {
-        if (getBlackHoleResearchDone()) {
-            researchButton.textContent = 'RESEARCHED';
-            researchButton.classList.remove('red-disabled-text');
-            researchButton.classList.add('green-ready-text');
+        if (researchDone) {
             researchButton.disabled = true;
             researchButton.style.pointerEvents = 'none';
         } else {
             const price = getBlackHoleResearchPrice();
             const currentResearch = getResourceDataObject('research', ['quantity']);
 
-            researchButton.textContent = 'Research';
+            researchButton.textContent = `Research Black Hole\n(${formatNumber(price)} Research)`;
             researchButton.disabled = true;
             researchButton.style.pointerEvents = 'none';
             researchButton.classList.add('red-disabled-text');
@@ -1868,11 +1876,20 @@ function blackHoleUIChecks() {
         blackHoleCanvas.dataset.timeWarpDurationMs = String(totalTimeWarpDurationMs || 0);
     }
 
-    if (timeWarpProgressBarContainer) {
-        timeWarpProgressBarContainer.classList.toggle('invisible', !timeWarping);
-    }
-    if (chargeProgressBarContainer) {
-        chargeProgressBarContainer.classList.toggle('invisible', timeWarping);
+    if (researchDone) {
+        if (timeWarpProgressBarContainer) {
+            timeWarpProgressBarContainer.classList.toggle('invisible', !timeWarping);
+        }
+        if (chargeProgressBarContainer) {
+            chargeProgressBarContainer.classList.toggle('invisible', timeWarping);
+        }
+    } else {
+        if (timeWarpProgressBarContainer) {
+            timeWarpProgressBarContainer.classList.add('invisible');
+        }
+        if (chargeProgressBarContainer) {
+            chargeProgressBarContainer.classList.add('invisible');
+        }
     }
 
     if (timeWarping) {
@@ -1919,7 +1936,7 @@ function blackHoleUIChecks() {
     }
 
     const secondaryButtons = [secondaryButton2, secondaryButton3, chargeButton].filter(Boolean);
-    if (!getBlackHoleResearchDone()) {
+    if (!researchDone) {
         secondaryButtons.forEach(button => {
             button.disabled = true;
             button.style.pointerEvents = 'none';

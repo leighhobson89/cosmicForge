@@ -14,12 +14,15 @@ import {
     getCurrentlyChargingBlackHole,
     getCurrentlyTimeWarpingBlackHole,
     setCurrentlyTimeWarpingBlackHole,
+    setCurrentlyChargingBlackHole,
     setCurrentBlackHoleTimeWarpDurationTotal,
     getBlackHoleTimeWarpEndTimestampMs,
     setBlackHoleTimeWarpEndTimestampMs,
     getTimeLeftUntilBlackHoleChargeTimerFinishes,
+    setTimeLeftUntilBlackHoleChargeTimerFinishes,
     getBlackHoleChargeReady,
     setBlackHoleChargeReady,
+    setCurrentBlackHoleChargeTimerDurationTotal,
     getCurrentBlackHoleDuration,
     getCurrentBlackHolePower,
     deferredActions
@@ -468,12 +471,24 @@ export function drawTab7Content(heading, optionContentElement) {
         }
 
         const blackHoleRow2Container = document.createElement('div');
-        blackHoleRow2Container.style.display = 'flex';
-        blackHoleRow2Container.style.alignItems = 'center';
-        blackHoleRow2Container.style.justifyContent = 'space-between';
-        blackHoleRow2Container.style.gap = '18px';
         blackHoleRow2Container.style.width = '100%';
         blackHoleRow2Container.style.padding = '40px 60px';
+
+        const blackHoleResearchGateContainer = document.createElement('div');
+        blackHoleResearchGateContainer.id = 'blackHoleResearchGateContainer';
+        blackHoleResearchGateContainer.style.display = 'flex';
+        blackHoleResearchGateContainer.style.alignItems = 'center';
+        blackHoleResearchGateContainer.style.justifyContent = 'center';
+        blackHoleResearchGateContainer.style.width = '100%';
+        blackHoleResearchGateContainer.style.height = '220px';
+
+        const blackHoleUnlockedContainer = document.createElement('div');
+        blackHoleUnlockedContainer.id = 'blackHoleUnlockedContainer';
+        blackHoleUnlockedContainer.style.display = 'flex';
+        blackHoleUnlockedContainer.style.alignItems = 'center';
+        blackHoleUnlockedContainer.style.justifyContent = 'space-between';
+        blackHoleUnlockedContainer.style.gap = '18px';
+        blackHoleUnlockedContainer.style.width = '100%';
 
         const blackHoleRow2LeftButtons = document.createElement('div');
         blackHoleRow2LeftButtons.style.display = 'flex';
@@ -491,7 +506,7 @@ export function drawTab7Content(heading, optionContentElement) {
         blackHoleRow2RightButtons.style.height = '220px';
         blackHoleRow2RightButtons.style.width = '120px';
 
-        const blackHoleButton1 = createButton('Research', ['id_blackHoleResearchButton', 'option-button', 'red-disabled-text'], () => {
+        const blackHoleButton1 = createButton('Research Black Hole', ['id_blackHoleResearchButton', 'option-button', 'red-disabled-text', 'wide-option-button'], () => {
             if (getBlackHoleResearchDone()) {
                 return;
             }
@@ -504,6 +519,17 @@ export function drawTab7Content(heading, optionContentElement) {
 
             setResourceDataObject(currentResearch - price, 'research', ['quantity']);
             setBlackHoleResearchDone(true);
+
+            const chargeTimerName = 'blackHoleChargeTimer';
+            if (timerManagerDelta.hasTimer(chargeTimerName)) {
+                timerManagerDelta.removeTimer(chargeTimerName);
+            }
+
+            setBlackHoleChargeReady(false);
+            setCurrentlyChargingBlackHole(false);
+            setCurrentBlackHoleChargeTimerDurationTotal(0);
+            setTimeLeftUntilBlackHoleChargeTimerFinishes(0);
+            startBlackHoleChargeTimer([0, 'researchComplete']);
         });
         const blackHoleButton2 = createButton('Power +', ['id_blackHoleButton2', 'option-button'], () => {});
         const blackHoleButton3 = createButton('Duration +', ['id_blackHoleButton3', 'option-button'], () => {});
@@ -584,12 +610,11 @@ export function drawTab7Content(heading, optionContentElement) {
             button.classList.add('red-disabled-text');
         });
 
-        blackHoleButton1.style.width = '120px';
         blackHoleButton2.style.width = '120px';
         blackHoleButton3.style.width = '120px';
         blackHoleActivateChargeButton.style.width = '120px';
 
-        blackHoleRow2LeftButtons.appendChild(blackHoleButton1);
+        blackHoleResearchGateContainer.appendChild(blackHoleButton1);
         blackHoleRow2LeftButtons.appendChild(blackHoleButton3);
         blackHoleRow2LeftButtons.appendChild(blackHoleButton2);
         blackHoleRow2RightButtons.appendChild(blackHoleActivateChargeButton);
@@ -601,9 +626,18 @@ export function drawTab7Content(heading, optionContentElement) {
         blackHoleCanvas.dataset.timeWarpRemainingMs = '0';
         blackHoleCanvas.dataset.timeWarpDurationMs = '0';
 
-        blackHoleRow2Container.appendChild(blackHoleRow2LeftButtons);
-        blackHoleRow2Container.appendChild(blackHoleCanvas);
-        blackHoleRow2Container.appendChild(blackHoleRow2RightButtons);
+        blackHoleUnlockedContainer.appendChild(blackHoleRow2LeftButtons);
+        blackHoleUnlockedContainer.appendChild(blackHoleCanvas);
+        blackHoleUnlockedContainer.appendChild(blackHoleRow2RightButtons);
+
+        if (getBlackHoleResearchDone()) {
+            blackHoleResearchGateContainer.classList.add('invisible');
+        } else {
+            blackHoleUnlockedContainer.classList.add('invisible');
+        }
+
+        blackHoleRow2Container.appendChild(blackHoleResearchGateContainer);
+        blackHoleRow2Container.appendChild(blackHoleUnlockedContainer);
 
         optionContentElement.appendChild(createOptionRow(
             'blackHoleInteractionRow',

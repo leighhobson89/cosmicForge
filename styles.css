@@ -130,6 +130,10 @@
     width: 14vw;
 }
 
+.wide-option-button {
+    width: 240px;
+}
+
 .save-name {
     background-color: var(--bg-color);
     color: var(--text-color);
@@ -1248,6 +1252,7 @@ body {
     background-color: var(--button-bg-color) !important;
     color: var(--text-color);
     border: none;
+    white-space: pre-line;
     padding: 1px 5px;
     border-radius: 8px;
     cursor: pointer;
