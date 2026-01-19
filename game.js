@@ -424,7 +424,8 @@ import {
     callPopupModal,
     showHideModal,
     removeModalButtonTooltips,
-    generateStarfield
+    generateStarfield,
+    createBlackHole
 } from "./ui.js";
 
 import {
@@ -1876,6 +1877,38 @@ function blackHoleUIChecks() {
     const chargeProgressRow = document.getElementById('blackHoleChargeProgressRow');
     const timeWarpProgressRow = document.getElementById('blackHoleTimeWarpProgressRow');
     const blackHoleCanvas = document.getElementById('blackHoleCanvas');
+    const blackHoleCanvasContainer = document.getElementById('blackHoleCanvasContainer');
+
+    if (blackHoleCanvas) {
+        const power = getBlackHolePower();
+        const desiredSizePx = power > 20 ? 330 : (power >= 10 ? 275 : 220);
+        const currentSizePx = Number.parseFloat(blackHoleCanvas.dataset.renderSizePx || '220');
+
+        if (blackHoleCanvasContainer) {
+            const currentContainerSizePx = Number.parseFloat(blackHoleCanvasContainer.dataset.renderSizePx || blackHoleCanvasContainer.style.width || '220');
+            if (!Number.isFinite(currentContainerSizePx) || currentContainerSizePx !== desiredSizePx) {
+                blackHoleCanvasContainer.style.width = `${desiredSizePx}px`;
+                blackHoleCanvasContainer.style.height = `${desiredSizePx}px`;
+                blackHoleCanvasContainer.dataset.renderSizePx = String(desiredSizePx);
+            }
+        }
+
+        if (Number.isFinite(desiredSizePx) && desiredSizePx !== currentSizePx) {
+            const parent = blackHoleCanvas.parentElement;
+            if (parent) {
+                const newCanvas = createBlackHole(0, desiredSizePx);
+                newCanvas.id = 'blackHoleCanvas';
+
+                newCanvas.dataset.chargePercent = blackHoleCanvas.dataset.chargePercent ?? '0';
+                newCanvas.dataset.timeWarping = blackHoleCanvas.dataset.timeWarping ?? 'false';
+                newCanvas.dataset.timeWarpRemainingMs = blackHoleCanvas.dataset.timeWarpRemainingMs ?? '0';
+                newCanvas.dataset.timeWarpDurationMs = blackHoleCanvas.dataset.timeWarpDurationMs ?? '0';
+                newCanvas.dataset.renderSizePx = String(desiredSizePx);
+
+                parent.replaceChild(newCanvas, blackHoleCanvas);
+            }
+        }
+    }
 
     const timeWarping = getCurrentlyTimeWarpingBlackHole();
     if (timeMultiplierElement) {

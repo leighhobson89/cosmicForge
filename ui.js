@@ -2479,13 +2479,17 @@ export function createSvgElement(id, width = "100%", height = "100%", additional
     return svgElement;
 }
 
- export function createBlackHole(defaultStage = 0) {
-     const size = 220;
+ export function createBlackHole(defaultStage = 0, sizeOverridePx = null) {
+     const baseSize = 220;
+     const renderSize = (typeof sizeOverridePx === 'number' && Number.isFinite(sizeOverridePx) && sizeOverridePx > 0)
+         ? sizeOverridePx
+         : baseSize;
+     const size = baseSize;
      const canvas = document.createElement('canvas');
-     canvas.width = size;
-     canvas.height = size;
-     canvas.style.width = `${size}px`;
-     canvas.style.height = `${size}px`;
+     canvas.width = renderSize;
+     canvas.height = renderSize;
+     canvas.style.width = `${renderSize}px`;
+     canvas.style.height = `${renderSize}px`;
      canvas.style.margin = '0 auto';
 
      const ctx = canvas.getContext('2d');
@@ -2493,9 +2497,10 @@ export function createSvgElement(id, width = "100%", height = "100%", additional
 
      const baseStage = Number.isFinite(defaultStage) ? Math.max(0, Math.floor(defaultStage)) : 0;
      const dpr = Math.max(1, Math.floor(window.devicePixelRatio || 1));
-     canvas.width = size * dpr;
-     canvas.height = size * dpr;
-     ctx.scale(dpr, dpr);
+     const scaleFactor = renderSize / baseSize;
+     canvas.width = renderSize * dpr;
+     canvas.height = renderSize * dpr;
+     ctx.scale(dpr * scaleFactor, dpr * scaleFactor);
 
      const c = size / 2;
      const coreRadius = 34;

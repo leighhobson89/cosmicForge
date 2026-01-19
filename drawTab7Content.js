@@ -507,6 +507,7 @@ export function drawTab7Content(heading, optionContentElement) {
         blackHoleUnlockedContainer.style.width = '100%';
 
         const blackHoleRow2LeftButtons = document.createElement('div');
+        blackHoleRow2LeftButtons.id = 'blackHoleRow2LeftButtons';
         blackHoleRow2LeftButtons.style.display = 'flex';
         blackHoleRow2LeftButtons.style.flexDirection = 'column';
         blackHoleRow2LeftButtons.style.justifyContent = 'space-between';
@@ -515,12 +516,22 @@ export function drawTab7Content(heading, optionContentElement) {
         blackHoleRow2LeftButtons.style.width = '240px';
 
         const blackHoleRow2RightButtons = document.createElement('div');
+        blackHoleRow2RightButtons.id = 'blackHoleRow2RightButtons';
         blackHoleRow2RightButtons.style.display = 'flex';
         blackHoleRow2RightButtons.style.flexDirection = 'column';
         blackHoleRow2RightButtons.style.justifyContent = 'center';
         blackHoleRow2RightButtons.style.alignItems = 'flex-end';
         blackHoleRow2RightButtons.style.height = '220px';
-        blackHoleRow2RightButtons.style.width = '120px';
+        blackHoleRow2RightButtons.style.width = '240px';
+
+        const blackHoleCanvasContainer = document.createElement('div');
+        blackHoleCanvasContainer.id = 'blackHoleCanvasContainer';
+        blackHoleCanvasContainer.style.display = 'flex';
+        blackHoleCanvasContainer.style.alignItems = 'center';
+        blackHoleCanvasContainer.style.justifyContent = 'center';
+        blackHoleCanvasContainer.style.width = '220px';
+        blackHoleCanvasContainer.style.height = '220px';
+        blackHoleCanvasContainer.style.flex = '0 0 auto';
 
         const blackHoleButton1 = createButton('Research Black Hole', ['id_blackHoleResearchButton', 'option-button', 'red-disabled-text', 'wide-option-button'], () => {
             if (getBlackHoleResearchDone()) {
@@ -667,9 +678,12 @@ export function drawTab7Content(heading, optionContentElement) {
         blackHoleCanvas.dataset.timeWarping = 'false';
         blackHoleCanvas.dataset.timeWarpRemainingMs = '0';
         blackHoleCanvas.dataset.timeWarpDurationMs = '0';
+        blackHoleCanvas.dataset.renderSizePx = '220';
+
+        blackHoleCanvasContainer.appendChild(blackHoleCanvas);
 
         blackHoleUnlockedContainer.appendChild(blackHoleRow2LeftButtons);
-        blackHoleUnlockedContainer.appendChild(blackHoleCanvas);
+        blackHoleUnlockedContainer.appendChild(blackHoleCanvasContainer);
         blackHoleUnlockedContainer.appendChild(blackHoleRow2RightButtons);
 
         if (getBlackHoleResearchDone()) {
