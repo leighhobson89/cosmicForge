@@ -1890,6 +1890,17 @@ function blackHoleUIChecks() {
     const totalTimeWarpDurationMs = getCurrentBlackHoleTimeWarpDurationTotal();
     const timeWarpEndTimestampMs = getBlackHoleTimeWarpEndTimestampMs();
     const timeWarpRemainingMs = timeWarping ? Math.max(timeWarpEndTimestampMs - Date.now(), 0) : 0;
+
+    const timeWarpDescriptionElement = document.getElementById('blackHoleTimeWarpProgressRowDescription');
+    if (timeWarpDescriptionElement) {
+        timeWarpDescriptionElement.classList.add('green-ready-text');
+        if (timeWarping) {
+            const remainingSeconds = (timeWarpRemainingMs / 1000).toFixed(1);
+            timeWarpDescriptionElement.textContent = `BLACK HOLE ACTIVATED - ${remainingSeconds}s - ${getBlackHolePower()}x`;
+        } else {
+            timeWarpDescriptionElement.textContent = 'BLACK HOLE ACTIVATED';
+        }
+    }
     if (blackHoleCanvas) {
         blackHoleCanvas.dataset.timeWarping = timeWarping ? 'true' : 'false';
         blackHoleCanvas.dataset.timeWarpRemainingMs = String(timeWarpRemainingMs);
