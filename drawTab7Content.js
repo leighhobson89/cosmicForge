@@ -486,7 +486,7 @@ export function drawTab7Content(heading, optionContentElement) {
         const blackHoleRow2RightButtons = document.createElement('div');
         blackHoleRow2RightButtons.style.display = 'flex';
         blackHoleRow2RightButtons.style.flexDirection = 'column';
-        blackHoleRow2RightButtons.style.justifyContent = 'space-between';
+        blackHoleRow2RightButtons.style.justifyContent = 'center';
         blackHoleRow2RightButtons.style.alignItems = 'flex-end';
         blackHoleRow2RightButtons.style.height = '220px';
         blackHoleRow2RightButtons.style.width = '120px';
@@ -505,8 +505,8 @@ export function drawTab7Content(heading, optionContentElement) {
             setResourceDataObject(currentResearch - price, 'research', ['quantity']);
             setBlackHoleResearchDone(true);
         });
-        const blackHoleButton2 = createButton('Button 2', ['id_blackHoleButton2', 'option-button'], () => {});
-        const blackHoleButton3 = createButton('Button 3', ['id_blackHoleButton3', 'option-button'], () => {});
+        const blackHoleButton2 = createButton('Power +', ['id_blackHoleButton2', 'option-button'], () => {});
+        const blackHoleButton3 = createButton('Duration +', ['id_blackHoleButton3', 'option-button'], () => {});
         const blackHoleActivateChargeButton = createButton('Charge', ['id_blackHoleChargeButton', 'option-button'], () => {
             if (getCurrentlyChargingBlackHole() || getCurrentlyTimeWarpingBlackHole()) {
                 return;
@@ -590,9 +590,8 @@ export function drawTab7Content(heading, optionContentElement) {
         blackHoleActivateChargeButton.style.width = '120px';
 
         blackHoleRow2LeftButtons.appendChild(blackHoleButton1);
+        blackHoleRow2LeftButtons.appendChild(blackHoleButton3);
         blackHoleRow2LeftButtons.appendChild(blackHoleButton2);
-
-        blackHoleRow2RightButtons.appendChild(blackHoleButton3);
         blackHoleRow2RightButtons.appendChild(blackHoleActivateChargeButton);
 
         const blackHoleCanvas = createBlackHole(0);
