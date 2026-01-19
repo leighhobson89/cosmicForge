@@ -271,6 +271,8 @@ let currentAsteroidSearchTimerDurationTotal = 0;
 let currentInvestigateStarTimerDurationTotal = 0;
 let currentPillageVoidTimerDurationTotal = 0;
 let currentBlackHoleChargeTimerDurationTotal = 0;
+let currentBlackHoleDuration = 3000;
+let currentBlackHolePower = 5;
 let timeLeftUntilAsteroidScannerTimerFinishes = 0;
 let timeLeftUntilTravelToDestinationStarTimerFinishes = 0;
 let timeLeftUntilPillageVoidTimerFinishes = 0;
@@ -1257,6 +1259,8 @@ export function captureGameStatusForSaving(type) {
     gameState.currentInvestigateStarTimerDurationTotal = currentInvestigateStarTimerDurationTotal;
     gameState.currentPillageVoidTimerDurationTotal = currentPillageVoidTimerDurationTotal;
     gameState.currentBlackHoleChargeTimerDurationTotal = currentBlackHoleChargeTimerDurationTotal;
+    gameState.currentBlackHoleDuration = currentBlackHoleDuration;
+    gameState.currentBlackHolePower = currentBlackHolePower;
     gameState.timeLeftUntilRocketTravelToAsteroidTimerFinishes = timeLeftUntilRocketTravelToAsteroidTimerFinishes;
     gameState.asteroidArray = asteroidArray;
     gameState.rocketTravelDuration = rocketTravelDuration;
@@ -1486,6 +1490,8 @@ export function restoreGameStatus(gameState, type) {
             currentInvestigateStarTimerDurationTotal = gameState.currentInvestigateStarTimerDurationTotal ?? 0;
             currentPillageVoidTimerDurationTotal = gameState.currentPillageVoidTimerDurationTotal ?? 0;
             currentBlackHoleChargeTimerDurationTotal = gameState.currentBlackHoleChargeTimerDurationTotal ?? 0;
+            currentBlackHoleDuration = gameState.currentBlackHoleDuration ?? 3000;
+            currentBlackHolePower = gameState.currentBlackHolePower ?? 5
             asteroidArray = (gameState.asteroidArray ?? []).filter(item => item !== '') || null;
             rocketTravelDuration = gameState.rocketTravelDuration ?? {rocket1: 0, rocket2: 0, rocket3: 0, rocket4: 0};
             starTravelDuration = gameState.starTravelDuration ?? 0;
@@ -3080,6 +3086,26 @@ export function getCurrentBlackHoleChargeTimerDurationTotal() {
 
 export function setCurrentBlackHoleChargeTimerDurationTotal(value) {
     currentBlackHoleChargeTimerDurationTotal = value ?? 0;
+}
+
+export function getCurrentBlackHoleDuration() {
+    return currentBlackHoleDuration;
+}
+
+export function setCurrentBlackHoleDuration(value) {
+    currentBlackHoleDuration = (typeof value === 'number' && Number.isFinite(value) && value >= 0)
+        ? value
+        : 3000;
+}
+
+export function getCurrentBlackHolePower() {
+    return currentBlackHolePower;
+}
+
+export function setCurrentBlackHolePower(value) {
+    currentBlackHolePower = (typeof value === 'number' && Number.isFinite(value) && value > 0)
+        ? value
+        : 5;
 }
 
 export function getCurrentlyChargingBlackHole() {

@@ -2537,16 +2537,19 @@ export function createSvgElement(id, width = "100%", height = "100%", additional
          if (!canvas.isConnected) return;
 
          const chargePercent = getChargePercent();
-         const stage = Math.max(baseStage, chargePercent === null ? baseStage : getStageFromChargePercent(chargePercent));
+        const stage = Math.max(baseStage, chargePercent === null ? baseStage : getStageFromChargePercent(chargePercent));
+        const isFullyCharged = chargePercent !== null && chargePercent >= 100;
+        const saturationDampening = stage >= 3 && isFullyCharged ? 0.82 : 1;
 
-         const arms = 2 + Math.min(3, stage);
-         const spin = 0.00055 + stage * 0.00012 + (chargePercent === null ? 0 : (chargePercent / 100) * 0.00008);
-         const t = now * spin;
+        const arms = 2 + Math.min(3, stage);
+        const spin = 0.00055 + stage * 0.00012 + (chargePercent === null ? 0 : (chargePercent / 100) * 0.00008);
+        const t = now * spin;
 
-         const pulseSpeed = 0.0022 + stage * 0.00045;
-         const pulse = Math.sin(now * pulseSpeed);
-         const pulseScale = 1 + pulse * (0.006 + stage * 0.002);
-         const textColor = getTextColor();
+        const pulseSpeed = 0.0022 + stage * 0.00045;
+        const pulse = Math.sin(now * pulseSpeed);
+        const pulseAmplitude = 0.006 + stage * 0.002;
+        const pulseScale = 1 + pulse * pulseAmplitude * (isFullyCharged ? 1.75 : 1);
+        const textColor = getTextColor();
 
          ctx.clearRect(0, 0, size, size);
 
@@ -2557,12 +2560,12 @@ export function createSvgElement(id, width = "100%", height = "100%", additional
 
          ctx.globalCompositeOperation = stage >= 3 ? 'lighter' : 'source-over';
          for (let k = 0; k < 3; k += 1) {
-             ctx.globalAlpha = (0.65 - k * 0.18) * (1 + pulse * (stage * 0.03));
-             ctx.lineWidth = (10 + k * 10) * (1 + stage * 0.06 + pulse * (stage * 0.02));
-             ctx.strokeStyle = textColor;
-             ctx.beginPath();
-             ctx.arc(0, 0, ringRadius + k * 1.5, 0, Math.PI * 2);
-             ctx.stroke();
+            ctx.globalAlpha = (0.65 - k * 0.18) * (1 + pulse * (stage * 0.03)) * saturationDampening;
+            ctx.lineWidth = (10 + k * 10) * (1 + stage * 0.06 + pulse * (stage * 0.02));
+            ctx.strokeStyle = textColor;
+            ctx.beginPath();
+            ctx.arc(0, 0, ringRadius + k * 1.5, 0, Math.PI * 2);
+            ctx.stroke();
          }
 
          if (stage >= 1) {
@@ -2616,56 +2619,15 @@ export function createSvgElement(id, width = "100%", height = "100%", additional
                      const endY = startY + dirY * segmentLength;
 
                      const fade = (1 - p) * (0.35 + stage * 0.12);
-                     ctx.globalAlpha = strength * fade;
-                     ctx.lineWidth = (0.9 + stage * 0.45) * (0.9 + pulse * 0.08);
-                     ctx.beginPath();
-                     ctx.moveTo(startX, startY);
-                     ctx.lineTo(endX, endY);
-                     ctx.stroke();
+                     ctx.globalAlpha = strength * fade * saturationDampening;
+                    ctx.lineWidth = (0.9 + stage * 0.45) * (0.9 + pulse * 0.08);
+                    ctx.beginPath();
+                    ctx.moveTo(startX, startY);
+                    ctx.lineTo(endX, endY);
+                    ctx.stroke();
                  }
              }
 
-             ctx.restore();
-         }
-
-         if (stage >= 1) {
-             const outerSwirlRadius = ringRadius + 18;
-             const swirlCount = 6 + stage * 6;
-             const swirlLength = 32 + stage * 12;
-             const swirlThickness = 1 + stage * 0.6;
-             const swirlAlphaBase = 0.18 + stage * 0.08;
-             const swirlSpeed = 0.00016 + stage * 0.00012;
-             const swirlPhase = now * swirlSpeed;
-
-             ctx.save();
-             ctx.globalCompositeOperation = stage >= 2 ? 'lighter' : 'source-over';
-             for (let s = 0; s < swirlCount; s += 1) {
-                 const progress = (swirlPhase + s / swirlCount) % 1;
-                 const angle = progress * Math.PI * 2;
-                 const spiralTightness = 14 + stage * 4;
-                 const radiusOffset = Math.sin(progress * Math.PI * 2 + stage) * (4 + stage * 2);
-                 const startRadius = outerSwirlRadius + radiusOffset;
-                 const endRadius = startRadius - spiralTightness;
-
-                 ctx.beginPath();
-                 for (let i = 0; i <= swirlLength; i += 1) {
-                     const tSegment = i / swirlLength;
-                     const localAngle = angle - tSegment * 1.2;
-                     const localRadius = startRadius - tSegment * (startRadius - endRadius);
-                     const x = Math.cos(localAngle) * localRadius;
-                     const y = Math.sin(localAngle) * localRadius * 0.82;
-                     if (i === 0) {
-                         ctx.moveTo(x, y);
-                     } else {
-                         ctx.lineTo(x, y);
-                     }
-                 }
-
-                 ctx.lineWidth = swirlThickness * (0.9 + pulse * 0.1);
-                 ctx.strokeStyle = textColor;
-                 ctx.globalAlpha = swirlAlphaBase * (1 - progress * 0.65);
-                 ctx.stroke();
-             }
              ctx.restore();
          }
 
@@ -2679,7 +2641,7 @@ export function createSvgElement(id, width = "100%", height = "100%", additional
                  const x = Math.cos(angle) * r;
                  const y = Math.sin(angle) * (r * 0.65 + wobble);
                  const a = 0.35 + (1 - p) * 0.45;
-                ctx.globalAlpha = Math.min(1, a);
+                ctx.globalAlpha = Math.min(1, a) * saturationDampening;
                 ctx.fillStyle = textColor;
                 ctx.beginPath();
                 ctx.arc(x, y, 1.25 + (1 - p) * 1.4, 0, Math.PI * 2);

@@ -14,9 +14,11 @@ import {
     getCurrentlyChargingBlackHole,
     getTimeLeftUntilBlackHoleChargeTimerFinishes,
     getBlackHoleChargeReady,
+    getCurrentBlackHoleDuration,
+    getCurrentBlackHolePower,
     deferredActions
 } from './constantsAndGlobalVars.js';
-import { purchaseBuff, galacticMarketLiquidateForAp, galacticMarketSellApForCash, galacticMarketTrade, rebirth, startBlackHoleChargeTimer } from './game.js';
+import { purchaseBuff, galacticMarketLiquidateForAp, galacticMarketSellApForCash, galacticMarketTrade, rebirth, startBlackHoleChargeTimer, timeWarp } from './game.js';
 import { getAscendencyBuffDataObject, getResourceDataObject, setResourceDataObject, getBlackHoleResearchDone, getBlackHoleResearchPrice, setBlackHoleResearchDone } from './resourceDataObject.js';
 import { capitaliseString } from './utilityFunctions.js';
 import { modalRebirthText, modalRebirthHeader } from './descriptions.js';
@@ -470,7 +472,7 @@ export function drawTab7Content(heading, optionContentElement) {
         });
         const blackHoleButton2 = createButton('Button 2', ['id_blackHoleButton2', 'option-button'], () => {});
         const blackHoleButton3 = createButton('Button 3', ['id_blackHoleButton3', 'option-button'], () => {});
-        const blackHoleButton4 = createButton('Charge', ['id_blackHoleChargeButton', 'option-button'], () => {
+        const blackHoleActivateChargeButton = createButton('Charge', ['id_blackHoleChargeButton', 'option-button'], () => {
             if (getCurrentlyChargingBlackHole()) {
                 return;
             }
@@ -483,9 +485,10 @@ export function drawTab7Content(heading, optionContentElement) {
             }
 
             startBlackHoleChargeTimer([0, 'buttonClick']);
+            timeWarp(getCurrentBlackHoleDuration(), getCurrentBlackHolePower());
         });
 
-        [blackHoleButton2, blackHoleButton3, blackHoleButton4].forEach(button => {
+        [blackHoleButton2, blackHoleButton3, blackHoleActivateChargeButton].forEach(button => {
             button.disabled = true;
             button.style.pointerEvents = 'none';
             button.classList.add('red-disabled-text');
@@ -494,13 +497,13 @@ export function drawTab7Content(heading, optionContentElement) {
         blackHoleButton1.style.width = '120px';
         blackHoleButton2.style.width = '120px';
         blackHoleButton3.style.width = '120px';
-        blackHoleButton4.style.width = '120px';
+        blackHoleActivateChargeButton.style.width = '120px';
 
         blackHoleRow2LeftButtons.appendChild(blackHoleButton1);
         blackHoleRow2LeftButtons.appendChild(blackHoleButton2);
 
         blackHoleRow2RightButtons.appendChild(blackHoleButton3);
-        blackHoleRow2RightButtons.appendChild(blackHoleButton4);
+        blackHoleRow2RightButtons.appendChild(blackHoleActivateChargeButton);
 
         const blackHoleCanvas = createBlackHole(0);
         blackHoleCanvas.id = 'blackHoleCanvas';
