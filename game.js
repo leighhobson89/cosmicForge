@@ -425,7 +425,10 @@ import {
     showHideModal,
     removeModalButtonTooltips,
     generateStarfield,
-    createBlackHole
+    createBlackHole,
+    setButtonState,
+    setElementPointerEvents,
+    setElementOpacity
 } from "./ui.js";
 
 import {
@@ -1846,23 +1849,16 @@ function blackHoleUIChecks() {
     const researchButton = document.getElementById('blackHoleResearchButton');
     if (researchButton) {
         if (researchDone) {
-            researchButton.disabled = true;
-            researchButton.style.pointerEvents = 'none';
+            setButtonState(researchButton, { enabled: false, applyDisabledClass: false });
         } else {
             const price = getBlackHoleResearchPrice();
             const currentResearch = getResourceDataObject('research', ['quantity']);
 
             researchButton.textContent = `Research Black Hole\n(${formatNumber(price)} Research)`;
-            researchButton.disabled = true;
-            researchButton.style.pointerEvents = 'none';
-            researchButton.classList.add('red-disabled-text');
-            researchButton.classList.remove('green-ready-text');
+            setButtonState(researchButton, { enabled: false, ready: false });
 
             if (currentResearch >= price) {
-                researchButton.disabled = false;
-                researchButton.style.pointerEvents = 'auto';
-                researchButton.classList.remove('red-disabled-text');
-                researchButton.classList.add('green-ready-text');
+                setButtonState(researchButton, { enabled: true, ready: true });
             }
         }
     }
@@ -2019,10 +2015,7 @@ function blackHoleUIChecks() {
     const secondaryButtons = [secondaryButton2, secondaryButton3, chargeButton].filter(Boolean);
     if (!researchDone) {
         secondaryButtons.forEach(button => {
-            button.disabled = true;
-            button.style.pointerEvents = 'none';
-            button.classList.add('red-disabled-text');
-            button.classList.remove('green-ready-text', 'black-hole-charge-ready-button');
+            setButtonState(button, { enabled: false, ready: false, removeClasses: ['black-hole-charge-ready-button'] });
             if (button === chargeButton) {
                 button.textContent = 'Charge';
             }
@@ -2037,17 +2030,8 @@ function blackHoleUIChecks() {
         const currentPower = getBlackHolePower();
         const nextPower = currentPower + getBlackHolePowerUpgradeIncrement();
         secondaryButton2.textContent = `Power\nx${currentPower} -> x${nextPower}\n${formatNumber(price)} Research Points`;
-        if (currentResearch >= price) {
-            secondaryButton2.disabled = false;
-            secondaryButton2.style.pointerEvents = 'auto';
-            secondaryButton2.classList.remove('red-disabled-text');
-            secondaryButton2.classList.add('green-ready-text');
-        } else {
-            secondaryButton2.disabled = true;
-            secondaryButton2.style.pointerEvents = 'none';
-            secondaryButton2.classList.add('red-disabled-text');
-            secondaryButton2.classList.remove('green-ready-text');
-        }
+        const canAfford = currentResearch >= price;
+        setButtonState(secondaryButton2, { enabled: canAfford, ready: canAfford });
     }
 
     if (secondaryButton3) {
@@ -2057,44 +2041,39 @@ function blackHoleUIChecks() {
         const currentDurationSeconds = Math.round(currentDurationMs / 1000);
         const nextDurationSeconds = Math.round(nextDurationMs / 1000);
         secondaryButton3.textContent = `Duration\n${currentDurationSeconds}s -> ${nextDurationSeconds}s\n${formatNumber(price)} Research Points`;
-        if (currentResearch >= price) {
-            secondaryButton3.disabled = false;
-            secondaryButton3.style.pointerEvents = 'auto';
-            secondaryButton3.classList.remove('red-disabled-text');
-            secondaryButton3.classList.add('green-ready-text');
-        } else {
-            secondaryButton3.disabled = true;
-            secondaryButton3.style.pointerEvents = 'none';
-            secondaryButton3.classList.add('red-disabled-text');
-            secondaryButton3.classList.remove('green-ready-text');
-        }
+        const canAfford = currentResearch >= price;
+        setButtonState(secondaryButton3, { enabled: canAfford, ready: canAfford });
     }
 
     if (chargeButton) {
         if (timeWarping) {
             chargeButton.textContent = 'Time Warp...';
-            chargeButton.classList.remove('black-hole-charge-ready-button');
-            chargeButton.classList.remove('red-disabled-text');
-            chargeButton.disabled = true;
-            chargeButton.style.pointerEvents = 'none';
+            setButtonState(chargeButton, {
+                enabled: false,
+                ready: false,
+                applyDisabledClass: false,
+                removeClasses: ['black-hole-charge-ready-button', 'red-disabled-text']
+            });
         } else if (charging) {
             chargeButton.textContent = 'Charging...';
-            chargeButton.classList.remove('black-hole-charge-ready-button');
-            chargeButton.classList.add('red-disabled-text');
-            chargeButton.disabled = true;
-            chargeButton.style.pointerEvents = 'none';
+            setButtonState(chargeButton, { enabled: false, ready: false, removeClasses: ['black-hole-charge-ready-button'] });
         } else if (chargeReady) {
             chargeButton.textContent = 'ACTIVATE';
-            chargeButton.classList.add('black-hole-charge-ready-button');
-            chargeButton.classList.remove('red-disabled-text');
-            chargeButton.disabled = false;
-            chargeButton.style.pointerEvents = 'auto';
+            setButtonState(chargeButton, {
+                enabled: true,
+                ready: false,
+                applyDisabledClass: false,
+                addClasses: ['black-hole-charge-ready-button'],
+                removeClasses: ['red-disabled-text']
+            });
         } else {
             chargeButton.textContent = 'Charge';
-            chargeButton.classList.remove('black-hole-charge-ready-button');
-            chargeButton.classList.remove('red-disabled-text');
-            chargeButton.disabled = false;
-            chargeButton.style.pointerEvents = 'auto';
+            setButtonState(chargeButton, {
+                enabled: true,
+                ready: false,
+                applyDisabledClass: false,
+                removeClasses: ['black-hole-charge-ready-button', 'red-disabled-text']
+            });
         }
     }
 }
@@ -2495,8 +2474,8 @@ function handleAutoCreateResourceSellRows() {
         if (resources.includes(currentPane)) {
             const sellRowElement = document.getElementById(`${currentPane}SellRow`);
             if (sellRowElement) {
-                sellRowElement.style.pointerEvents = 'none';
-                sellRowElement.style.opacity = '0.5';
+                setElementPointerEvents(sellRowElement, 'none');
+                setElementOpacity(sellRowElement, 0.5);
             }
         }
     });
@@ -5291,7 +5270,7 @@ function handleTechnologyScreenButtonAndDescriptionStates(element, quantity, tec
         element.classList.remove('red-disabled-text');
         element.classList.add('green-ready-text');
         element.textContent = 'Researched';
-        element.style.pointerEvents = 'none';
+        setElementPointerEvents(element, 'none');
         setTechRenderChange(true);
     }
 }
@@ -5323,7 +5302,7 @@ function handlePhilosophyTechnologyScreenButtonAndDescriptionStates(element, qua
         if (element.classList.contains('special-ability')) {
             if (getPhilosophyAbilityActive()) {
                 element.innerHTML = 'UNLOCKED';
-                element.style.pointerEvents = 'none';
+                setElementPointerEvents(element, 'none');
             }
         }
     }
@@ -5787,11 +5766,11 @@ function autoCreateChecks(element) {
             textAutoContainer.classList.remove('invisible');
         }
         if (!getPowerOnOff()) {
-            toggleSwitchContainer.style.pointerEvents = 'none';
-            toggleSwitchContainer.style.opacity = '0.5';
+            setElementPointerEvents(toggleSwitchContainer, 'none');
+            setElementOpacity(toggleSwitchContainer, 0.5);
         } else {
-            toggleSwitchContainer.style.pointerEvents = 'auto';
-            toggleSwitchContainer.style.opacity = '1';
+            setElementPointerEvents(toggleSwitchContainer, 'auto');
+            setElementOpacity(toggleSwitchContainer, 1);
         }
     } else {
         if (!toggleSwitchContainer.classList.contains('invisible')) {

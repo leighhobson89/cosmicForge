@@ -1980,6 +1980,68 @@ export function createToggleSwitch(id, isChecked, onChange, extraClasses) {
     return toggleContainer;
 }
 
+export function setElementPointerEvents(element, value) {
+    if (!element) {
+        return;
+    }
+
+    const pointerEvents = (value === 'none' || value === 'auto')
+        ? value
+        : (value ? 'auto' : 'none');
+
+    element.style.pointerEvents = pointerEvents;
+}
+
+export function setElementOpacity(element, value) {
+    if (!element) {
+        return;
+    }
+
+    element.style.opacity = String(value);
+}
+
+export function setButtonState(button, options = {}) {
+    if (!button) {
+        return;
+    }
+
+    const {
+        enabled,
+        ready = null,
+        addClasses = [],
+        removeClasses = [],
+        disabledClass = 'red-disabled-text',
+        readyClass = 'green-ready-text',
+        applyDisabledClass = true,
+        applyPointerEvents = true
+    } = options;
+
+    if (typeof enabled === 'boolean') {
+        if ('disabled' in button) {
+            button.disabled = !enabled;
+        }
+        if (applyPointerEvents) {
+            setElementPointerEvents(button, enabled);
+        }
+
+        if (applyDisabledClass) {
+            button.classList.toggle(disabledClass, !enabled);
+        }
+    }
+
+    if (ready !== null) {
+        button.classList.toggle(readyClass, Boolean(ready));
+    }
+
+    if (Array.isArray(removeClasses) && removeClasses.length) {
+        button.classList.remove(...removeClasses);
+    }
+
+    if (Array.isArray(addClasses) && addClasses.length) {
+        button.classList.add(...addClasses);
+    }
+}
+
 
 export function createButton(text, classNames, onClick, dataConditionCheck, resourcePriceObject, objectSectionArgument1, objectSectionArgument2, quantityArgument, disableKeyboardForButton, autoBuyerTier, rowCategory) {
     const button = document.createElement('button');
@@ -5665,7 +5727,7 @@ export async function drawAntimatterFlowDiagram(rocketData, svgElement) {
     boostTextContainer.style.color = "var(--text-color)";
     boostTextContainer.style.fontSize = "20px";
     boostTextContainer.style.fontWeight = "bold";
-    boostTextContainer.style.pointerEvents = 'none';
+    setElementPointerEvents(boostTextContainer, 'none');
     boostTextContainer.setAttribute("id", 'boostTextContainer');
 
     const rightArrowLine = document.createElement("div");
@@ -7380,8 +7442,8 @@ function addOneOffEventListeners() {
             }
         }
 
-        this.style.pointerEvents = 'none';
-        this.style.opacity = '0.5';
+        setElementPointerEvents(this, 'none');
+        setElementOpacity(this, 0.5);
     });
 }
 
@@ -7430,8 +7492,8 @@ function addPrizeEventListeners() {
                     break;
             }
 
-            this.style.pointerEvents = 'none';
-            this.style.opacity = '0.5';
+            setElementPointerEvents(this, 'none');
+            setElementOpacity(this, 0.5);
         });
     }
 }
@@ -7519,9 +7581,9 @@ function addWackyEffectsEventListeners() {
         
         targetElement.style.animation = newAnimation;
 
-        prizeTickerSpan.style.pointerEvents = 'none';
+        setElementPointerEvents(prizeTickerSpan, 'none');
         if (otherElement) {
-            otherElement.style.pointerEvents = 'none';
+            setElementPointerEvents(otherElement, 'none');
         }
     });
 
@@ -7547,7 +7609,7 @@ function addWackyEffectsEventListeners() {
                     prizeTickerSpan2.style.opacity = '0.5';
                     if (otherElement) {
                         otherElement.style.opacity = '0.5';
-                        otherElement.style.pointerEvents = 'none';
+                        setElementPointerEvents(otherElement, 'none');
                     }
                     break;
                 default:
@@ -7566,9 +7628,9 @@ function addWackyEffectsEventListeners() {
             
             targetElement.style.animation = newAnimation;
         
-            prizeTickerSpan2.style.pointerEvents = 'none';
+            setElementPointerEvents(prizeTickerSpan2, 'none');
             if (otherElement) {
-                otherElement.style.pointerEvents = 'none';
+                setElementPointerEvents(otherElement, 'none');
             }
         });
     }

@@ -1,4 +1,4 @@
-import { removeTabAttentionIfNoIndicators, createOptionRow, createButton, createDropdown, createTextElement, createTextFieldArea, callPopupModal, showHideModal, createMegaStructureDiagram, createMegaStructureTable, createBlackHole } from './ui.js';
+import { removeTabAttentionIfNoIndicators, createOptionRow, createButton, createDropdown, createTextElement, createTextFieldArea, callPopupModal, showHideModal, createMegaStructureDiagram, createMegaStructureTable, createBlackHole, setButtonState } from './ui.js';
 import {
     setApLiquidationQuantity,
     setGalacticMarketIncomingQuantity,
@@ -660,9 +660,7 @@ export function drawTab7Content(heading, optionContentElement) {
         });
 
         [blackHoleButton2, blackHoleButton3, blackHoleActivateChargeButton].forEach(button => {
-            button.disabled = true;
-            button.style.pointerEvents = 'none';
-            button.classList.add('red-disabled-text');
+            setButtonState(button, { enabled: false, ready: false });
         });
 
         blackHoleActivateChargeButton.style.width = '120px';

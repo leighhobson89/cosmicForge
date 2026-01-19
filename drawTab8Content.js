@@ -1,5 +1,5 @@
 import { getCurrentOptionPane, getCurrentTheme, setAutoSaveToggle, getAutoSaveToggle, getAutoSaveFrequency, setAutoSaveFrequency, getSaveData, setSaveData, getCurrencySymbol, setCurrencySymbol, getNotationType, setNotationType, setNotificationsToggle, getNotificationsToggle, getSaveName, getWeatherEffectSetting, setWeatherEffectSetting, setNewsTickerSetting, getNewsTickerSetting, setSaveExportCloudFlag, getBackgroundAudio, setBackgroundAudio, getSfx, setSfx, setWasAutoSaveToggled, setMouseParticleTrailEnabled, getMouseParticleTrailEnabled, setCustomPointerEnabled, getCustomPointerEnabled } from './constantsAndGlobalVars.js';
-import { setupAchievementTooltip, createHtmlTableAchievementsGrid, createHtmlTableStatistics, createHtmlTextAreaProse, toggleGameFullScreen, createButton, createTextFieldArea, createOptionRow, createDropdown, createToggleSwitch, selectTheme, callPopupModal, showHideModal, showNotification, applyCustomPointerSetting } from './ui.js';
+import { setupAchievementTooltip, createHtmlTableAchievementsGrid, createHtmlTableStatistics, createHtmlTextAreaProse, toggleGameFullScreen, createButton, createTextFieldArea, createOptionRow, createDropdown, createToggleSwitch, selectTheme, callPopupModal, showHideModal, showNotification, applyCustomPointerSetting, setElementPointerEvents } from './ui.js';
 import { importSaveStringFileFromComputer, downloadSaveStringToComputer, initializeAutoSave, saveGame, saveGameToCloud, loadGameFromCloud, copySaveStringToClipBoard, loadGame, destroySaveGameOnCloud } from './saveLoadGame.js';
 import { hardResetWarningHeader, hardResetWarningText, getStatisticsContent, getHelpContent } from './descriptions.js';
 import { setAchievementIconImageUrls, getAchievementPositionData } from './resourceDataObject.js';
@@ -627,7 +627,7 @@ export function drawTab8Content(heading, optionContentElement) {
                 if (span.innerHTML.includes('discord.gg')) {
                     span.classList.add('green-ready-text');
                     span.style.cursor = 'pointer';
-                    span.style.pointerEvents = 'auto';
+                    setElementPointerEvents(span, 'auto');
                     span.addEventListener('click', () => {
                         window.open(span.innerHTML, '_blank');
                     });
@@ -642,7 +642,7 @@ export function drawTab8Content(heading, optionContentElement) {
                 if (span.innerHTML.includes('@gmail.com')) {
                     span.classList.add('green-ready-text');
                     span.style.cursor = 'pointer';
-                    span.style.pointerEvents = 'auto';
+                    setElementPointerEvents(span, 'auto');
                     span.addEventListener('click', () => {
                         window.open(`mailto:${span.innerHTML}`, '_blank');
                     });
