@@ -316,6 +316,12 @@ import {
     setTimeWarpTimeoutId,
     getTimeWarpEndTimestampMs,
     setTimeWarpEndTimestampMs,
+    getCurrentlyTimeWarpingBlackHole,
+    setCurrentlyTimeWarpingBlackHole,
+    getCurrentBlackHoleTimeWarpDurationTotal,
+    setCurrentBlackHoleTimeWarpDurationTotal,
+    getBlackHoleTimeWarpEndTimestampMs,
+    setBlackHoleTimeWarpEndTimestampMs,
     getBlackHoleDiscovered,
     setBlackHoleDiscovered,
     getBlackHoleDiscoveryProbability,
@@ -1845,10 +1851,38 @@ function blackHoleUIChecks() {
     const secondaryButton3 = document.getElementById('blackHoleButton3');
     const chargeProgressBar = document.getElementById('blackHoleChargeProgressBar');
     const chargeProgressBarContainer = document.getElementById('blackHoleChargeProgressBarContainer');
+    const timeWarpProgressBar = document.getElementById('blackHoleTimeWarpProgressBar');
+    const timeWarpProgressBarContainer = document.getElementById('blackHoleTimeWarpProgressBarContainer');
     const blackHoleCanvas = document.getElementById('blackHoleCanvas');
 
+    const timeWarping = getCurrentlyTimeWarpingBlackHole();
+
+    if (timeWarpProgressBarContainer) {
+        timeWarpProgressBarContainer.classList.toggle('invisible', !timeWarping);
+    }
     if (chargeProgressBarContainer) {
-        chargeProgressBarContainer.classList.remove('invisible');
+        chargeProgressBarContainer.classList.toggle('invisible', timeWarping);
+    }
+
+    if (timeWarping) {
+        const total = getCurrentBlackHoleTimeWarpDurationTotal();
+        const endTimestamp = getBlackHoleTimeWarpEndTimestampMs();
+        const remaining = Math.max(endTimestamp - Date.now(), 0);
+
+        if (timeWarpProgressBar) {
+            const pct = total > 0 ? (remaining / total) * 100 : 0;
+            timeWarpProgressBar.style.width = `${Math.max(0, Math.min(100, pct))}%`;
+        }
+
+        if (remaining <= 0) {
+            setCurrentlyTimeWarpingBlackHole(false);
+            setCurrentBlackHoleTimeWarpDurationTotal(0);
+            setBlackHoleTimeWarpEndTimestampMs(0);
+
+            if (!getCurrentlyChargingBlackHole() && !getBlackHoleChargeReady()) {
+                startBlackHoleChargeTimer([0, 'timeWarpFinished']);
+            }
+        }
     }
 
     if (chargeProgressBar) {
@@ -1897,7 +1931,11 @@ function blackHoleUIChecks() {
     if (chargeButton) {
         const charging = getCurrentlyChargingBlackHole();
 
-        if (charging) {
+        if (timeWarping) {
+            chargeButton.textContent = 'Time Warp...';
+            chargeButton.classList.remove('black-hole-charge-ready-button');
+            chargeButton.disabled = true;
+        } else if (charging) {
             chargeButton.textContent = 'Charging...';
             chargeButton.classList.remove('black-hole-charge-ready-button');
             chargeButton.disabled = true;

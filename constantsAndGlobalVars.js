@@ -273,6 +273,11 @@ let currentPillageVoidTimerDurationTotal = 0;
 let currentBlackHoleChargeTimerDurationTotal = 0;
 let currentBlackHoleDuration = 3000;
 let currentBlackHolePower = 5;
+let currentlyChargingBlackHole = false;
+let blackHoleChargeReady = false;
+let currentlyTimeWarpingBlackHole = false;
+let currentBlackHoleTimeWarpDurationTotal = 0;
+let blackHoleTimeWarpEndTimestampMs = 0;
 let timeLeftUntilAsteroidScannerTimerFinishes = 0;
 let timeLeftUntilTravelToDestinationStarTimerFinishes = 0;
 let timeLeftUntilPillageVoidTimerFinishes = 0;
@@ -555,8 +560,6 @@ let currentlySearchingAsteroid = false;
 let currentlyInvestigatingStar = false;
 let currentlyPillagingVoid = false;
 let telescopeReadyToSearch = true;
-let currentlyChargingBlackHole = false;
-let blackHoleChargeReady = false;
 let asteroidTimerCanContinue = false;
 let starInvestigationTimerCanContinue = false;
 let pillageVoidTimerCanContinue = false;
@@ -3106,6 +3109,30 @@ export function setCurrentBlackHolePower(value) {
     currentBlackHolePower = (typeof value === 'number' && Number.isFinite(value) && value > 0)
         ? value
         : 5;
+}
+
+export function getCurrentlyTimeWarpingBlackHole() {
+    return currentlyTimeWarpingBlackHole;
+}
+
+export function setCurrentlyTimeWarpingBlackHole(value) {
+    currentlyTimeWarpingBlackHole = value ?? false;
+}
+
+export function getCurrentBlackHoleTimeWarpDurationTotal() {
+    return currentBlackHoleTimeWarpDurationTotal;
+}
+
+export function setCurrentBlackHoleTimeWarpDurationTotal(value) {
+    currentBlackHoleTimeWarpDurationTotal = value ?? 0;
+}
+
+export function getBlackHoleTimeWarpEndTimestampMs() {
+    return blackHoleTimeWarpEndTimestampMs;
+}
+
+export function setBlackHoleTimeWarpEndTimestampMs(value) {
+    blackHoleTimeWarpEndTimestampMs = (typeof value === 'number' && Number.isFinite(value)) ? value : 0;
 }
 
 export function getCurrentlyChargingBlackHole() {

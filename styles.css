@@ -1569,6 +1569,7 @@ button.red-disabled-text {
 #spaceTelescopeInvestigateStarProgressBarContainer,
 #spaceTelescopePillageVoidProgressBarContainer,
 #spaceTravelToStarProgressBarContainer,
+#blackHoleTimeWarpProgressBarContainer,
 #blackHoleChargeProgressBarContainer
  {
     background-color: var(--disabled-text);
@@ -1589,12 +1590,17 @@ button.red-disabled-text {
  #spaceTelescopeInvestigateStarProgressBar,
  #spaceTelescopePillageVoidProgressBar,
  #spaceTravelToStarProgressBar,
+ #blackHoleTimeWarpProgressBar,
  #blackHoleChargeProgressBar
  {
     background-color: var(--text-color);
     width: 0%;
     height: 25px;
     z-index: 1000
+ }
+
+ #blackHoleTimeWarpProgressBar {
+     background-color: var(--ready-text);
  }
 
  .label-star,

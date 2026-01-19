@@ -12,8 +12,14 @@ import {
     setGalacticMarketLiquidationAuthorization,
     getApLiquidationQuantity,
     getCurrentlyChargingBlackHole,
+    getCurrentlyTimeWarpingBlackHole,
+    setCurrentlyTimeWarpingBlackHole,
+    setCurrentBlackHoleTimeWarpDurationTotal,
+    getBlackHoleTimeWarpEndTimestampMs,
+    setBlackHoleTimeWarpEndTimestampMs,
     getTimeLeftUntilBlackHoleChargeTimerFinishes,
     getBlackHoleChargeReady,
+    setBlackHoleChargeReady,
     getCurrentBlackHoleDuration,
     getCurrentBlackHolePower,
     deferredActions
@@ -395,6 +401,35 @@ export function drawTab7Content(heading, optionContentElement) {
     }
     
     if (heading === 'Black Hole') {
+        const blackHoleTimeWarpProgressRow = createOptionRow(
+            'blackHoleTimeWarpProgressRow',
+            null,
+            null,
+            createTextElement(
+                `<div id="blackHoleTimeWarpProgressBar">`,
+                'blackHoleTimeWarpProgressBarContainer',
+                ['progress-bar-container', 'invisible']
+            ),
+            null,
+            null,
+            null,
+            null,
+            '',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            false,
+            null,
+            null,
+            '',
+            [true, '0', '100%'],
+            ['no-left-margin']
+        );
+        optionContentElement.appendChild(blackHoleTimeWarpProgressRow);
+
         const blackHoleChargeProgressRow = createOptionRow(
             'blackHoleChargeProgressRow',
             null,
@@ -473,19 +508,60 @@ export function drawTab7Content(heading, optionContentElement) {
         const blackHoleButton2 = createButton('Button 2', ['id_blackHoleButton2', 'option-button'], () => {});
         const blackHoleButton3 = createButton('Button 3', ['id_blackHoleButton3', 'option-button'], () => {});
         const blackHoleActivateChargeButton = createButton('Charge', ['id_blackHoleChargeButton', 'option-button'], () => {
-            if (getCurrentlyChargingBlackHole()) {
+            if (getCurrentlyChargingBlackHole() || getCurrentlyTimeWarpingBlackHole()) {
                 return;
             }
 
             if (getBlackHoleChargeReady()) {
+                setBlackHoleChargeReady(false);
+
                 const progressBar = document.getElementById('blackHoleChargeProgressBar');
                 if (progressBar) {
                     progressBar.style.width = '0%';
                 }
+
+                const chargeProgressBarContainer = document.getElementById('blackHoleChargeProgressBarContainer');
+                if (chargeProgressBarContainer) {
+                    chargeProgressBarContainer.classList.add('invisible');
+                }
+
+                const timeWarpProgressBarContainer = document.getElementById('blackHoleTimeWarpProgressBarContainer');
+                if (timeWarpProgressBarContainer) {
+                    timeWarpProgressBarContainer.classList.remove('invisible');
+                }
+
+                const timeWarpProgressBar = document.getElementById('blackHoleTimeWarpProgressBar');
+                if (timeWarpProgressBar) {
+                    timeWarpProgressBar.style.width = '100%';
+                }
+
+                const durationMs = getCurrentBlackHoleDuration();
+                setCurrentlyTimeWarpingBlackHole(true);
+                setCurrentBlackHoleTimeWarpDurationTotal(durationMs);
+                const endTimestampMs = Date.now() + durationMs;
+                setBlackHoleTimeWarpEndTimestampMs(endTimestampMs);
+
+                setTimeout(() => {
+                    if (!getCurrentlyTimeWarpingBlackHole()) {
+                        return;
+                    }
+                    if (getBlackHoleTimeWarpEndTimestampMs() !== endTimestampMs) {
+                        return;
+                    }
+
+                    setCurrentlyTimeWarpingBlackHole(false);
+                    setCurrentBlackHoleTimeWarpDurationTotal(0);
+                    setBlackHoleTimeWarpEndTimestampMs(0);
+                    if (!getCurrentlyChargingBlackHole() && !getBlackHoleChargeReady()) {
+                        startBlackHoleChargeTimer([0, 'timeWarpFinished']);
+                    }
+                }, durationMs);
+
+                timeWarp(durationMs, getCurrentBlackHolePower());
+                return;
             }
 
             startBlackHoleChargeTimer([0, 'buttonClick']);
-            timeWarp(getCurrentBlackHoleDuration(), getCurrentBlackHolePower());
         });
 
         [blackHoleButton2, blackHoleButton3, blackHoleActivateChargeButton].forEach(button => {
