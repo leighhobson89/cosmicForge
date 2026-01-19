@@ -2509,6 +2509,22 @@ export function createSvgElement(id, width = "100%", height = "100%", additional
          return clamp(raw, 0, 100);
      };
 
+     const getTimeWarping = () => canvas?.dataset?.timeWarping === 'true';
+
+     const getTimeWarpStrength = () => {
+         if (!getTimeWarping()) {
+             return 0;
+         }
+
+         const remainingRaw = Number.parseFloat(canvas?.dataset?.timeWarpRemainingMs);
+         if (!Number.isFinite(remainingRaw)) {
+             return 1;
+         }
+
+         const x = clamp(remainingRaw / 1000, 0, 1);
+         return x * x * (3 - 2 * x);
+     };
+
      const getStageFromChargePercent = (chargePercent) => {
          if (chargePercent >= 100) return 3;
          if (chargePercent >= 66) return 2;
@@ -2537,19 +2553,23 @@ export function createSvgElement(id, width = "100%", height = "100%", additional
          if (!canvas.isConnected) return;
 
          const chargePercent = getChargePercent();
-        const stage = Math.max(baseStage, chargePercent === null ? baseStage : getStageFromChargePercent(chargePercent));
-        const isFullyCharged = chargePercent !== null && chargePercent >= 100;
-        const saturationDampening = stage >= 3 && isFullyCharged ? 0.82 : 1;
+         const stage = Math.max(baseStage, chargePercent === null ? baseStage : getStageFromChargePercent(chargePercent));
+         const timeWarping = getTimeWarping();
+         const timeWarpStrength = getTimeWarpStrength();
+         const isFullyCharged = chargePercent !== null && chargePercent >= 100;
+         const saturationDampening = stage >= 3 && isFullyCharged ? 0.82 : 1;
 
-        const arms = 2 + Math.min(3, stage);
-        const spin = 0.00055 + stage * 0.00012 + (chargePercent === null ? 0 : (chargePercent / 100) * 0.00008);
-        const t = now * spin;
+         const extraArms = Math.floor(3 * timeWarpStrength);
+         const arms = (2 + Math.min(3, stage)) + extraArms;
+         const spinMultiplier = 1 + (3.15 - 1) * timeWarpStrength;
+         const spin = (0.00055 + stage * 0.00012 + (chargePercent === null ? 0 : (chargePercent / 100) * 0.00008)) * spinMultiplier;
+         const t = now * spin;
 
-        const pulseSpeed = 0.0022 + stage * 0.00045;
-        const pulse = Math.sin(now * pulseSpeed);
-        const pulseAmplitude = 0.006 + stage * 0.002;
-        const pulseScale = 1 + pulse * pulseAmplitude * (isFullyCharged ? 1.75 : 1);
-        const textColor = getTextColor();
+         const pulseSpeed = (0.0022 + stage * 0.00045) * (1 + (2.1 - 1) * timeWarpStrength);
+         const pulse = Math.sin(now * pulseSpeed);
+         const pulseAmplitude = (0.006 + stage * 0.002) * (1 + (2.4 - 1) * timeWarpStrength);
+         const pulseScale = 1 + pulse * pulseAmplitude * (isFullyCharged ? 1.75 : 1) * (1 + (1.2 - 1) * timeWarpStrength);
+         const textColor = getTextColor();
 
          ctx.clearRect(0, 0, size, size);
 
@@ -2558,14 +2578,33 @@ export function createSvgElement(id, width = "100%", height = "100%", additional
          ctx.scale(pulseScale, pulseScale);
          ctx.scale(1, 0.82);
 
-         ctx.globalCompositeOperation = stage >= 3 ? 'lighter' : 'source-over';
+         ctx.globalCompositeOperation = ((timeWarping && timeWarpStrength > 0) || stage >= 3) ? 'lighter' : 'source-over';
          for (let k = 0; k < 3; k += 1) {
-            ctx.globalAlpha = (0.65 - k * 0.18) * (1 + pulse * (stage * 0.03)) * saturationDampening;
-            ctx.lineWidth = (10 + k * 10) * (1 + stage * 0.06 + pulse * (stage * 0.02));
-            ctx.strokeStyle = textColor;
-            ctx.beginPath();
-            ctx.arc(0, 0, ringRadius + k * 1.5, 0, Math.PI * 2);
-            ctx.stroke();
+             const flash = timeWarping ? (0.75 + 0.25 * Math.sin(now * 0.032 + k * 2.1)) : 1;
+             const flashStrength = 1 + (flash - 1) * timeWarpStrength;
+             ctx.globalAlpha = (0.65 - k * 0.18) * (1 + pulse * (stage * 0.03)) * saturationDampening * flashStrength;
+             ctx.lineWidth = (10 + k * 10) * (1 + stage * 0.06 + pulse * (stage * 0.02)) * (1 + (1.35 - 1) * timeWarpStrength);
+             ctx.strokeStyle = textColor;
+             ctx.beginPath();
+             ctx.arc(0, 0, ringRadius + k * 1.5 + (timeWarping ? 2.4 * Math.sin(now * 0.006 + k) * timeWarpStrength : 0), 0, Math.PI * 2);
+             ctx.stroke();
+         }
+
+         if (timeWarping && timeWarpStrength > 0) {
+             ctx.save();
+             ctx.globalCompositeOperation = 'lighter';
+             const shockCount = 3;
+             for (let s = 0; s < shockCount; s += 1) {
+                 const ph = ((now * 0.00085) + s * 0.31) % 1;
+                 const rr = coreRadius + 10 + ph * 96;
+                 ctx.globalAlpha = (1 - ph) * 0.38 * timeWarpStrength;
+                 ctx.lineWidth = 1.2 + (1 - ph) * 5.2 * timeWarpStrength;
+                 ctx.strokeStyle = textColor;
+                 ctx.beginPath();
+                 ctx.arc(0, 0, rr, 0, Math.PI * 2);
+                 ctx.stroke();
+             }
+             ctx.restore();
          }
 
          if (stage >= 1) {
@@ -2620,11 +2659,11 @@ export function createSvgElement(id, width = "100%", height = "100%", additional
 
                      const fade = (1 - p) * (0.35 + stage * 0.12);
                      ctx.globalAlpha = strength * fade * saturationDampening;
-                    ctx.lineWidth = (0.9 + stage * 0.45) * (0.9 + pulse * 0.08);
-                    ctx.beginPath();
-                    ctx.moveTo(startX, startY);
-                    ctx.lineTo(endX, endY);
-                    ctx.stroke();
+                     ctx.lineWidth = (0.9 + stage * 0.45) * (0.9 + pulse * 0.08);
+                     ctx.beginPath();
+                     ctx.moveTo(startX, startY);
+                     ctx.lineTo(endX, endY);
+                     ctx.stroke();
                  }
              }
 
@@ -2633,20 +2672,43 @@ export function createSvgElement(id, width = "100%", height = "100%", additional
 
          for (let arm = 0; arm < arms; arm += 1) {
              const armOffset = (arm / arms) * Math.PI * 2;
-             for (let i = 0; i < 220; i += 1) {
-                 const p = i / 220;
+             const steps = timeWarping ? (220 + Math.floor(100 * timeWarpStrength)) : 220;
+             for (let i = 0; i < steps; i += 1) {
+                 const p = i / steps;
                  const r = coreRadius + p * 44;
-                 const angle = armOffset + t * 6.0 + p * 10.0;
-                 const wobble = Math.sin(p * 18 + t * 2.5 + armOffset) * (1.4 + stage * 0.35 + pulse * (stage * 0.15));
+                 const angle = armOffset + t * (6.0 + (9.5 - 6.0) * timeWarpStrength) + p * (10.0 + (14.0 - 10.0) * timeWarpStrength);
+                 const wobble = Math.sin(p * 18 + t * (2.5 + (4.2 - 2.5) * timeWarpStrength) + armOffset)
+                     * (1.4 + stage * 0.35 + pulse * (stage * 0.15))
+                     * (1 + (1.45 - 1) * timeWarpStrength);
                  const x = Math.cos(angle) * r;
                  const y = Math.sin(angle) * (r * 0.65 + wobble);
-                 const a = 0.35 + (1 - p) * 0.45;
-                ctx.globalAlpha = Math.min(1, a) * saturationDampening;
-                ctx.fillStyle = textColor;
-                ctx.beginPath();
-                ctx.arc(x, y, 1.25 + (1 - p) * 1.4, 0, Math.PI * 2);
-                ctx.fill();
-            }
+                 const a = (0.35 + (1 - p) * 0.45) * (1 + (1.2 - 1) * timeWarpStrength);
+                 ctx.globalAlpha = Math.min(1, a) * saturationDampening;
+                 ctx.fillStyle = textColor;
+                 ctx.beginPath();
+                 ctx.arc(x, y, (1.25 + (1 - p) * 1.4) * (1 + (1.15 - 1) * timeWarpStrength), 0, Math.PI * 2);
+                 ctx.fill();
+             }
+         }
+
+         if (timeWarping && timeWarpStrength > 0) {
+             ctx.save();
+             ctx.globalCompositeOperation = 'lighter';
+             ctx.fillStyle = textColor;
+             const particles = Math.floor(90 * timeWarpStrength);
+             for (let i = 0; i < particles; i += 1) {
+                 const p = ((now * 0.00011) + i * 0.037) % 1;
+                 const rr = (size * 0.52) * (1 - p) + (coreRadius + 2) * p;
+                 const ang = now * 0.0035 + i * 0.82 + p * 6.5;
+                 const squeeze = 0.66 + 0.1 * Math.sin(now * 0.004 + i);
+                 const x = Math.cos(ang) * rr;
+                 const y = Math.sin(ang) * rr * squeeze;
+                 ctx.globalAlpha = (1 - p) * 0.95 * timeWarpStrength;
+                 ctx.beginPath();
+                 ctx.arc(x, y, 1.1 + (1 - p) * 1.8, 0, Math.PI * 2);
+                 ctx.fill();
+             }
+             ctx.restore();
          }
 
          ctx.restore();
@@ -2666,9 +2728,9 @@ export function createSvgElement(id, width = "100%", height = "100%", additional
          ringGradient.addColorStop(0.55, textColor);
          ringGradient.addColorStop(1, 'rgba(0,0,0,0)');
 
-         ctx.globalAlpha = 1;
+         ctx.globalAlpha = timeWarping ? (1 - 0.15 * timeWarpStrength + 0.15 * Math.sin(now * 0.03) * timeWarpStrength) : 1;
          ctx.strokeStyle = ringGradient;
-         ctx.lineWidth = 3;
+         ctx.lineWidth = timeWarping ? (3 + (4.6 - 3) * timeWarpStrength) : 3;
          ctx.beginPath();
          ctx.arc(0, 0, coreRadius + 3, t * 2.0, t * 2.0 + Math.PI * 1.55);
          ctx.stroke();

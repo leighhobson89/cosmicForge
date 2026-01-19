@@ -1856,6 +1856,14 @@ function blackHoleUIChecks() {
     const blackHoleCanvas = document.getElementById('blackHoleCanvas');
 
     const timeWarping = getCurrentlyTimeWarpingBlackHole();
+    const totalTimeWarpDurationMs = getCurrentBlackHoleTimeWarpDurationTotal();
+    const timeWarpEndTimestampMs = getBlackHoleTimeWarpEndTimestampMs();
+    const timeWarpRemainingMs = timeWarping ? Math.max(timeWarpEndTimestampMs - Date.now(), 0) : 0;
+    if (blackHoleCanvas) {
+        blackHoleCanvas.dataset.timeWarping = timeWarping ? 'true' : 'false';
+        blackHoleCanvas.dataset.timeWarpRemainingMs = String(timeWarpRemainingMs);
+        blackHoleCanvas.dataset.timeWarpDurationMs = String(totalTimeWarpDurationMs || 0);
+    }
 
     if (timeWarpProgressBarContainer) {
         timeWarpProgressBarContainer.classList.toggle('invisible', !timeWarping);
@@ -1865,9 +1873,8 @@ function blackHoleUIChecks() {
     }
 
     if (timeWarping) {
-        const total = getCurrentBlackHoleTimeWarpDurationTotal();
-        const endTimestamp = getBlackHoleTimeWarpEndTimestampMs();
-        const remaining = Math.max(endTimestamp - Date.now(), 0);
+        const total = totalTimeWarpDurationMs;
+        const remaining = timeWarpRemainingMs;
 
         if (timeWarpProgressBar) {
             const pct = total > 0 ? (remaining / total) * 100 : 0;

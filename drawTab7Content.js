@@ -536,10 +536,17 @@ export function drawTab7Content(heading, optionContentElement) {
                 }
 
                 const durationMs = getCurrentBlackHoleDuration();
+                const endTimestampMs = Date.now() + durationMs;
                 setCurrentlyTimeWarpingBlackHole(true);
                 setCurrentBlackHoleTimeWarpDurationTotal(durationMs);
-                const endTimestampMs = Date.now() + durationMs;
                 setBlackHoleTimeWarpEndTimestampMs(endTimestampMs);
+
+                const blackHoleCanvas = document.getElementById('blackHoleCanvas');
+                if (blackHoleCanvas) {
+                    blackHoleCanvas.dataset.timeWarping = 'true';
+                    blackHoleCanvas.dataset.timeWarpRemainingMs = String(durationMs);
+                    blackHoleCanvas.dataset.timeWarpDurationMs = String(durationMs);
+                }
 
                 setTimeout(() => {
                     if (!getCurrentlyTimeWarpingBlackHole()) {
@@ -552,6 +559,13 @@ export function drawTab7Content(heading, optionContentElement) {
                     setCurrentlyTimeWarpingBlackHole(false);
                     setCurrentBlackHoleTimeWarpDurationTotal(0);
                     setBlackHoleTimeWarpEndTimestampMs(0);
+
+                    const blackHoleCanvas = document.getElementById('blackHoleCanvas');
+                    if (blackHoleCanvas) {
+                        blackHoleCanvas.dataset.timeWarping = 'false';
+                        blackHoleCanvas.dataset.timeWarpRemainingMs = '0';
+                    }
+
                     if (!getCurrentlyChargingBlackHole() && !getBlackHoleChargeReady()) {
                         startBlackHoleChargeTimer([0, 'timeWarpFinished']);
                     }
@@ -584,6 +598,9 @@ export function drawTab7Content(heading, optionContentElement) {
         const blackHoleCanvas = createBlackHole(0);
         blackHoleCanvas.id = 'blackHoleCanvas';
         blackHoleCanvas.dataset.chargePercent = '0';
+        blackHoleCanvas.dataset.timeWarping = 'false';
+        blackHoleCanvas.dataset.timeWarpRemainingMs = '0';
+        blackHoleCanvas.dataset.timeWarpDurationMs = '0';
 
         blackHoleRow2Container.appendChild(blackHoleRow2LeftButtons);
         blackHoleRow2Container.appendChild(blackHoleCanvas);
