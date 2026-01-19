@@ -1941,19 +1941,27 @@ function blackHoleUIChecks() {
         if (timeWarping) {
             chargeButton.textContent = 'Time Warp...';
             chargeButton.classList.remove('black-hole-charge-ready-button');
+            chargeButton.classList.remove('red-disabled-text');
             chargeButton.disabled = true;
+            chargeButton.style.pointerEvents = 'none';
         } else if (charging) {
             chargeButton.textContent = 'Charging...';
             chargeButton.classList.remove('black-hole-charge-ready-button');
+            chargeButton.classList.add('red-disabled-text');
             chargeButton.disabled = true;
+            chargeButton.style.pointerEvents = 'none';
         } else if (getBlackHoleChargeReady()) {
             chargeButton.textContent = 'ACTIVATE';
             chargeButton.classList.add('black-hole-charge-ready-button');
+            chargeButton.classList.remove('red-disabled-text');
             chargeButton.disabled = false;
+            chargeButton.style.pointerEvents = 'auto';
         } else {
             chargeButton.textContent = 'Charge';
             chargeButton.classList.remove('black-hole-charge-ready-button');
+            chargeButton.classList.remove('red-disabled-text');
             chargeButton.disabled = false;
+            chargeButton.style.pointerEvents = 'auto';
         }
     }
 }
