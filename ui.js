@@ -256,7 +256,8 @@ import {
     calculateStarTravelDurationWithModifiers,
     getAscendencyPointsWithRepeatableBonus,
     formatProductionRateValue,
-    timeWarp
+    timeWarp,
+    forceClearWeather
 } from './game.js';
 
 import { 
@@ -9136,6 +9137,12 @@ debugTimeWarpButton?.addEventListener('click', () => {
     const duration = getDebugTimeWarpDurationMs();
     const multiplier = getDebugTimeWarpMultiplier();
     timeWarp(duration, multiplier);
+});
+
+const clearWeatherButton = document.getElementById('clearWeatherButton');
+clearWeatherButton?.addEventListener('click', () => {
+    forceClearWeather();
+    showNotification('CHEAT! Weather set to sunny', 'info', 3000, 'debug');
 });
 
 const buildLaunchPadScannerAndAllRocketsButton = document.getElementById('buildLaunchPadScannerAndAllRocketsButton');

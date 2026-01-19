@@ -431,10 +431,13 @@ import {
  import { playClickSfx, sfxPlayer, weatherAmbienceManager, backgroundAudio } from './audioManager.js';
  import { timerManager } from './timerManager.js';
 import { timerManagerDelta } from './timerManagerDelta.js';
- import { initialiseDescriptions, megaStructureTableText } from './descriptions.js';
 
- import { drawTab5Content } from './drawTab5Content.js';
+import { initialiseDescriptions, megaStructureTableText } from './descriptions.js';
+
+import { drawTab5Content } from './drawTab5Content.js';
 import { handleTechnologyButtonClick } from './drawTab3Content.js';
+
+let weatherCountDownToChangeInterval = null;
 
 function updateProductionRateText(elementId, rateValue) {
     if (!isFinite(rateValue)) {
@@ -7249,9 +7252,7 @@ function startInitialTimers() {
     initialiseResearchDeltaTimer();
     initialiseEnergyDeltaTimer();
 
-    let weatherCountDownToChangeInterval;
-
-    changeWeather(weatherCountDownToChangeInterval);
+    changeWeather();
 
     let marketBiasAdjustmentInterval;
     startMarketBiasAdjustment();
@@ -7296,7 +7297,7 @@ function startInitialTimers() {
     }
 }
 
-function changeWeather(weatherCountDownToChangeInterval) {
+function changeWeather(forcedWeatherType = null) {
     function selectNewWeather() {
         setResourceDataObject(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'quantity']) * getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'rate']), 'buildings', ['energy', 'upgrades', 'powerPlant2', 'purchasedRate']);
         setWeatherEfficiencyApplied(false);
@@ -7310,11 +7311,15 @@ function changeWeather(weatherCountDownToChangeInterval) {
         let cumulativeProbability = 0;
         let selectedWeatherType = '';
 
-        for (let i = 0; i < weatherTypes.length; i++) {
-            cumulativeProbability += weatherProbabilities[i];
-            if (randomSelection <= cumulativeProbability) {
-                selectedWeatherType = weatherTypes[i];
-                break;
+        if (forcedWeatherType && weatherCurrentStarSystemObject[forcedWeatherType]) {
+            selectedWeatherType = forcedWeatherType;
+        } else {
+            for (let i = 0; i < weatherTypes.length; i++) {
+                cumulativeProbability += weatherProbabilities[i];
+                if (randomSelection <= cumulativeProbability) {
+                    selectedWeatherType = weatherTypes[i];
+                    break;
+                }
             }
         }
 
@@ -7393,9 +7398,18 @@ function changeWeather(weatherCountDownToChangeInterval) {
             stopWeatherEffect();
             setWeatherEffectOn(false);
             clearInterval(weatherCountDownToChangeInterval);
-            changeWeather(weatherCountDownToChangeInterval);
+            weatherCountDownToChangeInterval = null;
+            changeWeather();
         }
     }, 1000);
+}
+
+export function forceClearWeather() {
+    stopWeatherEffect();
+    setWeatherEffectOn(false);
+    setCurrentPrecipitationRate(0);
+    setWeatherEfficiencyApplied(false);
+    changeWeather('sunny');
 }
 
 function calculateCreatableCompoundAmount(compoundToCreate) {
