@@ -11647,6 +11647,10 @@ export function addPermanentBuffsBackInAfterRebirth() {
     if (getBuffCompoundAutomationData()['boughtYet'] > 0) {
         setTechUnlockedArray('compoundMachining');
     }
+
+    if (getAscendencyBuffDataObject()?.autoSpaceTelescope?.boughtYet > 0) {
+        setResourceDataObject(true, 'space', ['upgrades', 'spaceTelescope', 'autoSpaceTelescopeRowEnabled']);
+    }
 }
 
 export function rebirth() {
