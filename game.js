@@ -337,6 +337,9 @@ import {
     getBlackHoleChargeReady,
     getBlackHoleDurationUpgradeIncrementMs,
     getBlackHolePowerUpgradeIncrement,
+
+    getMiaplacidusEndgameStoryShown,
+    setMiaplacidusEndgameStoryShown,
 } from './constantsAndGlobalVars.js';
 
 import {
@@ -438,7 +441,24 @@ import {
     capitaliseWordsWithRomanNumerals
  } from './utilityFunctions.js';
 
- import { modalCompoundMachiningTabUnlockHeader, modalCompoundMachiningTabUnlockText, modalPlayerLeaderPhilosophyHeaderText, modalPlayerLeaderPhilosophyContentText, modalPlayerLeaderIntroHeaderText, modalPlayerLeaderIntroContentText1, modalPlayerLeaderIntroContentText2, modalPlayerLeaderIntroContentText3, modalPlayerLeaderIntroContentText4, modalGalacticTabUnlockHeader, modalGalacticTabUnlockText, newsTickerContent, refreshAchievementTooltipDescriptions, modalBlackHoleDiscoveredHeader, modalBlackHoleDiscoveredText } from './descriptions.js';
+ import {
+    modalCompoundMachiningTabUnlockHeader,
+    modalCompoundMachiningTabUnlockText,
+    modalPlayerLeaderPhilosophyHeaderText,
+    modalPlayerLeaderPhilosophyContentText,
+    modalPlayerLeaderIntroHeaderText,
+    modalPlayerLeaderIntroContentText1,
+    modalPlayerLeaderIntroContentText2,
+    modalPlayerLeaderIntroContentText3,
+    modalPlayerLeaderIntroContentText4,
+    modalGalacticTabUnlockHeader,
+    modalGalacticTabUnlockText,
+    newsTickerContent,
+    refreshAchievementTooltipDescriptions,
+    modalBlackHoleDiscoveredHeader,
+    modalBlackHoleDiscoveredText,
+    miaplacidusEndgameStoryPopups
+} from './descriptions.js';
 
  import { initializeAutoSave, saveGame } from './saveLoadGame.js';
  import { playClickSfx, sfxPlayer, weatherAmbienceManager, backgroundAudio } from './audioManager.js';
@@ -11581,6 +11601,15 @@ export async function settleSystemAfterBattle(accessPoint) {
             break;
     }
 
+    if (
+        accessPoint === 'battle' &&
+        getDestinationStar()?.toLowerCase() === getHomeStarName() &&
+        !getMiaplacidusEndgameStoryShown()
+    ) {
+        setMiaplacidusEndgameStoryShown(true);
+        await showMiaplacidusEndgameStory();
+    }
+
     if (getStarsWithAncientManuscripts().some(star => star[0] === getDestinationStar())) {
         let factoryStarToReport = null;
 
@@ -11618,6 +11647,35 @@ export async function settleSystemAfterBattle(accessPoint) {
     }    
 
     autoSelectOption('fleetHangarOption', apGain);
+}
+
+async function showMiaplacidusEndgameStory() {
+    const show = ({ header, content, confirmLabel }) => new Promise(resolve => {
+        callPopupModal(
+            header,
+            content,
+            true,
+            false,
+            false,
+            false,
+            function() {
+                showHideModal();
+                resolve();
+            },
+            null,
+            null,
+            null,
+            confirmLabel,
+            null,
+            null,
+            null,
+            false
+        );
+    });
+
+    for (const popup of miaplacidusEndgameStoryPopups) {
+        await show(popup);
+    }
 }
 
 function decideIfMoreSystemsAreAutomaticallySettled() {

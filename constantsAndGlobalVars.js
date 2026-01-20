@@ -593,6 +593,8 @@ let belligerentEnemyFlag = false;
 let feedbackCanBeRequested = true;
 let philosophyAbilityActive = false;
 
+let miaplacidusEndgameStoryShown = false;
+
 //GETTER SETTER METHODS
 export function setElements() {
     elements = {
@@ -1401,7 +1403,8 @@ export function captureGameStatusForSaving(type) {
         infinitePower: infinitePower,
         megaStructureResourceBonus: megaStructureResourceBonus,
         storageAdderBonus: storageAdderBonus,
-        permanentAntimatterUnlock: permanentAntimatterUnlock
+        permanentAntimatterUnlock: permanentAntimatterUnlock,
+        miaplacidusEndgameStoryShown: miaplacidusEndgameStoryShown,
     }
 
     return gameState;
@@ -1627,6 +1630,7 @@ export function restoreGameStatus(gameState, type) {
             megaStructureResourceBonus = gameState.flags.megaStructureResourceBonus ?? false;
             storageAdderBonus = gameState.flags.storageAdderBonus ?? false;
             permanentAntimatterUnlock = gameState.flags.permanentAntimatterUnlock ?? false;
+            miaplacidusEndgameStoryShown = gameState.flags.miaplacidusEndgameStoryShown ?? false;
 
             selectTheme(getCurrentTheme());
             applyCustomPointerSetting();
@@ -4521,6 +4525,14 @@ export function getPlayerPhilosophy() {
 
 export function setPlayerPhilosophy(value) {
     philosophy = value;
+}
+
+export function getMiaplacidusEndgameStoryShown() {
+    return miaplacidusEndgameStoryShown;
+}
+
+export function setMiaplacidusEndgameStoryShown(value) {
+    miaplacidusEndgameStoryShown = value;
 }
 
 //image urls----------------------------------------------------------------------------------------------------------------------

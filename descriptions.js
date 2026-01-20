@@ -118,6 +118,7 @@ export let modalMegaStructureTechGalacticMemoryArchive5Header;
 export let modalMegaStructureTechGalacticMemoryArchive5Text;
 export let modalBlackHoleDiscoveredHeader;
 export let modalBlackHoleDiscoveredText;
+export let miaplacidusEndgameStoryPopups;
 
 export function initialiseDescriptions() {
     gameIntroHeader = 'Welcome to the Cosmic Forge!';
@@ -228,6 +229,54 @@ export function initialiseDescriptions() {
     modalMegaStructureTechGalacticMemoryArchive5Text = `You have connected this Galactic Memory Archive into the fabric of the galaxy<br>meaning its benefits are now permanently available in whichever<br>system you might one day settle. This has enormous potential.<br><br><span class="green-ready-text">All Resource And Compound Storage Capacity + 10B!<br>All Resource And Compound Storage Capacity starts at 10B in every new System!</span>`;
     modalBlackHoleDiscoveredHeader = 'Black Hole Discovered!';
     modalBlackHoleDiscoveredText = `While studying the stars with the Space Telescope, you stumbled upon a Black Hole!<br>Time Dilation is a feature of these objects, and maybe we can harness its power for our own uses!<br><br><span class="green-ready-text">Take a look in the Galactic tab to interact with it.</span>`;
+
+    miaplacidusEndgameStoryPopups = [
+        {
+            header: 'MIAPLACIDUS',
+            content: 'The void falls silent as your fleets break the last wardens.<br>' +
+                'The great force field is gone, and the sky finally opens.<br>' +
+                'You step onto soil you once knew only in memory.<br>' +
+                'Spicite banners rise beside Miaplacidean symbols, unbroken.<br>' +
+                'For the first time since exile... you are home.',
+            confirmLabel: 'CONTINUE'
+        },
+        {
+            header: 'THE PORTAL',
+            content: 'Deep in the ruins, you find the scar in space - the old breach.<br>' +
+                'This is where the first explorer vanished into the disturbance.<br>' +
+                'This is where the machine race traced your people back.<br>' +
+                'Now the portal flickers, starved of power and authority.<br>' +
+                'You mark it not as a doorway, but as a warning.',
+            confirmLabel: 'CONTINUE'
+        },
+        {
+            header: 'THE FORGE',
+            content: 'Spica\'s colony stands at your side, stronger than any prophecy.<br>' +
+                'The galaxy remembers: Megastructures fall, systems unite, fear fades.<br>' +
+                'Your name is no longer a refugee\'s whisper - Mia\'Plac is legend.<br>' +
+                'You did not only survive... you built a future from hydrogen and hope.<br>' +
+                'The Cosmic Forge burns brighter than ever.',
+            confirmLabel: 'CONTINUE'
+        },
+        {
+            header: 'RECLAMATION',
+            content: 'Miaplacidus is reclaimed. The Wardens are defeated.<br>' +
+                'Your people\'s story is no longer one of loss, but of return.<br>' +
+                'This was the promise at the beginning of your long drift.<br>' +
+                'And now... you have fulfilled it.<br>' +
+                '<span class="green-ready-text">The game is complete.</span>',
+            confirmLabel: 'END GAME'
+        },
+        {
+            header: 'ONE LAST THING... ',
+            content: 'You can keep playing if you wish.<br>' +
+                'Keep conquering and settling until every system is yours.<br>' +
+                'Build, optimize, and prove your supremacy across the stars.<br>' +
+                'But in truth, your greatest victory is already written.<br>' +
+                'Welcome home, Cosmic Forger.',
+            confirmLabel: 'GLUTTON FOR PUNISHMENT'
+        }
+    ];
 
     headerDescriptions = {
         'Resources': 'Here you can gain and sell resources. You can also upgrade your storage capacity and automate resource harvesting.  When you discover fusion, you will also handle that here.',
