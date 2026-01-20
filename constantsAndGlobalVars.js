@@ -850,10 +850,21 @@ export const statFunctionsGets = {
     "stat_fleet3": getStatFleet3,
     "stat_fleet4": getStatFleet4,
     "stat_fleet5": getStatFleet5,
-    "stat_enemy": getStatEnemy,
-    "stat_enemyTotalDefenceOvercome": getStatEnemyTotalDefenceOvercome,
-    "stat_enemyTotalDefenceRemaining": getStatEnemyTotalDefenceRemaining,
+    "stat_enemy": getStatEnemyAllTime,
+    "stat_enemyTotalDefenceOvercome": getStatEnemyTotalDefenceOvercomeAllTime,
+    "stat_enemyTotalDefenceRemaining": getStatEnemyTotalDefenceRemainingAllTime,
     "stat_apFromStarVoyage": getStatApFromStarVoyage,
+
+    "stat_envoyThisRun": getStatFleetEnvoy,
+    "stat_scoutThisRun": getStatFleetScout,
+    "stat_marauderThisRun": getStatFleetMarauder,
+    "stat_landStalkerThisRun": getStatFleetLandStalker,
+    "stat_navalStraferThisRun": getStatFleetNavalStrafer,
+    "stat_envoy": getStatFleetEnvoy,
+    "stat_scout": getStatFleetScout,
+    "stat_marauder": getStatFleetMarauder,
+    "stat_landStalker": getStatFleetLandStalker,
+    "stat_navalStrafer": getStatFleetNavalStrafer,
 };
 
 export const statFunctionsSets = {
@@ -4624,27 +4635,51 @@ function getStatFleetAttackStrength() {
 }
 
 function getStatFleet1() {
-    return getResourceDataObject('space', ['upgrades', 'fleetScout', 'quantity']);
+    return getResourceDataObject('space', ['upgrades', 'fleetEnvoy', 'quantity']);
 }
 
 function getStatFleet2() {
-    return getResourceDataObject('space', ['upgrades', 'fleetMarauder', 'quantity']);
+    return getResourceDataObject('space', ['upgrades', 'fleetScout', 'quantity']);
 }
 
 function getStatFleet3() {
-    return getResourceDataObject('space', ['upgrades', 'fleetLandStalker', 'quantity']);
+    return getResourceDataObject('space', ['upgrades', 'fleetMarauder', 'quantity']);
 }
 
 function getStatFleet4() {
-    return getResourceDataObject('space', ['upgrades', 'fleetNavalStrafer', 'quantity']);
+    return getResourceDataObject('space', ['upgrades', 'fleetLandStalker', 'quantity']);
 }
 
 function getStatFleet5() {
+    return getResourceDataObject('space', ['upgrades', 'fleetNavalStrafer', 'quantity']);
+}
+
+function getStatFleetEnvoy() {
     return getResourceDataObject('space', ['upgrades', 'fleetEnvoy', 'quantity']);
+}
+
+function getStatFleetScout() {
+    return getResourceDataObject('space', ['upgrades', 'fleetScout', 'quantity']);
+}
+
+function getStatFleetMarauder() {
+    return getResourceDataObject('space', ['upgrades', 'fleetMarauder', 'quantity']);
+}
+
+function getStatFleetLandStalker() {
+    return getResourceDataObject('space', ['upgrades', 'fleetLandStalker', 'quantity']);
+}
+
+function getStatFleetNavalStrafer() {
+    return getResourceDataObject('space', ['upgrades', 'fleetNavalStrafer', 'quantity']);
 }
 
 function getStatEnemy() {
     return getStarSystemDataObject('stars', ['destinationStar', 'raceName'], true) ?? 'N/A';
+}
+
+function getStatEnemyAllTime() {
+    return 'N/A';
 }
 
 function getStatEnemyTotalDefenceOvercome() {
@@ -4653,8 +4688,16 @@ function getStatEnemyTotalDefenceOvercome() {
     return Math.max(0, start - current);
 }
 
+function getStatEnemyTotalDefenceOvercomeAllTime() {
+    return 'N/A';
+}
+
 function getStatEnemyTotalDefenceRemaining() {
     return getStarSystemDataObject('stars', ['destinationStar', 'enemyFleets', 'fleetPower'], true) ?? 0;
+}
+
+function getStatEnemyTotalDefenceRemainingAllTime() {
+    return 'N/A';
 }
 
 function getStatApFromStarVoyage() {

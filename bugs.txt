@@ -2,6 +2,5 @@ when power on with a basic power plant, carbon production severely reduced in re
 if you buy a resource or compound in the GM befoe it is revealed, could be a better way of handling it than just allowing it and then it showing up when it is revealed
 
 REALLY TO DO TO END OF GAME
-    - ADD REST OF STATISTICS
     - ADD ACHIEVEMENTS TO INCLUDE PHILOSOPHIES AND MEGASTRUCTURE STORY ARC
     - TELL A STORY IN THE INTRO POPUPS AND ADD MORE OF THIS THROUGHOUT ALL THE GAME

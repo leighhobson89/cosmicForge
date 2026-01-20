@@ -2363,19 +2363,19 @@ statisticsContent = {
         subHeading5: "Fleet Attack Strength",
         subBody5: "10000",
 
-        subHeading6: "Fleet1",
+        subHeading6: "Envoy",
         subBody6: "8",
 
-        subHeading7: "Fleet2",
+        subHeading7: "Scout",
         subBody7: "12",
 
-        subHeading8: "Fleet3",
+        subHeading8: "Marauder",
         subBody8: "8",
 
-        subHeading9: "Fleet4",
+        subHeading9: "Land Stalker",
         subBody9: "2",
 
-        subHeading10: "Fleet5",
+        subHeading10: "Naval Strafer",
         subBody10: "2",
 
         subHeading11: "Enemy",
