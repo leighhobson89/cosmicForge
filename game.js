@@ -9038,7 +9038,7 @@ function getConstituentComponents(createCompoundDescriptionString) {
     let constituentPartName4 = '';
 
     // Main compound quantity
-    const regexCompoundToCreate = /(\d+(?:\.\d+)?(?:[KMGTPE]?)?)\s*/;
+    const regexCompoundToCreate = /(\d[\d,]*(?:\.\d+)?(?:[KMBGTPE]?)?)\s*/;
     const matchCompound = createCompoundDescriptionString.match(regexCompoundToCreate);
     if (matchCompound) {
         compoundToCreateQuantity = matchCompound[1];
@@ -9047,7 +9047,7 @@ function getConstituentComponents(createCompoundDescriptionString) {
     }
     
     // Constituent Part 1
-    const regexConstituentPart1 = /\((\d+(?:\.\d+)?(?:[KMGTPE]?)?)\s*([a-zA-Z]+)/;
+    const regexConstituentPart1 = /\((\d[\d,]*(?:\.\d+)?(?:[KMBGTPE]?)?)\s*([a-zA-Z]+)/;
 
     const matchConstituentPart1 = createCompoundDescriptionString.match(regexConstituentPart1);
     if (matchConstituentPart1) {
@@ -9056,7 +9056,7 @@ function getConstituentComponents(createCompoundDescriptionString) {
     }
     
     // Constituent Part 2
-    const regexConstituentPart2 = /, (\d+(?:\.\d+)?(?:[KMGTPE]?)?)\s*([a-zA-Z]+)/
+    const regexConstituentPart2 = /, (\d[\d,]*(?:\.\d+)?(?:[KMBGTPE]?)?)\s*([a-zA-Z]+)/
     const matchConstituentPart2 = createCompoundDescriptionString.match(regexConstituentPart2);
     if (matchConstituentPart2) {
         constituentPartQuantity2 = matchConstituentPart2[1];
@@ -9064,7 +9064,7 @@ function getConstituentComponents(createCompoundDescriptionString) {
     }
     
     // Constituent Part 3
-    const regexConstituentPart3 = /(?:, \d+(?:\.\d+)?(?:[KMGTPE]?)?\s*[a-zA-Z]+){1}\s*,\s*(\d+(?:\.\d+)?(?:[KMGTPE]?)?)\s*([a-zA-Z]+)/;
+    const regexConstituentPart3 = /(?:, \d[\d,]*(?:\.\d+)?(?:[KMBGTPE]?)?\s*[a-zA-Z]+){1}\s*,\s*(\d[\d,]*(?:\.\d+)?(?:[KMBGTPE]?)?)\s*([a-zA-Z]+)/;
                                     
     const matchConstituentPart3 = createCompoundDescriptionString.match(regexConstituentPart3);
     if (matchConstituentPart3) {
@@ -9073,7 +9073,7 @@ function getConstituentComponents(createCompoundDescriptionString) {
     }
     
     // Constituent Part 4
-    const regexConstituentPart4 = /(?:, \d+(?:\.\d+)?(?:[KMGTPE]?)?\s*[a-zA-Z]+){2}\s*,\s*(\d+(?:\.\d+)?(?:[KMGTPE]?)?)\s*([a-zA-Z]+)/;
+    const regexConstituentPart4 = /(?:, \d[\d,]*(?:\.\d+)?(?:[KMBGTPE]?)?\s*[a-zA-Z]+){2}\s*,\s*(\d[\d,]*(?:\.\d+)?(?:[KMBGTPE]?)?)\s*([a-zA-Z]+)/;
     const matchConstituentPart4 = createCompoundDescriptionString.match(regexConstituentPart4);
     if (matchConstituentPart4) {
         constituentPartQuantity4 = matchConstituentPart4[1];
@@ -9130,10 +9130,10 @@ function parseNumber(value) {
         P: 1e15
     };
 
-    let match = value.match(/(\d+(?:\.\d+)?)([KMGTPE]?)?/);
+    let match = value.match(/(\d[\d,]*(?:\.\d+)?)([KMBGTPE]?)?/);
     if (match) {
         let [_, numPart, unitPart] = match;
-        let number = parseFloat(numPart.replace(',', ''));
+        let number = parseFloat(numPart.replace(/,/g, ''));
         if (unitPart in unitMultipliers) {
             number *= unitMultipliers[unitPart];
         }

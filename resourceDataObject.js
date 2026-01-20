@@ -983,7 +983,7 @@ export const miaplacidus = {
             sea: { value: 0, class: 'red-disabled-text' }
         }
     },
-    anomalies: ['Stalwart'],
+    anomalies: ['Broken Force Field', 'AI Master Race'],
     initialImpression: 0,
     currentImpression: 0,
     latestDifferenceInImpression: 0,

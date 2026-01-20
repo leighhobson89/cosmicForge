@@ -5524,7 +5524,11 @@ function buildStarShipSidebarStatus() {
     }
 
     if (starShipState === 'orbiting') {
-        return { text: 'Orbiting Destination', className: starShipStatusClassMap['Orbiting Destination'] };
+        const destination = (getStarShipStatus() || [])[1];
+        const destinationText = destination
+            ? `Orbiting ${capitaliseWordsWithRomanNumerals(destination)}`
+            : 'Orbiting Destination';
+        return { text: destinationText, className: starShipStatusClassMap['Orbiting Destination'] };
     }
 
     if (starShipState === 'travelling' || getStarShipTravelling()) {

@@ -648,10 +648,15 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                 anomaliesText = '<span>None</span>';
             } else {
                 anomaliesText = starData.anomalies.map(a => {
-                    if (a.name === 'None') {
+                    if (typeof a === 'string') {
+                        return `<span class="red-disabled-text">${a}</span>`;
+                    }
+
+                    if (a?.name === 'None') {
                         return `<span>N/A</span>`;
                     }
-                    return `${a.name}: <span class="${a.class}">${a.effect}</span>`;
+
+                    return `${a?.name}: <span class="${a?.class}">${a?.effect}</span>`;
                 }).join('<br/>');
             }
             
