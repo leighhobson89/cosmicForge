@@ -2557,7 +2557,8 @@ export function createSvgElement(id, width = "100%", height = "100%", additional
      canvas.height = renderSize;
      canvas.style.width = `${paddedWidth}px`;
      canvas.style.height = `${renderSize}px`;
-     canvas.style.margin = '0 0 0 100px';
+     canvas.style.display = 'block';
+     canvas.style.margin = '0 auto';
 
      const ctx = canvas.getContext('2d');
      if (!ctx) return canvas;

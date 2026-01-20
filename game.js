@@ -1831,6 +1831,7 @@ function blackHoleUIChecks() {
     }
 
     const timeMultiplierElement = document.getElementById('blackholeOption2');
+    const statusIndicatorElement = document.getElementById('blackholeOption3');
 
     if (getBlackHoleDiscovered()) {
         rowElement.parentElement.parentElement.classList.remove('invisible');
@@ -1955,6 +1956,23 @@ function blackHoleUIChecks() {
     const charging = getCurrentlyChargingBlackHole();
     const chargeReady = getBlackHoleChargeReady();
 
+    if (statusIndicatorElement) {
+        statusIndicatorElement.classList.remove('warning-orange-text', 'green-ready-text');
+
+        if (timeWarping && researchDone) {
+            statusIndicatorElement.textContent = 'ACTIVE!';
+            statusIndicatorElement.classList.add('green-ready-text');
+        } else if (chargeReady && researchDone && !timeWarping) {
+            statusIndicatorElement.textContent = 'READY!';
+            statusIndicatorElement.classList.add('green-ready-text');
+        } else if (charging && researchDone && !timeWarping) {
+            statusIndicatorElement.textContent = 'Charging...';
+            statusIndicatorElement.classList.add('warning-orange-text');
+        } else {
+            statusIndicatorElement.textContent = '';
+        }
+    }
+
     if (!researchDone) {
         if (timeWarpProgressRow) {
             timeWarpProgressRow.classList.add('invisible');
@@ -2078,16 +2096,25 @@ function blackHoleUIChecks() {
 
     if (chargeButton) {
         if (timeWarping) {
-            chargeButton.textContent = 'Time Warp...';
+            chargeButton.textContent = 'ACTIVE!';
+            setButtonState(chargeButton, {
+                enabled: false,
+                ready: false,
+                applyDisabledClass: false,
+                removeClasses: ['black-hole-charge-ready-button', 'red-disabled-text', 'warning-orange-text'],
+                addClasses: ['green-ready-text']
+            });
+            chargeButton.classList.add('green-ready-text');
+        } else if (charging) {
+            chargeButton.textContent = 'Charging...';
             setButtonState(chargeButton, {
                 enabled: false,
                 ready: false,
                 applyDisabledClass: false,
                 removeClasses: ['black-hole-charge-ready-button', 'red-disabled-text']
             });
-        } else if (charging) {
-            chargeButton.textContent = 'Charging...';
-            setButtonState(chargeButton, { enabled: false, ready: false, removeClasses: ['black-hole-charge-ready-button'] });
+            chargeButton.classList.add('warning-orange-text');
+            chargeButton.classList.remove('green-ready-text');
         } else if (chargeReady) {
             chargeButton.textContent = 'ACTIVATE';
             setButtonState(chargeButton, {
@@ -2095,16 +2122,20 @@ function blackHoleUIChecks() {
                 ready: false,
                 applyDisabledClass: false,
                 addClasses: ['black-hole-charge-ready-button'],
-                removeClasses: ['red-disabled-text']
+                removeClasses: ['red-disabled-text', 'warning-orange-text']
             });
+            chargeButton.classList.remove('warning-orange-text');
+            chargeButton.classList.remove('green-ready-text');
         } else {
             chargeButton.textContent = 'Charge';
             setButtonState(chargeButton, {
                 enabled: true,
                 ready: false,
                 applyDisabledClass: false,
-                removeClasses: ['black-hole-charge-ready-button', 'red-disabled-text']
+                removeClasses: ['black-hole-charge-ready-button', 'red-disabled-text', 'warning-orange-text']
             });
+            chargeButton.classList.remove('warning-orange-text');
+            chargeButton.classList.remove('green-ready-text');
         }
     }
 }
