@@ -11641,6 +11641,17 @@ export function rebirth() {
     resetAchievementsOnRebirth();
     autoGrantAchievementsOnRebirth();
     resetResourceDataObjectOnRebirthAndAddApAndPermanentBuffsBack(); //resets resource data, adds permanent buffs, and adds AP back in
+
+    if (getBlackHoleResearchDone() && !getCurrentlyTimeWarpingBlackHole() && !getCurrentlyChargingBlackHole() && !getBlackHoleChargeReady()) {
+        const timerName = 'blackHoleChargeTimer';
+        if (timerManagerDelta.hasTimer(timerName)) {
+            timerManagerDelta.removeTimer(timerName);
+        }
+        setCurrentBlackHoleChargeTimerDurationTotal(0);
+        setTimeLeftUntilBlackHoleChargeTimerFinishes(0);
+        startBlackHoleChargeTimer([0, 'rebirth']);
+    }
+
     resetTabsOnRebirth();
     resetUIElementsOnRebirth();
     setCurrentRunIsMegaStructureRun(getFactoryStarsArray().includes(getCurrentStarSystem()));
