@@ -1609,11 +1609,11 @@ export function updateContent(heading, tab, type) {
     optionContentElement = document.getElementById(`optionContentTab${tabNumber}`);
 
     headerContentElement.innerText = heading;
-    
-    if (heading.includes('⚠️')) {
-        heading = heading.replace(/⚠️/, '').trimEnd();
+
+    if (heading.includes('⚠️') || heading.includes('🌀')) {
+        heading = heading.replace(/\s*[⚠️🌀]/g, '').trim();
         headerContentElement.innerText = heading;
-    }    
+    }
 
     optionContentElement.innerHTML = '';
        
@@ -2397,23 +2397,48 @@ export function updateAttentionIndicators() {
         const element = document.querySelector(rule.selector);
 
         if (rule.condition()) {
-            element.innerHTML.includes('???')
-                ? removeAttentionIndicator(element)
-                : appendAttentionIndicator(element);
+            if (element.innerHTML.includes('???')) {
+                removeAttentionIndicator(element);
+                return;
+            }
+
+            let iconText = '⚠️';
+            if (element.id?.startsWith('tab')) {
+                const container = document.getElementById(`${element.id}ContainerGroup`);
+                const containerIcons = Array.from(container?.querySelectorAll('.attention-indicator') || []);
+                const iconTexts = containerIcons
+                    .map(icon => icon?.textContent?.trim())
+                    .filter(Boolean);
+
+                if (iconTexts.includes('🌀')) {
+                    iconText = '🌀';
+                } else if (iconTexts.length > 0) {
+                    iconText = iconTexts[0];
+                }
+            }
+
+            appendAttentionIndicator(element, iconText);
         } else {
             removeAttentionIndicator(element);
         }
     });
 }
 
-export function appendAttentionIndicator(element) {
+export function appendAttentionIndicator(element, iconText = '⚠️') {
     if (!element || !(element instanceof HTMLElement)) return;
-    if (!element.querySelector('.attention-indicator')) {
-      const icon = document.createElement('span');
-      icon.className = 'attention-indicator';
-      icon.textContent = ' ⚠️';
-      element.appendChild(icon);
+    const existing = element.querySelector('.attention-indicator');
+    if (existing) {
+        const desired = ` ${iconText}`;
+        if (existing.textContent !== desired) {
+            existing.textContent = desired;
+        }
+        return;
     }
+
+    const icon = document.createElement('span');
+    icon.className = 'attention-indicator';
+    icon.textContent = ` ${iconText}`;
+    element.appendChild(icon);
   }
 
 export function removeAttentionIndicator(element) {
@@ -6199,7 +6224,7 @@ export function showTabsUponUnlock() {
 
 function normalizeTabName(tabName) {
     return tabName
-        .replace(/\s*⚠️/, '')
+        .replace(/\s*[⚠️🌀]/g, '')
         .toLowerCase()
         .trimEnd();
 }
@@ -6243,7 +6268,16 @@ export function checkOrderOfTabs() {
     allTabs.forEach(tab => {
         const container = document.getElementById(`${tab.id}ContainerGroup`);
         if (container && container.querySelector('.attention-indicator')) {
-            appendAttentionIndicator(tab);
+            const containerIcons = Array.from(container.querySelectorAll('.attention-indicator'));
+            const iconTexts = containerIcons
+                .map(icon => icon?.textContent?.trim())
+                .filter(Boolean);
+
+            const iconText = iconTexts.includes('🌀')
+                ? '🌀'
+                : (iconTexts[0] || '⚠️');
+
+            appendAttentionIndicator(tab, iconText);
         } else {
             removeAttentionIndicator(tab);
         }

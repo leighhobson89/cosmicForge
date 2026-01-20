@@ -1834,6 +1834,15 @@ function blackHoleUIChecks() {
     const timeMultiplierElement = document.getElementById('blackholeOption2');
     const statusIndicatorElement = document.getElementById('blackholeOption3');
 
+    const interactionDescriptionElement = document.getElementById('blackHoleInteractionRowDescription');
+    if (interactionDescriptionElement) {
+        const researchPoints = getResourceDataObject('research', ['quantity']);
+        const baseText = 'Here you can research and upgrade your interaction power with the Black Hole - Research Points:';
+        const formattedBase = baseText.replace(/ /g, '&nbsp;');
+        const formattedResearch = `<span class="green-ready-text">${formatNumber(researchPoints)}</span>`;
+        interactionDescriptionElement.innerHTML = `${formattedBase}&nbsp;${formattedResearch}`;
+    }
+
     if (getBlackHoleDiscovered()) {
         rowElement.parentElement.parentElement.classList.remove('invisible');
     } else {
@@ -1956,6 +1965,27 @@ function blackHoleUIChecks() {
 
     const charging = getCurrentlyChargingBlackHole();
     const chargeReady = getBlackHoleChargeReady();
+
+    if (researchDone && chargeReady && !timeWarping) {
+        appendAttentionIndicator(rowElement, '🌀');
+    } else if (charging || timeWarping) {
+        const icon = rowElement.querySelector('.attention-indicator');
+        if (icon) {
+            icon.remove();
+        }
+    }
+
+    const tab7 = document.getElementById('tab7');
+    if (tab7 && !tab7.innerHTML.includes('???')) {
+        if (researchDone && chargeReady && !timeWarping) {
+            appendAttentionIndicator(tab7, '🌀');
+        } else {
+            const tabIcon = tab7.querySelector('.attention-indicator');
+            if (tabIcon && tabIcon.textContent?.trim() === '🌀') {
+                tabIcon.remove();
+            }
+        }
+    }
 
     if (statusIndicatorElement) {
         statusIndicatorElement.classList.remove('warning-orange-text', 'green-ready-text');
@@ -8101,6 +8131,7 @@ export function startBlackHoleChargeTimer(adjustment) {
                 timerManagerDelta.removeTimer(timerName);
                 setCurrentlyChargingBlackHole(false);
                 setBlackHoleChargeReady(true);
+                appendAttentionIndicator(document.getElementById('blackholeOption'), '🌀');
                 setTimeLeftUntilBlackHoleChargeTimerFinishes(0);
 
                 if (progressBar) {
@@ -9946,6 +9977,7 @@ function handleBlackHoleDiscoveryRoll() {
     const roll = Math.random() * 100;
     if (roll < updatedProbability) {
         setBlackHoleDiscovered(true);
+        appendAttentionIndicator(document.getElementById('blackholeOption'));
         callPopupModal(
             modalBlackHoleDiscoveredHeader,
             modalBlackHoleDiscoveredText,
