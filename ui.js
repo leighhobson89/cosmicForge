@@ -2721,6 +2721,7 @@ export function createSvgElement(id, width = "100%", height = "100%", additional
 
          ctx.save();
          ctx.translate(c, c);
+         ctx.translate(0, 16); // Adjusted vertical centering
          ctx.scale(pulseScale, pulseScale);
          ctx.scale(1, 0.82);
 
@@ -2859,8 +2860,9 @@ export function createSvgElement(id, width = "100%", height = "100%", additional
 
          ctx.restore();
 
-         ctx.save();
-         ctx.translate(c, c);
+        ctx.save();
+        ctx.translate(c, c);
+        ctx.translate(0, 16);
 
          ctx.globalCompositeOperation = 'source-over';
          ctx.globalAlpha = 1;
@@ -8105,6 +8107,115 @@ export function setColoniseOpinionProgressBar(value, parentElement) {
     barText.textContent = `Impression: ${value}%`;
 }
 
+
+const battleVisualLasers = [];
+const battleVisualExplosions = [];
+
+
+function wrapAngle(angle) {
+    return ((angle % (2 * Math.PI)) + (2 * Math.PI)) % (2 * Math.PI);
+}
+
+
+function angleLerp(current, target, t) {
+    const c = wrapAngle(current);
+    const to = wrapAngle(target);
+    let diff = to - c;
+    if (diff > Math.PI) diff -= Math.PI * 2;
+    if (diff < -Math.PI) diff += Math.PI * 2;
+    return c + diff * t;
+}
+
+
+function updateUnitRenderState(unit) {
+    if (typeof unit.renderX !== 'number') unit.renderX = unit.x;
+    if (typeof unit.renderY !== 'number') unit.renderY = unit.y;
+    const desiredRot = typeof unit.rotation === 'number' ? unit.rotation : 0;
+    if (typeof unit.renderRotation !== 'number') unit.renderRotation = desiredRot;
+
+    unit.renderX += (unit.x - unit.renderX) * 0.35;
+    unit.renderY += (unit.y - unit.renderY) * 0.35;
+    unit.renderRotation = angleLerp(unit.renderRotation, desiredRot, 0.22);
+}
+
+
+function renderBattleLasers(ctx, now) {
+    if (!battleVisualLasers.length) return;
+
+    for (let i = battleVisualLasers.length - 1; i >= 0; i--) {
+        const shot = battleVisualLasers[i];
+        const age = now - shot.t;
+        if (age >= shot.life) {
+            battleVisualLasers.splice(i, 1);
+            continue;
+        }
+
+        const p = age / shot.life;
+        const a = (1 - p);
+
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.lineCap = 'round';
+
+        ctx.globalAlpha = 0.18 * a;
+        ctx.strokeStyle = shot.color;
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.moveTo(shot.x1, shot.y1);
+        ctx.lineTo(shot.x2, shot.y2);
+        ctx.stroke();
+
+        ctx.globalAlpha = 0.95 * a;
+        ctx.strokeStyle = shot.color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(shot.x1, shot.y1);
+        ctx.lineTo(shot.x2, shot.y2);
+        ctx.stroke();
+
+        ctx.globalAlpha = 0.7 * a;
+        ctx.fillStyle = 'rgba(255,255,255,1)';
+        ctx.beginPath();
+        ctx.arc(shot.x2, shot.y2, 1.6, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+    }
+}
+
+
+function renderBattleExplosions(ctx, now) {
+    if (!battleVisualExplosions.length) return;
+
+    for (let i = battleVisualExplosions.length - 1; i >= 0; i--) {
+        const ex = battleVisualExplosions[i];
+        const age = now - ex.t;
+        if (age >= ex.life) {
+            battleVisualExplosions.splice(i, 1);
+            continue;
+        }
+
+        const p = age / ex.life;
+        const a = 1 - p;
+
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+
+        for (const part of ex.parts) {
+            const px = ex.x + part.vx * p;
+            const py = ex.y + part.vy * p + p * p * 26;
+            const pr = part.r * (1 - p);
+            ctx.globalAlpha = a * part.a;
+            ctx.fillStyle = part.c;
+            ctx.beginPath();
+            ctx.arc(px, py, pr, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        ctx.restore();
+    }
+}
+
 //-------------------------------------------------------------------------------------------------
 //--------------BATTLECANVAS-------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
@@ -8304,32 +8415,78 @@ export function setColoniseOpinionProgressBar(value, parentElement) {
     
     function drawUnit(ctx, unit) {
         ctx.save();
-        ctx.translate(unit.x, unit.y);
+        const x = typeof unit.renderX === 'number' ? unit.renderX : unit.x;
+        const y = typeof unit.renderY === 'number' ? unit.renderY : unit.y;
+        ctx.translate(x, y);
 
         if (unit.id.includes('air')) {
-            ctx.rotate(unit.rotation);
+            ctx.rotate(typeof unit.renderRotation === 'number' ? unit.renderRotation : unit.rotation);
         }
     
         switch (unit.id.split('_')[1]) {
             case 'air':
             case 'air_scout':
             case 'air_marauder':
+                ctx.save();
+                ctx.globalAlpha = 0.22;
+                ctx.fillStyle = 'rgba(255,255,255,1)';
                 ctx.beginPath();
-                ctx.moveTo(0, -unit.size);
-                ctx.lineTo(-unit.size, unit.size);
-                ctx.lineTo(unit.size, unit.size);
+                ctx.moveTo(0, -unit.size * 0.55);
+                ctx.lineTo(-unit.size * 0.35, unit.size * 0.65);
+                ctx.lineTo(unit.size * 0.35, unit.size * 0.65);
                 ctx.closePath();
                 ctx.fill();
+                ctx.restore();
+
+                ctx.beginPath();
+                ctx.moveTo(0, -unit.size);
+                ctx.lineTo(-unit.size * 1.1, unit.size);
+                ctx.lineTo(0, unit.size * 0.55);
+                ctx.lineTo(unit.size * 1.1, unit.size);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.globalAlpha = 0.5;
+                ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+                ctx.lineWidth = Math.max(1, unit.size * 0.18);
+                ctx.stroke();
+                ctx.globalAlpha = 1;
                 break;
             case 'land':
             case 'land_landStalker':
-                ctx.fillRect(-unit.size, -unit.size / 2, unit.size * 2, unit.size);
+                ctx.beginPath();
+                if (typeof ctx.roundRect === 'function') {
+                    ctx.roundRect(-unit.size, -unit.size * 0.55, unit.size * 2, unit.size * 1.1, unit.size * 0.35);
+                } else {
+                    ctx.rect(-unit.size, -unit.size * 0.55, unit.size * 2, unit.size * 1.1);
+                }
+                ctx.fill();
+
+                ctx.globalAlpha = 0.55;
+                ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+                ctx.lineWidth = Math.max(1, unit.size * 0.16);
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+
+                ctx.fillStyle = 'rgba(255,255,255,0.18)';
+                ctx.fillRect(-unit.size * 0.25, -unit.size * 0.75, unit.size * 0.5, unit.size * 0.55);
                 break;
             case 'sea':
             case 'sea_navalStrafer':
+                ctx.save();
+                ctx.scale(1.35, 0.85);
                 ctx.beginPath();
                 ctx.arc(0, 0, unit.size / 2, 0, Math.PI * 2);
                 ctx.fill();
+                ctx.restore();
+
+                ctx.globalAlpha = 0.55;
+                ctx.strokeStyle = 'rgba(0,0,0,0.28)';
+                ctx.lineWidth = Math.max(1, unit.size * 0.14);
+                ctx.beginPath();
+                ctx.arc(0, 0, unit.size * 0.45, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.globalAlpha = 1;
                 break;
         }
     
@@ -8343,6 +8500,22 @@ export function setColoniseOpinionProgressBar(value, parentElement) {
         
         animationContainer.style.left = `${x}px`;
         animationContainer.style.top = `${y}px`;
+
+        const now = performance.now();
+        const parts = [];
+        const count = 26;
+        for (let i = 0; i < count; i++) {
+            const a = (i / count) * Math.PI * 2;
+            const sp = 28 + Math.random() * 120;
+            parts.push({
+                vx: Math.cos(a) * sp,
+                vy: Math.sin(a) * sp,
+                r: 2.6 + Math.random() * 2.2,
+                a: 0.25 + Math.random() * 0.65,
+                c: Math.random() > 0.5 ? 'rgba(255,240,180,1)' : 'rgba(255,110,80,1)'
+            });
+        }
+        battleVisualExplosions.push({ x, y, t: now, life: 520, parts });
         
         setTimeout(() => {
             animationContainer.classList.remove('animate-explosion');
@@ -8352,9 +8525,7 @@ export function setColoniseOpinionProgressBar(value, parentElement) {
 
     export function shootLaser(unit, enemy) {
         const canvas = document.getElementById('battleCanvas');
-        const ctx = canvas.getContext("2d");
-    
-        ctx.lineWidth = 2;
+
         let strokeColor = "transparent";
     
         if (unit.currentGoal && unit.currentGoal.id === enemy.id) {
@@ -8377,11 +8548,11 @@ export function setColoniseOpinionProgressBar(value, parentElement) {
             }
         }
     
-        ctx.strokeStyle = strokeColor;
-        ctx.beginPath();
-        ctx.moveTo(unit.x, unit.y);
-        ctx.lineTo(enemy.x, enemy.y);
-        ctx.stroke();
+        const x1 = typeof unit.renderX === 'number' ? unit.renderX : unit.x;
+        const y1 = typeof unit.renderY === 'number' ? unit.renderY : unit.y;
+        const x2 = typeof enemy.renderX === 'number' ? enemy.renderX : enemy.x;
+        const y2 = typeof enemy.renderY === 'number' ? enemy.renderY : enemy.y;
+        battleVisualLasers.push({ x1, y1, x2, y2, color: strokeColor, t: performance.now(), life: 150 });
     }
 
     
@@ -8443,6 +8614,8 @@ export function setColoniseOpinionProgressBar(value, parentElement) {
         if (!battleUnits) return;
     
         ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
+
+        const now = performance.now();
 
         const highestColumnEnemy = battleUnits.enemy.reduce((max, unit) =>
             Math.max(max, unit.columnNumber || 0), 0);
@@ -8515,6 +8688,9 @@ export function setColoniseOpinionProgressBar(value, parentElement) {
                 console.log('unit drawn out of bounds of ever being on canvas:', unit);
             }
         });
+
+        battleUnits.player.forEach(updateUnitRenderState);
+        battleUnits.enemy.forEach(updateUnitRenderState);
     
         battleUnits.player.forEach(unit => {
             if (!unit.disabled) {
@@ -8540,6 +8716,9 @@ export function setColoniseOpinionProgressBar(value, parentElement) {
             drawUnit(ctx, unit);
             }
         });
+
+        renderBattleExplosions(ctx, now);
+        renderBattleLasers(ctx, now);
     }        
 
     function moveIntoFormation(canvas) {
