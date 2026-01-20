@@ -2932,7 +2932,7 @@ export function getCurrentStarSystem() {
 }
 
 export function setCurrentStarSystem(value) {
-    currentStarSystem = value;
+    currentStarSystem = typeof value === 'string' ? value.toLowerCase() : value;
 }
 
 export function getStartingStarSystem() {
@@ -3668,7 +3668,7 @@ export function getDestinationStar() {
 }
 
 export function setDestinationStar(value) {
-    destinationStar = value;
+    destinationStar = typeof value === 'string' ? value.toLowerCase() : value;
 }
 
 export function getStarShipTravelling() {
