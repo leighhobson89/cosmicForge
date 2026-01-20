@@ -2493,7 +2493,7 @@ export function createHtmlTableStatistics(id, classList = [], mainHeadings, subH
 
     for (let i = 0; i < mainHeadings.length; i++) {
         const mainHeading = capitaliseString(mainHeadings[i]);
-        const dualColumnPerRow = ['resources', 'compounds', 'research'].includes(String(mainHeadings[i]).toLowerCase());
+        const dualColumnPerRow = ['resources', 'compounds', 'research', 'energy', 'spacemining', 'interstellar'].includes(String(mainHeadings[i]).toLowerCase());
 
         innerTextString += `<span class="${mainHeaderClasses.join(' ')}">${mainHeading}</span><br/>`;
 

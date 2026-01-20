@@ -2292,7 +2292,7 @@ statisticsContent = {
         subBody4: "10000",
 
         subHeading5: "Techs Unlocked",
-        subBody5: "10000 / 38 (make dynamic)"
+        subBody5: "0"
     },
     'energy': {
         subHeading1: "Power",
@@ -2313,30 +2313,30 @@ statisticsContent = {
         subHeading6: "Times Tripped",
         subBody6: "10000",
 
-        subHeading7: "Basic Power Plants ",
+        subHeading7: "Basic Power Plants",
         subBody7: "10000",
 
-        subHeading8: "Advanced Power Plants ",
+        subHeading8: "Advanced Power Plants",
         subBody8: "10000",
 
-        subHeading9: "Solar Power Plants ",
+        subHeading9: "Solar Power Plants",
         subBody9: "10000",
 
-        subHeading10: "Sodium Ion Batteries ",
+        subHeading10: "Sodium Ion Batteries",
         subBody10: "10000",
 
-        subHeading11: "Battery2 ",
+        subHeading11: "Battery2",
         subBody11: "10000",
 
-        subHeading12: "Battery3 ",
+        subHeading12: "Battery3",
         subBody12: "10000"
     },
     'spaceMining': {
         subHeading1: "Space Telescope Built",
-        subBody1: "Yes",
+        subBody1: "N/A",
 
         subHeading2: "Launch Pad Built",
-        subBody2: "Yes",
+        subBody2: "N/A",
 
         subHeading3: "Rockets Built",
         subBody3: "4",
@@ -2349,16 +2349,16 @@ statisticsContent = {
     },
     'interstellar': {
         subHeading1: "Star Study Range",
-        subBody1: "5",
+        subBody1: "N/A",
 
         subHeading2: "Star Ship Built",
-        subBody2: "Yes",
+        subBody2: "N/A",
 
         subHeading3: "Star Ship Distance Travelled",
         subBody3: "0ly",
 
         subHeading4: "System Scanned",
-        subBody4: "No",
+        subBody4: "N/A",
 
         subHeading5: "Fleet Attack Strength",
         subBody5: "10000",

@@ -89,6 +89,7 @@ import {
     getAutoSaveToggle,
     setAutoSaveToggle,
     setBattleUnits,
+    setEnemyFleetPowerAtBattleStart,
     getBattleTriggeredByPlayer,
     getInFormation,
     setInFormation,
@@ -6857,6 +6858,7 @@ async function coloniseChecks() {
                 button.innerHTML = 'Attack!';
                 button.onclick = function() {
                     disableTabsLinksAndAutoSaveDuringBattle(true);
+                    setEnemyFleetPowerAtBattleStart(getStarSystemDataObject('stars', ['destinationStar', 'enemyFleets', 'fleetPower']));
                     setBattleTriggeredByPlayer(true);
                     setDiplomacyPossible(false);
                     setStarSystemDataObject(0, 'stars', ['destinationStar', 'initialImpression']);

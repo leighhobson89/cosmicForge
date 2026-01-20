@@ -485,6 +485,10 @@ let allTimeTotalResearchPoints = 0;
 let allTimeTotalScienceKits = 0;
 let allTimeTotalScienceClubs = 0;
 let allTimeTotalScienceLabs = 0;
+let allTimeTotalRocketsLaunched = 0;
+let allTimeTotalStarShipsLaunched = 0;
+let allTimeTotalAsteroidsDiscovered = 0;
+let allTimeTotalLegendaryAsteroidsDiscovered = 0;
 
 let hydrogenThisRun = 0;
 let heliumThisRun = 0;
@@ -506,10 +510,7 @@ let researchPointsThisRun = 0;
 let scienceKitsThisRun = 0;
 let scienceClubsThisRun = 0;
 let scienceLabsThisRun = 0;
-let allTimeTotalRocketsLaunched = 0;
-let allTimeTotalStarShipsLaunched = 0;
-let allTimeTotalAsteroidsDiscovered = 0;
-let allTimeTotalLegendaryAsteroidsDiscovered = 0;
+
 let starStudyRange = 0;
 let allTimeTotalAntimatterMined = 0;
 let antimatterMinedThisRun = 0;
@@ -521,12 +522,22 @@ let apAnticipatedThisRun = 0;
 let allTimeStarShipsBuilt = 0;
 let starShipTravelDistance = 0;
 let allTimesTripped = 0;
+let timesTrippedThisRun = 0;
 let allTimeBasicPowerPlantsBuilt = 0;
 let allTimeAdvancedPowerPlantsBuilt = 0;
 let allTimeSolarPowerPlantsBuilt = 0;
 let allTimeSodiumIonBatteriesBuilt = 0;
 let allTimeBattery2Built = 0;
 let allTimeBattery3Built = 0;
+let basicPowerPlantsBuiltThisRun = 0;
+let advancedPowerPlantsBuiltThisRun = 0;
+let solarPowerPlantsBuiltThisRun = 0;
+let sodiumIonBatteriesBuiltThisRun = 0;
+let battery2BuiltThisRun = 0;
+let battery3BuiltThisRun = 0;
+let allTimeRocketsBuilt = 0;
+let allTimeTotalAsteroidsMined = 0;
+let enemyFleetPowerAtBattleStart = 0;
 let asteroidsMinedThisRun = 0;
 let formationGoal = null;
 let liquidationValue = 0;
@@ -768,7 +779,8 @@ export const statFunctionsGets = {
     "stat_scienceKits": getStatScienceKits,
     "stat_scienceClubs": getStatScienceClubs,
     "stat_scienceLabs": getStatScienceLabs,
-    "stat_techsUnlocked": getStatTechsUnlocked,
+    "stat_techsUnlocked": getStatTechsUnlockedAllTime,
+    "stat_techsUnlockedThisRun": getStatTechsUnlocked,
 
     "stat_researchPointsThisRun": getStatResearchPointsThisRun,
     "stat_scienceKitsThisRun": getStatScienceKitsThisRun,
@@ -776,31 +788,62 @@ export const statFunctionsGets = {
     "stat_scienceLabsThisRun": getStatScienceLabsThisRun,
 
     // Energy
-    "stat_power": getStatPower,
-    "stat_totalEnergy": getStatTotalEnergy,
-    "stat_totalProduction": getStatTotalProduction,
-    "stat_totalConsumption": getStatTotalConsumption,
-    "stat_totalBatteryStorage": getStatTotalBatteryStorage,
+    "stat_powerThisRun": getStatPower,
+    "stat_totalEnergyThisRun": getStatTotalEnergy,
+    "stat_totalProductionThisRun": getStatTotalProduction,
+    "stat_totalConsumptionThisRun": getStatTotalConsumption,
+    "stat_totalBatteryStorageThisRun": getStatTotalBatteryStorage,
+    "stat_power": getStatPowerAllTime,
+    "stat_totalEnergy": getStatTotalEnergyAllTime,
+    "stat_totalProduction": getStatTotalProductionAllTime,
+    "stat_totalConsumption": getStatTotalConsumptionAllTime,
+    "stat_totalBatteryStorage": getStatTotalBatteryStorageAllTime,
     "stat_timesTripped": getStatTimesTripped,
+    "stat_timesTrippedThisRun": getStatTimesTrippedThisRun,
     "stat_basicPowerPlants": getStatBasicPowerPlants,
+    "stat_basicPowerPlantsThisRun": getStatBasicPowerPlantsThisRun,
     "stat_advancedPowerPlants": getStatAdvancedPowerPlants,
+    "stat_advancedPowerPlantsThisRun": getStatAdvancedPowerPlantsThisRun,
     "stat_solarPowerPlants": getStatSolarPowerPlants,
+    "stat_solarPowerPlantsThisRun": getStatSolarPowerPlantsThisRun,
     "stat_sodiumIonBatteries": getStatSodiumIonBatteries,
+    "stat_sodiumIonBatteriesThisRun": getStatSodiumIonBatteriesThisRun,
     "stat_battery2": getStatBattery2,
+    "stat_battery2ThisRun": getStatBattery2ThisRun,
     "stat_battery3": getStatBattery3,
+    "stat_battery3ThisRun": getStatBattery3ThisRun,
 
     // Space Mining
-    "stat_spaceTelescopeBuilt": getStatSpaceTelescopeBuilt,
-    "stat_launchPadBuilt": getStatLaunchPadBuilt,
-    "stat_rocketsBuilt": getStatRocketsBuilt,
-    "stat_asteroidsDiscovered": getStatAsteroidsDiscovered,
+    "stat_spaceTelescopeBuiltThisRun": getStatSpaceTelescopeBuilt,
+    "stat_launchPadBuiltThisRun": getStatLaunchPadBuilt,
+    "stat_spaceTelescopeBuilt": getStatSpaceTelescopeBuiltAllTime,
+    "stat_launchPadBuilt": getStatLaunchPadBuiltAllTime,
+    "stat_rocketsBuiltThisRun": getStatRocketsBuilt,
+    "stat_rocketsBuilt": getStatRocketsBuiltAllTime,
+    "stat_asteroidsDiscoveredThisRun": getStatAsteroidsDiscovered,
+    "stat_asteroidsDiscovered": getStatTotalAsteroidsDiscovered,
+    "stat_asteroidsMinedThisRun": getStatAsteroidsMinedThisRun,
     "stat_asteroidsMined": getStatAsteroidsMined,
 
     // Interstellar
-    "stat_starStudyRange": getStatStarStudyRange,
-    "stat_starShipBuilt": getStatStarShipBuilt,
+    "stat_starStudyRangeThisRun": getStatStarStudyRange,
+    "stat_starShipBuiltThisRun": getStatStarShipBuilt,
+    "stat_systemScannedThisRun": getStatSystemScanned,
+    "stat_starStudyRange": getStatStarStudyRangeAllTime,
+    "stat_starShipBuilt": getStatStarShipBuiltAllTime,
+    "stat_systemScanned": getStatSystemScannedAllTime,
+    "stat_starShipDistanceTravelledThisRun": getStatStarShipDistanceTravelled,
     "stat_starShipDistanceTravelled": getStatStarShipDistanceTravelled,
-    "stat_systemScanned": getStatSystemScanned,
+    "stat_fleetAttackStrengthThisRun": getStatFleetAttackStrength,
+    "stat_fleet1ThisRun": getStatFleet1,
+    "stat_fleet2ThisRun": getStatFleet2,
+    "stat_fleet3ThisRun": getStatFleet3,
+    "stat_fleet4ThisRun": getStatFleet4,
+    "stat_fleet5ThisRun": getStatFleet5,
+    "stat_enemyThisRun": getStatEnemy,
+    "stat_enemyTotalDefenceOvercomeThisRun": getStatEnemyTotalDefenceOvercome,
+    "stat_enemyTotalDefenceRemainingThisRun": getStatEnemyTotalDefenceRemaining,
+    "stat_apFromStarVoyageThisRun": getStatApFromStarVoyage,
     "stat_fleetAttackStrength": getStatFleetAttackStrength,
     "stat_fleet1": getStatFleet1,
     "stat_fleet2": getStatFleet2,
@@ -865,13 +908,21 @@ export const statFunctionsSets = {
     "set_totalRocketsLaunched": setStatTotalRocketsLaunched,
     "set_starShipLaunched": setStatStarShipLaunched,
     "set_allTimesTripped": setStatTimesTripped,
+    "set_allTimesTrippedThisRun": setStatTimesTrippedThisRun,
     "set_allTimeBasicPowerPlantsBuilt": setStatBasicPowerPlants,
+    "set_allTimeBasicPowerPlantsBuiltThisRun": setStatBasicPowerPlantsThisRun,
     "set_allTimeAdvancedPowerPlantsBuilt": setStatAdvancedPowerPlants,
+    "set_allTimeAdvancedPowerPlantsBuiltThisRun": setStatAdvancedPowerPlantsThisRun,
     "set_allTimeSolarPowerPlantsBuilt": setStatSolarPowerPlants,
+    "set_allTimeSolarPowerPlantsBuiltThisRun": setStatSolarPowerPlantsThisRun,
     "set_allTimeSodiumIonBatteriesBuilt": setStatSodiumIonBatteries,
+    "set_allTimeSodiumIonBatteriesBuiltThisRun": setStatSodiumIonBatteriesThisRun,
     "set_allTimeBattery2Built": setStatBattery2,
+    "set_allTimeBattery2BuiltThisRun": setStatBattery2ThisRun,
     "set_allTimeBattery3Built": setStatBattery3,
+    "set_allTimeBattery3BuiltThisRun": setStatBattery3ThisRun,
     "set_asteroidsMined": setStatAsteroidsMined,
+    "set_asteroidsMinedThisRun": setStatAsteroidsMinedThisRun,
 };
 
 export function setGameStateVariable(value) {
@@ -1199,6 +1250,14 @@ export function resetAllVariablesOnRebirth() {
     apAnticipatedThisRun = 0;
     starShipTravelDistance = 0;
     asteroidsMinedThisRun = 0;
+    timesTrippedThisRun = 0;
+    basicPowerPlantsBuiltThisRun = 0;
+    advancedPowerPlantsBuiltThisRun = 0;
+    solarPowerPlantsBuiltThisRun = 0;
+    sodiumIonBatteriesBuiltThisRun = 0;
+    battery2BuiltThisRun = 0;
+    battery3BuiltThisRun = 0;
+    enemyFleetPowerAtBattleStart = 0;
 
     hydrogenThisRun = 0;
     heliumThisRun = 0;
@@ -1220,10 +1279,33 @@ export function resetAllVariablesOnRebirth() {
     scienceKitsThisRun = 0;
     scienceClubsThisRun = 0;
     scienceLabsThisRun = 0;
-    
+    allTimeTotalRocketsLaunched = 0;
+    allTimeTotalStarShipsLaunched = 0;
+    allTimeTotalAsteroidsDiscovered = 0;
+    allTimeTotalLegendaryAsteroidsDiscovered = 0;
+    starStudyRange = 0;
+    allTimeTotalAntimatterMined = 0;
+    antimatterMinedThisRun = 0;
+    allTimeTotalApGain = 0;
+    currentRunNumber = 0;
+    currentRunTimer = 0;
+    totalNewsTickerPrizesCollected = 0;
+    apAnticipatedThisRun = 0;
+    allTimeStarShipsBuilt = 0;
+    starShipTravelDistance = 0;
+    allTimesTripped = 0;
+    allTimeBasicPowerPlantsBuilt = 0;
+    allTimeAdvancedPowerPlantsBuilt = 0;
+    allTimeSolarPowerPlantsBuilt = 0;
+    allTimeSodiumIonBatteriesBuilt = 0;
+    allTimeBattery2Built = 0;
+    allTimeBattery3Built = 0;
+    asteroidsMinedThisRun = 0;
     formationGoal = null;
+    liquidationValue = 0;
+    megastructureAntimatterAmount = 0;
 
-    //FLAGS    
+    //FLAGS
     checkRocketFuellingStatus = {
         rocket1: false,
         rocket2: false,
@@ -1442,13 +1524,23 @@ export function captureGameStatusForSaving(type) {
     gameState.runNumber = runNumber;
     gameState.starShipTravelDistance = starShipTravelDistance;
     gameState.allTimesTripped = allTimesTripped;
+    gameState.timesTrippedThisRun = timesTrippedThisRun;
     gameState.allTimeBasicPowerPlantsBuilt = allTimeBasicPowerPlantsBuilt;
     gameState.allTimeAdvancedPowerPlantsBuilt = allTimeAdvancedPowerPlantsBuilt;
     gameState.allTimeSolarPowerPlantsBuilt = allTimeSolarPowerPlantsBuilt;
     gameState.allTimeSodiumIonBatteriesBuilt = allTimeSodiumIonBatteriesBuilt;
     gameState.allTimeBattery2Built = allTimeBattery2Built;
     gameState.allTimeBattery3Built = allTimeBattery3Built;
+    gameState.basicPowerPlantsBuiltThisRun = basicPowerPlantsBuiltThisRun;
+    gameState.advancedPowerPlantsBuiltThisRun = advancedPowerPlantsBuiltThisRun;
+    gameState.solarPowerPlantsBuiltThisRun = solarPowerPlantsBuiltThisRun;
+    gameState.sodiumIonBatteriesBuiltThisRun = sodiumIonBatteriesBuiltThisRun;
+    gameState.battery2BuiltThisRun = battery2BuiltThisRun;
+    gameState.battery3BuiltThisRun = battery3BuiltThisRun;
+    gameState.allTimeRocketsBuilt = allTimeRocketsBuilt;
+    gameState.allTimeTotalAsteroidsMined = allTimeTotalAsteroidsMined;
     gameState.asteroidsMinedThisRun = asteroidsMinedThisRun;
+    gameState.enemyFleetPowerAtBattleStart = enemyFleetPowerAtBattleStart;
     gameState.runStartTimeStamp = runStartTimeStamp;
     gameState.gameStartTimeStamp = gameStartTimeStamp;
     gameState.battleUnits = battleUnits;
@@ -1668,13 +1760,23 @@ export function restoreGameStatus(gameState, type) {
             runNumber = gameState.runNumber ?? 1;
             starShipTravelDistance = gameState.starShipTravelDistance ?? 0;
             allTimesTripped = gameState.allTimesTripped ?? 0;
+            timesTrippedThisRun = gameState.timesTrippedThisRun ?? 0;
             allTimeBasicPowerPlantsBuilt = gameState.allTimeBasicPowerPlantsBuilt ?? 0;
             allTimeAdvancedPowerPlantsBuilt = gameState.allTimeAdvancedPowerPlantsBuilt ?? 0;
             allTimeSolarPowerPlantsBuilt = gameState.allTimeSolarPowerPlantsBuilt ?? 0;
             allTimeSodiumIonBatteriesBuilt = gameState.allTimeSodiumIonBatteriesBuilt ?? 0;
             allTimeBattery2Built = gameState.allTimeBattery2Built ?? 0;
             allTimeBattery3Built = gameState.allTimeBattery3Built ?? 0;
+            basicPowerPlantsBuiltThisRun = gameState.basicPowerPlantsBuiltThisRun ?? 0;
+            advancedPowerPlantsBuiltThisRun = gameState.advancedPowerPlantsBuiltThisRun ?? 0;
+            solarPowerPlantsBuiltThisRun = gameState.solarPowerPlantsBuiltThisRun ?? 0;
+            sodiumIonBatteriesBuiltThisRun = gameState.sodiumIonBatteriesBuiltThisRun ?? 0;
+            battery2BuiltThisRun = gameState.battery2BuiltThisRun ?? 0;
+            battery3BuiltThisRun = gameState.battery3BuiltThisRun ?? 0;
+            allTimeRocketsBuilt = gameState.allTimeRocketsBuilt ?? 0;
+            allTimeTotalAsteroidsMined = gameState.allTimeTotalAsteroidsMined ?? 0;
             asteroidsMinedThisRun = gameState.asteroidsMinedThisRun ?? 0;
+            enemyFleetPowerAtBattleStart = gameState.enemyFleetPowerAtBattleStart ?? 0;
             runStartTimeStamp = gameState.runStartTimeStamp ?? null;
             gameStartTimeStamp = gameState.gameStartTimeStamp ?? null;
             battleUnits = gameState.battleUnits ?? { player: [], enemy: [] };
@@ -3015,7 +3117,10 @@ export function getNewsTickerSetting() {
 }
 
 export function setRocketsBuilt(value) {
-    rocketsBuilt.push(value);
+    if (!rocketsBuilt.includes(value)) {
+        rocketsBuilt.push(value);
+        allTimeRocketsBuilt += 1;
+    }
 }
 
 export function getRocketsBuilt() {
@@ -4347,12 +4452,24 @@ function getStatTechsUnlocked() {//
     return getTechUnlockedArray().length;
 }
 
+function getStatTechsUnlockedAllTime() {
+    return getTechUnlockedArray().length;
+}
+
 function getStatPower() {//
     return document.getElementById('stat3').textContent.split(' ')[1];
 }
 
+function getStatPowerAllTime() {
+    return 'N/A';
+}
+
 function getStatTotalEnergy() {//
     return document.getElementById('stat2').textContent;
+}
+
+function getStatTotalEnergyAllTime() {
+    return 'N/A';
 }
 
 function getStatTotalProduction() {//
@@ -4362,52 +4479,104 @@ function getStatTotalProduction() {//
         * getTimerRateRatio()) + ' KW / s';
 }
 
+function getStatTotalProductionAllTime() {
+    return 'N/A';
+}
+
 function getStatTotalConsumption() {//
     return Math.floor(getTotalEnergyUse() * getTimerRateRatio()) + ' KW / s';
+}
+
+function getStatTotalConsumptionAllTime() {
+    return 'N/A';
 }
 
 function getStatTotalBatteryStorage() {//
     return Math.floor(getResourceDataObject('buildings', ['energy', 'storageCapacity']) / 1000)  + ' MWh';
 }
 
+function getStatTotalBatteryStorageAllTime() {
+    return 'N/A';
+}
+
 function getStatTimesTripped() {//
     return allTimesTripped;
+}
+
+function getStatTimesTrippedThisRun() {
+    return timesTrippedThisRun;
 }
 
 function getStatBasicPowerPlants() {//
     return allTimeBasicPowerPlantsBuilt;
 }
 
+function getStatBasicPowerPlantsThisRun() {
+    return basicPowerPlantsBuiltThisRun;
+}
+
 function getStatAdvancedPowerPlants() {//
     return allTimeAdvancedPowerPlantsBuilt;
+}
+
+function getStatAdvancedPowerPlantsThisRun() {
+    return advancedPowerPlantsBuiltThisRun;
 }
 
 function getStatSolarPowerPlants() {//
     return allTimeSolarPowerPlantsBuilt;
 }
 
+function getStatSolarPowerPlantsThisRun() {
+    return solarPowerPlantsBuiltThisRun;
+}
+
 function getStatSodiumIonBatteries() {//
     return allTimeSodiumIonBatteriesBuilt;
+}
+
+function getStatSodiumIonBatteriesThisRun() {
+    return sodiumIonBatteriesBuiltThisRun;
 }
 
 function getStatBattery2() {//
     return allTimeBattery2Built;
 }
 
+function getStatBattery2ThisRun() {
+    return battery2BuiltThisRun;
+}
+
 function getStatBattery3() {//
     return allTimeBattery3Built;
+}
+
+function getStatBattery3ThisRun() {
+    return battery3BuiltThisRun;
 }
 
 function getStatSpaceTelescopeBuilt() {//
     return getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'spaceTelescopeBoughtYet']) ? "Yes" : "No";
 }
 
+function getStatSpaceTelescopeBuiltAllTime() {
+    return 'N/A';
+}
+
 function getStatLaunchPadBuilt() {//
     return getResourceDataObject('space', ['upgrades', 'launchPad', 'launchPadBoughtYet']) ? "Yes" : "No";
 }
 
+function getStatLaunchPadBuiltAllTime() {
+    return 'N/A';
+}
+
 function getStatRocketsBuilt() {//
     return getRocketsBuilt().length;
+}
+
+function getStatRocketsBuiltAllTime() {
+    return allTimeRocketsBuilt;
 }
 
 function getStatAsteroidsDiscovered() {//
@@ -4415,6 +4584,10 @@ function getStatAsteroidsDiscovered() {//
 }
 
 function getStatAsteroidsMined() {
+    return allTimeTotalAsteroidsMined;
+}
+
+function getStatAsteroidsMinedThisRun() {
     return asteroidsMinedThisRun;
 }
 
@@ -4422,8 +4595,16 @@ function getStatStarStudyRange() {//
     return `${starStudyRange} ly`;
 }
 
+function getStatStarStudyRangeAllTime() {
+    return 'N/A';
+}
+
 function getStatStarShipBuilt() {//
     return starShipBuilt ? "Yes" : "No";
+}
+
+function getStatStarShipBuiltAllTime() {
+    return 'N/A';
 }
 
 function getStatStarShipDistanceTravelled() {//
@@ -4434,44 +4615,50 @@ function getStatSystemScanned() {//
     return destinationStarScanned ? "Yes" : "No";
 }
 
+function getStatSystemScannedAllTime() {
+    return 'N/A';
+}
+
 function getStatFleetAttackStrength() {
-    return 1;
+    return Math.floor(getResourceDataObject('fleets', ['attackPower']));
 }
 
 function getStatFleet1() {
-    return 1;
+    return getResourceDataObject('space', ['upgrades', 'fleetScout', 'quantity']);
 }
 
 function getStatFleet2() {
-    return 1;
+    return getResourceDataObject('space', ['upgrades', 'fleetMarauder', 'quantity']);
 }
 
 function getStatFleet3() {
-    return 1;
+    return getResourceDataObject('space', ['upgrades', 'fleetLandStalker', 'quantity']);
 }
 
 function getStatFleet4() {
-    return 1;
+    return getResourceDataObject('space', ['upgrades', 'fleetNavalStrafer', 'quantity']);
 }
 
 function getStatFleet5() {
-    return 1;
+    return getResourceDataObject('space', ['upgrades', 'fleetEnvoy', 'quantity']);
 }
 
 function getStatEnemy() {
-    return 1;
+    return getStarSystemDataObject('stars', ['destinationStar', 'raceName'], true) ?? 'N/A';
 }
 
 function getStatEnemyTotalDefenceOvercome() {
-    return 1;
+    const start = enemyFleetPowerAtBattleStart;
+    const current = getStarSystemDataObject('stars', ['destinationStar', 'enemyFleets', 'fleetPower'], true) ?? 0;
+    return Math.max(0, start - current);
 }
 
 function getStatEnemyTotalDefenceRemaining() {
-    return 1;
+    return getStarSystemDataObject('stars', ['destinationStar', 'enemyFleets', 'fleetPower'], true) ?? 0;
 }
 
 function getStatApFromStarVoyage() {
-    return 1;
+    return apAnticipatedThisRun;
 }
 
 //setters
@@ -4671,32 +4858,72 @@ function setStatTimesTripped(valueToAdd) {
     allTimesTripped += valueToAdd;
 }
 
+function setStatTimesTrippedThisRun(valueToAdd) {
+    timesTrippedThisRun += valueToAdd;
+}
+
 function setStatBasicPowerPlants(valueToAdd) {
     allTimeBasicPowerPlantsBuilt += valueToAdd;
+}
+
+function setStatBasicPowerPlantsThisRun(valueToAdd) {
+    basicPowerPlantsBuiltThisRun += valueToAdd;
 }
 
 function setStatAdvancedPowerPlants(valueToAdd) {
     allTimeAdvancedPowerPlantsBuilt += valueToAdd;
 }
 
+function setStatAdvancedPowerPlantsThisRun(valueToAdd) {
+    advancedPowerPlantsBuiltThisRun += valueToAdd;
+}
+
 function setStatSolarPowerPlants(valueToAdd) {
     allTimeSolarPowerPlantsBuilt += valueToAdd;
+}
+
+function setStatSolarPowerPlantsThisRun(valueToAdd) {
+    solarPowerPlantsBuiltThisRun += valueToAdd;
 }
 
 function setStatSodiumIonBatteries(valueToAdd) {
     allTimeSodiumIonBatteriesBuilt += valueToAdd;
 }
 
+function setStatSodiumIonBatteriesThisRun(valueToAdd) {
+    sodiumIonBatteriesBuiltThisRun += valueToAdd;
+}
+
 function setStatBattery2(valueToAdd) {
     allTimeBattery2Built += valueToAdd;
+}
+
+function setStatBattery2ThisRun(valueToAdd) {
+    battery2BuiltThisRun += valueToAdd;
 }
 
 function setStatBattery3(valueToAdd) {
     allTimeBattery3Built += valueToAdd;
 }
 
+function setStatBattery3ThisRun(valueToAdd) {
+    battery3BuiltThisRun += valueToAdd;
+}
+
 function setStatAsteroidsMined(valueToAdd) {
+    allTimeTotalAsteroidsMined += valueToAdd;
+}
+
+function setStatAsteroidsMinedThisRun(valueToAdd) {
     asteroidsMinedThisRun += valueToAdd;
+}
+
+export function setEnemyFleetPowerAtBattleStart(value) {
+    enemyFleetPowerAtBattleStart = Number(value) || 0;
+}
+
+export function getEnemyFleetPowerAtBattleStart() {
+    return enemyFleetPowerAtBattleStart;
 }
 
 export function getActivatedWackyNewsEffectsArray() {
