@@ -9145,6 +9145,9 @@ export function playWinCinematic(durationMs = 14000) {
         const easeInOutSine = (t) => -(Math.cos(Math.PI * t) - 1) / 2;
         const rnd = (min, max) => min + Math.random() * (max - min);
 
+        const holdAfterTitleMs = 3000;
+        const totalDurationMs = durationMs + holdAfterTitleMs;
+
         const stars = [];
         const landBlobs = [];
         const cloudPuffs = [];
@@ -9658,6 +9661,11 @@ export function playWinCinematic(durationMs = 14000) {
             ctx.font = `500 ${Math.round(size * 0.36)}px system-ui, -apple-system, Segoe UI, Roboto, Arial`;
             ctx.fillStyle = 'rgba(220, 255, 245, 1)';
             ctx.fillText('WELCOME HOME, MIA\' PLAC', w * 0.5, h * 0.245);
+
+            ctx.globalAlpha = 0.55 * a;
+            ctx.font = `600 ${Math.round(size * 0.28)}px system-ui, -apple-system, Segoe UI, Roboto, Arial`;
+            ctx.fillStyle = 'rgba(220, 255, 245, 1)';
+            ctx.fillText('YOU ARE THE COSMIC FORGER', w * 0.5, h * 0.285);
             ctx.restore();
         };
 
@@ -9698,16 +9706,16 @@ export function playWinCinematic(durationMs = 14000) {
 
         const frame = (now) => {
             const elapsed = now - start;
-            const tt = clamp01(elapsed / durationMs);
+            const ttBase = clamp01(elapsed / durationMs);
             const w = window.innerWidth;
             const h = window.innerHeight;
 
             const introA = easeOutCubic(clamp01(elapsed / 1100));
-            const outroA = 1 - easeInOutSine(clamp01((elapsed - (durationMs - 1200)) / 1200));
+            const outroA = 1 - easeInOutSine(clamp01((elapsed - (totalDurationMs - 1200)) / 1200));
             const sceneA = clamp01(introA * outroA);
 
             drawStars(w, h, elapsed / 1000);
-            drawAurora(w, h, tt);
+            drawAurora(w, h, ttBase);
 
             const planetT = elapsed / 1000;
             const planet = { cx: w * 0.74, cy: h * 0.78, r: Math.min(w, h) * 0.42 };
@@ -9715,7 +9723,7 @@ export function playWinCinematic(durationMs = 14000) {
             const planetDrawn = drawPlanet(w, h, planetT);
             drawRingDebris(planetDrawn, planetT, 'front', sceneA);
 
-            const shipPhase = clamp01((tt - 0.08) / 0.62);
+            const shipPhase = clamp01((ttBase - 0.08) / 0.62);
             if (shipPhase > 0 && elapsed >= nextShipSpawnAt && shipPhase < 1) {
                 const intensity = lerp(85, 18, shipPhase);
                 spawnShip(planetDrawn, elapsed);
@@ -9733,13 +9741,13 @@ export function playWinCinematic(durationMs = 14000) {
 
             drawTroops(elapsed, sceneA);
 
-            const fireworkPhase = clamp01((tt - 0.52) / 0.34);
-            if (fireworkPhase > 0 && elapsed >= nextFireworkAt && tt < 0.9) {
+            const fireworkPhase = clamp01((ttBase - 0.52) / 0.34);
+            if (fireworkPhase > 0 && elapsed >= nextFireworkAt && ttBase < 0.9) {
                 spawnFirework(elapsed);
                 nextFireworkAt = elapsed + rnd(280, 520);
             }
             drawFireworks(elapsed, sceneA);
-            drawTitle(w, h, tt);
+            drawTitle(w, h, ttBase);
 
             ctx.save();
             ctx.globalAlpha = (1 - sceneA);
@@ -9747,7 +9755,7 @@ export function playWinCinematic(durationMs = 14000) {
             ctx.fillRect(0, 0, w, h);
             ctx.restore();
 
-            if (elapsed >= durationMs) {
+            if (elapsed >= totalDurationMs) {
                 end();
                 return;
             }
