@@ -9148,6 +9148,7 @@ export function playWinCinematic(durationMs = 14000) {
         const stars = [];
         const landBlobs = [];
         const cloudPuffs = [];
+        const ringPieces = [];
         const ships = [];
         const troops = [];
         const fireworks = [];
@@ -9170,6 +9171,7 @@ export function playWinCinematic(durationMs = 14000) {
             stars.length = 0;
             landBlobs.length = 0;
             cloudPuffs.length = 0;
+            ringPieces.length = 0;
 
             const w = window.innerWidth;
             const h = window.innerHeight;
@@ -9206,6 +9208,95 @@ export function playWinCinematic(durationMs = 14000) {
                     sp: rnd(-0.25, 0.25)
                 });
             }
+
+            const pieceCount = 22;
+            for (let i = 0; i < pieceCount; i++) {
+                const start = rnd(0, Math.PI * 2);
+                const len = rnd(0.12, 0.34);
+                const end = start + len;
+                const mid = (start + end) / 2;
+
+                ringPieces.push({
+                    start,
+                    end,
+                    mid,
+                    radJitter: rnd(-0.03, 0.06),
+                    thick: rnd(0.8, 1.35),
+                    hue: rnd(175, 210),
+                    dashA: rnd(10, 24),
+                    dashB: rnd(7, 20)
+                });
+            }
+        };
+
+        const drawRingDebris = (planet, t, layer, alphaBase = 1) => {
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+            const rBase = Math.min(w, h) * 0.42;
+
+            const cx = planet.cx;
+            const cy = planet.cy;
+            const tilt = -0.55;
+            const squash = 0.34;
+
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(tilt);
+            ctx.scale(1, squash);
+
+            const wob = 0.5 + 0.5 * Math.sin(t * 0.8);
+            const ringR = rBase * 1.12;
+
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            for (const p of ringPieces) {
+                const depth = Math.sin(p.mid);
+                if (layer === 'back' && depth >= 0) continue;
+                if (layer === 'front' && depth < 0) continue;
+
+                const localAlpha = (layer === 'front' ? 0.42 : 0.18) * alphaBase;
+                const flicker = 0.75 + 0.25 * Math.sin(t * 2.1 + p.mid * 3.0);
+
+                ctx.save();
+                const rr = ringR * (1 + p.radJitter);
+                ctx.globalAlpha = localAlpha * flicker;
+
+                ctx.setLineDash([p.dashA * (1 + wob), p.dashB]);
+                ctx.lineWidth = (rBase * 0.055) * p.thick;
+                ctx.strokeStyle = `hsla(${p.hue}, 90%, 72%, 0.95)`;
+
+                ctx.beginPath();
+                ctx.arc(0, 0, rr, p.start, p.end);
+                ctx.stroke();
+
+                ctx.setLineDash([]);
+                ctx.lineWidth *= 0.35;
+                ctx.globalAlpha *= 0.55;
+                ctx.strokeStyle = `rgba(255,255,255,0.85)`;
+                ctx.beginPath();
+                ctx.arc(0, 0, rr + rBase * 0.015, p.start + 0.02, p.end - 0.02);
+                ctx.stroke();
+
+                const fragmentCount = Math.floor(rnd(1, 4));
+                for (let i = 0; i < fragmentCount; i++) {
+                    const a = lerp(p.start, p.end, Math.random());
+                    const fx = Math.cos(a) * rr;
+                    const fy = Math.sin(a) * rr;
+                    const sz = rnd(rBase * 0.01, rBase * 0.025);
+                    ctx.save();
+                    ctx.translate(fx, fy);
+                    ctx.rotate(a + rnd(-0.6, 0.6));
+                    ctx.globalAlpha = (layer === 'front' ? 0.35 : 0.18) * alphaBase;
+                    ctx.fillStyle = `hsla(${p.hue + 10}, 70%, 65%, 1)`;
+                    ctx.fillRect(-sz * 0.5, -sz * 0.15, sz, sz * 0.3);
+                    ctx.restore();
+                }
+
+                ctx.restore();
+            }
+
+            ctx.restore();
         };
 
         const drawStars = (w, h, t) => {
@@ -9566,7 +9657,7 @@ export function playWinCinematic(durationMs = 14000) {
             ctx.globalAlpha = 0.65 * a;
             ctx.font = `500 ${Math.round(size * 0.36)}px system-ui, -apple-system, Segoe UI, Roboto, Arial`;
             ctx.fillStyle = 'rgba(220, 255, 245, 1)';
-            ctx.fillText('A NEW PARADISE FOUND', w * 0.5, h * 0.245);
+            ctx.fillText('WELCOME HOME, MIA\' PLAC', w * 0.5, h * 0.245);
             ctx.restore();
         };
 
@@ -9617,12 +9708,17 @@ export function playWinCinematic(durationMs = 14000) {
 
             drawStars(w, h, elapsed / 1000);
             drawAurora(w, h, tt);
-            const planet = drawPlanet(w, h, elapsed / 1000);
+
+            const planetT = elapsed / 1000;
+            const planet = { cx: w * 0.74, cy: h * 0.78, r: Math.min(w, h) * 0.42 };
+            drawRingDebris(planet, planetT, 'back', sceneA);
+            const planetDrawn = drawPlanet(w, h, planetT);
+            drawRingDebris(planetDrawn, planetT, 'front', sceneA);
 
             const shipPhase = clamp01((tt - 0.08) / 0.62);
             if (shipPhase > 0 && elapsed >= nextShipSpawnAt && shipPhase < 1) {
                 const intensity = lerp(85, 18, shipPhase);
-                spawnShip(planet, elapsed);
+                spawnShip(planetDrawn, elapsed);
                 nextShipSpawnAt = elapsed + rnd(intensity * 0.6, intensity * 1.05);
             }
 
@@ -9632,7 +9728,7 @@ export function playWinCinematic(durationMs = 14000) {
                     ships.splice(i, 1);
                     continue;
                 }
-                drawShip(ship, planet, elapsed, sceneA);
+                drawShip(ship, planetDrawn, elapsed, sceneA);
             }
 
             drawTroops(elapsed, sceneA);
