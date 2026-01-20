@@ -433,7 +433,8 @@ import {
     createBlackHole,
     setButtonState,
     setElementPointerEvents,
-    setElementOpacity
+    setElementOpacity,
+    playWinCinematic
 } from "./ui.js";
 
 import {
@@ -11650,7 +11651,7 @@ export async function settleSystemAfterBattle(accessPoint) {
 }
 
 async function showMiaplacidusEndgameStory() {
-    const show = ({ header, content, confirmLabel }) => new Promise(resolve => {
+    const show = ({ header, content, confirmLabel }, isLastPopup = false) => new Promise(resolve => {
         callPopupModal(
             header,
             content,
@@ -11658,8 +11659,11 @@ async function showMiaplacidusEndgameStory() {
             false,
             false,
             false,
-            function() {
+            async function() {
                 showHideModal();
+                if (isLastPopup) {
+                    await playWinCinematic();
+                }
                 resolve();
             },
             null,
@@ -11673,8 +11677,10 @@ async function showMiaplacidusEndgameStory() {
         );
     });
 
-    for (const popup of miaplacidusEndgameStoryPopups) {
-        await show(popup);
+    for (let i = 0; i < miaplacidusEndgameStoryPopups.length; i++) {
+        const popup = miaplacidusEndgameStoryPopups[i];
+        const isLastPopup = i === miaplacidusEndgameStoryPopups.length - 1;
+        await show(popup, isLastPopup);
     }
 }
 
