@@ -8225,9 +8225,35 @@ function renderBattleExplosions(ctx, now) {
         ctx.save();
         ctx.globalCompositeOperation = 'lighter';
 
+        const flashA = Math.max(0, Math.min(1, (1 - p * 2.1))) * 0.9;
+        if (flashA > 0.001) {
+            const r = 10 + p * 46;
+            const g = ctx.createRadialGradient(ex.x, ex.y, 0, ex.x, ex.y, r);
+            g.addColorStop(0, `rgba(255,255,255,${0.9 * flashA})`);
+            g.addColorStop(0.25, `rgba(255,240,180,${0.75 * flashA})`);
+            g.addColorStop(0.6, `rgba(255,120,80,${0.35 * flashA})`);
+            g.addColorStop(1, 'rgba(255,120,80,0)');
+            ctx.globalAlpha = 1;
+            ctx.fillStyle = g;
+            ctx.beginPath();
+            ctx.arc(ex.x, ex.y, r, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        const ringA = Math.max(0, Math.min(1, 1 - Math.abs(p - 0.28) / 0.28)) * 0.65;
+        if (ringA > 0.001) {
+            const rr = 8 + p * 120;
+            ctx.globalAlpha = ringA;
+            ctx.strokeStyle = 'rgba(255,255,255,1)';
+            ctx.lineWidth = Math.max(1, 7 - p * 6);
+            ctx.beginPath();
+            ctx.arc(ex.x, ex.y, rr, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+
         for (const part of ex.parts) {
             const px = ex.x + part.vx * p;
-            const py = ex.y + part.vy * p + p * p * 26;
+            const py = ex.y + part.vy * p + p * p * 44;
             const pr = part.r * (1 - p);
             ctx.globalAlpha = a * part.a;
             ctx.fillStyle = part.c;
@@ -8527,24 +8553,33 @@ function renderBattleExplosions(ctx, now) {
 
         const now = performance.now();
         const parts = [];
-        const count = 26;
+        const count = 70;
+        const palette = [
+            'rgba(255,255,255,1)',
+            'rgba(255,240,180,1)',
+            'rgba(255,170,90,1)',
+            'rgba(255,90,70,1)',
+            'rgba(255,0,255,1)',
+            'rgba(64,224,208,1)'
+        ];
         for (let i = 0; i < count; i++) {
             const a = (i / count) * Math.PI * 2;
-            const sp = 28 + Math.random() * 120;
+            const sp = 70 + Math.random() * 220;
+            const spark = Math.random() < 0.35;
             parts.push({
                 vx: Math.cos(a) * sp,
                 vy: Math.sin(a) * sp,
-                r: 2.6 + Math.random() * 2.2,
-                a: 0.25 + Math.random() * 0.65,
-                c: Math.random() > 0.5 ? 'rgba(255,240,180,1)' : 'rgba(255,110,80,1)'
+                r: (spark ? 1.2 : 2.8) + Math.random() * (spark ? 2.0 : 4.4),
+                a: (spark ? 0.55 : 0.35) + Math.random() * (spark ? 0.45 : 0.6),
+                c: palette[Math.floor(Math.random() * palette.length)]
             });
         }
-        battleVisualExplosions.push({ x, y, t: now, life: 520, parts });
+        battleVisualExplosions.push({ x, y, t: now, life: 980, parts });
         
         setTimeout(() => {
             animationContainer.classList.remove('animate-explosion');
             animationContainer.classList.add('invisible');
-        }, 1000);
+        }, 1250);
     }
 
     export function shootLaser(unit, enemy) {
