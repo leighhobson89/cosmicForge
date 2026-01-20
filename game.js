@@ -4515,7 +4515,6 @@ function updateAntimatterAndDiagram(ticks = 1) {
 
     if (getAntimatterUnlocked() && totalAntimatterGainThisUpdate > 0) {
         addToResourceAllTimeStat(totalAntimatterGainThisUpdate, 'antimatter');
-        addToResourceAllTimeStat(totalAntimatterGainThisUpdate, 'antimatterThisRun');
     }
 
     if (elements?.miningRate) {
@@ -9527,7 +9526,6 @@ export function offlineGains(switchedFocus) {
         
         setResourceDataObject(Math.floor(currentAntimatterQuantity + offlineGainsAntimatter), 'antimatter', ['quantity']);
         addToResourceAllTimeStat(Math.floor(offlineGainsAntimatter), 'antimatter');
-        addToResourceAllTimeStat(Math.floor(offlineGainsAntimatter), 'antimatterThisRun');        
         
         if (!switchedFocus) {
             showNotification('Offline Gains Added!', 'info', 3000, 'loadSave');
@@ -11263,6 +11261,11 @@ export function addToResourceAllTimeStat(amountToAdd, item) {
     if (item !== 'solar') {
         const setFunction = statFunctionsSets[`set_${item}`];
         setFunction(amountToAdd);
+
+        const setThisRunFunction = statFunctionsSets[`set_${item}ThisRun`];
+        if (typeof setThisRunFunction === 'function') {
+            setThisRunFunction(amountToAdd);
+        }
     }
 }
 

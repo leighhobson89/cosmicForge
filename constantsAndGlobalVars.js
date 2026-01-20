@@ -485,6 +485,27 @@ let allTimeTotalResearchPoints = 0;
 let allTimeTotalScienceKits = 0;
 let allTimeTotalScienceClubs = 0;
 let allTimeTotalScienceLabs = 0;
+
+let hydrogenThisRun = 0;
+let heliumThisRun = 0;
+let carbonThisRun = 0;
+let neonThisRun = 0;
+let oxygenThisRun = 0;
+let sodiumThisRun = 0;
+let siliconThisRun = 0;
+let ironThisRun = 0;
+
+let dieselThisRun = 0;
+let glassThisRun = 0;
+let steelThisRun = 0;
+let concreteThisRun = 0;
+let waterThisRun = 0;
+let titaniumThisRun = 0;
+
+let researchPointsThisRun = 0;
+let scienceKitsThisRun = 0;
+let scienceClubsThisRun = 0;
+let scienceLabsThisRun = 0;
 let allTimeTotalRocketsLaunched = 0;
 let allTimeTotalStarShipsLaunched = 0;
 let allTimeTotalAsteroidsDiscovered = 0;
@@ -718,6 +739,15 @@ export const statFunctionsGets = {
     "stat_silicon": getStatSilicon,
     "stat_iron": getStatIron,
 
+    "stat_hydrogenThisRun": getStatHydrogenThisRun,
+    "stat_heliumThisRun": getStatHeliumThisRun,
+    "stat_carbonThisRun": getStatCarbonThisRun,
+    "stat_neonThisRun": getStatNeonThisRun,
+    "stat_oxygenThisRun": getStatOxygenThisRun,
+    "stat_sodiumThisRun": getStatSodiumThisRun,
+    "stat_siliconThisRun": getStatSiliconThisRun,
+    "stat_ironThisRun": getStatIronThisRun,
+
     // Compounds
     "stat_diesel": getStatDiesel,
     "stat_glass": getStatGlass,
@@ -726,12 +756,24 @@ export const statFunctionsGets = {
     "stat_water": getStatWater,
     "stat_titanium": getStatTitanium,
 
+    "stat_dieselThisRun": getStatDieselThisRun,
+    "stat_glassThisRun": getStatGlassThisRun,
+    "stat_steelThisRun": getStatSteelThisRun,
+    "stat_concreteThisRun": getStatConcreteThisRun,
+    "stat_waterThisRun": getStatWaterThisRun,
+    "stat_titaniumThisRun": getStatTitaniumThisRun,
+
     // Research
     "stat_researchPoints": getStatResearchPoints,
     "stat_scienceKits": getStatScienceKits,
     "stat_scienceClubs": getStatScienceClubs,
     "stat_scienceLabs": getStatScienceLabs,
     "stat_techsUnlocked": getStatTechsUnlocked,
+
+    "stat_researchPointsThisRun": getStatResearchPointsThisRun,
+    "stat_scienceKitsThisRun": getStatScienceKitsThisRun,
+    "stat_scienceClubsThisRun": getStatScienceClubsThisRun,
+    "stat_scienceLabsThisRun": getStatScienceLabsThisRun,
 
     // Energy
     "stat_power": getStatPower,
@@ -790,6 +832,27 @@ export const statFunctionsSets = {
     "set_scienceKits": setStatScienceKits,
     "set_scienceClubs": setStatScienceClubs,
     "set_scienceLabs": setStatScienceLabs,
+
+    "set_hydrogenThisRun": setStatHydrogenThisRun,
+    "set_heliumThisRun": setStatHeliumThisRun,
+    "set_carbonThisRun": setStatCarbonThisRun,
+    "set_neonThisRun": setStatNeonThisRun,
+    "set_oxygenThisRun": setStatOxygenThisRun,
+    "set_sodiumThisRun": setStatSodiumThisRun,
+    "set_siliconThisRun": setStatSiliconThisRun,
+    "set_ironThisRun": setStatIronThisRun,
+
+    "set_dieselThisRun": setStatDieselThisRun,
+    "set_glassThisRun": setStatGlassThisRun,
+    "set_steelThisRun": setStatSteelThisRun,
+    "set_concreteThisRun": setStatConcreteThisRun,
+    "set_waterThisRun": setStatWaterThisRun,
+    "set_titaniumThisRun": setStatTitaniumThisRun,
+
+    "set_researchPointsThisRun": setStatResearchPointsThisRun,
+    "set_scienceKitsThisRun": setStatScienceKitsThisRun,
+    "set_scienceClubsThisRun": setStatScienceClubsThisRun,
+    "set_scienceLabsThisRun": setStatScienceLabsThisRun,
     "set_antimatter": setStatAntimatter,
     "set_antimatterThisRun": setStatAntimatterThisRun,
     "set_apAnticipated": setStatApAnticipated,
@@ -1136,6 +1199,27 @@ export function resetAllVariablesOnRebirth() {
     apAnticipatedThisRun = 0;
     starShipTravelDistance = 0;
     asteroidsMinedThisRun = 0;
+
+    hydrogenThisRun = 0;
+    heliumThisRun = 0;
+    carbonThisRun = 0;
+    neonThisRun = 0;
+    oxygenThisRun = 0;
+    sodiumThisRun = 0;
+    siliconThisRun = 0;
+    ironThisRun = 0;
+
+    dieselThisRun = 0;
+    glassThisRun = 0;
+    steelThisRun = 0;
+    concreteThisRun = 0;
+    waterThisRun = 0;
+    titaniumThisRun = 0;
+
+    researchPointsThisRun = 0;
+    scienceKitsThisRun = 0;
+    scienceClubsThisRun = 0;
+    scienceLabsThisRun = 0;
     
     formationGoal = null;
 
@@ -1298,6 +1382,27 @@ export function captureGameStatusForSaving(type) {
     gameState.allTimeTotalScienceKits = allTimeTotalScienceKits;
     gameState.allTimeTotalScienceClubs = allTimeTotalScienceClubs;
     gameState.allTimeTotalScienceLabs = allTimeTotalScienceLabs;
+
+    gameState.hydrogenThisRun = hydrogenThisRun;
+    gameState.heliumThisRun = heliumThisRun;
+    gameState.carbonThisRun = carbonThisRun;
+    gameState.neonThisRun = neonThisRun;
+    gameState.oxygenThisRun = oxygenThisRun;
+    gameState.sodiumThisRun = sodiumThisRun;
+    gameState.siliconThisRun = siliconThisRun;
+    gameState.ironThisRun = ironThisRun;
+
+    gameState.dieselThisRun = dieselThisRun;
+    gameState.glassThisRun = glassThisRun;
+    gameState.steelThisRun = steelThisRun;
+    gameState.concreteThisRun = concreteThisRun;
+    gameState.waterThisRun = waterThisRun;
+    gameState.titaniumThisRun = titaniumThisRun;
+
+    gameState.researchPointsThisRun = researchPointsThisRun;
+    gameState.scienceKitsThisRun = scienceKitsThisRun;
+    gameState.scienceClubsThisRun = scienceClubsThisRun;
+    gameState.scienceLabsThisRun = scienceLabsThisRun;
     gameState.allTimeTotalRocketsLaunched = allTimeTotalRocketsLaunched;
     gameState.allTimeTotalStarShipsLaunched = allTimeTotalStarShipsLaunched;
     gameState.allTimeTotalAsteroidsDiscovered = allTimeTotalAsteroidsDiscovered;
@@ -1525,6 +1630,27 @@ export function restoreGameStatus(gameState, type) {
             allTimeTotalScienceKits = gameState.allTimeTotalScienceKits ?? 0;
             allTimeTotalScienceClubs = gameState.allTimeTotalScienceClubs ?? 0;
             allTimeTotalScienceLabs = gameState.allTimeTotalScienceLabs ?? 0;
+
+            hydrogenThisRun = gameState.hydrogenThisRun ?? 0;
+            heliumThisRun = gameState.heliumThisRun ?? 0;
+            carbonThisRun = gameState.carbonThisRun ?? 0;
+            neonThisRun = gameState.neonThisRun ?? 0;
+            oxygenThisRun = gameState.oxygenThisRun ?? 0;
+            sodiumThisRun = gameState.sodiumThisRun ?? 0;
+            siliconThisRun = gameState.siliconThisRun ?? 0;
+            ironThisRun = gameState.ironThisRun ?? 0;
+
+            dieselThisRun = gameState.dieselThisRun ?? 0;
+            glassThisRun = gameState.glassThisRun ?? 0;
+            steelThisRun = gameState.steelThisRun ?? 0;
+            concreteThisRun = gameState.concreteThisRun ?? 0;
+            waterThisRun = gameState.waterThisRun ?? 0;
+            titaniumThisRun = gameState.titaniumThisRun ?? 0;
+
+            researchPointsThisRun = gameState.researchPointsThisRun ?? 0;
+            scienceKitsThisRun = gameState.scienceKitsThisRun ?? 0;
+            scienceClubsThisRun = gameState.scienceClubsThisRun ?? 0;
+            scienceLabsThisRun = gameState.scienceLabsThisRun ?? 0;
             allTimeTotalRocketsLaunched = gameState.allTimeTotalRocketsLaunched ?? 0;
             allTimeTotalStarShipsLaunched = gameState.allTimeTotalStarShipsLaunched ?? 0;
             allTimeTotalAsteroidsDiscovered = gameState.allTimeTotalAsteroidsDiscovered ?? 0;
@@ -4077,72 +4203,144 @@ function getStatHydrogen() {//
     return allTimeTotalHydrogen;
 }
 
+function getStatHydrogenThisRun() {
+    return hydrogenThisRun;
+}
+
 function getStatHelium() {//
     return allTimeTotalHelium;
+}
+
+function getStatHeliumThisRun() {
+    return heliumThisRun;
 }
 
 function getStatCarbon() {//
     return allTimeTotalCarbon;
 }
 
+function getStatCarbonThisRun() {
+    return carbonThisRun;
+}
+
 function getStatNeon() {//
     return allTimeTotalNeon;
+}
+
+function getStatNeonThisRun() {
+    return neonThisRun;
 }
 
 function getStatOxygen() {//
     return allTimeTotalOxygen;
 }
 
+function getStatOxygenThisRun() {
+    return oxygenThisRun;
+}
+
 function getStatSodium() {//
     return allTimeTotalSodium;
+}
+
+function getStatSodiumThisRun() {
+    return sodiumThisRun;
 }
 
 function getStatSilicon() {//
     return allTimeTotalSilicon;
 }
 
+function getStatSiliconThisRun() {
+    return siliconThisRun;
+}
+
 function getStatIron() {//
     return allTimeTotalIron;
+}
+
+function getStatIronThisRun() {
+    return ironThisRun;
 }
 
 function getStatDiesel() {//
     return allTimeTotalDiesel;
 }
 
+function getStatDieselThisRun() {
+    return dieselThisRun;
+}
+
 function getStatGlass() {//
     return allTimeTotalGlass;
+}
+
+function getStatGlassThisRun() {
+    return glassThisRun;
 }
 
 function getStatSteel() {//
     return allTimeTotalSteel;
 }
 
+function getStatSteelThisRun() {
+    return steelThisRun;
+}
+
 function getStatConcrete() {//
     return allTimeTotalConcrete;
+}
+
+function getStatConcreteThisRun() {
+    return concreteThisRun;
 }
 
 function getStatWater() {//
     return allTimeTotalWater;
 }
 
+function getStatWaterThisRun() {
+    return waterThisRun;
+}
+
 function getStatTitanium() {//
     return allTimeTotalTitanium;
+}
+
+function getStatTitaniumThisRun() {
+    return titaniumThisRun;
 }
 
 function getStatResearchPoints() {//
     return allTimeTotalResearchPoints;
 }
 
+function getStatResearchPointsThisRun() {
+    return researchPointsThisRun;
+}
+
 function getStatScienceKits() {//
     return allTimeTotalScienceKits;
+}
+
+function getStatScienceKitsThisRun() {
+    return scienceKitsThisRun;
 }
 
 function getStatScienceClubs() {//
     return allTimeTotalScienceClubs;
 }
 
+function getStatScienceClubsThisRun() {
+    return scienceClubsThisRun;
+}
+
 function getStatScienceLabs() {//
     return allTimeTotalScienceLabs;
+}
+
+function getStatScienceLabsThisRun() {
+    return scienceLabsThisRun;
 }
 
 function getStatTechsUnlocked() {//
@@ -4281,48 +4479,96 @@ function setStatHydrogen(valueToAdd) {
     allTimeTotalHydrogen += valueToAdd;
 }
 
+function setStatHydrogenThisRun(valueToAdd) {
+    hydrogenThisRun += valueToAdd;
+}
+
 function setStatHelium(valueToAdd) {
     allTimeTotalHelium += valueToAdd;
+}
+
+function setStatHeliumThisRun(valueToAdd) {
+    heliumThisRun += valueToAdd;
 }
 
 function setStatCarbon(valueToAdd) {
     allTimeTotalCarbon += valueToAdd;
 }
 
+function setStatCarbonThisRun(valueToAdd) {
+    carbonThisRun += valueToAdd;
+}
+
 function setStatNeon(valueToAdd) {
     allTimeTotalNeon += valueToAdd;
+}
+
+function setStatNeonThisRun(valueToAdd) {
+    neonThisRun += valueToAdd;
 }
 
 function setStatOxygen(valueToAdd) {
     allTimeTotalOxygen += valueToAdd;
 }
 
+function setStatOxygenThisRun(valueToAdd) {
+    oxygenThisRun += valueToAdd;
+}
+
 function setStatSodium(valueToAdd) {
     allTimeTotalSodium += valueToAdd;
+}
+
+function setStatSodiumThisRun(valueToAdd) {
+    sodiumThisRun += valueToAdd;
 }
 
 function setStatSilicon(valueToAdd) {
     allTimeTotalSilicon += valueToAdd;
 }
 
+function setStatSiliconThisRun(valueToAdd) {
+    siliconThisRun += valueToAdd;
+}
+
 function setStatIron(valueToAdd) {
     allTimeTotalIron += valueToAdd;
+}
+
+function setStatIronThisRun(valueToAdd) {
+    ironThisRun += valueToAdd;
 }
 
 function setStatDiesel(valueToAdd) {
     allTimeTotalDiesel += valueToAdd;
 }
 
+function setStatDieselThisRun(valueToAdd) {
+    dieselThisRun += valueToAdd;
+}
+
 function setStatGlass(valueToAdd) {
     allTimeTotalGlass += valueToAdd;
+}
+
+function setStatGlassThisRun(valueToAdd) {
+    glassThisRun += valueToAdd;
 }
 
 function setStatSteel(valueToAdd) {
     allTimeTotalSteel += valueToAdd;
 }
 
+function setStatSteelThisRun(valueToAdd) {
+    steelThisRun += valueToAdd;
+}
+
 function setStatConcrete(valueToAdd) {
     allTimeTotalConcrete += valueToAdd;
+}
+
+function setStatConcreteThisRun(valueToAdd) {
+    concreteThisRun += valueToAdd;
 }
 
 function setStatWater(valueToAdd) {
@@ -4331,24 +4577,50 @@ function setStatWater(valueToAdd) {
     }
 }
 
+function setStatWaterThisRun(valueToAdd) {
+    if (getTechUnlockedArray().includes('compounds')) {
+        waterThisRun += valueToAdd;
+    }
+}
+
 function setStatTitanium(valueToAdd) {
     allTimeTotalTitanium += valueToAdd;
+}
+
+function setStatTitaniumThisRun(valueToAdd) {
+    titaniumThisRun += valueToAdd;
 }
 
 function setStatResearchPoints(valueToAdd) {
     allTimeTotalResearchPoints += valueToAdd;
 }
 
+function setStatResearchPointsThisRun(valueToAdd) {
+    researchPointsThisRun += valueToAdd;
+}
+
 function setStatScienceKits(valueToAdd) {
     allTimeTotalScienceKits += valueToAdd;
+}
+
+function setStatScienceKitsThisRun(valueToAdd) {
+    scienceKitsThisRun += valueToAdd;
 }
 
 function setStatScienceClubs(valueToAdd) {
     allTimeTotalScienceClubs += valueToAdd;
 }
 
+function setStatScienceClubsThisRun(valueToAdd) {
+    scienceClubsThisRun += valueToAdd;
+}
+
 function setStatScienceLabs(valueToAdd) {
     allTimeTotalScienceLabs += valueToAdd;
+}
+
+function setStatScienceLabsThisRun(valueToAdd) {
+    scienceLabsThisRun += valueToAdd;
 }
 
 function setStatAntimatter(valueToAdd) {

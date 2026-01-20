@@ -2493,6 +2493,7 @@ export function createHtmlTableStatistics(id, classList = [], mainHeadings, subH
 
     for (let i = 0; i < mainHeadings.length; i++) {
         const mainHeading = capitaliseString(mainHeadings[i]);
+        const dualColumnPerRow = ['resources', 'compounds', 'research'].includes(String(mainHeadings[i]).toLowerCase());
 
         innerTextString += `<span class="${mainHeaderClasses.join(' ')}">${mainHeading}</span><br/>`;
 
@@ -2538,17 +2539,33 @@ export function createHtmlTableStatistics(id, classList = [], mainHeadings, subH
                     </tr>
                 `;
             } else {
-                innerTextString += `
-                    <tr>
-                        <td class="left-column"><span class="${headerClasses.join(' ')}">${header}</span></td>
-                        <td class="middle-column">
-                            ${!isAllTimeHeader ? `<span id="stat_${toCamelCase(header.replace(':', '').trim())}" class="${bodyClasses.join(' ')}">${body}</span>` : ''}
-                        </td>
-                        <td class="right-column">
-                            ${isAllTimeHeader ? `<span id="stat_${toCamelCase(header.replace(':', '').trim())}" class="${bodyClasses.join(' ')}">${body}</span>` : ''}
-                        </td>
-                    </tr>
-                `;
+                const statIdBase = toCamelCase(header.replace(':', '').trim());
+
+                if (dualColumnPerRow) {
+                    innerTextString += `
+                        <tr>
+                            <td class="left-column"><span class="${headerClasses.join(' ')}">${header}</span></td>
+                            <td class="middle-column">
+                                <span id="stat_${statIdBase}ThisRun" class="${bodyClasses.join(' ')}">${body}</span>
+                            </td>
+                            <td class="right-column">
+                                <span id="stat_${statIdBase}" class="${bodyClasses.join(' ')}">${body}</span>
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    innerTextString += `
+                        <tr>
+                            <td class="left-column"><span class="${headerClasses.join(' ')}">${header}</span></td>
+                            <td class="middle-column">
+                                ${!isAllTimeHeader ? `<span id="stat_${statIdBase}" class="${bodyClasses.join(' ')}">${body}</span>` : ''}
+                            </td>
+                            <td class="right-column">
+                                ${isAllTimeHeader ? `<span id="stat_${statIdBase}" class="${bodyClasses.join(' ')}">${body}</span>` : ''}
+                            </td>
+                        </tr>
+                    `;
+                }
             }
             
         }
