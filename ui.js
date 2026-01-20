@@ -392,6 +392,52 @@ function attachSharedTooltip(element, getContent) {
     element.addEventListener('mouseleave', hide);
 }
 
+function hasMegaStructureTech(techList, structureId, techIndex) {
+    return Array.isArray(techList) && techList.some(entry => Array.isArray(entry) && entry[0] === structureId && entry[1] === techIndex);
+}
+
+function buildForceFieldTooltipContent() {
+    const techsResearched = getMegaStructureTechsResearched?.() || [];
+    let disconnectCount = 0;
+
+    for (let structureId = 1; structureId <= 4; structureId++) {
+        if (hasMegaStructureTech(techsResearched, structureId, 3)) {
+            disconnectCount += 1;
+        }
+    }
+
+    let strengthText = '100%';
+    let strengthClass = 'red-disabled-text';
+
+    if (disconnectCount >= 4) {
+        strengthText = 'DOWN!';
+        strengthClass = 'green-ready-text';
+    } else if (disconnectCount === 3) {
+        strengthText = '25%';
+        strengthClass = '';
+    } else if (disconnectCount === 2) {
+        strengthText = '50%';
+        strengthClass = 'warning-orange-text';
+    } else if (disconnectCount === 1) {
+        strengthText = '75%';
+        strengthClass = 'warning-orange-text';
+    }
+
+    const strengthHtml = strengthClass
+        ? `<span class="${strengthClass}">${strengthText}</span>`
+        : `<span>${strengthText}</span>`;
+
+    const followUp = disconnectCount >= 4
+        ? `<div class="green-ready-text">You can now move to Miaplacidus!</div>`
+        : '<div>Keep searching and conquering Ancient Megastructures to weaken the Miaplacidus Force Field</div>';
+
+    return [
+        `<div>Force Field Strength: ${strengthHtml}</div>`,
+        '<div class="tooltip-spacer">&nbsp;</div>',
+        followUp
+    ].join('');
+}
+
 function buildLaunchPadSidebarStatus() {
     const statusElement = document.getElementById('launchPadOption2');
     const optionRow = statusElement?.closest('.row-side-menu');
@@ -1109,10 +1155,6 @@ function buildAntimatterMegaStructureLines(timerRatio) {
     });
 
     return { lines, total };
-}
-
-function hasMegaStructureTech(techList, structureId, techIndex) {
-    return Array.isArray(techList) && techList.some(entry => Array.isArray(entry) && entry[0] === structureId && entry[1] === techIndex);
 }
 
 function findAsteroidByName(asteroids, targetName) {
@@ -8880,7 +8922,8 @@ export function setColoniseOpinionProgressBar(value, parentElement) {
 export function createMegaStructureDiagram() {
     const container = document.createElement('div');
     container.className = 'mega-structure-diagram-container';
-    container.id = 'container';
+    container.id = 'megaStructureDiagramContainer';
+    attachSharedTooltip(container, buildForceFieldTooltipContent);
 
     const forceFieldBox = document.createElement('div');
     forceFieldBox.className = 'force-field-container';
