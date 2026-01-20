@@ -1,5 +1,5 @@
 import { getGameActiveCountTime, getTimerRateRatio, getSaveName, getRocketUserName, getDestinationStar, getCurrencySymbol, getPlayerPhilosophy, getRepeatableTechMultipliers, getStatRun, getCurrentRunIsMegaStructureRun } from "./constantsAndGlobalVars.js";
-import { calculateAndAddExtraAPFromPhilosophyRepeatable } from "./game.js";
+import { calculateAndAddExtraAPFromPhilosophyRepeatable, formatNumber } from "./game.js";
 import { getAchievementDataObject, getResourceDataObject } from "./resourceDataObject.js";
 import { capitaliseWordsWithRomanNumerals } from "./utilityFunctions.js";
 
@@ -1402,6 +1402,11 @@ export function initialiseDescriptions() {
             content2: "",
             updateAt: ""
         },
+        spaceRocket4AutoBuyerRow: {
+            content1: `Fuel and launch your mining vessel to start mining valuable Antimatter - Power: ${Math.floor(getResourceDataObject('space', ['upgrades', 'rocket4', 'autoBuyer', 'tier1', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content2: "",
+            updateAt: ""
+        },
         spaceStarShipStellarScannerRow: {
             content1: `Click to Scan the destination Star for any life or threats that may be present.`,
             content2: "",
@@ -1409,11 +1414,6 @@ export function initialiseDescriptions() {
         },
         spaceStarShipDestinationReminderRow: {
             content1: "Select a destination in the Star Map.",
-            content2: "",
-            updateAt: ""
-        },
-        spaceRocket4AutoBuyerRow: {
-            content1: `Fuel and launch your mining vessel to start mining valuable Antimatter - Power: ${Math.floor(getResourceDataObject('space', ['upgrades', 'rocket4', 'autoBuyer', 'tier1', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },

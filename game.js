@@ -722,6 +722,7 @@ export async function gameLoop() {
         checkForAchievements();
 
         updateRocketNames();
+        updateRocketFuelAutoBuyerDescriptions();
         updateAllPowerPlantRates();
         checkIfStarShipBuilt();
 
@@ -2619,6 +2620,42 @@ function updateRocketNames() {
         for (let i = 1; i <= 4; i++) {
             document.getElementById(`rocket${i}`).textContent = getRocketUserName(`rocket${i}`);
         }
+    }
+}
+
+function buildRocketFuelCostSuffix(rocketKey) {
+    const price = getResourceDataObject('space', ['upgrades', rocketKey, 'autoBuyer', 'tier1', 'price']) ?? 0;
+    if (Number(price) <= 0) {
+        return '';
+    }
+
+    const cash = getResourceDataObject('currency', ['cash']) ?? 0;
+    const hasEnoughCash = Number(cash) >= Number(price);
+    const className = hasEnoughCash ? 'green-ready-text' : 'red-disabled-text';
+    const currencySymbol = getCurrencySymbol?.() ?? '$';
+    const formattedPrice = formatNumber(price);
+    const displayPrice = currencySymbol === '€'
+        ? `${formattedPrice}${currencySymbol}`
+        : `${currencySymbol}${formattedPrice}`;
+
+    return ` - Fuel:&nbsp;<span class="${className}">${displayPrice}</span>`;
+}
+
+function updateRocketFuelAutoBuyerDescriptions() {
+    const tab = getCurrentTab?.();
+    if (!tab?.[1]?.includes('Space Mining')) {
+        return;
+    }
+
+    for (let i = 1; i <= 4; i++) {
+        const rocketKey = `rocket${i}`;
+        const descElement = document.getElementById(`spaceRocket${i}AutoBuyerRowDescription`);
+        if (!descElement) {
+            continue;
+        }
+
+        const powerKwPerSecond = Math.floor((getResourceDataObject('space', ['upgrades', rocketKey, 'autoBuyer', 'tier1', 'energyUse']) ?? 0) * getTimerRateRatio());
+        descElement.innerHTML = `Fuel and launch your mining vessel to start mining valuable Antimatter - Power: ${powerKwPerSecond}KW / s${buildRocketFuelCostSuffix(rocketKey)}`;
     }
 }
 
