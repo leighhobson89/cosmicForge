@@ -23,6 +23,7 @@ import {
     getBlackHoleChargeReady,
     setBlackHoleChargeReady,
     setCurrentBlackHoleChargeTimerDurationTotal,
+    getCurrentBlackHoleChargeTimerDurationTotal,
     getGameCostMultiplier,
     getBlackHoleDurationUpgradeIncrementMs,
     getBlackHolePowerUpgradeIncrement,
@@ -43,7 +44,11 @@ import {
     getBlackHolePowerPrice,
     setBlackHolePowerPrice,
     getBlackHoleDurationPrice,
-    setBlackHoleDurationPrice
+    setBlackHoleDurationPrice,
+    getBlackHoleRechargePrice,
+    setBlackHoleRechargePrice,
+    getBlackHoleRechargeMultiplier,
+    setBlackHoleRechargeMultiplier
 } from './resourceDataObject.js';
 import { capitaliseString } from './utilityFunctions.js';
 import { modalRebirthText, modalRebirthHeader } from './descriptions.js';
@@ -588,6 +593,43 @@ export function drawTab7Content(heading, optionContentElement) {
             setBlackHoleDurationPrice(Math.ceil(price * getGameCostMultiplier()));
             setBlackHoleDuration(getBlackHoleDuration() + getBlackHoleDurationUpgradeIncrementMs());
         });
+        const blackHoleButton4 = createButton('Recharge', ['id_blackHoleButton4', 'option-button', 'wide-option-button'], () => {
+            if (!getBlackHoleResearchDone()) {
+                return;
+            }
+
+            const price = getBlackHoleRechargePrice();
+            const currentResearch = getResourceDataObject('research', ['quantity']);
+            if (currentResearch < price) {
+                return;
+            }
+
+            setResourceDataObject(currentResearch - price, 'research', ['quantity']);
+            setBlackHoleRechargePrice(Math.ceil(price * getGameCostMultiplier()));
+
+            const previousMultiplier = getBlackHoleRechargeMultiplier();
+            const newMultiplier = previousMultiplier * 0.9;
+            setBlackHoleRechargeMultiplier(newMultiplier);
+
+            if (getCurrentlyChargingBlackHole()) {
+                const timerName = 'blackHoleChargeTimer';
+                if (timerManagerDelta.hasTimer(timerName)) {
+                    const previousTotal = getCurrentBlackHoleChargeTimerDurationTotal();
+                    const previousRemaining = getTimeLeftUntilBlackHoleChargeTimerFinishes();
+                    const elapsed = previousTotal - previousRemaining;
+                    const progress = previousTotal > 0 ? Math.max(0, Math.min(1, elapsed / previousTotal)) : 0;
+
+                    timerManagerDelta.removeTimer(timerName);
+                    setCurrentlyChargingBlackHole(false);
+
+                    const newTotal = Math.round(previousTotal * 0.9);
+                    const newRemaining = Math.round(newTotal * (1 - progress));
+                    setCurrentBlackHoleChargeTimerDurationTotal(newTotal);
+                    setTimeLeftUntilBlackHoleChargeTimerFinishes(newRemaining);
+                    startBlackHoleChargeTimer([newRemaining, 'rechargeUpgrade']);
+                }
+            }
+        });
         const blackHoleActivateChargeButton = createButton('Charge', ['id_blackHoleChargeButton', 'option-button'], () => {
             if (getCurrentlyChargingBlackHole() || getCurrentlyTimeWarpingBlackHole()) {
                 return;
@@ -659,7 +701,7 @@ export function drawTab7Content(heading, optionContentElement) {
             startBlackHoleChargeTimer([0, 'buttonClick']);
         });
 
-        [blackHoleButton2, blackHoleButton3, blackHoleActivateChargeButton].forEach(button => {
+        [blackHoleButton2, blackHoleButton3, blackHoleButton4, blackHoleActivateChargeButton].forEach(button => {
             setButtonState(button, { enabled: false, ready: false });
         });
 
@@ -668,6 +710,7 @@ export function drawTab7Content(heading, optionContentElement) {
         blackHoleResearchGateContainer.appendChild(blackHoleButton1);
         blackHoleRow2LeftButtons.appendChild(blackHoleButton3);
         blackHoleRow2LeftButtons.appendChild(blackHoleButton2);
+        blackHoleRow2LeftButtons.appendChild(blackHoleButton4);
         blackHoleRow2RightButtons.appendChild(blackHoleActivateChargeButton);
 
         const blackHoleCanvas = createBlackHole(0);

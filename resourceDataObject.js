@@ -951,8 +951,10 @@ export let resourceData = {
         researchPrice: 1000000,
         durationPrice: 600000,
         powerPrice: 850000,
+        rechargePrice: 900000,
         duration: 3000,
         power: 5,
+        rechargeMultiplier: 1,
         blackHoleResearchDone: false
     }
 };
@@ -2392,6 +2394,10 @@ const achievementPositionDataLinker = {
     have50HoursWithOnePioneer: { id: 'have50HoursWithOnePioneer', gridRow: 4, gridColumn: 9 }
 };
 
+export function getAchievementIconImageUrls() {
+    return achievementImageUrls;
+}
+
 export const megaStructureImageUrls = {
     forceField0Misty: './images/megaStructure/misty/ForceField0.png',
     forceField1Misty: './images/megaStructure/misty/ForceField1.png',
@@ -2652,6 +2658,32 @@ export function getBlackHolePowerPrice() {
 
 export function setBlackHolePowerPrice(value) {
     setResourceDataObject(value, 'blackHole', ['powerPrice']);
+}
+
+export function getBlackHoleRechargePrice() {
+    const value = getResourceDataObject('blackHole', ['rechargePrice'], true);
+    if (value === undefined) {
+        setBlackHoleRechargePrice(900000);
+        return 900000;
+    }
+    return value;
+}
+
+export function setBlackHoleRechargePrice(value) {
+    setResourceDataObject(value, 'blackHole', ['rechargePrice']);
+}
+
+export function getBlackHoleRechargeMultiplier() {
+    const value = getResourceDataObject('blackHole', ['rechargeMultiplier'], true);
+    if (value === undefined) {
+        setBlackHoleRechargeMultiplier(1);
+        return 1;
+    }
+    return value;
+}
+
+export function setBlackHoleRechargeMultiplier(value) {
+    setResourceDataObject(value, 'blackHole', ['rechargeMultiplier']);
 }
 
 export function restoreGalacticMarketDataObject(value) {
