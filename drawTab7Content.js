@@ -467,7 +467,7 @@ export function drawTab7Content(heading, optionContentElement) {
             null,
             null,
             null,
-            '',
+            '<span id="blackHoleChargeProgressRowDescription">BLACK HOLE CHARGING</span>',
             null,
             null,
             null,
@@ -492,8 +492,11 @@ export function drawTab7Content(heading, optionContentElement) {
         }
 
         const blackHoleRow2Container = document.createElement('div');
+        blackHoleRow2Container.style.display = 'flex';
+        blackHoleRow2Container.style.flexDirection = 'column';
         blackHoleRow2Container.style.width = '100%';
-        blackHoleRow2Container.style.padding = '40px 60px';
+        blackHoleRow2Container.style.minHeight = '220px';
+        blackHoleRow2Container.style.padding = '0px 60px 0px 60px';
 
         const blackHoleResearchGateContainer = document.createElement('div');
         blackHoleResearchGateContainer.id = 'blackHoleResearchGateContainer';
@@ -501,7 +504,9 @@ export function drawTab7Content(heading, optionContentElement) {
         blackHoleResearchGateContainer.style.alignItems = 'center';
         blackHoleResearchGateContainer.style.justifyContent = 'center';
         blackHoleResearchGateContainer.style.width = '100%';
-        blackHoleResearchGateContainer.style.height = '220px';
+        blackHoleResearchGateContainer.style.height = '100%';
+        blackHoleResearchGateContainer.style.minHeight = '220px';
+        blackHoleResearchGateContainer.style.flex = '1 0 auto';
 
         const blackHoleUnlockedContainer = document.createElement('div');
         blackHoleUnlockedContainer.id = 'blackHoleUnlockedContainer';
@@ -515,19 +520,19 @@ export function drawTab7Content(heading, optionContentElement) {
         blackHoleRow2LeftButtons.id = 'blackHoleRow2LeftButtons';
         blackHoleRow2LeftButtons.style.display = 'flex';
         blackHoleRow2LeftButtons.style.flexDirection = 'column';
-        blackHoleRow2LeftButtons.style.justifyContent = 'space-between';
+        blackHoleRow2LeftButtons.style.justifyContent = 'space-evenly';
+        blackHoleRow2LeftButtons.style.gap = '20%';
         blackHoleRow2LeftButtons.style.alignItems = 'flex-start';
         blackHoleRow2LeftButtons.style.height = '220px';
         blackHoleRow2LeftButtons.style.width = '240px';
 
-        const blackHoleRow2RightButtons = document.createElement('div');
-        blackHoleRow2RightButtons.id = 'blackHoleRow2RightButtons';
-        blackHoleRow2RightButtons.style.display = 'flex';
-        blackHoleRow2RightButtons.style.flexDirection = 'column';
-        blackHoleRow2RightButtons.style.justifyContent = 'center';
-        blackHoleRow2RightButtons.style.alignItems = 'flex-end';
-        blackHoleRow2RightButtons.style.height = '220px';
-        blackHoleRow2RightButtons.style.width = '240px';
+        const blackHoleChargeButtonContainer = document.createElement('div');
+        blackHoleChargeButtonContainer.id = 'blackHoleChargeButtonContainer';
+        blackHoleChargeButtonContainer.style.display = 'flex';
+        blackHoleChargeButtonContainer.style.alignItems = 'center';
+        blackHoleChargeButtonContainer.style.justifyContent = 'flex-end';
+        blackHoleChargeButtonContainer.style.height = '220px';
+        blackHoleChargeButtonContainer.style.width = '240px';
 
         const blackHoleCanvasContainer = document.createElement('div');
         blackHoleCanvasContainer.id = 'blackHoleCanvasContainer';
@@ -711,7 +716,7 @@ export function drawTab7Content(heading, optionContentElement) {
         blackHoleRow2LeftButtons.appendChild(blackHoleButton3);
         blackHoleRow2LeftButtons.appendChild(blackHoleButton2);
         blackHoleRow2LeftButtons.appendChild(blackHoleButton4);
-        blackHoleRow2RightButtons.appendChild(blackHoleActivateChargeButton);
+        blackHoleChargeButtonContainer.appendChild(blackHoleActivateChargeButton);
 
         const blackHoleCanvas = createBlackHole(0);
         blackHoleCanvas.id = 'blackHoleCanvas';
@@ -725,7 +730,7 @@ export function drawTab7Content(heading, optionContentElement) {
 
         blackHoleUnlockedContainer.appendChild(blackHoleRow2LeftButtons);
         blackHoleUnlockedContainer.appendChild(blackHoleCanvasContainer);
-        blackHoleUnlockedContainer.appendChild(blackHoleRow2RightButtons);
+        blackHoleUnlockedContainer.appendChild(blackHoleChargeButtonContainer);
 
         if (getBlackHoleResearchDone()) {
             blackHoleResearchGateContainer.classList.add('invisible');

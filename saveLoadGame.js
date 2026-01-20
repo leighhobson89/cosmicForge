@@ -559,6 +559,14 @@ export function migrateResourceData(saveData, objectType) {
                 if (saveData.blackHole.blackHoleResearchDone === undefined) {
                     saveData.blackHole.blackHoleResearchDone = false;
                 }
+
+                if (saveData.blackHole.rechargePrice === undefined) {
+                    saveData.blackHole.rechargePrice = 900000;
+                }
+
+                if (saveData.blackHole.rechargeMultiplier === undefined) {
+                    saveData.blackHole.rechargeMultiplier = 1;
+                }
             }
 
             saveData.version = 0.79;
@@ -596,6 +604,12 @@ export function migrateResourceData(saveData, objectType) {
         }
         if (saveData.blackHole.blackHoleResearchDone === undefined) {
             saveData.blackHole.blackHoleResearchDone = false;
+        }
+        if (saveData.blackHole.rechargePrice === undefined) {
+            saveData.blackHole.rechargePrice = 900000;
+        }
+        if (saveData.blackHole.rechargeMultiplier === undefined) {
+            saveData.blackHole.rechargeMultiplier = 1;
         }
     }
 

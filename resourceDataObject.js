@@ -2871,6 +2871,13 @@ export let resourceDataRebirthCopy = structuredClone(resourceData);
 
 export function resetResourceDataObjectOnRebirthAndAddApAndPermanentBuffsBack() {
     const currentAp = getResourceDataObject('ascendencyPoints', ['quantity']);
+    const blackHoleResearchDone = getResourceDataObject('blackHole', ['blackHoleResearchDone']);
+    const blackHolePower = getResourceDataObject('blackHole', ['power']);
+    const blackHoleDuration = getResourceDataObject('blackHole', ['duration']);
+    const blackHoleRechargeMultiplier = getResourceDataObject('blackHole', ['rechargeMultiplier']);
+    const blackHolePowerPrice = getResourceDataObject('blackHole', ['powerPrice']);
+    const blackHoleDurationPrice = getResourceDataObject('blackHole', ['durationPrice']);
+    const blackHoleRechargePrice = getResourceDataObject('blackHole', ['rechargePrice']);
     const currentPricesForRepeatables = {};
     const playerPhilosophy = getPlayerPhilosophy();
     const allPhilosophyTechs = getResourceDataObject('philosophyRepeatableTechs');
@@ -2887,6 +2894,13 @@ export function resetResourceDataObjectOnRebirthAndAddApAndPermanentBuffsBack() 
     });
 
     Object.assign(resourceData, resourceDataRebirthCopy);
+    setResourceDataObject(blackHoleResearchDone, 'blackHole', ['blackHoleResearchDone']);
+    setResourceDataObject(blackHolePower, 'blackHole', ['power']);
+    setResourceDataObject(blackHoleDuration, 'blackHole', ['duration']);
+    setResourceDataObject(blackHoleRechargeMultiplier, 'blackHole', ['rechargeMultiplier']);
+    setResourceDataObject(blackHolePowerPrice, 'blackHole', ['powerPrice']);
+    setResourceDataObject(blackHoleDurationPrice, 'blackHole', ['durationPrice']);
+    setResourceDataObject(blackHoleRechargePrice, 'blackHole', ['rechargePrice']);
     setResourceDataObject(researchAutoBuyerEnabled, 'research', ['upgrades', 'autoBuyer', 'active']);
 
     if (getMegaStructureResourceBonus()) {

@@ -1933,6 +1933,19 @@ function blackHoleUIChecks() {
             timeWarpDescriptionElement.textContent = 'BLACK HOLE ACTIVATED';
         }
     }
+
+    const chargeDescriptionElement = document.getElementById('blackHoleChargeProgressRowDescription');
+    if (chargeDescriptionElement) {
+        chargeDescriptionElement.classList.add('green-ready-text');
+        if (getCurrentlyChargingBlackHole()) {
+            const remainingSeconds = (getTimeLeftUntilBlackHoleChargeTimerFinishes() / 1000).toFixed(1);
+            chargeDescriptionElement.textContent = `BLACK HOLE CHARGING - ${remainingSeconds}s`;
+        } else if (getBlackHoleChargeReady()) {
+            chargeDescriptionElement.textContent = 'BLACK HOLE CHARGED';
+        } else {
+            chargeDescriptionElement.textContent = 'BLACK HOLE CHARGING';
+        }
+    }
     if (blackHoleCanvas) {
         blackHoleCanvas.dataset.timeWarping = timeWarping ? 'true' : 'false';
         blackHoleCanvas.dataset.timeWarpRemainingMs = String(timeWarpRemainingMs);
