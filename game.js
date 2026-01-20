@@ -6175,6 +6175,7 @@ function waitForAnimationEnd(element, animationClass) {
         element.classList.add(animationClass);
         element.addEventListener('animationend', function onAnimationEnd() {
             element.removeEventListener('animationend', onAnimationEnd);
+            element.classList.remove(animationClass);
             resolve();
         });
     });
@@ -6185,6 +6186,8 @@ let settleSystemAfterBattleCalled = false;
 async function initiateBattleFadeOut(battleResolved) {
     const battleCanvas = document.getElementById('battleCanvas');
     if (battleCanvas) {
+        // Freeze battle rendering/AI during the end animation so the victory/defeat text remains visible.
+        setBattleOngoing(false);
         await waitForAnimationEnd(battleCanvas, 'fade-in-stretch');
         setBattleResolved(true, battleResolved[1]);
 
@@ -6914,16 +6917,36 @@ function drawBattleResultText(canvasId, result) {
     const canvasWidth = canvas.width;
     const canvasHeight = canvas.height;
 
-    ctx.font = "30px Arial";
-    ctx.fillStyle = "white";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    
-    if (result === 'player') {
-        ctx.fillText("Battle Won!", canvasWidth / 2, canvasHeight / 2);
-    } else if (result === 'enemy') {
-        ctx.fillText("Battle Lost!", canvasWidth / 2, canvasHeight / 2);
-    }
+    const won = result === 'player';
+    const text = won ? 'BATTLE WON' : 'BATTLE LOST';
+    const subText = won ? 'SYSTEM SECURED' : 'FLEET DESTROYED';
+
+    const x = canvasWidth / 2;
+    const y = canvasHeight / 2;
+
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    const panelW = Math.min(460, canvasWidth * 0.7);
+    const panelH = 120;
+    ctx.globalAlpha = 0.55;
+    ctx.fillStyle = 'rgba(0,0,0,0.55)';
+    ctx.fillRect(x - panelW / 2, y - panelH / 2, panelW, panelH);
+
+    ctx.globalAlpha = 1;
+    ctx.shadowColor = won ? 'rgba(120,255,220,0.85)' : 'rgba(255,120,120,0.85)';
+    ctx.shadowBlur = 26;
+    ctx.fillStyle = 'rgba(255,255,255,1)';
+    ctx.font = '800 44px system-ui, -apple-system, Segoe UI, Roboto, Arial';
+    ctx.fillText(text, x, y - 12);
+
+    ctx.shadowBlur = 12;
+    ctx.globalAlpha = 0.9;
+    ctx.font = '600 16px system-ui, -apple-system, Segoe UI, Roboto, Arial';
+    ctx.fillText(subText, x, y + 28);
+
+    ctx.restore();
 }
 
 async function colonisePrepareWarUI(reason) {
@@ -11298,6 +11321,7 @@ function trackEnemyAndAdjustHealth(unit) {
 export function assignGoalToUnits() {
     const canvas = document.getElementById('battleCanvas');
     const battleUnits = getBattleUnits();
+    const now = performance.now();
     
     ['player', 'enemy'].forEach(owner => {
         battleUnits[owner].forEach(unit => {
@@ -11318,11 +11342,15 @@ export function assignGoalToUnits() {
                         unit.huntY = null;
                     } else if (getBattleTriggeredByPlayer() ) {
                         if (unit.currentGoal !== 'dead') {
-                            unit.currentGoal = {
-                                x: Math.floor(Math.random() * (canvas.offsetWidth - 20)) + 10,
-                                y: Math.floor(Math.random() * (canvas.offsetHeight - 20)) + 10,
-                                id: 'hunt'
-                            };
+                            const cooldown = typeof unit.nextHuntUpdateAt === 'number' ? unit.nextHuntUpdateAt : 0;
+                            if (!unit.currentGoal || unit.currentGoal.id !== 'hunt' || now >= cooldown) {
+                                unit.currentGoal = {
+                                    x: Math.floor(Math.random() * (canvas.offsetWidth - 20)) + 10,
+                                    y: Math.floor(Math.random() * (canvas.offsetHeight - 20)) + 10,
+                                    id: 'hunt'
+                                };
+                                unit.nextHuntUpdateAt = now + 900 + Math.random() * 900;
+                            }
                         }
                     }
                 }
@@ -11357,7 +11385,7 @@ function getNewGoalForUnit(unit) {
     return preferredTarget;
 }
 
-function getVisibleEnemies(unit) {
+function getVisibleEnemies(unit, fireLasers = true) {
     const battleUnits = getBattleUnits();
     const enemyUnits = (unit.owner === 'player' ? battleUnits.enemy : battleUnits.player).filter(enemy => enemy.disabled !== true);
 
@@ -11383,9 +11411,11 @@ function getVisibleEnemies(unit) {
                 if (angleToEnemy >= minAngle && angleToEnemy <= maxAngle) {
                     visibleEnemies.push(enemy);
 
-                    if (Math.random() <= 0.2) {
-                        if (unit.currentGoal && unit.currentGoal.id === enemy.id) {
-                            shootLaser(unit, enemy);
+                    if (fireLasers) {
+                        if (Math.random() <= 0.2) {
+                            if (unit.currentGoal && unit.currentGoal.id === enemy.id) {
+                                shootLaser(unit, enemy);
+                            }
                         }
                     }
                 }
@@ -11394,9 +11424,11 @@ function getVisibleEnemies(unit) {
                 if (angleToEnemy >= minAngle || angleToEnemy <= maxAngle) {
                     visibleEnemies.push(enemy);
 
-                    if (Math.random() <= 0.2) {
-                        if (unit.currentGoal && unit.currentGoal.id === enemy.id) {
-                            shootLaser(unit, enemy);
+                    if (fireLasers) {
+                        if (Math.random() <= 0.2) {
+                            if (unit.currentGoal && unit.currentGoal.id === enemy.id) {
+                                shootLaser(unit, enemy);
+                            }
                         }
                     }
                 }
@@ -11448,7 +11480,7 @@ function getPreferredTarget(unit, visibleEnemies) {
     }
 
     const stealthyTargets = potentialTargets.filter(target => {
-        return !getVisibleEnemies(target).includes(unit);
+        return !getVisibleEnemies(target, false).includes(unit);
     });
 
     if (stealthyTargets.length > 0) {

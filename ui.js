@@ -3747,7 +3747,7 @@ export async function showBattlePopup(won, apGain = 0) {
 
         if (won) {
             if (won !== 'megastructure') {
-                content += `<br>- You have conquered the -<span class="green-ready-text">${capitaliseWordsWithRomanNumerals(getDestinationStar())}</span> System!`;
+                content += `<br>- You have conquered the <span class="green-ready-text">${capitaliseWordsWithRomanNumerals(getDestinationStar())}</span> System!`;
             } else {
                 content += `<br>- You have defeated the Mechanized army and conquered the <span class="factory-star-text">${capitaliseWordsWithRomanNumerals(getDestinationStar())}</span> System!<br>You will be able to conduct investigative research on how to harness its power on your next run!<br><br><span class="green-ready-text">Prepare for Glory!</span>`;
             }
@@ -8142,12 +8142,36 @@ function updateUnitRenderState(unit) {
 function renderBattleLasers(ctx, now) {
     if (!battleVisualLasers.length) return;
 
+    const battleUnits = getBattleUnits();
+    const allUnits = battleUnits ? [...battleUnits.player, ...battleUnits.enemy] : [];
+
     for (let i = battleVisualLasers.length - 1; i >= 0; i--) {
         const shot = battleVisualLasers[i];
         const age = now - shot.t;
         if (age >= shot.life) {
             battleVisualLasers.splice(i, 1);
             continue;
+        }
+
+        let x1 = shot.x1;
+        let y1 = shot.y1;
+        let x2 = shot.x2;
+        let y2 = shot.y2;
+
+        if (shot.unitId && allUnits.length) {
+            const u = allUnits.find(s => s.id === shot.unitId);
+            if (u) {
+                x1 = typeof u.renderX === 'number' ? u.renderX : u.x;
+                y1 = typeof u.renderY === 'number' ? u.renderY : u.y;
+            }
+        }
+
+        if (shot.enemyId && allUnits.length) {
+            const e = allUnits.find(s => s.id === shot.enemyId);
+            if (e) {
+                x2 = typeof e.renderX === 'number' ? e.renderX : e.x;
+                y2 = typeof e.renderY === 'number' ? e.renderY : e.y;
+            }
         }
 
         const p = age / shot.life;
@@ -8161,22 +8185,22 @@ function renderBattleLasers(ctx, now) {
         ctx.strokeStyle = shot.color;
         ctx.lineWidth = 6;
         ctx.beginPath();
-        ctx.moveTo(shot.x1, shot.y1);
-        ctx.lineTo(shot.x2, shot.y2);
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
         ctx.stroke();
 
         ctx.globalAlpha = 0.95 * a;
         ctx.strokeStyle = shot.color;
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(shot.x1, shot.y1);
-        ctx.lineTo(shot.x2, shot.y2);
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
         ctx.stroke();
 
         ctx.globalAlpha = 0.7 * a;
         ctx.fillStyle = 'rgba(255,255,255,1)';
         ctx.beginPath();
-        ctx.arc(shot.x2, shot.y2, 1.6, 0, Math.PI * 2);
+        ctx.arc(x2, y2, 1.6, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.restore();
@@ -8524,8 +8548,6 @@ function renderBattleExplosions(ctx, now) {
     }
 
     export function shootLaser(unit, enemy) {
-        const canvas = document.getElementById('battleCanvas');
-
         let strokeColor = "transparent";
     
         if (unit.currentGoal && unit.currentGoal.id === enemy.id) {
@@ -8552,7 +8574,19 @@ function renderBattleExplosions(ctx, now) {
         const y1 = typeof unit.renderY === 'number' ? unit.renderY : unit.y;
         const x2 = typeof enemy.renderX === 'number' ? enemy.renderX : enemy.x;
         const y2 = typeof enemy.renderY === 'number' ? enemy.renderY : enemy.y;
-        battleVisualLasers.push({ x1, y1, x2, y2, color: strokeColor, t: performance.now(), life: 150 });
+
+        // Keep lasers essentially "instant" (1-2 frames) and anchored to current unit positions.
+        battleVisualLasers.push({
+            unitId: unit.id,
+            enemyId: enemy.id,
+            x1,
+            y1,
+            x2,
+            y2,
+            color: strokeColor,
+            t: performance.now(),
+            life: 34
+        });
     }
 
     
