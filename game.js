@@ -8132,6 +8132,7 @@ export function startBlackHoleChargeTimer(adjustment) {
                 setCurrentlyChargingBlackHole(false);
                 setBlackHoleChargeReady(true);
                 appendAttentionIndicator(document.getElementById('blackholeOption'), '🌀');
+                showNotification('The Black Hole is Charged and ready to Activate!', 'info', 3000, 'special');
                 setTimeLeftUntilBlackHoleChargeTimerFinishes(0);
 
                 if (progressBar) {
