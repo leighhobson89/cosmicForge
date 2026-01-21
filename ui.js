@@ -114,6 +114,8 @@ import {
     STACK_WIDTH,
     BASE_RIGHT,
     setAchievementFlagArray,
+    getThemesTriedArray,
+    setThemesTriedArray,
     setActivatedWackyNewsEffectsArray,
     setFirstAccessArray,
     getFirstAccessArray,
@@ -2456,7 +2458,7 @@ export function createHtmlTableAchievementsGrid(id, classList = [], achievements
     container.classList.add(...classList);
     container.style.display = 'grid';
     container.style.gridTemplateColumns = 'repeat(10, 80px)';
-    container.style.gridTemplateRows = 'repeat(5, 80px)';
+    container.style.gridTemplateRows = 'repeat(6, 80px)';
     container.style.gap = '0px';
     container.style.padding = '10px';
     container.style.justifyContent = 'start';
@@ -2913,6 +2915,14 @@ export function selectTheme(theme) {
     const body = document.body;
     body.setAttribute('data-theme', theme);
     setCurrentTheme(theme);
+
+    setThemesTriedArray(theme, 'add');
+    const requiredThemes = ['terminal', 'dark', 'misty', 'light', 'frosty', 'summer', 'forest'];
+    const triedThemes = getThemesTriedArray();
+    const hasAllThemes = requiredThemes.every(t => triedThemes.includes(t));
+    if (hasAllThemes) {
+        setAchievementFlagArray('tryAllThemes', 'add');
+    }
 }
 
 export function showWeatherNotification(type) {
@@ -9335,6 +9345,8 @@ let activeWinCinematicPromise = null;
 export function playWinCinematic(durationMs = 14000) {
     if (activeWinCinematicPromise) return activeWinCinematicPromise;
 
+    setAchievementFlagArray('completeGame', 'add');
+
     activeWinCinematicPromise = new Promise((resolve) => {
         const existing = document.getElementById('winCinematicOverlay');
         if (existing) {
@@ -9350,7 +9362,7 @@ export function playWinCinematic(durationMs = 14000) {
         overlay.style.top = '0';
         overlay.style.width = '100vw';
         overlay.style.height = '100vh';
-        overlay.style.zIndex = '2147483647';
+        overlay.style.zIndex = '95000';
         overlay.style.background = 'rgba(0, 0, 0, 1)';
         overlay.style.opacity = '1';
         overlay.style.transition = 'opacity 900ms ease';

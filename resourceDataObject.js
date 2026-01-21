@@ -3,12 +3,12 @@ import { migrateResourceData } from "./saveLoadGame.js";
 import { addPermanentBuffsBackInAfterRebirth, setResourceAutobuyerPricesAfterRepeatables, setCompoundRecipePricesAfterRepeatables, setEnergyAndResearchBuildingPricesAfterRepeatables, setFleetPricesAfterRepeatables, setFleetArmorBuffsAfterRepeatables, setFleetSpeedsAfterRepeatables, setFleetAttackDamageAfterRepeatables, setInitialImpressionBaseAfterRepeatables, setStarStudyEfficiencyAfterRepeatables, setAsteroidSearchEfficiencyAfterRepeatables, calculateAndAddExtraAPFromPhilosophyRepeatable, setStarshipPartPricesAfterRepeatables, setRocketPartPricesAfterRepeatables, setRocketTravelTimeReductionAfterRepeatables, setStarshipTravelTimeReductionAfterRepeatables, applyRateMultiplierToAllResources, addStorageCapacityAndCompoundsToAllResources } from './game.js';
 import { getMultiplierPermanentCompounds, getMultiplierPermanentResources, getCurrentTheme, setCompoundCreateDropdownRecipeText, getCompoundCreateDropdownRecipeText, getStatRun, getPlayerPhilosophy, getAllRepeatableTechMultipliersObject, getFactoryStarsArray, getMegaStructureTechsResearched, getMegaStructureResourceBonus, getStorageAdderBonus, mapFactoryStarValue } from "./constantsAndGlobalVars.js";
 
-import { achievementAchieve100FusionEfficiency, achievementActivateAllWackyNewsTickers, achievementBeatEnemy, achievementCollect100Precipitation, achievementCollect100TitaniumAsPrecipitation, achievementConquerStarSystems, achievementCreateCompound, achievementDiscoverAsteroid, achievementDiscoverLegendaryAsteroid, achievementHave4RocketsMiningAntimatter, achievementHave50HoursWithOnePioneer, achievementInitiateDiplomacyWithAlienRace, achievementLaunchRocket, achievementLaunchStarShip, achievementLiquidateAllAssets, achievementMineAllAntimatterAsteroid, achievementPerformGalaticMarketTransaction, achievementRebirth, achievementResearchAllTechnologies, achievementSeeAllNewsTickers, achievementSpendAp, achievementStudyAllStarsInOneRun, achievementStudyAStar, achievementTrade10APForCash, achievementTripPower } from "./achievements.js";
+import { achievementAchieve100FusionEfficiency, achievementActivateAllWackyNewsTickers, achievementAdoptPhilosophy, achievementBeatEnemy, achievementBringDownMiaplacideanForceField, achievementCollect100Precipitation, achievementCollect100TitaniumAsPrecipitation, achievementCompleteGame, achievementCompleteRunOnMiaplacidus, achievementConquerMegastructureSystem, achievementConquerStarSystems, achievementCreateCompound, achievementDiscoverAsteroid, achievementDiscoverBlackHole, achievementDiscoverLegendaryAsteroid, achievementFindAncientManuscript, achievementHave4RocketsMiningAntimatter, achievementHave50HoursWithOnePioneer, achievementHaveFleetSizeOf50EachShipType, achievementInitiateDiplomacyWithAlienRace, achievementLaunchRocket, achievementLaunchStarShip, achievementLiquidateAllAssets, achievementMineAllAntimatterAsteroid, achievementPerformGalaticMarketTransaction, achievementRebirth, achievementResearchAllTechnologies, achievementSeeAllNewsTickers, achievementSpendAp, achievementStudyAllStarsInOneRun, achievementStudyAStar, achievementTrade10APForCash, achievementTripPower, achievementActivateBlackHoleOver10x, achievementTryAllThemes } from "./achievements.js";
 import { showNotification } from "./ui.js";
 
 export let achievementImageUrls;
 export let resourceData = {
-    version: 0.79, //update this whenever changes are made to the structure
+    version: 0.80, //update this whenever changes are made to the structure
     resources: {
         solar: {
             autoSell: false,
@@ -816,7 +816,7 @@ export let resourceData = {
                 setPrice: 'scienceLabPrice',
                 energyUse: 0.5
             }
-        }
+        }    
     },    
     techs: {
         knowledgeSharing: { appearsAt: [0, null, null], prereqs: [null], price: 150, idForRenderPosition: 10, path: 1 },
@@ -994,7 +994,7 @@ export const miaplacidus = {
 
 
 export let starSystems = {
-    version: 0.79,
+    version: 0.80,
     stars: {
         spica: {
             mapSize: 5.504440179536064, //might need to add this to star object when added dynamically for after rebirth
@@ -1013,7 +1013,7 @@ export let starSystems = {
 };
 
 export let galacticMarket = {
-    version: 0.79,
+    version: 0.80,
     resources: {
         hydrogen: { 
             name: "Hydrogen", 
@@ -1119,7 +1119,7 @@ export let galacticMarket = {
 };
 
 export let ascendencyBuffs = {
-    version: 0.79,
+    version: 0.80,
     "efficientStorage": {  //done
         name: "Efficient Storage",
         description: "buffEfficientStorageRow",
@@ -2283,6 +2283,211 @@ export let achievementsData = {
             }
         },
         notification: "studyAllStarsInOneRunNotification"
+    },
+    adoptPhilosophy: {
+        id: "adoptPhilosophy",
+        name: "Adopt a Philosophy",
+        specialConditionName: 'achievementAdoptPhilosophy',
+        specialCondition: achievementAdoptPhilosophy,
+        specialConditionArguments: false,
+        resetOnRebirth: false,
+        active: false,
+        requirements: {
+            requirement1: "special",
+            value1: ""
+        },
+        gives: {
+            gives1: "rewardString",
+            value1: {
+                type: 'pride',
+                quantity: 0
+            }
+        },
+        notification: "adoptPhilosophyNotification"
+    },
+    discoverBlackHole: {
+        id: "discoverBlackHole",
+        name: "Discover a Black Hole",
+        specialConditionName: 'achievementDiscoverBlackHole',
+        specialCondition: achievementDiscoverBlackHole,
+        specialConditionArguments: false,
+        resetOnRebirth: false,
+        active: false,
+        requirements: {
+            requirement1: "special",
+            value1: ""
+        },
+        gives: {
+            gives1: "cash",
+            value1: {
+                quantity: 1000000
+            }
+        },
+        notification: "discoverBlackHoleNotification"
+    },
+    activateBlackHoleOver10x: {
+        id: "activateBlackHoleOver10x",
+        name: "Activate a Black Hole at more than 10x Time Warp",
+        specialConditionName: 'achievementActivateBlackHoleOver10x',
+        specialCondition: achievementActivateBlackHoleOver10x,
+        specialConditionArguments: false,
+        resetOnRebirth: false,
+        active: false,
+        requirements: {
+            requirement1: "special",
+            value1: ""
+        },
+        gives: {
+            gives1: "doubleAllResourcesToStorageCap",
+            value1: {
+                quantity: 0
+            }
+        },
+        notification: "activateBlackHoleOver10xNotification"
+    },
+    findAncientManuscript: {
+        id: "findAncientManuscript",
+        name: "Find an Ancient Manuscript",
+        specialConditionName: 'achievementFindAncientManuscript',
+        specialCondition: achievementFindAncientManuscript,
+        specialConditionArguments: false,
+        resetOnRebirth: false,
+        active: false,
+        requirements: {
+            requirement1: "special",
+            value1: ""
+        },
+        gives: {
+            gives1: "doubleAllCompoundsToStorageCap",
+            value1: {
+                quantity: 0
+            }
+        },
+        notification: "findAncientManuscriptNotification"
+    },
+    conquerMegastructureSystem: {
+        id: "conquerMegastructureSystem",
+        name: "Conquer a Megastructure System",
+        specialConditionName: 'achievementConquerMegastructureSystem',
+        specialCondition: achievementConquerMegastructureSystem,
+        specialConditionArguments: false,
+        resetOnRebirth: false,
+        active: false,
+        requirements: {
+            requirement1: "special",
+            value1: ""
+        },
+        gives: {
+            gives1: "cash",
+            value1: {
+                quantity: 1000000
+            }
+        },
+        notification: "conquerMegastructureSystemNotification"
+    },
+    bringDownMiaplacideanForceField: {
+        id: "bringDownMiaplacideanForceField",
+        name: "Bring down the Miaplacidean Force Field",
+        specialConditionName: 'achievementBringDownMiaplacideanForceField',
+        specialCondition: achievementBringDownMiaplacideanForceField,
+        specialConditionArguments: false,
+        resetOnRebirth: false,
+        active: false,
+        requirements: {
+            requirement1: "special",
+            value1: ""
+        },
+        gives: {
+            gives1: "ascendencyPoints",
+            value1: {
+                quantity: 100
+            }
+        },
+        notification: "bringDownMiaplacideanForceFieldNotification"
+    },
+    completeGame: {
+        id: "completeGame",
+        name: "Complete the Game",
+        specialConditionName: 'achievementCompleteGame',
+        specialCondition: achievementCompleteGame,
+        specialConditionArguments: false,
+        resetOnRebirth: false,
+        active: false,
+        requirements: {
+            requirement1: "special",
+            value1: ""
+        },
+        gives: {
+            gives1: "rewardString",
+            value1: {
+                type: 'pride',
+                quantity: 0
+            }
+        },
+        notification: "completeGameNotification"
+    },
+    completeRunOnMiaplacidus: {
+        id: "completeRunOnMiaplacidus",
+        name: "Complete a Run on Miaplacidus",
+        specialConditionName: 'achievementCompleteRunOnMiaplacidus',
+        specialCondition: achievementCompleteRunOnMiaplacidus,
+        specialConditionArguments: false,
+        resetOnRebirth: false,
+        active: false,
+        requirements: {
+            requirement1: "special",
+            value1: ""
+        },
+        gives: {
+            gives1: "rewardString",
+            value1: {
+                type: 'gluttonForPunishment',
+                quantity: 0
+            }
+        },
+        notification: "completeRunOnMiaplacidusNotification"
+    },
+    haveFleetSizeOf50EachShipType: {
+        id: "haveFleetSizeOf50EachShipType",
+        name: "Have a Fleet Size of at least 50 of each Ship Type",
+        specialConditionName: 'achievementHaveFleetSizeOf50EachShipType',
+        specialCondition: achievementHaveFleetSizeOf50EachShipType,
+        specialConditionArguments: false,
+        resetOnRebirth: true,
+        active: false,
+        requirements: {
+            requirement1: "special",
+            value1: ""
+        },
+        gives: {
+            gives1: "compound",
+            value1: {
+                type: 'titanium',
+                quantity: 1000000
+            }
+        },
+        notification: "haveFleetSizeOf50EachShipTypeNotification"
+    },
+    tryAllThemes: {
+        id: "tryAllThemes",
+        name: "Try All Themes",
+        specialConditionName: 'achievementTryAllThemes',
+        specialCondition: achievementTryAllThemes,
+        specialConditionArguments: false,
+        resetOnRebirth: false,
+        active: false,
+        requirements: {
+            requirement1: "special",
+            value1: ""
+        },
+        gives: {
+            gives1: "rewardString",
+            value1: {
+                type: 'pride',
+                quantity: 0
+            }
+        },
+        notification: "tryAllThemesNotification"
     }
 };
 
@@ -2338,6 +2543,16 @@ export function setAchievementIconImageUrls() {
         studyAllStarsInOneRun: `./images/achievements/${getCurrentTheme()}/images/studyAllStarsInOneRun.png`,
         trade10APForCash: `./images/achievements/${getCurrentTheme()}/images/trade10APForCash.png`,
         have50HoursWithOnePioneer: `./images/achievements/${getCurrentTheme()}/images/have50HoursWithOnePioneer.png`,    
+        adoptPhilosophy: `./images/achievements/${getCurrentTheme()}/images/adoptPhilosophy.png`,
+        discoverBlackHole: `./images/achievements/${getCurrentTheme()}/images/discoverBlackHole.png`,
+        activateBlackHoleOver10x: `./images/achievements/${getCurrentTheme()}/images/activateBlackHoleOver10x.png`,
+        findAncientManuscript: `./images/achievements/${getCurrentTheme()}/images/findAncientManuscript.png`,
+        conquerMegastructureSystem: `./images/achievements/${getCurrentTheme()}/images/conquerMegastructureSystem.png`,
+        bringDownMiaplacideanForceField: `./images/achievements/${getCurrentTheme()}/images/bringDownMiaplacideanForceField.png`,
+        completeGame: `./images/achievements/${getCurrentTheme()}/images/completeGame.png`,
+        completeRunOnMiaplacidus: `./images/achievements/${getCurrentTheme()}/images/completeRunOnMiaplacidus.png`,
+        haveFleetSizeOf50EachShipType: `./images/achievements/${getCurrentTheme()}/images/haveFleetSizeOf50EachShipType.png`,
+        tryAllThemes: `./images/achievements/${getCurrentTheme()}/images/tryAllThemes.png`,
     };    
 }  
 
@@ -2391,7 +2606,17 @@ const achievementPositionDataLinker = {
     have4RocketsMiningAntimatter: { id: 'have4RocketsMiningAntimatter', gridRow: 4, gridColumn: 6 },
     studyAllStarsInOneRun: { id: 'studyAllStarsInOneRun', gridRow: 4, gridColumn: 7 },
     trade10APForCash: { id: 'trade10APForCash', gridRow: 4, gridColumn: 8 },
-    have50HoursWithOnePioneer: { id: 'have50HoursWithOnePioneer', gridRow: 4, gridColumn: 9 }
+    have50HoursWithOnePioneer: { id: 'have50HoursWithOnePioneer', gridRow: 4, gridColumn: 9 },
+    adoptPhilosophy: { id: 'adoptPhilosophy', gridRow: 5, gridColumn: 0 },
+    discoverBlackHole: { id: 'discoverBlackHole', gridRow: 5, gridColumn: 1 },
+    activateBlackHoleOver10x: { id: 'activateBlackHoleOver10x', gridRow: 5, gridColumn: 2 },
+    findAncientManuscript: { id: 'findAncientManuscript', gridRow: 5, gridColumn: 3 },
+    conquerMegastructureSystem: { id: 'conquerMegastructureSystem', gridRow: 5, gridColumn: 4 },
+    bringDownMiaplacideanForceField: { id: 'bringDownMiaplacideanForceField', gridRow: 5, gridColumn: 5 },
+    completeGame: { id: 'completeGame', gridRow: 5, gridColumn: 6 },
+    completeRunOnMiaplacidus: { id: 'completeRunOnMiaplacidus', gridRow: 5, gridColumn: 7 },
+    haveFleetSizeOf50EachShipType: { id: 'haveFleetSizeOf50EachShipType', gridRow: 5, gridColumn: 8 },
+    tryAllThemes: { id: 'tryAllThemes', gridRow: 5, gridColumn: 9 }
 };
 
 export function getAchievementIconImageUrls() {
@@ -2698,7 +2923,28 @@ export function restoreAscendencyBuffsDataObject(value) {
 
 export function restoreAchievementsDataObject(value) {
     value = migrateResourceData(value, 'achievementsData')
-    achievementsData = value;
+    const template = achievementsData;
+    const merged = { ...template };
+
+    if (value && typeof value === 'object') {
+        for (const [key, savedAchievement] of Object.entries(value)) {
+            if (key === 'version') {
+                continue;
+            }
+
+            if (template[key] && savedAchievement && typeof savedAchievement === 'object') {
+                merged[key] = {
+                    ...template[key],
+                    active: savedAchievement.active ?? template[key].active
+                };
+            } else {
+                merged[key] = savedAchievement;
+            }
+        }
+    }
+
+    merged.version = template.version;
+    achievementsData = merged;
 }
 
 export function getStarSystemWeather(starSystem) {

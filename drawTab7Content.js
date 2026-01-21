@@ -27,7 +27,8 @@ import {
     getGameCostMultiplier,
     getBlackHoleDurationUpgradeIncrementMs,
     getBlackHolePowerUpgradeIncrement,
-    deferredActions
+    deferredActions,
+    setAchievementFlagArray
 } from './constantsAndGlobalVars.js';
 import { purchaseBuff, galacticMarketLiquidateForAp, galacticMarketSellApForCash, galacticMarketTrade, rebirth, startBlackHoleChargeTimer, timeWarp } from './game.js';
 import {
@@ -556,6 +557,7 @@ export function drawTab7Content(heading, optionContentElement) {
 
             setResourceDataObject(currentResearch - price, 'research', ['quantity']);
             setBlackHoleResearchDone(true);
+            setAchievementFlagArray('discoverBlackHole', 'add');
 
             const chargeTimerName = 'blackHoleChargeTimer';
             if (timerManagerDelta.hasTimer(chargeTimerName)) {

@@ -36,7 +36,17 @@ export const achievementFunctionsMap = {
     achievementHave4RocketsMiningAntimatter,
     achievementStudyAllStarsInOneRun,
     achievementTrade10APForCash,
-    achievementHave50HoursWithOnePioneer
+    achievementHave50HoursWithOnePioneer,
+    achievementAdoptPhilosophy,
+    achievementDiscoverBlackHole,
+    achievementActivateBlackHoleOver10x,
+    achievementFindAncientManuscript,
+    achievementConquerMegastructureSystem,
+    achievementBringDownMiaplacideanForceField,
+    achievementCompleteGame,
+    achievementCompleteRunOnMiaplacidus,
+    achievementHaveFleetSizeOf50EachShipType,
+    achievementTryAllThemes
 };
 
 export function checkForAchievements() {
@@ -278,6 +288,8 @@ export function addAchievementBonus(achievement) {
                     break;
             }
             break;
+        case 'rewardString':
+            break;
         case 'cash':
             const currentCash = getResourceDataObject('currency', ['cash']);
             setResourceDataObject(Math.floor(currentCash + quantity), 'currency', ['cash']);
@@ -285,6 +297,34 @@ export function addAchievementBonus(achievement) {
         case 'antimatter':
             const currentAntimatter = getResourceDataObject('antimatter', ['quantity']);
             setResourceDataObject(Math.floor(currentAntimatter + quantity), 'antimatter', ['quantity']);
+            break;
+        case 'compound':
+            if (!type) {
+                break;
+            }
+            const currentCompound = getResourceDataObject('compounds', [type, 'quantity']);
+            const compoundCap = getResourceDataObject('compounds', [type, 'storageCapacity']);
+            setResourceDataObject(Math.min(compoundCap, Math.floor(currentCompound + quantity)), 'compounds', [type, 'quantity']);
+            break;
+        case 'doubleAllResourcesToStorageCap':
+            {
+                const allResources = getResourceDataObject('resources');
+                for (const resourceKey in allResources) {
+                    const currentQuantity = getResourceDataObject('resources', [resourceKey, 'quantity']);
+                    const storageCapacity = getResourceDataObject('resources', [resourceKey, 'storageCapacity']);
+                    setResourceDataObject(Math.min(storageCapacity, Math.floor(currentQuantity * 2)), 'resources', [resourceKey, 'quantity']);
+                }
+            }
+            break;
+        case 'doubleAllCompoundsToStorageCap':
+            {
+                const allCompounds = getResourceDataObject('compounds');
+                for (const compoundKey in allCompounds) {
+                    const currentQuantity = getResourceDataObject('compounds', [compoundKey, 'quantity']);
+                    const storageCapacity = getResourceDataObject('compounds', [compoundKey, 'storageCapacity']);
+                    setResourceDataObject(Math.min(storageCapacity, Math.floor(currentQuantity * 2)), 'compounds', [compoundKey, 'quantity']);
+                }
+            }
             break;
     }
 }
@@ -548,6 +588,91 @@ export function achievementHave50HoursWithOnePioneer() {
     const fiftyHoursInMs = 50 * 60 * 60 * 1000;
 
     if (elapsedTimeActive >= fiftyHoursInMs) {
+        grantAchievement(achievement);
+    }
+}
+
+export function achievementAdoptPhilosophy() {
+    const achievement = getAchievementDataObject('adoptPhilosophy');
+    if (getAchievementFlagArray().includes('adoptPhilosophy')) {
+        setAchievementFlagArray('adoptPhilosophy', 'remove');
+        grantAchievement(achievement);
+    }
+}
+
+export function achievementDiscoverBlackHole() {
+    const achievement = getAchievementDataObject('discoverBlackHole');
+    if (getAchievementFlagArray().includes('discoverBlackHole')) {
+        setAchievementFlagArray('discoverBlackHole', 'remove');
+        grantAchievement(achievement);
+    }
+}
+
+export function achievementActivateBlackHoleOver10x() {
+    const achievement = getAchievementDataObject('activateBlackHoleOver10x');
+    if (getAchievementFlagArray().includes('activateBlackHoleOver10x')) {
+        setAchievementFlagArray('activateBlackHoleOver10x', 'remove');
+        grantAchievement(achievement);
+    }
+}
+
+export function achievementFindAncientManuscript() {
+    const achievement = getAchievementDataObject('findAncientManuscript');
+    if (getAchievementFlagArray().includes('findAncientManuscript')) {
+        setAchievementFlagArray('findAncientManuscript', 'remove');
+        grantAchievement(achievement);
+    }
+}
+
+export function achievementConquerMegastructureSystem() {
+    const achievement = getAchievementDataObject('conquerMegastructureSystem');
+    if (getAchievementFlagArray().includes('conquerMegastructureSystem')) {
+        setAchievementFlagArray('conquerMegastructureSystem', 'remove');
+        grantAchievement(achievement);
+    }
+}
+
+export function achievementBringDownMiaplacideanForceField() {
+    const achievement = getAchievementDataObject('bringDownMiaplacideanForceField');
+    if (getAchievementFlagArray().includes('bringDownMiaplacideanForceField')) {
+        setAchievementFlagArray('bringDownMiaplacideanForceField', 'remove');
+        grantAchievement(achievement);
+    }
+}
+
+export function achievementCompleteGame() {
+    const achievement = getAchievementDataObject('completeGame');
+    if (getAchievementFlagArray().includes('completeGame')) {
+        setAchievementFlagArray('completeGame', 'remove');
+        grantAchievement(achievement);
+    }
+}
+
+export function achievementCompleteRunOnMiaplacidus() {
+    const achievement = getAchievementDataObject('completeRunOnMiaplacidus');
+    if (getAchievementFlagArray().includes('completeRunOnMiaplacidus')) {
+        setAchievementFlagArray('completeRunOnMiaplacidus', 'remove');
+        grantAchievement(achievement);
+    }
+}
+
+export function achievementHaveFleetSizeOf50EachShipType() {
+    const achievement = getAchievementDataObject('haveFleetSizeOf50EachShipType');
+
+    const scout = getResourceDataObject('space', ['upgrades', 'fleetScout', 'quantity']);
+    const marauder = getResourceDataObject('space', ['upgrades', 'fleetMarauder', 'quantity']);
+    const landStalker = getResourceDataObject('space', ['upgrades', 'fleetLandStalker', 'quantity']);
+    const navalStrafer = getResourceDataObject('space', ['upgrades', 'fleetNavalStrafer', 'quantity']);
+
+    if (scout >= 50 && marauder >= 50 && landStalker >= 50 && navalStrafer >= 50) {
+        grantAchievement(achievement);
+    }
+}
+
+export function achievementTryAllThemes() {
+    const achievement = getAchievementDataObject('tryAllThemes');
+    if (getAchievementFlagArray().includes('tryAllThemes')) {
+        setAchievementFlagArray('tryAllThemes', 'remove');
         grantAchievement(achievement);
     }
 }

@@ -572,6 +572,46 @@ export function migrateResourceData(saveData, objectType) {
             saveData.version = 0.79;
         }
 
+        if (saveData.version < 0.80) {
+            if (objectType === 'achievementsData') {
+                if (!saveData.findAncientManuscript) {
+                    saveData.findAncientManuscript = { active: false };
+                }
+                if (!saveData.conquerMegastructureSystem) {
+                    saveData.conquerMegastructureSystem = { active: false };
+                }
+                if (!saveData.bringDownMiaplacideanForceField) {
+                    saveData.bringDownMiaplacideanForceField = { active: false };
+                }
+                if (!saveData.completeGame) {
+                    saveData.completeGame = { active: false };
+                }
+                if (!saveData.completeRunOnMiaplacidus) {
+                    saveData.completeRunOnMiaplacidus = { active: false };
+                }
+                if (!saveData.haveFleetSizeOf50EachShipType) {
+                    saveData.haveFleetSizeOf50EachShipType = { active: false };
+                }
+                if (!saveData.tryAllThemes) {
+                    saveData.tryAllThemes = { active: false };
+                }
+                if (!saveData.adoptPhilosophy) {
+                    saveData.adoptPhilosophy = { active: false };
+                }
+                if (!saveData.discoverBlackHole) {
+                    saveData.discoverBlackHole = { active: false };
+                }
+                if (!saveData.activateBlackHoleOver10x) {
+                    saveData.activateBlackHoleOver10x = { active: false };
+                }
+                if (!saveData.collect100TitaniumAsPrecipitation) {
+                    saveData.collect100TitaniumAsPrecipitation = { active: false };
+                }
+            }
+
+            saveData.version = 0.80;
+        }
+
         saveData.version += 0.001;
     }
 

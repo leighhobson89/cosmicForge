@@ -24,7 +24,7 @@ let saveData = null;
 //CONSTANTS
 export const HOMESTAR = 'miaplacidus';
 export const MINIMUM_GAME_VERSION_FOR_SAVES = 0.70;
-export const GAME_VERSION_FOR_SAVES = 0.79;
+export const GAME_VERSION_FOR_SAVES = 0.80;
 export const deferredActions = [];
 
 //NOTIFICATIONS
@@ -240,6 +240,7 @@ let launchedRockets = [];
 let saveName = null;
 let lastSavedTimeStamp = null;
 let currentTheme = 'terminal';
+let themesTriedArray = ['terminal'];
 let autoSaveFrequency = 300000;
 let currentStarSystem = getStartingStarSystem();
 let currentStarSystemWeatherEfficiency = [];
@@ -1412,6 +1413,7 @@ export function captureGameStatusForSaving(type) {
     // Global variables
     gameState.saveName = getSaveName();
     gameState.currentTheme = getCurrentTheme();
+    gameState.themesTriedArray = themesTriedArray;
     gameState.autoSaveFrequency = getAutoSaveFrequency();
     gameState.currentStarSystem = getCurrentStarSystem();
     gameState.currencySymbol = getCurrencySymbol();
@@ -1669,6 +1671,7 @@ export function restoreGameStatus(gameState, type) {
             }
 
             setCurrentTheme(gameState.currentTheme);
+            themesTriedArray = Array.isArray(gameState.themesTriedArray) ? gameState.themesTriedArray : ['terminal'];
             setAutoSaveFrequency(300000);
             setCurrentStarSystem(gameState.currentStarSystem);
             setCurrencySymbol(gameState.currencySymbol);
@@ -2993,6 +2996,22 @@ export function getCurrentTheme() {
 
 export function setCurrentTheme(value) {
     currentTheme = value;
+}
+
+export function setThemesTriedArray(themeKey, action) {
+    if (action === 'add' && typeof themeKey === 'string' && themeKey.length) {
+        if (!themesTriedArray.includes(themeKey)) {
+            themesTriedArray.push(themeKey);
+        }
+    } else if (action === 'remove' && typeof themeKey === 'string' && themeKey.length) {
+        themesTriedArray = themesTriedArray.filter(t => t !== themeKey);
+    } else if (action === 'empty') {
+        themesTriedArray = [];
+    }
+}
+
+export function getThemesTriedArray() {
+    return themesTriedArray;
 }
 
 export function getLastSavedTimeStamp() {

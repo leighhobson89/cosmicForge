@@ -500,6 +500,9 @@ function updateProductionRateText(elementId, rateValue) {
 
 export function timeWarp(lengthOfTimeInMs, multiplyRateBy) {
     //console.log('timeWarp invoked with:', lengthOfTimeInMs, multiplyRateBy);
+    if (typeof multiplyRateBy === 'number' && Number.isFinite(multiplyRateBy) && multiplyRateBy > 10) {
+        setAchievementFlagArray('activateBlackHoleOver10x', 'add');
+    }
     const durationMs = (typeof lengthOfTimeInMs === 'number' && Number.isFinite(lengthOfTimeInMs))
         ? Math.max(0, lengthOfTimeInMs)
         : 0;
@@ -8465,28 +8468,32 @@ export function startInvestigateStarTimer(adjustment) {
                         true, 
                         function() {  
                             setPlayerPhilosophy('constructor');
+                            setAchievementFlagArray('adoptPhilosophy', 'add');
                             showNotification('You are a CONSTRUCTOR!', 'warning', 3000, 'special');
                             showHideModal();
                             removeModalButtonTooltips();
                         }, 
                         function() {  
                             setPlayerPhilosophy('supremacist');
+                            setAchievementFlagArray('adoptPhilosophy', 'add');
                             showNotification('You are a SUPREMACIST!', 'warning', 3000, 'special');
                             showHideModal();
                             removeModalButtonTooltips();
                         }, 
                         function() {  
                             setPlayerPhilosophy('voidborn');
+                            setAchievementFlagArray('adoptPhilosophy', 'add');
                             showNotification('You are VOIDBORN!', 'warning', 3000, 'special');
                             showHideModal();
                             removeModalButtonTooltips();
                         }, 
                         function() {  
                             setPlayerPhilosophy('expansionist');
+                            setAchievementFlagArray('adoptPhilosophy', 'add');
                             showNotification('You are an EXPANSIONIST!', 'warning', 3000, 'special');
                             showHideModal();
                             removeModalButtonTooltips();
-                        }, 
+                        },
                         'CONSTRUCTOR', 
                         'SUPREMACIST', 
                         'VOIDBORN', 
@@ -11589,6 +11596,7 @@ export async function settleSystemAfterBattle(accessPoint) {
     if (isFactoryStar) {
         apModifier *= 2;
         setMegaStructuresInPossessionArray(getStarSystemDataObject('stars', [getDestinationStar(), 'factoryStar']));
+        setAchievementFlagArray('conquerMegastructureSystem', 'add');
     }
 
     const baseApGain = Math.floor(getStarSystemDataObject('stars', ['destinationStar', 'ascendencyPoints']) * apModifier);
@@ -11656,6 +11664,7 @@ export async function settleSystemAfterBattle(accessPoint) {
             if (manuscriptData && manuscriptData[3] === false) { //finds first false manuscript slot to activate that factory star
                 factoryStarToReport = getStarsWithAncientManuscripts()[i][1];
                 activateFactoryStar(getStarsWithAncientManuscripts()[i]);
+                setAchievementFlagArray('findAncientManuscript', 'add');
                 break;
             }
         }
@@ -11826,6 +11835,12 @@ export function addPermanentBuffsBackInAfterRebirth() {
 
 export function rebirth() {
     setAchievementFlagArray('rebirth', 'add');
+
+    const homeStarLower = getHomeStarName()?.toLowerCase();
+    const currentStarLower = getCurrentStarSystem()?.toLowerCase();
+    if (homeStarLower === 'miaplacidus' && currentStarLower === homeStarLower) {
+        setAchievementFlagArray('completeRunOnMiaplacidus', 'add');
+    }
     autoSelectOption('galacticMarketOption');
     document.getElementById('tabsContainer').children[0]?.click();
     autoSelectOption('hydrogenOption');
@@ -12056,7 +12071,11 @@ export function applyMegaStructureBonuses(megastructure, tech) {
                 case 3:
                     setMegaStructureAntimatterAmount(0.15);
                     setPermanentAntimatterUnlock(true);
-                    setMiaplacidusMilestoneLevel(getMiaplacidusMilestoneLevel() + 1);
+                    const newMiaplacidusMilestoneLevel = getMiaplacidusMilestoneLevel() + 1;
+                    setMiaplacidusMilestoneLevel(newMiaplacidusMilestoneLevel);
+                    if (newMiaplacidusMilestoneLevel >= 4) {
+                        setAchievementFlagArray('bringDownMiaplacideanForceField', 'add');
+                    }
                     setMegaStructureTechsResearched([1,3]);
                     return;
                 case 4:
@@ -12082,7 +12101,11 @@ export function applyMegaStructureBonuses(megastructure, tech) {
                 case 3:
                     setMegaStructureAntimatterAmount(0.15);
                     setPermanentAntimatterUnlock(true);
-                    setMiaplacidusMilestoneLevel(getMiaplacidusMilestoneLevel() + 1);
+                    const newMiaplacidusMilestoneLevel = getMiaplacidusMilestoneLevel() + 1;
+                    setMiaplacidusMilestoneLevel(newMiaplacidusMilestoneLevel);
+                    if (newMiaplacidusMilestoneLevel >= 4) {
+                        setAchievementFlagArray('bringDownMiaplacideanForceField', 'add');
+                    }
                     setMegaStructureTechsResearched([2,3]);
                     return;
                 case 4:
@@ -12106,7 +12129,11 @@ export function applyMegaStructureBonuses(megastructure, tech) {
                 case 3:
                     setMegaStructureAntimatterAmount(0.15);
                     setPermanentAntimatterUnlock(true);
-                    setMiaplacidusMilestoneLevel(getMiaplacidusMilestoneLevel() + 1);
+                    const newMiaplacidusMilestoneLevel = getMiaplacidusMilestoneLevel() + 1;
+                    setMiaplacidusMilestoneLevel(newMiaplacidusMilestoneLevel);
+                    if (newMiaplacidusMilestoneLevel >= 4) {
+                        setAchievementFlagArray('bringDownMiaplacideanForceField', 'add');
+                    }
                     setMegaStructureTechsResearched([3, 3]);
                     return;
                 case 4:
@@ -12132,7 +12159,11 @@ export function applyMegaStructureBonuses(megastructure, tech) {
                 case 3:
                     setMegaStructureAntimatterAmount(0.15);
                     setPermanentAntimatterUnlock(true);
-                    setMiaplacidusMilestoneLevel(getMiaplacidusMilestoneLevel() + 1);
+                    const newMiaplacidusMilestoneLevel = getMiaplacidusMilestoneLevel() + 1;
+                    setMiaplacidusMilestoneLevel(newMiaplacidusMilestoneLevel);
+                    if (newMiaplacidusMilestoneLevel >= 4) {
+                        setAchievementFlagArray('bringDownMiaplacideanForceField', 'add');
+                    }
                     setMegaStructureTechsResearched([4,3]);
                     return;
                 case 4:

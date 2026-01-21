@@ -348,7 +348,7 @@ export function initialiseDescriptions() {
     };
 
     rocketNames = {
-        version: 0.79,
+        version: 0.80,
         rocketDescription: "Build the launch pad to launch built rockets and mine asteroids for Antimatter.",
         [getRocketUserName('rocket1').toLowerCase()]: "Build the launch pad to launch built rockets and mine asteroids for Antimatter.",
         [getRocketUserName('rocket2').toLowerCase()]: "Build the launch pad to launch built rockets and mine asteroids for Antimatter.",
@@ -3073,6 +3073,108 @@ function generateAchievementTooltipDescriptions() {
             Status: ${getAchievementDataObject('have50HoursWithOnePioneer', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
         </span>
         `
+        ,
+        "adoptPhilosophy": `
+        ${getAchievementTooltipDescriptionTexts('adoptPhilosophy')}<br>
+        <span class="green-ready-text">Reward: Pride!</span><br>
+        <span class="${getAchievementDataObject('adoptPhilosophy', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
+            Reset on Rebirth: ${getAchievementDataObject('adoptPhilosophy', ['resetOnRebirth']) ? 'YES' : 'NO'}
+        </span><br><br>
+        <span class="${getAchievementDataObject('adoptPhilosophy', ['active']) ? 'green-ready-text' : ''}">
+            Status: ${getAchievementDataObject('adoptPhilosophy', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+        </span>
+        `,
+        "discoverBlackHole": `
+        ${getAchievementTooltipDescriptionTexts('discoverBlackHole')}<br>
+        <span class="green-ready-text">Reward: ${getCurrencySymbol()}1000000</span><br>
+        <span class="${getAchievementDataObject('discoverBlackHole', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
+            Reset on Rebirth: ${getAchievementDataObject('discoverBlackHole', ['resetOnRebirth']) ? 'YES' : 'NO'}
+        </span><br><br>
+        <span class="${getAchievementDataObject('discoverBlackHole', ['active']) ? 'green-ready-text' : ''}">
+            Status: ${getAchievementDataObject('discoverBlackHole', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+        </span>
+        `,
+        "activateBlackHoleOver10x": `
+        ${getAchievementTooltipDescriptionTexts('activateBlackHoleOver10x')}<br>
+        <span class="green-ready-text">Reward: x2 all Resource quantities (capped at storage)</span><br>
+        <span class="${getAchievementDataObject('activateBlackHoleOver10x', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
+            Reset on Rebirth: ${getAchievementDataObject('activateBlackHoleOver10x', ['resetOnRebirth']) ? 'YES' : 'NO'}
+        </span><br><br>
+        <span class="${getAchievementDataObject('activateBlackHoleOver10x', ['active']) ? 'green-ready-text' : ''}">
+            Status: ${getAchievementDataObject('activateBlackHoleOver10x', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+        </span>
+        `,
+        "findAncientManuscript": `
+        ${getAchievementTooltipDescriptionTexts('findAncientManuscript')}<br>
+        <span class="green-ready-text">Reward: x2 all Compound quantities (capped at storage)</span><br>
+        <span class="${getAchievementDataObject('findAncientManuscript', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
+            Reset on Rebirth: ${getAchievementDataObject('findAncientManuscript', ['resetOnRebirth']) ? 'YES' : 'NO'}
+        </span><br><br>
+        <span class="${getAchievementDataObject('findAncientManuscript', ['active']) ? 'green-ready-text' : ''}">
+            Status: ${getAchievementDataObject('findAncientManuscript', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+        </span>
+        `,
+        "conquerMegastructureSystem": `
+        ${getAchievementTooltipDescriptionTexts('conquerMegastructureSystem')}<br>
+        <span class="green-ready-text">Reward: ${getCurrencySymbol()}1000000</span><br>
+        <span class="${getAchievementDataObject('conquerMegastructureSystem', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
+            Reset on Rebirth: ${getAchievementDataObject('conquerMegastructureSystem', ['resetOnRebirth']) ? 'YES' : 'NO'}
+        </span><br><br>
+        <span class="${getAchievementDataObject('conquerMegastructureSystem', ['active']) ? 'green-ready-text' : ''}">
+            Status: ${getAchievementDataObject('conquerMegastructureSystem', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+        </span>
+        `,
+        "bringDownMiaplacideanForceField": `
+        ${getAchievementTooltipDescriptionTexts('bringDownMiaplacideanForceField')}<br>
+        <span class="green-ready-text">Reward: 100 AP</span><br>
+        <span class="${getAchievementDataObject('bringDownMiaplacideanForceField', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
+            Reset on Rebirth: ${getAchievementDataObject('bringDownMiaplacideanForceField', ['resetOnRebirth']) ? 'YES' : 'NO'}
+        </span><br><br>
+        <span class="${getAchievementDataObject('bringDownMiaplacideanForceField', ['active']) ? 'green-ready-text' : ''}">
+            Status: ${getAchievementDataObject('bringDownMiaplacideanForceField', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+        </span>
+        `,
+        "completeGame": `
+        ${getAchievementTooltipDescriptionTexts('completeGame')}<br>
+        <span class="green-ready-text">Reward: Pride!</span><br>
+        <span class="${getAchievementDataObject('completeGame', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
+            Reset on Rebirth: ${getAchievementDataObject('completeGame', ['resetOnRebirth']) ? 'YES' : 'NO'}
+        </span><br><br>
+        <span class="${getAchievementDataObject('completeGame', ['active']) ? 'green-ready-text' : ''}">
+            Status: ${getAchievementDataObject('completeGame', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+        </span>
+        `,
+        "completeRunOnMiaplacidus": `
+        ${getAchievementTooltipDescriptionTexts('completeRunOnMiaplacidus')}<br>
+        <span class="green-ready-text">Reward: Glutton For Punishment!</span><br>
+        <span class="${getAchievementDataObject('completeRunOnMiaplacidus', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
+            Reset on Rebirth: ${getAchievementDataObject('completeRunOnMiaplacidus', ['resetOnRebirth']) ? 'YES' : 'NO'}
+        </span><br><br>
+        <span class="${getAchievementDataObject('completeRunOnMiaplacidus', ['active']) ? 'green-ready-text' : ''}">
+            Status: ${getAchievementDataObject('completeRunOnMiaplacidus', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+        </span>
+        `,
+        "haveFleetSizeOf50EachShipType": `
+        ${getAchievementTooltipDescriptionTexts('haveFleetSizeOf50EachShipType')}<br>
+        <span class="green-ready-text">Reward: 1000000 Titanium (capped at storage)</span><br>
+        <span class="${getAchievementDataObject('haveFleetSizeOf50EachShipType', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
+            Reset on Rebirth: ${getAchievementDataObject('haveFleetSizeOf50EachShipType', ['resetOnRebirth']) ? 'YES' : 'NO'}
+        </span><br><br>
+        <span class="${getAchievementDataObject('haveFleetSizeOf50EachShipType', ['active']) ? 'green-ready-text' : ''}">
+            Status: ${getAchievementDataObject('haveFleetSizeOf50EachShipType', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+        </span>
+        `
+        ,
+        "tryAllThemes": `
+        ${getAchievementTooltipDescriptionTexts('tryAllThemes')}<br>
+        <span class="green-ready-text">Reward: Pride!</span><br>
+        <span class="${getAchievementDataObject('tryAllThemes', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
+            Reset on Rebirth: ${getAchievementDataObject('tryAllThemes', ['resetOnRebirth']) ? 'YES' : 'NO'}
+        </span><br><br>
+        <span class="${getAchievementDataObject('tryAllThemes', ['active']) ? 'green-ready-text' : ''}">
+            Status: ${getAchievementDataObject('tryAllThemes', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+        </span>
+        `
     };    
 }
 
@@ -3126,7 +3228,17 @@ achievementTooltipDescriptionTexts = {
     "have4RocketsMiningAntimatter": "Have 4 Rockets Mining Antimatter",
     "studyAllStarsInOneRun": "Study All Stars in One Run",
     "trade10APForCash": "Trade 10 AP for Cash",
-    "have50HoursWithOnePioneer": "Log 50 Active Hours with One Pioneer"      
+    "have50HoursWithOnePioneer": "Log 50 Active Hours with One Pioneer",
+    "adoptPhilosophy": "Adopt a Philosophy",
+    "discoverBlackHole": "Discover a Black Hole",
+    "activateBlackHoleOver10x": "Activate a Black Hole over 10x Time Warp",
+    "findAncientManuscript": "Find an Ancient Manuscript",
+    "conquerMegastructureSystem": "Conquer a Megastructure System",
+    "bringDownMiaplacideanForceField": "Bring down the Miaplacidean Force Field",
+    "completeGame": "Complete the Game",
+    "completeRunOnMiaplacidus": "Complete a Run on Miaplacidus",
+    "haveFleetSizeOf50EachShipType": "Have at least 50 of each Ship Type",
+    "tryAllThemes": "Try All Themes"      
 };
 
 achievementNotifications = {
@@ -3179,7 +3291,17 @@ achievementNotifications = {
     "have4RocketsMiningAntimatterNotification": "ACHIEVEMENT:\nYou have 4 rockets simultaneously mining Antimatter!\n\nREWARD: 100000 Cash",
     "studyAllStarsInOneRunNotification": "ACHIEVEMENT:\nYou have studied all Stars in the Star Map in one run!\n\nREWARD: Pride!",
     "trade10APForCashNotification": "ACHIEVEMENT:\nYou have traded 10 AP for Cash in one transaction in the Galactic Market!\n\nREWARD: 5AP",
-    "have50HoursWithOnePioneerNotification": "ACHIEVEMENT:\nYou have logged 50 active hours with one Pioneer Name!\n\nREWARD: 50AP"
+    "have50HoursWithOnePioneerNotification": "ACHIEVEMENT:\nYou have logged 50 active hours with one Pioneer Name!\n\nREWARD: 50AP",
+    "adoptPhilosophyNotification": "ACHIEVEMENT:\nYou have adopted a Philosophy!\n\nREWARD: Pride!",
+    "discoverBlackHoleNotification": "ACHIEVEMENT:\nYou have discovered a Black Hole!\n\nREWARD: 1000000 Cash",
+    "activateBlackHoleOver10xNotification": "ACHIEVEMENT:\nYou have activated a Black Hole at more than 10x Time Warp!\n\nREWARD: x2 all Resource quantities (capped at storage)",
+    "findAncientManuscriptNotification": "ACHIEVEMENT:\nYou have found an Ancient Manuscript!\n\nREWARD: x2 all Compound quantities (capped at storage)",
+    "conquerMegastructureSystemNotification": "ACHIEVEMENT:\nYou have conquered a Megastructure System!\n\nREWARD: 1000000 Cash",
+    "bringDownMiaplacideanForceFieldNotification": "ACHIEVEMENT:\nYou have brought down the Miaplacidean Force Field!\n\nREWARD: 100AP",
+    "completeGameNotification": "ACHIEVEMENT:\nYou have completed the game!\n\nREWARD: Pride!",
+    "completeRunOnMiaplacidusNotification": "ACHIEVEMENT:\nYou have completed a run on Miaplacidus!\n\nREWARD: Glutton For Punishment!",
+    "haveFleetSizeOf50EachShipTypeNotification": "ACHIEVEMENT:\nYou have at least 50 of each ship type!\n\nREWARD: 1000000 Titanium (capped at storage)",
+    "tryAllThemesNotification": "ACHIEVEMENT:\nYou have tried all Themes!\n\nREWARD: Pride!"
 };
 
 export const megaStructureTableText = {
