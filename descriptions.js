@@ -2525,7 +2525,7 @@ helpContent = {
         subBody1: "Ancient Manuscripts point you toward MegaStructure star systems. Clues to their location can sometimes surface in the News Ticker, so keep an eye on it.",
 
         subHeading2: "Megastructures",
-        subBody2: "The 4 MegaStructures are extremely difficult to conquer, but the rewards are massive. Each one you overcome contributes directly to the destruction of the Miaplacidus forcefield.",
+        subBody2: "MegaStructures are extremely difficult to conquer, and hidden in the Galaxy, but the rewards for doing so are massive. Each one you acquire also contributes directly to the destruction of the Miaplacidus forcefield.",
 
         subHeading3: "Miaplacidus",
         subBody3: "Miaplacidus - your Homeland - It is protected by a powerful force field maintained by the machine race. As you dismantle MegaStructures, and connect them to your own cause, that force field will weaken until it eventually collapses.",
