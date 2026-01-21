@@ -2528,7 +2528,7 @@ helpContent = {
         subBody2: "MegaStructures are extremely difficult to conquer, and hidden in the Galaxy, but the rewards for doing so are massive. Each one you acquire also contributes directly to the destruction of the Miaplacidus forcefield.",
 
         subHeading3: "Miaplacidus",
-        subBody3: "Miaplacidus - your Homeland - It is protected by a powerful force field maintained by the machine race. As you dismantle MegaStructures, and connect them to your own cause, that force field will weaken until it eventually collapses.",
+        subBody3: "Miaplacidus - your Homeland - It is protected by a powerful force field maintained by the machine race. As you dismantle MegaStructures, and connect them to your own cause, that force field will weaken until it eventually collapses, where you will then face the almighty battle of your life to recover your Ancestral homeland.",
 
         subHeading4: "The End Goal",
         subBody4: "Once the Miaplacidus force field is gone, you can attack the Master AI race, reclaim Miaplacidus, and reconquer your homeland. This is the end goal of the game."
