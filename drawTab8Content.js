@@ -619,8 +619,10 @@ export function drawTab8Content(heading, optionContentElement) {
         );
         
         optionContentElement.appendChild(helpRow);
-    
-        if (document.getElementById('contactRowTextArea') && document.getElementById('contactRowTextArea').classList.contains('discord-link')) {
+
+        const contactRowTextArea = document.getElementById('contactRowTextArea');
+
+        if (helpRow && contactRowTextArea && contactRowTextArea.classList.contains('discord-link')) {
             const spans = helpRow.querySelectorAll('span');
             
             spans.forEach(span => {
@@ -635,7 +637,7 @@ export function drawTab8Content(heading, optionContentElement) {
             });
         }
         
-        if (document.getElementById('contactRowTextArea') && document.getElementById('contactRowTextArea').classList.contains('email-link')) {
+        if (helpRow && contactRowTextArea && contactRowTextArea.classList.contains('email-link')) {
             const spans = helpRow.querySelectorAll('span');
             
             spans.forEach(span => {

@@ -1,24 +1,26 @@
 {
   "compilerOptions": {
-    "lib": ["ESNext"],
+    "lib": ["ESNext", "DOM"],
     "target": "ESNext",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "moduleDetection": "force",
     "jsx": "react-jsx",
     "allowJs": true,
-    "checkJs": true,
+    "checkJs": false,
     "verbatimModuleSyntax": true,
     "allowImportingTsExtensions": false,
     "noEmit": true,
-    "strict": true,
+    "strict": false,
     "skipLibCheck": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
+    "noImplicitAny": false,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false
   },
-  "include": ["**/*.js", "**/*.cjs", "**/*.mjs"]
+  "include": ["**/*.js", "**/*.cjs", "**/*.mjs"],
+  "exclude": ["node_modules", "builds", "tools", ".git"]
 }

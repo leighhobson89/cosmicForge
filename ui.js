@@ -5797,11 +5797,11 @@ function drawLeftSideOfAntimatterSvg(asteroidsArray, rocketData, svgElement, svg
 export async function drawAntimatterFlowDiagram(rocketData, svgElement) {
     const asteroidsArray = getAsteroidArray();
     const svgNS = "http://www.w3.org/2000/svg";
-    let topMostY;
-    let bottomMostY;
-    let rightOffset;
-    let boxWidth;
-    let boxHeight;
+    let topMostY = 0;
+    let bottomMostY = 0;
+    let rightOffset = 0;
+    let boxWidth = 0;
+    let boxHeight = 0;
 
     if (!getHasAntimatterSvgRightBoxDataChanged(svgElement)) {
         [topMostY, bottomMostY, rightOffset, boxWidth, boxHeight] = drawLeftSideOfAntimatterSvg(asteroidsArray, rocketData, svgElement, svgNS);
@@ -6224,8 +6224,8 @@ export function showTabsUponUnlock() {
     const unlockedTechs = getTechUnlockedArray();
 
     tabs.forEach(tab => {
-        const tabTech = tab.getAttribute('data-tab');
-        const tabName = tab.getAttribute('data-name');
+        const tabTech = tab.getAttribute('data-tab') ?? '';
+        const tabName = tab.getAttribute('data-name') ?? '';
 
         if (unlockedTechs.includes(tabTech)) {
             if (!getBattleTriggeredByPlayer()) {
@@ -8048,7 +8048,10 @@ export function sortAsteroidTable(asteroidsArray, sortMethod) {
 }
 
 export function renameRocket(rocketId, originalRocketKey) {
-    const newRocketName = document.getElementById(`${rocketId}NameField`).textContent.trim(); 
+    const rocketNameField = document.getElementById(`${rocketId}NameField`);
+    if (!rocketNameField) return;
+
+    const newRocketName = (rocketNameField.textContent ?? '').trim(); 
     const newRocketKey = newRocketName.toLowerCase();
 
     setRocketUserName(rocketId, newRocketName);
@@ -8795,7 +8798,8 @@ function renderBattleExplosions(ctx, now) {
                 //     (unit.currentGoal?.id ? 'blue' : 
                 //     getComputedStyle(document.querySelector('[data-theme]')).getPropertyValue('--ready-text').trim());
                 
-                ctx.fillStyle = getComputedStyle(document.querySelector('[data-theme]')).getPropertyValue('--ready-text').trim();  
+                const themeElement = document.querySelector('[data-theme]');
+                ctx.fillStyle = themeElement ? getComputedStyle(themeElement).getPropertyValue('--ready-text').trim() : 'white';
                 drawUnit(ctx, unit);
             }
 
@@ -8808,7 +8812,8 @@ function renderBattleExplosions(ctx, now) {
             //     (unit.currentGoal?.id ? 'blue' : 
             //     getComputedStyle(document.querySelector('[data-theme]')).getPropertyValue('--disabled-text').trim());
             
-            ctx.fillStyle = getComputedStyle(document.querySelector('[data-theme]')).getPropertyValue('--disabled-text').trim();  
+            const themeElement = document.querySelector('[data-theme]');
+            ctx.fillStyle = themeElement ? getComputedStyle(themeElement).getPropertyValue('--disabled-text').trim() : 'white';
             drawUnit(ctx, unit);
             }
         });
