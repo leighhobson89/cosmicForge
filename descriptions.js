@@ -339,6 +339,7 @@ export function initialiseDescriptions() {
         'concepts - early': "Early game concepts.",
         'concepts - mid': "Mid game concepts.",
         'concepts - late': "Late game concepts pre rebirth.",
+        'concepts - end goal': "End game concepts and what to work toward.",
         'philosophies': "Philosophies and their effects.",
         'visual': "Change the visual settings of the game.",
         'game options': "Change the game options to your liking.",
@@ -2514,7 +2515,23 @@ helpContent = {
         subBody9: "The Galactic market is a major unlock, and arrives after your ship arrives at the new System in the first run.  In it, you can trade Resources, Cash and AP.",
 
         subHeading10: "Ascendency Perks",
-        subBody10: "You can spend acquired AP on permanent buffs that make future runs easier, and the game more replayable and fun!"
+        subBody10: "You can spend acquired AP on permanent buffs that make future runs easier, and the game more replayable and fun!",
+
+        subHeading11: "Black Hole",
+        subBody11: "You can accidentally discover a Black Hole, and once researched it can be used to Time Warp, speeding up travel times and Resource collection. It needs to be charged which takes time, but the time can be reduced with upgrades. You can also increase the time it stays active for and the power of it with further upgrades, and once it is unlocked it is available across different runs."
+    },
+    'concepts - end goal': {
+        subHeading1: "Ancient Manuscripts",
+        subBody1: "Ancient Manuscripts point you toward MegaStructure star systems. Clues to their location can sometimes surface in the News Ticker, so keep an eye on it.",
+
+        subHeading2: "Megastructures",
+        subBody2: "The 4 MegaStructures are extremely difficult to conquer, but the rewards are massive. Each one you overcome contributes directly to the destruction of the Miaplacidus forcefield.",
+
+        subHeading3: "Miaplacidus",
+        subBody3: "Miaplacidus - your Homeland - It is protected by a powerful force field maintained by the machine race. As you dismantle MegaStructures, and connect them to your own cause, that force field will weaken until it eventually collapses.",
+
+        subHeading4: "The End Goal",
+        subBody4: "Once the Miaplacidus force field is gone, you can attack the Master AI race, reclaim Miaplacidus, and reconquer your homeland. This is the end goal of the game."
     },
     'philosophies': {
     subHeading1: "Philosophies",

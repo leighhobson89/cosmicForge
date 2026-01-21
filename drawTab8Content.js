@@ -11,6 +11,7 @@ export function drawTab8Content(heading, optionContentElement) {
     if (heading === 'Concepts - Early') createHelpSectionRow('conceptsEarlyRow', []);
     if (heading === 'Concepts - Mid') createHelpSectionRow('conceptsMidRow', []);
     if (heading === 'Concepts - Late') createHelpSectionRow('conceptsLateRow', []);
+    if (heading === 'Concepts - End Goal') createHelpSectionRow('conceptsEndGoalRow', []);
     if (heading === 'Philosophies') createHelpSectionRow('philosophies', []);
     if (heading === 'Statistics') createStatisticsSectionRow('statisticsRow');
     if (heading === 'Achievements') createAchievementsSectionRow('achievementsRow');

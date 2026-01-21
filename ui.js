@@ -6869,6 +6869,16 @@ function initializeTabEventListeners() {
         });    
     });
 
+    document.querySelectorAll('[class*="tab8"][class*="option13"]').forEach(function(element) {
+        element.addEventListener('click', function() {
+            selectRowCss(this);
+            setLastScreenOpenRegister('tab8', 'concepts - end goal');
+            setCurrentOptionPane('concepts - end goal');
+            updateContent('Concepts - End Goal', 'tab8', 'content');
+            setFirstAccessArray('concepts - end goal');
+        });
+    });
+
     document.querySelectorAll('[class*="tab8"][class*="option8"]').forEach(function(element) {
         element.addEventListener('click', function() {
             selectRowCss(this);
