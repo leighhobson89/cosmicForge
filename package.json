@@ -1,12 +1,63 @@
 {
-    "name": "my-app",
-    "version": "1.0.0",
-    "main": "server.js",
-    "scripts": {
-        "start": "node server.js"
+  "$schema": "https://json.schemastore.org/package",
+  "name": "cosmic-forge",
+  "version": "1.0.0",
+  "description": "An Electron sandbox for forging stellar civilizations.",
+  "author": {
+    "name": "Leigh Hobson",
+    "email": "leigh@cosmicforge.dev"
+  },
+  "main": "main.js",
+  "type": "module",
+  "build": {
+    "appId": "net.leighhobson.cosmicforge",
+    "mac": {
+      "target": "zip",
+      "category": "public.app-category.games",
+      "icon": "icons/app.icns"
     },
-    "dependencies": {
-        "express": "^4.18.2",
-        "firebase": "^11.2.0"
-    }
+    "win": {
+      "target": "portable",
+      "icon": "icons/app.ico"
+    },
+    "linux": {
+      "target": "zip",
+      "icon": "icon.png"
+    },
+    "portable": {
+      "unicode": false,
+      "artifactName": "cosmic-forge.exe"
+    },
+    "files": [
+      "index.html",
+      "main.js",
+      "package.json",
+      "styles.css",
+      "*.png",
+      "*.js",
+      "images/**/*",
+      "sounds/**/*",
+      "resources/**/*",
+      "production_resources/**/*",
+      "*.json",
+      "*.md",
+      "icons/*.*"
+    ]
+  },
+  "scripts": {
+    "start": "electron .",
+    "build-icons": "mkdir -p icons && icon-gen -i icon.png -o icons",
+    "build:mac": "bun run build-icons && electron-builder --mac --universal -c.mac.identity=null --publish never",
+    "build:win": "bun run build-icons && electron-builder --win",
+    "build:linux": "bun run build-icons && electron-builder --linux"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/electron": "latest",
+    "electron": "latest",
+    "electron-builder": "latest",
+    "icon-gen": "latest"
+  },
+  "dependencies": {},
+  "private": true
 }
