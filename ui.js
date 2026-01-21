@@ -2209,7 +2209,7 @@ export function setupAchievementTooltip() {
     tooltip.style.position = 'absolute';
     tooltip.style.padding = '6px 10px';
     tooltip.style.pointerEvents = 'none';
-    tooltip.style.background = 'var(--bg-color)';
+    tooltip.style.background = 'var(--container-bg-color)';
     tooltip.style.color = 'var(--text-color)';
     tooltip.style.border = '1px solid var(--border-color, #555)';
     tooltip.style.borderRadius = 'var(--border-radius, 4px)';

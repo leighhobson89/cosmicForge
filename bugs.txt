@@ -1,5 +1,2 @@
 when power on with a basic power plant, carbon production severely reduced in reality but appears to only be reduced by 2/s
 if you buy a resource or compound in the GM befoe it is revealed, could be a better way of handling it than just allowing it and then it showing up when it is revealed
-
-REALLY TO DO TO END OF GAME
-    - ADD ACHIEVEMENTS ARTWORK FOR NEW ACHIEVEMENTS
