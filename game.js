@@ -1954,6 +1954,7 @@ function blackHoleUIChecks() {
     }
 
     const chargeButton = document.getElementById('blackHoleChargeButton');
+    const chargeButtonContainer = document.getElementById('blackHoleChargeButtonContainer');
     const secondaryButton2 = document.getElementById('blackHoleButton2');
     const secondaryButton3 = document.getElementById('blackHoleButton3');
     const secondaryButton4 = document.getElementById('blackHoleButton4');
@@ -2038,9 +2039,15 @@ function blackHoleUIChecks() {
         }
     }
     if (blackHoleCanvas) {
-        blackHoleCanvas.dataset.timeWarping = timeWarping ? 'true' : 'false';
-        blackHoleCanvas.dataset.timeWarpRemainingMs = String(timeWarpRemainingMs);
-        blackHoleCanvas.dataset.timeWarpDurationMs = String(totalTimeWarpDurationMs || 0);
+        if (alwaysOn) {
+            blackHoleCanvas.dataset.timeWarping = 'true';
+            blackHoleCanvas.dataset.timeWarpRemainingMs = '1000';
+            blackHoleCanvas.dataset.timeWarpDurationMs = '1000';
+        } else {
+            blackHoleCanvas.dataset.timeWarping = timeWarping ? 'true' : 'false';
+            blackHoleCanvas.dataset.timeWarpRemainingMs = String(timeWarpRemainingMs);
+            blackHoleCanvas.dataset.timeWarpDurationMs = String(totalTimeWarpDurationMs || 0);
+        }
     }
 
     const charging = getCurrentlyChargingBlackHole();
@@ -2223,7 +2230,12 @@ function blackHoleUIChecks() {
         }
     }
 
+    if (chargeButtonContainer) {
+        chargeButtonContainer.classList.toggle('visibility-hidden', alwaysOn);
+    }
+
     if (chargeButton) {
+        chargeButton.classList.toggle('visibility-hidden', alwaysOn);
         if (alwaysOn) {
             chargeButton.textContent = 'ACTIVE';
             setButtonState(chargeButton, {

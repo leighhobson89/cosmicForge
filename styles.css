@@ -805,6 +805,10 @@ body {
     display: none !important;
 }
 
+.visibility-hidden {
+    visibility: hidden !important;
+}
+
 .tab-invisible {
     visibility: hidden;
 }
