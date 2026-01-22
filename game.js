@@ -2084,34 +2084,24 @@ function blackHoleUIChecks() {
         }
     }
 
-    if (!researchDone) {
-        if (timeWarpProgressRow) {
-            timeWarpProgressRow.classList.add('invisible');
-        }
-        if (chargeProgressRow) {
-            chargeProgressRow.classList.add('invisible');
-        }
-    } else if (timeWarping) {
-        if (timeWarpProgressRow) {
-            timeWarpProgressRow.classList.remove('invisible');
-        }
-        if (chargeProgressRow) {
-            chargeProgressRow.classList.add('invisible');
-        }
-    } else {
-        if (timeWarpProgressRow) {
-            timeWarpProgressRow.classList.add('invisible');
-        }
-        if (chargeProgressRow) {
-            chargeProgressRow.classList.toggle('invisible', !(charging || chargeReady));
-        }
+    const shouldShowTimeWarpProgressRow = researchDone && timeWarping && !alwaysOn;
+    const shouldShowChargeProgressRow = researchDone && !timeWarping && (alwaysOn || charging || chargeReady);
+
+    if (timeWarpProgressRow) {
+        timeWarpProgressRow.classList.toggle('invisible', !shouldShowTimeWarpProgressRow);
+    }
+    if (chargeProgressRow) {
+        chargeProgressRow.classList.toggle('invisible', !shouldShowChargeProgressRow);
     }
 
+    const shouldShowTimeWarpProgressBar = timeWarping && !alwaysOn;
+    const shouldShowChargeProgressBar = (charging || chargeReady) && !alwaysOn && !timeWarping;
+
     if (timeWarpProgressBarContainer) {
-        timeWarpProgressBarContainer.classList.toggle('invisible', !timeWarping);
+        timeWarpProgressBarContainer.classList.toggle('invisible', !shouldShowTimeWarpProgressBar);
     }
     if (chargeProgressBarContainer) {
-        chargeProgressBarContainer.classList.toggle('invisible', !(charging || chargeReady));
+        chargeProgressBarContainer.classList.toggle('invisible', !shouldShowChargeProgressBar);
     }
 
     if (timeWarping && !alwaysOn) {
