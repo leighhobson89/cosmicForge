@@ -11724,7 +11724,7 @@ export async function settleSystemAfterBattle(accessPoint) {
 }
 
 async function showMiaplacidusEndgameStory() {
-    const show = ({ header, content, confirmLabel }, isLastPopup = false) => new Promise(resolve => {
+    const show = ({ header, content, confirmLabel }) => new Promise(resolve => {
         callPopupModal(
             header,
             content,
@@ -11734,9 +11734,6 @@ async function showMiaplacidusEndgameStory() {
             false,
             async function() {
                 showHideModal();
-                if (isLastPopup) {
-                    await playWinCinematic();
-                }
                 resolve();
             },
             null,
@@ -11750,11 +11747,15 @@ async function showMiaplacidusEndgameStory() {
         );
     });
 
-    for (let i = 0; i < miaplacidusEndgameStoryPopups.length; i++) {
-        const popup = miaplacidusEndgameStoryPopups[i];
-        const isLastPopup = i === miaplacidusEndgameStoryPopups.length - 1;
-        await show(popup, isLastPopup);
+    const lastIndex = miaplacidusEndgameStoryPopups.length - 1;
+
+    for (let i = 0; i < lastIndex; i++) {
+        await show(miaplacidusEndgameStoryPopups[i]);
     }
+
+    await playWinCinematic();
+
+    await show(miaplacidusEndgameStoryPopups[lastIndex]);
 }
 
 function decideIfMoreSystemsAreAutomaticallySettled() {
