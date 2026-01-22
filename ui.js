@@ -1028,10 +1028,10 @@ function buildProductionTooltipContent(resourceKey, category) {
 function buildResearchTooltipContent() {
     const timerRatio = getTimerRateRatio() || 1;
     const rateElement = document.getElementById('researchRate');
-    const fallbackRate = `${formatProductionRateValue(calculateResearchTooltipRatePerTick() * timerRatio)} / s`;
-    const netRateDisplay = (rateElement?.textContent?.trim()) || fallbackRate;
-
     const warpMultiplier = getBlackHoleAlwaysOn() ? getBlackHolePower() : getTimeWarpMultiplier();
+
+    const fallbackRate = `${formatProductionRateValue(calculateResearchTooltipRatePerTick() * timerRatio * (warpMultiplier || 1))} / s`;
+    const netRateDisplay = (rateElement?.textContent?.trim()) || fallbackRate;
 
     const lines = [
         `<div><strong>Research</strong>: <span class="green-ready-text">${netRateDisplay}</span></div>`

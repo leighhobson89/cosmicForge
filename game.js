@@ -1032,7 +1032,8 @@ function updateResearchRateDisplay(researchRatePerTick) {
         return;
     }
 
-    const displayRate = researchRatePerTick * getTimerRateRatio();
+    const displayWarpMultiplier = getBlackHoleAlwaysOn() ? getBlackHolePower() : getTimeWarpMultiplier();
+    const displayRate = researchRatePerTick * getTimerRateRatio() * (displayWarpMultiplier || 1);
     researchRateElement.textContent = `${displayRate.toFixed(1)} / s`;
 
     if (displayRate > 0) {
