@@ -50,6 +50,7 @@ import {
     getNormalMaxAntimatterRate,
     getMiningObject,
     getImageUrls,
+    getUnlockedResourcesArray,
     setUnlockedCompoundsArray,
     setUnlockedResourcesArray,
     setTechUnlockedArray,
@@ -4990,7 +4991,30 @@ export function removeAllIndicatorIcons(iconText = '⚠️', indicatorClass = 'a
     });
 }
 
+function syncResourceSidebarVisibility() {
+    const unlockedResources = getUnlockedResourcesArray();
+    const resourceKeys = ['hydrogen', 'helium', 'carbon', 'neon', 'oxygen', 'sodium', 'silicon', 'iron'];
+
+    resourceKeys.forEach(resourceKey => {
+        const optionElement = document.getElementById(`${resourceKey}Option`);
+        const row = optionElement?.closest('.row-side-menu');
+        if (!row) return;
+
+        const shouldBeVisible = resourceKey === 'hydrogen' || unlockedResources.includes(resourceKey);
+        if (shouldBeVisible) {
+            row.classList.remove('invisible');
+        } else {
+            row.classList.add('invisible');
+            if (optionElement) {
+                removeAttentionIndicator(optionElement);
+            }
+        }
+    });
+}
+
 export function updateDynamicUiContent() {
+    syncResourceSidebarVisibility();
+
     if (!document.getElementById('energyConsumptionStats').classList.contains('invisible')) {
         const powerPlant1PurchasedRate = getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'purchasedRate']);
         const powerPlant2PurchasedRate = getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'purchasedRate']);
@@ -6273,6 +6297,10 @@ export function showTabsUponUnlock() {
                     }
                 });
             }                  
+        } else if (tabTech) {
+            tab.classList.add('tab-not-yet');
+            tab.textContent = '???';
+            removeAttentionIndicator(tab);
         }
     });
 }
@@ -6309,12 +6337,21 @@ export function checkOrderOfTabs() {
     unlockedTabs = unlockedTabs.sort((a, b) => tabPriorities[a] - tabPriorities[b]);
 
     const allTabs = Array.from(document.getElementById('tabsContainer').children);
-    const tabsWithUnknown = allTabs.filter(tab => tab.textContent === '???');
+    const tabsWithUnknown = allTabs.filter(tab => tab.classList.contains('tab-not-yet'));
     
     if (tabsWithUnknown.length > 0) {
         unlockedTabs = unlockedTabs.filter(tab => !tabsWithUnknown.some(t => `tab${tab}` === t.id));
         unlockedTabs.push(...tabsWithUnknown.map(tab => parseInt(tab.id.replace('tab', ''), 10)));
     }
+
+    const allTabIds = allTabs
+        .map(tab => parseInt(tab.id.replace('tab', ''), 10))
+        .filter(Number.isFinite);
+    allTabIds.forEach(id => {
+        if (!unlockedTabs.includes(id)) {
+            unlockedTabs.push(id);
+        }
+    });
 
     if (!unlockedTabs.includes(8)) {
         unlockedTabs.push(8);
