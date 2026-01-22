@@ -1874,7 +1874,7 @@ export function restoreGameStatus(gameState, type) {
             megaStructureResourceBonus = gameState.flags.megaStructureResourceBonus ?? false;
             storageAdderBonus = gameState.flags.storageAdderBonus ?? false;
             permanentAntimatterUnlock = gameState.flags.permanentAntimatterUnlock ?? false;
-            nonExhaustiveResources = gameState.flags.nonExhaustiveResources ?? false;
+            nonExhaustiveResources = gameState.flags.nonExhaustiveResources ?? (ascendencyBuffs?.nonExhaustiveResources?.boughtYet > 0) ?? false;
             miaplacidusEndgameStoryShown = gameState.flags.miaplacidusEndgameStoryShown ?? false;
 
             selectTheme(getCurrentTheme());
@@ -4208,7 +4208,7 @@ export function setMegaStructureTechsResearched(value) {
 }
 
 export function getNonExhaustiveResources() {
-    return nonExhaustiveResources;
+    return nonExhaustiveResources || !!(ascendencyBuffs?.nonExhaustiveResources?.boughtYet > 0);
 }
 
 export function setNonExhaustiveResources(value) {

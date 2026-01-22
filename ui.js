@@ -8752,6 +8752,18 @@ function renderBattleExplosions(ctx, now) {
         const lastEnemyOnScreen = lastEnemyUnits.some(unit => unit.x <= (canvas.offsetWidth - 10));
 
         const allUnitsOnScreen = lastPlayerOnScreen && lastEnemyOnScreen;
+
+        if (!getBattleTriggeredByPlayer() && !getFormationGoal()) {
+            setFormationGoal(moveIntoFormation(canvas));
+        }
+
+        const formationGoals = getFormationGoal();
+
+        const getFormationYForUnit = (unitId) => {
+            if (!Array.isArray(formationGoals)) return null;
+            const goal = formationGoals.find(g => g.id === unitId);
+            return goal ? goal.y : null;
+        };
     
         battleUnits.player.forEach(unit => {
             if (!unit.hasBeenOnCanvas && unit.x > 3 && unit.y >= 0) {
@@ -8760,15 +8772,17 @@ function renderBattleExplosions(ctx, now) {
     
             if (!allUnitsOnScreen && !getBattleTriggeredByPlayer()) {
                 unit.x += 1;
+                const targetY = getFormationYForUnit(unit.id);
+                if (typeof targetY === 'number') {
+                    unit.y = targetY;
+                }
             } else if (unit.hasBeenOnCanvas) {
 
                 if (getBattleTriggeredByPlayer()) {
                     calculateMovement(unit, canvas, 'player', 'fight');
                 } else {
-                    if (!getFormationGoal()) {
-                        setFormationGoal(moveIntoFormation(canvas));
-                    } else {
-                        calculateMovement(unit, canvas, 'player', 'formation')
+                    if (allUnitsOnScreen) {
+                        unit.inFormation = true;
                     }
                 }
             } else {
@@ -8783,20 +8797,26 @@ function renderBattleExplosions(ctx, now) {
     
             if (!allUnitsOnScreen && !getBattleTriggeredByPlayer()) {
                 unit.x -= 1;
+                const targetY = getFormationYForUnit(unit.id);
+                if (typeof targetY === 'number') {
+                    unit.y = targetY;
+                }
             } else if (unit.hasBeenOnCanvas) {
                 if (getBattleTriggeredByPlayer()) {
                     calculateMovement(unit, canvas, 'enemy', 'fight');
                 } else {
-                    if (!getFormationGoal()) {
-                        setFormationGoal(moveIntoFormation(canvas));
-                    } else {
-                        calculateMovement(unit, canvas, 'enemy', 'formation')
+                    if (allUnitsOnScreen) {
+                        unit.inFormation = true;
                     }
                 }
             } else {
                 console.log('unit drawn out of bounds of ever being on canvas:', unit);
             }
         });
+
+        if (!getBattleTriggeredByPlayer() && allUnitsOnScreen) {
+            setInFormation(true);
+        }
 
         battleUnits.player.forEach(updateUnitRenderState);
         battleUnits.enemy.forEach(updateUnitRenderState);

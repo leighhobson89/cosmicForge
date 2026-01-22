@@ -338,7 +338,6 @@ import {
     getBlackHoleChargeReady,
     getBlackHoleDurationUpgradeIncrementMs,
     getBlackHolePowerUpgradeIncrement,
-
     getMiaplacidusEndgameStoryShown,
     setMiaplacidusEndgameStoryShown,
     getNonExhaustiveResources,
@@ -6793,6 +6792,7 @@ async function coloniseChecks() {
         if (getBattleTriggeredByPlayer() && !getBattleResolved()[0]) {
             const battleResolved = checkBattleOutcome();
             if (battleResolved[0]) {
+                await new Promise(resolve => setTimeout(resolve, 500));
                 drawBattleResultText('battleCanvas', battleResolved[1]);
                 await initiateBattleFadeOut(battleResolved);
 
@@ -11890,7 +11890,11 @@ export function rebirth() {
     autoGrantAchievementsOnRebirth();
     resetResourceDataObjectOnRebirthAndAddApAndPermanentBuffsBack(); //resets resource data, adds permanent buffs, and adds AP back in
 
-    if (getNonExhaustiveResources()) {
+    const hasNonExhaustivePerk =
+        (getAscendencyBuffDataObject()?.nonExhaustiveResources?.boughtYet > 0) ||
+        getNonExhaustiveResources();
+
+    if (hasNonExhaustivePerk) {
         grantNonExhaustiveResourcesAfterRebirth();
     }
 
