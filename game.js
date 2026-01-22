@@ -341,6 +341,8 @@ import {
 
     getMiaplacidusEndgameStoryShown,
     setMiaplacidusEndgameStoryShown,
+    getNonExhaustiveResources,
+    setNonExhaustiveResources,
 } from './constantsAndGlobalVars.js';
 
 import {
@@ -478,7 +480,6 @@ function updateProductionRateText(elementId, rateValue) {
     if (!isFinite(rateValue)) {
         rateValue = 0;
     }
-
     const elements = getElements?.();
     const rateElement = elements?.[elementId] || document.getElementById(elementId);
     if (!rateElement) {
@@ -496,6 +497,28 @@ function updateProductionRateText(elementId, rateValue) {
     } else {
         rateElement.classList.add('warning-orange-text');
     }
+}
+
+function grantNonExhaustiveResourcesAfterRebirth() {
+    const resources = getResourceDataObject('resources');
+    if (!resources) return;
+
+    Object.keys(resources).forEach(resourceKey => {
+        const tier1PriceRaw = getResourceDataObject('resources', [resourceKey, 'upgrades', 'autoBuyer', 'tier1', 'price'], true);
+        const tier1Price = Number(tier1PriceRaw);
+        if (!Number.isFinite(tier1Price) || tier1Price <= 0) return;
+
+        let storageCapacity = Number(getResourceDataObject('resources', [resourceKey, 'storageCapacity'], true));
+        if (!Number.isFinite(storageCapacity)) storageCapacity = 0;
+
+        while (tier1Price > storageCapacity) {
+            storageCapacity = storageCapacity > 0 ? storageCapacity * 2 : tier1Price * 2;
+            setResourceDataObject(storageCapacity, 'resources', [resourceKey, 'storageCapacity']);
+        }
+
+        const currentQuantity = Number(getResourceDataObject('resources', [resourceKey, 'quantity'], true)) || 0;
+        setResourceDataObject(currentQuantity + tier1Price, 'resources', [resourceKey, 'quantity']);
+    });
 }
 
 export function timeWarp(lengthOfTimeInMs, multiplyRateBy) {
@@ -7931,6 +7954,10 @@ export function purchaseBuff(buff) {
         const updatedAp = Math.max(0, Math.round(currentAscendencyPoints - cost));
         setResourceDataObject(updatedAp, 'ascendencyPoints', ['quantity']);
         setAscendencyBuffDataObject(buffData.boughtYet + 1, buff, ['boughtYet']);
+
+        if (buff === 'nonExhaustiveResources') {
+            setNonExhaustiveResources(true);
+        }
     }
 
     if (buff === 'roboticResearchAutomation') {
@@ -11862,6 +11889,10 @@ export function rebirth() {
     resetAchievementsOnRebirth();
     autoGrantAchievementsOnRebirth();
     resetResourceDataObjectOnRebirthAndAddApAndPermanentBuffsBack(); //resets resource data, adds permanent buffs, and adds AP back in
+
+    if (getNonExhaustiveResources()) {
+        grantNonExhaustiveResourcesAfterRebirth();
+    }
 
     if (getBlackHoleResearchDone() && !getCurrentlyTimeWarpingBlackHole() && !getCurrentlyChargingBlackHole() && !getBlackHoleChargeReady()) {
         const timerName = 'blackHoleChargeTimer';

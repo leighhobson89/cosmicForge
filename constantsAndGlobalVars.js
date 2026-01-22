@@ -24,7 +24,7 @@ let saveData = null;
 //CONSTANTS
 export const HOMESTAR = 'miaplacidus';
 export const MINIMUM_GAME_VERSION_FOR_SAVES = 0.70;
-export const GAME_VERSION_FOR_SAVES = 0.80;
+export const GAME_VERSION_FOR_SAVES = 0.81;
 export const deferredActions = [];
 
 //NOTIFICATIONS
@@ -569,6 +569,7 @@ let rocketReadyToTravel = {
 let storageAdderBonus = false;
 let megaStructureResourceBonus = false;
 let infinitePower = false;
+let nonExhaustiveResources = false;
 let currentRunIsMegaStructureRun = false;
 let megaStructureTabNotificationShown = false;
 let hasVisitedMegaStructure = false;
@@ -1614,6 +1615,7 @@ export function captureGameStatusForSaving(type) {
         megaStructureResourceBonus: megaStructureResourceBonus,
         storageAdderBonus: storageAdderBonus,
         permanentAntimatterUnlock: permanentAntimatterUnlock,
+        nonExhaustiveResources: nonExhaustiveResources,
         miaplacidusEndgameStoryShown: miaplacidusEndgameStoryShown,
     }
 
@@ -1872,6 +1874,7 @@ export function restoreGameStatus(gameState, type) {
             megaStructureResourceBonus = gameState.flags.megaStructureResourceBonus ?? false;
             storageAdderBonus = gameState.flags.storageAdderBonus ?? false;
             permanentAntimatterUnlock = gameState.flags.permanentAntimatterUnlock ?? false;
+            nonExhaustiveResources = gameState.flags.nonExhaustiveResources ?? false;
             miaplacidusEndgameStoryShown = gameState.flags.miaplacidusEndgameStoryShown ?? false;
 
             selectTheme(getCurrentTheme());
@@ -4202,6 +4205,14 @@ export function getMegaStructureTechsResearched() {
 
 export function setMegaStructureTechsResearched(value) {
     megaStructureTechsResearched.push(value);
+}
+
+export function getNonExhaustiveResources() {
+    return nonExhaustiveResources;
+}
+
+export function setNonExhaustiveResources(value) {
+    nonExhaustiveResources = Boolean(value);
 }
 
 export function getInfinitePower() {

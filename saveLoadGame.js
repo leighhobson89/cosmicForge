@@ -612,6 +612,23 @@ export function migrateResourceData(saveData, objectType) {
             saveData.version = 0.80;
         }
 
+        if (saveData.version < 0.81) {
+            if (objectType === 'ascendencyBuffsData') {
+                saveData.nonExhaustiveResources = {
+                    name: "Non Exhaustive Resources",
+                    description: "buffNonExhaustiveResourcesRow",
+                    rebuyable: false,
+                    rebuyableIncreaseMultiple: 1,
+                    baseCostAp: 10,
+                    effectCategoryMagnitude: 1,
+                    boughtYet: 0,
+                    timesRebuyable: 1
+                };
+            }
+
+            saveData.version = 0.81;
+        }
+
         saveData.version += 0.001;
     }
 

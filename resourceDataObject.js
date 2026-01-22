@@ -8,7 +8,7 @@ import { showNotification } from "./ui.js";
 
 export let achievementImageUrls;
 export let resourceData = {
-    version: 0.80, //update this whenever changes are made to the structure
+    version: 0.81, //update this whenever changes are made to the structure
     resources: {
         solar: {
             autoSell: false,
@@ -994,7 +994,7 @@ export const miaplacidus = {
 
 
 export let starSystems = {
-    version: 0.80,
+    version: 0.81,
     stars: {
         spica: {
             mapSize: 5.504440179536064, //might need to add this to star object when added dynamically for after rebirth
@@ -1013,7 +1013,7 @@ export let starSystems = {
 };
 
 export let galacticMarket = {
-    version: 0.80,
+    version: 0.81,
     resources: {
         hydrogen: { 
             name: "Hydrogen", 
@@ -1119,7 +1119,17 @@ export let galacticMarket = {
 };
 
 export let ascendencyBuffs = {
-    version: 0.80,
+    version: 0.81,
+    "nonExhaustiveResources": {
+        name: "Non Exhaustive Resources",
+        description: "buffNonExhaustiveResourcesRow",
+        rebuyable: false,
+        rebuyableIncreaseMultiple: 1,
+        baseCostAp: 10,
+        effectCategoryMagnitude: 1,
+        boughtYet: 0,
+        timesRebuyable: 1
+    },
     "efficientStorage": {  //done
         name: "Efficient Storage",
         description: "buffEfficientStorageRow",
@@ -3417,13 +3427,23 @@ export function setRebirthStarSystemToStarSystemDataObject(newObject) {
 }
 
 export function setAutoBuyerTierLevel(key, value, override = false, type) {
-    if (resourceData[type][key].upgrades.autoBuyer.normalProgression === true || override) {
-        resourceData[type][key].upgrades.autoBuyer.currentTierLevel = value;
+    const typeData = resourceData?.[type];
+    const entry = typeData?.[key];
+    const autoBuyer = entry?.upgrades?.autoBuyer;
+
+    if (!autoBuyer) {
+        return;
+    }
+
+    if (autoBuyer.normalProgression === true || override) {
+        autoBuyer.currentTierLevel = value;
     }
 }
 
 export function getAutoBuyerTierLevel(key, type) {
-    return resourceData[type][key].upgrades.autoBuyer.currentTierLevel;
+    const typeData = resourceData?.[type];
+    const entry = typeData?.[key];
+    return entry?.upgrades?.autoBuyer?.currentTierLevel ?? 0;
 }
 
 export function getRocketParts(rocket) {

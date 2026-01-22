@@ -5,7 +5,10 @@ import { showNotification } from "./ui.js";
 
 export function resetAchievementsOnRebirth() {
     for (const key in achievementsData) {
-        if (achievementsData[key].resetOnRebirth) {
+        if (key === 'version') continue;
+
+        const achievement = achievementsData[key];
+        if (achievement?.resetOnRebirth) {
             setAchievementDataObject(false, key, ['active']);
         }
     }
