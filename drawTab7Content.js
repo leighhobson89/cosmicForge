@@ -30,7 +30,8 @@ import {
     getBlackHolePowerUpgradeIncrement,
     deferredActions,
     setAchievementFlagArray,
-    getMinimumBlackHoleChargeTime
+    getMinimumBlackHoleChargeTime,
+    getBlackHoleAlwaysOn
 } from './constantsAndGlobalVars.js';
 import { purchaseBuff, galacticMarketLiquidateForAp, galacticMarketSellApForCash, galacticMarketTrade, rebirth, startBlackHoleChargeTimer, timeWarp } from './game.js';
 import {
@@ -658,6 +659,9 @@ export function drawTab7Content(heading, optionContentElement) {
             }
         });
         const blackHoleActivateChargeButton = createButton('Charge', ['id_blackHoleChargeButton', 'option-button'], () => {
+            if (getBlackHoleAlwaysOn()) {
+                return;
+            }
             if (getCurrentlyChargingBlackHole() || getCurrentlyTimeWarpingBlackHole()) {
                 return;
             }

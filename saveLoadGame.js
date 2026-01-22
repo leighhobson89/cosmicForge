@@ -13,7 +13,8 @@ import {
     getFeedbackGiven,
     getFeedbackContent,
     getBattleOngoing,
-    getTimeWarpMultiplier
+    getTimeWarpMultiplier,
+    getBlackHoleAlwaysOn
 } from './constantsAndGlobalVars.js';
 
 import { setAchievementIconImageUrls } from './resourceDataObject.js';
@@ -45,7 +46,7 @@ export function initializeAutoSave() {
 
     const autoSaveHandler = () => {
 
-        if (getTimeWarpMultiplier() !== 1) {
+        if (getTimeWarpMultiplier() !== 1 && !getBlackHoleAlwaysOn()) {
             timeLeft = frequency / 1000;
             autoSaveTimer = setTimeout(autoSaveHandler, frequency);
             return;
@@ -174,7 +175,7 @@ export async function saveGameToCloud(gameData, type) {
 }
 
 export function saveGame(type) {
-    if (getTimeWarpMultiplier() !== 1) {
+    if (getTimeWarpMultiplier() !== 1 && !getBlackHoleAlwaysOn()) {
         return;
     }
 

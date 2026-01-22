@@ -174,7 +174,9 @@ import {
     getDebugTimeWarpDurationMs,
     setDebugTimeWarpDurationMs,
     getDebugTimeWarpMultiplier,
-    setDebugTimeWarpMultiplier
+    setDebugTimeWarpMultiplier,
+    getTimeWarpMultiplier,
+    getBlackHoleAlwaysOn
 } from './constantsAndGlobalVars.js';
 import {
     getResourceDataObject,
@@ -185,6 +187,7 @@ import {
     getGalacticMarketDataObject,
     getBuffEnhancedMiningData,
     getAchievementImageUrl,
+    getBlackHolePower,
     getStarSystemWeather
 } from "./resourceDataObject.js";
 import {
@@ -982,13 +985,19 @@ function buildProductionTooltipContent(resourceKey, category) {
 
     const timerRatio = getTimerRateRatio() || 1;
     const displayName = capitaliseString(resourceData.nameResource || resourceData.nameCompound || resourceKey);
+    const warpMultiplier = getBlackHoleAlwaysOn() ? getBlackHolePower() : getTimeWarpMultiplier();
     const rateElement = document.getElementById(`${resourceKey}Rate`);
-    const fallbackRate = `${formatProductionRateValue(((getResourceDataObject(category, [resourceKey, 'rate']) || 0) * timerRatio))} / s`;
+    const fallbackRate = `${formatProductionRateValue(((getResourceDataObject(category, [resourceKey, 'rate']) || 0) * timerRatio * (warpMultiplier || 1)))} / s`;
     const netRateDisplay = (rateElement?.textContent?.trim()) || fallbackRate;
 
     const lines = [
         `<div><strong>${displayName}</strong>: <span class="green-ready-text">${netRateDisplay}</span></div>`
     ];
+
+    if ((warpMultiplier || 1) !== 1) {
+        lines.push('<div class="tooltip-spacer">&nbsp;</div>');
+        lines.push(`<div class="green-ready-text">Black Hole Multiplier of x${warpMultiplier} applied</div>`);
+    }
 
     const autoBuyerGenerationLines = buildAutoBuyerGenerationLines(resourceKey, category, timerRatio);
     const autoCreateGenerationLine = buildAutoCreateGenerationLine(resourceKey, category, timerRatio);
@@ -1021,9 +1030,16 @@ function buildResearchTooltipContent() {
     const fallbackRate = `${formatProductionRateValue(calculateResearchTooltipRatePerTick() * timerRatio)} / s`;
     const netRateDisplay = (rateElement?.textContent?.trim()) || fallbackRate;
 
+    const warpMultiplier = getBlackHoleAlwaysOn() ? getBlackHolePower() : getTimeWarpMultiplier();
+
     const lines = [
         `<div><strong>Research</strong>: <span class="green-ready-text">${netRateDisplay}</span></div>`
     ];
+
+    if ((warpMultiplier || 1) !== 1) {
+        lines.push('<div class="tooltip-spacer">&nbsp;</div>');
+        lines.push(`<div class="green-ready-text">Black Hole Multiplier of x${warpMultiplier} applied</div>`);
+    }
 
     const { lines: generationLines, total: generationTotal } = buildResearchGenerationLines(timerRatio);
     if (generationLines.length > 0) {
@@ -1084,14 +1100,20 @@ function buildResearchGenerationLines(timerRatio) {
 
 function buildAntimatterTooltipContent() {
     const timerRatio = getTimerRateRatio() || 1;
+    const warpMultiplier = getBlackHoleAlwaysOn() ? getBlackHolePower() : getTimeWarpMultiplier();
     const rateElement = document.getElementById('miningRate');
     const antimatterRate = (getResourceDataObject('antimatter', ['rate']) || 0) * timerRatio;
-    const fallbackRate = `${formatProductionRateValue(antimatterRate)} / s`;
+    const fallbackRate = `${formatProductionRateValue(antimatterRate * (warpMultiplier || 1))} / s`;
     const netRateDisplay = (rateElement?.textContent?.trim()) || fallbackRate;
 
     const lines = [
         `<div><strong>Antimatter</strong>: <span class="green-ready-text">${netRateDisplay}</span></div>`
     ];
+
+    if ((warpMultiplier || 1) !== 1) {
+        lines.push('<div class="tooltip-spacer">&nbsp;</div>');
+        lines.push(`<div class="green-ready-text">Black Hole Multiplier of x${warpMultiplier} applied</div>`);
+    }
 
     const { lines: rocketLines } = buildAntimatterRocketLines(timerRatio);
     if (rocketLines.length > 0) {

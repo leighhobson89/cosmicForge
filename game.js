@@ -488,13 +488,16 @@ function updateProductionRateText(elementId, rateValue) {
         return;
     }
 
-    const formattedValue = formatProductionRateValue(rateValue);
+    const displayWarpMultiplier = getBlackHoleAlwaysOn() ? getBlackHolePower() : getTimeWarpMultiplier();
+    const displayRateValue = rateValue * (displayWarpMultiplier || 1);
+
+    const formattedValue = formatProductionRateValue(displayRateValue);
     rateElement.textContent = `${formattedValue} / s`;
 
     rateElement.classList.remove('green-ready-text', 'red-disabled-text', 'warning-orange-text');
-    if (rateValue > 0) {
+    if (displayRateValue > 0) {
         rateElement.classList.add('green-ready-text');
-    } else if (rateValue < 0) {
+    } else if (displayRateValue < 0) {
         rateElement.classList.add('red-disabled-text');
     } else {
         rateElement.classList.add('warning-orange-text');
@@ -705,6 +708,27 @@ function handleResearchAutoBuyer() {
 
 export async function gameLoop() {
     if (gameState === getGameVisibleActive()) {
+        if (getBlackHoleAlwaysOn()) {
+            const desiredMultiplier = getBlackHolePower();
+            if (getTimeWarpMultiplier() !== desiredMultiplier) {
+                setTimeWarpMultiplier(desiredMultiplier);
+            }
+            if (getTimeWarpEndTimestampMs() !== 0) {
+                setTimeWarpEndTimestampMs(0);
+            }
+            const existingTimeout = getTimeWarpTimeoutId();
+            if (existingTimeout) {
+                clearTimeout(existingTimeout);
+                setTimeWarpTimeoutId(null);
+            }
+            if (!getCurrentlyTimeWarpingBlackHole()) {
+                setCurrentlyTimeWarpingBlackHole(true);
+            }
+            if (getBlackHoleTimeWarpEndTimestampMs() !== 0) {
+                setBlackHoleTimeWarpEndTimestampMs(0);
+            }
+        }
+
         const timeWarpEndTimestampMs = getTimeWarpEndTimestampMs();
         if (timeWarpEndTimestampMs > 0 && Date.now() >= timeWarpEndTimestampMs) {
             const existingTimeout = getTimeWarpTimeoutId();
@@ -717,7 +741,9 @@ export async function gameLoop() {
             setTimeWarpEndTimestampMs(0);
         }
 
-        const effectiveMultiplier = (document.hidden || !document.hasFocus()) ? 1 : getTimeWarpMultiplier();
+        const effectiveMultiplier = (document.hidden || !document.hasFocus())
+            ? 1
+            : (getBlackHoleAlwaysOn() ? getBlackHolePower() : getTimeWarpMultiplier());
         timerManagerDelta.updateWithTimestamp(performance.now(), effectiveMultiplier);
         updateAttentionIndicators();
         calculateElapsedActiveGameTime();
@@ -1970,7 +1996,8 @@ function blackHoleUIChecks() {
         }
     }
 
-    const timeWarping = getCurrentlyTimeWarpingBlackHole();
+    const alwaysOn = getBlackHoleAlwaysOn();
+    const timeWarping = alwaysOn || getCurrentlyTimeWarpingBlackHole();
     if (timeMultiplierElement) {
         if (timeWarping) {
             timeMultiplierElement.textContent = `Time ${getBlackHolePower()}x`;
@@ -1980,14 +2007,16 @@ function blackHoleUIChecks() {
             timeMultiplierElement.classList.remove('green-ready-text');
         }
     }
-    const totalTimeWarpDurationMs = getCurrentBlackHoleTimeWarpDurationTotal();
-    const timeWarpEndTimestampMs = getBlackHoleTimeWarpEndTimestampMs();
-    const timeWarpRemainingMs = timeWarping ? Math.max(timeWarpEndTimestampMs - Date.now(), 0) : 0;
+    const totalTimeWarpDurationMs = alwaysOn ? 0 : getCurrentBlackHoleTimeWarpDurationTotal();
+    const timeWarpEndTimestampMs = alwaysOn ? 0 : getBlackHoleTimeWarpEndTimestampMs();
+    const timeWarpRemainingMs = alwaysOn ? 0 : (timeWarping ? Math.max(timeWarpEndTimestampMs - Date.now(), 0) : 0);
 
     const timeWarpDescriptionElement = document.getElementById('blackHoleTimeWarpProgressRowDescription');
     if (timeWarpDescriptionElement) {
         timeWarpDescriptionElement.classList.add('green-ready-text');
-        if (timeWarping) {
+        if (alwaysOn) {
+            timeWarpDescriptionElement.textContent = `BLACK HOLE ALWAYS ACTIVE - ${getBlackHolePower()}x`;
+        } else if (timeWarping) {
             const remainingSeconds = (timeWarpRemainingMs / 1000).toFixed(1);
             timeWarpDescriptionElement.textContent = `BLACK HOLE ACTIVATED - ${remainingSeconds}s - ${getBlackHolePower()}x`;
         } else {
@@ -2084,7 +2113,7 @@ function blackHoleUIChecks() {
         chargeProgressBarContainer.classList.toggle('invisible', !(charging || chargeReady));
     }
 
-    if (timeWarping) {
+    if (timeWarping && !alwaysOn) {
         const total = totalTimeWarpDurationMs;
         const remaining = timeWarpRemainingMs;
 
@@ -2204,7 +2233,17 @@ function blackHoleUIChecks() {
     }
 
     if (chargeButton) {
-        if (timeWarping) {
+        if (alwaysOn) {
+            chargeButton.textContent = 'ACTIVE';
+            setButtonState(chargeButton, {
+                enabled: false,
+                ready: false,
+                applyDisabledClass: false,
+                removeClasses: ['black-hole-charge-ready-button', 'red-disabled-text', 'warning-orange-text'],
+                addClasses: ['green-ready-text']
+            });
+            chargeButton.classList.add('green-ready-text');
+        } else if (timeWarping) {
             chargeButton.textContent = 'ACTIVE!';
             setButtonState(chargeButton, {
                 enabled: false,
@@ -4576,7 +4615,8 @@ function updateAntimatterAndDiagram(ticks = 1) {
 
     if (elements?.miningRate) {
         const miningRateElement = elements.miningRate;
-        const formattedMiningRate = `${(totalAntimatterGainPerTick * getTimerRateRatio()).toFixed(2)} / s`;
+        const displayWarpMultiplier = getBlackHoleAlwaysOn() ? getBlackHolePower() : getTimeWarpMultiplier();
+        const formattedMiningRate = `${(totalAntimatterGainPerTick * getTimerRateRatio() * (displayWarpMultiplier || 1)).toFixed(2)} / s`;
         miningRateElement.innerText = formattedMiningRate;
 
         miningRateElement.classList.remove('green-ready-text', 'warning-orange-text');

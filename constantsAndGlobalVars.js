@@ -1356,7 +1356,6 @@ export function resetAllVariablesOnRebirth() {
     telescopeReadyToSearch = true;
     currentlyChargingBlackHole = false;
     blackHoleChargeReady = false;
-    blackHoleAlwaysOn = false;
     asteroidTimerCanContinue = false;
     starInvestigationTimerCanContinue = false;
     pillageVoidTimerCanContinue = false;
