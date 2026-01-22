@@ -50,6 +50,7 @@ import {
     setCurrentPillageVoidTimerDurationTotal,
     getTimeLeftUntilPillageVoidTimerFinishes,
     getOnboardingMode,
+    setOnboardingMode,
     setTimeLeftUntilPillageVoidTimerFinishes,
     getAdditionalSystemsToSettleThisRun,
     setAdditionalSystemsToSettleThisRun,
@@ -2587,13 +2588,150 @@ export function setAsteroidSearchEfficiencyAfterRepeatables() {
 }
 
  let onboardingSteps = null;
+ let onboardingSegments = null;
+ let onboardingSegmentIndex = 0;
+ let onboardingAwaitingCompletionConfirm = false;
+ let onboardingClickTargetEl = null;
+ let onboardingClickHandler = null;
  let lastOnboardingRenderMs = 0;
  let onboardingRenderDirty = true;
+ const ONBOARDING_HIGHLIGHT_PADDING = 5;
 
- export function setOnboardingSteps(steps) {
-     onboardingSteps = Array.isArray(steps) ? steps : null;
-     onboardingRenderDirty = true;
+ function cleanupOnboardingClickListener() {
+     if (onboardingClickTargetEl && onboardingClickHandler) {
+         onboardingClickTargetEl.removeEventListener('click', onboardingClickHandler, true);
+     }
+
+     onboardingClickTargetEl = null;
+     onboardingClickHandler = null;
  }
+
+ function resetOnboardingProgression() {
+    onboardingSegmentIndex = 0;
+    onboardingAwaitingCompletionConfirm = false;
+    onboardingSegments = null;
+    cleanupOnboardingClickListener();
+ }
+
+ function normalizeOnboardingSteps(steps) {
+    if (!Array.isArray(steps)) {
+        return [];
+    }
+
+    const normalized = [];
+
+    steps.forEach(step => {
+        if (!Array.isArray(step) || step.length === 0) {
+            normalized.push(step);
+            return;
+        }
+
+        if (step[0] === 'spotlight') {
+            const [, targetSpec, message, rawOptions] = step;
+            const options = (rawOptions && typeof rawOptions === 'object') ? rawOptions : {};
+            const highlightMode = options.highlightMode === 'div' ? 'div' : (options.highlightMode === 'none' ? 'none' : 'button');
+            const waitForClick = options.waitForClick !== false;
+
+            if (message !== undefined && message !== null) {
+                normalized.push(['callout', targetSpec, message]);
+            }
+
+            if (highlightMode === 'div') {
+                normalized.push(['divOverlay', targetSpec]);
+            } else if (highlightMode === 'button') {
+                normalized.push(['buttonOverlay', targetSpec]);
+            }
+
+            if (waitForClick) {
+                normalized.push(['waitForClick', targetSpec]);
+            }
+
+            return;
+        }
+
+        if (step[0] === 'timedSpotlight') {
+            const [, targetSpec, message, msRaw, rawOptions] = step;
+            const options = (rawOptions && typeof rawOptions === 'object') ? rawOptions : {};
+            const highlightMode = options.highlightMode === 'div' ? 'div' : (options.highlightMode === 'none' ? 'none' : 'button');
+            const waitMs = Math.max(0, Number(msRaw) || 0);
+
+            if (message !== undefined && message !== null) {
+                normalized.push(['callout', targetSpec, message]);
+            }
+
+            if (highlightMode === 'div') {
+                normalized.push(['divOverlay', targetSpec]);
+            } else if (highlightMode === 'button') {
+                normalized.push(['buttonOverlay', targetSpec]);
+            }
+
+            normalized.push(['waitForMs', waitMs]);
+            return;
+        }
+
+        normalized.push(step);
+    });
+
+    return normalized;
+}
+
+export function setOnboardingSteps(steps) {
+    onboardingSteps = Array.isArray(steps) ? normalizeOnboardingSteps(steps) : null;
+    resetOnboardingProgression();
+    onboardingRenderDirty = true;
+}
+
+function buildOnboardingSegments(steps) {
+    const segments = [];
+    let currentItems = [];
+
+    const pushSegment = (overrides = {}) => {
+        segments.push({
+            items: currentItems,
+            waitForClickTarget: overrides.waitForClickTarget ?? null,
+            condition: overrides.condition ?? null,
+            waitForElementTarget: overrides.waitForElementTarget ?? null,
+            waitForElementTimeout: overrides.waitForElementTimeout ?? 0,
+            waitForMs: overrides.waitForMs ?? 0,
+            waitDeadline: null
+        });
+        currentItems = [];
+    };
+
+    for (const step of steps) {
+        if (!Array.isArray(step)) {
+            continue;
+        }
+
+        if (step[0] === 'waitForClick') {
+            pushSegment({ waitForClickTarget: step[1] });
+            continue;
+        }
+
+        if (step[0] === 'condition') {
+            pushSegment({ condition: step });
+            continue;
+        }
+
+        if (step[0] === 'waitForElement') {
+            pushSegment({ waitForElementTarget: step[1], waitForElementTimeout: Number(step[2]) || 0 });
+            continue;
+        }
+
+        if (step[0] === 'waitForMs') {
+            pushSegment({ waitForMs: Number(step[1]) || 0 });
+            continue;
+        }
+
+        currentItems.push(step);
+    }
+
+    if (currentItems.length > 0) {
+        pushSegment();
+    }
+
+    return segments;
+}
 
  function clearOnboardingOverlay(overlay) {
      while (overlay.firstChild) {
@@ -2606,24 +2744,36 @@ export function setAsteroidSearchEfficiencyAfterRepeatables() {
  }
 
  function addOnboardingCallout(svg, overlay, targetOrX, yMaybe, textMaybe) {
-     let targetPoint = null;
-     let text = '';
-     let targetEl = null;
-     let targetRect = null;
+    let targetPoint = null;
+    let text = '';
+    let targetEl = null;
+    let targetRect = null;
 
-     if (typeof targetOrX === 'number' && typeof yMaybe === 'number') {
-         targetPoint = { x: targetOrX, y: yMaybe };
-         text = textMaybe ?? '';
-     } else {
-         targetEl = resolveOnboardingTargetElement(targetOrX);
-         targetPoint = getElementCenterPoint(targetEl);
-         text = yMaybe ?? '';
-         targetRect = targetEl?.getBoundingClientRect?.() ?? null;
-     }
+    if (typeof targetOrX === 'number' && typeof yMaybe === 'number') {
+        targetPoint = { x: targetOrX, y: yMaybe };
+        text = textMaybe ?? '';
+    } else {
+        targetEl = resolveOnboardingTargetElement(targetOrX);
+        text = yMaybe ?? '';
 
-     if (!targetPoint) {
-         return;
-     }
+        if (targetEl) {
+            const { rect } = getHighlightTargetWithRect(targetEl);
+            if (rect) {
+                targetRect = rect;
+                targetPoint = {
+                    x: rect.left + rect.width / 2,
+                    y: rect.top + rect.height / 2
+                };
+            } else {
+                targetPoint = getElementCenterPoint(targetEl);
+                targetRect = targetEl?.getBoundingClientRect?.() ?? null;
+            }
+        }
+    }
+
+    if (!targetPoint) {
+        return;
+    }
 
      const vw = window.innerWidth;
      const vh = window.innerHeight;
@@ -2685,7 +2835,9 @@ export function setAsteroidSearchEfficiencyAfterRepeatables() {
          return { x: best.left + boxW / 2, y: best.top };
      })();
 
-     addOnboardingArrowBetweenPoints(svg, tail.x, tail.y, targetPoint.x, targetPoint.y);
+     const arrowHeadPoint = targetRect ? getEllipseBoundaryPoint(targetPoint, tail, targetRect) : targetPoint;
+
+     addOnboardingArrowBetweenPoints(svg, tail.x, tail.y, arrowHeadPoint.x, arrowHeadPoint.y);
  }
 
  function createOnboardingSvgLayer() {
@@ -2698,25 +2850,139 @@ export function setAsteroidSearchEfficiencyAfterRepeatables() {
      return svg;
  }
 
- function resolveTargetElement(identifier) {
+ function getLabelForInput(input) {
+    if (!input || !input.id) {
+        return null;
+    }
+
+    const escapedId = typeof CSS !== 'undefined' && CSS?.escape ? CSS.escape(input.id) : input.id;
+    return document.querySelector(`label[for="${escapedId}"]`);
+}
+
+function findInputElementMatchingNeedle(lowerNeedle) {
+    if (!lowerNeedle) {
+        return null;
+    }
+
+    const inputs = Array.from(document.querySelectorAll('input'));
+    for (const input of inputs) {
+        const labelForInput = getLabelForInput(input);
+        const candidates = [
+            input.value,
+            input.placeholder,
+            input.getAttribute?.('aria-label'),
+            input.getAttribute?.('title'),
+            input.innerText,
+            input.textContent,
+            labelForInput?.innerText,
+            labelForInput?.textContent,
+            input.name
+        ];
+
+        for (const candidate of candidates) {
+            const hay = (candidate || '').trim().toLowerCase();
+            if (!hay) {
+                continue;
+            }
+
+            if (hay === lowerNeedle || hay.includes(lowerNeedle)) {
+                return input;
+            }
+        }
+    }
+
+    return null;
+}
+
+function getHighlightTargetWithRect(element) {
+    if (!element) {
+        return { target: null, rect: null };
+    }
+
+    const validate = (candidate) => {
+        if (!candidate || !candidate.getBoundingClientRect) {
+            return null;
+        }
+
+        const rect = candidate.getBoundingClientRect();
+        if (rect && rect.width > 0 && rect.height > 0) {
+            return { target: candidate, rect };
+        }
+
+        return null;
+    };
+
+    const direct = validate(element);
+    if (direct) {
+        return direct;
+    }
+
+    if (element.tagName === 'INPUT') {
+        const labelForInput = getLabelForInput(element);
+        const viaLabel = validate(labelForInput);
+        if (viaLabel) {
+            return viaLabel;
+        }
+    }
+
+    let current = element.parentElement;
+    while (current) {
+        const viaParent = validate(current);
+        if (viaParent) {
+            return viaParent;
+        }
+        current = current.parentElement;
+    }
+
+    return { target: null, rect: null };
+}
+
+function resolveTargetElement(identifier) {
      if (identifier === null || identifier === undefined) {
          return null;
      }
 
-     const asString = String(identifier).trim();
+     let mode = null;
+     let raw = identifier;
+     if (Array.isArray(identifier) && identifier.length >= 2) {
+         raw = identifier[0];
+         mode = Number(identifier[1]);
+     }
+
+     const asString = String(raw).trim();
      if (!asString) {
          return null;
      }
 
-     const byId = document.getElementById(asString);
-     if (byId) {
-         return byId;
+     if (mode === 1) {
+         return document.getElementById(asString);
+     }
+
+     if (mode !== 0) {
+         const byId = document.getElementById(asString);
+         if (byId) {
+             return byId;
+         }
      }
 
      const needle = asString.toLowerCase();
      const candidates = Array.from(document.querySelectorAll('button, a, [role="button"], input[type="button"], input[type="submit"]'));
      for (const candidate of candidates) {
          const text = (candidate.innerText || candidate.value || candidate.textContent || '').trim();
+         const hay = text.toLowerCase();
+         if (hay === needle || hay.includes(needle)) {
+             return candidate;
+         }
+     }
+
+     const inputMatch = findInputElementMatchingNeedle(needle);
+     if (inputMatch) {
+         return inputMatch;
+     }
+
+     const divCandidates = Array.from(document.querySelectorAll('div'));
+     for (const candidate of divCandidates) {
+         const text = (candidate.innerText || candidate.textContent || '').trim();
          const hay = text.toLowerCase();
          if (hay === needle || hay.includes(needle)) {
              return candidate;
@@ -2731,14 +2997,27 @@ export function setAsteroidSearchEfficiencyAfterRepeatables() {
          return null;
      }
 
-     const asString = String(identifier).trim();
+     let mode = null;
+     let raw = identifier;
+     if (Array.isArray(identifier) && identifier.length >= 2) {
+         raw = identifier[0];
+         mode = Number(identifier[1]);
+     }
+
+     const asString = String(raw).trim();
      if (!asString) {
          return null;
      }
 
-     const byId = document.getElementById(asString);
-     if (byId) {
-         return byId;
+     if (mode === 1) {
+         return document.getElementById(asString);
+     }
+
+     if (mode !== 0) {
+         const byId = document.getElementById(asString);
+         if (byId) {
+             return byId;
+         }
      }
 
      const needle = asString.toLowerCase();
@@ -2752,12 +3031,26 @@ export function setAsteroidSearchEfficiencyAfterRepeatables() {
          }
      }
 
+     const inputMatch = findInputElementMatchingNeedle(needle);
+     if (inputMatch) {
+         return inputMatch;
+     }
+
      const paragraphs = Array.from(document.querySelectorAll('p'));
      for (const paragraph of paragraphs) {
-         const text = (paragraph.innerText || paragraph.textContent || '').trim();
-         const hay = text.toLowerCase();
+         const content = (paragraph.innerHTML || '').trim();
+         const hay = content.toLowerCase();
          if (hay === needle || hay.includes(needle)) {
              return paragraph;
+         }
+     }
+
+     const divCandidates = Array.from(document.querySelectorAll('div'));
+     for (const candidate of divCandidates) {
+         const text = (candidate.innerText || candidate.textContent || '').trim();
+         const hay = text.toLowerCase();
+         if (hay === needle || hay.includes(needle)) {
+             return candidate;
          }
      }
 
@@ -2849,7 +3142,7 @@ export function setAsteroidSearchEfficiencyAfterRepeatables() {
      }
  }
 
- function createEllipseHighlight(overlay, rect, padding = 10) {
+ function createEllipseHighlight(overlay, rect, padding = ONBOARDING_HIGHLIGHT_PADDING) {
     if (!rect || rect.width <= 0 || rect.height <= 0) {
         return;
     }
@@ -2863,30 +3156,144 @@ export function setAsteroidSearchEfficiencyAfterRepeatables() {
     overlay.appendChild(highlight);
 }
 
-function addOnboardingButtonHighlight(overlay, identifier) {
-    const target = resolveTargetElement(identifier);
+function getEllipseBoundaryPoint(centerPoint, towardsPoint, targetRect) {
+    if (!centerPoint || !towardsPoint || !targetRect) {
+        return centerPoint;
+    }
+
+    const halfWidth = (targetRect.width + ONBOARDING_HIGHLIGHT_PADDING * 2) / 2;
+    const halfHeight = (targetRect.height + ONBOARDING_HIGHLIGHT_PADDING * 2) / 2;
+
+    if (halfWidth <= 0 || halfHeight <= 0) {
+        return centerPoint;
+    }
+
+    const dx = towardsPoint.x - centerPoint.x;
+    const dy = towardsPoint.y - centerPoint.y;
+
+    if (dx === 0 && dy === 0) {
+        return centerPoint;
+    }
+
+    const denom = Math.sqrt((dx * dx) / (halfWidth * halfWidth) + (dy * dy) / (halfHeight * halfHeight));
+    if (!Number.isFinite(denom) || denom <= 0) {
+        return centerPoint;
+    }
+
+    const u = Math.min(1 / denom, 1);
+
+    return {
+        x: centerPoint.x + dx * u,
+        y: centerPoint.y + dy * u
+    };
+}
+
+ function addOnboardingButtonHighlight(overlay, identifier) {
+    const target = resolveOnboardingTargetElement(identifier);
     if (!target) {
         return;
     }
 
-    const rect = target.getBoundingClientRect();
-    createEllipseHighlight(overlay, rect);
-}
-
-function addOnboardingDivOverlay(overlay, label) {
-    const needle = typeof label === 'string' ? label.trim() : '';
-    if (!needle) {
+    const { rect } = getHighlightTargetWithRect(target);
+    if (!rect) {
         return;
     }
 
-    const paragraphs = Array.from(document.querySelectorAll('p'));
-    paragraphs.forEach(paragraph => {
-        const content = (paragraph.innerHTML || '').trim();
+    createEllipseHighlight(overlay, rect);
+}
+
+ function addOnboardingDivOverlay(overlay, label) {
+     if (Array.isArray(label) && Number(label[1]) === 1) {
+         const el = resolveOnboardingTargetElement(label);
+         const rect = el?.getBoundingClientRect?.();
+         if (rect) {
+             createEllipseHighlight(overlay, rect);
+         }
+         return;
+     }
+
+     const needle =
+         Array.isArray(label) && Number(label[1]) === 0
+             ? String(label[0] ?? '').trim()
+             : (typeof label === 'string' ? label.trim() : '');
+
+     if (!needle) {
+         return;
+     }
+
+     const highlightElements = [
+        ...Array.from(document.querySelectorAll('p')),
+        ...Array.from(document.querySelectorAll('div'))
+    ];
+
+    highlightElements.forEach(element => {
+        const content = (element.innerText || element.textContent || '').trim();
         if (content === needle) {
-            const rect = paragraph.getBoundingClientRect();
+            const rect = element.getBoundingClientRect();
             createEllipseHighlight(overlay, rect);
         }
     });
+ }
+
+ function checkOnboardingCondition(conditionStep) {
+    if (!Array.isArray(conditionStep) || conditionStep[0] !== 'condition') {
+        return false;
+    }
+
+    const pathSpec = conditionStep[2];
+    const threshold = conditionStep[3];
+    const comparatorRaw = conditionStep.length > 4 ? conditionStep[4] : undefined;
+
+    if (!Array.isArray(pathSpec) || pathSpec.length < 2) {
+        return false;
+    }
+
+    const category = pathSpec[0];
+    const path = pathSpec.slice(1);
+
+    let currentRaw;
+    if (category === 'computed') {
+        const computedKey = path[0];
+        if (computedKey === 'researchRatePerTick') {
+            currentRaw = calculateResearchRatePerTick();
+        } else {
+            return false;
+        }
+    } else {
+        currentRaw = getResourceDataObject(category, path, true);
+    }
+
+    const current = typeof currentRaw === 'number' ? currentRaw : Number(currentRaw);
+    const target = typeof threshold === 'number' ? threshold : Number(threshold);
+
+    if (!Number.isFinite(current) || !Number.isFinite(target)) {
+        return false;
+    }
+
+    const comparator = typeof comparatorRaw === 'string' ? comparatorRaw.toLowerCase() : 'gte';
+    const epsilon = 1e-9;
+
+    switch (comparator) {
+        case 'gt':
+        case '>':
+            return current > target + epsilon;
+        case 'lt':
+        case '<':
+            return current < target - epsilon;
+        case 'lte':
+        case '<=':
+            return current <= target + epsilon;
+        case 'eq':
+        case '==':
+            return Math.abs(current - target) <= epsilon;
+        case 'ne':
+        case '!=':
+            return Math.abs(current - target) > epsilon;
+        case 'gte':
+        case '>=':
+        default:
+            return current >= target - epsilon;
+    }
 }
 
  function renderOnboardingSteps(overlay, steps) {
@@ -2901,35 +3308,39 @@ function addOnboardingDivOverlay(overlay, label) {
          }
 
          const type = step[0];
-        if (type === 'textBlock') {
-            addOnboardingTextBlock(overlay, step[1], step[2], step[3]);
-        } else if (type === 'arrow') {
-            const label = step.length > 3 ? step[3] : null;
-            let facing = step.length > 4 ? step[4] : undefined;
+         if (type === 'textBlock') {
+             addOnboardingTextBlock(overlay, step[1], step[2], step[3]);
+         } else if (type === 'arrow') {
+             const label = step.length > 3 ? step[3] : null;
+             let facing = step.length > 4 ? step[4] : undefined;
 
-            if (step.length === 4 && typeof label === 'string') {
-                const lower = label.toLowerCase();
-                if (['left', 'right', 'up', 'down'].includes(lower)) {
-                    facing = label;
-                    addOnboardingArrow(svg, overlay, step[1], step[2], null, facing);
-                    continue;
-                }
-            }
+             if (step.length === 4 && typeof label === 'string') {
+                 const lower = label.toLowerCase();
+                 if (['left', 'right', 'up', 'down'].includes(lower)) {
+                     facing = label;
+                     addOnboardingArrow(svg, overlay, step[1], step[2], null, facing);
+                     continue;
+                 }
+             }
 
-            addOnboardingArrow(svg, overlay, step[1], step[2], label, facing);
-        } else if (type === 'callout') {
-            if (typeof step[1] === 'number' && typeof step[2] === 'number') {
-                addOnboardingCallout(svg, overlay, step[1], step[2], step[3]);
-            } else {
-                addOnboardingCallout(svg, overlay, step[1], step[2]);
-            }
-        } else if (type === 'buttonOverlay') {
-            addOnboardingButtonHighlight(overlay, step[1]);
-        } else if (type === 'divOverlay') {
-            addOnboardingDivOverlay(overlay, step[1]);
-        }
-    }
-}
+             addOnboardingArrow(svg, overlay, step[1], step[2], label, facing);
+         } else if (type === 'callout') {
+             if (typeof step[1] === 'number' && typeof step[2] === 'number') {
+                 addOnboardingCallout(svg, overlay, step[1], step[2], step[3]);
+             } else {
+                 addOnboardingCallout(svg, overlay, step[1], step[2]);
+             }
+         } else if (type === 'buttonOverlay') {
+             addOnboardingButtonHighlight(overlay, step[1]);
+         } else if (type === 'divOverlay') {
+             addOnboardingDivOverlay(overlay, step[1]);
+         } else if (type === 'waitForClick') {
+             continue;
+         } else if (type === 'condition') {
+             continue;
+         }
+     }
+ }
 
  export function onboardingChecks() {
      const overlay = document.getElementById('onboardingOverlay');
@@ -2940,29 +3351,145 @@ function addOnboardingDivOverlay(overlay, label) {
      if (!getOnboardingMode()) {
          overlay.style.display = 'none';
          onboardingRenderDirty = true;
+         resetOnboardingProgression();
+         return;
+     }
+
+     if (onboardingAwaitingCompletionConfirm) {
+         overlay.style.display = 'none';
          return;
      }
 
      overlay.style.display = 'block';
 
      if (!onboardingSteps) {
-         setOnboardingSteps([
-            ['callout', 'Hydrogen', 'Click the Hydrogen Option'],
-            ['divOverlay', 'Hydrogen']
+        setOnboardingSteps([
+            ['spotlight', ['Hydrogen', 0], 'Click the Hydrogen Option', { highlightMode: 'div' }],
+            ['spotlight', ['Gain', 0], 'Click the Gain button'],
+            ['spotlight', ['hydrogenQuantity', 1], 'Continue clicking Gain until you have 50 Hydrogen', { waitForClick: false }],
+            ['condition', ['hydrogenQuantity', 1], ['resources', 'hydrogen', 'quantity'], 50],
+            ['spotlight', ['Add 2 Hydrogen /s', 0], 'Buy a Hydrogen AutoBuyer'],
+            ['spotlight', ['tab3', 1], 'Click the Research Tab', { waitForElementTarget: ['Research', 0], waitForElementTimeout: 4000 }],
+            ['spotlight', ['researchOption', 1], 'Click Research', { highlightMode: 'div' }],
+            ['spotlight', ['Add 0.5 Research /s', 0], 'Buy 3 Science Kits', { waitForClick: false }],
+            ['condition', ['Add 0.5 Research /s', 0], ['research', 'upgrades', 'scienceKit', 'quantity'], 3],
+            ['spotlight', ['scienceKitToggle', 1], 'Turn off the Science Kit toggle', { waitForClick: false }],
+            ['condition', ['scienceKitToggle', 1], ['computed', 'researchRatePerTick'], 0, 'eq'],
+            ['timedSpotlight', ['researchRate', 1], 'You can switch on and off many items in the game and when off they wont produce, but wont consume energy', 3000],
+            ['spotlight', ['scienceKitToggle', 1], 'Turn the Science Kit toggle back on', { waitForClick: false }],
+            ['condition', ['scienceKitToggle', 1], ['computed', 'researchRatePerTick'], 0, 'gt'],
         ]);
     }
 
+     if (!onboardingSegments) {
+         onboardingSegments = buildOnboardingSegments(onboardingSteps);
+         onboardingSegmentIndex = 0;
+     }
+
+     const currentSegment = onboardingSegments[onboardingSegmentIndex];
+     if (!currentSegment) {
+         onboardingAwaitingCompletionConfirm = true;
+         cleanupOnboardingClickListener();
+         overlay.style.display = 'none';
+
+         callPopupModal(
+             'ONBOARDING COMPLETE',
+             'Onboarding is over.',
+             true,
+             false,
+             false,
+             false,
+             () => {
+                 setOnboardingMode(false);
+                 console.log('Onboarding mode disabled');
+                 resetOnboardingProgression();
+                 showHideModal();
+             },
+             null,
+             null,
+             null,
+             'CONTINUE',
+             null,
+             null,
+             null,
+             false
+         );
+
+         return;
+     }
+
+     if (currentSegment.condition) {
+         if (checkOnboardingCondition(currentSegment.condition)) {
+             onboardingSegmentIndex += 1;
+             onboardingRenderDirty = true;
+             cleanupOnboardingClickListener();
+             return;
+         }
+     }
+
+     if (currentSegment.waitForElementTarget) {
+         const el = resolveOnboardingTargetElement(currentSegment.waitForElementTarget);
+         if (el) {
+             console.log('Onboarding waitForElement target found:', currentSegment.waitForElementTarget);
+             onboardingSegmentIndex += 1;
+             onboardingRenderDirty = true;
+             cleanupOnboardingClickListener();
+             return;
+         }
+
+         if (currentSegment.waitForElementTimeout > 0) {
+             if (!currentSegment.waitDeadline) {
+                 currentSegment.waitDeadline = Date.now() + currentSegment.waitForElementTimeout;
+             } else if (Date.now() >= currentSegment.waitDeadline) {
+                 onboardingSegmentIndex += 1;
+                 onboardingRenderDirty = true;
+                 cleanupOnboardingClickListener();
+                 return;
+             }
+         }
+     }
+
+     if (currentSegment.waitForMs > 0 && !currentSegment.waitForClickTarget) {
+         if (!currentSegment.waitDeadline) {
+             currentSegment.waitDeadline = Date.now() + currentSegment.waitForMs;
+         } else if (Date.now() >= currentSegment.waitDeadline) {
+             onboardingSegmentIndex += 1;
+             onboardingRenderDirty = true;
+             cleanupOnboardingClickListener();
+             return;
+         }
+     }
+
+     if (currentSegment.waitForClickTarget) {
+         const desiredTargetEl = resolveOnboardingTargetElement(currentSegment.waitForClickTarget);
+
+         if (!desiredTargetEl) {
+             cleanupOnboardingClickListener();
+         } else if (onboardingClickTargetEl !== desiredTargetEl) {
+             cleanupOnboardingClickListener();
+             onboardingClickTargetEl = desiredTargetEl;
+             onboardingClickHandler = () => {
+                 onboardingSegmentIndex += 1;
+                 onboardingRenderDirty = true;
+                 cleanupOnboardingClickListener();
+             };
+             onboardingClickTargetEl.addEventListener('click', onboardingClickHandler, true);
+         }
+     } else {
+         cleanupOnboardingClickListener();
+     }
+
      const now = Date.now();
      if (onboardingRenderDirty || now - lastOnboardingRenderMs > 150) {
-         renderOnboardingSteps(overlay, onboardingSteps);
+         renderOnboardingSteps(overlay, currentSegment.items);
          lastOnboardingRenderMs = now;
          onboardingRenderDirty = false;
      }
  }
 
- export function calculateAndAddExtraAPFromPhilosophyRepeatable(amountToAdd = 0) {
-     return amountToAdd;
- }
+export function calculateAndAddExtraAPFromPhilosophyRepeatable(amountToAdd = 0) {
+    return amountToAdd;
+}
 
 export function getAscendencyPointsWithRepeatableBonus(baseAscendencyPoints = 0) {
     const base = Number(baseAscendencyPoints) || 0;
