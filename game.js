@@ -2586,20 +2586,383 @@ export function setAsteroidSearchEfficiencyAfterRepeatables() {
     setBaseSearchAsteroidTimerDuration(newDuration);
 }
 
-export function onboardingChecks() {
-    const overlay = document.getElementById('onboardingOverlay');
-    if (!overlay) return;
-    
-    if (getOnboardingMode()) {
-        overlay.style.display = 'block';
-    } else {
-        overlay.style.display = 'none';
+ let onboardingSteps = null;
+ let lastOnboardingRenderMs = 0;
+ let onboardingRenderDirty = true;
+
+ export function setOnboardingSteps(steps) {
+     onboardingSteps = Array.isArray(steps) ? steps : null;
+     onboardingRenderDirty = true;
+ }
+
+ function clearOnboardingOverlay(overlay) {
+     while (overlay.firstChild) {
+         overlay.removeChild(overlay.firstChild);
+     }
+ }
+
+ function clamp(value, min, max) {
+     return Math.min(Math.max(value, min), max);
+ }
+
+ function addOnboardingCallout(svg, overlay, targetOrX, yMaybe, textMaybe) {
+     let targetPoint = null;
+     let text = '';
+     let targetEl = null;
+     let targetRect = null;
+
+     if (typeof targetOrX === 'number' && typeof yMaybe === 'number') {
+         targetPoint = { x: targetOrX, y: yMaybe };
+         text = textMaybe ?? '';
+     } else {
+         targetEl = resolveOnboardingTargetElement(targetOrX);
+         targetPoint = getElementCenterPoint(targetEl);
+         text = yMaybe ?? '';
+         targetRect = targetEl?.getBoundingClientRect?.() ?? null;
+     }
+
+     if (!targetPoint) {
+         return;
+     }
+
+     const vw = window.innerWidth;
+     const vh = window.innerHeight;
+     const margin = 12;
+     const gap = 18;
+
+     const targetWidth = targetRect?.width ?? 0;
+     const baseGap = 18;
+     const requiredArrowLength = targetWidth > 0 ? targetWidth * 2 : 0;
+     const arrowLength = Math.max(baseGap, requiredArrowLength);
+     const labelClearance = 16;
+     const horizontalOffset = arrowLength + labelClearance;
+     const verticalOffset = arrowLength + labelClearance;
+
+     const measure = document.createElement('div');
+     measure.className = 'onboarding-step-text';
+     measure.style.left = '0px';
+     measure.style.top = '0px';
+     measure.style.visibility = 'hidden';
+     measure.style.maxWidth = `${Math.max(140, vw - margin * 2)}px`;
+     measure.textContent = String(text ?? '');
+     overlay.appendChild(measure);
+
+     const rect = measure.getBoundingClientRect();
+     const boxW = rect.width || 260;
+     const boxH = rect.height || 60;
+
+     const candidates = [
+         { dir: 'left', left: targetPoint.x - horizontalOffset - boxW, top: targetPoint.y - boxH / 2 },
+         { dir: 'right', left: targetPoint.x + horizontalOffset, top: targetPoint.y - boxH / 2 },
+         { dir: 'up', left: targetPoint.x - boxW / 2, top: targetPoint.y - verticalOffset - boxH },
+         { dir: 'down', left: targetPoint.x - boxW / 2, top: targetPoint.y + verticalOffset }
+     ];
+
+     let best = null;
+     for (const c of candidates) {
+         const clampedLeft = clamp(c.left, margin, vw - margin - boxW);
+         const clampedTop = clamp(c.top, margin, vh - margin - boxH);
+         const score = Math.abs(clampedLeft - c.left) + Math.abs(clampedTop - c.top);
+
+         if (!best || score < best.score) {
+             best = {
+                 dir: c.dir,
+                 left: clampedLeft,
+                 top: clampedTop,
+                 score
+             };
+         }
+     }
+
+     measure.style.left = `${best.left}px`;
+     measure.style.top = `${best.top}px`;
+     measure.style.visibility = '';
+
+     const tail = (() => {
+         if (best.dir === 'left') return { x: best.left + boxW, y: best.top + boxH / 2 };
+         if (best.dir === 'right') return { x: best.left, y: best.top + boxH / 2 };
+         if (best.dir === 'up') return { x: best.left + boxW / 2, y: best.top + boxH };
+         return { x: best.left + boxW / 2, y: best.top };
+     })();
+
+     addOnboardingArrowBetweenPoints(svg, tail.x, tail.y, targetPoint.x, targetPoint.y);
+ }
+
+ function createOnboardingSvgLayer() {
+     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+     svg.setAttribute('class', 'onboarding-steps-svg');
+     svg.setAttribute('width', '100%');
+     svg.setAttribute('height', '100%');
+     svg.setAttribute('viewBox', `0 0 ${window.innerWidth} ${window.innerHeight}`);
+     svg.setAttribute('preserveAspectRatio', 'none');
+     return svg;
+ }
+
+ function resolveTargetElement(identifier) {
+     if (identifier === null || identifier === undefined) {
+         return null;
+     }
+
+     const asString = String(identifier).trim();
+     if (!asString) {
+         return null;
+     }
+
+     const byId = document.getElementById(asString);
+     if (byId) {
+         return byId;
+     }
+
+     const needle = asString.toLowerCase();
+     const candidates = Array.from(document.querySelectorAll('button, a, [role="button"], input[type="button"], input[type="submit"]'));
+     for (const candidate of candidates) {
+         const text = (candidate.innerText || candidate.value || candidate.textContent || '').trim();
+         const hay = text.toLowerCase();
+         if (hay === needle || hay.includes(needle)) {
+             return candidate;
+         }
+     }
+
+     return null;
+ }
+
+ function resolveOnboardingTargetElement(identifier) {
+     if (identifier === null || identifier === undefined) {
+         return null;
+     }
+
+     const asString = String(identifier).trim();
+     if (!asString) {
+         return null;
+     }
+
+     const byId = document.getElementById(asString);
+     if (byId) {
+         return byId;
+     }
+
+     const needle = asString.toLowerCase();
+
+     const buttonCandidates = Array.from(document.querySelectorAll('button, a, [role="button"], input[type="button"], input[type="submit"]'));
+     for (const candidate of buttonCandidates) {
+         const text = (candidate.innerText || candidate.value || candidate.textContent || '').trim();
+         const hay = text.toLowerCase();
+         if (hay === needle || hay.includes(needle)) {
+             return candidate;
+         }
+     }
+
+     const paragraphs = Array.from(document.querySelectorAll('p'));
+     for (const paragraph of paragraphs) {
+         const text = (paragraph.innerText || paragraph.textContent || '').trim();
+         const hay = text.toLowerCase();
+         if (hay === needle || hay.includes(needle)) {
+             return paragraph;
+         }
+     }
+
+     return null;
+ }
+
+ function getElementCenterPoint(el) {
+     if (!el || !el.getBoundingClientRect) {
+         return null;
+     }
+
+     const rect = el.getBoundingClientRect();
+     if (!rect || rect.width <= 0 || rect.height <= 0) {
+         return null;
+     }
+
+     return {
+         x: rect.left + rect.width / 2,
+         y: rect.top + rect.height / 2
+     };
+ }
+
+ function addOnboardingTextBlock(overlay, x, y, text) {
+     const el = document.createElement('div');
+     el.className = 'onboarding-step-text';
+     el.style.left = `${Number(x) || 0}px`;
+     el.style.top = `${Number(y) || 0}px`;
+     el.textContent = text ?? '';
+     overlay.appendChild(el);
+ }
+
+ function computeArrowTail(x, y, facing, length = 90) {
+     const fx = Number(x) || 0;
+     const fy = Number(y) || 0;
+     const dir = String(facing || 'left').toLowerCase();
+
+     if (dir === 'right') return { x: fx + length, y: fy };
+     if (dir === 'up') return { x: fx, y: fy - length };
+     if (dir === 'down') return { x: fx, y: fy + length };
+     return { x: fx - length, y: fy };
+ }
+
+ function addOnboardingArrowBetweenPoints(svg, startX, startY, endX, endY) {
+     const dx = endX - startX;
+     const dy = endY - startY;
+     const len = Math.hypot(dx, dy) || 1;
+     const ux = dx / len;
+     const uy = dy / len;
+
+     const headSize = 14;
+     const wing = 7;
+
+     const lineEndX = endX - ux * headSize;
+     const lineEndY = endY - uy * headSize;
+
+     const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+     line.setAttribute('x1', `${startX}`);
+     line.setAttribute('y1', `${startY}`);
+     line.setAttribute('x2', `${lineEndX}`);
+     line.setAttribute('y2', `${lineEndY}`);
+     line.setAttribute('class', 'onboarding-step-arrow-line');
+     svg.appendChild(line);
+
+     const p2x = endX - ux * headSize - uy * wing;
+     const p2y = endY - uy * headSize + ux * wing;
+     const p3x = endX - ux * headSize + uy * wing;
+     const p3y = endY - uy * headSize - ux * wing;
+
+     const head = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+     head.setAttribute('points', `${endX},${endY} ${p2x},${p2y} ${p3x},${p3y}`);
+     head.setAttribute('class', 'onboarding-step-arrow-head');
+     svg.appendChild(head);
+ }
+
+ function addOnboardingArrow(svg, overlay, x, y, label, facing) {
+     const headX = Number(x) || 0;
+     const headY = Number(y) || 0;
+     const tail = computeArrowTail(headX, headY, facing);
+
+     addOnboardingArrowBetweenPoints(svg, tail.x, tail.y, headX, headY);
+
+     if (label !== undefined && label !== null && String(label).trim() !== '') {
+         const labelEl = document.createElement('div');
+         labelEl.className = 'onboarding-step-arrow-label';
+         labelEl.style.left = `${headX + 10}px`;
+         labelEl.style.top = `${headY + 10}px`;
+         labelEl.textContent = String(label);
+         overlay.appendChild(labelEl);
+     }
+ }
+
+ function createEllipseHighlight(overlay, rect, padding = 10) {
+    if (!rect || rect.width <= 0 || rect.height <= 0) {
+        return;
+    }
+
+    const highlight = document.createElement('div');
+    highlight.className = 'onboarding-step-highlight';
+    highlight.style.left = `${rect.left - padding}px`;
+    highlight.style.top = `${rect.top - padding}px`;
+    highlight.style.width = `${rect.width + padding * 2}px`;
+    highlight.style.height = `${rect.height + padding * 2}px`;
+    overlay.appendChild(highlight);
+}
+
+function addOnboardingButtonHighlight(overlay, identifier) {
+    const target = resolveTargetElement(identifier);
+    if (!target) {
+        return;
+    }
+
+    const rect = target.getBoundingClientRect();
+    createEllipseHighlight(overlay, rect);
+}
+
+function addOnboardingDivOverlay(overlay, label) {
+    const needle = typeof label === 'string' ? label.trim() : '';
+    if (!needle) {
+        return;
+    }
+
+    const paragraphs = Array.from(document.querySelectorAll('p'));
+    paragraphs.forEach(paragraph => {
+        const content = (paragraph.innerHTML || '').trim();
+        if (content === needle) {
+            const rect = paragraph.getBoundingClientRect();
+            createEllipseHighlight(overlay, rect);
+        }
+    });
+}
+
+ function renderOnboardingSteps(overlay, steps) {
+     clearOnboardingOverlay(overlay);
+
+     const svg = createOnboardingSvgLayer();
+     overlay.appendChild(svg);
+
+     for (const step of steps) {
+         if (!Array.isArray(step) || step.length === 0) {
+             continue;
+         }
+
+         const type = step[0];
+        if (type === 'textBlock') {
+            addOnboardingTextBlock(overlay, step[1], step[2], step[3]);
+        } else if (type === 'arrow') {
+            const label = step.length > 3 ? step[3] : null;
+            let facing = step.length > 4 ? step[4] : undefined;
+
+            if (step.length === 4 && typeof label === 'string') {
+                const lower = label.toLowerCase();
+                if (['left', 'right', 'up', 'down'].includes(lower)) {
+                    facing = label;
+                    addOnboardingArrow(svg, overlay, step[1], step[2], null, facing);
+                    continue;
+                }
+            }
+
+            addOnboardingArrow(svg, overlay, step[1], step[2], label, facing);
+        } else if (type === 'callout') {
+            if (typeof step[1] === 'number' && typeof step[2] === 'number') {
+                addOnboardingCallout(svg, overlay, step[1], step[2], step[3]);
+            } else {
+                addOnboardingCallout(svg, overlay, step[1], step[2]);
+            }
+        } else if (type === 'buttonOverlay') {
+            addOnboardingButtonHighlight(overlay, step[1]);
+        } else if (type === 'divOverlay') {
+            addOnboardingDivOverlay(overlay, step[1]);
+        }
     }
 }
 
-export function calculateAndAddExtraAPFromPhilosophyRepeatable(amountToAdd = 0) {
-    return amountToAdd;
-}
+ export function onboardingChecks() {
+     const overlay = document.getElementById('onboardingOverlay');
+     if (!overlay) {
+         return;
+     }
+
+     if (!getOnboardingMode()) {
+         overlay.style.display = 'none';
+         onboardingRenderDirty = true;
+         return;
+     }
+
+     overlay.style.display = 'block';
+
+     if (!onboardingSteps) {
+         setOnboardingSteps([
+            ['callout', 'Hydrogen', 'Click the Hydrogen Option'],
+            ['divOverlay', 'Hydrogen']
+        ]);
+    }
+
+     const now = Date.now();
+     if (onboardingRenderDirty || now - lastOnboardingRenderMs > 150) {
+         renderOnboardingSteps(overlay, onboardingSteps);
+         lastOnboardingRenderMs = now;
+         onboardingRenderDirty = false;
+     }
+ }
+
+ export function calculateAndAddExtraAPFromPhilosophyRepeatable(amountToAdd = 0) {
+     return amountToAdd;
+ }
 
 export function getAscendencyPointsWithRepeatableBonus(baseAscendencyPoints = 0) {
     const base = Number(baseAscendencyPoints) || 0;
