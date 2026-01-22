@@ -342,6 +342,9 @@ import {
     setMiaplacidusEndgameStoryShown,
     getNonExhaustiveResources,
     setNonExhaustiveResources,
+    getMinimumBlackHoleChargeTime,
+    getBlackHoleAlwaysOn,
+    setBlackHoleAlwaysOn,
 } from './constantsAndGlobalVars.js';
 
 import {
@@ -2147,29 +2150,57 @@ function blackHoleUIChecks() {
     }
 
     if (secondaryButton3) {
-        const price = getBlackHoleDurationPrice();
-        const currentDurationMs = getBlackHoleDuration();
-        const nextDurationMs = currentDurationMs + getBlackHoleDurationUpgradeIncrementMs();
-        const currentDurationSeconds = Math.round(currentDurationMs / 1000);
-        const nextDurationSeconds = Math.round(nextDurationMs / 1000);
-        secondaryButton3.textContent = `Duration\n${currentDurationSeconds}s -> ${nextDurationSeconds}s\n${formatNumber(price)} Research Points`;
-        const canAfford = currentResearch >= price;
-        setButtonState(secondaryButton3, { enabled: canAfford, ready: canAfford });
+        const minChargeMs = getMinimumBlackHoleChargeTime();
+        const baseChargeMs = getBaseBlackHoleChargeTimerDuration();
+        const currentChargeMs = Math.round(baseChargeMs * getBlackHoleRechargeMultiplier());
+        const rechargeCapped = getBlackHoleAlwaysOn() || currentChargeMs <= minChargeMs;
+
+        if (rechargeCapped && !getBlackHoleAlwaysOn()) {
+            setBlackHoleAlwaysOn(true);
+        }
+
+        if (rechargeCapped) {
+            secondaryButton3.textContent = `Duration\nALWAYS ACTIVE`;
+            setButtonState(secondaryButton3, { enabled: false, ready: false });
+        } else {
+            const price = getBlackHoleDurationPrice();
+            const currentDurationMs = getBlackHoleDuration();
+            const nextDurationMs = currentDurationMs + getBlackHoleDurationUpgradeIncrementMs();
+            const currentDurationSeconds = Math.round(currentDurationMs / 1000);
+            const nextDurationSeconds = Math.round(nextDurationMs / 1000);
+            secondaryButton3.textContent = `Duration\n${currentDurationSeconds}s -> ${nextDurationSeconds}s\n${formatNumber(price)} Research Points`;
+            const canAfford = currentResearch >= price;
+            setButtonState(secondaryButton3, { enabled: canAfford, ready: canAfford });
+        }
     }
 
     if (secondaryButton4) {
+        const minChargeMs = getMinimumBlackHoleChargeTime();
         const price = getBlackHoleRechargePrice();
         const baseChargeMs = getBaseBlackHoleChargeTimerDuration();
         const currentMultiplier = getBlackHoleRechargeMultiplier();
         const currentChargeMs = Math.round(baseChargeMs * currentMultiplier);
-        const nextChargeMs = Math.round(currentChargeMs * 0.9);
+        const minMultiplier = baseChargeMs > 0 ? minChargeMs / baseChargeMs : 0;
+        const nextMultiplier = Math.max(minMultiplier, currentMultiplier * 0.88);
+        const nextChargeMs = Math.round(baseChargeMs * nextMultiplier);
 
-        const currentChargeSeconds = Math.round(currentChargeMs / 1000);
-        const nextChargeSeconds = Math.round(nextChargeMs / 1000);
-        secondaryButton4.textContent = `Recharge\n${currentChargeSeconds}s -> ${nextChargeSeconds}s\n${formatNumber(price)} Research Points`;
+        const rechargeCapped = getBlackHoleAlwaysOn() || currentChargeMs <= minChargeMs;
 
-        const canAfford = currentResearch >= price;
-        setButtonState(secondaryButton4, { enabled: canAfford, ready: canAfford });
+        if (rechargeCapped && !getBlackHoleAlwaysOn()) {
+            setBlackHoleAlwaysOn(true);
+        }
+
+        if (rechargeCapped) {
+            secondaryButton4.textContent = `Recharge\n${(minChargeMs / 1000).toFixed(0)}s\nMAX UPGRADE`;
+            setButtonState(secondaryButton4, { enabled: false, ready: false });
+        } else {
+            const currentChargeSeconds = (currentChargeMs / 1000).toFixed(1);
+            const nextChargeSeconds = (Math.max(minChargeMs, nextChargeMs) / 1000).toFixed(1);
+            secondaryButton4.textContent = `Recharge\n${currentChargeSeconds}s -> ${nextChargeSeconds}s\n${formatNumber(price)} Research Points`;
+
+            const canAfford = currentResearch >= price;
+            setButtonState(secondaryButton4, { enabled: canAfford, ready: canAfford });
+        }
     }
 
     if (chargeButton) {
@@ -8179,13 +8210,21 @@ export function startBlackHoleChargeTimer(adjustment) {
         return;
     }
 
+    const minChargeMs = getMinimumBlackHoleChargeTime();
+
     let totalDuration = getCurrentBlackHoleChargeTimerDurationTotal();
     if (adjustment[0] === 0 || !totalDuration) {
         totalDuration = Math.round(getBaseBlackHoleChargeTimerDuration() * getBlackHoleRechargeMultiplier());
-        setCurrentBlackHoleChargeTimerDurationTotal(totalDuration);
+    }
+    totalDuration = Math.max(totalDuration, minChargeMs);
+    setCurrentBlackHoleChargeTimerDurationTotal(totalDuration);
+
+    if (totalDuration <= minChargeMs && !getBlackHoleAlwaysOn()) {
+        setBlackHoleAlwaysOn(true);
     }
 
     let timeRemaining = adjustment[0] === 0 ? totalDuration : adjustment[0];
+    timeRemaining = Math.max(Math.min(timeRemaining, totalDuration), 0);
     setTimeLeftUntilBlackHoleChargeTimerFinishes(timeRemaining);
 
     timerManagerDelta.addTimer(timerName, {

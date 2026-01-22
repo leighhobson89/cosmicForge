@@ -32,6 +32,7 @@ export const MAX_STACKS = 4;
 export const STACK_WIDTH = 220;
 export const BASE_RIGHT = 0;        
 
+export const MINIMUM_BLACK_HOLE_CHARGE_TIME = 30000;
 export const INFINITE_POWER_RATE = 5000000000000000;
 export const MENU_STATE = 'menuState';
 export const GAME_VISIBLE_ACTIVE = 'gameVisibleActive';
@@ -276,6 +277,7 @@ let currentPillageVoidTimerDurationTotal = 0;
 let currentBlackHoleChargeTimerDurationTotal = 0;
 let currentlyChargingBlackHole = false;
 let blackHoleChargeReady = false;
+let blackHoleAlwaysOn = false;
 let currentlyTimeWarpingBlackHole = false;
 let currentBlackHoleTimeWarpDurationTotal = 0;
 let blackHoleTimeWarpEndTimestampMs = 0;
@@ -1354,6 +1356,7 @@ export function resetAllVariablesOnRebirth() {
     telescopeReadyToSearch = true;
     currentlyChargingBlackHole = false;
     blackHoleChargeReady = false;
+    blackHoleAlwaysOn = false;
     asteroidTimerCanContinue = false;
     starInvestigationTimerCanContinue = false;
     pillageVoidTimerCanContinue = false;
@@ -1587,6 +1590,7 @@ export function captureGameStatusForSaving(type) {
         telescopeReadyToSearch: telescopeReadyToSearch,
         currentlyChargingBlackHole: currentlyChargingBlackHole,
         blackHoleChargeReady: blackHoleChargeReady,
+        blackHoleAlwaysOn: blackHoleAlwaysOn,
         currentlyTravellingToAsteroid: currentlyTravellingToAsteroid,
         rocketReadyToTravel: rocketReadyToTravel,
         antimatterUnlocked: antimatterUnlocked,
@@ -1846,6 +1850,7 @@ export function restoreGameStatus(gameState, type) {
             telescopeReadyToSearch = gameState.flags.telescopeReadyToSearch ?? true;            
             currentlyChargingBlackHole = gameState.flags.currentlyChargingBlackHole ?? false;
             blackHoleChargeReady = gameState.flags.blackHoleChargeReady ?? false;
+            blackHoleAlwaysOn = gameState.flags.blackHoleAlwaysOn ?? false;
             currentlyTravellingToAsteroid = gameState.flags.currentlyTravellingToAsteroid ?? { rocket1: false, rocket2: false, rocket3: false, rocket4: false };
             rocketReadyToTravel = gameState.flags.rocketReadyToTravel ?? { rocket1: true, rocket2: true, rocket3: true, rocket4: true };
             antimatterUnlocked = gameState.flags.antimatterUnlocked ?? false;
@@ -3399,6 +3404,14 @@ export function getBlackHoleChargeReady() {
 
 export function setBlackHoleChargeReady(value) {
     blackHoleChargeReady = value ?? false;
+}
+
+export function getBlackHoleAlwaysOn() {
+    return blackHoleAlwaysOn;
+}
+
+export function setBlackHoleAlwaysOn(value) {
+    blackHoleAlwaysOn = value ?? false;
 }
 
 export function getTimeLeftUntilRocketTravelToAsteroidTimerFinishes(key) {
@@ -5105,6 +5118,10 @@ export function getMiaplacidusEndgameStoryShown() {
 
 export function setMiaplacidusEndgameStoryShown(value) {
     miaplacidusEndgameStoryShown = value;
+}
+
+export function getMinimumBlackHoleChargeTime() {
+    return MINIMUM_BLACK_HOLE_CHARGE_TIME;
 }
 
 //image urls----------------------------------------------------------------------------------------------------------------------

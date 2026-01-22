@@ -24,11 +24,13 @@ import {
     setBlackHoleChargeReady,
     setCurrentBlackHoleChargeTimerDurationTotal,
     getCurrentBlackHoleChargeTimerDurationTotal,
+    getBaseBlackHoleChargeTimerDuration,
     getGameCostMultiplier,
     getBlackHoleDurationUpgradeIncrementMs,
     getBlackHolePowerUpgradeIncrement,
     deferredActions,
-    setAchievementFlagArray
+    setAchievementFlagArray,
+    getMinimumBlackHoleChargeTime
 } from './constantsAndGlobalVars.js';
 import { purchaseBuff, galacticMarketLiquidateForAp, galacticMarketSellApForCash, galacticMarketTrade, rebirth, startBlackHoleChargeTimer, timeWarp } from './game.js';
 import {
@@ -590,6 +592,14 @@ export function drawTab7Content(heading, optionContentElement) {
                 return;
             }
 
+            const minChargeMs = getMinimumBlackHoleChargeTime();
+            const baseChargeMs = getBaseBlackHoleChargeTimerDuration();
+            const currentChargeMs = Math.round(baseChargeMs * getBlackHoleRechargeMultiplier());
+            const rechargeCapped = currentChargeMs <= minChargeMs;
+            if (rechargeCapped) {
+                return;
+            }
+
             const price = getBlackHoleDurationPrice();
             const currentResearch = getResourceDataObject('research', ['quantity']);
             if (currentResearch < price) {
@@ -605,6 +615,17 @@ export function drawTab7Content(heading, optionContentElement) {
                 return;
             }
 
+            const minChargeMs = getMinimumBlackHoleChargeTime();
+            const baseChargeMs = getBaseBlackHoleChargeTimerDuration();
+            const previousMultiplier = getBlackHoleRechargeMultiplier();
+            const minMultiplier = baseChargeMs > 0 ? (minChargeMs / baseChargeMs) : 0;
+            const nextMultiplier = Math.max(minMultiplier, previousMultiplier * 0.88);
+
+            const currentChargeMs = Math.round(baseChargeMs * previousMultiplier);
+            if (currentChargeMs <= minChargeMs) {
+                return;
+            }
+
             const price = getBlackHoleRechargePrice();
             const currentResearch = getResourceDataObject('research', ['quantity']);
             if (currentResearch < price) {
@@ -614,9 +635,7 @@ export function drawTab7Content(heading, optionContentElement) {
             setResourceDataObject(currentResearch - price, 'research', ['quantity']);
             setBlackHoleRechargePrice(Math.ceil(price * getGameCostMultiplier()));
 
-            const previousMultiplier = getBlackHoleRechargeMultiplier();
-            const newMultiplier = previousMultiplier * 0.9;
-            setBlackHoleRechargeMultiplier(newMultiplier);
+            setBlackHoleRechargeMultiplier(nextMultiplier);
 
             if (getCurrentlyChargingBlackHole()) {
                 const timerName = 'blackHoleChargeTimer';
@@ -629,7 +648,8 @@ export function drawTab7Content(heading, optionContentElement) {
                     timerManagerDelta.removeTimer(timerName);
                     setCurrentlyChargingBlackHole(false);
 
-                    const newTotal = Math.round(previousTotal * 0.9);
+                    const scale = previousMultiplier > 0 ? (nextMultiplier / previousMultiplier) : 1;
+                    const newTotal = Math.round(previousTotal * scale);
                     const newRemaining = Math.round(newTotal * (1 - progress));
                     setCurrentBlackHoleChargeTimerDurationTotal(newTotal);
                     setTimeLeftUntilBlackHoleChargeTimerFinishes(newRemaining);
