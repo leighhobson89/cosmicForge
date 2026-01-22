@@ -49,6 +49,7 @@ import {
     getCurrentPillageVoidTimerDurationTotal,
     setCurrentPillageVoidTimerDurationTotal,
     getTimeLeftUntilPillageVoidTimerFinishes,
+    getOnboardingMode,
     setTimeLeftUntilPillageVoidTimerFinishes,
     getAdditionalSystemsToSettleThisRun,
     setAdditionalSystemsToSettleThisRun,
@@ -838,6 +839,7 @@ export async function gameLoop() {
         megastructureUIChecks();
         blackHoleUIChecks();
         rebirthChecks();
+        onboardingChecks();
         calculateLiquidationValue();
 
         handlePowerAllButtonState();
@@ -2582,6 +2584,17 @@ export function setAsteroidSearchEfficiencyAfterRepeatables() {
     const currentDuration = getBaseSearchAsteroidTimerDuration();
     const newDuration = currentDuration * 0.99;
     setBaseSearchAsteroidTimerDuration(newDuration);
+}
+
+export function onboardingChecks() {
+    const overlay = document.getElementById('onboardingOverlay');
+    if (!overlay) return;
+    
+    if (getOnboardingMode()) {
+        overlay.style.display = 'block';
+    } else {
+        overlay.style.display = 'none';
+    }
 }
 
 export function calculateAndAddExtraAPFromPhilosophyRepeatable(amountToAdd = 0) {
