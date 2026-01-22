@@ -9457,7 +9457,7 @@ export function playWinCinematic(durationMs = 14000) {
         const easeInOutSine = (t) => -(Math.cos(Math.PI * t) - 1) / 2;
         const rnd = (min, max) => min + Math.random() * (max - min);
 
-        const holdAfterTitleMs = 3000;
+        const holdAfterTitleMs = 13000;
         const totalDurationMs = durationMs + holdAfterTitleMs;
 
         const stars = [];
@@ -9951,7 +9951,57 @@ export function playWinCinematic(durationMs = 14000) {
             ctx.restore();
         };
 
-        const drawTitle = (w, h, tt) => {
+        const creditsLines = [
+            'CREDITS:',
+            'Game Design - Leigh Hobson',
+            'Development - Leigh Hobson',
+            'Graphics and UI Design - Leigh Hobson',
+            'QA - Leigh Hobson',
+            'Story - Leigh Hobson',
+            'Cosmic Forge © 2026 Leigh Hobson'
+        ];
+        const creditsLineVisibleMs = 2500;
+        const creditsFadeMs = 750;
+        const creditsStepMs = creditsLineVisibleMs - creditsFadeMs;
+        const creditsStartMs = durationMs * 0.76;
+
+        const drawCredits = (w, h, elapsed, titleA) => {
+            const t = elapsed - creditsStartMs;
+            if (t < 0) return;
+
+            const size = Math.max(34, Math.min(74, w * 0.055));
+            const baseY = h * 0.355;
+
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.shadowColor = 'rgba(120, 255, 230, 0.45)';
+            ctx.shadowBlur = 18;
+            ctx.fillStyle = 'rgba(220, 255, 245, 1)';
+
+            for (let i = 0; i < creditsLines.length; i++) {
+                const local = t - i * creditsStepMs;
+                if (local < 0 || local > creditsLineVisibleMs) continue;
+
+                const fadeIn = clamp01(local / creditsFadeMs);
+                const fadeOut = clamp01((creditsLineVisibleMs - local) / creditsFadeMs);
+                const a = Math.min(fadeIn, fadeOut);
+
+                const phase = clamp01(local / creditsLineVisibleMs);
+                const y = baseY + lerp(22, -22, easeInOutSine(phase));
+
+                const fontScale = i === 0 ? 0.30 : (i === creditsLines.length - 1 ? 0.26 : 0.28);
+                const weight = i === 0 ? 700 : (i === creditsLines.length - 1 ? 600 : 500);
+
+                ctx.globalAlpha = 0.85 * a * titleA;
+                ctx.font = `${weight} ${Math.round(size * fontScale)}px system-ui, -apple-system, Segoe UI, Roboto, Arial`;
+                ctx.fillText(creditsLines[i], w * 0.5, y);
+            }
+
+            ctx.restore();
+        };
+
+        const drawTitle = (w, h, tt, elapsed) => {
             const endA = clamp01((tt - 0.76) / 0.16);
             if (endA <= 0) return;
 
@@ -9979,6 +10029,8 @@ export function playWinCinematic(durationMs = 14000) {
             ctx.fillStyle = 'rgba(220, 255, 245, 1)';
             ctx.fillText('YOU ARE THE COSMIC FORGER', w * 0.5, h * 0.285);
             ctx.restore();
+
+            drawCredits(w, h, elapsed, a);
         };
 
         const cleanup = () => {
@@ -10059,7 +10111,7 @@ export function playWinCinematic(durationMs = 14000) {
                 nextFireworkAt = elapsed + rnd(280, 520);
             }
             drawFireworks(elapsed, sceneA);
-            drawTitle(w, h, ttBase);
+            drawTitle(w, h, ttBase, elapsed);
 
             ctx.save();
             ctx.globalAlpha = (1 - sceneA);
