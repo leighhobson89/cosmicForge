@@ -628,6 +628,7 @@ let liquidatedThisRun = false;
 let belligerentEnemyFlag = false;
 let feedbackCanBeRequested = true;
 let philosophyAbilityActive = false;
+let onboardingMode = false;
 
 let miaplacidusEndgameStoryShown = false;
 
@@ -3791,6 +3792,14 @@ export function getWarMode() {
 
 export function setWarMode(value) {
     warMode = value;
+}
+
+export function getOnboardingMode() {
+    return onboardingMode;
+}
+
+export function setOnboardingMode(value) {
+    onboardingMode = value;
 }
 
 export function getBelligerentEnemyFlag() {

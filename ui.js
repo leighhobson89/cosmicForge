@@ -82,6 +82,7 @@ import {
     getCurrentOptionPane,
     setSaveName,
     getSaveName,
+    setOnboardingMode,
     getSaveData,
     getTimerRateRatio,
     getBuildingTypeOnOff,
@@ -237,6 +238,8 @@ import {
 } from "./descriptions.js";
 
 import { saveGame, loadGameFromCloud, generateRandomPioneerName, saveGameToCloud } from './saveLoadGame.js';
+
+let shouldPromptOnboarding = false;
 
 import {
     setSellFuseCreateTextDescriptionClassesBasedOnButtonStates,
@@ -1489,7 +1492,7 @@ function buildFuelConsumptionLines(resourceKey, category, timerRatio) {
 
     const modalConfirmBtn = document.getElementById('modalConfirm');
 
-    const startGameClickHandler = () => {
+    const startGameClickHandler = async () => {
         if (document.getElementById('fullScreenCheckBox').classList.contains('checked')) {
             toggleGameFullScreen();
         }
@@ -1497,6 +1500,8 @@ function buildFuelConsumptionLines(resourceKey, category, timerRatio) {
         showHideModal();
 
         modalConfirmBtn.removeEventListener('click', startGameClickHandler);
+
+        await promptOnboardingIfNeeded();
     };
 
     modalConfirmBtn.addEventListener('click', startGameClickHandler);
@@ -4252,14 +4257,18 @@ async function getUserSaveName() {
         saveNameButton.classList.remove('invisible');
         saveNameButton.innerText = 'CONFIRM';
 
-        const handleSaveNameClick = () => {
+        const handleSaveNameClick = async () => {
             const userName = saveNameField.value.trim();
             if (userName) {
                 setSaveName(userName);
                 localStorage.setItem('saveName', getSaveName());
+                setOnboardingMode(false);
                 saveNameButton.innerText = 'START';
                 showHideModal();
-                loadGameFromCloud();
+
+                const loadSucceeded = await loadGameFromCloud();
+                shouldPromptOnboarding = !loadSucceeded;
+
                 saveGame('initialise');
                 saveNameButton.removeEventListener('click', handleSaveNameClick); // Remove handler after successful input
                 resolve();
@@ -4270,6 +4279,46 @@ async function getUserSaveName() {
 
         saveNameButton.addEventListener('click', handleSaveNameClick);
     });
+}
+
+async function promptOnboardingIfNeeded() {
+    if (!shouldPromptOnboarding) {
+        return;
+    }
+
+    await new Promise((resolve) => {
+        callPopupModal(
+            'NEED A HAND?',
+            'Looks like you\'re starting a new journey.<br>' +
+            'Would you like a short tutorial onboarding to help you get started?<br>' +
+            'You can continue normally either way.',
+            true,
+            true,
+            false,
+            false,
+            () => {
+                setOnboardingMode(true);
+                console.log('We are in onboarding mode');
+                showHideModal();
+                resolve();
+            },
+            () => {
+                setOnboardingMode(false);
+                console.log('Onboarding skipped');
+                showHideModal();
+                resolve();
+            },
+            null,
+            null,
+            'YES',
+            'NO',
+            null,
+            null,
+            false
+        );
+    });
+
+    shouldPromptOnboarding = false;
 }
 
 export function getTimeInStatCell() {
