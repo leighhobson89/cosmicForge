@@ -390,14 +390,15 @@ button {
     z-index: 15000;
 }
 
- .onboarding-step-text {
-     position: absolute;
-     max-width: 320px;
-     padding: 10px 12px;
-     border-radius: 10px;
-     background: rgba(0, 0, 0, 0.7);
-     color: white;
- }
+.onboarding-step-text {
+    position: absolute;
+    max-width: 320px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    white-space: pre-line;
+}
 
 .onboarding-step-arrow-label {
     position: absolute;

@@ -2743,6 +2743,19 @@ function buildOnboardingSegments(steps) {
      return Math.min(Math.max(value, min), max);
  }
 
+ function formatOnboardingText(raw) {
+    if (raw === null || raw === undefined) {
+        return '';
+    }
+
+    const str = String(raw);
+    if (!str.includes('*')) {
+        return str;
+    }
+
+    return str.replace(/\*/g, '\n');
+ }
+
  function addOnboardingCallout(svg, overlay, targetOrX, yMaybe, textMaybe) {
     let targetPoint = null;
     let text = '';
@@ -2751,10 +2764,10 @@ function buildOnboardingSegments(steps) {
 
     if (typeof targetOrX === 'number' && typeof yMaybe === 'number') {
         targetPoint = { x: targetOrX, y: yMaybe };
-        text = textMaybe ?? '';
+        text = formatOnboardingText(textMaybe);
     } else {
         targetEl = resolveOnboardingTargetElement(targetOrX);
-        text = yMaybe ?? '';
+        text = formatOnboardingText(yMaybe);
 
         if (targetEl) {
             const { rect } = getHighlightTargetWithRect(targetEl);
@@ -2794,7 +2807,7 @@ function buildOnboardingSegments(steps) {
      measure.style.top = '0px';
      measure.style.visibility = 'hidden';
      measure.style.maxWidth = `${Math.max(140, vw - margin * 2)}px`;
-     measure.textContent = String(text ?? '');
+     measure.textContent = text;
      overlay.appendChild(measure);
 
      const rect = measure.getBoundingClientRect();
@@ -2976,88 +2989,98 @@ function resolveTargetElement(identifier) {
      }
 
      const inputMatch = findInputElementMatchingNeedle(needle);
-     if (inputMatch) {
-         return inputMatch;
-     }
 
-     const divCandidates = Array.from(document.querySelectorAll('div'));
-     for (const candidate of divCandidates) {
-         const text = (candidate.innerText || candidate.textContent || '').trim();
-         const hay = text.toLowerCase();
-         if (hay === needle || hay.includes(needle)) {
-             return candidate;
-         }
-     }
+    const divCandidates = Array.from(document.querySelectorAll('div'));
+    for (const candidate of divCandidates) {
+        const text = (candidate.innerText || candidate.textContent || '').trim();
+        const hay = text.toLowerCase();
+        if (hay === needle || hay.includes(needle)) {
+            return candidate;
+        }
+    }
 
-     return null;
- }
+    const spanCandidates = Array.from(document.querySelectorAll('span'));
+    for (const candidate of spanCandidates) {
+        const text = (candidate.innerText || candidate.textContent || '').trim();
+        const hay = text.toLowerCase();
+        if (hay === needle || hay.includes(needle)) {
+            return candidate;
+        }
+    }
 
- function resolveOnboardingTargetElement(identifier) {
-     if (identifier === null || identifier === undefined) {
-         return null;
-     }
+    return null;
+}
 
-     let mode = null;
-     let raw = identifier;
-     if (Array.isArray(identifier) && identifier.length >= 2) {
-         raw = identifier[0];
-         mode = Number(identifier[1]);
-     }
+function resolveOnboardingTargetElement(identifier) {
+    if (identifier === null || identifier === undefined) {
+        return null;
+    }
 
-     const asString = String(raw).trim();
-     if (!asString) {
-         return null;
-     }
+    let mode = null;
+    let raw = identifier;
+    if (Array.isArray(identifier) && identifier.length >= 2) {
+        raw = identifier[0];
+        mode = Number(identifier[1]);
+    }
 
-     if (mode === 1) {
-         return document.getElementById(asString);
-     }
+    const asString = String(raw).trim();
+    if (!asString) {
+        return null;
+    }
 
-     if (mode !== 0) {
-         const byId = document.getElementById(asString);
-         if (byId) {
-             return byId;
-         }
-     }
+    if (mode === 1) {
+        return document.getElementById(asString);
+    }
 
-     const needle = asString.toLowerCase();
+    if (mode !== 0) {
+        const byId = document.getElementById(asString);
+        if (byId) {
+            return byId;
+        }
+    }
 
-     const buttonCandidates = Array.from(document.querySelectorAll('button, a, [role="button"], input[type="button"], input[type="submit"]'));
-     for (const candidate of buttonCandidates) {
-         const text = (candidate.innerText || candidate.value || candidate.textContent || '').trim();
-         const hay = text.toLowerCase();
-         if (hay === needle || hay.includes(needle)) {
-             return candidate;
-         }
-     }
+    const needle = asString.toLowerCase();
 
-     const inputMatch = findInputElementMatchingNeedle(needle);
-     if (inputMatch) {
-         return inputMatch;
-     }
+    const buttonCandidates = Array.from(document.querySelectorAll('button, a, [role="button"], input[type="button"], input[type="submit"]'));
+    for (const candidate of buttonCandidates) {
+        const text = (candidate.innerText || candidate.value || candidate.textContent || '').trim();
+        const hay = text.toLowerCase();
+        if (hay === needle || hay.includes(needle)) {
+            return candidate;
+        }
+    }
 
-     const paragraphs = Array.from(document.querySelectorAll('p'));
-     for (const paragraph of paragraphs) {
-         const content = (paragraph.innerHTML || '').trim();
-         const hay = content.toLowerCase();
-         if (hay === needle || hay.includes(needle)) {
-             return paragraph;
-         }
-     }
+    const inputMatch = findInputElementMatchingNeedle(needle);
+    if (inputMatch) {
+        return inputMatch;
+    }
 
-     const divCandidates = Array.from(document.querySelectorAll('div'));
-     for (const candidate of divCandidates) {
-         const text = (candidate.innerText || candidate.textContent || '').trim();
-         const hay = text.toLowerCase();
-         if (hay === needle || hay.includes(needle)) {
-             return candidate;
-         }
-     }
+    const paragraphs = Array.from(document.querySelectorAll('p'));
+    for (const paragraph of paragraphs) {
+        const content = (paragraph.innerHTML || '').trim();
+        const hay = content.toLowerCase();
+        if (hay === needle || hay.includes(needle)) {
+            return paragraph;
+        }
+    }
 
-     return null;
- }
+    const spanCandidates = Array.from(document.querySelectorAll('span'));
+    for (const candidate of spanCandidates) {
+        const text = (candidate.innerText || candidate.textContent || '').trim();
+        const hay = text.toLowerCase();
+        if (hay === needle || hay.includes(needle)) {
+            return candidate;
+        }
+    }
 
- function getElementCenterPoint(el) {
+    const divCandidates = Array.from(document.querySelectorAll('div'));
+    for (const candidate of divCandidates) {
+        const text = (candidate.innerText || candidate.textContent || '').trim();
+        const hay = text.toLowerCase();
+        if (hay === needle || hay.includes(needle)) {
+            return candidate;
+        }
+    }
      if (!el || !el.getBoundingClientRect) {
          return null;
      }
@@ -3223,7 +3246,8 @@ function getEllipseBoundaryPoint(centerPoint, towardsPoint, targetRect) {
 
      const highlightElements = [
         ...Array.from(document.querySelectorAll('p')),
-        ...Array.from(document.querySelectorAll('div'))
+        ...Array.from(document.querySelectorAll('div')),
+        ...Array.from(document.querySelectorAll('span'))
     ];
 
     highlightElements.forEach(element => {
@@ -3378,6 +3402,24 @@ function getEllipseBoundaryPoint(centerPoint, towardsPoint, targetRect) {
             ['timedSpotlight', ['researchRate', 1], 'You can switch on and off many items in the game and when off they wont produce, but wont consume energy', 3000],
             ['spotlight', ['scienceKitToggle', 1], 'Turn the Science Kit toggle back on', { waitForClick: false }],
             ['condition', ['scienceKitToggle', 1], ['computed', 'researchRatePerTick'], 0, 'gt'],
+            ['spotlight', ['tab1', 1], 'Return to the Resources Tab', { waitForElementTarget: ['Hydrogen', 0], waitForElementTimeout: 4000 }],
+            ['timedSpotlight', ['hydrogenQuantity', 1], 'Eventually your storage will fill up, and you will need to expand it.', 3000],
+            ['spotlight', ['Increase storage', 0], 'Click the Increase Storage Button when storage full.'],
+            ['timedSpotlight', ['hydrogenQuantity', 1], 'It cost you all your Hydrogen but now you can store double.', 3000],
+            ['timedSpotlight', ['Gain', 0], 'Feel free to click Gain to help your Auto Buyer along.', 3000],
+            ['condition', ['hydrogenQuantity', 1], ['resources', 'hydrogen', 'quantity'], 300],
+            ['spotlight', ['Sell', 0], 'Click the Sell Button.'],
+            ['timedSpotlight', ['cashStat', 1], 'Your Cash is shown here.', 3000],
+            ['spotlight', ['tab3', 1], "Let's return to the Research Tab"],
+            ['spotlight', ['Technology', 0], 'Click Technology'],
+            ['timedSpotlight', ['Tech Tree', 0], 'here you can see and select technologies to Research.', 3000],
+            ['spotlight', ['Tech Tree', 0], 'Click Tech Tree'],
+            ['timedSpotlight', ['Tech Tree', 0], 'Here you see a graphical representation of techs. * It will grow out as you continue progression in the game.', 4000],
+            ['spotlight', ['Technology', 0], 'Return to the Technology Option'],
+            ['spotlight', ['RESEARCH', 0], 'When you have 150 Research, click Research on Knowledge Sharing'],
+            ['spotlight', ['researchOption', 1], 'Click Research'],
+            ['spotlight', ['Add 8 Research /s', 0], 'Once you save up more Cash you can now buy a Science Club * You will Research much faster!'],
+
         ]);
     }
 
