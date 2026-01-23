@@ -3460,7 +3460,6 @@ function getEllipseBoundaryPoint(centerPoint, towardsPoint, targetRect) {
              false,
              () => {
                  setOnboardingMode(false);
-                 console.log('Onboarding mode disabled');
                  resetOnboardingProgression();
                  showHideModal();
              },
@@ -3489,7 +3488,6 @@ function getEllipseBoundaryPoint(centerPoint, towardsPoint, targetRect) {
      if (currentSegment.waitForElementTarget) {
          const el = resolveOnboardingTargetElement(currentSegment.waitForElementTarget);
          if (el) {
-             console.log('Onboarding waitForElement target found:', currentSegment.waitForElementTarget);
              onboardingSegmentIndex += 1;
              onboardingRenderDirty = true;
              cleanupOnboardingClickListener();
@@ -11092,7 +11090,6 @@ function handleBlackHoleDiscoveryRoll() {
     }
     
     const currentProbability = getBlackHoleDiscoveryProbability();
-    console.log(`[Black Hole] Current discovery probability: ${currentProbability}%`);
 
     const updatedProbability = Math.min(100, getBlackHoleDiscoveryProbability() + 3);
     setBlackHoleDiscoveryProbability(updatedProbability);

@@ -4298,13 +4298,11 @@ async function promptOnboardingIfNeeded() {
             false,
             () => {
                 setOnboardingMode(true);
-                console.log('We are in onboarding mode');
                 showHideModal();
                 resolve();
             },
             () => {
                 setOnboardingMode(false);
-                console.log('Onboarding skipped');
                 showHideModal();
                 resolve();
             },
