@@ -2595,7 +2595,35 @@ export function setAsteroidSearchEfficiencyAfterRepeatables() {
  let onboardingClickHandler = null;
  let lastOnboardingRenderMs = 0;
  let onboardingRenderDirty = true;
+ let onboardingExitButton = null;
  const ONBOARDING_HIGHLIGHT_PADDING = 5;
+
+ function ensureOnboardingExitButton() {
+    if (onboardingExitButton && document.body.contains(onboardingExitButton)) {
+        return onboardingExitButton;
+    }
+
+    const button = document.getElementById('onboardingExitButton') || document.createElement('button');
+    button.id = 'onboardingExitButton';
+    button.type = 'button';
+    button.textContent = 'Exit Onboarding';
+    button.className = 'option-button onboarding-exit-button';
+
+    if (!button.dataset.onboardingExitHandlerAttached) {
+        button.dataset.onboardingExitHandlerAttached = 'true';
+        button.addEventListener('click', () => {
+            setOnboardingMode(false);
+            resetOnboardingProgression();
+        });
+    }
+
+    if (!document.body.contains(button)) {
+        document.body.appendChild(button);
+    }
+
+    onboardingExitButton = button;
+    return onboardingExitButton;
+}
 
  function cleanupOnboardingClickListener() {
      if (onboardingClickTargetEl && onboardingClickHandler) {
@@ -2611,12 +2639,55 @@ export function setAsteroidSearchEfficiencyAfterRepeatables() {
     onboardingAwaitingCompletionConfirm = false;
     onboardingSegments = null;
     cleanupOnboardingClickListener();
- }
+}
+
+function isOnboardingTabSatisfied(requiredTab) {
+    if (!requiredTab) {
+        return true;
+    }
+
+    const current = (getCurrentTab?.()?.[1] ?? '').toString().trim().toLowerCase();
+    const desired = String(requiredTab).trim().toLowerCase();
+    if (!current || !desired) {
+        return true;
+    }
+
+    return current === desired;
+}
+
+function getRequiredTabForSegment(segment) {
+    if (!segment || !Array.isArray(segment.items)) {
+        return null;
+    }
+
+    for (const step of segment.items) {
+        if (!Array.isArray(step) || step.length === 0) {
+            continue;
+        }
+
+        const type = step[0];
+        if (type === 'callout') {
+            if (typeof step[1] === 'number' && typeof step[2] === 'number') {
+                if (typeof step[4] === 'string') {
+                    return step[4];
+                }
+            } else if (typeof step[3] === 'string') {
+                return step[3];
+            }
+        }
+
+        if ((type === 'buttonOverlay' || type === 'divOverlay') && typeof step[2] === 'string') {
+            return step[2];
+        }
+    }
+
+    return null;
+}
 
  function normalizeOnboardingSteps(steps) {
-    if (!Array.isArray(steps)) {
-        return [];
-    }
+   if (!Array.isArray(steps)) {
+       return [];
+   }
 
     const normalized = [];
 
@@ -2627,19 +2698,42 @@ export function setAsteroidSearchEfficiencyAfterRepeatables() {
         }
 
         if (step[0] === 'spotlight') {
-            const [, targetSpec, message, rawOptions] = step;
+            const [, targetSpec, message] = step;
+            let rawOptions = null;
+            let requiredTab = null;
+            if (step.length >= 5 && typeof step[4] === 'string') {
+                rawOptions = step[3];
+                requiredTab = step[4];
+            } else if (step.length >= 4 && typeof step[3] === 'string') {
+                requiredTab = step[3];
+            } else {
+                rawOptions = step[3];
+            }
+
             const options = (rawOptions && typeof rawOptions === 'object') ? rawOptions : {};
             const highlightMode = options.highlightMode === 'div' ? 'div' : (options.highlightMode === 'none' ? 'none' : 'button');
             const waitForClick = options.waitForClick !== false;
 
             if (message !== undefined && message !== null) {
-                normalized.push(['callout', targetSpec, message]);
+                if (requiredTab) {
+                    normalized.push(['callout', targetSpec, message, requiredTab]);
+                } else {
+                    normalized.push(['callout', targetSpec, message]);
+                }
             }
 
             if (highlightMode === 'div') {
-                normalized.push(['divOverlay', targetSpec]);
+                if (requiredTab) {
+                    normalized.push(['divOverlay', targetSpec, requiredTab]);
+                } else {
+                    normalized.push(['divOverlay', targetSpec]);
+                }
             } else if (highlightMode === 'button') {
-                normalized.push(['buttonOverlay', targetSpec]);
+                if (requiredTab) {
+                    normalized.push(['buttonOverlay', targetSpec, requiredTab]);
+                } else {
+                    normalized.push(['buttonOverlay', targetSpec]);
+                }
             }
 
             if (waitForClick) {
@@ -2650,19 +2744,42 @@ export function setAsteroidSearchEfficiencyAfterRepeatables() {
         }
 
         if (step[0] === 'timedSpotlight') {
-            const [, targetSpec, message, msRaw, rawOptions] = step;
+            const [, targetSpec, message, msRaw] = step;
+            let rawOptions = null;
+            let requiredTab = null;
+            if (step.length >= 6 && typeof step[5] === 'string') {
+                rawOptions = step[4];
+                requiredTab = step[5];
+            } else if (step.length >= 5 && typeof step[4] === 'string') {
+                requiredTab = step[4];
+            } else {
+                rawOptions = step[4];
+            }
+
             const options = (rawOptions && typeof rawOptions === 'object') ? rawOptions : {};
             const highlightMode = options.highlightMode === 'div' ? 'div' : (options.highlightMode === 'none' ? 'none' : 'button');
             const waitMs = Math.max(0, Number(msRaw) || 0);
 
             if (message !== undefined && message !== null) {
-                normalized.push(['callout', targetSpec, message]);
+                if (requiredTab) {
+                    normalized.push(['callout', targetSpec, message, requiredTab]);
+                } else {
+                    normalized.push(['callout', targetSpec, message]);
+                }
             }
 
             if (highlightMode === 'div') {
-                normalized.push(['divOverlay', targetSpec]);
+                if (requiredTab) {
+                    normalized.push(['divOverlay', targetSpec, requiredTab]);
+                } else {
+                    normalized.push(['divOverlay', targetSpec]);
+                }
             } else if (highlightMode === 'button') {
-                normalized.push(['buttonOverlay', targetSpec]);
+                if (requiredTab) {
+                    normalized.push(['buttonOverlay', targetSpec, requiredTab]);
+                } else {
+                    normalized.push(['buttonOverlay', targetSpec]);
+                }
             }
 
             normalized.push(['waitForMs', waitMs]);
@@ -2735,7 +2852,12 @@ function buildOnboardingSegments(steps) {
 
  function clearOnboardingOverlay(overlay) {
      while (overlay.firstChild) {
-         overlay.removeChild(overlay.firstChild);
+         const child = overlay.firstChild;
+         if (child && child.id === 'onboardingExitButton') {
+             overlay.removeChild(child);
+             continue;
+         }
+         overlay.removeChild(child);
      }
  }
 
@@ -3096,14 +3218,18 @@ function resolveOnboardingTargetElement(identifier) {
      };
  }
 
- function addOnboardingTextBlock(overlay, x, y, text) {
-     const el = document.createElement('div');
-     el.className = 'onboarding-step-text';
-     el.style.left = `${Number(x) || 0}px`;
-     el.style.top = `${Number(y) || 0}px`;
-     el.textContent = text ?? '';
-     overlay.appendChild(el);
- }
+ function addOnboardingTextBlock(overlay, x, y, text, className = 'onboarding-step-text') {
+    const el = document.createElement('div');
+    el.className = className;
+
+    if (Number.isFinite(Number(x)) && Number.isFinite(Number(y)) && className === 'onboarding-step-text') {
+        el.style.left = `${Number(x) || 0}px`;
+        el.style.top = `${Number(y) || 0}px`;
+    }
+
+    el.textContent = text ?? '';
+    overlay.appendChild(el);
+}
 
  function computeArrowTail(x, y, facing, length = 90) {
      const fx = Number(x) || 0;
@@ -3225,7 +3351,7 @@ function getEllipseBoundaryPoint(centerPoint, towardsPoint, targetRect) {
     createEllipseHighlight(overlay, rect);
 }
 
- function addOnboardingDivOverlay(overlay, label) {
+ function addOnboardingDivOverlay(overlay, label, requiredTab) {
      if (Array.isArray(label) && Number(label[1]) === 1) {
          const el = resolveOnboardingTargetElement(label);
          const rect = el?.getBoundingClientRect?.();
@@ -3320,11 +3446,23 @@ function getEllipseBoundaryPoint(centerPoint, towardsPoint, targetRect) {
     }
 }
 
- function renderOnboardingSteps(overlay, steps) {
+ function renderOnboardingSteps(overlay, steps, requiredTab = null) {
      clearOnboardingOverlay(overlay);
 
      const svg = createOnboardingSvgLayer();
      overlay.appendChild(svg);
+
+     if (!isOnboardingTabSatisfied(requiredTab)) {
+        const tabLabel = requiredTab ? String(requiredTab).trim() : 'required';
+        addOnboardingTextBlock(
+            overlay,
+            null,
+            null,
+            `Please return to the ${tabLabel} tab or exit Onboarding Mode`,
+            'onboarding-tab-warning'
+        );
+        return;
+    }
 
      for (const step of steps) {
          if (!Array.isArray(step) || step.length === 0) {
@@ -3357,7 +3495,7 @@ function getEllipseBoundaryPoint(centerPoint, towardsPoint, targetRect) {
          } else if (type === 'buttonOverlay') {
              addOnboardingButtonHighlight(overlay, step[1]);
          } else if (type === 'divOverlay') {
-             addOnboardingDivOverlay(overlay, step[1]);
+             addOnboardingDivOverlay(overlay, step[1], requiredTab);
          } else if (type === 'waitForClick') {
              continue;
          } else if (type === 'condition') {
@@ -3372,8 +3510,11 @@ function getEllipseBoundaryPoint(centerPoint, towardsPoint, targetRect) {
          return;
      }
 
+     const exitButton = ensureOnboardingExitButton();
+
      if (!getOnboardingMode()) {
          overlay.style.display = 'none';
+         exitButton.style.display = 'none';
          onboardingRenderDirty = true;
          resetOnboardingProgression();
          return;
@@ -3381,62 +3522,66 @@ function getEllipseBoundaryPoint(centerPoint, towardsPoint, targetRect) {
 
      if (onboardingAwaitingCompletionConfirm) {
          overlay.style.display = 'none';
+         exitButton.style.display = 'none';
          return;
      }
 
      overlay.style.display = 'block';
+     exitButton.style.display = 'flex';
+     exitButton.style.justifyContent = 'center';
+     exitButton.style.alignItems = 'center';
 
      if (!onboardingSteps) {
-        setOnboardingSteps([
-            ['spotlight', ['Hydrogen', 0], 'Click the Hydrogen Option', { highlightMode: 'div' }],
-            ['spotlight', ['Gain', 0], 'Click the Gain button'],
-            ['spotlight', ['hydrogenQuantity', 1], 'Continue clicking Gain until you have 50 Hydrogen', { waitForClick: false }],
+      setOnboardingSteps([
+            ['spotlight', ['Hydrogen', 0], 'Click the Hydrogen Option', { highlightMode: 'div' }, 'Resources'],
+            ['spotlight', ['Gain', 0], 'Click the Gain button', 'Resources'],
+            ['spotlight', ['hydrogenQuantity', 1], 'Continue clicking Gain until you have 50 Hydrogen', { waitForClick: false }, 'Resources'],
             ['condition', ['hydrogenQuantity', 1], ['resources', 'hydrogen', 'quantity'], 50],
-            ['spotlight', ['Add 2 Hydrogen /s', 0], 'Buy a Hydrogen AutoBuyer'],
-            ['spotlight', ['tab3', 1], 'Click the Research Tab', { waitForElementTarget: ['Research', 0], waitForElementTimeout: 4000 }],
-            ['spotlight', ['researchOption', 1], 'Click Research', { highlightMode: 'div' }],
-            ['spotlight', ['Add 0.5 Research /s', 0], 'Buy 3 Science Kits', { waitForClick: false }],
+            ['spotlight', ['Add 2 Hydrogen /s', 0], 'Buy a Hydrogen AutoBuyer', 'Resources'],
+            ['spotlight', ['tab3', 1], 'Click the Research Tab', { waitForElementTarget: ['Research', 0], waitForElementTimeout: 4000 }, 'Resources'],
+            ['spotlight', ['researchOption', 1], 'Click Research', { highlightMode: 'div' }, 'Research'],
+            ['spotlight', ['Add 0.5 Research /s', 0], 'Buy 3 Science Kits', { waitForClick: false }, 'Research'],
             ['condition', ['Add 0.5 Research /s', 0], ['research', 'upgrades', 'scienceKit', 'quantity'], 3],
-            ['spotlight', ['scienceKitToggle', 1], 'Turn off the Science Kit toggle', { waitForClick: false }],
+            ['spotlight', ['scienceKitToggle', 1], 'Turn off the Science Kit toggle', { waitForClick: false }, 'Research'],
             ['condition', ['scienceKitToggle', 1], ['computed', 'researchRatePerTick'], 0, 'eq'],
-            ['timedSpotlight', ['researchRate', 1], 'You can switch on and off many items in the game and when off they wont produce*but wont consume energy', 4000],
-            ['spotlight', ['scienceKitToggle', 1], 'Turn the Science Kit toggle back on', { waitForClick: false }],
+            ['timedSpotlight', ['researchRate', 1], 'You can switch on and off many items in the game and when off they wont produce*but wont consume energy', 4000, 'Research'],
+            ['spotlight', ['scienceKitToggle', 1], 'Turn the Science Kit toggle back on', { waitForClick: false }, 'Research'],
             ['condition', ['scienceKitToggle', 1], ['computed', 'researchRatePerTick'], 0, 'gt'],
-            ['spotlight', ['tab1', 1], 'Return to the Resources Tab', { waitForElementTarget: ['Hydrogen', 0], waitForElementTimeout: 4000 }],
-            ['timedSpotlight', ['hydrogenQuantity', 1], 'Eventually your storage will fill up*and you will need to expand it.', 4000],
-            ['spotlight', ['Increase storage', 0], 'Click the Increase Storage Button when storage full.'],
-            ['timedSpotlight', ['hydrogenQuantity', 1], 'It cost you all your Hydrogen but now you can store double.', 3000],
-            ['timedSpotlight', ['Gain', 0], 'Feel free to click Gain to help your Auto Buyer along.', 3000],
+            ['spotlight', ['tab1', 1], 'Return to the Resources Tab', { waitForElementTarget: ['Hydrogen', 0], waitForElementTimeout: 4000 }, 'Research'],
+            ['timedSpotlight', ['hydrogenQuantity', 1], 'Eventually your storage will fill up*and you will need to expand it.', 4000, 'Resources'],
+            ['spotlight', ['Increase storage', 0], 'Click the Increase Storage Button when storage full.', 'Resources'],
+            ['timedSpotlight', ['hydrogenQuantity', 1], 'It cost you all your Hydrogen but now you can store double.', 3000, 'Resources'],
+            ['timedSpotlight', ['Gain', 0], 'Feel free to click Gain to help your Auto Buyer along.', 3000, 'Resources'],
             ['condition', ['hydrogenQuantity', 1], ['resources', 'hydrogen', 'quantity'], 300],
-            ['spotlight', ['Sell', 0], 'Click the Sell Button.'],
-            ['timedSpotlight', ['cashStat', 1], 'Your Cash is shown here.', 3000],
-            ['spotlight', ['tab3', 1], "Let's return to the Research Tab"],
-            ['spotlight', ['Technology', 0], 'Click Technology'],
-            ['timedSpotlight', ['Technology', 0], 'Here you can see and select technologies to Research.', 3000],
-            ['spotlight', ['Tech Tree', 0], 'Click Tech Tree'],
-            ['timedSpotlight', ['Tech Tree', 0], 'Here you see a graphical representation of techs. * It will grow out as you continue progression in the game.', 4000],
-            ['spotlight', ['Technology', 0], 'Return to the Technology Option'],
-            ['spotlight', ['RESEARCH', 0], 'When you have 150 Research, click Research on Knowledge Sharing'],
-            ['spotlight', ['researchOption', 1], 'Click Research'],
-            ['timedSpotlight', ['Add 8 Research /s', 0], 'Once you save up more Cash you can buy a Science Club * You will Research much faster!', 4000],
-            ['spotlight', ['tab8', 1], 'Next we will take a look at the Settings Tab.'],
-            ['spotlight', ['Visual', 0], 'While we are here, lets change the look and feel.'],
-            ['timedSpotlight', ['themeSelect', 1], 'In this menu you can customise the look and feel of the game.*Scroll down to find Themes.', 4000],
-            ['spotlight', ['themeSelect', 1], 'Click the Dropdown'],
-            ['spotlight', ['themeSelect', 1], 'Select Dark'],
-            ['spotlight', ['Game Options', 0], 'Now Click Game Options'],
-            ['spotlight', ['backGroundAudioToggle', 1], 'Click the Background Ambience Option toggle switch'],
-            ['timedSpotlight', ['backGroundAudioToggle', 1], 'There, some ambience!* Now I will show you the help file * so you can learn more about the game and really enjoy it!', 4000],
-            ['spotlight', ['Cosmicopedia', 0], 'Click Cosmicopedia'],
-            ['timedSpotlight', ['Get Started', 0], 'Get Started will go over the steps you performed in*this tutorial', 4000],
-            ['timedSpotlight', ['Story', 0], 'Story gives you the background and lore around the game', 4000],
-            ['spotlight', ['Concepts - Early', 0], "Click 'Concepts - Early'"],
-            ['spotlight', ['Concepts - Mid', 0], "When you are done Click 'Concepts - Mid Game'"],
-            ['spotlight', ['Concepts - Late', 0], "When you are done Click 'Concepts - Late'"],
-            ['timedSpotlight', ['Concepts - Late', 0], 'This is all the background you need!  One last thing before I leave * you to explore and Forge!', 4000],
-            ['spotlight', ['Saving / Loading', 0], "Click 'Saving / Loading'"],
-            ['spotlight', ['autoSaveToggle', 1], 'Click The Autosave Toggle Switch'],
-            ['timedSpotlight', ['autoSaveToggle', 1], "You game will now save periodocally*Thats it!  Go forth and Forge, Mia'Plac!", 7000],
+            ['spotlight', ['Sell', 0], 'Click the Sell Button.', 'Resources'],
+            ['timedSpotlight', ['cashStat', 1], 'Your Cash is shown here.', 3000, 'Resources'],
+            ['spotlight', ['tab3', 1], "Let's return to the Research Tab", 'Resources'],
+            ['spotlight', ['Technology', 0], 'Click Technology', 'Research'],
+            ['timedSpotlight', ['Technology', 0], 'Here you can see and select technologies to Research.', 3000, 'Research'],
+            ['spotlight', ['Tech Tree', 0], 'Click Tech Tree', 'Research'],
+            ['timedSpotlight', ['Tech Tree', 0], 'Here you see a graphical representation of techs. * It will grow out as you continue progression in the game.', 4000, 'Research'],
+            ['spotlight', ['Technology', 0], 'Return to the Technology Option', 'Research'],
+            ['spotlight', ['RESEARCH', 0], 'When you have 150 Research, click Research on Knowledge Sharing', 'Research'],
+            ['spotlight', ['researchOption', 1], 'Click Research', 'Research'],
+            ['timedSpotlight', ['Add 8 Research /s', 0], 'Once you save up more Cash you can buy a Science Club * You will Research much faster!', 4000, 'Research'],
+            ['spotlight', ['tab8', 1], 'Next we will take a look at the Settings Tab.', 'Research'],
+            ['spotlight', ['Visual', 0], 'While we are here, lets change the look and feel.', 'Settings'],
+            ['timedSpotlight', ['themeSelect', 1], 'In this menu you can customise the look and feel of the game.*Scroll down to find Themes.', 4000, 'Settings'],
+            ['spotlight', ['themeSelect', 1], 'Click the Dropdown', 'Settings'],
+            ['spotlight', ['themeSelect', 1], 'Select Dark', 'Settings'],
+            ['spotlight', ['Game Options', 0], 'Now Click Game Options', 'Settings'],
+            ['spotlight', ['backGroundAudioToggle', 1], 'Click the Background Ambience Option toggle switch', 'Settings'],
+            ['timedSpotlight', ['backGroundAudioToggle', 1], 'There, some ambience!* Now I will show you the help file * so you can learn more about the game and really enjoy it!', 4000, 'Settings'],
+            ['spotlight', ['Cosmicopedia', 0], 'Click Cosmicopedia', 'Settings'],
+            ['timedSpotlight', ['Get Started', 0], 'Get Started will go over the steps you performed in*this tutorial', 4000, 'Settings'],
+            ['timedSpotlight', ['Story', 0], 'Story gives you the background and lore around the game', 4000, 'Settings'],
+            ['spotlight', ['Concepts - Early', 0], "Click 'Concepts - Early'", 'Settings'],
+            ['spotlight', ['Concepts - Mid', 0], "When you are done Click 'Concepts - Mid Game'", 'Settings'],
+            ['spotlight', ['Concepts - Late', 0], "When you are done Click 'Concepts - Late'", 'Settings'],
+            ['timedSpotlight', ['Concepts - Late', 0], 'This is all the background you need!  One last thing before I leave * you to explore and Forge!', 4000, 'Settings'],
+            ['spotlight', ['Saving / Loading', 0], "Click 'Saving / Loading'", 'Settings'],
+            ['spotlight', ['autoSaveToggle', 1], 'Click The Autosave Toggle Switch', 'Settings'],
+            ['timedSpotlight', ['autoSaveToggle', 1], "You game will now save periodocally*Thats it!  Go forth and Forge, Mia'Plac!", 7000, 'Settings'],
         ]);
     }
 
@@ -3445,104 +3590,119 @@ function getEllipseBoundaryPoint(centerPoint, towardsPoint, targetRect) {
          onboardingSegmentIndex = 0;
      }
 
-     const currentSegment = onboardingSegments[onboardingSegmentIndex];
-     if (!currentSegment) {
-         onboardingAwaitingCompletionConfirm = true;
-         cleanupOnboardingClickListener();
-         overlay.style.display = 'none';
+    const currentSegment = onboardingSegments[onboardingSegmentIndex];
+    if (!currentSegment) {
+        onboardingAwaitingCompletionConfirm = true;
+        cleanupOnboardingClickListener();
+        overlay.style.display = 'none';
 
-         callPopupModal(
-             'ONBOARDING COMPLETE',
-             'Onboarding is over.',
-             true,
-             false,
-             false,
-             false,
-             () => {
-                 setOnboardingMode(false);
-                 resetOnboardingProgression();
-                 showHideModal();
-             },
-             null,
-             null,
-             null,
-             'CONTINUE',
-             null,
-             null,
-             null,
-             false
-         );
+        callPopupModal(
+            'ONBOARDING COMPLETE',
+            'Onboarding is over.',
+            true,
+            false,
+            false,
+            false,
+            () => {
+                setOnboardingMode(false);
+                resetOnboardingProgression();
+                showHideModal();
+            },
+            null,
+            null,
+            null,
+            'CONTINUE',
+            null,
+            null,
+            null,
+            false
+        );
 
-         return;
-     }
+        return;
+    }
 
-     if (currentSegment.condition) {
-         if (checkOnboardingCondition(currentSegment.condition)) {
-             onboardingSegmentIndex += 1;
-             onboardingRenderDirty = true;
-             cleanupOnboardingClickListener();
-             return;
-         }
-     }
+    const requiredTab = getRequiredTabForSegment(currentSegment);
+    const tabSatisfied = isOnboardingTabSatisfied(requiredTab);
+    if (!tabSatisfied) {
+        currentSegment.waitDeadline = null;
+        cleanupOnboardingClickListener();
 
-     if (currentSegment.waitForElementTarget) {
-         const el = resolveOnboardingTargetElement(currentSegment.waitForElementTarget);
-         if (el) {
-             onboardingSegmentIndex += 1;
-             onboardingRenderDirty = true;
-             cleanupOnboardingClickListener();
-             return;
-         }
+        const now = Date.now();
+        if (onboardingRenderDirty || now - lastOnboardingRenderMs > 150) {
+            renderOnboardingSteps(overlay, currentSegment.items, requiredTab);
+            lastOnboardingRenderMs = now;
+            onboardingRenderDirty = false;
+        }
+        return;
+    }
 
-         if (currentSegment.waitForElementTimeout > 0) {
-             if (!currentSegment.waitDeadline) {
-                 currentSegment.waitDeadline = Date.now() + currentSegment.waitForElementTimeout;
-             } else if (Date.now() >= currentSegment.waitDeadline) {
-                 onboardingSegmentIndex += 1;
-                 onboardingRenderDirty = true;
-                 cleanupOnboardingClickListener();
-                 return;
-             }
-         }
-     }
+    if (currentSegment.condition) {
+        if (checkOnboardingCondition(currentSegment.condition)) {
+            onboardingSegmentIndex += 1;
+            onboardingRenderDirty = true;
+            cleanupOnboardingClickListener();
+            return;
+        }
+    }
 
-     if (currentSegment.waitForMs > 0 && !currentSegment.waitForClickTarget) {
-         if (!currentSegment.waitDeadline) {
-             currentSegment.waitDeadline = Date.now() + currentSegment.waitForMs;
-         } else if (Date.now() >= currentSegment.waitDeadline) {
-             onboardingSegmentIndex += 1;
-             onboardingRenderDirty = true;
-             cleanupOnboardingClickListener();
-             return;
-         }
-     }
+    if (currentSegment.waitForElementTarget) {
+        const el = resolveOnboardingTargetElement(currentSegment.waitForElementTarget);
+        if (el) {
+            onboardingSegmentIndex += 1;
+            onboardingRenderDirty = true;
+            cleanupOnboardingClickListener();
+            return;
+        }
 
-     if (currentSegment.waitForClickTarget) {
-         const desiredTargetEl = resolveOnboardingTargetElement(currentSegment.waitForClickTarget);
+        if (currentSegment.waitForElementTimeout > 0) {
+            if (!currentSegment.waitDeadline) {
+                currentSegment.waitDeadline = Date.now() + currentSegment.waitForElementTimeout;
+            } else if (Date.now() >= currentSegment.waitDeadline) {
+                onboardingSegmentIndex += 1;
+                onboardingRenderDirty = true;
+                cleanupOnboardingClickListener();
+                return;
+            }
+        }
+    }
 
-         if (!desiredTargetEl) {
-             cleanupOnboardingClickListener();
-         } else if (onboardingClickTargetEl !== desiredTargetEl) {
-             cleanupOnboardingClickListener();
-             onboardingClickTargetEl = desiredTargetEl;
-             onboardingClickHandler = () => {
-                 onboardingSegmentIndex += 1;
-                 onboardingRenderDirty = true;
-                 cleanupOnboardingClickListener();
-             };
-             onboardingClickTargetEl.addEventListener('click', onboardingClickHandler, true);
-         }
-     } else {
-         cleanupOnboardingClickListener();
-     }
+    if (currentSegment.waitForMs > 0 && !currentSegment.waitForClickTarget) {
+        if (!currentSegment.waitDeadline) {
+            currentSegment.waitDeadline = Date.now() + currentSegment.waitForMs;
+        } else if (Date.now() >= currentSegment.waitDeadline) {
+            onboardingSegmentIndex += 1;
+            onboardingRenderDirty = true;
+            cleanupOnboardingClickListener();
+            return;
+        }
+    }
 
-     const now = Date.now();
-     if (onboardingRenderDirty || now - lastOnboardingRenderMs > 150) {
-         renderOnboardingSteps(overlay, currentSegment.items);
-         lastOnboardingRenderMs = now;
-         onboardingRenderDirty = false;
-     }
- }
+    if (currentSegment.waitForClickTarget) {
+        const desiredTargetEl = resolveOnboardingTargetElement(currentSegment.waitForClickTarget);
+
+        if (!desiredTargetEl) {
+            cleanupOnboardingClickListener();
+        } else if (onboardingClickTargetEl !== desiredTargetEl) {
+            cleanupOnboardingClickListener();
+            onboardingClickTargetEl = desiredTargetEl;
+            onboardingClickHandler = () => {
+                onboardingSegmentIndex += 1;
+                onboardingRenderDirty = true;
+                cleanupOnboardingClickListener();
+            };
+            onboardingClickTargetEl.addEventListener('click', onboardingClickHandler, true);
+        }
+    } else {
+        cleanupOnboardingClickListener();
+    }
+
+    const now = Date.now();
+    if (onboardingRenderDirty || now - lastOnboardingRenderMs > 150) {
+        renderOnboardingSteps(overlay, currentSegment.items, requiredTab);
+        lastOnboardingRenderMs = now;
+        onboardingRenderDirty = false;
+    }
+}
 
 export function calculateAndAddExtraAPFromPhilosophyRepeatable(amountToAdd = 0) {
     return amountToAdd;
