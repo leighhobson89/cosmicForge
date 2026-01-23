@@ -16,6 +16,8 @@ IGNORE_LIST = [
     "package-lock.json",
     ".vscode",
     "builds",
+    "dist",
+    "icons",
     ".git",
     "powerDiagram.png",
     "techtree.graphml",
