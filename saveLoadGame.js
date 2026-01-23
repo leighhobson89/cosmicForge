@@ -14,7 +14,9 @@ import {
     getFeedbackContent,
     getBattleOngoing,
     getTimeWarpMultiplier,
-    getBlackHoleAlwaysOn
+    getBlackHoleAlwaysOn,
+    getOnboardingMode,
+    setOnboardingMode
 } from './constantsAndGlobalVars.js';
 
 import { setAchievementIconImageUrls } from './resourceDataObject.js';
@@ -175,6 +177,16 @@ export async function saveGameToCloud(gameData, type) {
 }
 
 export function saveGame(type) {
+    if (getOnboardingMode()) {
+        if (type !== 'onSaveScreen') {
+            showNotification("You can't save while onboarding mode is active!", 'info', 4000, 'loadSave');
+        }
+
+        // Prevent callers from using stale save data (e.g. cloud export button / autosave follow-ups)
+        setSaveData(null);
+        return;
+    }
+
     if (getTimeWarpMultiplier() !== 1 && !getBlackHoleAlwaysOn()) {
         return;
     }
@@ -231,6 +243,11 @@ export function importSaveStringFileFromComputer() {
 }
 
 export function downloadSaveStringToComputer() {
+    if (getOnboardingMode()) {
+        showNotification("You can't save while onboarding mode is active!", 'info', 4000, 'loadSave');
+        return;
+    }
+
     const saveArea = document.getElementById('exportSaveArea');
     if (!saveArea || !saveArea.value) {
         console.warn('No save data found to download.');
@@ -254,6 +271,11 @@ export function downloadSaveStringToComputer() {
 }
 
 export function copySaveStringToClipBoard() {
+    if (getOnboardingMode()) {
+        showNotification("You can't save while onboarding mode is active!", 'info', 4000, 'loadSave');
+        return;
+    }
+
     const textArea = document.getElementById('exportSaveArea');
     textArea.select();
     textArea.setSelectionRange(0, 99999);
@@ -305,6 +327,7 @@ export async function loadGameFromCloud() {
         const gameState = JSON.parse(decompressedJson);
 
         await initialiseLoadedGame(gameState, 'cloud');
+        setOnboardingMode(false);
         setAchievementIconImageUrls();
         getNavigatorLanguage();
         showNotification('Game loaded successfully!', 'info', 3000, 'loadSave');
@@ -338,6 +361,7 @@ export function loadGame() {
 
             initialiseLoadedGame(gameState, 'textImport')
                 .then(() => {
+                    setOnboardingMode(false);
                     setAchievementIconImageUrls();
                     showNotification('Game loaded successfully!', 'info', 3000, 'loadSave');
                     resolve();
@@ -372,6 +396,7 @@ function validateSaveString(compressed) {
 
 async function initialiseLoadedGame(gameState, type) {
     await restoreGameStatus(gameState, type);
+    setOnboardingMode(false);
 }
 
 export function generateRandomPioneerName() {
