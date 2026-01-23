@@ -234,7 +234,12 @@ import {
     modalPlayerLeaderIntroContentText2,
     modalPlayerLeaderIntroContentText3,
     modalPlayerLeaderIntroContentText4,
-    galacticMarketTooltipDescriptions
+    galacticMarketTooltipDescriptions,
+    modalBlackHoleDiscoveredHeader,
+    modalBlackHoleDiscoveredText,
+    miaplacidusEndgameStoryPopups,
+    onboardingModalHeader,
+    onboardingModalText
 } from "./descriptions.js";
 
 import { saveGame, loadGameFromCloud, generateRandomPioneerName, saveGameToCloud } from './saveLoadGame.js';
@@ -4288,10 +4293,8 @@ async function promptOnboardingIfNeeded() {
 
     await new Promise((resolve) => {
         callPopupModal(
-            'NEED A HAND?',
-            'Looks like you\'re starting a new journey.<br>' +
-            'Would you like a short tutorial onboarding to help you get started?<br>' +
-            'You can continue normally either way.',
+            onboardingModalHeader,
+            onboardingModalText,
             true,
             true,
             false,

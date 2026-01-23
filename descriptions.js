@@ -119,6 +119,8 @@ export let modalMegaStructureTechGalacticMemoryArchive5Text;
 export let modalBlackHoleDiscoveredHeader;
 export let modalBlackHoleDiscoveredText;
 export let miaplacidusEndgameStoryPopups;
+export let onboardingModalHeader;
+export let onboardingModalText;
 
 export function initialiseDescriptions() {
     gameIntroHeader = 'Welcome to the Cosmic Forge!';
@@ -129,6 +131,8 @@ export function initialiseDescriptions() {
             class="save-name save-name-height save-name-modal-width">${getSaveName()}</textarea><br><br>You can load a previous game by changing this name to a previous one.
     `;
     gameIntroText = 'You find yourself with advanced knowledge but on a world with almost no material!<br>Begin by gathering Hydrogen and mastering the art of fusion to create Helium, Carbon, and beyond.<br> Explore new technologies to unlock powerful compounds, and one by one recreate the materials to create<br>a craft to explore and discover the secrets of the interstellar medium!<br><br>With each click, fusion, and discovery, you edge closer to fulfilling your destiny!<br><br>Good Luck!';
+    onboardingModalHeader = 'NEED A HAND?';
+    onboardingModalText = `Looks like you're starting a new journey.<br>Would you like a short tutorial onboarding to help you get started?<br>You can continue normally either way.<br><br><span class="green-ready-text">This is the only opportunity to access the Onboarding.</span>`;
     launchStarShipWarningHeader = 'WARNING: POINT OF NO RETURN!';
     launchStarShipWarningText = 'Once your Starship is launched you may not retrieve it this run.<br>So please revise the Star Data section and ensure you really want to select this destination,<br>then please click OK to confirm, or CANCEL to check.';
     enterWarModeModalHeader = `CONQUEST!`;
