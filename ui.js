@@ -177,8 +177,15 @@ import {
     setDebugTimeWarpDurationMs,
     getDebugTimeWarpMultiplier,
     setDebugTimeWarpMultiplier,
+    getDebugHoldEnterToGainEnabled,
+    setDebugHoldEnterToGainEnabled,
     getTimeWarpMultiplier,
-    getBlackHoleAlwaysOn
+    getBlackHoleAlwaysOn,
+    setTimeWarpMultiplier,
+    getTimeWarpTimeoutId,
+    setTimeWarpTimeoutId,
+    getTimeWarpEndTimestampMs,
+    
 } from './constantsAndGlobalVars.js';
 import {
     getResourceDataObject,
@@ -238,13 +245,12 @@ import {
     modalBlackHoleDiscoveredHeader,
     modalBlackHoleDiscoveredText,
     miaplacidusEndgameStoryPopups,
-    onboardingModalHeader,
-    onboardingModalText
+    
 } from "./descriptions.js";
 
 import { saveGame, loadGameFromCloud, generateRandomPioneerName, saveGameToCloud } from './saveLoadGame.js';
 
-let shouldPromptOnboarding = false;
+import { promptOnboardingIfNeeded, setShouldPromptOnboarding } from './onboarding.js';
 
 import {
     setSellFuseCreateTextDescriptionClassesBasedOnButtonStates,
@@ -296,6 +302,137 @@ let modalTooltipHandlers = {};
 const variableDebuggerWindow = document.getElementById('variableDebuggerWindow');
 const debugWindow = document.getElementById('debugWindow');
 const closeButton = document.querySelector('.close-btn');
+
+let hoveredButtonElement = null;
+let holdEnterRapidClickIntervalId = null;
+
+function shouldIgnoreHoldEnterRapidClick(eventTarget) {
+    const target = eventTarget ?? document.activeElement;
+    if (!target) {
+        return false;
+    }
+
+    const tag = (target.tagName || '').toUpperCase();
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') {
+        return true;
+    }
+
+    if (target.isContentEditable) {
+        return true;
+    }
+
+    return false;
+}
+
+function updateHoldEnterToGainDebugStatus() {
+    const button = document.getElementById('holdEnterToGainDebugButton');
+    if (!button) {
+        return;
+    }
+
+    const enabled = getDebugHoldEnterToGainEnabled();
+    button.textContent = enabled ? 'Enabled' : 'Disabled';
+    button.classList.remove('green-ready-text', 'debug-toggle-inactive');
+    if (enabled) {
+        button.classList.add('green-ready-text');
+    } else {
+        button.classList.add('debug-toggle-inactive');
+    }
+}
+
+function stopHoldEnterRapidClick() {
+    if (holdEnterRapidClickIntervalId) {
+        clearInterval(holdEnterRapidClickIntervalId);
+        holdEnterRapidClickIntervalId = null;
+    }
+}
+
+function startHoldEnterRapidClick() {
+    if (holdEnterRapidClickIntervalId) {
+        return;
+    }
+
+    const intervalMs = 35;
+    holdEnterRapidClickIntervalId = setInterval(() => {
+        if (!getDebugHoldEnterToGainEnabled()) {
+            stopHoldEnterRapidClick();
+            return;
+        }
+
+        const btn = hoveredButtonElement;
+        if (!btn || btn.disabled) {
+            return;
+        }
+
+        if (!document.body.contains(btn)) {
+            hoveredButtonElement = null;
+            return;
+        }
+
+        btn.click();
+    }, intervalMs);
+}
+
+document.addEventListener('mouseover', (event) => {
+    const target = event.target;
+    if (!target) {
+        return;
+    }
+
+    const button = target.closest?.('button');
+    if (button) {
+        hoveredButtonElement = button;
+    }
+}, true);
+
+document.addEventListener('mouseout', (event) => {
+    const target = event.target;
+    if (!target) {
+        return;
+    }
+
+    const button = target.closest?.('button');
+    if (button && hoveredButtonElement === button) {
+        hoveredButtonElement = null;
+    }
+}, true);
+
+document.addEventListener('keydown', (event) => {
+    if (event.code !== 'Enter') {
+        return;
+    }
+
+    if (!getDebugHoldEnterToGainEnabled()) {
+        return;
+    }
+
+    if (event.repeat) {
+        return;
+    }
+
+    if (shouldIgnoreHoldEnterRapidClick(event.target)) {
+        return;
+    }
+
+    if (!hoveredButtonElement) {
+        return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    startHoldEnterRapidClick();
+});
+
+document.addEventListener('keyup', (event) => {
+    if (event.code === 'Enter') {
+        if (holdEnterRapidClickIntervalId) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        stopHoldEnterRapidClick();
+    }
+});
 
 function shouldUseCustomPointer() {
     return !!getCustomPointerEnabled();
@@ -1506,7 +1643,7 @@ function buildFuelConsumptionLines(resourceKey, category, timerRatio) {
 
         modalConfirmBtn.removeEventListener('click', startGameClickHandler);
 
-        await promptOnboardingIfNeeded();
+        await promptOnboardingIfNeeded({ callPopupModal, showHideModal });
     };
 
     modalConfirmBtn.addEventListener('click', startGameClickHandler);
@@ -4272,7 +4409,7 @@ async function getUserSaveName() {
                 showHideModal();
 
                 const loadSucceeded = await loadGameFromCloud();
-                shouldPromptOnboarding = !loadSucceeded;
+                setShouldPromptOnboarding(!loadSucceeded);
 
                 saveGame('initialise');
                 saveNameButton.removeEventListener('click', handleSaveNameClick); // Remove handler after successful input
@@ -4286,41 +4423,6 @@ async function getUserSaveName() {
     });
 }
 
-async function promptOnboardingIfNeeded() {
-    if (!shouldPromptOnboarding) {
-        return;
-    }
-
-    await new Promise((resolve) => {
-        callPopupModal(
-            onboardingModalHeader,
-            onboardingModalText,
-            true,
-            true,
-            false,
-            false,
-            () => {
-                setOnboardingMode(true);
-                showHideModal();
-                resolve();
-            },
-            () => {
-                setOnboardingMode(false);
-                showHideModal();
-                resolve();
-            },
-            null,
-            null,
-            'YES',
-            'NO',
-            null,
-            null,
-            false
-        );
-    });
-
-    shouldPromptOnboarding = false;
-}
 
 export function getTimeInStatCell() {
     const now = new Date();
@@ -10540,6 +10642,14 @@ unlockAllTabsButton.addEventListener('click', () => {
 
     showNotification('CHEAT! All tabs unlocked!', 'info', 3000, 'debug');
 });
+
+const holdEnterToGainDebugButton = document.getElementById('holdEnterToGainDebugButton');
+holdEnterToGainDebugButton?.addEventListener('click', () => {
+    setDebugHoldEnterToGainEnabled(!getDebugHoldEnterToGainEnabled());
+    updateHoldEnterToGainDebugStatus();
+});
+
+updateHoldEnterToGainDebugStatus();
 
 function toggleVariableDebuggerWindow() {
     if (variableDebuggerWindow.style.display === 'none' || !variableDebuggerWindow.style.display) {

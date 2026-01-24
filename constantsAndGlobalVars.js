@@ -14,6 +14,7 @@ export const debugVisibilityArray = ['settingsNotificationTestRow'];
 
 var debugTimeWarpDurationMs = 5000;
 var debugTimeWarpMultiplier = 10;
+var debugHoldEnterToGainEnabled = false;
 let blackHoleDiscovered = false;
 let blackHoleDiscoveryProbability = 0;
 
@@ -2123,6 +2124,14 @@ export function setDebugTimeWarpMultiplier(value) {
     if (Number.isFinite(parsed) && parsed > 0) {
         debugTimeWarpMultiplier = parsed;
     }
+}
+
+export function getDebugHoldEnterToGainEnabled() {
+    return debugHoldEnterToGainEnabled;
+}
+
+export function setDebugHoldEnterToGainEnabled(value) {
+    debugHoldEnterToGainEnabled = Boolean(value);
 }
 
 export function getIncreaseStorageFactor() {

@@ -33,7 +33,7 @@
     transform: translate(-50%, -50%);
     opacity: 0;
     transition: opacity 0.08s ease;
-    z-index: 100000;
+    z-index: 100000000000000000000000001;
 }
 
 .custom-pointer.visible {
@@ -1578,6 +1578,11 @@ button.red-disabled-text {
 
 .green-ready-text {
     color: var(--ready-text) !important;
+    font-weight: bold;
+}
+
+.debug-toggle-inactive {
+    color: var(--disabled-text);
     font-weight: bold;
 }
 
