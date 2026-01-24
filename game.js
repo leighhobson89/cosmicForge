@@ -6176,7 +6176,7 @@ export function getNavigatorLanguage() {
     }
 
     const platform = navigator.platform;
-    setUserPlatform([primaryLanguage, region, platform]);
+    return [primaryLanguage, region, platform];
 }
 
 

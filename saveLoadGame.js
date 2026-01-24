@@ -10,6 +10,7 @@ import {
     getAutoSaveToggle,
     getSaveData,
     getUserPlatform,
+    getHostSource,
     getFeedbackGiven,
     getFeedbackContent,
     getBattleOngoing,
@@ -97,6 +98,7 @@ export async function destroySaveGameOnCloud() {
                 data: existingRow.data,
                 created_at: currentTimestamp,
                 region: existingRow.region,
+                hostSource: existingRow.hostSource,
                 feedback: existingRow.feedback,
                 feedback_content: existingRow.feedback_content
             }]);
@@ -145,6 +147,7 @@ export async function saveGameToCloud(gameData, type) {
                     data: gameData,
                     'created_at': currentTimestamp,
                     'region': getUserPlatform(),
+                    'hostSource': getHostSource(),
                     'feedback': getFeedbackGiven(),
                     'feedback_content': getFeedbackContent()
                 })
@@ -160,7 +163,15 @@ export async function saveGameToCloud(gameData, type) {
         } else {
             const { error: insertError } = await supabase
                 .from('CosmicForge_saves')
-                .insert([{ pioneer_name: userId, data: gameData, 'created_at': currentTimestamp }]);
+                .insert([{
+                    pioneer_name: userId,
+                    data: gameData,
+                    created_at: currentTimestamp,
+                    region: getUserPlatform(),
+                    hostSource: getHostSource(),
+                    feedback: getFeedbackGiven(),
+                    feedback_content: getFeedbackContent()
+                }]);
 
             if (insertError) {
                 throw insertError;

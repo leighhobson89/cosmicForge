@@ -303,7 +303,12 @@ let settledStars = [STARTING_STAR_SYSTEM];
 let apSellForCashPrice = AP_BASE_SELL_PRICE;
 let apBuyForCashPrice = AP_BASE_BUY_PRICE;
 let apLiquidationQuantity = 0;
-let userPlatform = [null, null, null];
+let userPlatform = [
+    null, // [0] - Platform: 'github', 'itch', 'electron', or 'unknown'
+    null, // [1] - User agent string
+    null  // [2] - Additional platform-specific data
+];
+let hostSource = null;
 let multiplierPermanentResources = 1;
 let multiplierPermanentCompounds = 1;
 let playerStartingUnitHealth = 100;
@@ -1397,6 +1402,48 @@ export function resetAllVariablesOnRebirth() {
 }
 
 export function captureGameStatusForSaving(type) {
+    // Ensure platform is detected before saving
+    if (!userPlatform[0] || !hostSource) {
+        // Initialize user platform
+        detectAndSetUserPlatform();
+
+        function detectAndSetUserPlatform() {
+            const ua = window.navigator.userAgent.toLowerCase();
+            let platform = 'unknown';
+            let platformData = {};
+            const hostname = window?.location?.hostname;
+            
+            // Check if running in Electron
+            if (window && window.process && window.process.versions && window.process.versions.electron) {
+                platform = 'electron';
+                platformData = {
+                    electronVersion: window.process.versions.electron,
+                    nodeVersion: window.process.versions.node,
+                    chromeVersion: window.process.versions.chrome
+                };
+            } 
+            // Check if running on GitHub Pages
+            else if (window.location.hostname.includes('github.io')) {
+                platform = 'github';
+                platformData = {
+                    hostname: window.location.hostname,
+                    pathname: window.location.pathname
+                };
+            }
+            // Check if running on Itch.io
+            else if (window.location.hostname.includes('itch.io')) {
+                platform = 'itch';
+                platformData = {
+                    hostname: window.location.hostname,
+                    pathname: window.location.pathname,
+                    referrer: document.referrer
+                };
+            }
+            
+            userPlatform = [platform, ua, platformData];
+            hostSource = hostname || (platform === 'electron' ? 'electron' : 'unknown');
+        }
+    }
     let gameState = {};
 
     if (type === 'manualExportCloud') {
@@ -1521,6 +1568,7 @@ export function captureGameStatusForSaving(type) {
     gameState.collectedPrecipitationQuantityThisRun = collectedPrecipitationQuantityThisRun;
     gameState.gameActiveCountTime = gameActiveCountTime;
     gameState.userPlatform = userPlatform;
+    gameState.hostSource = hostSource;
     gameState.compoundCreateDropdownRecipeText = compoundCreateDropdownRecipeText;
     gameState.firstAccessArray = firstAccessArray;
     gameState.philosophy = philosophy;
@@ -1808,6 +1856,7 @@ export function restoreGameStatus(gameState, type) {
             collectedPrecipitationQuantityThisRun = gameState.collectedPrecipitationQuantityThisRun ?? 0;
             gameActiveCountTime = gameState.gameActiveCountTime ?? [0, 0];
             userPlatform = gameState.userPlatform ?? [null, null, null];
+            hostSource = gameState.hostSource ?? null;
             multiplierPermanentResources = gameState.multiplierPermanentResources ?? 1;
             multiplierPermanentCompounds = gameState.multiplierPermanentCompounds ?? 1;
             firstAccessArray = gameState.firstAccessArray ?? [];
@@ -5628,6 +5677,14 @@ export function getUserPlatform() {
 
 export function setUserPlatform(value) {
     userPlatform = value;
+}
+
+export function getHostSource() {
+    return hostSource;
+}
+
+export function setHostSource(value) {
+    hostSource = value;
 }
 
 export function setAchievementFlagArray(achievementKey, action) {
