@@ -1402,48 +1402,8 @@ export function resetAllVariablesOnRebirth() {
 }
 
 export function captureGameStatusForSaving(type) {
-    // Ensure platform is detected before saving
-    if (!userPlatform[0] || !hostSource) {
-        // Initialize user platform
-        detectAndSetUserPlatform();
-
-        function detectAndSetUserPlatform() {
-            const ua = window.navigator.userAgent.toLowerCase();
-            let platform = 'unknown';
-            let platformData = {};
-            const hostname = window?.location?.hostname;
-            
-            // Check if running in Electron
-            if (window && window.process && window.process.versions && window.process.versions.electron) {
-                platform = 'electron';
-                platformData = {
-                    electronVersion: window.process.versions.electron,
-                    nodeVersion: window.process.versions.node,
-                    chromeVersion: window.process.versions.chrome
-                };
-            } 
-            // Check if running on GitHub Pages
-            else if (window.location.hostname.includes('github.io')) {
-                platform = 'github';
-                platformData = {
-                    hostname: window.location.hostname,
-                    pathname: window.location.pathname
-                };
-            }
-            // Check if running on Itch.io
-            else if (window.location.hostname.includes('itch.io')) {
-                platform = 'itch';
-                platformData = {
-                    hostname: window.location.hostname,
-                    pathname: window.location.pathname,
-                    referrer: document.referrer
-                };
-            }
-            
-            userPlatform = [platform, ua, platformData];
-            hostSource = hostname || (platform === 'electron' ? 'electron' : 'unknown');
-        }
-    }
+    // Always refresh platform metadata before saving
+    detectAndSetUserPlatform();
     let gameState = {};
 
     if (type === 'manualExportCloud') {
@@ -5685,6 +5645,44 @@ export function getHostSource() {
 
 export function setHostSource(value) {
     hostSource = value;
+}
+
+function detectAndSetUserPlatform() {
+    if (typeof window === 'undefined') {
+        userPlatform = ['unknown', 'unknown', {}];
+        hostSource = 'unknown';
+        return;
+    }
+
+    const ua = window.navigator?.userAgent?.toLowerCase?.() ?? 'unknown';
+    let platform = 'unknown';
+    let platformData = {};
+    const hostname = window?.location?.hostname;
+
+    if (window?.process?.versions?.electron) {
+        platform = 'electron';
+        platformData = {
+            electronVersion: window.process.versions.electron,
+            nodeVersion: window.process.versions.node,
+            chromeVersion: window.process.versions.chrome
+        };
+    } else if (window.location?.hostname?.includes('github.io')) {
+        platform = 'github';
+        platformData = {
+            hostname: window.location.hostname,
+            pathname: window.location.pathname
+        };
+    } else if (window.location?.hostname?.includes('itch.io')) {
+        platform = 'itch';
+        platformData = {
+            hostname: window.location.hostname,
+            pathname: window.location.pathname,
+            referrer: (typeof document !== 'undefined' && document?.referrer) ? document.referrer : ''
+        };
+    }
+
+    userPlatform = [platform, ua, platformData];
+    hostSource = hostname || (platform === 'electron' ? 'electron' : 'unknown');
 }
 
 export function setAchievementFlagArray(achievementKey, action) {
