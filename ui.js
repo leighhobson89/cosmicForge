@@ -95,6 +95,7 @@ import {
     getCurrentlyTravellingToAsteroid,
     getRocketDirection,
     getCurrentStarSystemWeatherEfficiency,
+    getCurrentPrecipitationRate,
     getCurrentStarSystem,
     setSortAsteroidMethod,
     getAsteroidArray,
@@ -1147,7 +1148,8 @@ function buildProductionTooltipContent(resourceKey, category) {
 
     const autoBuyerGenerationLines = buildAutoBuyerGenerationLines(resourceKey, category, timerRatio);
     const autoCreateGenerationLine = buildAutoCreateGenerationLine(resourceKey, category, timerRatio);
-    const generationBlock = [autoBuyerGenerationLines, autoCreateGenerationLine].filter(Boolean).join('');
+    const precipitationGenerationLine = buildPrecipitationGenerationLine(resourceKey, category, timerRatio);
+    const generationBlock = [autoBuyerGenerationLines, autoCreateGenerationLine, precipitationGenerationLine].filter(Boolean).join('');
     if (generationBlock) {
         lines.push('<div class="tooltip-spacer">&nbsp;</div>');
         lines.push('<div><strong>Generation</strong></div>');
@@ -1459,6 +1461,45 @@ function buildAutoCreateGenerationLine(resourceKey, category, timerRatio) {
 
     const formatted = formatProductionRateValue(autoCreateRate);
     return `<div class="stats-text">Auto Creation: ${formatted} / s</div>`;
+}
+
+function buildPrecipitationGenerationLine(resourceKey, category, timerRatio) {
+    if (category !== 'compounds') {
+        return '';
+    }
+
+    if (getCurrentStarSystemWeatherEfficiency()?.[2] !== 'rain') {
+        return '';
+    }
+
+    const precipitationCategory = getStarSystemDataObject('stars', [getCurrentStarSystem(), 'precipitationResourceCategory']);
+    if (precipitationCategory !== 'compounds') {
+        return '';
+    }
+
+    const precipitationType = getStarSystemDataObject('stars', [getCurrentStarSystem(), 'precipitationType']);
+    if (!precipitationType || resourceKey !== precipitationType) {
+        return '';
+    }
+
+    const tech = getTechUnlockedArray();
+    const revealedBy = getResourceDataObject('compounds', [precipitationType, 'revealedBy']);
+    const precipitationRevealedYet = tech.includes('compounds') && tech.includes(revealedBy);
+    if (!precipitationRevealedYet) {
+        return '';
+    }
+
+    const compoundData = getResourceDataObject('compounds', [precipitationType]);
+    const quantity = compoundData?.quantity ?? 0;
+    const capacity = compoundData?.storageCapacity ?? Infinity;
+    const available = Math.max(0, capacity - quantity);
+    const perTickRate = Math.max(0, getCurrentPrecipitationRate?.() ?? 0);
+    const effectivePerTick = available <= 0 ? 0 : Math.min(perTickRate, available);
+    const perSecond = effectivePerTick * timerRatio;
+
+    const className = perSecond > 0 ? 'green-ready-text' : 'red-disabled-text';
+    const formatted = formatProductionRateValue(perSecond);
+    return `<div>Precipitation: <span class="${className}">${formatted} / s</span></div>`;
 }
 
 function buildAutoCreateDiversionLines(resourceKey, category) {
