@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cosmic Forge Save Inspector</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    body {
+      padding: 16px;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: block;
+      justify-content: unset;
+      overflow-y: auto;
+      user-select: text;
+    }
+    textarea { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    .error { color: var(--disabled-text); white-space: pre-wrap; }
+    .muted { color: rgba(var(--text-color-rgb), 0.7); }
+    .kv { display: grid; grid-template-columns: 240px 1fr; gap: 8px 12px; align-items: start; }
+    .kv .k { font-weight: 600; }
+    .kv .v pre { margin: 0; }
+    pre { color: var(--text-color); }
+    details summary { cursor: pointer; }
+    .section-summary { display: inline-block; margin-left: 8px; }
+    .sticky-topbar { position: sticky; top: 0; background: var(--container-bg-color); z-index: 10; padding-top: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--container-border-color); }
+    .path { color: var(--text-color); }
+    .form-control { background-color: var(--container-bg-color); color: var(--text-color); border-color: var(--container-border-color); }
+    .form-control:focus { background-color: var(--container-bg-color); color: var(--text-color); border-color: var(--tab-border-color); box-shadow: none; }
+    .btn-outline-secondary { border-color: var(--tab-border-color); color: var(--text-color); }
+    .btn-outline-secondary:hover { background-color: var(--tab-bg-hover); border-color: var(--tab-border-color); color: var(--text-hover-color); }
+    .btn-outline-dark { border-color: var(--tab-border-color); color: var(--text-color); }
+    .btn-outline-dark:hover { background-color: var(--tab-bg-hover); border-color: var(--tab-border-color); color: var(--text-hover-color); }
+    .inspector-header-right { display: flex; align-items: center; gap: 12px; }
+  </style>
+</head>
+<body data-theme="terminal">
+  <div class="container-fluid">
+    <div class="sticky-topbar">
+      <div class="d-flex align-items-center justify-content-between">
+        <h3 class="mb-0">Cosmic Forge Save Inspector</h3>
+        <div class="inspector-header-right">
+          <div class="muted">Paste save string, decode, inspect</div>
+          <div>
+            <label for="themeSelect" class="mr-2 mb-0 font-weight-bold">Theme</label>
+            <select id="themeSelect" class="form-control form-control-sm d-inline-block" style="width: 180px"></select>
+          </div>
+        </div>
+      </div>
+
+      <div id="editedSaveContainer" class="row mt-3 d-none">
+        <div class="col-12">
+          <label for="editedSaveOutput" class="font-weight-bold">Edited save string</label>
+          <textarea id="editedSaveOutput" class="form-control" rows="4" readonly></textarea>
+          <div class="muted mt-1">This appears after your first edit. Copy/paste this string to import the modified save.</div>
+        </div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col-lg-8">
+          <label for="saveInput" class="font-weight-bold">Save string</label>
+          <textarea id="saveInput" class="form-control" rows="6" placeholder="Paste your save string here..."></textarea>
+          <div class="d-flex align-items-center mt-2">
+            <button id="decodeBtn" class="btn btn-primary mr-2">Decode</button>
+            <button id="clearBtn" class="btn btn-outline-secondary mr-3">Clear</button>
+            <div class="mono muted" id="meta"></div>
+          </div>
+          <div id="error" class="error mt-2"></div>
+        </div>
+
+        <div class="col-lg-4">
+          <label for="searchInput" class="font-weight-bold">Search</label>
+          <input id="searchInput" class="form-control" placeholder="Search by key/path/value..." />
+          <div class="mt-2">
+            <button id="expandAllBtn" class="btn btn-sm btn-outline-dark mr-2">Expand top-level</button>
+            <button id="collapseAllBtn" class="btn btn-sm btn-outline-dark">Collapse all</button>
+          </div>
+          <div class="muted mt-2">Search filters what gets rendered (lazy-load on expand).</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-3">
+      <div class="col-12">
+        <div id="output"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
+  <script type="module" src="./save-inspector.js"></script>
+</body>
+</html>
