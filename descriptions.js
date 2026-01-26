@@ -2399,6 +2399,15 @@ statisticsContent = {
 
         subHeading14: "AP From Star Voyage",
         subBody14: "1",
+
+        subHeading15: "Black Hole Discovered",
+        subBody15: "N/A",
+
+        subHeading16: "Black Hole Always Active",
+        subBody16: "N/A",
+
+        subHeading17: "Black Hole Strength",
+        subBody17: "N/A",
     }
 }
 

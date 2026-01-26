@@ -8301,11 +8301,13 @@ function determineStatClassColor(value) {
     const normalized = isString ? rawString.replace(/^•/, '').trim().toUpperCase() : value;
 
     if (
+        normalized === 'FALSE' ||
         normalized === 'NO' ||
         normalized === '0' ||
         normalized === 'OFF' ||
         rawString === '⛰' ||
         normalized === 'N/A' ||
+        value === false ||
         value === 0
     ) {
         return 'red-disabled-text';

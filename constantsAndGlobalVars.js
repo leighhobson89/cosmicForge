@@ -1,4 +1,4 @@
-import { restoreAchievementsDataObject, restoreAscendencyBuffsDataObject, restoreGalacticMarketDataObject, restoreRocketNamesObject, restoreResourceDataObject, restoreStarSystemsDataObject, resourceData, starSystems, getResourceDataObject, setResourceDataObject, galacticMarket, ascendencyBuffs, achievementsData, getStarSystemDataObject } from "./resourceDataObject.js";
+import { restoreAchievementsDataObject, restoreAscendencyBuffsDataObject, restoreGalacticMarketDataObject, restoreRocketNamesObject, restoreResourceDataObject, restoreStarSystemsDataObject, resourceData, starSystems, getResourceDataObject, setResourceDataObject, galacticMarket, ascendencyBuffs, achievementsData, getStarSystemDataObject, getBlackHoleResearchDone, getBlackHolePower, getBlackHoleDuration, getBlackHoleRechargeMultiplier, getBlackHoleResearchPrice, getBlackHolePowerPrice, getBlackHoleDurationPrice, getBlackHoleRechargePrice } from "./resourceDataObject.js";
 import { achievementFunctionsMap } from "./achievements.js";
 import { drawNativeTechTree, selectTheme, startWeatherEffect, stopWeatherEffect, applyCustomPointerSetting } from "./ui.js";
 import { capitaliseWordsWithRomanNumerals, capitaliseString } from './utilityFunctions.js';
@@ -876,6 +876,13 @@ export const statFunctionsGets = {
     "stat_marauder": getStatFleetMarauder,
     "stat_landStalker": getStatFleetLandStalker,
     "stat_navalStrafer": getStatFleetNavalStrafer,
+
+    "stat_blackHoleDiscoveredThisRun": getStatBlackHoleDiscoveredThisRun,
+    "stat_blackHoleDiscovered": getStatBlackHoleDiscoveredAllTime,
+    "stat_blackHoleAlwaysActiveThisRun": getStatBlackHoleAlwaysActiveThisRun,
+    "stat_blackHoleAlwaysActive": getStatBlackHoleAlwaysActiveAllTime,
+    "stat_blackHoleStrengthThisRun": getStatBlackHoleStrengthThisRun,
+    "stat_blackHoleStrength": getStatBlackHoleStrengthAllTime,
 };
 
 export const statFunctionsSets = {
@@ -4752,13 +4759,37 @@ function getStatEnemyAllTime() {
 }
 
 function getStatEnemyTotalDefenceOvercome() {
+    return 'N/A';
+}
+
+function getStatEnemyTotalDefenceOvercomeAllTime() {
     const start = enemyFleetPowerAtBattleStart;
     const current = getStarSystemDataObject('stars', ['destinationStar', 'enemyFleets', 'fleetPower'], true) ?? 0;
     return Math.max(0, start - current);
 }
 
-function getStatEnemyTotalDefenceOvercomeAllTime() {
+function getStatBlackHoleDiscoveredThisRun() {
     return 'N/A';
+}
+
+function getStatBlackHoleDiscoveredAllTime() {
+    return getBlackHoleDiscovered() ? 'true' : 'false';
+}
+
+function getStatBlackHoleAlwaysActiveThisRun() {
+    return 'N/A';
+}
+
+function getStatBlackHoleAlwaysActiveAllTime() {
+    return getBlackHoleAlwaysOn() ? 'true' : 'false';
+}
+
+function getStatBlackHoleStrengthThisRun() {
+    return 'N/A';
+}
+
+function getStatBlackHoleStrengthAllTime() {
+    return getBlackHolePower();
 }
 
 function getStatEnemyTotalDefenceRemaining() {
@@ -5590,6 +5621,35 @@ export function populateVariableDebugger() {
         { label: "currentRunIsMegaStructureRun", value: currentRunIsMegaStructureRun },
         { label: "megaStructureResourceBonus", value: megaStructureResourceBonus },
         { label: "infinitePower", value: infinitePower },
+
+        { label: "", value: "" },
+        { label: "Black Hole:", value: "" },
+        { label: "", value: "" },
+
+        { label: "blackHoleDiscovered", value: getBlackHoleDiscovered() },
+        { label: "blackHoleDiscoveryProbability", value: getBlackHoleDiscoveryProbability() },
+        { label: "blackHoleResearchDone", value: getBlackHoleResearchDone() },
+        { label: "blackHoleAlwaysOn", value: getBlackHoleAlwaysOn() },
+        { label: "blackHoleChargeReady", value: getBlackHoleChargeReady() },
+        { label: "currentlyChargingBlackHole", value: getCurrentlyChargingBlackHole() },
+        { label: "currentlyTimeWarpingBlackHole", value: getCurrentlyTimeWarpingBlackHole() },
+
+        { label: "timeWarpMultiplier", value: getTimeWarpMultiplier() },
+        { label: "timeWarpEndTimestampMs", value: getTimeWarpEndTimestampMs() },
+
+        { label: "baseBlackHoleChargeTimerDuration", value: getBaseBlackHoleChargeTimerDuration() },
+        { label: "blackHoleDurationUpgradeIncrementMs", value: getBlackHoleDurationUpgradeIncrementMs() },
+        { label: "blackHolePowerUpgradeIncrement", value: getBlackHolePowerUpgradeIncrement() },
+        { label: "currentBlackHoleChargeTimerDurationTotal", value: getCurrentBlackHoleChargeTimerDurationTotal() },
+        { label: "timeLeftUntilBlackHoleChargeTimerFinishes", value: getTimeLeftUntilBlackHoleChargeTimerFinishes() },
+
+        { label: "blackHolePower", value: getBlackHolePower() },
+        { label: "blackHoleDuration", value: getBlackHoleDuration() },
+        { label: "blackHoleRechargeMultiplier", value: getBlackHoleRechargeMultiplier() },
+        { label: "blackHoleResearchPrice", value: getBlackHoleResearchPrice() },
+        { label: "blackHolePowerPrice", value: getBlackHolePowerPrice() },
+        { label: "blackHoleDurationPrice", value: getBlackHoleDurationPrice() },
+        { label: "blackHoleRechargePrice", value: getBlackHoleRechargePrice() },
     ];    
 
     debugTextAreaContainer.innerHTML = "";
@@ -5659,14 +5719,7 @@ function detectAndSetUserPlatform() {
     let platformData = {};
     const hostname = window?.location?.hostname;
 
-    if (window?.process?.versions?.electron) {
-        platform = 'electron';
-        platformData = {
-            electronVersion: window.process.versions.electron,
-            nodeVersion: window.process.versions.node,
-            chromeVersion: window.process.versions.chrome
-        };
-    } else if (window.location?.hostname?.includes('github.io')) {
+    if (window.location?.hostname?.includes('github.io')) {
         platform = 'github';
         platformData = {
             hostname: window.location.hostname,
