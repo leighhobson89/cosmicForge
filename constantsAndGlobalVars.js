@@ -1153,6 +1153,20 @@ export function resetAllVariablesOnRebirth() {
         rocket3: false,
         rocket4: false 
     }
+
+    currentlyTravellingToAsteroid = {
+        rocket1: false,
+        rocket2: false,
+        rocket3: false,
+        rocket4: false
+    };
+
+    rocketReadyToTravel = {
+        rocket1: true,
+        rocket2: true,
+        rocket3: true,
+        rocket4: true
+    };
     
     oneOffPrizesAlreadyClaimedArray = [];
     
@@ -5552,6 +5566,7 @@ export function populateVariableDebugger() {
         { label: "rocketReadyToTravel - rocket4", value: rocketReadyToTravel.rocket4 },
         { label: "rocketUserName", value: rocketUserName },
         { label: "rocketsBuilt", value: rocketsBuilt },
+        { label: "miningObject", value: miningObject },
         { label: "asteroidArray", value: asteroidArray },
         { label: "rocketsFuellerStartedArray", value: rocketsFuellerStartedArray },
         { label: "launchedRockets", value: launchedRockets },

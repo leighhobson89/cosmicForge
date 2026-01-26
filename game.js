@@ -4542,6 +4542,11 @@ function updateAntimatterAndDiagram(ticks = 1) {
     for (let i = 1; i <= 4; i++) {
         const rocketName = `rocket${i}`;
         const rocketKey = getMiningObject()[rocketName];
+
+        if (typeof rocketKey !== 'string' || rocketKey === 'refuel' || rocketKey.trim() === '') {
+            continue;
+        }
+
         const asteroid = getAsteroidArray().find(asteroid => asteroid[rocketKey])?.[rocketKey];
 
         if (asteroid) {
