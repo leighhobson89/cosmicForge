@@ -13,7 +13,7 @@ export let stateLoading = false;
 export const debugVisibilityArray = ['settingsNotificationTestRow'];
 
 var debugTimeWarpDurationMs = 5000;
-var debugTimeWarpMultiplier = 10;
+var debugTimeWarpMultiplier = 50;
 var debugHoldEnterToGainEnabled = false;
 let blackHoleDiscovered = false;
 let blackHoleDiscoveryProbability = 0;
@@ -2699,6 +2699,10 @@ export function getTechUnlockedArray() {
     return techUnlockedArray;
 }
 
+export function setTechUnlockedArrayDirect(value) {
+    techUnlockedArray = Array.isArray(value) ? value : techUnlockedArray;
+}
+
 export function setTechUnlockedArray(value) {
     if (value === 'run1' && techUnlockedArray.length === 1 && techUnlockedArray[0] === 'apAwardedThisRun' && value !== 'compoundMachining') {
         techUnlockedArray = [];
@@ -4186,21 +4190,45 @@ export function markManuscriptClueShown(starName, clueId) {
 }
 
 export function activateFactoryStar(star) {
-    const factoryStarName = star[1];
-    const factoryStarId = starSystems.stars[factoryStarName].factoryStar
+    const factoryStarNameRaw = star?.[1];
+    if (!factoryStarNameRaw) {
+        return;
+    }
 
-    const mappedFactoryStarString = mapFactoryStarValue(factoryStarId);
-    starSystems.stars[factoryStarName].factoryStar = mappedFactoryStarString;
-    
+    const factoryStarName = factoryStarNameRaw.toLowerCase();
+
     for (let i = 0; i < starsWithAncientManuscripts.length; i++) {
         const current = starsWithAncientManuscripts[i];
-        const isExactMatch = current.length === star.length && current.every((value, index) => value === star[index]);
+        const isMatch =
+            Array.isArray(current) &&
+            Array.isArray(star) &&
+            current[0] === star[0] &&
+            current[1] === star[1] &&
+            current[2] === star[2];
 
-        if (isExactMatch) {
+        if (isMatch) {
             starsWithAncientManuscripts[i][3] = true;
+            starsWithAncientManuscripts[i][1] = factoryStarName;
             break;
         }
     }
+
+    if (!factoryStarsArray.includes(factoryStarName)) {
+        factoryStarsArray.push(factoryStarName);
+    }
+
+    const factoryStarObject = starSystems?.stars?.[factoryStarName];
+    if (!factoryStarObject) {
+        return;
+    }
+
+    const factoryStarId = factoryStarObject.factoryStar;
+    if (factoryStarId === undefined || factoryStarId === null) {
+        return;
+    }
+
+    const mappedFactoryStarString = mapFactoryStarValue(factoryStarId);
+    starSystems.stars[factoryStarName].factoryStar = mappedFactoryStarString;
 }
 
 export function setMegaStructuresInPossessionArray(value) {
@@ -4263,8 +4291,12 @@ export function getMegaStructureTechsResearched() {
     return megaStructureTechsResearched;
 }
 
-export function setMegaStructureTechsResearched(value) {
-    megaStructureTechsResearched.push(value);
+export function setMegaStructureTechsResearched(value, override = false) {
+    if (!override) {
+        megaStructureTechsResearched.push(value);
+    } else {
+        megaStructureTechsResearched = value;
+    }
 }
 
 export function getNonExhaustiveResources() {

@@ -30,6 +30,7 @@ import {
     setAlreadySeenNewsTickerArray,
     getAlreadySeenNewsTickerArray,
     getStarShipStatus,
+    setStarShipStatus,
     getStarShipArrowPosition,
     getFromStarObject,
     setFromStarObject,
@@ -39,6 +40,8 @@ import {
     setDestinationStar,
     getDestinationStar,
     getStarShipBuilt,
+    setStarShipBuilt,
+    setFleetChangedSinceLastDiplomacy,
     setSortStarMethod,
     getStarVisionDistance,
     STAR_SEED,
@@ -101,6 +104,7 @@ import {
     getAsteroidArray,
     getMegaStructureTechsResearched,
     getCurrentRunIsMegaStructureRun,
+    setTechUnlockedArrayDirect,
     getIsAntimatterBoostActive,
     setRocketsBuilt,
     setAntimatterUnlocked,
@@ -186,6 +190,7 @@ import {
     getTimeWarpTimeoutId,
     setTimeWarpTimeoutId,
     getTimeWarpEndTimestampMs,
+    setStellarScannerBuilt,
     
 } from './constantsAndGlobalVars.js';
 import {
@@ -10438,14 +10443,59 @@ closeButton.addEventListener('click', () => {
     debugWindow.style.display = 'none';
 });
 
+const prepareRunForStarshipLaunchButton = document.getElementById('prepareRunForStarshipLaunchButton');
+let preparingRunForStarshipLaunch = false;
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function clickDebugButton(buttonId, delayMs = 100, times = 1) {
+    for (let i = 0; i < times; i++) {
+        document.getElementById(buttonId)?.click();
+        await sleep(delayMs);
+    }
+}
+
+prepareRunForStarshipLaunchButton?.addEventListener('click', async () => {
+    if (preparingRunForStarshipLaunch) {
+        return;
+    }
+
+    preparingRunForStarshipLaunch = true;
+    try {
+        await clickDebugButton('give1BButton');
+        await clickDebugButton('give1MAllResourcesAndCompounds');
+        await clickDebugButton('grantAllTechsButton');
+        await clickDebugButton('buildLaunchPadScannerAndAllRocketsButton');
+        await clickDebugButton('add10AsteroidsButton');
+        await clickDebugButton('addStarButton', 100, 5);
+        await clickDebugButton('buildStarshipDebugButton');
+        await clickDebugButton('addFleetsAndEnvoyButton');
+    } finally {
+        preparingRunForStarshipLaunch = false;
+    }
+});
+
 const grantAllTechsButton = document.getElementById('grantAllTechsButton');
 grantAllTechsButton.addEventListener('click', () => {
     const techArray = getResourceDataObject('techs');
     setResourceDataObject(getResourceDataObject('research', ['quantity']) + 1000000, 'research', ['quantity']);
 
+    const megaStructureTechIds = Object.keys(techArray).filter((techKey) => techArray?.[techKey]?.special === 'megastructure');
+    const nonMegaStructureTechIds = Object.keys(techArray).filter((techKey) => techArray?.[techKey]?.special !== 'megastructure');
+
     Object.keys(techArray).forEach((techKey) => {
+        if (techArray?.[techKey]?.special === 'megastructure') {
+            return;
+        }
         setTechUnlockedArray(techKey);
     });
+
+    if (megaStructureTechIds.length > 0) {
+        const existingUnlocked = getTechUnlockedArray() || [];
+        const existingNonMega = existingUnlocked.filter((techKey) => !megaStructureTechIds.includes(techKey));
+        const merged = Array.from(new Set([...existingNonMega, ...nonMegaStructureTechIds]));
+        setTechUnlockedArrayDirect(merged);
+    }
 
     setUnlockedCompoundsArray('diesel');
     setUnlockedCompoundsArray('glass');
@@ -10457,7 +10507,6 @@ grantAllTechsButton.addEventListener('click', () => {
     setCanFuelRockets(true);
     setCanTravelToAsteroids(true);
 
-    grantAllTechsButton.classList.add('red-disabled-text');
     showNotification('CHEAT! All techs unlocked!', 'info', 3000, 'debug');
 
     console.log('All techs unlocked!');
@@ -10514,20 +10563,20 @@ give1MAllResourcesAndCompoundsButton.addEventListener('click', () => {
     });
 
     Object.keys(resources).forEach(resourceKey => {
-        setResourceDataObject(1000000, 'resources', [resourceKey, 'storageCapacity']);
-        setResourceDataObject(1000000, 'resources', [resourceKey, 'quantity']);
+        setResourceDataObject(1000000000, 'resources', [resourceKey, 'storageCapacity']);
+        setResourceDataObject(1000000000, 'resources', [resourceKey, 'quantity']);
         setUnlockedResourcesArray(resourceKey);
         setAutoBuyerTierLevel(resourceKey, 4, false, 'resources');
     });
 
     Object.keys(compounds).forEach(compoundKey => {
-        setResourceDataObject(1000000, 'compounds', [compoundKey, 'storageCapacity']);
-        setResourceDataObject(1000000, 'compounds', [compoundKey, 'quantity']);
+        setResourceDataObject(1000000000, 'compounds', [compoundKey, 'storageCapacity']);
+        setResourceDataObject(1000000000, 'compounds', [compoundKey, 'quantity']);
         setUnlockedCompoundsArray(compoundKey);
         setAutoBuyerTierLevel(compoundKey, 4, false, 'compounds');
     });
     
-    showNotification('CHEAT! 1M of every resource and compound added!', 'info', 3000, 'debug');
+    showNotification('CHEAT! 1B of every resource and compound added!', 'info', 3000, 'debug');
     console.log('1M storage capacity granted to all resources and compounds!');
 });
 
@@ -10553,20 +10602,20 @@ give100AllResourcesAndCompoundsButton.addEventListener('click', () => {
     });
 
     Object.keys(resources).forEach(resourceKey => {
-        setResourceDataObject(100, 'resources', [resourceKey, 'storageCapacity']);
-        setResourceDataObject(100, 'resources', [resourceKey, 'quantity']);
+        setResourceDataObject(1000000, 'resources', [resourceKey, 'storageCapacity']);
+        setResourceDataObject(1000000, 'resources', [resourceKey, 'quantity']);
         setUnlockedResourcesArray(resourceKey);
         setAutoBuyerTierLevel(resourceKey, 1, false, 'resources');
     });
 
     Object.keys(compounds).forEach(compoundKey => {
-        setResourceDataObject(100, 'compounds', [compoundKey, 'storageCapacity']);
-        setResourceDataObject(100, 'compounds', [compoundKey, 'quantity']);
+        setResourceDataObject(1000000, 'compounds', [compoundKey, 'storageCapacity']);
+        setResourceDataObject(1000000, 'compounds', [compoundKey, 'quantity']);
         setUnlockedCompoundsArray(compoundKey);
         setAutoBuyerTierLevel(compoundKey, 1, false, 'compounds');
     });
     
-    showNotification('CHEAT! 100 of every resource and compound!', 'info', 3000, 'debug');
+    showNotification('CHEAT! 1M of every resource and compound added!', 'info', 3000, 'debug');
     console.log('100 of all resources and compounds!');
 });
 
@@ -10594,7 +10643,7 @@ if (debugTimeWarpDurationSelect) {
     const durationOptions = Array.from(debugTimeWarpDurationSelect.options).map(option => option.value);
     let durationValue = String(getDebugTimeWarpDurationMs());
     if (!durationOptions.includes(durationValue)) {
-        durationValue = durationOptions[durationOptions.length - 1];
+        durationValue = durationOptions.includes('5000') ? '5000' : durationOptions[0];
         setDebugTimeWarpDurationMs(Number(durationValue));
     }
     debugTimeWarpDurationSelect.value = durationValue;
@@ -10607,7 +10656,7 @@ if (debugTimeWarpMultiplierSelect) {
     const multiplierOptions = Array.from(debugTimeWarpMultiplierSelect.options).map(option => option.value);
     let multiplierValue = String(getDebugTimeWarpMultiplier());
     if (!multiplierOptions.includes(multiplierValue)) {
-        multiplierValue = multiplierOptions[2]; // default ×10
+        multiplierValue = multiplierOptions.includes('50') ? '50' : multiplierOptions[0];
         setDebugTimeWarpMultiplier(Number(multiplierValue));
     }
     debugTimeWarpMultiplierSelect.value = multiplierValue;
@@ -10652,6 +10701,80 @@ gain10000AntimatterButton.addEventListener('click', () => {
     setAntimatterUnlocked(true);
     setResourceDataObject(getResourceDataObject('antimatter', ['quantity']) + 10000, 'antimatter', ['quantity']);
     showNotification('CHEAT! 10000 Antimatter added!', 'info', 3000, 'debug');
+});
+
+const add100ApButton = document.getElementById('add100ApButton');
+add100ApButton?.addEventListener('click', () => {
+    const currentAp = getResourceDataObject('ascendencyPoints', ['quantity']);
+    setResourceDataObject(Math.floor(currentAp + 100), 'ascendencyPoints', ['quantity']);
+    showNotification('CHEAT! 100 Ascendency Points added!', 'info', 3000, 'debug');
+});
+
+const addFleetsAndEnvoyButton = document.getElementById('addFleetsAndEnvoyButton');
+addFleetsAndEnvoyButton?.addEventListener('click', () => {
+    if (!getStarShipBuilt()) {
+        showNotification('CHEAT! Build the Starship first', 'info', 3000, 'debug');
+        return;
+    }
+
+    const fleetKeys = ['fleetScout', 'fleetMarauder', 'fleetLandStalker', 'fleetNavalStrafer'];
+    fleetKeys.forEach((fleetKey) => {
+        const current = getResourceDataObject('space', ['upgrades', fleetKey, 'quantity']);
+        setResourceDataObject(Math.floor(current + 30), 'space', ['upgrades', fleetKey, 'quantity']);
+
+        const baseAttack = getResourceDataObject('space', ['upgrades', fleetKey, 'baseAttackStrength']) ?? 0;
+        const baseDefense = getResourceDataObject('space', ['upgrades', fleetKey, 'defenseStrength']) ?? 0;
+
+        const currentAttackPower = getResourceDataObject('fleets', ['attackPower']) ?? 0;
+        const currentDefensePower = getResourceDataObject('fleets', ['defensePower']) ?? 0;
+        setResourceDataObject(currentAttackPower + baseAttack * 30, 'fleets', ['attackPower']);
+        setResourceDataObject(currentDefensePower + baseDefense * 30, 'fleets', ['defensePower']);
+    });
+
+    const currentEnvoy = getResourceDataObject('space', ['upgrades', 'fleetEnvoy', 'quantity']);
+    const maxEnvoy = getResourceDataObject('space', ['upgrades', 'fleetEnvoy', 'maxCanBuild']) ?? 1;
+    const newEnvoy = Math.min(maxEnvoy, Math.floor(currentEnvoy + 1));
+    setResourceDataObject(newEnvoy, 'space', ['upgrades', 'fleetEnvoy', 'quantity']);
+    if (newEnvoy > 0) {
+        setResourceDataObject(true, 'space', ['upgrades', 'fleetEnvoy', 'envoyBuiltYet']);
+    }
+
+    setFleetChangedSinceLastDiplomacy(true);
+    replaceBattleUnits({ player: [], enemy: [] });
+    setNeedNewBattleCanvas(true);
+    setFormationGoal(null);
+    setInFormation(false);
+
+    showNotification('CHEAT! 30 Fleets + 1 Envoy added!', 'info', 3000, 'debug');
+});
+
+const buildStarshipDebugButton = document.getElementById('buildStarshipDebugButton');
+buildStarshipDebugButton?.addEventListener('click', () => {
+    if (getStarShipBuilt()) {
+        showNotification('CHEAT! Starship already Built!', 'info', 3000, 'debug');
+        return;
+    }
+
+    const upgrades = getResourceDataObject('space', ['upgrades']) || {};
+    Object.keys(upgrades).forEach((upgradeKey) => {
+        if (!upgradeKey.startsWith('ss')) {
+            return;
+        }
+
+        const parts = getResourceDataObject('space', ['upgrades', upgradeKey, 'parts']);
+        if (typeof parts === 'number') {
+            setResourceDataObject(parts, 'space', ['upgrades', upgradeKey, 'builtParts']);
+        }
+        setResourceDataObject(true, 'space', ['upgrades', upgradeKey, 'finished']);
+    });
+
+    setStarShipBuilt(true);
+    setStellarScannerBuilt(true);
+    setStarShipStatus(['readyForTravel', null]);
+
+    setCurrentStarObject({ name: capitaliseWordsWithRomanNumerals(getCurrentStarSystem()) });
+
+    showNotification('CHEAT! Starship built!', 'info', 3000, 'debug');
 });
 
 const unlockAllTabsButton = document.getElementById('unlockAllTabsButton');

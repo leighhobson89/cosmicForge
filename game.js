@@ -6948,6 +6948,11 @@ async function coloniseChecks() {
             const enemyFleetSum = (enemyFleetTotals?.air || 0) + (enemyFleetTotals?.land || 0) + (enemyFleetTotals?.sea || 0);
 
             if (civilizationLevel === 'None' || civilizationLevel === 'Unsentient' || enemyFleetSum === 0) {
+                document.querySelectorAll("button.bully, button.passive, button.harmony, button.vassalize")
+                .forEach(button => {
+                    button.classList.add("red-disabled-text");
+                    button.classList.remove("green-ready-text");
+                });
                 const conquestButton = document.querySelector('button.conquest');
                 if (conquestButton) {
                     conquestButton.innerHTML = 'Settle';
@@ -7078,6 +7083,18 @@ function checkDiplomacyButtons(element) {
     const playerAttackPower = getResourceDataObject('fleets', ['attackPower']);
     const enemyPower = Math.floor(starData.enemyFleets.air + starData.enemyFleets.land + starData.enemyFleets.sea);
     const currentImpression = starData.currentImpression;
+
+    if (civilizationLevel === 'None' || civilizationLevel === 'Unsentient' || enemyPower === 0) {
+        if (element.classList.contains('conquest')) {
+            element.innerHTML = 'Settle';
+            element.classList.remove('red-disabled-text');
+            element.classList.add('green-ready-text');
+        } else {
+            element.classList.add('red-disabled-text');
+            element.classList.remove('green-ready-text');
+        }
+        return;
+    }
 
     let active = false;
 
@@ -11728,26 +11745,31 @@ export async function settleSystemAfterBattle(accessPoint) {
     }
 
     if (getStatRun() < 2) {
-        callPopupModal(
-            modalPlayerLeaderIntroHeaderText,
-            getPlayerPhilosophy() === 'constructor' ? modalPlayerLeaderIntroContentText1 :
-            getPlayerPhilosophy() === 'supremacist' ? modalPlayerLeaderIntroContentText2 :
-            getPlayerPhilosophy() === 'voidborn' ? modalPlayerLeaderIntroContentText3 :
-            modalPlayerLeaderIntroContentText4,
-            true,
-            false,
-            false,
-            false,
-            function() { showHideModal() },
-            null,
-            null,
-            null,
-            'IT SHALL BE DONE',
-            null,
-            null,
-            null,
-            false
-    );
+        await new Promise((resolve) => {
+            callPopupModal(
+                modalPlayerLeaderIntroHeaderText,
+                getPlayerPhilosophy() === 'constructor' ? modalPlayerLeaderIntroContentText1 :
+                getPlayerPhilosophy() === 'supremacist' ? modalPlayerLeaderIntroContentText2 :
+                getPlayerPhilosophy() === 'voidborn' ? modalPlayerLeaderIntroContentText3 :
+                modalPlayerLeaderIntroContentText4,
+                true,
+                false,
+                false,
+                false,
+                function() {
+                    showHideModal();
+                    resolve();
+                },
+                null,
+                null,
+                null,
+                'IT SHALL BE DONE',
+                null,
+                null,
+                null,
+                false
+            );
+        });
     }
 
     switch(accessPoint) {
@@ -11776,41 +11798,51 @@ export async function settleSystemAfterBattle(accessPoint) {
         await showMiaplacidusEndgameStory();
     }
 
-    if (getStarsWithAncientManuscripts().some(star => star[0] === getDestinationStar())) {
-        let factoryStarToReport = null;
+    const manuscriptsAtDestination = (getStarsWithAncientManuscripts() || []).filter(
+        entry => Array.isArray(entry) && entry[0] === getDestinationStar() && entry[3] === false
+    );
 
-        for (let i = 0; i < 4; i++) {
-            const manuscriptData = getStarsWithAncientManuscripts()[i];
-            if (manuscriptData && manuscriptData[3] === false) { //finds first false manuscript slot to activate that factory star
-                factoryStarToReport = getStarsWithAncientManuscripts()[i][1];
-                activateFactoryStar(getStarsWithAncientManuscripts()[i]);
-                setAchievementFlagArray('findAncientManuscript', 'add');
-                break;
+    if (manuscriptsAtDestination.length > 0) {
+        const activatedFactoryStars = [];
+
+        manuscriptsAtDestination.forEach((manuscriptData) => {
+            activateFactoryStar(manuscriptData);
+
+            const factoryStarName = manuscriptData?.[1];
+            if (factoryStarName) {
+                activatedFactoryStars.push(factoryStarName);
             }
-        }
+        });
+
+        setAchievementFlagArray('findAncientManuscript', 'add');
+
+        const factoryStarToReport = activatedFactoryStars[0] ?? 'Unknown';
 
         const header = 'ANCIENT MANUSCRIPT!';
         const content = `Exploring a habitable Planet in the ${capitaliseWordsWithRomanNumerals(getDestinationStar())} System after your victory, you discover<br>an Ancient Manuscript!  It seems to point out about strange activities<br>in a previously undiscovered System, the <span class="factory-star-text">${capitaliseWordsWithRomanNumerals(factoryStarToReport)}</span> System! Its location has also<br>been revealed to us!`;
 
-        callPopupModal(
-            header, 
-            content, 
-            true, 
-            false, 
-            false, 
-            false, 
-            function() {
-                showHideModal();
-            },
-            null, 
-            null, 
-            null,
-            'CONFIRM',
-            null,
-            null,
-            null,
-            false
-        );
+        await new Promise((resolve) => {
+            callPopupModal(
+                header, 
+                content, 
+                true, 
+                false, 
+                false, 
+                false, 
+                function() {
+                    showHideModal();
+                    resolve();
+                },
+                null, 
+                null, 
+                null,
+                'CONFIRM',
+                null,
+                null,
+                null,
+                false
+            );
+        });
     }    
 
     autoSelectOption('fleetHangarOption', apGain);

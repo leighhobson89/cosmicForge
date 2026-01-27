@@ -923,17 +923,25 @@
                         <option value="3000">3000 ms</option>
                         <option value="4000">4000 ms</option>
                         <option value="5000" selected>5000 ms</option>
+                        <option value="20000">20000 ms</option>
                     </select>
                     <select id="debugTimeWarpMultiplierSelect" class="debug-select">
                         <option value="2">×2</option>
                         <option value="5">×5</option>
-                        <option value="10" selected>×10</option>
+                        <option value="10">×10</option>
                         <option value="20">×20</option>
-                        <option value="50">×50</option>
+                        <option value="50" selected>×50</option>
+                        <option value="200">×200</option>
                     </select>
                 </div>
                 <div class="timewarp-actions">
                     <button id="debugTimeWarpButton" class="option-button">Timewarp</button>
+                </div>
+            </div>
+            <div class="debug-row">
+                <div class="debug-label">Prepare run for Starship Launch</div>
+                <div class="button-column">
+                    <button id="prepareRunForStarshipLaunchButton" class="option-button">Prepare</button>
                 </div>
             </div>
             <div class="debug-row">
@@ -955,13 +963,13 @@
                 </div>
             </div>
             <div class="debug-row">
-                <div class="debug-label">Give 1M of all Resources and Compounds</div>
+                <div class="debug-label">Give 1B of all Resources and Compounds</div>
                 <div class="button-column">
                     <button id="give1MAllResourcesAndCompounds" class="option-button">Gain</button>
                 </div>
             </div>
             <div class="debug-row">
-                <div class="debug-label">Give 100 of all Resources and Compounds</div>
+                <div class="debug-label">Give 1M of all Resources and Compounds</div>
                 <div class="button-column">
                     <button id="give100AllResourcesAndCompounds" class="option-button">Gain</button>
                 </div>
@@ -1003,6 +1011,12 @@
                 </div>
             </div>
             <div class="debug-row">
+                <div class="debug-label">Add 100 Ascendency Points</div>
+                <div class="button-column">
+                    <button id="add100ApButton" class="option-button">Gain</button>
+                </div>
+            </div>
+            <div class="debug-row">
                 <div class="debug-label">Unlock All Tabs</div>
                 <div class="button-column">
                     <button id="unlockAllTabsButton" class="option-button">Enabled</button>
@@ -1012,6 +1026,18 @@
                 <div class="debug-label">Hold Enter To Gain</div>
                 <div class="button-column">
                     <button id="holdEnterToGainDebugButton" class="option-button debug-toggle-inactive">Disabled</button>
+                </div>
+            </div>
+            <div class="debug-row">
+                <div class="debug-label">Add 30 Fleets + Envoy</div>
+                <div class="button-column">
+                    <button id="addFleetsAndEnvoyButton" class="option-button">Gain</button>
+                </div>
+            </div>
+            <div class="debug-row">
+                <div class="debug-label">Build Starship</div>
+                <div class="button-column">
+                    <button id="buildStarshipDebugButton" class="option-button">Build</button>
                 </div>
             </div>
         </div>
