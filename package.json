@@ -50,14 +50,18 @@
     "build-icons": "mkdir -p icons && icon-gen -i icon.png -o icons",
     "build:mac": "bun run build-icons && electron-builder --mac --universal -c.mac.identity=null --publish never",
     "build:win": "bun run build-icons && electron-builder --win",
-    "build:linux": "bun run build-icons && electron-builder --linux"
+    "build:linux": "bun run build-icons && electron-builder --linux",
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js",
+    "test:smoke": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js tests/smoke"
   },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/electron": "latest",
     "electron": "latest",
     "electron-builder": "latest",
-    "icon-gen": "latest"
+    "icon-gen": "latest",
+    "jest": "^29.7.0",
+    "playwright": "^1.41.2"
   },
   "dependencies": {},
   "private": true
