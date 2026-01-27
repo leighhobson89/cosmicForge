@@ -10467,7 +10467,8 @@ prepareRunForStarshipLaunchButton?.addEventListener('click', async () => {
         await clickDebugButton('grantAllTechsButton');
         await clickDebugButton('buildLaunchPadScannerAndAllRocketsButton');
         await clickDebugButton('add10AsteroidsButton');
-        await clickDebugButton('addStarButton', 100, 5);
+        await clickDebugButton('addStarButton', 50, 5);
+        await clickDebugButton('gain10000AntimatterButton', 50, 8);
         await clickDebugButton('buildStarshipDebugButton');
         await clickDebugButton('addFleetsAndEnvoyButton');
     } finally {
