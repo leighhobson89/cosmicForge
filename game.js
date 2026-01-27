@@ -1769,8 +1769,8 @@ export function drawMegaStructureTableText() {
 
     function conditionForId(id) {
         if (id.startsWith('name')) {
-            const owned = getMegaStructuresInPossessionArray();
-            const name = megaStructureTableText[id];
+            const owned = (getMegaStructuresInPossessionArray() || []).map((item) => String(item).toLowerCase());
+            const name = String(megaStructureTableText[id] || '').toLowerCase();
             return owned.includes(name);
         }
 
@@ -1805,7 +1805,8 @@ function megastructureUIChecks() {
     const isMegaStructureRun = getCurrentRunIsMegaStructureRun();
     const optionElement = document.getElementById('megastructuresOption');
     const optionContainer = optionElement?.parentElement?.parentElement;
-    const shouldShowOption = isMegaStructureRun || getMegaStructureTabUnlocked();
+    const hasCapturedMegaStructure = (getMegaStructuresInPossessionArray() || []).length > 0;
+    const shouldShowOption = isMegaStructureRun || getMegaStructureTabUnlocked() || hasCapturedMegaStructure;
 
     if (!optionContainer) {
         return;
@@ -6975,6 +6976,7 @@ async function coloniseChecks() {
                 button.innerHTML = 'Attack!';
                 button.onclick = function() {
                     disableTabsLinksAndAutoSaveDuringBattle(true);
+                    settleSystemAfterBattleCalled = false;
                     setEnemyFleetPowerAtBattleStart(getStarSystemDataObject('stars', ['destinationStar', 'enemyFleets', 'fleetPower']));
                     setBattleTriggeredByPlayer(true);
                     setDiplomacyPossible(false);
@@ -11723,7 +11725,9 @@ export function turnAround(unit) {
 
 export async function settleSystemAfterBattle(accessPoint) {
     setAchievementFlagArray('settleSystem', 'add');    
-    const isFactoryStar = getFactoryStarsArray().includes(getDestinationStar());
+    const destinationStarKey = getDestinationStar();
+    const destinationFactoryStar = getStarSystemDataObject('stars', [destinationStarKey, 'factoryStar'], true);
+    const isFactoryStar = Boolean(destinationFactoryStar) || getFactoryStarsArray().includes(destinationStarKey);
     let apModifier = accessPoint === 'battle' || accessPoint === 'surrender' ? 2 : 1;
     
     if (accessPoint !== 'battle') {
@@ -11732,7 +11736,8 @@ export async function settleSystemAfterBattle(accessPoint) {
 
     if (isFactoryStar) {
         apModifier *= 2;
-        setMegaStructuresInPossessionArray(getStarSystemDataObject('stars', [getDestinationStar(), 'factoryStar']));
+        setMegaStructuresInPossessionArray(destinationFactoryStar);
+        setMegaStructureTabUnlocked(true);
         setAchievementFlagArray('conquerMegastructureSystem', 'add');
     }
 
@@ -11846,6 +11851,7 @@ export async function settleSystemAfterBattle(accessPoint) {
     }    
 
     autoSelectOption('fleetHangarOption', apGain);
+    settleSystemAfterBattleCalled = false;
 }
 
 async function showMiaplacidusEndgameStory() {

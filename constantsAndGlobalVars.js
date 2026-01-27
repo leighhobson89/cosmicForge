@@ -1854,7 +1854,7 @@ export function restoreGameStatus(gameState, type) {
             starsWithAncientManuscripts = gameState.starsWithAncientManuscripts ?? [];
             factoryStarsArray = gameState.factoryStarsArray ?? [];
             manuscriptCluesShown = gameState.manuscriptCluesShown ?? {};
-            megaStructuresInPossessionArray = gameState.megaStructuresInPossessionArray ?? [];
+            megaStructuresInPossessionArray = (gameState.megaStructuresInPossessionArray ?? []).map(mapFactoryStarValue);
             miaplacidusMilestoneLevel = gameState.miaplacidusMilestoneLevel ?? 0;
             megaStructureTechsResearched = gameState.megaStructureTechsResearched ?? [];
             megastructureAntimatterAmount = gameState.megaStructureAntimatterAmount ?? 0;
@@ -4232,7 +4232,7 @@ export function activateFactoryStar(star) {
 }
 
 export function setMegaStructuresInPossessionArray(value) {
-    megaStructuresInPossessionArray.push(value);
+    megaStructuresInPossessionArray.push(mapFactoryStarValue(value));
 }
 
 export function getMegaStructuresInPossessionArray() {
@@ -4240,11 +4240,22 @@ export function getMegaStructuresInPossessionArray() {
 }
 
 export function getFactoryStarsArray() {
-    return factoryStarsArray;
+    const base = Array.isArray(factoryStarsArray) ? factoryStarsArray : [];
+    const derived = starSystems?.stars
+        ? Object.keys(starSystems.stars).filter((starName) => Boolean(starSystems.stars?.[starName]?.factoryStar))
+        : [];
+
+    return Array.from(
+        new Set(
+            [...base, ...derived]
+                .filter(Boolean)
+                .map((starName) => (typeof starName === 'string' ? starName.toLowerCase() : starName))
+        )
+    );
 }
 
 export function setFactoryStarsArray(value) {
-    factoryStarsArray.push(value);
+    factoryStarsArray.push(typeof value === 'string' ? value.toLowerCase() : value);
 }
 
 export function getCurrentRunIsMegaStructureRun() {
