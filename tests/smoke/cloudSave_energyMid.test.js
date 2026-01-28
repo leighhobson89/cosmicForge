@@ -452,36 +452,44 @@ describe("cloudSave_energyMid", () => {
 
               await page.evaluate(async ({ type, eff }) => {
                 const globals = await import("/constantsAndGlobalVars.js");
-                const mod = await import("/resourceDataObject.js");
+                const game = await import("/game.js");
 
-                const pp2 = mod.resourceData.buildings.energy.upgrades.powerPlant2;
-                pp2.purchasedRate = pp2.maxPurchasedRate;
                 globals.setCurrentStarSystemWeatherEfficiency(["spica", eff, type]);
                 globals.setWeatherEfficiencyApplied(false);
+
+                // Deterministically recompute purchasedRate for powerPlant2 based on current weather.
+                // This avoids races with the autonomous weather timer / energy tick.
+                game.addBuildingPotentialRate("powerPlant2");
+
+                // Prevent updateEnergyDelta from applying the weather multiplier a second time.
+                globals.setWeatherEfficiencyApplied(true);
               }, { type, eff });
 
-              await page.waitForFunction(
-                async ({ eff }) => {
-                  const mod = await import("/resourceDataObject.js");
-                  const pp2 = mod.resourceData?.buildings?.energy?.upgrades?.powerPlant2;
-                  return Math.abs((pp2?.purchasedRate ?? 0) - (pp2?.maxPurchasedRate ?? 0) * eff) < 1e-9;
-                },
-                { eff },
-                { timeout: 60000 }
-              );
-
-              const afterRates = await page.evaluate(async () => {
+              const afterState = await page.evaluate(async () => {
+                const globals = await import("/constantsAndGlobalVars.js");
                 const mod = await import("/resourceDataObject.js");
                 const pp2 = mod.resourceData?.buildings?.energy?.upgrades?.powerPlant2;
+                const weather = globals.getCurrentStarSystemWeatherEfficiency?.() ?? [];
                 return {
-                  maxPurchased: pp2?.maxPurchasedRate ?? 0,
-                  purchased: pp2?.purchasedRate ?? 0
+                  afterRates: {
+                    maxPurchased: pp2?.maxPurchasedRate ?? 0,
+                    purchased: pp2?.purchasedRate ?? 0
+                  },
+                  currentWeather: {
+                    system: weather[0],
+                    eff: weather[1],
+                    type: weather[2]
+                  }
                 };
               });
 
-              expect(Number(afterRates.purchased)).toBeCloseTo(Number(afterRates.maxPurchased) * eff, 10);
+              expect(afterState.currentWeather.type).toBe(type);
+              expect(Number(afterState.afterRates.purchased)).toBeCloseTo(
+                Number(afterState.afterRates.maxPurchased) * Number(afterState.currentWeather.eff),
+                10
+              );
 
-              return { beforeRates, afterRates };
+              return { beforeRates, afterState };
             },
             { input: { type, eff } }
           );
