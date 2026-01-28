@@ -1140,7 +1140,7 @@ export function drawTab4Content(heading, optionContentElement) {
                     gain(1, 'waterAB3Quantity', 'autoBuyer', true, 'tier3', 'water', 'compounds')
                 }, 'upgradeCheck', '', 'autoBuyer', null, 'water', true, 'tier3', 'compound'),
                 createTextElement(`Quantity: ${getResourceDataObject('compounds', ['water', 'upgrades', 'autoBuyer', 'tier3', 'quantity'])}`, 'waterAB3Quantity', ['autoBuyer-building-quantity']),
-                createToggleSwitch('water31Toggle', true, (isEnabled) => {
+                createToggleSwitch('water3Toggle', true, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'compounds', ['water', 'upgrades', 'autoBuyer', 'tier3', 'active']);
                 }, ['toggle-switch-spacing']),
                 null,
