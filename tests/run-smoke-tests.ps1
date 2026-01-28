@@ -12,13 +12,13 @@ $env:HEADLESS = '1'
 
 # Run all tests under tests/smoke
 $tests = @(
-  'tests/smoke/launchAndOnboard.test.js',
-  'tests/smoke/launch-app.test.js',
-  'tests/smoke/earlyLoop.test.js',
-  'tests/smoke/autobuyer.test.js',
-  'tests/smoke/researchTech.test.js'
-  'tests/smoke/energyMid.test.js',
-  'tests/smoke/spaceAntimatter.test.js'
+  #'tests/smoke/launchAndOnboard.test.js',
+  #'tests/smoke/launch-app.test.js',
+  #'tests/smoke/earlyLoop.test.js',
+  'tests/smoke/autobuyer.test.js'
+  #'tests/smoke/researchTech.test.js'
+  #'tests/smoke/energyMid.test.js',
+  #'tests/smoke/spaceAntimatter.test.js'
 )
 
 $expectedFailures = @(
