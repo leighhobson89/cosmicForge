@@ -312,8 +312,23 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                 }
 
                 const lower = query.toLowerCase();
+                const manuscripts = getStarsWithAncientManuscripts?.() || [];
+                const revealedFactoryStars = new Set(
+                    manuscripts
+                        .filter((entry) => Array.isArray(entry) && entry.length >= 4 && entry[3] === true)
+                        .map((entry) => String(entry[1]).toLowerCase())
+                );
+                const factoryStars = new Set((getFactoryStarsArray() || []).map((name) => String(name).toLowerCase()));
+
                 const matches = allStars
                     .filter((name) => String(name).toLowerCase().includes(lower))
+                    .filter((name) => {
+                        const normalizedLower = String(name).toLowerCase();
+                        if (!factoryStars.has(normalizedLower)) {
+                            return true;
+                        }
+                        return revealedFactoryStars.has(normalizedLower);
+                    })
                     .slice(0, 50);
 
                 renderResults(matches);
