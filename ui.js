@@ -2167,7 +2167,7 @@ export function createDropdown(id, options, selectedValue, onChange, classes = [
 
         optionDiv.addEventListener('click', (event) => {
             playClickSfx();
-            const value = event.target.getAttribute('data-value');
+            const value = event.currentTarget.getAttribute('data-value');
             const selectedOption = options.find(option => option.value == value);
             dropdownText.innerHTML = selectedOption ? selectedOption.text : 'Select an option';
             if (getCurrentOptionPane().startsWith('rocket')) {
@@ -5411,6 +5411,12 @@ function buildRocketSidebarStatus(rocketKey) {
     }
 
     if (!fuelingEntries.length) {
+        return { text: 'Ready For Refuel', className: rocketStatusClassMap['Ready For Refuel'] };
+    }
+
+    // If THIS rocket is not currently fuelling and isn't launched/travelling/mining,
+    // it should still show Ready For Refuel even if other rockets are fuelling.
+    if (!fuelingEntries.includes(rocketKey) && !fuelingEntries.includes(`${rocketKey}FuelledUp`)) {
         return { text: 'Ready For Refuel', className: rocketStatusClassMap['Ready For Refuel'] };
     }
 
