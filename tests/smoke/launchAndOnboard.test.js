@@ -586,7 +586,7 @@ describe("launchAndOnboard", () => {
 
         await step({
           page,
-          text: "You game will now save periodocally*Thats it!  Go forth and Forge, Mia'Plac!",
+          text: "You game will now save periodically*Thats it!  Go forth and Forge, Mia'Plac!",
           targetLocator: page.locator('label[for="autoSaveToggle"]'),
           waitAfterMs: 7000
         });

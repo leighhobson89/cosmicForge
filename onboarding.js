@@ -1039,7 +1039,7 @@ export function onboardingChecks(
             ['timedSpotlight', ['Concepts - Late', 0], 'This is all the background you need!  One last thing before I leave * you to explore and Forge!', 4000, 'Settings'],
             ['spotlight', ['Saving / Loading', 0], "Click 'Saving / Loading'", 'Settings'],
             ['spotlight', ['autoSaveToggle', 1], 'Click The Autosave Toggle Switch', 'Settings'],
-            ['timedSpotlight', ['autoSaveToggle', 1], "You game will now save periodocally*Thats it!  Go forth and Forge, Mia'Plac!", 7000, 'Settings'],
+            ['timedSpotlight', ['autoSaveToggle', 1], "You game will now save periodically*Thats it!  Go forth and Forge, Mia'Plac!", 7000, 'Settings'],
         ]);
     }
 
