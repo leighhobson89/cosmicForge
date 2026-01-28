@@ -84,34 +84,52 @@ export async function startStaticServer({ rootDir }) {
 }
 
 export async function createCloudLoadedGame({ page, port, pioneerId }) {
-  await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: "domcontentloaded" });
+  const runStep = globalThis.smokeStep
+    ? (name, fn, meta) => globalThis.smokeStep(name, fn, meta)
+    : async (_name, fn) => fn();
 
-  await page.waitForSelector("#pioneerCodeName", { timeout: 60000 });
-  await page.fill("#pioneerCodeName", pioneerId);
-  await page.click("#modalConfirm");
+  await runStep(
+    "navigate to app",
+    async () => {
+      await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: "domcontentloaded" });
+    },
+    { input: { port } }
+  );
 
-  // Fullscreen prompt is part of the boot flow.
-  await page.waitForSelector("#fullScreenCheckBox", { timeout: 60000 });
-  await page.click("#fullScreenCheckBox");
-  await page.click("#modalConfirm");
+  await runStep(
+    "enter pioneer id",
+    async () => {
+      await page.waitForSelector("#pioneerCodeName", { timeout: 60000 });
+      await page.fill("#pioneerCodeName", pioneerId);
+      await page.click("#modalConfirm");
+    },
+    { input: { pioneerId } }
+  );
+
+  await runStep("accept fullscreen prompt", async () => {
+    await page.waitForSelector("#fullScreenCheckBox", { timeout: 60000 });
+    await page.click("#fullScreenCheckBox");
+    await page.click("#modalConfirm");
+  });
 
   await page.waitForTimeout(300);
 
-  // Wait for cloud-load notification.
-  await page.waitForSelector(".notification-container.classification-loadSave", { timeout: 10000 });
-  await page.waitForFunction(() => {
-    const containers = document.querySelectorAll(".notification-container.classification-loadSave");
-    const text = Array.from(containers)
-      .map((el) => el.textContent ?? "")
-      .join("\n");
-    return text.includes("Game loaded successfully") || text.includes("No saved game data found");
-  }, null, { timeout: 10000 });
+  const notificationText = await runStep("wait for cloud-load notification", async () => {
+    await page.waitForSelector(".notification-container.classification-loadSave", { timeout: 10000 });
+    await page.waitForFunction(() => {
+      const containers = document.querySelectorAll(".notification-container.classification-loadSave");
+      const text = Array.from(containers)
+        .map((el) => el.textContent ?? "")
+        .join("\n");
+      return text.includes("Game loaded successfully") || text.includes("No saved game data found");
+    }, null, { timeout: 10000 });
 
-  const notificationText = await page.evaluate(() => {
-    const containers = document.querySelectorAll(".notification-container.classification-loadSave");
-    return Array.from(containers)
-      .map((el) => el.textContent ?? "")
-      .join("\n");
+    return await page.evaluate(() => {
+      const containers = document.querySelectorAll(".notification-container.classification-loadSave");
+      return Array.from(containers)
+        .map((el) => el.textContent ?? "")
+        .join("\n");
+    });
   });
 
   if (!notificationText.includes("Game loaded successfully")) {
@@ -120,6 +138,7 @@ export async function createCloudLoadedGame({ page, port, pioneerId }) {
     );
   }
 
-  // Wait until main UI is available.
-  await page.waitForSelector("#tab1", { timeout: 60000 });
+  await runStep("wait for main UI", async () => {
+    await page.waitForSelector("#tab1", { timeout: 60000 });
+  });
 }

@@ -15,11 +15,12 @@ export default {
   reporters: [
     'default',
     ['jest-html-reporters', {
-      publicPath: './html-report',
-      filename: 'report.html',
+      publicPath: process.env.JEST_HTML_REPORT_PATH ?? './html-report',
+      filename: process.env.JEST_HTML_REPORT_FILENAME ?? 'report.html',
       expand: true,
       hideIcon: false,
-      pageTitle: 'CosmicForge Test Report',
+      pageTitle: process.env.JEST_HTML_REPORT_TITLE ?? 'CosmicForge Test Report',
+      includeConsoleLog: true,
       logoImgPath: undefined,
       inlineSource: false
     }]
