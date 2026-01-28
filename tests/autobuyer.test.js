@@ -480,6 +480,62 @@ describe("cloudSave_autobuyer", () => {
         await assertPowerIsOn(`${label}:power`);
       };
 
+      const getTierDiagnostics = async ({ type, key, baselineEnergy, expectedRate, expectedEnergy }) => {
+        await waitForRateToMatch(type, key, expectedRate, { timeoutMs: 4000 });
+        const actualRate = await readGrossAutoBuyerRate(type, key);
+        const currentEnergy = await readEnergyMetrics();
+        const actualUseDelta = (currentEnergy.totalEnergyUse ?? 0) - (baselineEnergy.totalEnergyUse ?? 0);
+        const actualNetDelta = (baselineEnergy.net ?? 0) - (currentEnergy.net ?? 0);
+        const generationShift = Math.abs((currentEnergy.rate ?? 0) - (baselineEnergy.rate ?? 0));
+        const generationShiftTol = Math.max(Math.abs(baselineEnergy.rate ?? 0) * 0.05, 5);
+
+        return {
+          expected: {
+            rate: expectedRate,
+            energyUseDelta: expectedEnergy
+          },
+          actual: {
+            rate: actualRate,
+            energyUseDelta: actualUseDelta
+          },
+          energy: {
+            baseline: baselineEnergy,
+            current: currentEnergy,
+            netDelta: actualNetDelta,
+            generationShift,
+            generationShiftTol,
+            netDeltaTrusted: generationShift <= generationShiftTol
+          }
+        };
+      };
+
+      const getTierIncrementalDiagnostics = async ({ type, key, before, after, tierExpected }) => {
+        const actualTierRateDelta = (after.rateGross ?? 0) - (before.rateGross ?? 0);
+        const actualTierEnergyUseDelta = (after.energy.totalEnergyUse ?? 0) - (before.energy.totalEnergyUse ?? 0);
+        const actualTierNetDelta = (before.energy.net ?? 0) - (after.energy.net ?? 0);
+        const generationShift = Math.abs((after.energy.rate ?? 0) - (before.energy.rate ?? 0));
+        const generationShiftTol = Math.max(Math.abs(before.energy.rate ?? 0) * 0.05, 5);
+
+        return {
+          expectedTier: {
+            rateDelta: tierExpected.rate ?? 0,
+            energyUseDelta: tierExpected.energyUse ?? 0
+          },
+          actualTier: {
+            rateDelta: actualTierRateDelta,
+            energyUseDelta: actualTierEnergyUseDelta
+          },
+          energy: {
+            before: before.energy,
+            after: after.energy,
+            netDelta: actualTierNetDelta,
+            generationShift,
+            generationShiftTol,
+            netDeltaTrusted: generationShift <= generationShiftTol
+          }
+        };
+      };
+
       const waitForEnergyConsumptionDelta = async (expectedDelta, baseline, timeoutMs = 1000) => {
         if (!expectedDelta) {
           return baseline;
@@ -684,6 +740,12 @@ describe("cloudSave_autobuyer", () => {
               expect(tierCfg.rate).toBeGreaterThan(0);
               const tierQty = await readTierQuantity("resources", key, tier);
               expect(tierQty).toBe(1);
+
+              const before = {
+                rateGross: await readGrossAutoBuyerRate("resources", key),
+                energy: await readEnergyMetrics()
+              };
+
               await toggleTierViaUi(key, tier, true);
               await page.waitForTimeout(WAIT_SETTLE_MS);
 
@@ -691,8 +753,35 @@ describe("cloudSave_autobuyer", () => {
               const expectedRate = purchasedTierCfgs.reduce((acc, t) => acc + (t.cfg.rate ?? 0), 0);
               const expectedEnergy = purchasedTierCfgs.reduce((acc, t) => acc + (t.cfg.energyUse ?? 0), 0);
 
+              await waitForRateToMatch("resources", key, expectedRate, { timeoutMs: 4000 });
+              const after = {
+                rateGross: await readGrossAutoBuyerRate("resources", key),
+                energy: await readEnergyMetrics()
+              };
+
+              const incremental = await getTierIncrementalDiagnostics({
+                type: "resources",
+                key,
+                before,
+                after,
+                tierExpected: { rate: tierCfg.rate, energyUse: tierCfg.energyUse }
+              });
+
+              const diagnostics = await getTierDiagnostics({
+                type: "resources",
+                key,
+                baselineEnergy,
+                expectedRate,
+                expectedEnergy
+              });
+
               await assertRateAndQuantityDelta("resources", key, expectedRate, SAMPLE_DELTA_MS, `resources:${key}:tier${tier}:cumulative`);
               await assertEnergyMatchesActiveTiers(baselineEnergy, expectedEnergy, `resources:${key}:tier${tier}:energyCumulative`);
+
+              return {
+                incremental,
+                cumulative: diagnostics
+              };
             });
 
             if (tier >= 2) {
@@ -758,6 +847,12 @@ describe("cloudSave_autobuyer", () => {
               expect(tierCfg.rate).toBeGreaterThan(0);
               const tierQty = await readTierQuantity("compounds", key, tier);
               expect(tierQty).toBe(1);
+
+              const before = {
+                rateGross: await readGrossAutoBuyerRate("compounds", key),
+                energy: await readEnergyMetrics()
+              };
+
               await toggleTierViaUi(key, tier, true);
               await page.waitForTimeout(WAIT_SETTLE_MS);
 
@@ -765,8 +860,35 @@ describe("cloudSave_autobuyer", () => {
               const expectedRate = purchasedTierCfgs.reduce((acc, t) => acc + (t.cfg.rate ?? 0), 0);
               const expectedEnergy = purchasedTierCfgs.reduce((acc, t) => acc + (t.cfg.energyUse ?? 0), 0);
 
+              await waitForRateToMatch("compounds", key, expectedRate, { timeoutMs: 4000 });
+              const after = {
+                rateGross: await readGrossAutoBuyerRate("compounds", key),
+                energy: await readEnergyMetrics()
+              };
+
+              const incremental = await getTierIncrementalDiagnostics({
+                type: "compounds",
+                key,
+                before,
+                after,
+                tierExpected: { rate: tierCfg.rate, energyUse: tierCfg.energyUse }
+              });
+
+              const diagnostics = await getTierDiagnostics({
+                type: "compounds",
+                key,
+                baselineEnergy,
+                expectedRate,
+                expectedEnergy
+              });
+
               await assertRateAndQuantityDelta("compounds", key, expectedRate, SAMPLE_DELTA_MS, `compounds:${key}:tier${tier}:cumulative`);
               await assertEnergyMatchesActiveTiers(baselineEnergy, expectedEnergy, `compounds:${key}:tier${tier}:energyCumulative`);
+
+              return {
+                incremental,
+                cumulative: diagnostics
+              };
             });
 
             if (tier >= 2) {
