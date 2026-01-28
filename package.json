@@ -57,6 +57,7 @@
   "devDependencies": {
     "@types/bun": "latest",
     "@types/electron": "latest",
+    "debug": "^4.3.4",
     "electron": "latest",
     "electron-builder": "latest",
     "icon-gen": "latest",
