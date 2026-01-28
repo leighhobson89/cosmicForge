@@ -2350,7 +2350,7 @@ canvas {
  }
 
  .star-map-search-item:hover {
-     background-color: var(--container-bg-color);
+     background-color: color-mix(in srgb, currentColor 30%, transparent);
  }
 
 .header-button-container {
