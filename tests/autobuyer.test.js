@@ -77,20 +77,19 @@ describe("cloudSave_autobuyer", () => {
               upgrades.powerPlant1.purchasedRate = 0;
             }
             if (upgrades.powerPlant2) {
-              upgrades.powerPlant2.quantity = Math.max(upgrades.powerPlant2.quantity ?? 0, 1000);
-              upgrades.powerPlant2.purchasedRate = Math.max(upgrades.powerPlant2.purchasedRate ?? 0, 1000000);
+              upgrades.powerPlant2.quantity = 0;
+              upgrades.powerPlant2.purchasedRate = 0;
             }
             if (upgrades.powerPlant3) {
-              upgrades.powerPlant3.quantity = Math.max(upgrades.powerPlant3.quantity ?? 0, 0);
-              upgrades.powerPlant3.purchasedRate = 0;
+              upgrades.powerPlant3.quantity = Math.max(upgrades.powerPlant3.quantity ?? 0, 100);
+              upgrades.powerPlant3.purchasedRate = Math.max(upgrades.powerPlant3.purchasedRate ?? 0, 1000000);
             }
           }
 
-          // Solar fuel is free, but make sure it exists anyway.
-          const solar = rdo.resourceData?.resources?.solar;
-          if (solar) {
-            solar.storageCapacity = Math.max(solar.storageCapacity ?? 0, 1000000000);
-            solar.quantity = Math.max(solar.quantity ?? 0, 1000000);
+          const diesel = rdo.resourceData?.compounds?.diesel;
+          if (diesel) {
+            diesel.storageCapacity = Math.max(diesel.storageCapacity ?? 0, 1000000000);
+            diesel.quantity = Math.max(diesel.quantity ?? 0, 1000000000);
           }
 
           if (typeof cg.setTrippedStatus === "function") {
@@ -101,8 +100,8 @@ describe("cloudSave_autobuyer", () => {
           }
           if (typeof cg.setBuildingTypeOnOff === "function") {
             cg.setBuildingTypeOnOff("powerPlant1", false);
-            cg.setBuildingTypeOnOff("powerPlant2", true);
-            cg.setBuildingTypeOnOff("powerPlant3", false);
+            cg.setBuildingTypeOnOff("powerPlant2", false);
+            cg.setBuildingTypeOnOff("powerPlant3", true);
           }
         });
       };
