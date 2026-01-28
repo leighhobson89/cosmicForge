@@ -16,9 +16,9 @@ $tests = @(
   #'tests/smoke/launch-app.test.js',
   #'tests/smoke/cloudSave_earlyLoop.test.js',
   #'tests/smoke/cloudSave_autobuyer.test.js',
-  #'tests/smoke/cloudSave_researchTech.test.js',
-  'tests/smoke/cloudSave_energyMid.test.js'
-  #'tests/smoke/cloudSave_spaceAntimatter.test.js'
+  #'tests/smoke/cloudSave_researchTech.test.js'
+  #'tests/smoke/cloudSave_energyMid.test.js',
+  'tests/smoke/cloudSave_spaceAntimatter.test.js'
 )
 
 $expectedFailures = @(
