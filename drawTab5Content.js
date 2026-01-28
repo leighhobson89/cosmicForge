@@ -1,9 +1,11 @@
-import { removeTabAttentionIfNoIndicators, createColoniseOpinionProgressBar, setColoniseOpinionProgressBar, spaceTravelButtonHideAndShowDescription, drawStarConnectionDrawings, createStarDestinationRow, sortStarTable, handleSortStarClick, createTextElement, createOptionRow, createButton, generateStarfield, showNotification, showEnterWarModeModal, setWarUI } from './ui.js';
-import { getFactoryStarsArray, getSettledStars, setInFormation, setRedrawBattleDescription, setFleetChangedSinceLastDiplomacy, setDestinationStarScanned, getDestinationStarScanned, getStellarScannerBuilt, getStarShipTravelling, getDestinationStar, getCurrencySymbol, getSortStarMethod, getCurrentStarSystem, STAR_FIELD_SEED, NUMBER_OF_STARS, getStarMapMode, setStarMapMode, getWarMode, replaceBattleUnits, setNeedNewBattleCanvas, setFormationGoal, setBattleResolved, getBelligerentEnemyFlag, setAchievementFlagArray, getStarsWithAncientManuscripts, getStarShipDestinationReminderVisible } from './constantsAndGlobalVars.js';
+import { removeTabAttentionIfNoIndicators, createColoniseOpinionProgressBar, setColoniseOpinionProgressBar, spaceTravelButtonHideAndShowDescription, drawStarConnectionDrawings, createStarDestinationRow, sortStarTable, handleSortStarClick, createTextElement, createOptionRow, createButton, generateStarfield, showNotification, showEnterWarModeModal, setWarUI, removeStarConnectionTooltip } from './ui.js';
+
+import { getFactoryStarsArray, getSettledStars, setInFormation, setRedrawBattleDescription, setFleetChangedSinceLastDiplomacy, setDestinationStarScanned, getDestinationStarScanned, getStellarScannerBuilt, getStarShipTravelling, getDestinationStar, getCurrencySymbol, getSortStarMethod, getCurrentStarSystem, STAR_FIELD_SEED, NUMBER_OF_STARS, getStarMapMode, setStarMapMode, getWarMode, replaceBattleUnits, setNeedNewBattleCanvas, setFormationGoal, setBattleResolved, getBelligerentEnemyFlag, setAchievementFlagArray, getStarsWithAncientManuscripts, getStarShipDestinationReminderVisible, getStarVisionDistance, getMiaplacidusMilestoneLevel } from './constantsAndGlobalVars.js';
 
 import { getMaxFleetShip, getFleetShips, copyStarDataToDestinationStarField, getResourceDataObject, getStarShipParts, getStarShipPartsNeededInTotalPerModule, getStarSystemDataObject, setStarSystemDataObject } from './resourceDataObject.js';
 import { capitaliseString, capitaliseWordsWithRomanNumerals } from './utilityFunctions.js';
 import { updateDiplomacySituation, calculateModifiedAttitude, increaseAttackAndDefensePower, generateDestinationStarData, gain, getAscendencyPointsWithRepeatableBonus } from './game.js';
+import { getStarNames } from './descriptions.js';
 
 function getWeatherDisplayData(weatherTendency, weather) {
     if (Array.isArray(weatherTendency) && weatherTendency.length >= 3 && weatherTendency.every(value => value !== undefined)) {
@@ -38,15 +40,85 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
     }
     removeTabAttentionIfNoIndicators('tab5');
 
+    const headerRow = document.getElementById('headerContentTab5');
+    if (headerRow) {
+        headerRow.classList.toggle('star-map-header', heading === 'Star Map');
+        const headerContainer = headerRow.closest('.container-item-menu-header');
+        if (headerContainer) {
+            headerContainer.classList.toggle('star-map-header-container', heading === 'Star Map');
+        }
+    }
+
     if (heading === 'Star Map') {
         const headerRow = document.getElementById('headerContentTab5');
         
         headerRow.innerHTML = `
-            <div id="starMapNameField" class="star-map-name-field">Star Map</div>
-            <div id="starButtonContainer" class="header-button-container"></div>
+            <div class="star-map-header-top">
+                <div id="starMapNameField" class="star-map-name-field">Star Map</div>
+                <div id="starButtonContainer" class="header-button-container"></div>
+                <div id="starMapSearchRow" class="star-map-search-row">
+                    <input id="starMapSearchInput" class="star-map-search-input" type="text" placeholder="" autocomplete="off" />
+                    <div id="starMapSearchOverlay" class="star-map-search-overlay">
+                        <span class="star-map-search-overlay-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                        </span>
+                        <span class="star-map-search-overlay-text">Search Star...</span>
+                    </div>
+                    <div id="starMapSearchResults" class="star-map-search-results invisible" role="listbox"></div>
+                </div>
+            </div>
         `;
         
         const starButtonContainer = headerRow.querySelector('#starButtonContainer');
+        const searchRowEl = headerRow.querySelector('#starMapSearchRow');
+        const overlayTextEl = headerRow.querySelector('#starMapSearchOverlay .star-map-search-overlay-text');
+        const overlayIconEl = headerRow.querySelector('#starMapSearchOverlay .star-map-search-overlay-icon');
+        const searchInputEl = headerRow.querySelector('#starMapSearchInput');
+        const searchResultsEl = headerRow.querySelector('#starMapSearchResults');
+
+        const setSearchEnabledForMode = (mode) => {
+            const modeLower = String(mode || '').toLowerCase();
+            const enabled = modeLower === 'normal' || modeLower === 'distance';
+
+            if (searchRowEl) {
+                searchRowEl.style.pointerEvents = enabled ? 'auto' : 'none';
+                searchRowEl.classList.toggle('red-disabled-text', !enabled);
+            }
+
+            if (overlayTextEl) {
+                overlayTextEl.textContent = enabled ? 'Search Star...' : 'Normal/Dist Mode...';
+                overlayTextEl.classList.toggle('red-disabled-text', !enabled);
+            }
+
+            if (overlayIconEl) {
+                overlayIconEl.classList.toggle('red-disabled-text', !enabled);
+            }
+
+            if (searchInputEl) {
+                searchInputEl.classList.toggle('red-disabled-text', !enabled);
+            }
+
+            if (!enabled) {
+                if (searchInputEl) {
+                    searchInputEl.value = '';
+                }
+                if (searchResultsEl) {
+                    searchResultsEl.classList.add('invisible');
+                    searchResultsEl.innerHTML = '';
+                }
+                if (overlayTextEl) {
+                    overlayTextEl.classList.remove('invisible');
+                }
+            }
+
+            if (enabled && typeof globalThis.__starMapSearchSyncOverlayVisibility === 'function') {
+                globalThis.__starMapSearchSyncOverlayVisibility();
+            }
+        };
+
         const buttons = ['Normal', 'Distance', 'Studied', 'In Range'];
         
         buttons.forEach(button => {
@@ -58,6 +130,13 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                 buttonElement.classList.add('green-ready-text');
                 
                 setStarMapMode(button.toLowerCase());
+                setSearchEnabledForMode(button.toLowerCase());
+
+                removeStarConnectionTooltip();
+                const destinationRow = document.getElementById('descriptionContentTab5');
+                if (destinationRow) {
+                    destinationRow.innerHTML = 'This is a map of the known galaxy.';
+                }
 
                 const starContainer = document.querySelector('#optionContentTab5');
                 starContainer.innerHTML = '';
@@ -79,6 +158,214 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             const starData = getStarSystemDataObject('stars');
             createStarDestinationRow(starData[getDestinationStar()], 'travelling');
             spaceTravelButtonHideAndShowDescription();
+        }
+
+        const searchInput = headerRow.querySelector('#starMapSearchInput');
+        const resultsEl = headerRow.querySelector('#starMapSearchResults');
+
+        const closeResults = () => {
+            resultsEl?.classList.add('invisible');
+            if (resultsEl) {
+                resultsEl.innerHTML = '';
+            }
+        };
+
+        const selectStarByName = (starName) => {
+            const starContainer = document.querySelector('#optionContentTab5');
+            if (!starContainer) {
+                return;
+            }
+
+            const normalized = capitaliseWordsWithRomanNumerals(starName);
+            const possibleIds = [
+                normalized,
+                `settledStar${normalized}`,
+                `noneInterestingStar${normalized}`
+            ];
+
+            const starElement = possibleIds
+                .map((id) => document.getElementById(id))
+                .find(Boolean);
+
+            if (starElement) {
+                starElement.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            } else {
+                showNotification(`Star not found on map: ${normalized}`, 'warning', 2500, 'starMap');
+            }
+        };
+
+        const renderResults = (matches) => {
+            if (!resultsEl) {
+                return;
+            }
+
+            resultsEl.innerHTML = '';
+
+            if (matches.length === 0) {
+                resultsEl.innerHTML = `<div class="star-map-search-item red-disabled-text" role="option">No matches</div>`;
+                resultsEl.classList.remove('invisible');
+                return;
+            }
+
+            const settledStars = new Set((getSettledStars() || []).map((name) => String(name).toLowerCase()));
+            const factoryStars = new Set((getFactoryStarsArray() || []).map((name) => String(name).toLowerCase()));
+            const currentStarLower = String(getCurrentStarSystem() || '').toLowerCase();
+            const studiedDistance = getStarVisionDistance?.() ?? 0;
+
+            const dummyContainer = document.createElement('div');
+            const { starDistanceData } = generateStarfield(
+                dummyContainer,
+                NUMBER_OF_STARS,
+                STAR_FIELD_SEED,
+                null,
+                true,
+                getCurrentStarSystem(),
+                false
+            ) || { starDistanceData: {} };
+
+            const getItemClassesForStarName = (starName) => {
+                const normalizedLower = String(starName).toLowerCase();
+                const classes = [];
+
+                if (normalizedLower === 'miaplacidus') {
+                    classes.push('star-map-search-bold');
+                    if ((getMiaplacidusMilestoneLevel?.() ?? 0) !== 4) {
+                        classes.push('red-disabled-text');
+                        return classes;
+                    }
+                    const distance = starDistanceData?.[capitaliseWordsWithRomanNumerals(starName)];
+                    const isStudied = typeof distance === 'number' && distance <= studiedDistance;
+                    if (isStudied) {
+                        classes.push('green-ready-text');
+                    }
+                    return classes;
+                }
+
+                if (factoryStars.has(normalizedLower)) {
+                    classes.push('factory-star-text');
+                    return classes;
+                }
+
+                if (settledStars.has(normalizedLower)) {
+                    classes.push('settled-star-text');
+                    return classes;
+                }
+
+                if (normalizedLower === currentStarLower) {
+                    return classes;
+                }
+
+                const distance = starDistanceData?.[capitaliseWordsWithRomanNumerals(starName)];
+                const isStudied = typeof distance === 'number' && distance <= studiedDistance;
+                if (isStudied) {
+                    classes.push('green-ready-text');
+                }
+                return classes;
+            };
+
+            matches.forEach((match) => {
+                const item = document.createElement('div');
+                const itemClasses = ['star-map-search-item', ...getItemClassesForStarName(match)];
+                item.className = itemClasses.join(' ');
+                item.setAttribute('role', 'option');
+                item.textContent = match;
+                item.addEventListener('mousedown', (event) => {
+                    event.preventDefault();
+                    if (searchInput) {
+                        searchInput.value = match;
+                    }
+                    selectStarByName(match);
+                    if (typeof syncOverlayVisibility === 'function') {
+                        syncOverlayVisibility();
+                    }
+                    closeResults();
+                });
+                resultsEl.appendChild(item);
+            });
+
+            resultsEl.classList.remove('invisible');
+        };
+
+        if (searchInput && resultsEl) {
+            const overlayEl = headerRow.querySelector('#starMapSearchOverlay');
+            const overlayTextEl = headerRow.querySelector('#starMapSearchOverlay .star-map-search-overlay-text');
+            const allStars = getStarNames();
+
+            const syncOverlayVisibility = () => {
+                if (!overlayTextEl) {
+                    return;
+                }
+                const hasValue = (searchInput.value || '').trim().length > 0;
+                const focused = document.activeElement === searchInput;
+                const shouldHide = focused || hasValue;
+                overlayTextEl.classList.toggle('invisible', shouldHide);
+            };
+
+            globalThis.__starMapSearchSyncOverlayVisibility = syncOverlayVisibility;
+
+            const onSearchInput = () => {
+                const query = (searchInput.value || '').trim();
+                if (query.length < 2) {
+                    closeResults();
+                    syncOverlayVisibility();
+                    return;
+                }
+
+                const lower = query.toLowerCase();
+                const matches = allStars
+                    .filter((name) => String(name).toLowerCase().includes(lower))
+                    .slice(0, 50);
+
+                renderResults(matches);
+                syncOverlayVisibility();
+            };
+
+            searchInput.addEventListener('input', onSearchInput);
+            searchInput.addEventListener('focus', () => {
+                if ((searchInput.value || '').trim().length > 0) {
+                    searchInput.value = '';
+                }
+                closeResults();
+                syncOverlayVisibility();
+            });
+            searchInput.addEventListener('blur', () => {
+                closeResults();
+                syncOverlayVisibility();
+            });
+            searchInput.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') {
+                    closeResults();
+                    syncOverlayVisibility();
+                }
+            });
+
+            if (overlayEl) {
+                overlayEl.addEventListener('mousedown', (event) => {
+                    event.preventDefault();
+                    searchInput.focus();
+                });
+            }
+
+            syncOverlayVisibility();
+
+            if (!globalThis.__starMapSearchOutsideClickListenerAttached) {
+                globalThis.__starMapSearchOutsideClickListenerAttached = true;
+                document.addEventListener('click', (event) => {
+                    const target = event.target;
+                    const searchRow = document.getElementById('starMapSearchRow');
+                    if (!searchRow) {
+                        return;
+                    }
+                    if (target instanceof Node && searchRow.contains(target)) {
+                        return;
+                    }
+                    const resultsEl = document.getElementById('starMapSearchResults');
+                    resultsEl?.classList.add('invisible');
+                    if (resultsEl) {
+                        resultsEl.innerHTML = '';
+                    }
+                });
+            }
         }
     }
 
