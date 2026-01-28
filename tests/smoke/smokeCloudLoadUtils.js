@@ -95,17 +95,26 @@ export async function createCloudLoadedGame({ page, port, pioneerId }) {
   await page.click("#fullScreenCheckBox");
   await page.click("#modalConfirm");
 
+  await page.waitForTimeout(300);
+
   // Wait for cloud-load notification.
+  await page.waitForSelector(".notification-container.classification-loadSave", { timeout: 10000 });
   await page.waitForFunction(() => {
-    const text = document.getElementById("notificationContainer")?.textContent ?? "";
-    return text.includes("Game loaded successfully!") || text.includes("No saved game data found.");
-  }, null, { timeout: 60000 });
+    const containers = document.querySelectorAll(".notification-container.classification-loadSave");
+    const text = Array.from(containers)
+      .map((el) => el.textContent ?? "")
+      .join("\n");
+    return text.includes("Game loaded successfully") || text.includes("No saved game data found");
+  }, null, { timeout: 10000 });
 
-  const notificationText = await page.evaluate(() =>
-    document.getElementById("notificationContainer")?.textContent ?? ""
-  );
+  const notificationText = await page.evaluate(() => {
+    const containers = document.querySelectorAll(".notification-container.classification-loadSave");
+    return Array.from(containers)
+      .map((el) => el.textContent ?? "")
+      .join("\n");
+  });
 
-  if (!notificationText.includes("Game loaded successfully!")) {
+  if (!notificationText.includes("Game loaded successfully")) {
     throw new Error(
       `Cloud load failed for pioneer '${pioneerId}'. Notification: ${notificationText.trim()}`
     );
