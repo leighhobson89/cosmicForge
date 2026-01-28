@@ -3,7 +3,7 @@ import { chromium } from "playwright";
 import { startStaticServer, createCloudLoadedGame } from "./smokeCloudLoadUtils.js";
 
 describe("cloudSave_energyMid", () => {
-  test(
+  globalThis.smokeTest(
     "builds batteries + power plants and validates generation, charging, and fuel burn",
     async () => {
       const pioneerId = "smoke_save_energy_mid_v1";

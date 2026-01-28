@@ -3,7 +3,7 @@ import { chromium } from "playwright";
 import { startStaticServer, createCloudLoadedGame } from "./smokeCloudLoadUtils.js";
 
 describe("cloudSave_earlyLoop", () => {
-  test(
+  globalThis.smokeTest(
     "loads early-loop save and validates hydrogen gain/sell/storage",
     async () => {
       const pioneerId = "smoke_save_early_loop_v1";
@@ -19,90 +19,151 @@ describe("cloudSave_earlyLoop", () => {
         const context = await browser.newContext();
         const page = await context.newPage();
 
-        await createCloudLoadedGame({ page, port, pioneerId });
-
-        await page.click("#tab1");
-        await page.click("#hydrogenOption");
-
-        const before = await page.evaluate(async () => {
-          const mod = await import("/resourceDataObject.js");
-          return {
-            h: mod.resourceData?.resources?.hydrogen?.quantity ?? 0,
-            cap: mod.resourceData?.resources?.hydrogen?.storageCapacity ?? 0,
-            cash: mod.resourceData?.currency?.cash ?? 0
-          };
-        });
-
-        await page.locator("#hydrogenGainRow button").click();
-
-        await page.waitForFunction(
-          async (prev) => {
-            const mod = await import("/resourceDataObject.js");
-            const now = mod.resourceData?.resources?.hydrogen?.quantity ?? 0;
-            return now >= prev + 1;
+        await globalThis.smokeStep(
+          "cloud-load save",
+          async () => {
+            await createCloudLoadedGame({ page, port, pioneerId });
           },
-          before.h,
-          { timeout: 60000 }
+          { input: { pioneerId } }
         );
 
-        // Try a sell (assumes save has at least some hydrogen and sell is allowed).
-        const cashBeforeSell = await page.evaluate(async () => {
-          const mod = await import("/resourceDataObject.js");
-          return mod.resourceData?.currency?.cash ?? 0;
+        await globalThis.smokeStep("open Resources tab", async () => {
+          await page.click("#tab1");
+        }, { input: { selector: "#tab1" } });
+
+        await globalThis.smokeStep("open Hydrogen option", async () => {
+          await page.click("#hydrogenOption");
+        }, { input: { selector: "#hydrogenOption" } });
+
+        const before = await globalThis.smokeStep("snapshot starting quantities", async () => {
+          return await page.evaluate(async () => {
+            const mod = await import("/resourceDataObject.js");
+            return {
+              h: mod.resourceData?.resources?.hydrogen?.quantity ?? 0,
+              cap: mod.resourceData?.resources?.hydrogen?.storageCapacity ?? 0,
+              cash: mod.resourceData?.currency?.cash ?? 0
+            };
+          });
         });
 
-        const sellButton = page.locator("#hydrogenSellRow").getByRole("button", { name: "Sell" });
-        await sellButton.waitFor({ state: "visible", timeout: 60000 });
-        await sellButton.click();
-
-        await page.waitForFunction(
-          async (prevCash) => {
-            const mod = await import("/resourceDataObject.js");
-            const cashNow = mod.resourceData?.currency?.cash ?? 0;
-            return cashNow >= prevCash;
+        await globalThis.smokeStep(
+          "click Gain 1 Hydrogen",
+          async () => {
+            await page.locator("#hydrogenGainRow button").click();
           },
-          cashBeforeSell,
-          { timeout: 60000 }
+          { input: { selector: "#hydrogenGainRow button" } }
         );
 
-        // If the save is already at full storage, validate Increase Storage increases capacity.
-        const isFull = await page.evaluate(async () => {
-          const mod = await import("/resourceDataObject.js");
-          const q = mod.resourceData?.resources?.hydrogen?.quantity ?? 0;
-          const cap = mod.resourceData?.resources?.hydrogen?.storageCapacity ?? 0;
-          return cap > 0 && Math.floor(q) >= Math.floor(cap);
+        await globalThis.smokeStep(
+          "wait for hydrogen to increase by 1",
+          async () => {
+            await page.waitForFunction(
+              async (prev) => {
+                const mod = await import("/resourceDataObject.js");
+                const now = mod.resourceData?.resources?.hydrogen?.quantity ?? 0;
+                return now >= prev + 1;
+              },
+              before.h,
+              { timeout: 60000 }
+            );
+          },
+          { input: { prevHydrogen: before.h } }
+        );
+
+        const cashBeforeSell = await globalThis.smokeStep("snapshot cash before Sell", async () => {
+          return await page.evaluate(async () => {
+            const mod = await import("/resourceDataObject.js");
+            return mod.resourceData?.currency?.cash ?? 0;
+          });
+        });
+
+        await globalThis.smokeStep(
+          "click Sell Hydrogen",
+          async () => {
+            const sellButton = page.locator("#hydrogenSellRow").getByRole("button", { name: "Sell" });
+            await sellButton.waitFor({ state: "visible", timeout: 60000 });
+            await sellButton.click();
+          },
+          { input: { selector: "#hydrogenSellRow button[name=Sell]" } }
+        );
+
+        await globalThis.smokeStep(
+          "wait for cash to be >= previous",
+          async () => {
+            await page.waitForFunction(
+              async (prevCash) => {
+                const mod = await import("/resourceDataObject.js");
+                const cashNow = mod.resourceData?.currency?.cash ?? 0;
+                return cashNow >= prevCash;
+              },
+              cashBeforeSell,
+              { timeout: 60000 }
+            );
+          },
+          { input: { prevCash: cashBeforeSell } }
+        );
+
+        const isFull = await globalThis.smokeStep("check if hydrogen storage is full", async () => {
+          return await page.evaluate(async () => {
+            const mod = await import("/resourceDataObject.js");
+            const q = mod.resourceData?.resources?.hydrogen?.quantity ?? 0;
+            const cap = mod.resourceData?.resources?.hydrogen?.storageCapacity ?? 0;
+            return cap > 0 && Math.floor(q) >= Math.floor(cap);
+          });
         });
 
         if (isFull) {
-          const capBefore = await page.evaluate(async () => {
-            const mod = await import("/resourceDataObject.js");
-            return mod.resourceData?.resources?.hydrogen?.storageCapacity ?? 0;
+          const capBefore = await globalThis.smokeStep("snapshot hydrogen capacity before Increase Storage", async () => {
+            return await page.evaluate(async () => {
+              const mod = await import("/resourceDataObject.js");
+              return mod.resourceData?.resources?.hydrogen?.storageCapacity ?? 0;
+            });
           });
 
-          await page.getByRole("button", { name: "Increase Storage" }).click();
-
-          await page.waitForFunction(
-            async (prevCap) => {
-              const mod = await import("/resourceDataObject.js");
-              const capNow = mod.resourceData?.resources?.hydrogen?.storageCapacity ?? 0;
-              return capNow > prevCap;
+          await globalThis.smokeStep(
+            "click Increase Storage",
+            async () => {
+              await page.getByRole("button", { name: "Increase Storage" }).click();
             },
-            capBefore,
-            { timeout: 60000 }
+            { input: { selector: "button[name=Increase Storage]" } }
+          );
+
+          await globalThis.smokeStep(
+            "wait for storage capacity to increase",
+            async () => {
+              await page.waitForFunction(
+                async (prevCap) => {
+                  const mod = await import("/resourceDataObject.js");
+                  const capNow = mod.resourceData?.resources?.hydrogen?.storageCapacity ?? 0;
+                  return capNow > prevCap;
+                },
+                capBefore,
+                { timeout: 60000 }
+              );
+            },
+            { input: { prevCap: capBefore } }
           );
         }
 
-        const after = await page.evaluate(async () => {
-          const mod = await import("/resourceDataObject.js");
-          return {
-            h: mod.resourceData?.resources?.hydrogen?.quantity ?? 0,
-            cap: mod.resourceData?.resources?.hydrogen?.storageCapacity ?? 0,
-            cash: mod.resourceData?.currency?.cash ?? 0
-          };
+        const after = await globalThis.smokeStep("snapshot end quantities", async () => {
+          return await page.evaluate(async () => {
+            const mod = await import("/resourceDataObject.js");
+            return {
+              h: mod.resourceData?.resources?.hydrogen?.quantity ?? 0,
+              cap: mod.resourceData?.resources?.hydrogen?.storageCapacity ?? 0,
+              cash: mod.resourceData?.currency?.cash ?? 0
+            };
+          });
         });
 
-        expect(after.cap).toBeGreaterThan(0);
-        expect(after.cash).toBeGreaterThanOrEqual(before.cash);
+        await globalThis.smokeStep(
+          "assert storage capacity positive and cash not decreased",
+          async () => {
+            expect(after.cap).toBeGreaterThan(0);
+            expect(after.cash).toBeGreaterThanOrEqual(before.cash);
+          },
+          { input: { before, after } }
+        );
       } finally {
         await browser.close();
         await new Promise((resolve) => server.close(resolve));

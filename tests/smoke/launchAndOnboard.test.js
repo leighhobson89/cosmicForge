@@ -107,6 +107,26 @@ async function assertVisible(locator, timeout = 60000) {
 }
 
 async function step({ page, text, targetLocator, action, waitAfterMs }) {
+  if (globalThis.smokeStep) {
+    await globalThis.smokeStep(
+      `onboarding: ${normalizeOnboardingText(text)}`,
+      async () => {
+        await waitForOnboardingText(page, text);
+        if (targetLocator) {
+          await assertVisible(targetLocator);
+        }
+        if (action) {
+          await action();
+        }
+        if (waitAfterMs) {
+          await page.waitForTimeout(waitAfterMs);
+        }
+      },
+      { input: { text } }
+    );
+    return;
+  }
+
   await waitForOnboardingText(page, text);
   if (targetLocator) {
     await assertVisible(targetLocator);
@@ -120,7 +140,7 @@ async function step({ page, text, targetLocator, action, waitAfterMs }) {
 }
 
 describe("launchAndOnboard", () => {
-  test(
+  globalThis.smokeTest(
     "launches app and completes onboarding happy path",
     async () => {
       const pioneerId = `autoPioneer-${Date.now()}`;
@@ -136,39 +156,72 @@ describe("launchAndOnboard", () => {
         const context = await browser.newContext();
         const page = await context.newPage();
 
-        // Keep the smoke test deterministic (avoid waiting on cloud save).
-        await page.route("**/riogcxvtomyjlzkcnujf.supabase.co/**", (route) => route.abort());
+        await globalThis.smokeStep(
+          "block cloud save network",
+          async () => {
+            await page.route("**/riogcxvtomyjlzkcnujf.supabase.co/**", (route) => route.abort());
+          },
+          { input: { url: "**/riogcxvtomyjlzkcnujf.supabase.co/**" } }
+        );
 
-        await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: "domcontentloaded" });
+        await globalThis.smokeStep(
+          "open app",
+          async () => {
+            await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: "domcontentloaded" });
+          },
+          { input: { port } }
+        );
 
-        await page.waitForSelector("#pioneerCodeName", { timeout: 60000 });
-        await page.fill("#pioneerCodeName", pioneerId);
-        await page.click("#modalConfirm");
+        await globalThis.smokeStep(
+          "enter pioneer id",
+          async () => {
+            await page.waitForSelector("#pioneerCodeName", { timeout: 60000 });
+            await page.fill("#pioneerCodeName", pioneerId);
+            await page.click("#modalConfirm");
+          },
+          { input: { pioneerId, selector: "#pioneerCodeName" } }
+        );
 
-        await page.waitForSelector("#fullScreenCheckBox", { timeout: 60000 });
-        await page.click("#fullScreenCheckBox");
-        await page.click("#modalConfirm");
+        await globalThis.smokeStep(
+          "accept fullscreen prompt",
+          async () => {
+            await page.waitForSelector("#fullScreenCheckBox", { timeout: 60000 });
+            await page.click("#fullScreenCheckBox");
+            await page.click("#modalConfirm");
+          },
+          { input: { selectors: ["#fullScreenCheckBox", "#modalConfirm"] } }
+        );
 
         // Onboarding prompt
-        await page.waitForTimeout(100);
-        await page.waitForSelector("#modalConfirm", { timeout: 60000 });
-        await page.waitForSelector("#modalCancel", { timeout: 60000 });
+        await globalThis.smokeStep("confirm onboarding start", async () => {
+          await page.waitForTimeout(100);
+          await page.waitForSelector("#modalConfirm", { timeout: 60000 });
+          await page.waitForSelector("#modalCancel", { timeout: 60000 });
 
-        const onboardingYesText = ((await page.locator("#modalConfirm").textContent()) ?? "").trim();
-        expect(onboardingYesText).toBe("YES");
+          const onboardingYesText = ((await page.locator("#modalConfirm").textContent()) ?? "").trim();
+          expect(onboardingYesText).toBe("YES");
 
-        await page.waitForTimeout(100);
-        await page.click("#modalConfirm");
-
-        // Give ourselves enough currency/research to follow the onboarding quickly.
-        await page.evaluate(async () => {
-          const mod = await import("/resourceDataObject.js");
-          mod.setResourceDataObject(1000000, "currency", ["cash"]);
-          mod.setResourceDataObject(1000000, "research", ["quantity"]);
+          await page.waitForTimeout(100);
+          await page.click("#modalConfirm");
         });
 
+        // Give ourselves enough currency/research to follow the onboarding quickly.
+        await globalThis.smokeStep(
+          "seed cash + research",
+          async () => {
+            await page.evaluate(async () => {
+              const mod = await import("/resourceDataObject.js");
+              mod.setResourceDataObject(1000000, "currency", ["cash"]);
+              mod.setResourceDataObject(1000000, "research", ["quantity"]);
+            });
+          },
+          { input: { cash: 1000000, research: 1000000 } }
+        );
+
         const onboardingOverlay = page.locator("#onboardingOverlay");
-        await onboardingOverlay.waitFor({ state: "visible", timeout: 60000 });
+        await globalThis.smokeStep("wait for onboarding overlay", async () => {
+          await onboardingOverlay.waitFor({ state: "visible", timeout: 60000 });
+        }, { input: { selector: "#onboardingOverlay" } });
 
         // Resources -> Hydrogen -> Gain to 50
         await step({
@@ -592,18 +645,34 @@ describe("launchAndOnboard", () => {
         });
 
         // Completion popup
-        await page.waitForFunction(() => {
-          const header = document.querySelector(".modal-header h4")?.textContent?.trim();
-          const body = document.querySelector(".modal-content p")?.textContent?.trim();
-          return header === "ONBOARDING COMPLETE" && body === "Onboarding is over.";
-        }, null, { timeout: 60000 });
+        await globalThis.smokeStep("wait for onboarding complete popup", async () => {
+          await page.waitForFunction(() => {
+            const header = document.querySelector(".modal-header h4")?.textContent?.trim();
+            const body = document.querySelector(".modal-content p")?.textContent?.trim();
+            return header === "ONBOARDING COMPLETE" && body === "Onboarding is over.";
+          }, null, { timeout: 60000 });
+        });
 
-        await page.click("#modalConfirm");
+        await globalThis.smokeStep(
+          "confirm onboarding complete modal",
+          async () => {
+            await page.click("#modalConfirm");
+          },
+          { input: { selector: "#modalConfirm" } }
+        );
+
+        await globalThis.smokeStep(
+          "assert main UI still accessible",
+          async () => {
+            await page.waitForSelector("#tab1", { timeout: 60000 });
+          },
+          { input: { selector: "#tab1" } }
+        );
       } finally {
         await browser.close();
         await new Promise((resolve) => server.close(resolve));
       }
     },
-    300000
+    180000
   );
 });

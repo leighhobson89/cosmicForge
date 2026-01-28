@@ -85,135 +85,227 @@ async function startStaticServer({ rootDir }) {
 }
 
 describe("launchApp", () => {
-  test("opens app, creates new pioneer, starts fullscreen, shows onboarding, exits", async () => {
-    const pioneerId = `autoPioneer-${Date.now()}`;
+  globalThis.smokeTest(
+    "opens app, creates new pioneer, starts fullscreen, shows onboarding, exits",
+    async () => {
+      const pioneerId = `autoPioneer-${Date.now()}`;
 
-    const rootDir = path.resolve(process.cwd());
-    const { server, port } = await startStaticServer({ rootDir });
+      const rootDir = path.resolve(process.cwd());
+      const { server, port } = await startStaticServer({ rootDir });
 
-    const browser = await chromium.launch({
-      headless: process.env.HEADLESS === "1"
-    });
+      const browser = await chromium.launch({
+        headless: process.env.HEADLESS === "1"
+      });
 
-    try {
-      const context = await browser.newContext();
-      const page = await context.newPage();
+      try {
+        const context = await browser.newContext();
+        const page = await context.newPage();
 
-      // Keep the smoke test deterministic (avoid waiting on cloud save).
-      await page.route("**/riogcxvtomyjlzkcnujf.supabase.co/**", (route) => route.abort());
+        await globalThis.smokeStep(
+          "block cloud save network",
+          async () => {
+            await page.route("**/riogcxvtomyjlzkcnujf.supabase.co/**", (route) => route.abort());
+          },
+          { input: { url: "**/riogcxvtomyjlzkcnujf.supabase.co/**" } }
+        );
 
-      await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: "domcontentloaded" });
+        await globalThis.smokeStep(
+          "open app",
+          async () => {
+            await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: "domcontentloaded" });
+          },
+          { input: { port } }
+        );
 
-      await page.waitForSelector("#pioneerCodeName", { timeout: 60000 });
-      await page.fill("#pioneerCodeName", pioneerId);
-      await page.click("#modalConfirm");
+        await globalThis.smokeStep(
+          "enter pioneer id",
+          async () => {
+            await page.waitForSelector("#pioneerCodeName", { timeout: 60000 });
+            await page.fill("#pioneerCodeName", pioneerId);
+            await page.click("#modalConfirm");
+          },
+          { input: { pioneerId, selector: "#pioneerCodeName" } }
+        );
 
-      await page.waitForSelector("#fullScreenCheckBox", { timeout: 60000 });
-      await page.click("#fullScreenCheckBox");
-      await page.click("#modalConfirm");
+        await globalThis.smokeStep(
+          "accept fullscreen prompt",
+          async () => {
+            await page.waitForSelector("#fullScreenCheckBox", { timeout: 60000 });
+            await page.click("#fullScreenCheckBox");
+            await page.click("#modalConfirm");
+          },
+          { input: { selectors: ["#fullScreenCheckBox", "#modalConfirm"] } }
+        );
 
-      await page.waitForTimeout(100);
-      const onboardingCancel = page.locator("#modalCancel");
-      if (await onboardingCancel.isVisible({ timeout: 1500 }).catch(() => false)) {
-        const cancelText = (await onboardingCancel.textContent())?.trim();
-        if (cancelText === "NO") {
-          await onboardingCancel.click();
-        }
+        await globalThis.smokeStep("dismiss onboarding prompt if present", async () => {
+          await page.waitForTimeout(100);
+          const onboardingCancel = page.locator("#modalCancel");
+          if (await onboardingCancel.isVisible({ timeout: 1500 }).catch(() => false)) {
+            const cancelText = (await onboardingCancel.textContent())?.trim();
+            if (cancelText === "NO") {
+              await onboardingCancel.click();
+            }
+          }
+        }, { input: { selector: "#modalCancel" } });
+
+        await globalThis.smokeStep("wait for main UI", async () => {
+          await page.waitForSelector("#tab1", { timeout: 60000 });
+        }, { input: { selector: "#tab1" } });
+
+        const wasChecked = await globalThis.smokeStep("read fullscreen checkbox state", async () => {
+          return await page.evaluate(() =>
+            document.getElementById("fullScreenCheckBox")?.classList.contains("checked")
+          );
+        });
+        await globalThis.smokeStep("assert fullscreen checkbox checked", async () => {
+          expect(Boolean(wasChecked)).toBe(true);
+        }, { input: { wasChecked } });
+
+        const isDomFullScreen = await globalThis.smokeStep("read DOM fullscreen state", async () => {
+          return await page.evaluate(() => Boolean(document.fullscreenElement));
+        });
+        await globalThis.smokeStep("assert fullscreen type boolean", async () => {
+          expect(typeof isDomFullScreen).toBe("boolean");
+        }, { input: { isDomFullScreen } });
+      } finally {
+        await browser.close();
+        await new Promise((resolve) => server.close(resolve));
       }
-
-      await page.waitForSelector("#tab1", { timeout: 60000 });
-
-      const wasChecked = await page.evaluate(() =>
-        document.getElementById("fullScreenCheckBox")?.classList.contains("checked")
-      );
-      expect(Boolean(wasChecked)).toBe(true);
-
-      const isDomFullScreen = await page.evaluate(() => Boolean(document.fullscreenElement));
-      expect(typeof isDomFullScreen).toBe("boolean");
-    } finally {
-      await browser.close();
-      await new Promise((resolve) => server.close(resolve));
-    }
-  }, 120000);
+    },
+    120000
+  );
 });
 
 describe("gain50hydrogen", () => {
-  test("opens app, creates new pioneer, starts fullscreen, clicks gain 50x, exits", async () => {
-    const pioneerId = `autoPioneer-${Date.now()}`;
+  globalThis.smokeTest(
+    "opens app, creates new pioneer, starts fullscreen, clicks gain 50x, exits",
+    async () => {
+      const pioneerId = `autoPioneer-${Date.now()}`;
 
-    const rootDir = path.resolve(process.cwd());
-    const { server, port } = await startStaticServer({ rootDir });
+      const rootDir = path.resolve(process.cwd());
+      const { server, port } = await startStaticServer({ rootDir });
 
-    const browser = await chromium.launch({
-      headless: process.env.HEADLESS === "1"
-    });
-
-    try {
-      const context = await browser.newContext();
-      const page = await context.newPage();
-
-      // Keep the smoke test deterministic (avoid waiting on cloud save).
-      await page.route("**/riogcxvtomyjlzkcnujf.supabase.co/**", (route) => route.abort());
-
-      await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: "domcontentloaded" });
-
-      await page.waitForSelector("#pioneerCodeName", { timeout: 60000 });
-      await page.fill("#pioneerCodeName", pioneerId);
-      await page.click("#modalConfirm");
-
-      await page.waitForSelector("#fullScreenCheckBox", { timeout: 60000 });
-      await page.click("#fullScreenCheckBox");
-      await page.click("#modalConfirm");
-
-      await page.waitForTimeout(100);
-      const onboardingCancel = page.locator("#modalCancel");
-      if (await onboardingCancel.isVisible({ timeout: 1500 }).catch(() => false)) {
-        const cancelText = (await onboardingCancel.textContent())?.trim();
-        if (cancelText === "NO") {
-          await onboardingCancel.click();
-        }
-      }
-
-      await page.waitForSelector("#tab1", { timeout: 60000 });
-
-      await page.click("#tab1");
-      await page.click("#hydrogenOption");
-
-      await page.waitForSelector("#hydrogenGainRow", { timeout: 60000 });
-      const gainButton = page.locator("#hydrogenGainRow button");
-      await gainButton.waitFor({ state: "visible", timeout: 60000 });
-
-      for (let i = 0; i < 50; i += 1) {
-        await gainButton.click();
-      }
-
-      await page.waitForFunction(() => {
-        const el = document.getElementById("hydrogenQuantity");
-        if (!el) return false;
-        const text = (el.textContent ?? "").replace(/\s+/g, "");
-        return text === "50/150";
-      }, null, { timeout: 60000 });
-
-      const hydrogenQuantityInternal = await page.evaluate(async () => {
-        const mod = await import("/resourceDataObject.js");
-        return mod.resourceData?.resources?.hydrogen?.quantity;
+      const browser = await chromium.launch({
+        headless: process.env.HEADLESS === "1"
       });
 
-      expect(hydrogenQuantityInternal).toBe(50);
+      try {
+        const context = await browser.newContext();
+        const page = await context.newPage();
 
-      const hydrogenQuantitySidebar = await page.locator("#hydrogenQuantity").textContent();
-      expect((hydrogenQuantitySidebar ?? "").replace(/\s+/g, "")).toBe("50/150");
+        await globalThis.smokeStep(
+          "block cloud save network",
+          async () => {
+            await page.route("**/riogcxvtomyjlzkcnujf.supabase.co/**", (route) => route.abort());
+          },
+          { input: { url: "**/riogcxvtomyjlzkcnujf.supabase.co/**" } }
+        );
 
-      const wasChecked = await page.evaluate(() =>
-        document.getElementById("fullScreenCheckBox")?.classList.contains("checked")
-      );
-      expect(Boolean(wasChecked)).toBe(true);
+        await globalThis.smokeStep(
+          "open app",
+          async () => {
+            await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: "domcontentloaded" });
+          },
+          { input: { port } }
+        );
 
-      const isDomFullScreen = await page.evaluate(() => Boolean(document.fullscreenElement));
-      expect(typeof isDomFullScreen).toBe("boolean");
-    } finally {
-      await browser.close();
-      await new Promise((resolve) => server.close(resolve));
-    }
-  }, 120000);
+        await globalThis.smokeStep(
+          "enter pioneer id",
+          async () => {
+            await page.waitForSelector("#pioneerCodeName", { timeout: 60000 });
+            await page.fill("#pioneerCodeName", pioneerId);
+            await page.click("#modalConfirm");
+          },
+          { input: { pioneerId, selector: "#pioneerCodeName" } }
+        );
+
+        await globalThis.smokeStep(
+          "accept fullscreen prompt",
+          async () => {
+            await page.waitForSelector("#fullScreenCheckBox", { timeout: 60000 });
+            await page.click("#fullScreenCheckBox");
+            await page.click("#modalConfirm");
+          },
+          { input: { selectors: ["#fullScreenCheckBox", "#modalConfirm"] } }
+        );
+
+        await globalThis.smokeStep("dismiss onboarding prompt if present", async () => {
+          await page.waitForTimeout(100);
+          const onboardingCancel = page.locator("#modalCancel");
+          if (await onboardingCancel.isVisible({ timeout: 1500 }).catch(() => false)) {
+            const cancelText = (await onboardingCancel.textContent())?.trim();
+            if (cancelText === "NO") {
+              await onboardingCancel.click();
+            }
+          }
+        }, { input: { selector: "#modalCancel" } });
+
+        await globalThis.smokeStep("wait for main UI", async () => {
+          await page.waitForSelector("#tab1", { timeout: 60000 });
+        }, { input: { selector: "#tab1" } });
+
+        await globalThis.smokeStep("open Hydrogen pane", async () => {
+          await page.click("#tab1");
+          await page.click("#hydrogenOption");
+        }, { input: { selectors: ["#tab1", "#hydrogenOption"] } });
+
+        await globalThis.smokeStep("click Gain 50 times", async () => {
+          await page.waitForSelector("#hydrogenGainRow", { timeout: 60000 });
+          const gainButton = page.locator("#hydrogenGainRow button");
+          await gainButton.waitFor({ state: "visible", timeout: 60000 });
+
+          for (let i = 0; i < 50; i += 1) {
+            await gainButton.click();
+          }
+        }, { input: { selector: "#hydrogenGainRow button", clicks: 50 } });
+
+        await globalThis.smokeStep("wait for sidebar hydrogenQuantity to show 50/150", async () => {
+          await page.waitForFunction(() => {
+            const el = document.getElementById("hydrogenQuantity");
+            if (!el) return false;
+            const text = (el.textContent ?? "").replace(/\s+/g, "");
+            return text === "50/150";
+          }, null, { timeout: 60000 });
+        }, { input: { selector: "#hydrogenQuantity", expected: "50/150" } });
+
+        const hydrogenQuantityInternal = await globalThis.smokeStep("read internal hydrogen quantity", async () => {
+          return await page.evaluate(async () => {
+            const mod = await import("/resourceDataObject.js");
+            return mod.resourceData?.resources?.hydrogen?.quantity;
+          });
+        });
+
+        await globalThis.smokeStep("assert internal hydrogen == 50", async () => {
+          expect(hydrogenQuantityInternal).toBe(50);
+        }, { input: { hydrogenQuantityInternal } });
+
+        const hydrogenQuantitySidebar = await globalThis.smokeStep("read sidebar hydrogenQuantity text", async () => {
+          return await page.locator("#hydrogenQuantity").textContent();
+        });
+        await globalThis.smokeStep("assert sidebar hydrogenQuantity == 50/150", async () => {
+          expect((hydrogenQuantitySidebar ?? "").replace(/\s+/g, "")).toBe("50/150");
+        }, { input: { hydrogenQuantitySidebar } });
+
+        const wasChecked = await globalThis.smokeStep("read fullscreen checkbox state", async () => {
+          return await page.evaluate(() =>
+            document.getElementById("fullScreenCheckBox")?.classList.contains("checked")
+          );
+        });
+        await globalThis.smokeStep("assert fullscreen checkbox checked", async () => {
+          expect(Boolean(wasChecked)).toBe(true);
+        }, { input: { wasChecked } });
+
+        const isDomFullScreen = await globalThis.smokeStep("read DOM fullscreen state", async () => {
+          return await page.evaluate(() => Boolean(document.fullscreenElement));
+        });
+        await globalThis.smokeStep("assert fullscreen type boolean", async () => {
+          expect(typeof isDomFullScreen).toBe("boolean");
+        }, { input: { isDomFullScreen } });
+      } finally {
+        await browser.close();
+        await new Promise((resolve) => server.close(resolve));
+      }
+    },
+    120000
+  );
 });
