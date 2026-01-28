@@ -55,7 +55,7 @@
     "test:smoke": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js tests/smoke",
     "test:playwright": "playwright test",
     "test:allure": "npm run test && npm run test:playwright && allure generate allure-results --clean -o allure-report",
-    "test:report": "allure open allure-report"
+    "test:autobuyer": "npm test -- tests/smoke/cloudSave_autobuyer.test.js && start html-report/report.html"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.0",
@@ -68,7 +68,8 @@
     "electron-builder": "latest",
     "icon-gen": "latest",
     "jest": "^29.7.0",
-    "jest-allure": "^0.1.3",
+    "jest-allure2": "^1.2.3",
+    "jest-html-reporters": "^3.1.7",
     "playwright": "^1.41.2"
   },
   "private": true

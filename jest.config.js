@@ -14,13 +14,18 @@ export default {
   setupFilesAfterEnv: ['<rootDir>/tests/setup.js'],
   reporters: [
     'default',
-    ['jest-allure', { 
-      outputDir: 'allure-results',
-      disableWebdriverStepsReporting: true,
-      disableWebdriverScreenshotsReporting: false,
+    ['jest-html-reporters', {
+      publicPath: './html-report',
+      filename: 'report.html',
+      expand: true,
+      hideIcon: false,
+      pageTitle: 'CosmicForge Test Report',
+      logoImgPath: undefined,
+      inlineSource: false
     }]
   ],
   testMatch: [
     '<rootDir>/tests/**/*.test.js'
-  ]
+  ],
+  testTimeout: 180000
 };
