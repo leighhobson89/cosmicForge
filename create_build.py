@@ -31,6 +31,8 @@ IGNORE_LIST = [
     "resourceDataObject.js",
     "production_resources",
     "html-report",
+    "tools",
+    "tests",
 ]
 
 def copy_files_to_temp(src_dir, temp_dir):
