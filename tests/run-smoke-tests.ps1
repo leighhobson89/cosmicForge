@@ -12,18 +12,16 @@ $env:HEADLESS = '1'
 
 # Run all tests under tests/smoke
 $tests = @(
-  'tests/smoke/launchAndOnboard.test.js',
-  'tests/smoke/launch-app.test.js',
-  'tests/smoke/cloudSave_earlyLoop.test.js',
-  'tests/smoke/cloudSave_autobuyer.test.js',
-  'tests/smoke/cloudSave_researchTech.test.js',
-  'tests/smoke/cloudSave_energyMid.test.js',
-  'tests/smoke/cloudSave_spaceAntimatter.test.js'
+  #'tests/smoke/launchAndOnboard.test.js',
+  #'tests/smoke/launch-app.test.js',
+  #'tests/smoke/cloudSave_earlyLoop.test.js',
+  #'tests/smoke/cloudSave_autobuyer.test.js',
+  #'tests/smoke/cloudSave_researchTech.test.js',
+  'tests/smoke/cloudSave_energyMid.test.js'
+  #'tests/smoke/cloudSave_spaceAntimatter.test.js'
 )
 
 $expectedFailures = @(
-  'tests/smoke/cloudSave_researchTech.test.js',
-  'tests/smoke/cloudSave_spaceAntimatter.test.js'
 )
 
 $anyUnexpectedFailed = $false

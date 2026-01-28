@@ -266,6 +266,10 @@ describe("gain50hydrogen", () => {
             const text = (el.textContent ?? "").replace(/\s+/g, "");
             return text === "50/150";
           }, null, { timeout: 60000 });
+
+          const nowText = ((await page.locator("#hydrogenQuantity").textContent()) ?? "").replace(/\s+/g, "");
+          expect(nowText).toBe("50/150");
+          return { expected: "50/150", nowText };
         }, { input: { selector: "#hydrogenQuantity", expected: "50/150" } });
 
         const hydrogenQuantityInternal = await globalThis.smokeStep("read internal hydrogen quantity", async () => {

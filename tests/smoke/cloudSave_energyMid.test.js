@@ -119,6 +119,13 @@ describe("cloudSave_energyMid", () => {
             const mod = await import("/resourceDataObject.js");
             return (mod.resourceData?.buildings?.energy?.upgrades?.battery1?.quantity ?? 0) === 1;
           }, null, { timeout: 60000 });
+
+          const battery1Qty = await page.evaluate(async () => {
+            const mod = await import("/resourceDataObject.js");
+            return (mod.resourceData?.buildings?.energy?.upgrades?.battery1?.quantity ?? 0);
+          });
+          expect(battery1Qty).toBe(1);
+          return { expectedBattery1Qty: 1, battery1Qty };
         });
 
         await global.smokeStep("buy Battery 2", async () => {
@@ -128,6 +135,13 @@ describe("cloudSave_energyMid", () => {
             const mod = await import("/resourceDataObject.js");
             return (mod.resourceData?.buildings?.energy?.upgrades?.battery2?.quantity ?? 0) === 1;
           }, null, { timeout: 60000 });
+
+          const battery2Qty = await page.evaluate(async () => {
+            const mod = await import("/resourceDataObject.js");
+            return (mod.resourceData?.buildings?.energy?.upgrades?.battery2?.quantity ?? 0);
+          });
+          expect(battery2Qty).toBe(1);
+          return { expectedBattery2Qty: 1, battery2Qty };
         });
 
         await global.smokeStep("buy Battery 3", async () => {
@@ -137,6 +151,13 @@ describe("cloudSave_energyMid", () => {
             const mod = await import("/resourceDataObject.js");
             return (mod.resourceData?.buildings?.energy?.upgrades?.battery3?.quantity ?? 0) === 1;
           }, null, { timeout: 60000 });
+
+          const battery3Qty = await page.evaluate(async () => {
+            const mod = await import("/resourceDataObject.js");
+            return (mod.resourceData?.buildings?.energy?.upgrades?.battery3?.quantity ?? 0);
+          });
+          expect(battery3Qty).toBe(1);
+          return { expectedBattery3Qty: 1, battery3Qty };
         });
 
         const batteryState = await global.smokeStep(
@@ -176,6 +197,13 @@ describe("cloudSave_energyMid", () => {
             const mod = await import("/resourceDataObject.js");
             return (mod.resourceData?.buildings?.energy?.upgrades?.powerPlant3?.quantity ?? 0) === 1;
           }, null, { timeout: 60000 });
+
+          const powerPlant3Qty = await page.evaluate(async () => {
+            const mod = await import("/resourceDataObject.js");
+            return (mod.resourceData?.buildings?.energy?.upgrades?.powerPlant3?.quantity ?? 0);
+          });
+          expect(powerPlant3Qty).toBe(1);
+          return { expectedPowerPlant3Qty: 1, powerPlant3Qty };
         });
 
         await global.smokeStep("buy Basic Power Plant (powerPlant1)", async () => {
@@ -186,6 +214,13 @@ describe("cloudSave_energyMid", () => {
             const mod = await import("/resourceDataObject.js");
             return (mod.resourceData?.buildings?.energy?.upgrades?.powerPlant1?.quantity ?? 0) === 1;
           }, null, { timeout: 60000 });
+
+          const powerPlant1Qty = await page.evaluate(async () => {
+            const mod = await import("/resourceDataObject.js");
+            return (mod.resourceData?.buildings?.energy?.upgrades?.powerPlant1?.quantity ?? 0);
+          });
+          expect(powerPlant1Qty).toBe(1);
+          return { expectedPowerPlant1Qty: 1, powerPlant1Qty };
         });
 
         const plantsAfterBuy = await global.smokeStep(
@@ -227,6 +262,13 @@ describe("cloudSave_energyMid", () => {
             const el = document.getElementById("energyConsumptionStats");
             return el && !el.classList.contains("invisible");
           }, null, { timeout: 60000 });
+
+          const powerStatsVisible = await page.evaluate(() => {
+            const el = document.getElementById("energyConsumptionStats");
+            return Boolean(el && !el.classList.contains("invisible"));
+          });
+          expect(powerStatsVisible).toBe(true);
+          return { powerStatsVisible };
         });
 
         await global.smokeStep("toggle grid Power On", async () => {
@@ -238,6 +280,13 @@ describe("cloudSave_energyMid", () => {
             const mod = await import("/resourceDataObject.js");
             return (mod.resourceData?.buildings?.energy?.rate ?? 0) > 0;
           }, null, { timeout: 60000 });
+
+          const energyRateNow = await page.evaluate(async () => {
+            const mod = await import("/resourceDataObject.js");
+            return (mod.resourceData?.buildings?.energy?.rate ?? 0);
+          });
+          expect(energyRateNow).toBeGreaterThan(0);
+          return { energyRateNow };
         });
 
         const energyAfterPowerOn = await global.smokeStep(
@@ -281,6 +330,15 @@ describe("cloudSave_energyMid", () => {
               energyAfterPowerOn.qty,
               { timeout: 60000 }
             );
+
+            const nowEnergyQty = await page.evaluate(async () => {
+              const mod = await import("/resourceDataObject.js");
+              return mod.resourceData?.buildings?.energy?.quantity ?? 0;
+            });
+
+            expect(Number(nowEnergyQty)).toBeGreaterThan(Number(energyAfterPowerOn.qty));
+
+            return { prevEnergyQty: energyAfterPowerOn.qty, nowEnergyQty };
           },
           { input: { prevEnergyQty: energyAfterPowerOn.qty } }
         );
@@ -297,6 +355,15 @@ describe("cloudSave_energyMid", () => {
               energyAfterPowerOn.carbonQty,
               { timeout: 60000 }
             );
+
+            const nowCarbonQty = await page.evaluate(async () => {
+              const mod = await import("/resourceDataObject.js");
+              return mod.resourceData?.resources?.carbon?.quantity ?? 0;
+            });
+
+            expect(Number(nowCarbonQty)).toBeLessThan(Number(energyAfterPowerOn.carbonQty));
+
+            return { prevCarbonQty: energyAfterPowerOn.carbonQty, nowCarbonQty };
           },
           { input: { prevCarbonQty: energyAfterPowerOn.carbonQty } }
         );
@@ -313,6 +380,15 @@ describe("cloudSave_energyMid", () => {
               energyAfterPowerOn.dieselQty,
               { timeout: 60000 }
             );
+
+            const nowDieselQty = await page.evaluate(async () => {
+              const mod = await import("/resourceDataObject.js");
+              return mod.resourceData?.compounds?.diesel?.quantity ?? 0;
+            });
+
+            expect(Number(nowDieselQty)).toBeLessThan(Number(energyAfterPowerOn.dieselQty));
+
+            return { prevDieselQty: energyAfterPowerOn.dieselQty, nowDieselQty };
           },
           { input: { prevDieselQty: energyAfterPowerOn.dieselQty } }
         );
@@ -333,6 +409,13 @@ describe("cloudSave_energyMid", () => {
             const mod = await import("/resourceDataObject.js");
             return (mod.resourceData?.buildings?.energy?.upgrades?.powerPlant2?.quantity ?? 0) === 1;
           }, null, { timeout: 60000 });
+
+          const powerPlant2Qty = await page.evaluate(async () => {
+            const mod = await import("/resourceDataObject.js");
+            return (mod.resourceData?.buildings?.energy?.upgrades?.powerPlant2?.quantity ?? 0);
+          });
+          expect(powerPlant2Qty).toBe(1);
+          return { expectedPowerPlant2Qty: 1, powerPlant2Qty };
         });
 
         const solarRates = await page.evaluate(async () => {
@@ -358,6 +441,15 @@ describe("cloudSave_energyMid", () => {
           await global.smokeStep(
             `solar weather scaling (${type})`,
             async () => {
+              const beforeRates = await page.evaluate(async () => {
+                const mod = await import("/resourceDataObject.js");
+                const pp2 = mod.resourceData?.buildings?.energy?.upgrades?.powerPlant2;
+                return {
+                  maxPurchased: pp2?.maxPurchasedRate ?? 0,
+                  purchased: pp2?.purchasedRate ?? 0
+                };
+              });
+
               await page.evaluate(async ({ type, eff }) => {
                 const globals = await import("/constantsAndGlobalVars.js");
                 const mod = await import("/resourceDataObject.js");
@@ -377,6 +469,19 @@ describe("cloudSave_energyMid", () => {
                 { eff },
                 { timeout: 60000 }
               );
+
+              const afterRates = await page.evaluate(async () => {
+                const mod = await import("/resourceDataObject.js");
+                const pp2 = mod.resourceData?.buildings?.energy?.upgrades?.powerPlant2;
+                return {
+                  maxPurchased: pp2?.maxPurchasedRate ?? 0,
+                  purchased: pp2?.purchasedRate ?? 0
+                };
+              });
+
+              expect(Number(afterRates.purchased)).toBeCloseTo(Number(afterRates.maxPurchased) * eff, 10);
+
+              return { beforeRates, afterRates };
             },
             { input: { type, eff } }
           );

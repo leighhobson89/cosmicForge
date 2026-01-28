@@ -91,6 +91,10 @@ describe("cloudSave_autobuyer", () => {
             await page.waitForFunction(() => {
               return document.getElementById("hydrogenAB1Quantity")?.textContent?.includes("1");
             }, null, { timeout: 60000 });
+
+            const ab1Text = await page.evaluate(() => document.getElementById("hydrogenAB1Quantity")?.textContent ?? null);
+            expect(String(ab1Text ?? "")).toContain("1");
+            return { expectedIncludes: "1", ab1Text };
           },
           { input: { selector: "#hydrogenAutoBuyer1Row button[data-auto-buyer-tier='tier1']" } }
         );
@@ -140,6 +144,8 @@ describe("cloudSave_autobuyer", () => {
           "assert hydrogen increased",
           async () => {
             expect(h2).toBeGreaterThan(h1);
+
+            return { h1, h2, delta: h2 - h1 };
           },
           { input: { h1, h2, delta: h2 - h1 } }
         );

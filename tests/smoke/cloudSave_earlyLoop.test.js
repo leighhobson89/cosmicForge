@@ -66,6 +66,15 @@ describe("cloudSave_earlyLoop", () => {
               before.h,
               { timeout: 60000 }
             );
+
+            const nowHydrogen = await page.evaluate(async () => {
+              const mod = await import("/resourceDataObject.js");
+              return mod.resourceData?.resources?.hydrogen?.quantity ?? 0;
+            });
+
+            expect(Number(nowHydrogen)).toBeGreaterThanOrEqual(Number(before.h) + 1);
+
+            return { prevHydrogen: before.h, nowHydrogen };
           },
           { input: { prevHydrogen: before.h } }
         );
@@ -99,6 +108,15 @@ describe("cloudSave_earlyLoop", () => {
               cashBeforeSell,
               { timeout: 60000 }
             );
+
+            const cashNow = await page.evaluate(async () => {
+              const mod = await import("/resourceDataObject.js");
+              return mod.resourceData?.currency?.cash ?? 0;
+            });
+
+            expect(Number(cashNow)).toBeGreaterThanOrEqual(Number(cashBeforeSell));
+
+            return { prevCash: cashBeforeSell, cashNow };
           },
           { input: { prevCash: cashBeforeSell } }
         );
@@ -140,6 +158,15 @@ describe("cloudSave_earlyLoop", () => {
                 capBefore,
                 { timeout: 60000 }
               );
+
+              const capNow = await page.evaluate(async () => {
+                const mod = await import("/resourceDataObject.js");
+                return mod.resourceData?.resources?.hydrogen?.storageCapacity ?? 0;
+              });
+
+              expect(Number(capNow)).toBeGreaterThan(Number(capBefore));
+
+              return { prevCap: capBefore, capNow };
             },
             { input: { prevCap: capBefore } }
           );

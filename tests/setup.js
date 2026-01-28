@@ -36,6 +36,18 @@ function safeStringify(value) {
   }
 }
 
+function stripAnsi(text) {
+  return String(text ?? "").replace(/\u001b\[[0-9;]*m/g, "");
+}
+
+function toCleanError(error) {
+  if (!error) return null;
+  return {
+    message: stripAnsi(error?.message),
+    stack: stripAnsi(error?.stack)
+  };
+}
+
 global.smokeStep = async (name, fn, meta = {}) => {
   const start = Date.now();
   const input = Object.prototype.hasOwnProperty.call(meta, 'input') ? meta.input : undefined;
@@ -78,9 +90,9 @@ global.smokeStep = async (name, fn, meta = {}) => {
     const durationMs = Date.now() - start;
     stepRecord.status = "failed";
     stepRecord.durationMs = durationMs;
-    stepRecord.error = { message: error?.message, stack: error?.stack };
+    stepRecord.error = toCleanError(error);
     console.log(
-      `[SMOKE_STEP_FAIL] ${name} durationMs=${durationMs} error=${safeStringify({ message: error?.message, stack: error?.stack })}`
+      `[SMOKE_STEP_FAIL] ${name} durationMs=${durationMs} error=${safeStringify(stepRecord.error)}`
     );
     throw error;
   }
@@ -108,7 +120,7 @@ globalThis.smokeTest = (name, fn, timeout) => {
         globalThis.__smokeStepReport.tests[testName].status = "passed";
       } catch (error) {
         globalThis.__smokeStepReport.tests[testName].status = "failed";
-        globalThis.__smokeStepReport.tests[testName].error = { message: error?.message, stack: error?.stack };
+        globalThis.__smokeStepReport.tests[testName].error = toCleanError(error);
         throw error;
       } finally {
         globalThis.__smokeStepReport.tests[testName].durationMs = Date.now() - startedAt;
@@ -184,6 +196,36 @@ afterAll(async () => {
       try { return JSON.stringify(v, null, 2); } catch { return safe(v); }
     };
 
+    const renderError = (container, err) => {
+      const message = (err && err.message) ? String(err.message) : '';
+      const stack = (err && err.stack) ? String(err.stack) : '';
+
+      if (message) {
+        const preMsg = document.createElement('pre');
+        preMsg.textContent = message;
+        container.appendChild(preMsg);
+      }
+
+      if (stack) {
+        const det = document.createElement('details');
+        const sum = document.createElement('summary');
+        sum.textContent = 'Stack trace';
+        det.appendChild(sum);
+
+        const preStack = document.createElement('pre');
+        preStack.textContent = stack;
+        det.appendChild(preStack);
+
+        container.appendChild(det);
+      }
+
+      if (!message && !stack) {
+        const pre = document.createElement('pre');
+        pre.textContent = pretty(err);
+        container.appendChild(pre);
+      }
+    };
+
     for (const t of payload.tests) {
       const details = document.createElement('details');
       details.open = true;
@@ -197,9 +239,7 @@ afterAll(async () => {
       details.appendChild(summary);
 
       if (t.error) {
-        const pre = document.createElement('pre');
-        pre.textContent = pretty(t.error);
-        details.appendChild(pre);
+        renderError(details, t.error);
       }
 
       const table = document.createElement('table');
@@ -235,9 +275,13 @@ afterAll(async () => {
         tdInput.appendChild(preIn);
 
         const tdOut = document.createElement('td');
-        const preOut = document.createElement('pre');
-        preOut.textContent = pretty(s.status === 'failed' ? s.error : s.output);
-        tdOut.appendChild(preOut);
+        if (s.status === 'failed') {
+          renderError(tdOut, s.error);
+        } else {
+          const preOut = document.createElement('pre');
+          preOut.textContent = pretty(s.output);
+          tdOut.appendChild(preOut);
+        }
 
         tr.appendChild(tdName);
         tr.appendChild(tdStatus);
