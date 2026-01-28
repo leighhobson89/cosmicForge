@@ -1,7 +1,7 @@
 import { replaceRocketNames } from "./descriptions.js";
 import { migrateResourceData } from "./saveLoadGame.js";
 import { addPermanentBuffsBackInAfterRebirth, setResourceAutobuyerPricesAfterRepeatables, setCompoundRecipePricesAfterRepeatables, setEnergyAndResearchBuildingPricesAfterRepeatables, setFleetPricesAfterRepeatables, setFleetArmorBuffsAfterRepeatables, setFleetSpeedsAfterRepeatables, setFleetAttackDamageAfterRepeatables, setInitialImpressionBaseAfterRepeatables, setStarStudyEfficiencyAfterRepeatables, setAsteroidSearchEfficiencyAfterRepeatables, calculateAndAddExtraAPFromPhilosophyRepeatable, setStarshipPartPricesAfterRepeatables, setRocketPartPricesAfterRepeatables, setRocketTravelTimeReductionAfterRepeatables, setStarshipTravelTimeReductionAfterRepeatables, applyRateMultiplierToAllResources, addStorageCapacityAndCompoundsToAllResources } from './game.js';
-import { getMultiplierPermanentCompounds, getMultiplierPermanentResources, getCurrentTheme, setCompoundCreateDropdownRecipeText, getCompoundCreateDropdownRecipeText, getStatRun, getPlayerPhilosophy, getAllRepeatableTechMultipliersObject, getFactoryStarsArray, getMegaStructureTechsResearched, getMegaStructureResourceBonus, getStorageAdderBonus, mapFactoryStarValue } from "./constantsAndGlobalVars.js";
+import { getMultiplierPermanentCompounds, getMultiplierPermanentResources, getCurrentTheme, setCompoundCreateDropdownRecipeText, getCompoundCreateDropdownRecipeText, getStatRun, getPlayerPhilosophy, getAllRepeatableTechMultipliersObject, getFactoryStarsArray, getMegaStructureTechsResearched, getMegaStructureResourceBonus, getStorageAdderBonus, mapFactoryStarValue, getTechUnlockedArray, setTechUnlockedArrayDirect } from "./constantsAndGlobalVars.js";
 
 import { achievementAchieve100FusionEfficiency, achievementActivateAllWackyNewsTickers, achievementAdoptPhilosophy, achievementBeatEnemy, achievementBringDownMiaplacideanForceField, achievementCollect100Precipitation, achievementCollect100TitaniumAsPrecipitation, achievementCompleteGame, achievementCompleteRunOnMiaplacidus, achievementConquerMegastructureSystem, achievementConquerStarSystems, achievementCreateCompound, achievementDiscoverAsteroid, achievementDiscoverBlackHole, achievementDiscoverLegendaryAsteroid, achievementFindAncientManuscript, achievementHave4RocketsMiningAntimatter, achievementHave50HoursWithOnePioneer, achievementHaveFleetSizeOf50EachShipType, achievementInitiateDiplomacyWithAlienRace, achievementLaunchRocket, achievementLaunchStarShip, achievementLiquidateAllAssets, achievementMineAllAntimatterAsteroid, achievementPerformGalaticMarketTransaction, achievementRebirth, achievementResearchAllTechnologies, achievementSeeAllNewsTickers, achievementSpendAp, achievementStudyAllStarsInOneRun, achievementStudyAStar, achievementTrade10APForCash, achievementTripPower, achievementActivateBlackHoleOver10x, achievementTryAllThemes } from "./achievements.js";
 import { showNotification } from "./ui.js";
@@ -3176,6 +3176,34 @@ export function resetResourceDataObjectOnRebirthAndAddApAndPermanentBuffsBack() 
         setPricesForRepeatablesAfterRebirth(currentPricesForRepeatables);
     }
 
+    const megaStructureTechMapping = {
+        1: ['dysonSphereUnderstanding', 'dysonSphereCapabilities', 'dysonSphereDisconnect', 'dysonSpherePower', 'dysonSphereConnect'],
+        2: ['celestialProcessingCoreUnderstanding', 'celestialProcessingCoreCapabilities', 'celestialProcessingCoreDisconnect', 'celestialProcessingCorePower', 'celestialProcessingCoreConnect'],
+        3: ['plasmaForgeUnderstanding', 'plasmaForgeCapabilities', 'plasmaForgeDisconnect', 'plasmaForgePower', 'plasmaForgeConnect'],
+        4: ['galacticMemoryArchiveUnderstanding', 'galacticMemoryArchiveCapabilities', 'galacticMemoryArchiveDisconnect', 'galacticMemoryArchivePower', 'galacticMemoryArchiveConnect']
+    };
+ 
+    const megaStructureTechsResearched = getMegaStructureTechsResearched?.() || [];
+    if (Array.isArray(megaStructureTechsResearched) && megaStructureTechsResearched.length > 0) {
+        const existingUnlocked = getTechUnlockedArray?.() || [];
+        const merged = Array.isArray(existingUnlocked) ? [...existingUnlocked] : [];
+        const seen = new Set(merged);
+
+        megaStructureTechsResearched.forEach((entry) => {
+            if (!Array.isArray(entry) || entry.length < 2) return;
+            const [structureId, techIndex] = entry;
+            const techList = megaStructureTechMapping[structureId];
+            const techKey = Array.isArray(techList) ? techList[techIndex - 1] : null;
+
+            if (typeof techKey === 'string' && techKey.length > 0 && !seen.has(techKey)) {
+                merged.push(techKey);
+                seen.add(techKey);
+            }
+        });
+ 
+        setTechUnlockedArrayDirect(merged);
+    }
+ 
     setResourceDataObject(currentAp, 'ascendencyPoints', ['quantity']);
 }
 
