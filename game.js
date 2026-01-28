@@ -9123,8 +9123,6 @@ function setEnergyUse() {
                     } else {
                         energyUse = 0;
                     }
-
-                    energyUse = tier.energyUse || 0;
                     const quantity = tier.quantity || 0;
                     totalEnergyUseCompounds += energyUse * quantity;
                 }

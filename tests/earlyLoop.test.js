@@ -1,6 +1,6 @@
 import path from "node:path";
 import { chromium } from "playwright";
-import { startStaticServer, createCloudLoadedGame } from "./smokeCloudLoadUtils.js";
+import { startStaticServer, createCloudLoadedGame } from "./cloudLoadUtils.js";
 
 describe("cloudSave_earlyLoop", () => {
   globalThis.smokeTest(

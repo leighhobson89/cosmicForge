@@ -10,15 +10,15 @@ if (-not (Test-Path $jest)) {
 # Force headless mode for Playwright smoke tests
 $env:HEADLESS = '1'
 
-# Run all tests under tests/smoke
+# Run all tests under tests
 $tests = @(
-  'tests/smoke/launchAndOnboard.test.js',
-  'tests/smoke/launch-app.test.js',
-  'tests/smoke/earlyLoop.test.js',
-  'tests/smoke/autobuyer.test.js',
-  'tests/smoke/researchTech.test.js',
-  'tests/smoke/energyMid.test.js',
-  'tests/smoke/spaceAntimatter.test.js'
+  'tests/launchAndOnboard.test.js',
+  'tests/launch-app.test.js',
+  'tests/earlyLoop.test.js',
+  'tests/autobuyer.test.js',
+  'tests/researchTech.test.js',
+  'tests/energyMid.test.js',
+  'tests/spaceAntimatter.test.js'
 )
 
 $expectedFailures = @(

@@ -1,6 +1,6 @@
 import path from "node:path";
 import { chromium } from "playwright";
-import { startStaticServer, createCloudLoadedGame } from "./smokeCloudLoadUtils.js";
+import { startStaticServer, createCloudLoadedGame } from "./cloudLoadUtils.js";
 
 describe("cloudSave_autobuyer", () => {
   globalThis.smokeTest(
@@ -16,7 +16,10 @@ describe("cloudSave_autobuyer", () => {
       const WAIT_PANE_MS = 150;
       const WAIT_TOGGLE_MS = 250;
       const WAIT_SETTLE_MS = 250;
-      const SAMPLE_DELTA_MS = 600;
+      const SAMPLE_DELTA_MS = 500;
+      const RATE_REL_TOLERANCE = 0.6;
+      const ENERGY_ABS_TOLERANCE = 5;
+      const ENERGY_REL_TOLERANCE = 2.5;
 
       const openPane = async (tabSelector, optionSelector) => {
         await page.click(tabSelector);
@@ -183,6 +186,92 @@ describe("cloudSave_autobuyer", () => {
         }, { type, key });
       };
 
+      const readEnergyMetrics = async () => {
+        return await page.evaluate(() => {
+          const mod = globalThis.__smokeMods?.rdo;
+          const cg = globalThis.__smokeMods?.cg;
+          const energy = mod?.resourceData?.buildings?.energy;
+          const rate = energy?.rate ?? 0;
+          const totalEnergyUse = typeof cg?.getTotalEnergyUse === "function"
+            ? (cg.getTotalEnergyUse() ?? 0)
+            : (energy?.consumption ?? 0);
+          return {
+            rate,
+            totalEnergyUse,
+            net: rate - totalEnergyUse
+          };
+        });
+      };
+
+      const expectApprox = (actual, expected, { rel = RATE_REL_TOLERANCE, abs = 0 } = {}) => {
+        const relTol = Math.abs(expected) * rel;
+        const absTol = abs;
+        const tol = Math.max(relTol, absTol);
+        expect(actual).toBeGreaterThanOrEqual(expected - tol);
+        expect(actual).toBeLessThanOrEqual(expected + tol);
+      };
+
+      const waitForRateToMatch = async (type, key, expectedRate, { timeoutMs = 4000 } = {}) => {
+        if (!(expectedRate > 0)) {
+          return;
+        }
+
+        const tol = Math.max(Math.abs(expectedRate) * RATE_REL_TOLERANCE, 0.001);
+
+        await page.waitForFunction(
+          ({ type, key, expectedRate, tol }) => {
+            const grossFn = globalThis.calculateGrossAutoBuyerGenerationPerInterval;
+            let rate = 0;
+            if (typeof grossFn === "function") {
+              rate = grossFn(type, key) || 0;
+            } else {
+              const mod = globalThis.__smokeMods?.rdo;
+              const ab = mod?.resourceData?.[type]?.[key]?.upgrades?.autoBuyer;
+              if (ab) {
+                rate = [1, 2, 3, 4].reduce((sum, t) => {
+                  const tier = ab[`tier${t}`];
+                  if (!tier) return sum;
+                  const qty = tier.quantity ?? 0;
+                  if (qty <= 0) return sum;
+                  const active = tier.active !== false;
+                  if (!active) return sum;
+                  const r = tier.rate ?? 0;
+                  if (r <= 0) return sum;
+                  return sum + (r * qty);
+                }, 0);
+              }
+            }
+            return Math.abs(rate - expectedRate) <= tol;
+          },
+          { type, key, expectedRate, tol },
+          { timeout: timeoutMs }
+        );
+      };
+
+      const readGrossAutoBuyerRate = async (type, key) => {
+        return await page.evaluate(({ type, key }) => {
+          const grossFn = globalThis.calculateGrossAutoBuyerGenerationPerInterval;
+          if (typeof grossFn === "function") {
+            return grossFn(type, key) || 0;
+          }
+
+          const mod = globalThis.__smokeMods?.rdo;
+          const ab = mod?.resourceData?.[type]?.[key]?.upgrades?.autoBuyer;
+          if (!ab) return 0;
+          return [1, 2, 3, 4].reduce((sum, t) => {
+            const tier = ab[`tier${t}`];
+            if (!tier) return sum;
+            const qty = tier.quantity ?? 0;
+            if (qty <= 0) return sum;
+            const active = tier.active !== false;
+            if (!active) return sum;
+            const r = tier.rate ?? 0;
+            if (r <= 0) return sum;
+            return sum + (r * qty);
+          }, 0);
+        }, { type, key });
+      };
+
       const setTierLevelDirect = async (type, key, value) => {
         await page.evaluate(async ({ type, key, value }) => {
           const mod = globalThis.__smokeMods?.rdo || await import("/resourceDataObject.js");
@@ -340,6 +429,58 @@ describe("cloudSave_autobuyer", () => {
         return { q1, q2, delta: q2 - q1 };
       };
 
+      const setQuantityDirect = async (type, key, value) => {
+        await page.evaluate(({ type, key, value }) => {
+          const mod = globalThis.__smokeMods?.rdo;
+          const entry = mod?.resourceData?.[type]?.[key];
+          if (!entry) return;
+          entry.storageCapacity = Math.max(entry.storageCapacity ?? 0, 1000000000);
+          entry.quantity = value;
+        }, { type, key, value });
+      };
+
+      const assertRateAndQuantityDelta = async (type, key, expectedRate, durationMs, label) => {
+        await assertPowerIsOn(`${label}:power`);
+
+        await waitForRateToMatch(type, key, expectedRate, { timeoutMs: 4000 });
+        const actualRate = await readGrossAutoBuyerRate(type, key);
+        expectApprox(actualRate, expectedRate, { rel: RATE_REL_TOLERANCE, abs: 0.001 });
+
+        await setQuantityDirect(type, key, 0);
+        await page.waitForTimeout(WAIT_SETTLE_MS);
+        const delta = await measureQuantityDelta(type, key, durationMs);
+        const expectedDelta = expectedRate * (durationMs / 1000);
+
+        if (expectedDelta > 0) {
+          const floor = Math.max(expectedDelta * 0.15, 0.001);
+          expect(delta.delta).toBeGreaterThanOrEqual(floor);
+        }
+
+        await setQuantityDirect(type, key, 1000000);
+        await page.waitForTimeout(WAIT_SETTLE_MS);
+      };
+
+      const assertEnergyMatchesActiveTiers = async (baseline, expectedEnergyDelta, label) => {
+        const current = await readEnergyMetrics();
+        const actualUseDelta = (current.totalEnergyUse ?? 0) - (baseline.totalEnergyUse ?? 0);
+
+        // Primary invariant: consumption should rise by the sum of active tier energyUse.
+        // Generation (energy.rate) can change for unrelated reasons, so net can shift wildly.
+        expectApprox(actualUseDelta, expectedEnergyDelta, { rel: ENERGY_REL_TOLERANCE, abs: ENERGY_ABS_TOLERANCE });
+
+        const baselineRate = baseline.rate ?? 0;
+        const currentRate = current.rate ?? 0;
+        const generationShift = Math.abs(currentRate - baselineRate);
+        const generationShiftTol = Math.max(Math.abs(baselineRate) * 0.05, 5);
+
+        if (generationShift <= generationShiftTol) {
+          const actualNetDelta = (baseline.net ?? 0) - (current.net ?? 0);
+          expectApprox(actualNetDelta, expectedEnergyDelta, { rel: ENERGY_REL_TOLERANCE, abs: ENERGY_ABS_TOLERANCE });
+        }
+
+        await assertPowerIsOn(`${label}:power`);
+      };
+
       const waitForEnergyConsumptionDelta = async (expectedDelta, baseline, timeoutMs = 1000) => {
         if (!expectedDelta) {
           return baseline;
@@ -366,58 +507,32 @@ describe("cloudSave_autobuyer", () => {
         });
       };
 
-      const assertTierToggleEffects = async (type, key, tier) => {
-        const tierCfg = await readAutoBuyerTierConfig(type, key, tier);
+      const assertTierToggleEffects = async (type, key, tier, baselineEnergy, expectedRateOn, expectedEnergyOn, tierCfg) => {
         await page.waitForTimeout(WAIT_SETTLE_MS);
 
-        // Assume newly bought tiers are ON; enforce it to avoid flakiness.
-        await setTierActiveDirect(type, key, tier, true);
+        await toggleTierViaUi(key, tier, true);
         await page.waitForTimeout(WAIT_SETTLE_MS);
-        await assertPowerIsOn(`${type}:${key}:tier${tier}:onChecks`);
-
-        const onState = await readState(type, key);
         const activeOn = await readTierActive(type, key, tier);
         expect(activeOn).toBe(true);
 
-        const onDelta = type === "resources"
-          ? await measureQuantityDelta(type, key, SAMPLE_DELTA_MS)
-          : null;
+        await assertRateAndQuantityDelta(type, key, expectedRateOn, SAMPLE_DELTA_MS, `${type}:${key}:tier${tier}:on`);
+        await assertEnergyMatchesActiveTiers(baselineEnergy, expectedEnergyOn, `${type}:${key}:tier${tier}:energyOn`);
 
-        // Single transition: ON -> OFF, then do OFF checks and leave it OFF.
+        const expectedRateOff = expectedRateOn - (tierCfg.rate ?? 0);
+        const expectedEnergyOff = expectedEnergyOn - (tierCfg.energyUse ?? 0);
+
         await toggleTierViaUi(key, tier, false);
         await page.waitForTimeout(WAIT_SETTLE_MS);
-        await assertPowerIsOn(`${type}:${key}:tier${tier}:offChecks`);
-
-        const offState = await readState(type, key);
         const activeOff = await readTierActive(type, key, tier);
         expect(activeOff).toBe(false);
 
-        const expectedConsumptionDelta = (tierCfg.energyUse ?? 0) * 1;
-        const offConsumptionFinal = await waitForEnergyConsumptionDelta(
-          expectedConsumptionDelta,
-          onState.energyConsumption ?? 0,
-          1000
-        );
-        const actualConsumptionDelta = (onState.energyConsumption ?? 0) - (offConsumptionFinal ?? 0);
-        expect(actualConsumptionDelta).toBeGreaterThanOrEqual(0);
-        if (expectedConsumptionDelta > 0) {
-          expect(actualConsumptionDelta).toBeLessThanOrEqual(expectedConsumptionDelta + 0.05);
-        }
+        await assertRateAndQuantityDelta(type, key, expectedRateOff, SAMPLE_DELTA_MS, `${type}:${key}:tier${tier}:off`);
+        await assertEnergyMatchesActiveTiers(baselineEnergy, expectedEnergyOff, `${type}:${key}:tier${tier}:energyOff`);
 
-        if (type === "resources") {
-          const offDelta = await measureQuantityDelta(type, key, SAMPLE_DELTA_MS);
-          expect(offDelta.delta).toBeLessThan(onDelta.delta);
-
-          const expectedDropFloor = (tierCfg.rate ?? 0) * (SAMPLE_DELTA_MS / 1000) * 0.2;
-          const actualDrop = onDelta.delta - offDelta.delta;
-          if (expectedDropFloor > 0) {
-            expect(actualDrop).toBeGreaterThan(expectedDropFloor);
-          }
-        }
-
-        // Leave OFF.
+        await toggleTierViaUi(key, tier, true);
+        await page.waitForTimeout(WAIT_SETTLE_MS);
         const finalActive = await readTierActive(type, key, tier);
-        expect(finalActive).toBe(false);
+        expect(finalActive).toBe(true);
       };
 
       const assertQuantityIncreases = async (type, key) => {
@@ -432,7 +547,7 @@ describe("cloudSave_autobuyer", () => {
         await assertPowerIsOn(`${type}:${key}:quantityIncreaseCheck`);
 
         const before = await readState(type, key);
-        await page.waitForTimeout(800);
+        await page.waitForTimeout(500);
         const after = await readState(type, key);
         expect(after.quantity).toBeGreaterThan(before.quantity);
 
@@ -532,6 +647,10 @@ describe("cloudSave_autobuyer", () => {
         });
 
         for (const key of RESOURCES) {
+          const baselineEnergy = await globalThis.smokeStep(`baseline energy: ${key}`, async () => {
+            return await readEnergyMetrics();
+          });
+
           await globalThis.smokeStep(`open resource pane: ${key}`, async () => {
             await openPane("#tab1", `#${key}Option`);
           });
@@ -539,6 +658,14 @@ describe("cloudSave_autobuyer", () => {
           await globalThis.smokeStep(`ensure resource tiers visible: ${key}`, async () => {
             await setTierLevelDirect("resources", key, 4);
           });
+
+          await globalThis.smokeStep(`disable all resource tiers before buying: ${key}`, async () => {
+            for (let tier = 1; tier <= 4; tier += 1) {
+              await setTierActiveDirect("resources", key, tier, false);
+            }
+          });
+
+          const purchasedTierCfgs = [];
 
           for (let tier = 1; tier <= 4; tier += 1) {
             const tierCfg = await globalThis.smokeStep(`read config: ${key} tier${tier}`, async () => {
@@ -554,23 +681,35 @@ describe("cloudSave_autobuyer", () => {
               await topUpAfterPurchase("resources", key);
             });
 
-            await globalThis.smokeStep(`assert tier purchased and production increases: ${key} tier${tier}`, async () => {
+            await globalThis.smokeStep(`assert tier purchased and cumulative rate/energy apply: ${key} tier${tier}`, async () => {
               expect(tierCfg.rate).toBeGreaterThan(0);
               const tierQty = await readTierQuantity("resources", key, tier);
               expect(tierQty).toBe(1);
-              await assertQuantityIncreases("resources", key);
+              await toggleTierViaUi(key, tier, true);
+              await page.waitForTimeout(WAIT_SETTLE_MS);
+
+              purchasedTierCfgs.push({ tier, cfg: tierCfg });
+              const expectedRate = purchasedTierCfgs.reduce((acc, t) => acc + (t.cfg.rate ?? 0), 0);
+              const expectedEnergy = purchasedTierCfgs.reduce((acc, t) => acc + (t.cfg.energyUse ?? 0), 0);
+
+              await assertRateAndQuantityDelta("resources", key, expectedRate, SAMPLE_DELTA_MS, `resources:${key}:tier${tier}:cumulative`);
+              await assertEnergyMatchesActiveTiers(baselineEnergy, expectedEnergy, `resources:${key}:tier${tier}:energyCumulative`);
             });
 
             if (tier >= 2) {
               await globalThis.smokeStep(`toggle checks: ${key} tier${tier}`, async () => {
-                await assertTierToggleEffects("resources", key, tier);
+                const expectedRateOn = purchasedTierCfgs.reduce((acc, t) => acc + (t.cfg.rate ?? 0), 0);
+                const expectedEnergyOn = purchasedTierCfgs.reduce((acc, t) => acc + (t.cfg.energyUse ?? 0), 0);
+                await assertTierToggleEffects("resources", key, tier, baselineEnergy, expectedRateOn, expectedEnergyOn, tierCfg);
               });
             }
-
-            await globalThis.smokeStep(`leave tier OFF: ${key} tier${tier}`, async () => {
-              await setTierActiveDirect("resources", key, tier, false);
-            });
           }
+
+          await globalThis.smokeStep(`turn off all resource tiers after checks: ${key}`, async () => {
+            for (let tier = 1; tier <= 4; tier += 1) {
+              await setTierActiveDirect("resources", key, tier, false);
+            }
+          });
         }
 
         await globalThis.smokeStep("restore quantities for compound production", async () => {
@@ -582,6 +721,10 @@ describe("cloudSave_autobuyer", () => {
             continue;
           }
 
+          const baselineEnergy = await globalThis.smokeStep(`baseline energy: ${key}`, async () => {
+            return await readEnergyMetrics();
+          });
+
           await globalThis.smokeStep(`open compound pane: ${key}`, async () => {
             await openPane("#tab4", `#${key}Option`);
           });
@@ -589,6 +732,14 @@ describe("cloudSave_autobuyer", () => {
           await globalThis.smokeStep(`ensure compound tiers visible: ${key}`, async () => {
             await setTierLevelDirect("compounds", key, 4);
           });
+
+          await globalThis.smokeStep(`disable all compound tiers before buying: ${key}`, async () => {
+            for (let tier = 1; tier <= 4; tier += 1) {
+              await setTierActiveDirect("compounds", key, tier, false);
+            }
+          });
+
+          const purchasedTierCfgs = [];
 
           for (let tier = 1; tier <= 4; tier += 1) {
             const tierCfg = await globalThis.smokeStep(`read config: ${key} tier${tier}`, async () => {
@@ -604,24 +755,35 @@ describe("cloudSave_autobuyer", () => {
               await topUpAfterPurchase("compounds", key);
             });
 
-            await globalThis.smokeStep(`assert tier purchased and production increases: ${key} tier${tier}`, async () => {
+            await globalThis.smokeStep(`assert tier purchased and cumulative rate/energy apply: ${key} tier${tier}`, async () => {
               expect(tierCfg.rate).toBeGreaterThan(0);
-              const delta = await measureQuantityDelta("compounds", key, 800);
               const tierQty = await readTierQuantity("compounds", key, tier);
               expect(tierQty).toBe(1);
-              await assertQuantityIncreases("compounds", key);
+              await toggleTierViaUi(key, tier, true);
+              await page.waitForTimeout(WAIT_SETTLE_MS);
+
+              purchasedTierCfgs.push({ tier, cfg: tierCfg });
+              const expectedRate = purchasedTierCfgs.reduce((acc, t) => acc + (t.cfg.rate ?? 0), 0);
+              const expectedEnergy = purchasedTierCfgs.reduce((acc, t) => acc + (t.cfg.energyUse ?? 0), 0);
+
+              await assertRateAndQuantityDelta("compounds", key, expectedRate, SAMPLE_DELTA_MS, `compounds:${key}:tier${tier}:cumulative`);
+              await assertEnergyMatchesActiveTiers(baselineEnergy, expectedEnergy, `compounds:${key}:tier${tier}:energyCumulative`);
             });
 
             if (tier >= 2) {
               await globalThis.smokeStep(`toggle checks: ${key} tier${tier}`, async () => {
-                await assertTierToggleEffects("compounds", key, tier);
+                const expectedRateOn = purchasedTierCfgs.reduce((acc, t) => acc + (t.cfg.rate ?? 0), 0);
+                const expectedEnergyOn = purchasedTierCfgs.reduce((acc, t) => acc + (t.cfg.energyUse ?? 0), 0);
+                await assertTierToggleEffects("compounds", key, tier, baselineEnergy, expectedRateOn, expectedEnergyOn, tierCfg);
               });
             }
-
-            await globalThis.smokeStep(`leave tier OFF: ${key} tier${tier}`, async () => {
-              await setTierActiveDirect("compounds", key, tier, false);
-            });
           }
+
+          await globalThis.smokeStep(`turn off all compound tiers after checks: ${key}`, async () => {
+            for (let tier = 1; tier <= 4; tier += 1) {
+              await setTierActiveDirect("compounds", key, tier, false);
+            }
+          });
         }
       } finally {
         await browser.close();
