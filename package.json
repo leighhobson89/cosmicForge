@@ -52,18 +52,24 @@
     "build:win": "bun run build-icons && electron-builder --win",
     "build:linux": "bun run build-icons && electron-builder --linux",
     "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js",
-    "test:smoke": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js tests/smoke"
+    "test:smoke": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js tests/smoke",
+    "test:playwright": "playwright test",
+    "test:allure": "npm run test && npm run test:playwright && allure generate allure-results --clean -o allure-report",
+    "test:report": "allure open allure-report"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.0",
     "@types/bun": "latest",
     "@types/electron": "latest",
+    "allure-commandline": "^2.36.0",
+    "allure-playwright": "^3.4.5",
     "debug": "^4.3.4",
     "electron": "latest",
     "electron-builder": "latest",
     "icon-gen": "latest",
     "jest": "^29.7.0",
+    "jest-allure": "^0.1.3",
     "playwright": "^1.41.2"
   },
-  "dependencies": {},
   "private": true
 }
