@@ -81,6 +81,24 @@ const timedEffectDefinitions = {
             );
             randomEventUiHandlers.showEventModal?.('minerBrokeDownEnded', rocketName ? { rocketName } : null);
         }
+    },
+    supplyChainDisruption: {
+        id: 'supplyChainDisruption',
+        onExpire: () => {
+            const state = getTimedEffectState('supplyChainDisruption') || {};
+            const category = (state && typeof state === 'object') ? state.category : null;
+            const key = (state && typeof state === 'object') ? state.key : null;
+            const itemName = (category && key) ? getItemDisplayName(category, key) : null;
+
+            setTimedEffectState('supplyChainDisruption', { category: null, key: null });
+            randomEventUiHandlers.showNotification?.(
+                itemName ? `Supply chains restored (${itemName}).` : 'Supply chains restored.',
+                'info',
+                5000,
+                'default'
+            );
+            randomEventUiHandlers.showEventModal?.('supplyChainDisruptionEnded', itemName ? { itemName } : null);
+        }
     }
 };
 
@@ -275,8 +293,80 @@ const randomEventDefinitions = {
                 modalReplacements: { rocketName: getRocketUserName(pickedRocket) }
             };
         }
+    },
+    supplyChainDisruption: {
+        id: 'supplyChainDisruption',
+        initialProbability: 0.30,
+        canTrigger: () => {
+            const candidates = getSupplyChainDisruptionCandidates();
+            return candidates.length > 0 && !isTimedEffectActive('supplyChainDisruption');
+        },
+        trigger: () => {
+            const candidates = getSupplyChainDisruptionCandidates();
+            if (!candidates.length) return false;
+
+            const picked = candidates[Math.floor(Math.random() * candidates.length)];
+            const itemName = getItemDisplayName(picked.category, picked.key);
+            startTimedEffect('supplyChainDisruption', 15 * 60 * 1000, { category: picked.category, key: picked.key });
+
+            return {
+                notificationText: `Random Event: Supply Chain Disruption (${itemName})`,
+                modalReplacements: { itemName }
+            };
+        }
     }
 };
+
+function getItemDisplayName(category, key) {
+    if (!category || !key) {
+        return 'Unknown';
+    }
+
+    const data = getResourceDataObject(category, [key], true);
+    if (data && typeof data === 'object') {
+        const storedName = category === 'compounds' ? data.nameCompound : data.nameResource;
+        if (typeof storedName === 'string' && storedName.trim() !== '') {
+            return storedName;
+        }
+    }
+
+    return formatEventName(String(key));
+}
+
+function getSupplyChainDisruptionCandidates() {
+    const candidates = [];
+    const tiers = [1, 2, 3, 4];
+
+    const resourceKeys = Array.from(new Set(['hydrogen', ...(getUnlockedResourcesArray() || [])]));
+    resourceKeys.forEach((key) => {
+        if (key !== 'hydrogen' && !(getUnlockedResourcesArray() || []).includes(key)) {
+            return;
+        }
+
+        const hasAny = tiers.some((tier) => {
+            const qty = Number(getResourceDataObject('resources', [key, 'upgrades', 'autoBuyer', `tier${tier}`, 'quantity'], true)) || 0;
+            return qty > 0;
+        });
+
+        if (hasAny) {
+            candidates.push({ category: 'resources', key });
+        }
+    });
+
+    const compoundKeys = Array.from(new Set(getUnlockedCompoundsArray() || []));
+    compoundKeys.forEach((key) => {
+        const hasAny = tiers.some((tier) => {
+            const qty = Number(getResourceDataObject('compounds', [key, 'upgrades', 'autoBuyer', `tier${tier}`, 'quantity'], true)) || 0;
+            return qty > 0;
+        });
+
+        if (hasAny) {
+            candidates.push({ category: 'compounds', key });
+        }
+    });
+
+    return candidates;
+}
 
 function getTimedEffectsRoot() {
     const root = getRandomEventsRoot();

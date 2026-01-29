@@ -506,6 +506,34 @@ function updateProductionRateText(elementId, rateValue) {
     } else {
         rateElement.classList.add('warning-orange-text');
     }
+
+    const supplyChainState = isTimedEffectActive?.('supplyChainDisruption')
+        ? (getTimedEffectStateSnapshot?.('supplyChainDisruption') || null)
+        : null;
+    const supplyCategory = (supplyChainState && typeof supplyChainState === 'object') ? supplyChainState.category : null;
+    const supplyKey = (supplyChainState && typeof supplyChainState === 'object') ? supplyChainState.key : null;
+    if ((supplyCategory === 'resources' || supplyCategory === 'compounds') && typeof supplyKey === 'string') {
+        const candidateKey = (typeof elementId === 'string' && elementId.endsWith('Rate')) ? elementId.slice(0, -4) : null;
+        if (candidateKey && candidateKey === supplyKey) {
+            rateElement.classList.remove('green-ready-text', 'red-disabled-text');
+            rateElement.classList.add('warning-orange-text');
+        }
+    }
+}
+
+function getSupplyChainDisruptionMultiplier(category, key) {
+    const state = isTimedEffectActive?.('supplyChainDisruption')
+        ? (getTimedEffectStateSnapshot?.('supplyChainDisruption') || null)
+        : null;
+    if (!state || typeof state !== 'object') {
+        return 1;
+    }
+
+    if (state.category !== category || state.key !== key) {
+        return 1;
+    }
+
+    return 0.25;
 }
 
 function grantNonExhaustiveResourcesAfterRebirth() {
@@ -1286,12 +1314,13 @@ function updateResourceAutoBuyerDelta(resource, tier, deltaMs) {
     }
 
     let currentQuantity = getResourceDataObject('resources', [resource, 'quantity']) || 0;
+    const supplyChainMultiplier = getSupplyChainDisruptionMultiplier('resources', resource);
 
     if (getPowerOnOff()) {
         const autoBuyerExtractionRate = getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', `tier${tier}`, 'rate']) || 0;
         const currentTierAutoBuyerQuantity = getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', `tier${tier}`, 'quantity']) || 0;
         const activeAutoBuyer = getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', `tier${tier}`, 'active']);
-        const calculatedResourceRate = activeAutoBuyer ? autoBuyerExtractionRate * currentTierAutoBuyerQuantity : 0;
+        const calculatedResourceRate = (activeAutoBuyer ? autoBuyerExtractionRate * currentTierAutoBuyerQuantity : 0) * supplyChainMultiplier;
 
         const productionAmount = calculatedResourceRate * tickMultiplier;
         const updatedQuantity = Math.min(currentQuantity + productionAmount, storageCapacity);
@@ -1307,7 +1336,7 @@ function updateResourceAutoBuyerDelta(resource, tier, deltaMs) {
             return (
                 (getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', `tier${tierIndex}`, 'rate']) || 0) *
                 (getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', `tier${tierIndex}`, 'quantity']) || 0)
-            );
+            ) * supplyChainMultiplier;
         };
 
         const allResourceRatesAddedTogether =
@@ -1350,7 +1379,7 @@ function updateResourceAutoBuyerDelta(resource, tier, deltaMs) {
         const currentTierAutoBuyerQuantity = getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', 'tier1', 'quantity']) || 0;
         const activeAutoBuyer = getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', 'tier1', 'active']);
 
-        const calculatedResourceRate = activeAutoBuyer ? autoBuyerExtractionRate * currentTierAutoBuyerQuantity : 0;
+        const calculatedResourceRate = (activeAutoBuyer ? autoBuyerExtractionRate * currentTierAutoBuyerQuantity : 0) * supplyChainMultiplier;
         const productionAmount = calculatedResourceRate * tickMultiplier;
         const updatedQuantity = Math.min(currentQuantity + productionAmount, storageCapacity);
         const actualGain = Math.max(0, Math.min(storageCapacity - currentQuantity, productionAmount));
@@ -1422,12 +1451,13 @@ function updateCompoundAutoBuyerDelta(compound, tier, deltaMs) {
     }
 
     let currentQuantity = getResourceDataObject('compounds', [compound, 'quantity']) || 0;
+    const supplyChainMultiplier = getSupplyChainDisruptionMultiplier('compounds', compound);
 
     if (getPowerOnOff()) {
         const autoBuyerExtractionRate = getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', `tier${tier}`, 'rate']) || 0;
         const currentTierAutoBuyerQuantity = getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', `tier${tier}`, 'quantity']) || 0;
         const activeAutoBuyer = getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', `tier${tier}`, 'active']);
-        const calculatedCompoundRate = activeAutoBuyer ? autoBuyerExtractionRate * currentTierAutoBuyerQuantity : 0;
+        const calculatedCompoundRate = (activeAutoBuyer ? autoBuyerExtractionRate * currentTierAutoBuyerQuantity : 0) * supplyChainMultiplier;
 
         const productionAmount = calculatedCompoundRate * tickMultiplier;
         const updatedQuantity = Math.min(currentQuantity + productionAmount, storageCapacity);
@@ -1442,7 +1472,7 @@ function updateCompoundAutoBuyerDelta(compound, tier, deltaMs) {
             compound === getStarSystemDataObject('stars', [getCurrentStarSystem(), 'precipitationType']) &&
             getUnlockedCompoundsArray().includes(getStarSystemDataObject('stars', [getCurrentStarSystem(), 'precipitationType']))
         ) {
-            const precipitationGain = currentQuantity >= storageCapacity ? 0 : autoBuyerExtractionRate * tickMultiplier;
+            const precipitationGain = currentQuantity >= storageCapacity ? 0 : (autoBuyerExtractionRate * tickMultiplier * supplyChainMultiplier);
             setCollectedPrecipitationQuantityThisRun(getCollectedPrecipitationQuantityThisRun() + precipitationGain);
         }
 
@@ -1452,7 +1482,7 @@ function updateCompoundAutoBuyerDelta(compound, tier, deltaMs) {
             return (
                 (getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', `tier${tierIndex}`, 'rate']) || 0) *
                 (getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', `tier${tierIndex}`, 'quantity']) || 0)
-            );
+            ) * supplyChainMultiplier;
         };
 
         let allCompoundRatesAddedTogether =
@@ -1462,7 +1492,7 @@ function updateCompoundAutoBuyerDelta(compound, tier, deltaMs) {
             getCompoundTierContribution(4);
 
         if (compound === getStarSystemDataObject('stars', [getCurrentStarSystem(), 'precipitationType'])) {
-            allCompoundRatesAddedTogether += getCurrentPrecipitationRate();
+            allCompoundRatesAddedTogether += (getCurrentPrecipitationRate() * supplyChainMultiplier);
         }
 
         allCompoundRatesAddedTogether += calculateCompoundAutoCreateRatePerInterval(compound);
@@ -1495,7 +1525,7 @@ function updateCompoundAutoBuyerDelta(compound, tier, deltaMs) {
         const autoBuyerExtractionRate = getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', 'tier1', 'rate']) || 0;
         const currentTierAutoBuyerQuantity = getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', 'tier1', 'quantity']) || 0;
         const activeAutoBuyer = getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', 'tier1', 'active']);
-        const calculatedCompoundRate = activeAutoBuyer ? autoBuyerExtractionRate * currentTierAutoBuyerQuantity : 0;
+        const calculatedCompoundRate = (activeAutoBuyer ? autoBuyerExtractionRate * currentTierAutoBuyerQuantity : 0) * supplyChainMultiplier;
 
         const productionAmount = calculatedCompoundRate * tickMultiplier;
         const updatedQuantity = Math.min(currentQuantity + productionAmount, storageCapacity);
@@ -1508,14 +1538,14 @@ function updateCompoundAutoBuyerDelta(compound, tier, deltaMs) {
             compound === getStarSystemDataObject('stars', [getCurrentStarSystem(), 'precipitationType']) &&
             getUnlockedCompoundsArray().includes(getStarSystemDataObject('stars', [getCurrentStarSystem(), 'precipitationType']))
         ) {
-            const precipitationGain = activeAutoBuyer ? autoBuyerExtractionRate * tickMultiplier : 0;
+            const precipitationGain = activeAutoBuyer ? (autoBuyerExtractionRate * tickMultiplier * supplyChainMultiplier) : 0;
             setCollectedPrecipitationQuantityThisRun(getCollectedPrecipitationQuantityThisRun() + precipitationGain);
         }
 
         let compoundTier1Rate = calculatedCompoundRate;
 
         if (compound === getStarSystemDataObject('stars', [getCurrentStarSystem(), 'precipitationType'])) {
-            compoundTier1Rate += getCurrentPrecipitationRate();
+            compoundTier1Rate += (getCurrentPrecipitationRate() * supplyChainMultiplier);
         }
 
         compoundTier1Rate += calculateCompoundAutoCreateRatePerInterval(compound);
@@ -1525,8 +1555,9 @@ function updateCompoundAutoBuyerDelta(compound, tier, deltaMs) {
     } else if (
         compound === getStarSystemDataObject('stars', [getCurrentStarSystem(), 'precipitationType'])
     ) {
-        setResourceDataObject(getCurrentPrecipitationRate(), 'compounds', [compound, 'rate']);
-        updateProductionRateText(`${compound}Rate`, getCurrentPrecipitationRate() * getTimerRateRatio());
+        const precipitationRate = getCurrentPrecipitationRate() * supplyChainMultiplier;
+        setResourceDataObject(precipitationRate, 'compounds', [compound, 'rate']);
+        updateProductionRateText(`${compound}Rate`, precipitationRate * getTimerRateRatio());
     }
 
     if (getResourceDataObject('compounds', [compound, 'autoSell'])) {
@@ -1553,14 +1584,14 @@ function updateCompoundAutoBuyerDelta(compound, tier, deltaMs) {
         if (currentQuantity < storageCapacity) {
             const amountToCreateArray = calculateCreatableCompoundAmount(compound);
             const availableStorage = Math.floor(storageCapacity - currentQuantity);
-            const amountToCreate = Math.min(amountToCreateArray[0], availableStorage);
+            const amountToCreate = Math.floor(Math.min(amountToCreateArray[0], availableStorage) * supplyChainMultiplier);
 
             setResourceDataObject(currentQuantity + amountToCreate, 'compounds', [compound, 'quantity']);
 
             amountToCreateArray.slice(1).forEach(([amountPerUnit, resourceName]) => {
                 if (resourceName && amountPerUnit > 0) {
                     const currentResourceQuantity = getResourceDataObject('resources', [resourceName, 'quantity']) || 0;
-                    const newResourceQuantity = currentResourceQuantity - Math.floor((amountToCreate / amountToCreateArray[0]) * amountPerUnit);
+                    const newResourceQuantity = currentResourceQuantity - Math.floor((amountToCreate / Math.max(1, amountToCreateArray[0])) * amountPerUnit);
                     setResourceDataObject(newResourceQuantity, 'resources', [resourceName, 'quantity']);
                 }
             });
@@ -1631,7 +1662,8 @@ function calculateCompoundAutoCreateRatePerInterval(compoundKey) {
         return 0;
     }
 
-    return Math.min(...perIngredientRates);
+    const base = Math.min(...perIngredientRates);
+    return base * getSupplyChainDisruptionMultiplier('compounds', compoundKey);
 }
 
 function initialiseRocketFuelDeltaTimers() {
@@ -2836,8 +2868,10 @@ function addPrecipitationResource() {
     let precipitationStorageAvailable = getResourceDataObject(currentStarSystemPrecipitationCategory, [currentStarSystemPrecipitationType, 'storageCapacity']) > currentStarSystemPrecipitationTypeQuantity;
 
     if (getCurrentStarSystemWeatherEfficiency()[2] === 'rain' && precipitationTypeRevealedYet && precipitationStorageAvailable) {
-        setResourceDataObject(currentStarSystemPrecipitationTypeQuantity + getCurrentPrecipitationRate(), currentStarSystemPrecipitationCategory, [currentStarSystemPrecipitationType, 'quantity']);
-        addToResourceAllTimeStat(getCurrentPrecipitationRate(), currentStarSystemPrecipitationType);
+        const supplyChainMultiplier = getSupplyChainDisruptionMultiplier(currentStarSystemPrecipitationCategory, currentStarSystemPrecipitationType);
+        const precipitationGain = getCurrentPrecipitationRate() * supplyChainMultiplier;
+        setResourceDataObject(currentStarSystemPrecipitationTypeQuantity + precipitationGain, currentStarSystemPrecipitationCategory, [currentStarSystemPrecipitationType, 'quantity']);
+        addToResourceAllTimeStat(precipitationGain, currentStarSystemPrecipitationType);
         const precipitationId = currentStarSystemPrecipitationType + 'Quantity';
 
         if (document.getElementById(precipitationId)) {

@@ -144,6 +144,10 @@ export let modalEventMinerBrokeDownHeader;
 export let modalEventMinerBrokeDownText;
 export let modalEventMinerBrokeDownEndedHeader;
 export let modalEventMinerBrokeDownEndedText;
+export let modalEventSupplyChainDisruptionHeader;
+export let modalEventSupplyChainDisruptionText;
+export let modalEventSupplyChainDisruptionEndedHeader;
+export let modalEventSupplyChainDisruptionEndedText;
 
 export let randomEventTriggerDescriptions;
 
@@ -292,6 +296,12 @@ export function initialiseDescriptions() {
     modalEventMinerBrokeDownEndedHeader = 'MINER REPAIRED!';
     modalEventMinerBrokeDownEndedText = `Field repairs complete.<br><br><span class="green-ready-text">{rocketName} has been repaired and is ready to resume mining.</span>`;
 
+    modalEventSupplyChainDisruptionHeader = 'SUPPLY CHAIN DISRUPTION!';
+    modalEventSupplyChainDisruptionText = `A major logistics disruption has hit your operations.<br><br><span class="warning-orange-text">{itemName} production reduced to 25% for 15 minutes.</span>`;
+
+    modalEventSupplyChainDisruptionEndedHeader = 'SUPPLY CHAINS RESTORED!';
+    modalEventSupplyChainDisruptionEndedText = `Shipments are flowing again.<br><br><span class="green-ready-text">{itemName} production has returned to normal.</span>`;
+
     randomEventTriggerDescriptions = {
         powerPlantExplosion: 'Destroy 1 random owned power plant',
         batteryExplosion: 'Destroy 1 highest-tier owned battery',
@@ -301,7 +311,8 @@ export function initialiseDescriptions() {
         antimatterReaction: 'A mining rocket and its asteroid are destroyed',
         stockLoss: 'Lose 40-80% of an unlocked resource or compound stock',
         galacticMarketLockdown: 'Disable the Galactic Market for 30 minutes',
-        minerBrokeDown: 'One mining rocket produces 0 antimatter for 15 minutes'
+        minerBrokeDown: 'One mining rocket produces 0 antimatter for 15 minutes',
+        supplyChainDisruption: 'One resource or compound produces only 25% for 15 minutes'
     };
 
     miaplacidusEndgameStoryPopups = [

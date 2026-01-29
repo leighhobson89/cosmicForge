@@ -273,6 +273,10 @@ import {
     modalEventMinerBrokeDownText,
     modalEventMinerBrokeDownEndedHeader,
     modalEventMinerBrokeDownEndedText,
+    modalEventSupplyChainDisruptionHeader,
+    modalEventSupplyChainDisruptionText,
+    modalEventSupplyChainDisruptionEndedHeader,
+    modalEventSupplyChainDisruptionEndedText,
     
 } from "./descriptions.js";
 
@@ -1168,9 +1172,25 @@ function buildProductionTooltipContent(resourceKey, category) {
     const fallbackRate = `${formatProductionRateValue(((getResourceDataObject(category, [resourceKey, 'rate']) || 0) * timerRatio * (warpMultiplier || 1)))} / s`;
     const netRateDisplay = (rateElement?.textContent?.trim()) || fallbackRate;
 
+    const supplyChainState = isTimedEffectActive?.('supplyChainDisruption')
+        ? (getTimedEffectStateSnapshot?.('supplyChainDisruption') || null)
+        : null;
+    const supplyChainActiveForItem = !!(supplyChainState && typeof supplyChainState === 'object' && supplyChainState.category === category && supplyChainState.key === resourceKey);
+    const rateClass = supplyChainActiveForItem ? 'warning-orange-text' : 'green-ready-text';
+
     const lines = [
-        `<div><strong>${displayName}</strong>: <span class="green-ready-text">${netRateDisplay}</span></div>`
+        `<div><strong>${displayName}</strong>: <span class="${rateClass}">${netRateDisplay}</span></div>`
     ];
+
+    if (supplyChainActiveForItem) {
+        const remainingMs = getTimedEffectRemainingMs?.('supplyChainDisruption') || 0;
+        const remainingSeconds = Math.max(0, Math.ceil(remainingMs / 1000));
+        const minutes = Math.floor(remainingSeconds / 60);
+        const seconds = remainingSeconds % 60;
+        const formatted = `${minutes}:${String(seconds).padStart(2, '0')}`;
+        lines.push('<div class="tooltip-spacer">&nbsp;</div>');
+        lines.push(`<div class="warning-orange-text">Supply Chain Disruption active: production reduced (/4)<br>Time Remaining: ${formatted}</div>`);
+    }
 
     if ((warpMultiplier || 1) !== 1) {
         lines.push('<div class="tooltip-spacer">&nbsp;</div>');
@@ -1445,6 +1465,13 @@ function buildAutoBuyerGenerationLines(resourceKey, category, timerRatio) {
         return '';
     }
 
+    const supplyChainState = isTimedEffectActive?.('supplyChainDisruption')
+        ? (getTimedEffectStateSnapshot?.('supplyChainDisruption') || null)
+        : null;
+    const supplyChainMultiplier = (supplyChainState && typeof supplyChainState === 'object' && supplyChainState.category === category && supplyChainState.key === resourceKey)
+        ? 0.25
+        : 1;
+
     const tierNumbers = [1, 2, 3, 4];
     const tierLines = tierNumbers.map(tier => {
         const tierData = autoBuyer[`tier${tier}`];
@@ -1463,7 +1490,7 @@ function buildAutoBuyerGenerationLines(resourceKey, category, timerRatio) {
         }
 
         const perUnitRate = tierData.rate ?? 0;
-        const contribution = perUnitRate * quantity * timerRatio;
+        const contribution = perUnitRate * quantity * timerRatio * supplyChainMultiplier;
         const className = contribution > 0 ? 'green-ready-text' : 'red-disabled-text';
         const label = tierData.nameUpgrade || `Tier ${tier}`;
         const tierLabel = `${label} (Tier ${tier})`;
@@ -1485,7 +1512,14 @@ function buildAutoCreateGenerationLine(resourceKey, category, timerRatio) {
         return '';
     }
 
-    const autoCreateRate = calculateAutoCreateRatePerSecond(resourceKey, timerRatio);
+    const supplyChainState = isTimedEffectActive?.('supplyChainDisruption')
+        ? (getTimedEffectStateSnapshot?.('supplyChainDisruption') || null)
+        : null;
+    const supplyChainMultiplier = (supplyChainState && typeof supplyChainState === 'object' && supplyChainState.category === category && supplyChainState.key === resourceKey)
+        ? 0.25
+        : 1;
+
+    const autoCreateRate = calculateAutoCreateRatePerSecond(resourceKey, timerRatio) * supplyChainMultiplier;
     if (autoCreateRate <= 0) {
         return '';
     }
@@ -1526,7 +1560,13 @@ function buildPrecipitationGenerationLine(resourceKey, category, timerRatio) {
     const available = Math.max(0, capacity - quantity);
     const perTickRate = Math.max(0, getCurrentPrecipitationRate?.() ?? 0);
     const effectivePerTick = available <= 0 ? 0 : Math.min(perTickRate, available);
-    const perSecond = effectivePerTick * timerRatio;
+    const supplyChainState = isTimedEffectActive?.('supplyChainDisruption')
+        ? (getTimedEffectStateSnapshot?.('supplyChainDisruption') || null)
+        : null;
+    const supplyChainMultiplier = (supplyChainState && typeof supplyChainState === 'object' && supplyChainState.category === category && supplyChainState.key === resourceKey)
+        ? 0.25
+        : 1;
+    const perSecond = effectivePerTick * timerRatio * supplyChainMultiplier;
 
     const className = perSecond > 0 ? 'green-ready-text' : 'red-disabled-text';
     const formatted = formatProductionRateValue(perSecond);
@@ -10604,6 +10644,8 @@ setRandomEventUiHandlers({
             galacticMarketLockdownEnded: modalEventGalacticMarketLockdownEndedHeader,
             minerBrokeDown: modalEventMinerBrokeDownHeader,
             minerBrokeDownEnded: modalEventMinerBrokeDownEndedHeader,
+            supplyChainDisruption: modalEventSupplyChainDisruptionHeader,
+            supplyChainDisruptionEnded: modalEventSupplyChainDisruptionEndedHeader,
         };
         const textMap = {
             powerPlantExplosion: modalEventPowerPlantExplosionText,
@@ -10617,6 +10659,8 @@ setRandomEventUiHandlers({
             galacticMarketLockdownEnded: modalEventGalacticMarketLockdownEndedText,
             minerBrokeDown: modalEventMinerBrokeDownText,
             minerBrokeDownEnded: modalEventMinerBrokeDownEndedText,
+            supplyChainDisruption: modalEventSupplyChainDisruptionText,
+            supplyChainDisruptionEnded: modalEventSupplyChainDisruptionEndedText,
         };
 
         const header = headerMap[eventId];
