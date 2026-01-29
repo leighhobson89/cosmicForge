@@ -148,6 +148,10 @@ export let modalEventSupplyChainDisruptionHeader;
 export let modalEventSupplyChainDisruptionText;
 export let modalEventSupplyChainDisruptionEndedHeader;
 export let modalEventSupplyChainDisruptionEndedText;
+export let modalEventBlackHoleInstabilityHeader;
+export let modalEventBlackHoleInstabilityText;
+export let modalEventBlackHoleInstabilityEndedHeader;
+export let modalEventBlackHoleInstabilityEndedText;
 
 export let randomEventTriggerDescriptions;
 
@@ -302,6 +306,12 @@ export function initialiseDescriptions() {
     modalEventSupplyChainDisruptionEndedHeader = 'SUPPLY CHAINS RESTORED!';
     modalEventSupplyChainDisruptionEndedText = `Shipments are flowing again.<br><br><span class="green-ready-text">{itemName} production has returned to normal.</span>`;
 
+    modalEventBlackHoleInstabilityHeader = 'BLACK HOLE INSTABILITY!';
+    modalEventBlackHoleInstabilityText = `A violent fluctuation ripples through the singularity.<br><br><span class="warning-orange-text">Strength and duration will shift every minute for {minutes} minutes.</span>`;
+
+    modalEventBlackHoleInstabilityEndedHeader = 'BLACK HOLE STABILISED!';
+    modalEventBlackHoleInstabilityEndedText = `The singularity calms and returns to equilibrium.<br><br><span class="green-ready-text">Black Hole strength and duration restored to standard.</span>`;
+
     randomEventTriggerDescriptions = {
         powerPlantExplosion: 'Destroy 1 random owned power plant',
         batteryExplosion: 'Destroy 1 highest-tier owned battery',
@@ -312,7 +322,8 @@ export function initialiseDescriptions() {
         stockLoss: 'Lose 40-80% of an unlocked resource or compound stock',
         galacticMarketLockdown: 'Disable the Galactic Market for 30 minutes',
         minerBrokeDown: 'One mining rocket produces 0 antimatter for 15 minutes',
-        supplyChainDisruption: 'One resource or compound produces only 25% for 15 minutes'
+        supplyChainDisruption: 'One resource or compound produces only 25% for 15 minutes',
+        blackHoleInstability: 'Black Hole fluctuates in strength (and duration) for 15-25 minutes'
     };
 
     miaplacidusEndgameStoryPopups = [

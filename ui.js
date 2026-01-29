@@ -277,6 +277,10 @@ import {
     modalEventSupplyChainDisruptionText,
     modalEventSupplyChainDisruptionEndedHeader,
     modalEventSupplyChainDisruptionEndedText,
+    modalEventBlackHoleInstabilityHeader,
+    modalEventBlackHoleInstabilityText,
+    modalEventBlackHoleInstabilityEndedHeader,
+    modalEventBlackHoleInstabilityEndedText,
     
 } from "./descriptions.js";
 
@@ -10646,6 +10650,8 @@ setRandomEventUiHandlers({
             minerBrokeDownEnded: modalEventMinerBrokeDownEndedHeader,
             supplyChainDisruption: modalEventSupplyChainDisruptionHeader,
             supplyChainDisruptionEnded: modalEventSupplyChainDisruptionEndedHeader,
+            blackHoleInstability: modalEventBlackHoleInstabilityHeader,
+            blackHoleInstabilityEnded: modalEventBlackHoleInstabilityEndedHeader,
         };
         const textMap = {
             powerPlantExplosion: modalEventPowerPlantExplosionText,
@@ -10661,6 +10667,8 @@ setRandomEventUiHandlers({
             minerBrokeDownEnded: modalEventMinerBrokeDownEndedText,
             supplyChainDisruption: modalEventSupplyChainDisruptionText,
             supplyChainDisruptionEnded: modalEventSupplyChainDisruptionEndedText,
+            blackHoleInstability: modalEventBlackHoleInstabilityText,
+            blackHoleInstabilityEnded: modalEventBlackHoleInstabilityEndedText,
         };
 
         const header = headerMap[eventId];

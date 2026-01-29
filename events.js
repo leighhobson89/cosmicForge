@@ -1,5 +1,7 @@
 import {
     changeAsteroidArray,
+    getBlackHoleAlwaysOn,
+    getBlackHoleDiscovered,
     getActivatedFuelBurnObject,
     getAsteroidArray,
     getBuildingTypeOnOff,
@@ -27,7 +29,15 @@ import {
     setTimeLeftUntilRocketTravelToAsteroidTimerFinishes,
     setBuildingTypeOnOff
 } from "./constantsAndGlobalVars.js";
-import { getResourceDataObject, setResourceDataObject } from "./resourceDataObject.js";
+import {
+    getBlackHoleDuration,
+    getBlackHolePower,
+    getBlackHoleResearchDone,
+    getResourceDataObject,
+    setBlackHoleDuration,
+    setBlackHolePower,
+    setResourceDataObject
+} from "./resourceDataObject.js";
 import { timerManagerDelta } from "./timerManagerDelta.js";
 import { randomEventTriggerDescriptions } from "./descriptions.js";
 
@@ -98,6 +108,30 @@ const timedEffectDefinitions = {
                 'default'
             );
             randomEventUiHandlers.showEventModal?.('supplyChainDisruptionEnded', itemName ? { itemName } : null);
+        }
+    },
+    blackHoleInstability: {
+        id: 'blackHoleInstability',
+        onExpire: () => {
+            const state = getTimedEffectState('blackHoleInstability') || {};
+            const originalPower = Number(state?.originalPower);
+            const originalDuration = Number(state?.originalDuration);
+
+            if (Number.isFinite(originalPower) && originalPower > 0) {
+                setBlackHolePower(originalPower);
+            }
+            if (Number.isFinite(originalDuration) && originalDuration >= 0) {
+                setBlackHoleDuration(originalDuration);
+            }
+
+            setTimedEffectState('blackHoleInstability', {
+                tickAccumulatorMs: 0,
+                lastPowerMultiplier: 1,
+                lastDurationMultiplier: 1
+            });
+
+            randomEventUiHandlers.showNotification?.('Black Hole Instability stabilised.', 'info', 5000, 'default');
+            randomEventUiHandlers.showEventModal?.('blackHoleInstabilityEnded');
         }
     }
 };
@@ -314,8 +348,124 @@ const randomEventDefinitions = {
                 modalReplacements: { itemName }
             };
         }
+    },
+    blackHoleInstability: {
+        id: 'blackHoleInstability',
+        initialProbability: 0.30,
+        canTrigger: () => {
+            const discovered = typeof getBlackHoleDiscovered === 'function' ? !!getBlackHoleDiscovered() : false;
+            const researched = !!getBlackHoleResearchDone();
+            return discovered && researched && !isTimedEffectActive('blackHoleInstability');
+        },
+        trigger: () => {
+            const minutes = Math.floor(Math.random() * (25 - 15 + 1)) + 15;
+            const durationMs = minutes * 60 * 1000;
+
+            const originalPower = Number(getBlackHolePower());
+            const originalDuration = Number(getBlackHoleDuration());
+
+            startTimedEffect('blackHoleInstability', durationMs, {
+                originalPower,
+                originalDuration,
+                tickAccumulatorMs: 0,
+                lastPowerMultiplier: 1,
+                lastDurationMultiplier: 1
+            });
+
+            applyBlackHoleInstabilityShift(true);
+
+            return {
+                notificationText: `Random Event: Black Hole Instability (${minutes} minutes)`,
+                modalReplacements: {
+                    minutes
+                }
+            };
+        }
     }
 };
+
+function roundToTwo(value) {
+    const num = Number(value);
+    if (!Number.isFinite(num)) {
+        return num;
+    }
+    return Math.round(num * 100) / 100;
+}
+
+function formatInstabilityDelta(multiplier) {
+    const m = Number(multiplier);
+    if (!Number.isFinite(m) || m <= 0) {
+        return 'unknown';
+    }
+
+    const delta = (m - 1) * 100;
+    const rounded = Math.round(Math.abs(delta));
+
+    if (rounded === 0) {
+        return 'stable';
+    }
+    if (delta < 0) {
+        return `${rounded}% weaker`;
+    }
+    return `${rounded}% stronger`;
+}
+
+function applyBlackHoleInstabilityShift(showNotification) {
+    if (!isTimedEffectActive('blackHoleInstability')) {
+        return;
+    }
+
+    const state = getTimedEffectState('blackHoleInstability') || {};
+    const originalPower = Number(state?.originalPower);
+    const originalDuration = Number(state?.originalDuration);
+
+    if (!Number.isFinite(originalPower) || originalPower <= 0) {
+        return;
+    }
+
+    const alwaysOn = typeof getBlackHoleAlwaysOn === 'function' ? !!getBlackHoleAlwaysOn() : false;
+
+    const powerMultiplier = roundToTwo(Math.random() + 0.5); // 0.5 .. 1.5
+    const durationMultiplier = roundToTwo(Math.random() + 0.5); // 0.5 .. 1.5
+
+    const nextPower = Math.max(0.01, roundToTwo(originalPower * powerMultiplier));
+    setBlackHolePower(nextPower);
+
+    let appliedDurationMultiplier = 1;
+    if (!alwaysOn && Number.isFinite(originalDuration) && originalDuration >= 0) {
+        appliedDurationMultiplier = durationMultiplier;
+        const nextDuration = Math.max(0, Math.round(originalDuration * durationMultiplier));
+        setBlackHoleDuration(nextDuration);
+    } else if (alwaysOn && Number.isFinite(originalDuration) && originalDuration >= 0) {
+        // If the black hole becomes always-on during instability, revert duration to its original.
+        setBlackHoleDuration(originalDuration);
+    }
+
+    setTimedEffectState('blackHoleInstability', {
+        lastPowerMultiplier: powerMultiplier,
+        lastDurationMultiplier: appliedDurationMultiplier
+    });
+
+    if (showNotification) {
+        const powerText = formatInstabilityDelta(powerMultiplier);
+        if (alwaysOn) {
+            randomEventUiHandlers.showNotification?.(
+                `Black Hole Instability: Strength ${powerText} than standard.`,
+                'info',
+                5000,
+                'default'
+            );
+        } else {
+            const durationText = formatInstabilityDelta(appliedDurationMultiplier);
+            randomEventUiHandlers.showNotification?.(
+                `Black Hole Instability: Strength ${powerText} than standard. Duration ${durationText} than standard.`,
+                'info',
+                5000,
+                'default'
+            );
+        }
+    }
+}
 
 function getItemDisplayName(category, key) {
     if (!category || !key) {
@@ -436,6 +586,7 @@ function scheduleTimedEffectsTimer() {
 
     let lastRealUpdateTimestamp = null;
     let lastUsingRealTime = !timedEventTimerAffectedByTimewarp;
+    let lastUnwarpedUpdateTimestamp = null;
     const lastTimedEffectLogBuckets = {};
 
     timerManagerDelta.addTimer(TIMED_EFFECTS_TIMER_ID, {
@@ -444,6 +595,17 @@ function scheduleTimedEffectsTimer() {
         onUpdate: ({ deltaMs: _deltaMs }) => {
             if (!eventsMasterSwitch) {
                 return;
+            }
+
+            const unwarpedNow = (typeof performance !== 'undefined' && typeof performance.now === 'function')
+                ? performance.now()
+                : Date.now();
+            let realDeltaMs = 0;
+            if (lastUnwarpedUpdateTimestamp === null) {
+                lastUnwarpedUpdateTimestamp = unwarpedNow;
+            } else {
+                realDeltaMs = Math.max(0, unwarpedNow - lastUnwarpedUpdateTimestamp);
+                lastUnwarpedUpdateTimestamp = unwarpedNow;
             }
 
             const useRealTime = !timedEventTimerAffectedByTimewarp;
@@ -476,7 +638,9 @@ function scheduleTimedEffectsTimer() {
                     return;
                 }
 
-                const nextRemaining = remaining - effectiveDeltaMs;
+                const deltaForEffect = (effectId === 'blackHoleInstability') ? realDeltaMs : effectiveDeltaMs;
+
+                const nextRemaining = remaining - deltaForEffect;
                 if (nextRemaining <= 0) {
                     setTimedEffectState(effectId, { remainingMs: 0 });
                     handleTimedEffectExpired(effectId);
@@ -484,6 +648,22 @@ function scheduleTimedEffectsTimer() {
                 }
 
                 setTimedEffectState(effectId, { remainingMs: nextRemaining });
+
+                if (effectId === 'blackHoleInstability') {
+                    const prev = getTimedEffectState('blackHoleInstability') || {};
+                    const accumulator = Number(prev?.tickAccumulatorMs) || 0;
+                    const nextAccumulator = accumulator + deltaForEffect;
+                    const minutesElapsed = Math.floor(nextAccumulator / (60 * 1000));
+                    const carry = nextAccumulator - (minutesElapsed * 60 * 1000);
+
+                    if (minutesElapsed > 0) {
+                        for (let i = 0; i < minutesElapsed; i += 1) {
+                            applyBlackHoleInstabilityShift(true);
+                        }
+                    }
+
+                    setTimedEffectState('blackHoleInstability', { tickAccumulatorMs: carry });
+                }
 
                 if (randomEventDebugLoggingEnabled) {
                     const secondsRemaining = Math.max(0, Math.ceil(nextRemaining / 1000));
