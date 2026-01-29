@@ -40,7 +40,7 @@ let randomEventUiHandlers = {
 };
 
 let eventsMasterSwitch = true; //TRUE TO HAVE EVENTS WORKING IN GAME NOT TO BE CHANGED BY AI
-let randomEventDebugLoggingEnabled = true; //DEBUG EVENTS
+let randomEventDebugLoggingEnabled = false; //DEBUG EVENTS
 let eventTimerCountdownAffectedByTimewarp = false; //DEBUG EVENTS
 let timedEventTimerAffectedByTimewarp = true; //DEBUG EVENTS
 const COUNTDOWN_LOG_BUCKET_SECONDS = 30; //DEBUG
