@@ -269,10 +269,14 @@ import {
     modalEventGalacticMarketLockdownText,
     modalEventGalacticMarketLockdownEndedHeader,
     modalEventGalacticMarketLockdownEndedText,
+    modalEventMinerBrokeDownHeader,
+    modalEventMinerBrokeDownText,
+    modalEventMinerBrokeDownEndedHeader,
+    modalEventMinerBrokeDownEndedText,
     
 } from "./descriptions.js";
 
-import { getRandomEventDebugOptions, getTimedEffectRemainingMs, isTimedEffectActive, setRandomEventUiHandlers, triggerSpecificRandomEventDebug } from "./events.js";
+import { getRandomEventDebugOptions, getTimedEffectRemainingMs, getTimedEffectStateSnapshot, isTimedEffectActive, setRandomEventUiHandlers, triggerSpecificRandomEventDebug } from "./events.js";
 
 import { saveGame, loadGameFromCloud, generateRandomPioneerName, saveGameToCloud } from './saveLoadGame.js';
 
@@ -5416,6 +5420,7 @@ const rocketStatusClassMap = {
     'Select Destination': 'warning-orange-text',
     'Travelling': 'green-ready-text',
     'Mining': 'green-ready-text',
+    'Repairing': 'red-disabled-text',
     'Returning': 'green-ready-text',
     'Idle': ''
 };
@@ -5439,7 +5444,26 @@ function buildRocketSidebarStatus(rocketKey) {
     const isReturning = isTravelling && !!getRocketDirection(rocketKey);
     const destination = getDestinationAsteroid(rocketKey);
 
+    const minerBrokeDownState = isTimedEffectActive?.('minerBrokeDown')
+        ? (getTimedEffectStateSnapshot?.('minerBrokeDown') || null)
+        : null;
+    const minerBrokeDownRocket = (minerBrokeDownState && typeof minerBrokeDownState === 'object')
+        ? minerBrokeDownState.rocket
+        : null;
+
+    attachSharedTooltip(statusElement, () => statusElement?.dataset?.rocketStatusTooltipContent || '');
+    delete statusElement.dataset.rocketStatusTooltipContent;
+
     if (miningTarget) {
+        if (minerBrokeDownRocket && minerBrokeDownRocket === rocketKey) {
+            const remainingMs = getTimedEffectRemainingMs?.('minerBrokeDown') || 0;
+            const remainingSeconds = Math.max(0, Math.ceil(remainingMs / 1000));
+            const minutes = Math.floor(remainingSeconds / 60);
+            const seconds = remainingSeconds % 60;
+            const formatted = `${minutes}:${String(seconds).padStart(2, '0')}`;
+            statusElement.dataset.rocketStatusTooltipContent = `<div class="red-disabled-text">Miner Broke Down<br>Time Remaining: ${formatted}</div>`;
+            return { text: 'Repairing', className: rocketStatusClassMap['Repairing'] };
+        }
         return { text: 'Mining', className: rocketStatusClassMap['Mining'] };
     }
 
@@ -5891,6 +5915,13 @@ function buildStarShipSidebarStatus() {
 }
 
 function drawLeftSideOfAntimatterSvg(asteroidsArray, rocketData, svgElement, svgNS) {
+    const minerBrokeDownState = isTimedEffectActive?.('minerBrokeDown')
+        ? (getTimedEffectStateSnapshot?.('minerBrokeDown') || null)
+        : null;
+    const minerBrokeDownRocket = (minerBrokeDownState && typeof minerBrokeDownState === 'object')
+        ? minerBrokeDownState.rocket
+        : null;
+
     Array.from(svgElement.children).forEach(child => {
         if (child.id !== 'svgRateBar' && child.id !== 'svgRightScaleContainer') {
             svgElement.removeChild(child);
@@ -5969,7 +6000,9 @@ function drawLeftSideOfAntimatterSvg(asteroidsArray, rocketData, svgElement, svg
                 if (spaceIdx > 0) return name.slice(0, spaceIdx) + '...';
                 return name.length > 13 ? name.slice(0, 13) + '...' : name;
             })()],           
-            ["Complexity:", rocketInfo[2]],
+            ["Complexity:", (minerBrokeDownRocket && minerBrokeDownRocket === `rocket${index + 1}`)
+                ? '<span class="red-disabled-text">Repairing</span>'
+                : rocketInfo[2]],
             ["Antimatter Left:", Math.floor(rocketInfo[4])]
         ] : [
             ['', `Rocket ${index + 1}`],
@@ -10569,6 +10602,8 @@ setRandomEventUiHandlers({
             stockLoss: modalEventStockLossHeader,
             galacticMarketLockdown: modalEventGalacticMarketLockdownHeader,
             galacticMarketLockdownEnded: modalEventGalacticMarketLockdownEndedHeader,
+            minerBrokeDown: modalEventMinerBrokeDownHeader,
+            minerBrokeDownEnded: modalEventMinerBrokeDownEndedHeader,
         };
         const textMap = {
             powerPlantExplosion: modalEventPowerPlantExplosionText,
@@ -10580,6 +10615,8 @@ setRandomEventUiHandlers({
             stockLoss: modalEventStockLossText,
             galacticMarketLockdown: modalEventGalacticMarketLockdownText,
             galacticMarketLockdownEnded: modalEventGalacticMarketLockdownEndedText,
+            minerBrokeDown: modalEventMinerBrokeDownText,
+            minerBrokeDownEnded: modalEventMinerBrokeDownEndedText,
         };
 
         const header = headerMap[eventId];

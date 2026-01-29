@@ -449,7 +449,7 @@ import {
     capitaliseWordsWithRomanNumerals
  } from './utilityFunctions.js';
 
-import { initialiseRandomEventTimers } from './events.js';
+import { getTimedEffectStateSnapshot, isTimedEffectActive, initialiseRandomEventTimers } from './events.js';
 
 import {
     modalCompoundMachiningTabUnlockHeader,
@@ -4525,6 +4525,13 @@ function updateAntimatterAndDiagram(ticks = 1) {
     const asteroidsBeingMined = getAsteroidArray();
     const elements = getElements();
 
+    const minerBrokeDownState = isTimedEffectActive?.('minerBrokeDown')
+        ? (getTimedEffectStateSnapshot?.('minerBrokeDown') || null)
+        : null;
+    const minerBrokeDownRocket = (minerBrokeDownState && typeof minerBrokeDownState === 'object')
+        ? minerBrokeDownState.rocket
+        : null;
+
     if (getPermanentAntimatterUnlock() && !getAntimatterUnlocked()) {
         setAntimatterUnlocked(true);
     }
@@ -4588,6 +4595,10 @@ function updateAntimatterAndDiagram(ticks = 1) {
                 extractionRate *= getBoostRate();
             }
 
+            if (minerBrokeDownRocket && minerBrokeDownRocket === rocketName) {
+                extractionRate = 0;
+            }
+
             const potentialExtraction = extractionRate * tickCount;
             const actualExtraction = Math.min(potentialExtraction, asteroid.quantity[0]);
             const newQuantityAntimatterAsteroid = Math.max(0, asteroid.quantity[0] - actualExtraction);
@@ -4595,7 +4606,7 @@ function updateAntimatterAndDiagram(ticks = 1) {
             const asteroidDepleted = newQuantityAntimatterAsteroid === 0 && asteroid.quantity[0] > 0;
 
             totalAntimatterExtractionGained += actualExtraction;
-            rocketData[`rocket${i}`][3] = asteroidDepleted ? 0 : baseExtractionRate;
+            rocketData[`rocket${i}`][3] = (asteroidDepleted || (minerBrokeDownRocket && minerBrokeDownRocket === rocketName)) ? 0 : baseExtractionRate;
 
             if (asteroidDepleted && !getRocketDirection(`rocket${i}`)) {
                 setRocketDirection(`rocket${i}`, true); //set rocket returning

@@ -140,6 +140,10 @@ export let modalEventGalacticMarketLockdownHeader;
 export let modalEventGalacticMarketLockdownText;
 export let modalEventGalacticMarketLockdownEndedHeader;
 export let modalEventGalacticMarketLockdownEndedText;
+export let modalEventMinerBrokeDownHeader;
+export let modalEventMinerBrokeDownText;
+export let modalEventMinerBrokeDownEndedHeader;
+export let modalEventMinerBrokeDownEndedText;
 
 export let randomEventTriggerDescriptions;
 
@@ -282,6 +286,12 @@ export function initialiseDescriptions() {
     modalEventGalacticMarketLockdownEndedHeader = 'GALACTIC MARKET RESTORED!';
     modalEventGalacticMarketLockdownEndedText = `The disruption has cleared.<br><br><span class="green-ready-text">Galactic Market access has been restored.</span>`;
 
+    modalEventMinerBrokeDownHeader = 'MINER BROKE DOWN!';
+    modalEventMinerBrokeDownText = `A critical failure has halted one of your mining rockets.<br><br><span class="red-disabled-text">{rocketName} mining rate is 0 for 15 minutes.</span>`;
+
+    modalEventMinerBrokeDownEndedHeader = 'MINER REPAIRED!';
+    modalEventMinerBrokeDownEndedText = `Field repairs complete.<br><br><span class="green-ready-text">{rocketName} has been repaired and is ready to resume mining.</span>`;
+
     randomEventTriggerDescriptions = {
         powerPlantExplosion: 'Destroy 1 random owned power plant',
         batteryExplosion: 'Destroy 1 highest-tier owned battery',
@@ -290,7 +300,8 @@ export function initialiseDescriptions() {
         rocketInstantArrival: 'A travelling rocket instantly arrives',
         antimatterReaction: 'A mining rocket and its asteroid are destroyed',
         stockLoss: 'Lose 40-80% of an unlocked resource or compound stock',
-        galacticMarketLockdown: 'Disable the Galactic Market for 30 minutes'
+        galacticMarketLockdown: 'Disable the Galactic Market for 30 minutes',
+        minerBrokeDown: 'One mining rocket produces 0 antimatter for 15 minutes'
     };
 
     miaplacidusEndgameStoryPopups = [

@@ -39,8 +39,8 @@ let randomEventUiHandlers = {
     onTimedEffectStarted: null
 };
 
-let eventsMasterSwitch = false; //TRUE TO HAVE EVENTS WORKING IN GAME NOT TO BE CHANGED BY AI
-let randomEventDebugLoggingEnabled = false; //DEBUG EVENTS
+let eventsMasterSwitch = true; //TRUE TO HAVE EVENTS WORKING IN GAME NOT TO BE CHANGED BY AI
+let randomEventDebugLoggingEnabled = true; //DEBUG EVENTS
 let eventTimerCountdownAffectedByTimewarp = false; //DEBUG EVENTS
 let timedEventTimerAffectedByTimewarp = true; //DEBUG EVENTS
 const COUNTDOWN_LOG_BUCKET_SECONDS = 30; //DEBUG
@@ -62,6 +62,24 @@ const timedEffectDefinitions = {
         onExpire: () => {
             randomEventUiHandlers.showNotification?.('Galactic Market access restored.', 'info', 5000, 'default');
             randomEventUiHandlers.showEventModal?.('galacticMarketLockdownEnded');
+        }
+    },
+    minerBrokeDown: {
+        id: 'minerBrokeDown',
+        onExpire: () => {
+            const state = getTimedEffectState('minerBrokeDown') || {};
+            const rocketKey = (state && typeof state === 'object') ? state.rocket : null;
+            const fallbackRocketName = rocketKey ? formatEventName(String(rocketKey)) : null;
+            const rocketName = rocketKey ? (getRocketUserName(rocketKey) || fallbackRocketName) : null;
+
+            setTimedEffectState('minerBrokeDown', { rocket: null });
+            randomEventUiHandlers.showNotification?.(
+                rocketName ? `Mining operations restored, ${rocketName} has been repaired.` : 'Mining operations restored.',
+                'info',
+                5000,
+                'default'
+            );
+            randomEventUiHandlers.showEventModal?.('minerBrokeDownEnded', rocketName ? { rocketName } : null);
         }
     }
 };
@@ -237,6 +255,26 @@ const randomEventDefinitions = {
                 notificationText: 'Random Event: Galactic Market offline (30 minutes)'
             };
         }
+    },
+    minerBrokeDown: {
+        id: 'minerBrokeDown',
+        initialProbability: 0.30,
+        canTrigger: () => {
+            const mining = getMiningRockets();
+            return mining.length > 0 && !isTimedEffectActive('minerBrokeDown');
+        },
+        trigger: () => {
+            const mining = getMiningRockets();
+            if (!mining.length) return false;
+
+            const pickedRocket = mining[Math.floor(Math.random() * mining.length)];
+            startTimedEffect('minerBrokeDown', 15 * 60 * 1000, { rocket: pickedRocket });
+
+            return {
+                notificationText: `Random Event: Miner broke down (${getRocketUserName(pickedRocket)})`,
+                modalReplacements: { rocketName: getRocketUserName(pickedRocket) }
+            };
+        }
     }
 };
 
@@ -279,9 +317,15 @@ export function getTimedEffectRemainingMs(effectId) {
     return Math.max(0, Number(getTimedEffectState(effectId)?.remainingMs) || 0);
 }
 
-function startTimedEffect(effectId, durationMs) {
+export function getTimedEffectStateSnapshot(effectId) {
+    const state = getTimedEffectState(effectId);
+    return state && typeof state === 'object' ? { ...state } : null;
+}
+
+function startTimedEffect(effectId, durationMs, extraState = null) {
     const safeDuration = Math.max(0, Number(durationMs) || 0);
-    setTimedEffectState(effectId, { remainingMs: safeDuration });
+    const extra = (extraState && typeof extraState === 'object') ? extraState : null;
+    setTimedEffectState(effectId, { remainingMs: safeDuration, ...(extra || {}) });
 
     if (typeof randomEventUiHandlers.onTimedEffectStarted === 'function') {
         randomEventUiHandlers.onTimedEffectStarted(effectId);
