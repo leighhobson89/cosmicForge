@@ -170,6 +170,43 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             }
         };
 
+        const runSearchSelectionPing = (starName) => {
+            const modeLower = String(getStarMapMode?.() || '').toLowerCase();
+            if (modeLower !== 'normal' && modeLower !== 'distance') {
+                return;
+            }
+
+            const normalized = capitaliseWordsWithRomanNumerals(starName);
+            const possibleIds = [
+                normalized,
+                `settledStar${normalized}`,
+                `noneInterestingStar${normalized}`
+            ];
+
+            const starElement = possibleIds
+                .map((id) => document.getElementById(id))
+                .find(Boolean);
+
+            if (!starElement) {
+                return;
+            }
+
+            const rect = starElement.getBoundingClientRect();
+            const x = rect.left + rect.width / 2;
+            const y = rect.top + rect.height / 2;
+
+            const ping = document.createElement('div');
+            ping.style.left = `${x}px`;
+            ping.style.top = `${y}px`;
+            ping.className = 'star-map-search-selection-ping green-ready-text';
+
+            document.body.appendChild(ping);
+
+            window.setTimeout(() => {
+                ping.remove();
+            }, 4100);
+        };
+
         const selectStarByName = (starName) => {
             const starContainer = document.querySelector('#optionContentTab5');
             if (!starContainer) {
@@ -275,6 +312,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                         searchInput.value = match;
                     }
                     selectStarByName(match);
+                    runSearchSelectionPing(match);
                     if (typeof syncOverlayVisibility === 'function') {
                         syncOverlayVisibility();
                     }

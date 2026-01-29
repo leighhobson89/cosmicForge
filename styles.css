@@ -2353,6 +2353,42 @@ canvas {
      background-color: color-mix(in srgb, currentColor 30%, transparent);
  }
 
+@keyframes star-map-search-ping-explosion {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(0.2);
+        box-shadow: 0 0 18px rgba(0, 255, 153, 1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(6);
+        box-shadow: 0 0 40px rgba(0, 255, 153, 0);
+    }
+}
+
+.star-map-search-selection-ping {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    clip-path: polygon(
+        50% 0%,
+        61% 35%,
+        98% 35%,
+        68% 57%,
+        79% 91%,
+        50% 70%,
+        21% 91%,
+        32% 57%,
+        2% 35%,
+        39% 35%
+    );
+    background: var(--ready-text);
+    box-shadow: 0 0 18px rgba(0, 255, 153, 1);
+    pointer-events: none;
+    z-index: 99999;
+    animation: star-map-search-ping-explosion 2000ms cubic-bezier(0.2, 0.8, 0.2, 1) 2 forwards;
+}
+
 .header-button-container {
     display: inline-block;
     width: auto;
