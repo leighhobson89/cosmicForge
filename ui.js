@@ -191,7 +191,7 @@ import {
     setTimeWarpTimeoutId,
     getTimeWarpEndTimestampMs,
     setStellarScannerBuilt,
-    
+    getNotationType,
 } from './constantsAndGlobalVars.js';
 import {
     getResourceDataObject,
@@ -251,8 +251,22 @@ import {
     modalBlackHoleDiscoveredHeader,
     modalBlackHoleDiscoveredText,
     miaplacidusEndgameStoryPopups,
+    modalEventPowerPlantExplosionHeader,
+    modalEventPowerPlantExplosionText,
+    modalEventBatteryExplosionHeader,
+    modalEventBatteryExplosionText,
+    modalEventScienceTheftHeader,
+    modalEventScienceTheftText,
+    modalEventResearchBreakthroughHeader,
+    modalEventResearchBreakthroughText,
+    modalEventRocketInstantArrivalHeader,
+    modalEventRocketInstantArrivalText,
+    modalEventAntimatterReactionHeader,
+    modalEventAntimatterReactionText,
     
 } from "./descriptions.js";
+
+import { setRandomEventUiHandlers, triggerRandomEventDebug } from "./events.js";
 
 import { saveGame, loadGameFromCloud, generateRandomPioneerName, saveGameToCloud } from './saveLoadGame.js';
 
@@ -282,6 +296,7 @@ import {
     calculateStarTravelDurationWithModifiers,
     getAscendencyPointsWithRepeatableBonus,
     formatProductionRateValue,
+    formatNumber,
     timeWarp,
     forceClearWeather
 } from './game.js';
@@ -5219,6 +5234,8 @@ function syncResourceSidebarVisibility() {
 export function updateDynamicUiContent() {
     syncResourceSidebarVisibility();
 
+    refreshSpaceMiningRocketSidebar();
+
     if (!document.getElementById('energyConsumptionStats').classList.contains('invisible')) {
         const powerPlant1PurchasedRate = getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'purchasedRate']);
         const powerPlant2PurchasedRate = getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'purchasedRate']);
@@ -5236,6 +5253,32 @@ export function updateDynamicUiContent() {
 
     if (getCurrentOptionPane() !== 'star map') {
         removeStarConnectionTooltip();
+    }
+}
+
+function refreshSpaceMiningRocketSidebar() {
+    const builtRockets = getRocketsBuilt() || [];
+    ['rocket1', 'rocket2', 'rocket3', 'rocket4'].forEach((rocketKey) => {
+        const optionElement = document.getElementById(rocketKey);
+        const row = optionElement?.closest('.row-side-menu');
+        if (!row) return;
+
+        if (builtRockets.includes(rocketKey)) {
+            row.classList.remove('invisible');
+        } else {
+            row.classList.add('invisible');
+            if (optionElement) {
+                removeAttentionIndicator(optionElement);
+            }
+        }
+    });
+
+    const currentPane = getCurrentOptionPane();
+    if (currentPane && currentPane.startsWith('rocket') && !builtRockets.includes(currentPane)) {
+        setLastScreenOpenRegister('tab6', 'launch pad');
+        setCurrentOptionPane('launch pad');
+        updateContent('Launch Pad', 'tab6', 'content');
+        setFirstAccessArray('launch pad');
     }
 }
 
@@ -10456,6 +10499,83 @@ document.querySelector('.debug-variables-header').addEventListener('mousedown', 
 
 closeButton.addEventListener('click', () => {
     debugWindow.style.display = 'none';
+});
+
+setRandomEventUiHandlers({
+    showNotification,
+    refreshSpaceMiningRocketSidebar,
+    showEventModal: (eventId, replacements) => {
+        const headerMap = {
+            powerPlantExplosion: modalEventPowerPlantExplosionHeader,
+            batteryExplosion: modalEventBatteryExplosionHeader,
+            scienceTheft: modalEventScienceTheftHeader,
+            researchBreakthrough: modalEventResearchBreakthroughHeader,
+            rocketInstantArrival: modalEventRocketInstantArrivalHeader,
+            antimatterReaction: modalEventAntimatterReactionHeader,
+        };
+        const textMap = {
+            powerPlantExplosion: modalEventPowerPlantExplosionText,
+            batteryExplosion: modalEventBatteryExplosionText,
+            scienceTheft: modalEventScienceTheftText,
+            researchBreakthrough: modalEventResearchBreakthroughText,
+            rocketInstantArrival: modalEventRocketInstantArrivalText,
+            antimatterReaction: modalEventAntimatterReactionText,
+        };
+
+        const header = headerMap[eventId];
+        let content = textMap[eventId];
+        if (!header || !content) {
+            return;
+        }
+
+        if (replacements && typeof content === 'string') {
+            Object.entries(replacements).forEach(([key, value]) => {
+                const token = `{${key}}`;
+                let replacementValue = value;
+
+                const maybeNumber = (typeof value === 'number')
+                    ? value
+                    : (typeof value === 'string' && value.trim() !== '' && Number.isFinite(Number(value)))
+                        ? Number(value)
+                        : null;
+
+                if (maybeNumber !== null) {
+                    if (getNotationType() === 'normal') {
+                        replacementValue = String(Math.floor(maybeNumber));
+                    } else {
+                        replacementValue = formatNumber(maybeNumber);
+                    }
+                }
+
+                content = content.split(token).join(String(replacementValue));
+            });
+        }
+
+        callPopupModal(
+            header,
+            content,
+            true,
+            false,
+            false,
+            false,
+            function () {
+                showHideModal();
+            },
+            null,
+            null,
+            null,
+            'OK',
+            null,
+            null,
+            null,
+            false
+        );
+    }
+});
+
+const triggerRandomEventButton = document.getElementById('triggerRandomEventButton');
+triggerRandomEventButton?.addEventListener('click', () => {
+    triggerRandomEventDebug();
 });
 
 const prepareRunForStarshipLaunchButton = document.getElementById('prepareRunForStarshipLaunchButton');

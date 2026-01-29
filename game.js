@@ -449,7 +449,9 @@ import {
     capitaliseWordsWithRomanNumerals
  } from './utilityFunctions.js';
 
- import {
+import { initialiseRandomEventTimers } from './events.js';
+
+import {
     modalCompoundMachiningTabUnlockHeader,
     modalCompoundMachiningTabUnlockText,
     modalPlayerLeaderPhilosophyHeaderText,
@@ -468,9 +470,9 @@ import {
     miaplacidusEndgameStoryPopups
 } from './descriptions.js';
 
- import { initializeAutoSave, saveGame } from './saveLoadGame.js';
- import { playClickSfx, sfxPlayer, weatherAmbienceManager, backgroundAudio } from './audioManager.js';
- import { timerManager } from './timerManager.js';
+import { initializeAutoSave, saveGame } from './saveLoadGame.js';
+import { playClickSfx, sfxPlayer, weatherAmbienceManager, backgroundAudio } from './audioManager.js';
+import { timerManager } from './timerManager.js';
 import { timerManagerDelta } from './timerManagerDelta.js';
 
 import { initialiseDescriptions, megaStructureTableText } from './descriptions.js';
@@ -7665,6 +7667,8 @@ function startInitialTimers() {
 
     initialiseResearchDeltaTimer();
     initialiseEnergyDeltaTimer();
+
+    initialiseRandomEventTimers();
 
     changeWeather();
 

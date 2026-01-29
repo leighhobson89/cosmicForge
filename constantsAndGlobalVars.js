@@ -3208,6 +3208,10 @@ export function getRocketsBuilt() {
     return rocketsBuilt;
 }
 
+export function removeRocketBuilt(value) {
+    rocketsBuilt = rocketsBuilt.filter((item) => item !== value);
+}
+
 export function setStarShipModulesBuilt(value) {
     starShipModulesBuilt.push(value);
 }

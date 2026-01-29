@@ -122,6 +122,19 @@ export let miaplacidusEndgameStoryPopups;
 export let onboardingModalHeader;
 export let onboardingModalText;
 
+export let modalEventPowerPlantExplosionHeader;
+export let modalEventPowerPlantExplosionText;
+export let modalEventBatteryExplosionHeader;
+export let modalEventBatteryExplosionText;
+export let modalEventScienceTheftHeader;
+export let modalEventScienceTheftText;
+export let modalEventResearchBreakthroughHeader;
+export let modalEventResearchBreakthroughText;
+export let modalEventRocketInstantArrivalHeader;
+export let modalEventRocketInstantArrivalText;
+export let modalEventAntimatterReactionHeader;
+export let modalEventAntimatterReactionText;
+
 export function initialiseDescriptions() {
     gameIntroHeader = 'Welcome to the Cosmic Forge!';
     gameSaveNameCollect = `
@@ -233,6 +246,24 @@ export function initialiseDescriptions() {
     modalMegaStructureTechGalacticMemoryArchive5Text = `You have connected this Galactic Memory Archive into the fabric of the galaxy<br>meaning its benefits are now permanently available in whichever<br>system you might one day settle. This has enormous potential.<br><br><span class="green-ready-text">All Resource And Compound Storage Capacity + 10B!<br>All Resource And Compound Storage Capacity starts at 10B in every new System!</span>`;
     modalBlackHoleDiscoveredHeader = 'Black Hole Discovered!';
     modalBlackHoleDiscoveredText = `While studying the stars with the Space Telescope, you stumbled upon a Black Hole!<br>Time Dilation is a feature of these objects, and maybe we can harness its power for our own uses!<br><br><span class="green-ready-text">Take a look in the Galactic tab to interact with it.</span>`;
+
+    modalEventPowerPlantExplosionHeader = 'POWER PLANT EXPLOSION!';
+    modalEventPowerPlantExplosionText = `A catastrophic failure rocked your energy grid.<br><br><span class="red-disabled-text">{destroyedBuilding} destroyed!</span>`;
+
+    modalEventBatteryExplosionHeader = 'BATTERY EXPLOSION!';
+    modalEventBatteryExplosionText = `A battery containment breach caused a violent explosion.<br><br><span class="red-disabled-text">{destroyedBuilding} destroyed!</span>`;
+
+    modalEventScienceTheftHeader = 'SCIENCE THEFT!';
+    modalEventScienceTheftText = `A clandestine raid struck your research labs.<br><br><span class="red-disabled-text">-{amountStolen} Research</span>`;
+
+    modalEventResearchBreakthroughHeader = 'RESEARCH BREAKTHROUGH!';
+    modalEventResearchBreakthroughText = `A sudden insight unlocks new understanding.<br><br><span class="green-ready-text">+{amountGained} Research</span>`;
+
+    modalEventRocketInstantArrivalHeader = 'WARP ANOMALY!';
+    modalEventRocketInstantArrivalText = `A space-time distortion accelerates one of your rockets.<br><br><span class="green-ready-text">{rocketName}</span> instantly arrives!`;
+
+    modalEventAntimatterReactionHeader = 'ANTIMATTER REACTION!';
+    modalEventAntimatterReactionText = `A catastrophic reaction annihilates a mining operation.<br><br><span class="red-disabled-text">{rocketName} lost</span><br><span class="red-disabled-text">{asteroidName} destroyed</span><br><span class="red-disabled-text">-{antimatterLost} Antimatter</span>`;
 
     miaplacidusEndgameStoryPopups = [
         {

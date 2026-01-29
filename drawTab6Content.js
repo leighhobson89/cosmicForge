@@ -382,7 +382,12 @@ export function drawTab6Content(heading, optionContentElement) {
 
             let rarityElementOverride;
 
-            if (asteroid[asteroidName].quantity[0] === 0) {
+            if (asteroid[asteroidName].destroyed) {
+                rarityElementOverride = createTextElement("Destroyed!", 'asteroidInfoContainerRarity', ['value-asteroid', 'red-disabled-text']);
+                asteroid[asteroidName].quantity[1] = 'red-disabled-text';
+                asteroid[asteroidName].easeOfExtraction[1] = 'red-disabled-text';
+                asteroid[asteroidName].distance[1] = 'red-disabled-text';
+            } else if (asteroid[asteroidName].quantity[0] === 0) {
                 rarityElementOverride = createTextElement("Exhausted!", 'asteroidInfoContainerRarity', ['value-asteroid', 'red-disabled-text']);
                 asteroid[asteroidName].quantity[1] = 'red-disabled-text';
                 asteroid[asteroidName].easeOfExtraction[1] = 'red-disabled-text';
@@ -396,7 +401,7 @@ export function drawTab6Content(heading, optionContentElement) {
             const asteroidRow = createOptionRow(
                 `${asteroidRowName}`,
                 null,
-                asteroid[asteroidName].quantity[0] === 0 
+                (asteroid[asteroidName].destroyed || asteroid[asteroidName].quantity[0] === 0)
                 ? [`${name}:`, 'red-disabled-text']
                 : asteroid[asteroidName].beingMined 
                     ? [`${name}:`, 'green-ready-text']
@@ -432,7 +437,7 @@ export function drawTab6Content(heading, optionContentElement) {
                 [true, '25%', '75%']
             );
 
-            if (asteroid[asteroidName].quantity[0] === 0) {
+            if (asteroid[asteroidName].destroyed || asteroid[asteroidName].quantity[0] === 0) {
                 asteroidRow.style.opacity = "0.5";
             }
 
