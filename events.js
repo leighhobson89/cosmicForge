@@ -9,6 +9,9 @@ import {
     getMiningObject,
     getRocketDirection,
     getRocketUserName,
+    getTechUnlockedArray,
+    getUnlockedCompoundsArray,
+    getUnlockedResourcesArray,
     removeRocketBuilt,
     setAntimatterUnlocked,
     setCheckRocketFuellingStatus,
@@ -26,6 +29,7 @@ import {
 } from "./constantsAndGlobalVars.js";
 import { getResourceDataObject, setResourceDataObject } from "./resourceDataObject.js";
 import { timerManagerDelta } from "./timerManagerDelta.js";
+import { randomEventTriggerDescriptions } from "./descriptions.js";
 
 let randomEventUiHandlers = {
     showNotification: null,
@@ -43,7 +47,8 @@ const DEFAULT_EVENT_PROBABILITY = 0.30;
 const HALFWAY_PROBABILITY_MODIFIER = 0.5;
 const PROBABILITY_DECAY_ON_TRIGGER = 0.9;
 
-const GLOBAL_CYCLE_DURATION_MS = 60 * 60 * 1000;
+const MIN_CYCLE_DURATION_MS = 45 * 60 * 1000;
+const MAX_CYCLE_DURATION_MS = 75 * 60 * 1000;
 const GLOBAL_EVENT_TIMER_ID = 'randomEventGlobalTimer';
 
 const randomEventDefinitions = {
@@ -174,26 +179,101 @@ const randomEventDefinitions = {
                 antimatterLost: minedAmount
             };
         }
+    },
+    stockLoss: {
+        id: 'stockLoss',
+        initialProbability: 0.5,
+        canTrigger: () => true,
+        trigger: () => {
+            const target = pickStockLossTarget();
+            if (!target) return false;
+
+            const lossFraction = Math.random() * (0.80 - 0.40) + 0.40;
+            const percentLost = Math.floor(lossFraction * 100);
+
+            const remainingQuantity = Math.max(0, Math.round(target.quantity * (1 - lossFraction)));
+            const lostQuantity = Math.max(0, target.quantity - remainingQuantity);
+            setResourceDataObject(remainingQuantity, target.category, [target.key, 'quantity']);
+
+            const itemName = String(getResourceDataObject(target.category, [target.key, 'nameResource'], true) || target.key);
+            const reason = pickStockLossReason();
+
+            return {
+                itemName,
+                reason,
+                lostPercent: percentLost,
+                lostQuantity,
+                remainingQuantity
+            };
+        }
     }
 };
 
 function getEventTriggerDescription(eventId) {
-    switch (eventId) {
-        case 'powerPlantExplosion':
-            return 'Destroy 1 random owned power plant';
-        case 'batteryExplosion':
-            return 'Destroy 1 highest-tier owned battery';
-        case 'scienceTheft':
-            return 'Lose half your research points (rounded up stolen)';
-        case 'researchBreakthrough':
-            return 'Double your research points';
-        case 'rocketInstantArrival':
-            return 'A travelling rocket instantly arrives';
-        case 'antimatterReaction':
-            return 'A mining rocket and its asteroid are destroyed';
-        default:
-            return 'Unknown action';
+    const stored = randomEventTriggerDescriptions && typeof randomEventTriggerDescriptions === 'object'
+        ? randomEventTriggerDescriptions[eventId]
+        : null;
+    return stored || 'Unknown action';
+}
+
+function getUnlockedStockCandidates() {
+    const candidates = [];
+
+    const resourceKeys = Array.from(new Set(['hydrogen', ...(getUnlockedResourcesArray() || [])]));
+    resourceKeys.forEach((key) => {
+        if (key !== 'hydrogen' && !(getUnlockedResourcesArray() || []).includes(key)) {
+            return;
+        }
+
+        const quantity = Number(getResourceDataObject('resources', [key, 'quantity'], true) || 0);
+        const storageCapacity = Number(getResourceDataObject('resources', [key, 'storageCapacity'], true) || 0);
+        if (!Number.isFinite(quantity) || !Number.isFinite(storageCapacity) || storageCapacity <= 0 || quantity <= 0) {
+            return;
+        }
+
+        candidates.push({ category: 'resources', key, quantity, storageCapacity, fillRatio: quantity / storageCapacity });
+    });
+
+    if (getTechUnlockedArray().includes('compounds')) {
+        const compoundKeys = Array.from(new Set(getUnlockedCompoundsArray() || []));
+        compoundKeys.forEach((key) => {
+            const quantity = Number(getResourceDataObject('compounds', [key, 'quantity'], true) || 0);
+            const storageCapacity = Number(getResourceDataObject('compounds', [key, 'storageCapacity'], true) || 0);
+            if (!Number.isFinite(quantity) || !Number.isFinite(storageCapacity) || storageCapacity <= 0 || quantity <= 0) {
+                return;
+            }
+
+            candidates.push({ category: 'compounds', key, quantity, storageCapacity, fillRatio: quantity / storageCapacity });
+        });
     }
+
+    return candidates;
+}
+
+function pickStockLossTarget() {
+    const candidates = getUnlockedStockCandidates();
+    if (!candidates.length) {
+        return null;
+    }
+
+    const aboveHalf = candidates.filter((c) => c.fillRatio >= 0.5);
+    if (aboveHalf.length) {
+        return aboveHalf[Math.floor(Math.random() * aboveHalf.length)];
+    }
+
+    const maxFill = candidates.reduce((max, c) => Math.max(max, c.fillRatio), 0);
+    const top = candidates.filter((c) => c.fillRatio === maxFill);
+    return top[Math.floor(Math.random() * top.length)];
+}
+
+function pickStockLossReason() {
+    const reasons = [
+        'poor storage conditions',
+        'theft',
+        'a containment failure',
+        'a supply chain accident'
+    ];
+    return reasons[Math.floor(Math.random() * reasons.length)];
 }
 
 function getGlobalEventsState() {
@@ -203,9 +283,10 @@ function getGlobalEventsState() {
         return stored;
     }
 
+    const randomDurationMs = Math.floor(Math.random() * (MAX_CYCLE_DURATION_MS - MIN_CYCLE_DURATION_MS + 1)) + MIN_CYCLE_DURATION_MS;
     const initial = {
-        cycleDurationMs: GLOBAL_CYCLE_DURATION_MS,
-        timeRemainingMs: GLOBAL_CYCLE_DURATION_MS,
+        cycleDurationMs: randomDurationMs,
+        timeRemainingMs: randomDurationMs,
         halfwayAttempted: false
     };
     setResourceDataObject(initial, 'randomEvents', ['global']);
@@ -306,7 +387,7 @@ function scheduleGlobalEventTimer() {
             }
 
             const global = getGlobalEventsState();
-            const cycleDurationMs = Number(global.cycleDurationMs) || GLOBAL_CYCLE_DURATION_MS;
+            const cycleDurationMs = Number(global.cycleDurationMs);
             const halfThresholdMs = cycleDurationMs / 2;
 
             const previousRemaining = Number(global.timeRemainingMs) || 0;
@@ -338,9 +419,10 @@ function scheduleGlobalEventTimer() {
                 }
                 attemptTriggerAtCheckpoint('expiry');
 
-                remaining = cycleDurationMs;
+                const newRandomDurationMs = Math.floor(Math.random() * (MAX_CYCLE_DURATION_MS - MIN_CYCLE_DURATION_MS + 1)) + MIN_CYCLE_DURATION_MS;
+                remaining = newRandomDurationMs;
                 lastGlobalCountdownLogBucket = null;
-                setGlobalEventsState({ timeRemainingMs: remaining, halfwayAttempted: false, cycleDurationMs });
+                setGlobalEventsState({ timeRemainingMs: remaining, halfwayAttempted: false, cycleDurationMs: newRandomDurationMs });
                 return;
             }
 
@@ -512,6 +594,13 @@ function formatEventName(eventId) {
     return eventId.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase());
 }
 
+export function getRandomEventDebugOptions() {
+    return Object.keys(randomEventDefinitions).map((id) => ({
+        id,
+        title: formatEventName(id)
+    }));
+}
+
 function getBuildingDisplayName(buildingKey) {
     const map = {
         powerPlant1: 'Power Plant',
@@ -664,6 +753,46 @@ export function triggerRandomEventDebug() {
         ? (triggerResult.modalReplacements || triggerResult)
         : null;
     randomEventUiHandlers.showEventModal?.(picked, modalReplacements);
+}
+
+export function triggerSpecificRandomEventDebug(eventId) {
+    const def = randomEventDefinitions[eventId];
+    if (!def) {
+        randomEventUiHandlers.showNotification?.(`Unknown random event: ${eventId}`, 'warning', 3000, 'debug');
+        return;
+    }
+
+    if (!def.canTrigger()) {
+        randomEventUiHandlers.showNotification?.(`Random Event not eligible: ${formatEventName(eventId)}`, 'info', 3000, 'debug');
+        return;
+    }
+
+    const state = getEventState(eventId);
+    const baseP = Math.max(0, Math.min(1, Number(state?.currentProbability ?? DEFAULT_EVENT_PROBABILITY)));
+
+    const triggerResult = def.trigger();
+    if (!triggerResult) {
+        randomEventUiHandlers.showNotification?.(`Random Event failed to trigger: ${formatEventName(eventId)}`, 'info', 3000, 'debug');
+        return;
+    }
+
+    const nextProbability = Math.max(0.01, baseP * PROBABILITY_DECAY_ON_TRIGGER);
+    setEventState(eventId, {
+        currentProbability: nextProbability,
+        timesTriggered: Math.max(0, (Number(state?.timesTriggered) || 0) + 1)
+    });
+
+    randomEventUiHandlers.showNotification?.(
+        `Random Event: ${formatEventName(eventId)}`,
+        'info',
+        5000,
+        'default'
+    );
+
+    const modalReplacements = (triggerResult && typeof triggerResult === 'object')
+        ? (triggerResult.modalReplacements || triggerResult)
+        : null;
+    randomEventUiHandlers.showEventModal?.(eventId, modalReplacements);
 }
 
 export function setRandomEventUiHandlers({ showNotification, showEventModal, refreshSpaceMiningRocketSidebar } = {}) {

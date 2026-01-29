@@ -263,10 +263,12 @@ import {
     modalEventRocketInstantArrivalText,
     modalEventAntimatterReactionHeader,
     modalEventAntimatterReactionText,
+    modalEventStockLossHeader,
+    modalEventStockLossText,
     
 } from "./descriptions.js";
 
-import { setRandomEventUiHandlers, triggerRandomEventDebug } from "./events.js";
+import { getRandomEventDebugOptions, setRandomEventUiHandlers, triggerSpecificRandomEventDebug } from "./events.js";
 
 import { saveGame, loadGameFromCloud, generateRandomPioneerName, saveGameToCloud } from './saveLoadGame.js';
 
@@ -10512,6 +10514,7 @@ setRandomEventUiHandlers({
             researchBreakthrough: modalEventResearchBreakthroughHeader,
             rocketInstantArrival: modalEventRocketInstantArrivalHeader,
             antimatterReaction: modalEventAntimatterReactionHeader,
+            stockLoss: modalEventStockLossHeader,
         };
         const textMap = {
             powerPlantExplosion: modalEventPowerPlantExplosionText,
@@ -10520,6 +10523,7 @@ setRandomEventUiHandlers({
             researchBreakthrough: modalEventResearchBreakthroughText,
             rocketInstantArrival: modalEventRocketInstantArrivalText,
             antimatterReaction: modalEventAntimatterReactionText,
+            stockLoss: modalEventStockLossText,
         };
 
         const header = headerMap[eventId];
@@ -10574,8 +10578,24 @@ setRandomEventUiHandlers({
 });
 
 const triggerRandomEventButton = document.getElementById('triggerRandomEventButton');
+const debugRandomEventSelect = document.getElementById('debugRandomEventSelect');
+
+if (debugRandomEventSelect) {
+    const options = getRandomEventDebugOptions();
+    options.forEach(({ id, title }) => {
+        const opt = document.createElement('option');
+        opt.value = id;
+        opt.textContent = title;
+        debugRandomEventSelect.appendChild(opt);
+    });
+}
 triggerRandomEventButton?.addEventListener('click', () => {
-    triggerRandomEventDebug();
+    const selected = debugRandomEventSelect?.value;
+    if (!selected) {
+        showNotification('Please select an event to trigger.', 'info', 2500, 'debug');
+        return;
+    }
+    triggerSpecificRandomEventDebug(selected);
 });
 
 const prepareRunForStarshipLaunchButton = document.getElementById('prepareRunForStarshipLaunchButton');

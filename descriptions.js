@@ -134,6 +134,10 @@ export let modalEventRocketInstantArrivalHeader;
 export let modalEventRocketInstantArrivalText;
 export let modalEventAntimatterReactionHeader;
 export let modalEventAntimatterReactionText;
+export let modalEventStockLossHeader;
+export let modalEventStockLossText;
+
+export let randomEventTriggerDescriptions;
 
 export function initialiseDescriptions() {
     gameIntroHeader = 'Welcome to the Cosmic Forge!';
@@ -264,6 +268,19 @@ export function initialiseDescriptions() {
 
     modalEventAntimatterReactionHeader = 'ANTIMATTER REACTION!';
     modalEventAntimatterReactionText = `A catastrophic reaction annihilates a mining operation.<br><br><span class="red-disabled-text">{rocketName} lost</span><br><span class="red-disabled-text">{asteroidName} destroyed</span><br><span class="red-disabled-text">-{antimatterLost} Antimatter</span>`;
+
+    modalEventStockLossHeader = 'STOCK LOSS!';
+    modalEventStockLossText = `A major incident has struck your stores.<br><br><span class="red-disabled-text">-{lostPercent}% {itemName}</span><br>Lost due to {reason}.`;
+
+    randomEventTriggerDescriptions = {
+        powerPlantExplosion: 'Destroy 1 random owned power plant',
+        batteryExplosion: 'Destroy 1 highest-tier owned battery',
+        scienceTheft: 'Lose half your research points (rounded up stolen)',
+        researchBreakthrough: 'Double your research points',
+        rocketInstantArrival: 'A travelling rocket instantly arrives',
+        antimatterReaction: 'A mining rocket and its asteroid are destroyed',
+        stockLoss: 'Lose 40-80% of an unlocked resource or compound stock'
+    };
 
     miaplacidusEndgameStoryPopups = [
         {
