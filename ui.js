@@ -3456,16 +3456,22 @@ export function generateStarfield(starfieldContainer, numberOfStars = 70, seed =
         const settled = settledStarsList;
         const visionDistance = getStarVisionDistance();
         const ancientManuscriptStars = getStarsWithAncientManuscripts();
+        const manuscriptStarNameSet = new Set(
+            (ancientManuscriptStars || [])
+                .filter((entry) => Array.isArray(entry) && typeof entry[0] === 'string')
+                .map((entry) => entry[0].toLowerCase())
+        );
     
         const filteredStarData = stars
             .filter(star => {
                 const name = star.name;
                 const distance = starDistanceData[name];
+                const nameLower = String(name || '').toLowerCase();
                 return (
                     name !== 'Miaplacidus' &&
                     name !== destination &&
                     name !== current &&
-                    !ancientManuscriptStars.includes(name) &&
+                    !manuscriptStarNameSet.has(nameLower) &&
                     !settled.includes(name) &&
                     distance > visionDistance
                 );
@@ -7391,7 +7397,8 @@ function getEligibleManuscriptClue(newsTickerContainer) {
 
             return {
                 manuscriptStarName,
-                availableTemplates
+                availableTemplates,
+                usedCount: Array.isArray(usedIds) ? usedIds.length : 0
             };
         })
         .filter(Boolean);
@@ -7400,7 +7407,9 @@ function getEligibleManuscriptClue(newsTickerContainer) {
         return null;
     }
 
-    const entry = eligibleEntries[Math.floor(Math.random() * eligibleEntries.length)];
+    const minUsed = Math.min(...eligibleEntries.map((entry) => entry.usedCount));
+    const leastUsedEntries = eligibleEntries.filter((entry) => entry.usedCount === minUsed);
+    const entry = leastUsedEntries[Math.floor(Math.random() * leastUsedEntries.length)];
     const template = entry.availableTemplates[Math.floor(Math.random() * entry.availableTemplates.length)];
     const formattedStarName = capitaliseWordsWithRomanNumerals(entry.manuscriptStarName);
     const message = template.template.replaceAll('{STAR}', formattedStarName);

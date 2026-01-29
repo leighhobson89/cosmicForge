@@ -10131,7 +10131,10 @@ export function extendStarDataRange(debug) {
     const increment = getStarVisionIncrement() * Math.pow(getBuffDeeperStarStudyData()['effectCategoryMagnitude'], getBuffDeeperStarStudyData()['boughtYet']);
     const currentRange = getStarVisionDistance();
 
-    setStarVisionDistance(currentRange + increment);
+    const newRange = currentRange + increment;
+    setStarVisionDistance(newRange);
+
+    rollForAncientManuscriptGeneration(currentRange, newRange);
 
     if (hasStudiedAllRelevantStars()) {
         setAchievementFlagArray('studyAllStarsInOneRun', 'add');
@@ -10147,6 +10150,104 @@ export function extendStarDataRange(debug) {
         showNotification('Star Study Complete!</br></br>Take a look at the Star Map!', 'info', 3000, 'special');
         handleBlackHoleDiscoveryRoll();
     }
+}
+
+function getAncientManuscriptGenerationProbability() {
+    const ancientManuscriptsGenerated = getStarsWithAncientManuscripts().length;
+    const maxAncientManuscripts = getMaxAncientManuscripts();
+    const visionDistance = getStarVisionDistance();
+
+    if (ancientManuscriptsGenerated >= maxAncientManuscripts) {
+        return 0;
+    }
+
+    if (visionDistance < 5 && ancientManuscriptsGenerated === 0) {
+        return 20;
+    } else if (visionDistance === 5 && ancientManuscriptsGenerated === 0) {
+        return 100;
+    } else if (visionDistance >= 6 && visionDistance <= 19 && ancientManuscriptsGenerated < 2) {
+        return 20;
+    } else if (visionDistance === 20 && ancientManuscriptsGenerated < 2) {
+        return 100;
+    } else if (visionDistance >= 21 && visionDistance <= 34 && ancientManuscriptsGenerated < 3) {
+        return 20;
+    } else if (visionDistance === 35 && ancientManuscriptsGenerated < 3) {
+        return 100;
+    } else if (visionDistance >= 36 && visionDistance <= 44 && ancientManuscriptsGenerated < 4) {
+        return 20;
+    } else if (visionDistance === 45 && ancientManuscriptsGenerated < 4) {
+        return 100;
+    }
+
+    return 0;
+}
+
+function rollForAncientManuscriptGeneration(previousVisionDistance, newVisionDistance) {
+    const probability = getAncientManuscriptGenerationProbability();
+    if (!probability) {
+        return;
+    }
+
+    if (Math.random() * 100 >= probability) {
+        return;
+    }
+
+    const ancientManuscriptsGenerated = getStarsWithAncientManuscripts().length;
+    const position = ancientManuscriptsGenerated + 1;
+
+    const dummyContainer = document.createElement('div');
+    const { stars, starDistanceData } = generateStarfield(
+        dummyContainer,
+        NUMBER_OF_STARS,
+        STAR_FIELD_SEED,
+        null,
+        true,
+        getCurrentStarSystem(),
+        false
+    ) || { stars: [], starDistanceData: {} };
+
+    const oldRange = typeof previousVisionDistance === 'number' ? previousVisionDistance : 0;
+    const newRange = typeof newVisionDistance === 'number' ? newVisionDistance : getStarVisionDistance();
+    const currentStarLower = String(getCurrentStarSystem() || '').toLowerCase();
+    const existingManuscriptStars = new Set(
+        (getStarsWithAncientManuscripts() || [])
+            .filter((entry) => Array.isArray(entry) && typeof entry[0] === 'string')
+            .map((entry) => entry[0].toLowerCase())
+    );
+    const existingFactoryStars = new Set((getFactoryStarsArray() || []).map((n) => String(n).toLowerCase()));
+
+    const eligibleManuscriptStars = (stars || [])
+        .map((star) => {
+            const starName = star?.name;
+            if (!starName) return null;
+            const distance = starDistanceData?.[starName];
+            return { starName, distance };
+        })
+        .filter((entry) => {
+            if (!entry) return false;
+            const nameLower = String(entry.starName).toLowerCase();
+            if (nameLower === 'miaplacidus') return false;
+            if (nameLower === currentStarLower) return false;
+            if (existingManuscriptStars.has(nameLower)) return false;
+            if (existingFactoryStars.has(nameLower)) return false;
+            if (typeof entry.distance !== 'number') return false;
+            return entry.distance > oldRange && entry.distance <= newRange;
+        })
+        .map((entry) => entry.starName.toLowerCase());
+
+    if (!eligibleManuscriptStars.length) {
+        return;
+    }
+
+    const manuscriptStar = eligibleManuscriptStars[Math.floor(Math.random() * eligibleManuscriptStars.length)];
+    const factoryStarToPointTo = selectFactoryStarSystem(position);
+
+    if (!factoryStarToPointTo) {
+        return;
+    }
+
+    setFactoryStarsArray(factoryStarToPointTo);
+    setStarsWithAncientManuscripts([manuscriptStar, factoryStarToPointTo, position, false]);
 }
 
 function handleBlackHoleDiscoveryRoll() {
@@ -10485,8 +10586,7 @@ export function generateStarDataAndAddToDataObject(starElement, distance) {
     });
 
     const randomPrecipitationType = calculatePrecipitationType();
-    
-    calculateIfHasAncientManuscript(starElement.id.toLowerCase());
+
     const factoryStar = checkIfFactoryStar(starElement.id.toLowerCase());
 
     const newStarData = {
@@ -10521,46 +10621,6 @@ function checkIfFactoryStar(starName) {
     }
 
     return false;
-}
-
-function calculateIfHasAncientManuscript(starName) {
-    const ancientManuscriptsGenerated = getStarsWithAncientManuscripts().length;
-    const maxAncientManuscripts = getMaxAncientManuscripts();
-    
-    let probability = 0;
-
-    if (ancientManuscriptsGenerated >= maxAncientManuscripts || getFactoryStarsArray().includes(starName)) {
-        return;
-    } else {
-        const visionDistance = getStarVisionDistance();
-
-        if (visionDistance < 5 && ancientManuscriptsGenerated === 0) {
-            probability = 20;
-        } else if (visionDistance === 5 && ancientManuscriptsGenerated === 0) {
-            probability = 100;
-        } else if (visionDistance >= 6 && visionDistance <= 19 && ancientManuscriptsGenerated < 2) {
-            probability = 20;
-        } else if (visionDistance === 20 && ancientManuscriptsGenerated < 2) {
-            probability = 100;
-        } else if (visionDistance >= 21 && visionDistance <= 34 && ancientManuscriptsGenerated < 3) {
-            probability = 20;
-        } else if (visionDistance === 35 && ancientManuscriptsGenerated < 3) {
-            probability = 100;
-        } else if (visionDistance >= 36 && visionDistance <= 44 && ancientManuscriptsGenerated < 4) {
-            probability = 20;
-        } else if (visionDistance === 45 && ancientManuscriptsGenerated < 4) {
-            probability = 100;
-        } else {
-            probability = 0;
-        }
-    }
-
-    if (Math.random() * 100 < probability) {
-        const position = ancientManuscriptsGenerated + 1;
-        const factoryStarToPointTo = selectFactoryStarSystem(position);
-        setFactoryStarsArray(factoryStarToPointTo); //watch out for null being set in here by not finding a factoryStarToPointTo and handle if this happens
-        setStarsWithAncientManuscripts([starName, factoryStarToPointTo, position, false]); //add factoryStarToPointTo as second argument and shift others along
-    }
 }
 
 export function selectFactoryStarSystem(position) {
