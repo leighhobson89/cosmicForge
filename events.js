@@ -34,12 +34,15 @@ import { randomEventTriggerDescriptions } from "./descriptions.js";
 let randomEventUiHandlers = {
     showNotification: null,
     showEventModal: null,
-    refreshSpaceMiningRocketSidebar: null
+    refreshSpaceMiningRocketSidebar: null,
+    isGalacticTabUnlocked: null,
+    onTimedEffectStarted: null
 };
 
-let eventsMasterSwitch = false; //TRUE TO HAVE EVENTS WORKING IN GAME
-let randomEventDebugLoggingEnabled = false; //DEBUG EVENTS TRUE
-let randomEventTimerAffectedByTimewarp = false; //DEBUG EVENTS TRUE
+let eventsMasterSwitch = false; //TRUE TO HAVE EVENTS WORKING IN GAME NOT TO BE CHANGED BY AI
+let randomEventDebugLoggingEnabled = false; //DEBUG EVENTS
+let eventTimerCountdownAffectedByTimewarp = false; //DEBUG EVENTS
+let timedEventTimerAffectedByTimewarp = true; //DEBUG EVENTS
 const COUNTDOWN_LOG_BUCKET_SECONDS = 30; //DEBUG
 let lastGlobalCountdownLogBucket = null; //DEBUG
 
@@ -50,6 +53,18 @@ const PROBABILITY_DECAY_ON_TRIGGER = 0.9;
 const MIN_CYCLE_DURATION_MS = 45 * 60 * 1000;
 const MAX_CYCLE_DURATION_MS = 75 * 60 * 1000;
 const GLOBAL_EVENT_TIMER_ID = 'randomEventGlobalTimer';
+
+const TIMED_EFFECTS_TIMER_ID = 'randomEventTimedEffectsTimer';
+
+const timedEffectDefinitions = {
+    galacticMarketLockdown: {
+        id: 'galacticMarketLockdown',
+        onExpire: () => {
+            randomEventUiHandlers.showNotification?.('Galactic Market access restored.', 'info', 5000, 'default');
+            randomEventUiHandlers.showEventModal?.('galacticMarketLockdownEnded');
+        }
+    }
+};
 
 const randomEventDefinitions = {
     powerPlantExplosion: {
@@ -206,8 +221,149 @@ const randomEventDefinitions = {
                 remainingQuantity
             };
         }
+    },
+    galacticMarketLockdown: {
+        id: 'galacticMarketLockdown',
+        initialProbability: 0.15,
+        canTrigger: () => {
+            const galacticUnlocked = typeof randomEventUiHandlers.isGalacticTabUnlocked === 'function'
+                ? !!randomEventUiHandlers.isGalacticTabUnlocked()
+                : false;
+            return galacticUnlocked && !isTimedEffectActive('galacticMarketLockdown');
+        },
+        trigger: () => {
+            startTimedEffect('galacticMarketLockdown', 30 * 60 * 1000);
+            return {
+                notificationText: 'Random Event: Galactic Market offline (30 minutes)'
+            };
+        }
     }
 };
+
+function getTimedEffectsRoot() {
+    const root = getRandomEventsRoot();
+    const stored = root?.timedEffects;
+    if (stored && typeof stored === 'object') {
+        return stored;
+    }
+
+    setResourceDataObject({}, 'randomEvents', ['timedEffects']);
+    return getResourceDataObject('randomEvents', ['timedEffects'], true) || {};
+}
+
+function getTimedEffectState(effectId) {
+    getTimedEffectsRoot();
+    const stored = getResourceDataObject('randomEvents', ['timedEffects', effectId], true);
+    if (stored && typeof stored === 'object') {
+        return stored;
+    }
+
+    const initial = { id: effectId, remainingMs: 0 };
+    setResourceDataObject(initial, 'randomEvents', ['timedEffects', effectId]);
+    return initial;
+}
+
+function setTimedEffectState(effectId, partial) {
+    const previous = getTimedEffectState(effectId) || {};
+    const next = { ...previous, ...partial };
+    setResourceDataObject(next, 'randomEvents', ['timedEffects', effectId]);
+    return next;
+}
+
+export function isTimedEffectActive(effectId) {
+    const remaining = Number(getTimedEffectState(effectId)?.remainingMs) || 0;
+    return remaining > 0;
+}
+
+export function getTimedEffectRemainingMs(effectId) {
+    return Math.max(0, Number(getTimedEffectState(effectId)?.remainingMs) || 0);
+}
+
+function startTimedEffect(effectId, durationMs) {
+    const safeDuration = Math.max(0, Number(durationMs) || 0);
+    setTimedEffectState(effectId, { remainingMs: safeDuration });
+
+    if (typeof randomEventUiHandlers.onTimedEffectStarted === 'function') {
+        randomEventUiHandlers.onTimedEffectStarted(effectId);
+    }
+}
+
+function handleTimedEffectExpired(effectId) {
+    const def = timedEffectDefinitions[effectId];
+    if (def && typeof def.onExpire === 'function') {
+        def.onExpire();
+    }
+}
+
+function scheduleTimedEffectsTimer() {
+    if (timerManagerDelta.hasTimer(TIMED_EFFECTS_TIMER_ID)) {
+        return;
+    }
+
+    let lastRealUpdateTimestamp = null;
+    let lastUsingRealTime = !timedEventTimerAffectedByTimewarp;
+    const lastTimedEffectLogBuckets = {};
+
+    timerManagerDelta.addTimer(TIMED_EFFECTS_TIMER_ID, {
+        durationMs: 0,
+        repeat: true,
+        onUpdate: ({ deltaMs: _deltaMs }) => {
+            if (!eventsMasterSwitch) {
+                return;
+            }
+
+            const useRealTime = !timedEventTimerAffectedByTimewarp;
+            if (useRealTime !== lastUsingRealTime) {
+                lastUsingRealTime = useRealTime;
+                lastRealUpdateTimestamp = null;
+            }
+
+            let effectiveDeltaMs = _deltaMs;
+            if (useRealTime) {
+                const now = (typeof performance !== 'undefined' && typeof performance.now === 'function')
+                    ? performance.now()
+                    : Date.now();
+
+                if (lastRealUpdateTimestamp === null) {
+                    lastRealUpdateTimestamp = now;
+                    return;
+                }
+
+                effectiveDeltaMs = Math.max(0, now - lastRealUpdateTimestamp);
+                lastRealUpdateTimestamp = now;
+            }
+
+            const root = getTimedEffectsRoot();
+            const activeIds = Object.keys(root);
+
+            activeIds.forEach((effectId) => {
+                const remaining = Number(getTimedEffectState(effectId)?.remainingMs) || 0;
+                if (remaining <= 0) {
+                    return;
+                }
+
+                const nextRemaining = remaining - effectiveDeltaMs;
+                if (nextRemaining <= 0) {
+                    setTimedEffectState(effectId, { remainingMs: 0 });
+                    handleTimedEffectExpired(effectId);
+                    return;
+                }
+
+                setTimedEffectState(effectId, { remainingMs: nextRemaining });
+
+                if (randomEventDebugLoggingEnabled) {
+                    const secondsRemaining = Math.max(0, Math.ceil(nextRemaining / 1000));
+                    const bucket = Math.floor(secondsRemaining / COUNTDOWN_LOG_BUCKET_SECONDS);
+                    const lastBucket = lastTimedEffectLogBuckets[effectId];
+                    if (lastBucket === undefined || lastBucket !== bucket) {
+                        lastTimedEffectLogBuckets[effectId] = bucket;
+                        console.log(`[TimedEffects] ${formatEventName(effectId)}: ${secondsRemaining}s remaining`);
+                    }
+                }
+            });
+        }
+    });
+}
 
 function getEventTriggerDescription(eventId) {
     const stored = randomEventTriggerDescriptions && typeof randomEventTriggerDescriptions === 'object'
@@ -306,6 +462,9 @@ function getRandomEventsRoot() {
         if (!root.events || typeof root.events !== 'object') {
             setResourceDataObject({}, 'randomEvents', ['events']);
         }
+        if (!root.timedEffects || typeof root.timedEffects !== 'object') {
+            setResourceDataObject({}, 'randomEvents', ['timedEffects']);
+        }
         if (root.version === undefined) {
             setResourceDataObject(1, 'randomEvents', ['version']);
         }
@@ -313,6 +472,7 @@ function getRandomEventsRoot() {
     }
 
     setResourceDataObject({}, 'randomEvents', ['events']);
+    setResourceDataObject({}, 'randomEvents', ['timedEffects']);
     setResourceDataObject(1, 'randomEvents', ['version']);
     return getResourceDataObject('randomEvents', null, true);
 }
@@ -353,7 +513,7 @@ function scheduleGlobalEventTimer() {
     }
 
     let lastRealUpdateTimestamp = null;
-    let lastUsingRealTime = !randomEventTimerAffectedByTimewarp;
+    let lastUsingRealTime = !eventTimerCountdownAffectedByTimewarp;
 
     timerManagerDelta.addTimer(GLOBAL_EVENT_TIMER_ID, {
         durationMs: 0,
@@ -363,7 +523,7 @@ function scheduleGlobalEventTimer() {
                 return;
             }
 
-            const useRealTime = !randomEventTimerAffectedByTimewarp;
+            const useRealTime = !eventTimerCountdownAffectedByTimewarp;
 
             if (useRealTime !== lastUsingRealTime) {
                 lastUsingRealTime = useRealTime;
@@ -478,7 +638,9 @@ function attemptTriggerAtCheckpoint(checkpointType) {
     });
 
     randomEventUiHandlers.showNotification?.(
-        `Random Event: ${formatEventName(picked)}`,
+        (triggerResult && typeof triggerResult === 'object' && typeof triggerResult.notificationText === 'string' && triggerResult.notificationText.trim() !== '')
+            ? triggerResult.notificationText
+            : `Random Event: ${formatEventName(picked)}`,
         'info',
         5000,
         'default'
@@ -700,6 +862,7 @@ function destroyBattery(batteryKey) {
 export function initialiseRandomEventTimers() {
     getRandomEventsRoot();
     getGlobalEventsState();
+    getTimedEffectsRoot();
 
     Object.keys(randomEventDefinitions).forEach((eventId) => {
         ensureEventStateExists(eventId);
@@ -708,12 +871,11 @@ export function initialiseRandomEventTimers() {
     if (eventsMasterSwitch) {
         scheduleGlobalEventTimer();
     }
+
+    scheduleTimedEffectsTimer();
 }
 
 export function triggerRandomEventDebug() {
-    if (!eventsMasterSwitch) {
-        return;
-    }
     const ids = Object.keys(randomEventDefinitions);
     const eligible = ids.filter((id) => randomEventDefinitions[id].canTrigger());
 
@@ -743,7 +905,9 @@ export function triggerRandomEventDebug() {
     });
 
     randomEventUiHandlers.showNotification?.(
-        `Random Event: ${formatEventName(picked)}`,
+        (triggerResult && typeof triggerResult === 'object' && typeof triggerResult.notificationText === 'string' && triggerResult.notificationText.trim() !== '')
+            ? triggerResult.notificationText
+            : `Random Event: ${formatEventName(picked)}`,
         'info',
         5000,
         'default'
@@ -783,7 +947,9 @@ export function triggerSpecificRandomEventDebug(eventId) {
     });
 
     randomEventUiHandlers.showNotification?.(
-        `Random Event: ${formatEventName(eventId)}`,
+        (triggerResult && typeof triggerResult === 'object' && typeof triggerResult.notificationText === 'string' && triggerResult.notificationText.trim() !== '')
+            ? triggerResult.notificationText
+            : `Random Event: ${formatEventName(eventId)}`,
         'info',
         5000,
         'default'
@@ -795,7 +961,13 @@ export function triggerSpecificRandomEventDebug(eventId) {
     randomEventUiHandlers.showEventModal?.(eventId, modalReplacements);
 }
 
-export function setRandomEventUiHandlers({ showNotification, showEventModal, refreshSpaceMiningRocketSidebar } = {}) {
+export function setRandomEventUiHandlers({
+    showNotification,
+    showEventModal,
+    refreshSpaceMiningRocketSidebar,
+    isGalacticTabUnlocked,
+    onTimedEffectStarted
+} = {}) {
     if (typeof showNotification === 'function') {
         randomEventUiHandlers.showNotification = showNotification;
     }
@@ -805,8 +977,18 @@ export function setRandomEventUiHandlers({ showNotification, showEventModal, ref
     if (typeof refreshSpaceMiningRocketSidebar === 'function') {
         randomEventUiHandlers.refreshSpaceMiningRocketSidebar = refreshSpaceMiningRocketSidebar;
     }
+    if (typeof isGalacticTabUnlocked === 'function') {
+        randomEventUiHandlers.isGalacticTabUnlocked = isGalacticTabUnlocked;
+    }
+    if (typeof onTimedEffectStarted === 'function') {
+        randomEventUiHandlers.onTimedEffectStarted = onTimedEffectStarted;
+    }
 }
 
 export function setRandomEventTimerAffectedByTimewarp(enabled) {
-    randomEventTimerAffectedByTimewarp = !!enabled;
+    eventTimerCountdownAffectedByTimewarp = !!enabled;
+}
+
+export function setTimedEventTimerAffectedByTimewarp(enabled) {
+    timedEventTimerAffectedByTimewarp = !!enabled;
 }

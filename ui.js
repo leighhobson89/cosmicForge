@@ -265,10 +265,14 @@ import {
     modalEventAntimatterReactionText,
     modalEventStockLossHeader,
     modalEventStockLossText,
+    modalEventGalacticMarketLockdownHeader,
+    modalEventGalacticMarketLockdownText,
+    modalEventGalacticMarketLockdownEndedHeader,
+    modalEventGalacticMarketLockdownEndedText,
     
 } from "./descriptions.js";
 
-import { getRandomEventDebugOptions, setRandomEventUiHandlers, triggerSpecificRandomEventDebug } from "./events.js";
+import { getRandomEventDebugOptions, getTimedEffectRemainingMs, isTimedEffectActive, setRandomEventUiHandlers, triggerSpecificRandomEventDebug } from "./events.js";
 
 import { saveGame, loadGameFromCloud, generateRandomPioneerName, saveGameToCloud } from './saveLoadGame.js';
 
@@ -865,6 +869,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setElements();
     setupStatTooltips();
     attachEnergyTooltipMirrors();
+    applyGalacticMarketLockdownUi();
     setupProductionRateTooltips();
     setupMouseParticleTrail();
     adjustGalacticSidebarWidths();
@@ -5236,6 +5241,8 @@ function syncResourceSidebarVisibility() {
 export function updateDynamicUiContent() {
     syncResourceSidebarVisibility();
 
+    applyGalacticMarketLockdownUi();
+
     refreshSpaceMiningRocketSidebar();
 
     if (!document.getElementById('energyConsumptionStats').classList.contains('invisible')) {
@@ -5636,6 +5643,17 @@ function buildGalacticMarketSidebarStatus() {
     }
 
     attachSharedTooltip(statusElement, () => statusElement.dataset.galacticTooltipContent || '');
+
+    if (isTimedEffectActive?.('galacticMarketLockdown')) {
+        const remainingMs = getTimedEffectRemainingMs?.('galacticMarketLockdown') || 0;
+        const remainingSeconds = Math.max(0, Math.ceil(remainingMs / 1000));
+        const minutes = Math.floor(remainingSeconds / 60);
+        const seconds = remainingSeconds % 60;
+        const formatted = `${minutes}:${String(seconds).padStart(2, '0')}`;
+
+        statusElement.dataset.galacticTooltipContent = `<div class="red-disabled-text">Galactic Market Shutdown<br>Time Remaining: ${formatted}</div>`;
+        return { text: 'Shutdown!', className: 'red-disabled-text' };
+    }
 
     const outgoingSelection = getGalacticMarketOutgoingStockType();
     const incomingSelection = getGalacticMarketIncomingStockType();
@@ -7075,6 +7093,11 @@ function initializeTabEventListeners() {
 
     document.querySelectorAll('[class*="tab7"][class*="option2"]').forEach(function(element) {
         element.addEventListener('click', function() {
+            if (isTimedEffectActive?.('galacticMarketLockdown')) {
+                applyGalacticMarketLockdownUi();
+                showNotification('Galactic Market is currently offline.', 'warning', 3000, 'special');
+                return;
+            }
             selectRowCss(this);
             setLastScreenOpenRegister('tab7', 'galactic market');
             setCurrentOptionPane('galactic market');
@@ -10506,6 +10529,35 @@ closeButton.addEventListener('click', () => {
 setRandomEventUiHandlers({
     showNotification,
     refreshSpaceMiningRocketSidebar,
+    isGalacticTabUnlocked: () => {
+        const tab7 = document.getElementById('tab7');
+        return !!tab7 && !String(tab7.textContent || '').includes('???');
+    },
+    onTimedEffectStarted: (effectId) => {
+        if (effectId !== 'galacticMarketLockdown') {
+            return;
+        }
+
+        ['rebirth', 'galactic market', 'ascendency perks', 'megastructures', 'black hole'].forEach((key) => {
+            setFirstAccessArray?.(key);
+        });
+
+        const tab7 = document.getElementById('tab7');
+        removeAttentionIndicator?.(tab7);
+
+        document.querySelectorAll('#tab7ContainerGroup .attention-indicator')?.forEach((icon) => {
+            icon.remove();
+        });
+
+        updateAttentionIndicators?.();
+
+        if (getCurrentOptionPane?.() === 'galactic market') {
+            setLastScreenOpenRegister?.('tab7', null);
+            setCurrentOptionPane?.('');
+            document.querySelectorAll('.row-side-menu')?.forEach(i => i.classList.remove('row-side-menu-selected'));
+            updateContent('Galactic', 'tab7', 'intro');
+        }
+    },
     showEventModal: (eventId, replacements) => {
         const headerMap = {
             powerPlantExplosion: modalEventPowerPlantExplosionHeader,
@@ -10515,6 +10567,8 @@ setRandomEventUiHandlers({
             rocketInstantArrival: modalEventRocketInstantArrivalHeader,
             antimatterReaction: modalEventAntimatterReactionHeader,
             stockLoss: modalEventStockLossHeader,
+            galacticMarketLockdown: modalEventGalacticMarketLockdownHeader,
+            galacticMarketLockdownEnded: modalEventGalacticMarketLockdownEndedHeader,
         };
         const textMap = {
             powerPlantExplosion: modalEventPowerPlantExplosionText,
@@ -10524,6 +10578,8 @@ setRandomEventUiHandlers({
             rocketInstantArrival: modalEventRocketInstantArrivalText,
             antimatterReaction: modalEventAntimatterReactionText,
             stockLoss: modalEventStockLossText,
+            galacticMarketLockdown: modalEventGalacticMarketLockdownText,
+            galacticMarketLockdownEnded: modalEventGalacticMarketLockdownEndedText,
         };
 
         const header = headerMap[eventId];
@@ -10597,6 +10653,27 @@ triggerRandomEventButton?.addEventListener('click', () => {
     }
     triggerSpecificRandomEventDebug(selected);
 });
+
+function applyGalacticMarketLockdownUi() {
+    const locked = isTimedEffectActive?.('galacticMarketLockdown');
+    const elements = [
+        document.getElementById('galacticMarketOption'),
+        document.getElementById('galacticMarketOption2'),
+        document.getElementById('galacticMarketOption3')
+    ].filter(Boolean);
+
+    const option2 = document.getElementById('galacticMarketOption2');
+
+    elements.forEach((el) => {
+        if (locked) {
+            el.classList.add('red-disabled-text');
+            el.style.pointerEvents = (option2 && el === option2) ? 'auto' : 'none';
+        } else {
+            el.classList.remove('red-disabled-text');
+            el.style.pointerEvents = '';
+        }
+    });
+}
 
 const prepareRunForStarshipLaunchButton = document.getElementById('prepareRunForStarshipLaunchButton');
 let preparingRunForStarshipLaunch = false;

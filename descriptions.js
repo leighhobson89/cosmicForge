@@ -136,6 +136,10 @@ export let modalEventAntimatterReactionHeader;
 export let modalEventAntimatterReactionText;
 export let modalEventStockLossHeader;
 export let modalEventStockLossText;
+export let modalEventGalacticMarketLockdownHeader;
+export let modalEventGalacticMarketLockdownText;
+export let modalEventGalacticMarketLockdownEndedHeader;
+export let modalEventGalacticMarketLockdownEndedText;
 
 export let randomEventTriggerDescriptions;
 
@@ -272,6 +276,12 @@ export function initialiseDescriptions() {
     modalEventStockLossHeader = 'STOCK LOSS!';
     modalEventStockLossText = `A major incident has struck your stores.<br><br><span class="red-disabled-text">-{lostPercent}% {itemName}</span><br>Lost due to {reason}.`;
 
+    modalEventGalacticMarketLockdownHeader = 'GALACTIC MARKET OFFLINE!';
+    modalEventGalacticMarketLockdownText = `A network disruption has shut down access to the Galactic Market.<br><br><span class="red-disabled-text">Trading is unavailable for 30 minutes.</span>`;
+
+    modalEventGalacticMarketLockdownEndedHeader = 'GALACTIC MARKET RESTORED!';
+    modalEventGalacticMarketLockdownEndedText = `The disruption has cleared.<br><br><span class="green-ready-text">Galactic Market access has been restored.</span>`;
+
     randomEventTriggerDescriptions = {
         powerPlantExplosion: 'Destroy 1 random owned power plant',
         batteryExplosion: 'Destroy 1 highest-tier owned battery',
@@ -279,7 +289,8 @@ export function initialiseDescriptions() {
         researchBreakthrough: 'Double your research points',
         rocketInstantArrival: 'A travelling rocket instantly arrives',
         antimatterReaction: 'A mining rocket and its asteroid are destroyed',
-        stockLoss: 'Lose 40-80% of an unlocked resource or compound stock'
+        stockLoss: 'Lose 40-80% of an unlocked resource or compound stock',
+        galacticMarketLockdown: 'Disable the Galactic Market for 30 minutes'
     };
 
     miaplacidusEndgameStoryPopups = [
