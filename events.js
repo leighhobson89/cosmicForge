@@ -58,7 +58,7 @@ import {
 } from "./resourceDataObject.js";
 import { timerManagerDelta } from "./timerManagerDelta.js";
 import { randomEventTriggerDescriptions } from "./descriptions.js";
-import { setFleetPricesAfterRepeatables, setStarshipPartPricesAfterRepeatables } from "./game.js";
+import { forceWeatherCycle, setFleetPricesAfterRepeatables, setStarshipPartPricesAfterRepeatables, setWeatherCycleSecondsRemaining } from "./game.js";
 
 let randomEventUiHandlers = {
     showNotification: null,
@@ -91,6 +91,14 @@ const timedEffectDefinitions = {
         onExpire: () => {
             randomEventUiHandlers.showNotification?.('Galactic Market access restored.', 'info', 5000, 'default');
             randomEventUiHandlers.showEventModal?.('galacticMarketLockdownEnded');
+        }
+    },
+    endlessSummer: {
+        id: 'endlessSummer',
+        onExpire: () => {
+            randomEventUiHandlers.showNotification?.('Endless Summer has ended.', 'info', 5000, 'default');
+            randomEventUiHandlers.showEventModal?.('endlessSummerEnded');
+            forceWeatherCycle?.();
         }
     },
     minerBrokeDown: {
@@ -423,6 +431,20 @@ const randomEventDefinitions = {
             startTimedEffect('galacticMarketLockdown', 30 * 60 * 1000);
             return {
                 notificationText: 'Random Event: Galactic Market offline (30 minutes)'
+            };
+        }
+    },
+    endlessSummer: {
+        id: 'endlessSummer',
+        initialProbability: 0.5,
+        canTrigger: () => !isTimedEffectActive('endlessSummer'),
+        trigger: () => {
+            const minutes = Math.floor(Math.random() * (50 - 40 + 1)) + 40;
+            startTimedEffect('endlessSummer', minutes * 60 * 1000);
+            setWeatherCycleSecondsRemaining?.(10);
+            return {
+                notificationText: `Random Event: Endless Summer (${minutes} minutes)`,
+                modalReplacements: { minutes }
             };
         }
     },

@@ -7761,6 +7761,11 @@ function startInitialTimers() {
 }
 
 function changeWeather(forcedWeatherType = null) {
+    const endlessSummerActive = isTimedEffectActive?.('endlessSummer');
+    if (endlessSummerActive) {
+        forcedWeatherType = 'sunny';
+    }
+
     function selectNewWeather() {
         setResourceDataObject(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'quantity']) * getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'rate']), 'buildings', ['energy', 'upgrades', 'powerPlant2', 'purchasedRate']);
         setWeatherEfficiencyApplied(false);
@@ -7873,6 +7878,44 @@ export function forceClearWeather() {
     setCurrentPrecipitationRate(0);
     setWeatherEfficiencyApplied(false);
     changeWeather('sunny');
+}
+
+export function forceWeatherCycle() {
+    stopWeatherEffect();
+    setWeatherEffectOn(false);
+    setCurrentPrecipitationRate(0);
+    setWeatherEfficiencyApplied(false);
+
+    if (weatherCountDownToChangeInterval) {
+        clearInterval(weatherCountDownToChangeInterval);
+        weatherCountDownToChangeInterval = null;
+    }
+
+    changeWeather();
+}
+
+export function setWeatherCycleSecondsRemaining(secondsRemaining = 10) {
+    const seconds = Math.max(0, Math.floor(Number(secondsRemaining) || 0));
+
+    if (weatherCountDownToChangeInterval) {
+        clearInterval(weatherCountDownToChangeInterval);
+        weatherCountDownToChangeInterval = null;
+    }
+
+    let timeLeft = seconds;
+
+    weatherCountDownToChangeInterval = setInterval(() => {
+        if (timeLeft > 0) {
+            timeLeft -= 1;
+            return;
+        }
+
+        stopWeatherEffect();
+        setWeatherEffectOn(false);
+        clearInterval(weatherCountDownToChangeInterval);
+        weatherCountDownToChangeInterval = null;
+        changeWeather();
+    }, 1000);
 }
 
 function calculateCreatableCompoundAmount(compoundToCreate) {

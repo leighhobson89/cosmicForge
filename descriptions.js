@@ -138,6 +138,10 @@ export let modalEventStockLossHeader;
 export let modalEventStockLossText;
 export let modalEventStarshipLostInSpaceHeader;
 export let modalEventStarshipLostInSpaceText;
+export let modalEventEndlessSummerHeader;
+export let modalEventEndlessSummerText;
+export let modalEventEndlessSummerEndedHeader;
+export let modalEventEndlessSummerEndedText;
 export let modalEventGalacticMarketLockdownHeader;
 export let modalEventGalacticMarketLockdownText;
 export let modalEventGalacticMarketLockdownEndedHeader;
@@ -293,6 +297,12 @@ export function initialiseDescriptions() {
     modalEventStarshipLostInSpaceHeader = 'STARSHIP LOST IN SPACE!';
     modalEventStarshipLostInSpaceText = `You lose communications with the Starship while en route.<br><br><span class="red-disabled-text">Starship lost</span><br><span class="red-disabled-text">Destination cleared</span><br><span class="red-disabled-text">All fleet units lost</span>`;
 
+    modalEventEndlessSummerHeader = 'ENDLESS SUMMER!';
+    modalEventEndlessSummerText = `The skies are clearing and sunny weather is on the way.<br><br><span class="green-ready-text">Sunny weather for {minutes} minutes.</span>`;
+
+    modalEventEndlessSummerEndedHeader = 'ENDLESS SUMMER ENDED!';
+    modalEventEndlessSummerEndedText = `The climate returns to normal variability.<br><br><span class="green-ready-text">Weather patterns restored.</span>`;
+
     modalEventGalacticMarketLockdownHeader = 'GALACTIC MARKET OFFLINE!';
     modalEventGalacticMarketLockdownText = `A network disruption has shut down access to the Galactic Market.<br><br><span class="red-disabled-text">Trading is unavailable for 30 minutes.</span>`;
 
@@ -326,6 +336,7 @@ export function initialiseDescriptions() {
         antimatterReaction: 'A mining rocket and its asteroid are destroyed',
         stockLoss: 'Lose 40-80% of an unlocked resource or compound stock',
         starshipLostInSpace: 'Starship lost in space (reset starship and fleets)',
+        endlessSummer: 'Sunny weather only for 40-50 minutes',
         galacticMarketLockdown: 'Disable the Galactic Market for 30 minutes',
         minerBrokeDown: 'One mining rocket produces 0 antimatter for 15 minutes',
         supplyChainDisruption: 'One resource or compound produces only 25% for 15 minutes',
