@@ -4,142 +4,21 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Cosmic Forge - Analytics Dashboard</title>
-    <style>
-      :root {
-        color-scheme: dark;
-        --bg: #0b0f19;
-        --panel: #121a2b;
-        --muted: #8aa0c2;
-        --text: #e8f0ff;
-        --border: rgba(255,255,255,0.08);
-        --accent: #6bdcff;
-      }
-      body {
-        margin: 0;
-        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-        background: var(--bg);
-        color: var(--text);
-      }
-      header {
-        padding: 16px 20px;
-        border-bottom: 1px solid var(--border);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-      }
-      h1 {
-        font-size: 16px;
-        margin: 0;
-        letter-spacing: 0.4px;
-      }
-      .controls {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        flex-wrap: wrap;
-      }
-      label {
-        font-size: 12px;
-        color: var(--muted);
-      }
-      select, button {
-        background: rgba(255,255,255,0.06);
-        color: var(--text);
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        padding: 8px 10px;
-        font-size: 13px;
-      }
-      button {
-        cursor: pointer;
-      }
-      button:hover {
-        border-color: rgba(107,220,255,0.5);
-      }
-      main {
-        padding: 16px 20px;
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 14px;
-      }
-      .grid {
-        display: grid;
-        grid-template-columns: repeat(12, 1fr);
-        gap: 12px;
-      }
-      .card {
-        background: var(--panel);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 14px;
-      }
-      .card h2 {
-        margin: 0 0 10px 0;
-        font-size: 13px;
-        color: var(--muted);
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-      }
-      .kpis {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 10px;
-      }
-      .kpi {
-        background: rgba(255,255,255,0.04);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 12px;
-      }
-      .kpi .label {
-        font-size: 11px;
-        color: var(--muted);
-      }
-      .kpi .value {
-        font-size: 18px;
-        margin-top: 4px;
-        color: var(--accent);
-        font-weight: 700;
-      }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 13px;
-      }
-      th, td {
-        padding: 8px 6px;
-        border-bottom: 1px solid var(--border);
-        text-align: left;
-        vertical-align: top;
-      }
-      th {
-        color: var(--muted);
-        font-weight: 600;
-        font-size: 12px;
-      }
-      .mono {
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      }
-      .muted {
-        color: var(--muted);
-      }
-      .span-12 { grid-column: span 12; }
-      .span-6 { grid-column: span 6; }
-      .span-4 { grid-column: span 4; }
-      .span-3 { grid-column: span 3; }
-
-      @media (max-width: 900px) {
-        .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        .span-6, .span-4, .span-3 { grid-column: span 12; }
-      }
-    </style>
+    <link rel="stylesheet" href="./styles.css" />
   </head>
-  <body>
+  <body data-theme="terminal">
     <header>
       <h1>Cosmic Forge - Analytics Dashboard</h1>
       <div class="controls">
+        <label for="theme">Theme</label>
+        <select id="theme">
+          <option value="terminal" selected>Terminal</option>
+          <option value="dark">Dark</option>
+          <option value="light">Light</option>
+          <option value="frosty">Frosty</option>
+          <option value="summer">Summer</option>
+          <option value="forest">Forest</option>
+        </select>
         <label for="days">Range</label>
         <select id="days">
           <option value="1">Last 1 day</option>
@@ -266,6 +145,34 @@
     <script type="module">
       const $ = (id) => document.getElementById(id);
 
+      const AUTO_REFRESH_MS = 10_000;
+      let refreshTimer = null;
+      let loading = false;
+      let currentAbortController = null;
+
+      function applyTheme(theme) {
+        if (!theme) return;
+        document.body.setAttribute('data-theme', theme);
+        try {
+          localStorage.setItem('analytics_dashboard_theme', theme);
+        } catch {
+          // ignore
+        }
+      }
+
+      function loadSavedTheme() {
+        let saved = null;
+        try {
+          saved = localStorage.getItem('analytics_dashboard_theme');
+        } catch {
+          saved = null;
+        }
+        const theme = saved || 'terminal';
+        const sel = $('theme');
+        if (sel) sel.value = theme;
+        applyTheme(theme);
+      }
+
       function fmtInt(n) {
         return (typeof n === 'number') ? n.toLocaleString() : '-';
       }
@@ -299,11 +206,15 @@
       }
 
       async function load() {
+        if (loading) return;
+        loading = true;
         const days = Number.parseInt($('days').value, 10);
         $('status').textContent = 'Loading...';
 
         try {
-          const res = await fetch(`/api/report?days=${days}`);
+          if (currentAbortController) currentAbortController.abort();
+          currentAbortController = new AbortController();
+          const res = await fetch(`/api/report?days=${days}`, { signal: currentAbortController.signal });
           const json = await res.json();
           if (!res.ok) {
             throw new Error(json?.error || 'Request failed');
@@ -339,14 +250,51 @@
 
           $('status').textContent = 'OK';
         } catch (err) {
-          $('status').textContent = `Error: ${String(err?.message || err)}`;
+          if (err?.name === 'AbortError') {
+            $('status').textContent = 'Loading...';
+          } else {
+            $('status').textContent = `Error: ${String(err?.message || err)}`;
+          }
+        } finally {
+          loading = false;
+        }
+      }
+
+      function startAutoRefresh() {
+        stopAutoRefresh();
+        if (document.hidden) return;
+        refreshTimer = window.setInterval(() => {
+          if (document.hidden) return;
+          void load();
+        }, AUTO_REFRESH_MS);
+      }
+
+      function stopAutoRefresh() {
+        if (refreshTimer) {
+          window.clearInterval(refreshTimer);
+          refreshTimer = null;
         }
       }
 
       $('refresh').addEventListener('click', load);
       $('days').addEventListener('change', load);
+      $('theme').addEventListener('change', (e) => {
+        applyTheme(e.target.value);
+      });
 
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          stopAutoRefresh();
+          if (currentAbortController) currentAbortController.abort();
+        } else {
+          void load();
+          startAutoRefresh();
+        }
+      });
+
+      loadSavedTheme();
       load();
+      startAutoRefresh();
     </script>
   </body>
 </html>
