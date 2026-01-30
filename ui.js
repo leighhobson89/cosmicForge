@@ -2586,7 +2586,7 @@ export function setupModalButtonTooltips() {
     tooltip.style.border = '1px solid var(--border-color, #555)';
     tooltip.style.borderRadius = 'var(--border-radius, 4px)';
     tooltip.style.fontSize = '12px';
-    tooltip.style.zIndex = '10000';
+    tooltip.style.zIndex = '30000';
     tooltip.style.display = 'none';
     tooltip.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.2)';
     tooltip.style.maxWidth = '300px';
