@@ -56,6 +56,7 @@ import {
     setBlackHolePower,
     setResourceDataObject
 } from "./resourceDataObject.js";
+import { sfxPlayer } from "./audioManager.js";
 import { timerManagerDelta } from "./timerManagerDelta.js";
 import { randomEventTriggerDescriptions } from "./descriptions.js";
 import { forceWeatherCycle, setFleetPricesAfterRepeatables, setStarshipPartPricesAfterRepeatables, setWeatherCycleSecondsRemaining } from "./game.js";
@@ -1104,6 +1105,8 @@ function attemptTriggerAtCheckpoint(checkpointType) {
     const modalReplacements = (triggerResult && typeof triggerResult === 'object')
         ? (triggerResult.modalReplacements || triggerResult)
         : null;
+
+    sfxPlayer.playAudio('eventAlarm', false);
     randomEventUiHandlers.showEventModal?.(picked, modalReplacements);
 
     if (randomEventDebugLoggingEnabled) {

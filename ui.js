@@ -3809,6 +3809,7 @@ export function createStarDestinationRow(starData, isInteresting) {
                 const destinationStar = getDestinationStar();  
                 const starData = getStarSystemDataObject('stars', [destinationStar]);  
                 showNotification(`Travelling to ${capitaliseWordsWithRomanNumerals(starData.name)}`, 'info', 3000, 'special');
+                sfxPlayer.playAudio('starShipLaunch', false);
                 startTravelToDestinationStarTimer([0, 'buttonClick'], false);
                 spendAntimatterOnFuelForStarShip(starData.fuel);
                 spaceTravelButtonHideAndShowDescription();
@@ -8619,6 +8620,9 @@ export function setColoniseOpinionProgressBar(value, parentElement) {
 const battleVisualLasers = [];
 const battleVisualExplosions = [];
 
+let lastLaserGunSfxAt = 0;
+let lastShipBattleExplodeSfxAt = 0;
+
 
 function wrapAngle(angle) {
     return ((angle % (2 * Math.PI)) + (2 * Math.PI)) % (2 * Math.PI);
@@ -9060,6 +9064,11 @@ function renderBattleExplosions(ctx, now) {
         animationContainer.style.top = `${y}px`;
 
         const now = performance.now();
+        if (now - lastShipBattleExplodeSfxAt > 140) {
+            lastShipBattleExplodeSfxAt = now;
+            const explodeKey = Math.random() < 0.5 ? 'shipBattleExplode1' : 'shipBattleExplode2';
+            sfxPlayer.playAudio(explodeKey, false);
+        }
         const parts = [];
         const count = 70;
         const palette = [
@@ -9110,6 +9119,15 @@ function renderBattleExplosions(ctx, now) {
                 } else if (unit.id.includes('land')) {
                     strokeColor = "rgb(255, 255, 0)";
                 }
+            }
+        }
+
+        if (strokeColor !== "transparent") {
+            const now = performance.now();
+            if (now - lastLaserGunSfxAt > 80) {
+                lastLaserGunSfxAt = now;
+                const laserKey = Math.random() < 0.5 ? 'laserGun1' : 'laserGun2';
+                sfxPlayer.playAudio(laserKey, false);
             }
         }
     

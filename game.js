@@ -2237,6 +2237,7 @@ function blackHoleUIChecks() {
 
         if (rechargeCapped && !getBlackHoleAlwaysOn()) {
             setBlackHoleAlwaysOn(true);
+            sfxPlayer.playAudio('blackHoleActivated', false);
         }
 
         if (rechargeCapped) {
@@ -2268,6 +2269,7 @@ function blackHoleUIChecks() {
 
         if (rechargeCapped && !getBlackHoleAlwaysOn()) {
             setBlackHoleAlwaysOn(true);
+            sfxPlayer.playAudio('blackHoleActivated', false);
         }
 
         if (rechargeCapped) {
@@ -3197,6 +3199,8 @@ export function sellResource(resource) {
     }
 
     setResourceDataObject(currentCash + cashRaised, 'currency', ['cash']);
+
+    sfxPlayer.playAudio('kaching', false);
 }
 
 export function createCompound(compound) {
@@ -3297,6 +3301,8 @@ export function sellCompound(compound) {
             'info', 3000, 'special'
         );
     }
+
+    sfxPlayer.playAudio('kaching', false);
 }
 
 function updateAllCreatePreviews() {
@@ -6728,6 +6734,8 @@ export function galacticMarketLiquidateForAp(quantityOfAp) {
     setAscendencyPoints(newAscendencyPoints);
     setLiquidatedThisRun(true);
     setAchievementFlagArray('liquidateAllAssets', 'add');
+
+    sfxPlayer.playAudio('kaching', false);
 }
 
 
@@ -6740,6 +6748,8 @@ export function galacticMarketSellApForCash(quantityOfAp) {
     const amountToCredit = quantityOfAp * currentApPrice;
     setResourceDataObject(getAscendencyPoints() - quantityOfAp, 'ascendencyPoints', ['quantity']);
     setResourceDataObject(getResourceDataObject('currency', ['cash']) + amountToCredit, 'currency', ['cash']);
+
+    sfxPlayer.playAudio('kaching', false);
 }
 
 function calculateAndDisplayCashGainForAp(quantityToSell) {
@@ -6824,6 +6834,8 @@ export function galacticMarketTrade() {
 
     showNotification(notificationMessage, 'info', 5000, 3000, 'special');
     setAchievementFlagArray('performGalacticMarketTransaction', 'add');
+
+    sfxPlayer.playAudio('kaching', false);
 }
 
 function removeAndReplaceOutgoingOptionFromIncomingDropDown(outgoingDropdown, incomingDropdown) {
@@ -8398,6 +8410,7 @@ export function startBlackHoleChargeTimer(adjustment) {
 
     if (totalDuration <= minChargeMs && !getBlackHoleAlwaysOn()) {
         setBlackHoleAlwaysOn(true);
+        sfxPlayer.playAudio('blackHoleActivated', false);
     }
 
     let timeRemaining = adjustment[0] === 0 ? totalDuration : adjustment[0];
@@ -8490,6 +8503,8 @@ export function startTravelToDestinationStarTimer(adjustment) {
             if (timeRemaining <= 0) {
                 timerManagerDelta.removeTimer(timerName);
                 showNotification(`StarShip has reached orbit of the ${capitaliseWordsWithRomanNumerals(destination)} system!`, 'info', 3000, 'starShip');
+
+                sfxPlayer.playAudio('starShipArrive', false);
 
                 if (travelTimerDescriptionElement) {
                     travelTimerDescriptionElement.innerText = 'Orbiting ' + capitaliseWordsWithRomanNumerals(destination);
@@ -11902,6 +11917,8 @@ export async function settleSystemAfterBattle(accessPoint) {
         setAchievementFlagArray('conquerMegastructureSystem', 'add');
     }
 
+    sfxPlayer.playAudio('buildTelescope', false);
+
     const baseApGain = Math.floor(getStarSystemDataObject('stars', ['destinationStar', 'ascendencyPoints']) * apModifier);
     const apGain = getAscendencyPointsWithRepeatableBonus(baseApGain);
     
@@ -12410,6 +12427,12 @@ export function applyMegaStructureBonuses(megastructure, tech) {
                         setAchievementFlagArray('bringDownMiaplacideanForceField', 'add');
                     }
                     setMegaStructureTechsResearched([1,3]);
+
+                    if (newMiaplacidusMilestoneLevel >= 4) {
+                        sfxPlayer.playAudio('forcefieldTakedownFinal', false);
+                    } else {
+                        sfxPlayer.playAudio('forcefieldTakedown', false);
+                    }
                     return;
                 case 4:
                     setInfinitePower(true);
@@ -12420,6 +12443,8 @@ export function applyMegaStructureBonuses(megastructure, tech) {
                     setInfinitePower(true);
                     setMegaStructureTechsResearched([1,5]);
                     setPowerOnOff(true);
+
+                    sfxPlayer.playAudio('megastructureCaptured', false);
                     return;
             }
             break;
@@ -12440,12 +12465,20 @@ export function applyMegaStructureBonuses(megastructure, tech) {
                         setAchievementFlagArray('bringDownMiaplacideanForceField', 'add');
                     }
                     setMegaStructureTechsResearched([2,3]);
+
+                    if (newMiaplacidusMilestoneLevel >= 4) {
+                        sfxPlayer.playAudio('forcefieldTakedownFinal', false);
+                    } else {
+                        sfxPlayer.playAudio('forcefieldTakedown', false);
+                    }
                     return;
                 case 4:
                     setMegaStructureTechsResearched([2,4]);
                     return;
                 case 5:
                     setMegaStructureTechsResearched([2,5]);
+
+                    sfxPlayer.playAudio('megastructureCaptured', false);
                     return;
             }
             break;
@@ -12468,6 +12501,12 @@ export function applyMegaStructureBonuses(megastructure, tech) {
                         setAchievementFlagArray('bringDownMiaplacideanForceField', 'add');
                     }
                     setMegaStructureTechsResearched([3, 3]);
+
+                    if (newMiaplacidusMilestoneLevel >= 4) {
+                        sfxPlayer.playAudio('forcefieldTakedownFinal', false);
+                    } else {
+                        sfxPlayer.playAudio('forcefieldTakedown', false);
+                    }
                     return;
                 case 4:
                     applyRateMultiplierToAllResources(1.75);
@@ -12477,6 +12516,8 @@ export function applyMegaStructureBonuses(megastructure, tech) {
                     applyRateMultiplierToAllResources(2);
                     setMegaStructureResourceBonus(true);
                     setMegaStructureTechsResearched([3, 5]);
+
+                    sfxPlayer.playAudio('megastructureCaptured', false);
                     return;
             }
         case 4:
@@ -12498,6 +12539,12 @@ export function applyMegaStructureBonuses(megastructure, tech) {
                         setAchievementFlagArray('bringDownMiaplacideanForceField', 'add');
                     }
                     setMegaStructureTechsResearched([4,3]);
+
+                    if (newMiaplacidusMilestoneLevel >= 4) {
+                        sfxPlayer.playAudio('forcefieldTakedownFinal', false);
+                    } else {
+                        sfxPlayer.playAudio('forcefieldTakedown', false);
+                    }
                     return;
                 case 4:
                     addStorageCapacityAndCompoundsToAllResources(1000000000);
@@ -12507,6 +12554,8 @@ export function applyMegaStructureBonuses(megastructure, tech) {
                     addStorageCapacityAndCompoundsToAllResources(10000000000);
                     setStorageAdderBonus(true);
                     setMegaStructureTechsResearched([4,5]);
+
+                    sfxPlayer.playAudio('megastructureCaptured', false);
                     return;
             }
             break;

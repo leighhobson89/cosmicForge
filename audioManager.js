@@ -118,10 +118,22 @@ class SfxPlayer {
             "powerTripped": "./sounds/powerTripped.mp3",
             "rocketLaunch": "./sounds/rocketLaunch.mp3",
             "rocketLand": "./sounds/rocketLand.mp3",
+            "starShipLaunch": "./sounds/starShipLaunch.mp3",
+            "starShipArrive": "./sounds/starShipArrive.mp3",
             "starStudy": "./sounds/starStudy.mp3",
             "buildTelescope": "./sounds/buildTelescope.mp3",
             "buildLaunchPad": "./sounds/buildLaunchPad.mp3",
             "fuelRocket": "./sounds/fuelRocket.mp3",
+            "laserGun1": "./sounds/laserGun1.mp3",
+            "laserGun2": "./sounds/laserGun2.mp3",
+            "shipBattleExplode1": "./sounds/shipBattleExplode1.mp3",
+            "shipBattleExplode2": "./sounds/shipBattleExplode2.mp3",
+            "eventAlarm": "./sounds/eventAlarm.mp3",
+            "blackHoleActivated": "./sounds/blackHoleActivated.mp3",
+            "kaching": "./sounds/kaching.mp3",
+            "forcefieldTakedown": "./sounds/forcefieldTakedown.mp3",
+            "forcefieldTakedownFinal": "./sounds/forcefieldTakedownFinal.mp3",
+            "megastructureCaptured": "./sounds/megastructureCaptured.mp3",
         };
         this.activeSounds = new Map();
     }
