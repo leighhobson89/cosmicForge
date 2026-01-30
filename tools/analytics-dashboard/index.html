@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cosmic Forge - Analytics Dashboard</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0b0f19;
+        --panel: #121a2b;
+        --muted: #8aa0c2;
+        --text: #e8f0ff;
+        --border: rgba(255,255,255,0.08);
+        --accent: #6bdcff;
+      }
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+        background: var(--bg);
+        color: var(--text);
+      }
+      header {
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      h1 {
+        font-size: 16px;
+        margin: 0;
+        letter-spacing: 0.4px;
+      }
+      .controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      label {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      select, button {
+        background: rgba(255,255,255,0.06);
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 8px 10px;
+        font-size: 13px;
+      }
+      button {
+        cursor: pointer;
+      }
+      button:hover {
+        border-color: rgba(107,220,255,0.5);
+      }
+      main {
+        padding: 16px 20px;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        gap: 12px;
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 14px;
+      }
+      .card h2 {
+        margin: 0 0 10px 0;
+        font-size: 13px;
+        color: var(--muted);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+      .kpis {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+      }
+      .kpi {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px;
+      }
+      .kpi .label {
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .kpi .value {
+        font-size: 18px;
+        margin-top: 4px;
+        color: var(--accent);
+        font-weight: 700;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
+      th, td {
+        padding: 8px 6px;
+        border-bottom: 1px solid var(--border);
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        color: var(--muted);
+        font-weight: 600;
+        font-size: 12px;
+      }
+      .mono {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .span-12 { grid-column: span 12; }
+      .span-6 { grid-column: span 6; }
+      .span-4 { grid-column: span 4; }
+      .span-3 { grid-column: span 3; }
+
+      @media (max-width: 900px) {
+        .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .span-6, .span-4, .span-3 { grid-column: span 12; }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Cosmic Forge - Analytics Dashboard</h1>
+      <div class="controls">
+        <label for="days">Range</label>
+        <select id="days">
+          <option value="1">Last 1 day</option>
+          <option value="3">Last 3 days</option>
+          <option value="7" selected>Last 7 days</option>
+          <option value="14">Last 14 days</option>
+          <option value="30">Last 30 days</option>
+          <option value="90">Last 90 days</option>
+        </select>
+        <button id="refresh">Refresh</button>
+        <span id="status" class="muted"></span>
+      </div>
+    </header>
+
+    <main>
+      <div class="card">
+        <h2>Summary</h2>
+        <div class="kpis">
+          <div class="kpi"><div class="label">Events</div><div class="value" id="kpiEvents">-</div></div>
+          <div class="kpi"><div class="label">Unique Sessions</div><div class="value" id="kpiSessions">-</div></div>
+          <div class="kpi"><div class="label">Unique Clients</div><div class="value" id="kpiClients">-</div></div>
+          <div class="kpi"><div class="label">Miaplacidus Reached</div><div class="value" id="kpiMiaplacidus">-</div></div>
+          <div class="kpi"><div class="label">Black Hole Discovered (Clients)</div><div class="value" id="kpiBlackHoleDiscovered">-</div></div>
+          <div class="kpi"><div class="label">Black Hole Researched (Unique Clients)</div><div class="value" id="kpiBlackHoleResearched">-</div></div>
+          <div class="kpi"><div class="label">Legendary Asteroids (Total)</div><div class="value" id="kpiLegendaryAsteroidsTotal">-</div></div>
+          <div class="kpi"><div class="label">Legendary Asteroids (Unique Clients)</div><div class="value" id="kpiLegendaryAsteroidsUnique">-</div></div>
+        </div>
+        <div style="margin-top:10px" class="muted">
+          <span class="mono" id="meta"></span>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="card span-6">
+          <h2>Top Views (ui_view)</h2>
+          <table>
+            <thead><tr><th>View</th><th>Count</th></tr></thead>
+            <tbody id="topViews"></tbody>
+          </table>
+        </div>
+
+        <div class="card span-6">
+          <h2>Top Time Spent (ui_view_duration)</h2>
+          <table>
+            <thead><tr><th>View</th><th>Total Time</th></tr></thead>
+            <tbody id="topDurations"></tbody>
+          </table>
+        </div>
+
+        <div class="card span-6">
+          <h2>Top Click Targets (dom_click sample)</h2>
+          <table>
+            <thead><tr><th>Target</th><th>Count</th></tr></thead>
+            <tbody id="topClicks"></tbody>
+          </table>
+        </div>
+
+        <div class="card span-6">
+          <h2>Top Achievements (achievement_granted)</h2>
+          <table>
+            <thead><tr><th>Achievement</th><th>Count</th></tr></thead>
+            <tbody id="topAchievements"></tbody>
+          </table>
+        </div>
+
+        <div class="card span-12">
+          <h2>Star System Activity</h2>
+          <table>
+            <thead><tr><th>Star System</th><th>Count</th></tr></thead>
+            <tbody id="starSystems"></tbody>
+          </table>
+        </div>
+
+        <div class="card span-6">
+          <h2>Theme Selections (Total)</h2>
+          <table>
+            <thead><tr><th>Theme</th><th>Selections</th></tr></thead>
+            <tbody id="themeSelections"></tbody>
+          </table>
+        </div>
+
+        <div class="card span-6">
+          <h2>Theme Users (Unique Clients)</h2>
+          <table>
+            <thead><tr><th>Theme</th><th>Clients</th></tr></thead>
+            <tbody id="themeUsers"></tbody>
+          </table>
+        </div>
+
+        <div class="card span-12">
+          <h2>Settings Usage (Unique Clients from Snapshots)</h2>
+          <table>
+            <thead><tr><th>Setting:State</th><th>Clients</th></tr></thead>
+            <tbody id="settingsUsage"></tbody>
+          </table>
+        </div>
+
+        <div class="card span-6">
+          <h2>Philosophy Picks (Unique Clients)</h2>
+          <table>
+            <thead><tr><th>Philosophy</th><th>Clients</th></tr></thead>
+            <tbody id="philosophyPicks"></tbody>
+          </table>
+        </div>
+
+        <div class="card span-6">
+          <h2>Best Selling Ascendency Perks</h2>
+          <table>
+            <thead><tr><th>Perk</th><th>Purchases</th></tr></thead>
+            <tbody id="ascendencyPerks"></tbody>
+          </table>
+        </div>
+
+        <div class="card span-12">
+          <h2>Most Researched Philosophy Repeatables</h2>
+          <table>
+            <thead><tr><th>Philosophy:Tech</th><th>Research Count</th></tr></thead>
+            <tbody id="philosophyRepeatables"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+
+    <script type="module">
+      const $ = (id) => document.getElementById(id);
+
+      function fmtInt(n) {
+        return (typeof n === 'number') ? n.toLocaleString() : '-';
+      }
+
+      function fmtDuration(ms) {
+        if (typeof ms !== 'number') return '-';
+        const totalSeconds = Math.floor(ms / 1000);
+        const s = totalSeconds % 60;
+        const totalMinutes = Math.floor(totalSeconds / 60);
+        const m = totalMinutes % 60;
+        const h = Math.floor(totalMinutes / 60);
+        if (h > 0) return `${h}h ${m}m ${s}s`;
+        if (m > 0) return `${m}m ${s}s`;
+        return `${s}s`;
+      }
+
+      function renderRows(tbodyId, rows, formatter = (v) => v) {
+        const tbody = $(tbodyId);
+        tbody.innerHTML = '';
+        for (const r of rows || []) {
+          const tr = document.createElement('tr');
+          const tdKey = document.createElement('td');
+          tdKey.textContent = r.key;
+          tdKey.className = 'mono';
+          const tdVal = document.createElement('td');
+          tdVal.textContent = formatter(r.value);
+          tr.appendChild(tdKey);
+          tr.appendChild(tdVal);
+          tbody.appendChild(tr);
+        }
+      }
+
+      async function load() {
+        const days = Number.parseInt($('days').value, 10);
+        $('status').textContent = 'Loading...';
+
+        try {
+          const res = await fetch(`/api/report?days=${days}`);
+          const json = await res.json();
+          if (!res.ok) {
+            throw new Error(json?.error || 'Request failed');
+          }
+
+          const { report, since, limit } = json;
+
+          $('kpiEvents').textContent = fmtInt(report.total_events);
+          $('kpiSessions').textContent = fmtInt(report.unique_sessions);
+          $('kpiClients').textContent = fmtInt(report.unique_clients);
+          $('kpiMiaplacidus').textContent = fmtInt(report.miaplacidus_reached_count);
+          $('kpiBlackHoleDiscovered').textContent = fmtInt(report.black_hole_discovered_unique_clients);
+          $('kpiBlackHoleResearched').textContent = fmtInt(report.black_hole_researched_unique_clients);
+
+          $('kpiLegendaryAsteroidsTotal').textContent = fmtInt(report.legendary_asteroid_discoveries);
+          $('kpiLegendaryAsteroidsUnique').textContent = fmtInt(report.legendary_asteroid_unique_clients);
+
+          $('meta').textContent = `since=${since} limit=${limit}`;
+
+          renderRows('topViews', report.top_views, fmtInt);
+          renderRows('topDurations', report.top_view_durations, fmtDuration);
+          renderRows('topClicks', report.top_clicks, fmtInt);
+          renderRows('topAchievements', report.top_achievements, fmtInt);
+          renderRows('starSystems', report.star_system_activity, fmtInt);
+
+          renderRows('philosophyPicks', report.philosophy_selected_unique_clients, fmtInt);
+          renderRows('ascendencyPerks', report.ascendency_perk_purchases, fmtInt);
+          renderRows('philosophyRepeatables', report.philosophy_repeatables_researched, fmtInt);
+
+          renderRows('themeSelections', report.theme_selected_counts, fmtInt);
+          renderRows('themeUsers', report.theme_selected_unique_clients, fmtInt);
+          renderRows('settingsUsage', report.settings_snapshot_unique_clients, fmtInt);
+
+          $('status').textContent = 'OK';
+        } catch (err) {
+          $('status').textContent = `Error: ${String(err?.message || err)}`;
+        }
+      }
+
+      $('refresh').addEventListener('click', load);
+      $('days').addEventListener('change', load);
+
+      load();
+    </script>
+  </body>
+</html>

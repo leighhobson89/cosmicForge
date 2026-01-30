@@ -2,6 +2,7 @@ import { getCurrentStarSystem, setCanFuelRockets, setCanTravelToAsteroids, getTe
 import { setAllCompoundsToZeroQuantity, gain, startUpdateTimersAndRates, addToResourceAllTimeStat, setFleetArmorBuffsAfterRepeatables, setFleetSpeedsAfterRepeatables, setFleetAttackDamageAfterRepeatables, setInitialImpressionBaseAfterRepeatables, setStarStudyEfficiencyAfterRepeatables, setAsteroidSearchEfficiencyAfterRepeatables, setRocketTravelTimeReductionAfterRepeatables, setStarshipTravelTimeReductionAfterRepeatables, setResourceAutobuyerPricesAfterRepeatables, setCompoundRecipePricesAfterRepeatables, setEnergyAndResearchBuildingPricesAfterRepeatables, setFleetPricesAfterRepeatables, setStarshipPartPricesAfterRepeatables, setRocketPartPricesAfterRepeatables, applyMegaStructureBonuses } from './game.js';
 import { getStarSystemDataObject, setResourceDataObject, getResourceDataObject, setAutoBuyerTierLevel } from './resourceDataObject.js';
 import { removeTabAttentionIfNoIndicators, createToggleSwitch, createSvgElement, createTextElement, sortTechRows, createOptionRow, createButton, showNotification, updateDescriptionRow, appendAttentionIndicator, callPopupModal, showHideModal } from './ui.js';
+import { trackAnalyticsEvent } from './analytics.js';
 import { modalMegaStructureTechDysonSphere1Header, modalMegaStructureTechDysonSphere1Text, modalMegaStructureTechDysonSphere2Header, modalMegaStructureTechDysonSphere2Text, modalMegaStructureTechDysonSphere3Header, modalMegaStructureTechDysonSphere3Text, modalMegaStructureTechDysonSphere4Header, modalMegaStructureTechDysonSphere4Text, modalMegaStructureTechDysonSphere5Header, modalMegaStructureTechDysonSphere5Text, modalMegaStructureTechCelestialProcessingCore1Header, modalMegaStructureTechCelestialProcessingCore1Text, modalMegaStructureTechCelestialProcessingCore2Header, modalMegaStructureTechCelestialProcessingCore2Text, modalMegaStructureTechCelestialProcessingCore3Header, modalMegaStructureTechCelestialProcessingCore3Text, modalMegaStructureTechCelestialProcessingCore4Header, modalMegaStructureTechCelestialProcessingCore4Text, modalMegaStructureTechCelestialProcessingCore5Header, modalMegaStructureTechCelestialProcessingCore5Text, modalMegaStructureTechPlasmaForge1Header, modalMegaStructureTechPlasmaForge1Text, modalMegaStructureTechPlasmaForge2Header, modalMegaStructureTechPlasmaForge2Text, modalMegaStructureTechPlasmaForge3Header, modalMegaStructureTechPlasmaForge3Text, modalMegaStructureTechPlasmaForge4Header, modalMegaStructureTechPlasmaForge4Text, modalMegaStructureTechPlasmaForge5Header, modalMegaStructureTechPlasmaForge5Text, modalMegaStructureTechGalacticMemoryArchive1Header, modalMegaStructureTechGalacticMemoryArchive1Text, modalMegaStructureTechGalacticMemoryArchive2Header, modalMegaStructureTechGalacticMemoryArchive2Text, modalMegaStructureTechGalacticMemoryArchive3Header, modalMegaStructureTechGalacticMemoryArchive3Text, modalMegaStructureTechGalacticMemoryArchive4Header, modalMegaStructureTechGalacticMemoryArchive4Text, modalMegaStructureTechGalacticMemoryArchive5Header, modalMegaStructureTechGalacticMemoryArchive5Text, modalNanoBrokersUnlockHeader, modalNanoBrokersUnlockText, modalRocketCompositesTabUnlockHeader, modalRocketCompositesTabUnlockText, modalQuantumComputingTabUnlockHeader, modalQuantumComputingTabUnlockText, modalScienceLabsTabUnlockHeader, modalScienceLabsTabUnlockText, modalKnowledgeSharingTabUnlockHeader, modalKnowledgeSharingTabUnlockText, modalInterstellarTabUnlockHeader, modalInterstellarTabUnlockText, modalEnergyTabUnlockHeader, modalEnergyTabUnlockText, modalSpaceMiningTabUnlockText, modalSpaceMiningTabUnlockHeader, modalCompoundsTabUnlockHeader, modalCompoundsTabUnlockText, techNotificationMessages } from './descriptions.js';
 
 export function drawTab3Content(heading, optionContentElement) {
@@ -2251,6 +2252,12 @@ export function drawTab3Content(heading, optionContentElement) {
                         gain('efficientAssembly', 'efficientAssembly', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
                         let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('1'); //calc for this repeatable done in gameloop with baseprices, not here
                         setRepeatableTechMultipliers('1', ++currentRepeatableTechMultiplier);
+                        trackAnalyticsEvent('philosophy_repeatable_researched', {
+                            philosophy_id: getPlayerPhilosophy(),
+                            tech_id: 'efficientAssembly',
+                            repeatable_slot: 1,
+                            new_level: currentRepeatableTechMultiplier
+                        }, { immediate: true, flushReason: 'philosophy_repeatable' });
                         showNotification('Space Building costs reduced by 1%!', 'info', 3000, 'tech');
                     }, 'techUnlockPhilosophy', '', 'efficientAssembly', null, 'research', true, null, 'techPhilosophy'),
                     null,
@@ -2280,6 +2287,12 @@ export function drawTab3Content(heading, optionContentElement) {
                         gain('laserMining', 'laserMining', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
                         let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('2');
                         setRepeatableTechMultipliers('2', ++currentRepeatableTechMultiplier); //logged but not needed for calc below
+                        trackAnalyticsEvent('philosophy_repeatable_researched', {
+                            philosophy_id: getPlayerPhilosophy(),
+                            tech_id: 'laserMining',
+                            repeatable_slot: 2,
+                            new_level: currentRepeatableTechMultiplier
+                        }, { immediate: true, flushReason: 'philosophy_repeatable' });
                         setResourceAutobuyerPricesAfterRepeatables();
                         showNotification('Resources AutoBuyers 5% cheaper!', 'info', 3000, 'tech');
                     }, 'techUnlockPhilosophy', '', 'laserMining', null, 'research', true, null, 'techPhilosophy'),
@@ -2310,6 +2323,12 @@ export function drawTab3Content(heading, optionContentElement) {
                         gain('massCompoundAssembly', 'massCompoundAssembly', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
                         let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('3');
                         setRepeatableTechMultipliers('3', ++currentRepeatableTechMultiplier);
+                        trackAnalyticsEvent('philosophy_repeatable_researched', {
+                            philosophy_id: getPlayerPhilosophy(),
+                            tech_id: 'massCompoundAssembly',
+                            repeatable_slot: 3,
+                            new_level: currentRepeatableTechMultiplier
+                        }, { immediate: true, flushReason: 'philosophy_repeatable' });
                         setCompoundRecipePricesAfterRepeatables(); //logged but not needed for calc below
                         showNotification('Compounds recipes cheaper by 5%!', 'info', 3000, 'tech');
                     }, 'techUnlockPhilosophy', '', 'massCompoundAssembly', null, 'research', true, null, 'techPhilosophy'),
@@ -2340,6 +2359,12 @@ export function drawTab3Content(heading, optionContentElement) {
                         gain('energyDrones', 'energyDrones', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
                         let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('4');
                         setRepeatableTechMultipliers('4', ++currentRepeatableTechMultiplier); //logged but not needed for calc below
+                        trackAnalyticsEvent('philosophy_repeatable_researched', {
+                            philosophy_id: getPlayerPhilosophy(),
+                            tech_id: 'energyDrones',
+                            repeatable_slot: 4,
+                            new_level: currentRepeatableTechMultiplier
+                        }, { immediate: true, flushReason: 'philosophy_repeatable' });
                         setEnergyAndResearchBuildingPricesAfterRepeatables();
                         showNotification('Energy and Research Buildings 5% cheaper!', 'info', 3000, 'tech');
                     }, 'techUnlockPhilosophy', '', 'energyDrones', null, 'research', true, null, 'techPhilosophy'),
@@ -2401,6 +2426,12 @@ export function drawTab3Content(heading, optionContentElement) {
                         gain('hangarAutomation', 'hangarAutomation', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
                         let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('1');
                         setRepeatableTechMultipliers('1', ++currentRepeatableTechMultiplier); //logged but not needed for calc below
+                        trackAnalyticsEvent('philosophy_repeatable_researched', {
+                            philosophy_id: getPlayerPhilosophy(),
+                            tech_id: 'hangarAutomation',
+                            repeatable_slot: 1,
+                            new_level: currentRepeatableTechMultiplier
+                        }, { immediate: true, flushReason: 'philosophy_repeatable' });
                         setFleetPricesAfterRepeatables();
                         showNotification('Fleet build costs reduced by 5%!', 'info', 3000, 'tech');
                     }, 'techUnlockPhilosophy', '', 'hangarAutomation', null, 'research', true, null, 'techPhilosophy'),
@@ -2431,6 +2462,12 @@ export function drawTab3Content(heading, optionContentElement) {
                         gain('syntheticPlating', 'syntheticPlating', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
                         let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('2');
                         setRepeatableTechMultipliers('2', ++currentRepeatableTechMultiplier); //logged but not needed for calc below
+                        trackAnalyticsEvent('philosophy_repeatable_researched', {
+                            philosophy_id: getPlayerPhilosophy(),
+                            tech_id: 'syntheticPlating',
+                            repeatable_slot: 2,
+                            new_level: currentRepeatableTechMultiplier
+                        }, { immediate: true, flushReason: 'philosophy_repeatable' });
                         setFleetArmorBuffsAfterRepeatables();
                         showNotification('Fleet Armor increased by 5%!', 'info', 3000, 'tech');
                     }, 'techUnlockPhilosophy', '', 'syntheticPlating', null, 'research', true, null, 'techPhilosophy'),
@@ -2461,6 +2498,12 @@ export function drawTab3Content(heading, optionContentElement) {
                         gain('antimatterEngineMinaturization', 'antimatterEngineMinaturization', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
                         let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('3');
                         setRepeatableTechMultipliers('3', ++currentRepeatableTechMultiplier); //logged but not needed for calc below
+                        trackAnalyticsEvent('philosophy_repeatable_researched', {
+                            philosophy_id: getPlayerPhilosophy(),
+                            tech_id: 'antimatterEngineMinaturization',
+                            repeatable_slot: 3,
+                            new_level: currentRepeatableTechMultiplier
+                        }, { immediate: true, flushReason: 'philosophy_repeatable' });
                         setFleetSpeedsAfterRepeatables();
                         showNotification('Fleet Speed increased by 5%!', 'info', 3000, 'tech');
                     }, 'techUnlockPhilosophy', '', 'antimatterEngineMinaturization', null, 'research', true, null, 'techPhilosophy'),
@@ -2491,6 +2534,12 @@ export function drawTab3Content(heading, optionContentElement) {
                         gain('laserIntensityResearch', 'laserIntensityResearch', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
                         let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('4');
                         setRepeatableTechMultipliers('4', ++currentRepeatableTechMultiplier); //logged but not needed for calc below
+                        trackAnalyticsEvent('philosophy_repeatable_researched', {
+                            philosophy_id: getPlayerPhilosophy(),
+                            tech_id: 'laserIntensityResearch',
+                            repeatable_slot: 4,
+                            new_level: currentRepeatableTechMultiplier
+                        }, { immediate: true, flushReason: 'philosophy_repeatable' });
                         setFleetAttackDamageAfterRepeatables();
                         showNotification('Fleet Attack Power increased by 5%! (Applicable to Newly Built Ships)', 'info', 3000, 'tech');
                     }, 'techUnlockPhilosophy', '', 'laserIntensityResearch', null, 'research', true, null, 'techPhilosophy'),
@@ -2552,6 +2601,12 @@ export function drawTab3Content(heading, optionContentElement) {
                         gain('stellarWhispers', 'stellarWhispers', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
                         let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('1');
                         setRepeatableTechMultipliers('1', ++currentRepeatableTechMultiplier); //logged but not needed for calc below
+                        trackAnalyticsEvent('philosophy_repeatable_researched', {
+                            philosophy_id: getPlayerPhilosophy(),
+                            tech_id: 'stellarWhispers',
+                            repeatable_slot: 1,
+                            new_level: currentRepeatableTechMultiplier
+                        }, { immediate: true, flushReason: 'philosophy_repeatable' });
                         setInitialImpressionBaseAfterRepeatables();
                         showNotification('Initial Impression of enemies improved by 1%!', 'info', 3000, 'tech');
                     }, 'techUnlockPhilosophy', '', 'stellarWhispers', null, 'research', true, null, 'techPhilosophy'),
@@ -2582,6 +2637,12 @@ export function drawTab3Content(heading, optionContentElement) {
                         gain('stellarInsightManifold', 'stellarInsightManifold', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
                         let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('2');
                         setRepeatableTechMultipliers('2', ++currentRepeatableTechMultiplier); //logged but not needed for calc below
+                        trackAnalyticsEvent('philosophy_repeatable_researched', {
+                            philosophy_id: getPlayerPhilosophy(),
+                            tech_id: 'stellarInsightManifold',
+                            repeatable_slot: 2,
+                            new_level: currentRepeatableTechMultiplier
+                        }, { immediate: true, flushReason: 'philosophy_repeatable' });
                         setStarStudyEfficiencyAfterRepeatables();
                         showNotification('Star Study speed increased by 1%!', 'info', 3000, 'tech');
                     }, 'techUnlockPhilosophy', '', 'stellarInsightManifold', null, 'research', true, null, 'techPhilosophy'),
@@ -2612,6 +2673,12 @@ export function drawTab3Content(heading, optionContentElement) {
                         gain('asteroidDwellers', 'asteroidDwellers', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
                         let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('3');
                         setRepeatableTechMultipliers('3', ++currentRepeatableTechMultiplier); //logged but not needed for calc below
+                        trackAnalyticsEvent('philosophy_repeatable_researched', {
+                            philosophy_id: getPlayerPhilosophy(),
+                            tech_id: 'asteroidDwellers',
+                            repeatable_slot: 3,
+                            new_level: currentRepeatableTechMultiplier
+                        }, { immediate: true, flushReason: 'philosophy_repeatable' });
                         setAsteroidSearchEfficiencyAfterRepeatables();
                         showNotification('Asteroid Search speed increased by 1%!', 'info', 3000, 'tech');
                     }, 'techUnlockPhilosophy', '', 'asteroidDwellers', null, 'research', true, null, 'techPhilosophy'),
@@ -2642,6 +2709,12 @@ export function drawTab3Content(heading, optionContentElement) {
                         gain('ascendencyPhilosophy', 'ascendencyPhilosophy', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
                         let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('4');
                         setRepeatableTechMultipliers('4', ++currentRepeatableTechMultiplier); //calc done for repeatables in all code where AP are issued, not here
+                        trackAnalyticsEvent('philosophy_repeatable_researched', {
+                            philosophy_id: getPlayerPhilosophy(),
+                            tech_id: 'ascendencyPhilosophy',
+                            repeatable_slot: 4,
+                            new_level: currentRepeatableTechMultiplier
+                        }, { immediate: true, flushReason: 'philosophy_repeatable' });
                         showNotification('Base Ascendency Point gain +1!', 'info', 3000, 'tech');
                     }, 'techUnlockPhilosophy', '', 'ascendencyPhilosophy', null, 'research', true, null, 'techPhilosophy'),
                     null,
@@ -2702,6 +2775,12 @@ export function drawTab3Content(heading, optionContentElement) {
                         gain('spaceElevator', 'spaceElevator', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
                         let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('1'); //logged but not needed for calc below
                         setRepeatableTechMultipliers('1', ++currentRepeatableTechMultiplier);
+                        trackAnalyticsEvent('philosophy_repeatable_researched', {
+                            philosophy_id: getPlayerPhilosophy(),
+                            tech_id: 'spaceElevator',
+                            repeatable_slot: 1,
+                            new_level: currentRepeatableTechMultiplier
+                        }, { immediate: true, flushReason: 'philosophy_repeatable' });
                         setStarshipPartPricesAfterRepeatables();
                         showNotification('Starship Parts cost reduced by 5%!', 'info', 3000, 'tech');
                     }, 'techUnlockPhilosophy', '', 'spaceElevator', null, 'research', true, null, 'techPhilosophy'),
@@ -2732,6 +2811,12 @@ export function drawTab3Content(heading, optionContentElement) {
                         gain('launchPadMassProduction', 'launchPadMassProduction', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
                         let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('2');
                         setRepeatableTechMultipliers('2', ++currentRepeatableTechMultiplier); //logged but not needed for calc below
+                        trackAnalyticsEvent('philosophy_repeatable_researched', {
+                            philosophy_id: getPlayerPhilosophy(),
+                            tech_id: 'launchPadMassProduction',
+                            repeatable_slot: 2,
+                            new_level: currentRepeatableTechMultiplier
+                        }, { immediate: true, flushReason: 'philosophy_repeatable' });
                         setRocketPartPricesAfterRepeatables();
                         showNotification('Rocket Parts cost reduced by 5%!', 'info', 3000, 'tech');
                     }, 'techUnlockPhilosophy', '', 'launchPadMassProduction', null, 'research', true, null, 'techPhilosophy'),
@@ -2762,6 +2847,12 @@ export function drawTab3Content(heading, optionContentElement) {
                         gain('asteroidAttractors', 'asteroidAttractors', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
                         let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('3');
                         setRepeatableTechMultipliers('3', ++currentRepeatableTechMultiplier);
+                        trackAnalyticsEvent('philosophy_repeatable_researched', {
+                            philosophy_id: getPlayerPhilosophy(),
+                            tech_id: 'asteroidAttractors',
+                            repeatable_slot: 3,
+                            new_level: currentRepeatableTechMultiplier
+                        }, { immediate: true, flushReason: 'philosophy_repeatable' });
                         setRocketTravelTimeReductionAfterRepeatables();  //logged but not needed for calc below
                         showNotification('Rocket Travel time reduced by 5%!', 'info', 3000, 'tech');
                     }, 'techUnlockPhilosophy', '', 'asteroidAttractors', null, 'research', true, null, 'techPhilosophy'),
@@ -2792,6 +2883,12 @@ export function drawTab3Content(heading, optionContentElement) {
                         gain('warpDrive', 'warpDrive', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
                         let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('4');
                         setRepeatableTechMultipliers('4', ++currentRepeatableTechMultiplier);
+                        trackAnalyticsEvent('philosophy_repeatable_researched', {
+                            philosophy_id: getPlayerPhilosophy(),
+                            tech_id: 'warpDrive',
+                            repeatable_slot: 4,
+                            new_level: currentRepeatableTechMultiplier
+                        }, { immediate: true, flushReason: 'philosophy_repeatable' });
                         setStarshipTravelTimeReductionAfterRepeatables();  //logged but not needed for calc below
                         showNotification('Starship Travel time reduced by 5%!', 'info', 3000, 'tech');
                     }, 'techUnlockPhilosophy', '', 'warpDrive', null, 'research', true, null, 'techPhilosophy'),

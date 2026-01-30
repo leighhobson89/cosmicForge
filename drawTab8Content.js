@@ -3,6 +3,7 @@ import { setupAchievementTooltip, createHtmlTableAchievementsGrid, createHtmlTab
 import { importSaveStringFileFromComputer, downloadSaveStringToComputer, initializeAutoSave, saveGame, saveGameToCloud, loadGameFromCloud, copySaveStringToClipBoard, loadGame, destroySaveGameOnCloud } from './saveLoadGame.js';
 import { hardResetWarningHeader, hardResetWarningText, getStatisticsContent, getHelpContent } from './descriptions.js';
 import { setAchievementIconImageUrls, getAchievementPositionData } from './resourceDataObject.js';
+import { trackAnalyticsEvent } from './analytics.js';
 
 export function drawTab8Content(heading, optionContentElement) {
     if (heading === 'Contact') createHelpSectionRow('contactRow', ['discord-link', 'email-link']);
@@ -111,6 +112,10 @@ export function drawTab8Content(heading, optionContentElement) {
             createToggleSwitch('customPointerToggle', false, (isEnabled) => {
                 setCustomPointerEnabled(isEnabled);
                 applyCustomPointerSetting();
+                trackAnalyticsEvent('settings_changed', {
+                    setting_id: 'custom_pointer',
+                    enabled: !!isEnabled
+                }, { immediate: true, flushReason: 'settings' });
             }, null),
             null,
             null,
@@ -136,6 +141,10 @@ export function drawTab8Content(heading, optionContentElement) {
             'Mouse Trail:',
             createToggleSwitch('mouseTrailToggle', true, (isEnabled) => {
                 setMouseParticleTrailEnabled(isEnabled);
+                trackAnalyticsEvent('settings_changed', {
+                    setting_id: 'mouse_trail',
+                    enabled: !!isEnabled
+                }, { immediate: true, flushReason: 'settings' });
             }, null),
             null,
             null,
@@ -313,6 +322,10 @@ export function drawTab8Content(heading, optionContentElement) {
             'Background Ambience Sound:',
             createToggleSwitch('backGroundAudioToggle', false, (isEnabled) => {
                 setBackgroundAudio(isEnabled);
+                trackAnalyticsEvent('settings_changed', {
+                    setting_id: 'background_audio',
+                    enabled: !!isEnabled
+                }, { immediate: true, flushReason: 'settings' });
             }, null),
             null,
             null,
@@ -343,6 +356,10 @@ export function drawTab8Content(heading, optionContentElement) {
             'Sound Effects:',
             createToggleSwitch('sfxToggle', false, (isEnabled) => {
                 setSfx(isEnabled);
+                trackAnalyticsEvent('settings_changed', {
+                    setting_id: 'sfx',
+                    enabled: !!isEnabled
+                }, { immediate: true, flushReason: 'settings' });
             }, null),
             null,
             null,

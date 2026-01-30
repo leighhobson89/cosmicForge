@@ -2,6 +2,7 @@ import { getAchievementFlagArray, getActivatedWackyNewsEffectsArray, getAlreadyS
 import { getAchievementNotification, newsTickerContent, refreshAchievementTooltipDescriptions } from "./descriptions.js";
 import { achievementsData, getAchievementDataObject, getResourceDataObject, getStarSystemDataObject, setAchievementDataObject, setResourceDataObject } from "./resourceDataObject.js";
 import { showNotification } from "./ui.js";
+import { trackAnalyticsEvent } from "./analytics.js";
 
 export function resetAchievementsOnRebirth() {
     for (const key in achievementsData) {
@@ -139,6 +140,11 @@ export function genericAchievementChecker(achievement) {
 export function grantAchievement(achievement) {
     setAchievementDataObject(true, achievement.id, ['active']);
     showNotification(getAchievementNotification(achievement.notification), 'achievement', 4000, 'default');
+
+    trackAnalyticsEvent('achievement_granted', {
+        achievement_id: achievement.id,
+        notification_key: achievement.notification
+    }, { immediate: true, flushReason: 'achievement' });
 
     refreshAchievementTooltipDescriptions();
     addAchievementBonus(achievement);

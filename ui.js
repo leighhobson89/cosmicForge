@@ -86,6 +86,11 @@ import {
     setSaveName,
     getSaveName,
     setOnboardingMode,
+    getOnboardingMode,
+    getCurrentGameVersion,
+    getUserPlatform,
+    getHostSource,
+    debugFlag,
     getSaveData,
     getTimerRateRatio,
     getBuildingTypeOnOff,
@@ -156,6 +161,8 @@ import {
     getMouseParticleTrailEnabled,
     getCustomPointerEnabled,
     getCurrentTheme,
+    getBackgroundAudio,
+    getSfx,
     getMaxMouseTrailParticles,
     getParticleLifetimeMs,
     getParticlesPerEvent,
@@ -331,6 +338,8 @@ import {
     toCamelCase
 } from './utilityFunctions.js';
 
+import { enableGlobalClickTracking, initAnalytics, trackAnalyticsEvent } from './analytics.js';
+
 import { playClickSfx, playSwipeSfx, sfxPlayer } from './audioManager.js';
 
 import { drawTab1Content } from './drawTab1Content.js';
@@ -367,6 +376,92 @@ function shouldIgnoreHoldEnterRapidClick(eventTarget) {
     }
 
     return false;
+}
+
+let analyticsCurrentViewId = null;
+let analyticsCurrentViewStartedAtMs = null;
+let analyticsCurrentViewTab = null;
+let analyticsCurrentViewHeading = null;
+let analyticsCurrentViewType = null;
+
+let analyticsLastStarSystem = null;
+let analyticsStarSystemWatcherStarted = false;
+
+function normaliseAnalyticsHeading(value) {
+    return String(value ?? '')
+        .replace(/\s*[⚠️🌀]/g, '')
+        .trim()
+        .toLowerCase();
+}
+
+function recordAnalyticsView(heading, tab, type) {
+    const cleanedHeading = normaliseAnalyticsHeading(heading);
+    const viewId = `${String(tab ?? '')}:${cleanedHeading}`;
+
+    const previousViewId = analyticsCurrentViewId;
+    if (previousViewId === viewId) return;
+
+    const nowMs = Date.now();
+    const currentStarSystem = getCurrentStarSystem();
+
+    if (previousViewId && typeof analyticsCurrentViewStartedAtMs === 'number') {
+        const durationMs = Math.max(0, nowMs - analyticsCurrentViewStartedAtMs);
+        trackAnalyticsEvent('ui_view_duration', {
+            view_id: previousViewId,
+            tab: analyticsCurrentViewTab,
+            heading: analyticsCurrentViewHeading,
+            type: analyticsCurrentViewType,
+            duration_ms: durationMs,
+            next_view_id: viewId,
+            star_system: currentStarSystem
+        });
+    }
+
+    analyticsCurrentViewId = viewId;
+    analyticsCurrentViewStartedAtMs = nowMs;
+    analyticsCurrentViewTab = tab;
+    analyticsCurrentViewHeading = cleanedHeading;
+    analyticsCurrentViewType = type;
+
+    trackAnalyticsEvent('ui_view', {
+        view_id: viewId,
+        tab,
+        heading: cleanedHeading,
+        type,
+        star_system: currentStarSystem,
+        previous_view_id: previousViewId
+    });
+}
+
+function startStarSystemAnalyticsWatcher() {
+    if (analyticsStarSystemWatcherStarted) return;
+    analyticsStarSystemWatcherStarted = true;
+
+    analyticsLastStarSystem = getCurrentStarSystem();
+
+    trackAnalyticsEvent('star_system_seen', {
+        star_system: analyticsLastStarSystem
+    });
+
+    setInterval(() => {
+        const current = getCurrentStarSystem();
+        if (!current || current === analyticsLastStarSystem) return;
+
+        const previous = analyticsLastStarSystem;
+        analyticsLastStarSystem = current;
+
+        trackAnalyticsEvent('star_system_changed', {
+            from: previous,
+            to: current
+        }, { immediate: true, flushReason: 'star_system' });
+
+        if (String(current).toLowerCase() === 'miaplacidus') {
+            trackAnalyticsEvent('milestone_reached', {
+                milestone_id: 'reached_star_miaplacidus',
+                star_system: current
+            }, { immediate: true, flushReason: 'milestone' });
+        }
+    }, 5000);
 }
 
 function updateHoldEnterToGainDebugStatus() {
@@ -900,6 +995,39 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (localStorage.getItem('saveName')) {
         setSaveName(localStorage.getItem('saveName'));
     }
+
+    initAnalytics({
+        defaultEnabled: true,
+        getContext: () => ({
+            pioneer_name: getSaveName(),
+            game_version: getCurrentGameVersion(),
+            host_source: getHostSource(),
+            platform: getUserPlatform(),
+            language: navigator?.language,
+            run_number: getStatRun(),
+            onboarding: getOnboardingMode(),
+            debug: debugFlag
+        })
+    });
+
+    enableGlobalClickTracking({
+        allowTags: ['BUTTON'],
+        sampleRate: 0.10
+    });
+
+    trackAnalyticsEvent('app_domcontentloaded', {
+        ts: new Date().toISOString()
+    }, { immediate: true, flushReason: 'startup' });
+
+    trackAnalyticsEvent('settings_snapshot', {
+        theme_id: getCurrentTheme(),
+        background_audio: !!getBackgroundAudio(),
+        sfx: !!getSfx(),
+        custom_pointer: !!getCustomPointerEnabled(),
+        mouse_trail: !!getMouseParticleTrailEnabled()
+    }, { immediate: true, flushReason: 'startup' });
+
+    startStarSystemAnalyticsWatcher();
 
 function setupMouseParticleTrail() {
     if (getMouseParticleContainer() || !document.body) {
@@ -1929,6 +2057,8 @@ export function updateContent(heading, tab, type) {
         heading = heading.replace(/\s*[⚠️🌀]/g, '').trim();
         headerContentElement.innerText = heading;
     }
+
+    recordAnalyticsView(heading, tab, type);
 
     optionContentElement.innerHTML = '';
        
@@ -3233,6 +3363,11 @@ export function selectTheme(theme) {
     const body = document.body;
     body.setAttribute('data-theme', theme);
     setCurrentTheme(theme);
+
+    trackAnalyticsEvent('theme_selected', {
+        theme_id: theme,
+        source: 'settings'
+    }, { immediate: true, flushReason: 'theme' });
 
     setThemesTriedArray(theme, 'add');
     const requiredThemes = ['terminal', 'dark', 'misty', 'light', 'frosty', 'summer', 'forest'];

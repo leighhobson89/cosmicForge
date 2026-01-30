@@ -34,6 +34,7 @@ import {
     getBlackHoleAlwaysOn
 } from './constantsAndGlobalVars.js';
 import { purchaseBuff, galacticMarketLiquidateForAp, galacticMarketSellApForCash, galacticMarketTrade, rebirth, startBlackHoleChargeTimer, timeWarp } from './game.js';
+import { trackAnalyticsEvent } from './analytics.js';
 import {
     getAscendencyBuffDataObject,
     getResourceDataObject,
@@ -561,6 +562,13 @@ export function drawTab7Content(heading, optionContentElement) {
 
             setResourceDataObject(currentResearch - price, 'research', ['quantity']);
             setBlackHoleResearchDone(true);
+
+            trackAnalyticsEvent('black_hole_research_completed', {
+                price,
+                research_before: currentResearch,
+                research_after: currentResearch - price
+            }, { immediate: true, flushReason: 'black_hole' });
+
             setAchievementFlagArray('discoverBlackHole', 'add');
 
             const chargeTimerName = 'blackHoleChargeTimer';

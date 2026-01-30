@@ -452,6 +452,8 @@ import {
 
 import { getTimedEffectStateSnapshot, isTimedEffectActive, initialiseRandomEventTimers } from './events.js';
 
+import { trackAnalyticsEvent } from './analytics.js';
+
 import {
     modalCompoundMachiningTabUnlockHeader,
     modalCompoundMachiningTabUnlockText,
@@ -8172,9 +8174,19 @@ export function purchaseBuff(buff) {
     const cost = Math.round(baseCost);
 
     if (currentAscendencyPoints >= cost) {
+        const boughtYetBefore = buffData.boughtYet;
         const updatedAp = Math.max(0, Math.round(currentAscendencyPoints - cost));
         setResourceDataObject(updatedAp, 'ascendencyPoints', ['quantity']);
         setAscendencyBuffDataObject(buffData.boughtYet + 1, buff, ['boughtYet']);
+
+        trackAnalyticsEvent('ascendency_perk_purchased', {
+            perk_id: buff,
+            cost_ap: cost,
+            ap_before: currentAscendencyPoints,
+            ap_after: updatedAp,
+            bought_yet_before: boughtYetBefore,
+            bought_yet_after: boughtYetBefore + 1
+        }, { immediate: true, flushReason: 'ascendency' });
 
         if (buff === 'nonExhaustiveResources') {
             setNonExhaustiveResources(true);
@@ -8727,6 +8739,10 @@ export function startInvestigateStarTimer(adjustment) {
                         true, 
                         function() {  
                             setPlayerPhilosophy('constructor');
+                            trackAnalyticsEvent('philosophy_selected', {
+                                philosophy_id: 'constructor',
+                                source: 'star_study_modal'
+                            }, { immediate: true, flushReason: 'philosophy' });
                             setAchievementFlagArray('adoptPhilosophy', 'add');
                             showNotification('You are a CONSTRUCTOR!', 'warning', 3000, 'special');
                             showHideModal();
@@ -8734,6 +8750,10 @@ export function startInvestigateStarTimer(adjustment) {
                         }, 
                         function() {  
                             setPlayerPhilosophy('supremacist');
+                            trackAnalyticsEvent('philosophy_selected', {
+                                philosophy_id: 'supremacist',
+                                source: 'star_study_modal'
+                            }, { immediate: true, flushReason: 'philosophy' });
                             setAchievementFlagArray('adoptPhilosophy', 'add');
                             showNotification('You are a SUPREMACIST!', 'warning', 3000, 'special');
                             showHideModal();
@@ -8741,6 +8761,10 @@ export function startInvestigateStarTimer(adjustment) {
                         }, 
                         function() {  
                             setPlayerPhilosophy('voidborn');
+                            trackAnalyticsEvent('philosophy_selected', {
+                                philosophy_id: 'voidborn',
+                                source: 'star_study_modal'
+                            }, { immediate: true, flushReason: 'philosophy' });
                             setAchievementFlagArray('adoptPhilosophy', 'add');
                             showNotification('You are VOIDBORN!', 'warning', 3000, 'special');
                             showHideModal();
@@ -8748,6 +8772,10 @@ export function startInvestigateStarTimer(adjustment) {
                         }, 
                         function() {  
                             setPlayerPhilosophy('expansionist');
+                            trackAnalyticsEvent('philosophy_selected', {
+                                philosophy_id: 'expansionist',
+                                source: 'star_study_modal'
+                            }, { immediate: true, flushReason: 'philosophy' });
                             setAchievementFlagArray('adoptPhilosophy', 'add');
                             showNotification('You are an EXPANSIONIST!', 'warning', 3000, 'special');
                             showHideModal();
@@ -10386,6 +10414,12 @@ function handleBlackHoleDiscoveryRoll() {
     const roll = Math.random() * 100;
     if (roll < updatedProbability) {
         setBlackHoleDiscovered(true);
+
+        trackAnalyticsEvent('black_hole_discovered', {
+            probability: updatedProbability,
+            roll
+        }, { immediate: true, flushReason: 'black_hole' });
+
         appendAttentionIndicator(document.getElementById('blackholeOption'));
         callPopupModal(
             modalBlackHoleDiscoveredHeader,
@@ -10432,6 +10466,11 @@ export function discoverAsteroid(debug) {
     const keyName = Object.keys(asteroid)[0];
     if (!debug) {
         if (asteroid[keyName].specialName) {
+            trackAnalyticsEvent('legendary_asteroid_discovered', {
+                asteroid_name: asteroid[keyName].name,
+                star_system: getCurrentStarSystem(),
+                rarity: 'Legendary'
+            }, { immediate: true, flushReason: 'asteroid' });
             addToResourceAllTimeStat(1, 'totalLegendaryAsteroidsDiscovered');
             showNotification(`Legendary Asteroid Discovered!<br><br>They named it after you!<br><br>${asteroid[keyName].name}`, 'info', 3000, 'special');
         } else {
