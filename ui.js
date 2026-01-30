@@ -1213,8 +1213,14 @@ function buildProductionTooltipContent(resourceKey, category) {
         const minutes = Math.floor(remainingSeconds / 60);
         const seconds = remainingSeconds % 60;
         const formatted = `${minutes}:${String(seconds).padStart(2, '0')}`;
+        const percentDown = (supplyChainState && typeof supplyChainState === 'object')
+            ? (Number(supplyChainState.percentDown) || 0)
+            : 0;
+        const clampedPercentDown = Math.max(0, Math.min(100, Math.round(percentDown)));
         lines.push('<div class="tooltip-spacer">&nbsp;</div>');
-        lines.push(`<div class="warning-orange-text">Supply Chain Disruption active: production reduced (/4)<br>Time Remaining: ${formatted}</div>`);
+        lines.push(
+            `<div class="warning-orange-text">Supply Chain Disrupted:<br>Production Reduced -${clampedPercentDown}%<br>Time Remaining: ${formatted}</div>`
+        );
     }
 
     if ((warpMultiplier || 1) !== 1) {
@@ -1494,7 +1500,7 @@ function buildAutoBuyerGenerationLines(resourceKey, category, timerRatio) {
         ? (getTimedEffectStateSnapshot?.('supplyChainDisruption') || null)
         : null;
     const supplyChainMultiplier = (supplyChainState && typeof supplyChainState === 'object' && supplyChainState.category === category && supplyChainState.key === resourceKey)
-        ? 0.25
+        ? (1 - (Math.max(0, Math.min(100, Math.round(Number(supplyChainState.percentDown) || 0))) / 100))
         : 1;
 
     const tierNumbers = [1, 2, 3, 4];
@@ -1541,7 +1547,7 @@ function buildAutoCreateGenerationLine(resourceKey, category, timerRatio) {
         ? (getTimedEffectStateSnapshot?.('supplyChainDisruption') || null)
         : null;
     const supplyChainMultiplier = (supplyChainState && typeof supplyChainState === 'object' && supplyChainState.category === category && supplyChainState.key === resourceKey)
-        ? 0.25
+        ? (1 - (Math.max(0, Math.min(100, Math.round(Number(supplyChainState.percentDown) || 0))) / 100))
         : 1;
 
     const autoCreateRate = calculateAutoCreateRatePerSecond(resourceKey, timerRatio) * supplyChainMultiplier;
@@ -1589,7 +1595,7 @@ function buildPrecipitationGenerationLine(resourceKey, category, timerRatio) {
         ? (getTimedEffectStateSnapshot?.('supplyChainDisruption') || null)
         : null;
     const supplyChainMultiplier = (supplyChainState && typeof supplyChainState === 'object' && supplyChainState.category === category && supplyChainState.key === resourceKey)
-        ? 0.25
+        ? (1 - (Math.max(0, Math.min(100, Math.round(Number(supplyChainState.percentDown) || 0))) / 100))
         : 1;
     const perSecond = effectivePerTick * timerRatio * supplyChainMultiplier;
 

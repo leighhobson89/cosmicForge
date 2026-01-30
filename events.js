@@ -127,7 +127,7 @@ const timedEffectDefinitions = {
             const key = (state && typeof state === 'object') ? state.key : null;
             const itemName = (category && key) ? getItemDisplayName(category, key) : null;
 
-            setTimedEffectState('supplyChainDisruption', { category: null, key: null });
+            setTimedEffectState('supplyChainDisruption', { category: null, key: null, percentDown: null });
             randomEventUiHandlers.showNotification?.(
                 itemName ? `Supply chains restored (${itemName}).` : 'Supply chains restored.',
                 'info',
@@ -481,11 +481,12 @@ const randomEventDefinitions = {
 
             const picked = candidates[Math.floor(Math.random() * candidates.length)];
             const itemName = getItemDisplayName(picked.category, picked.key);
-            startTimedEffect('supplyChainDisruption', 15 * 60 * 1000, { category: picked.category, key: picked.key });
+            const percentDown = Math.floor(Math.random() * (80 - 60 + 1)) + 60;
+            startTimedEffect('supplyChainDisruption', 15 * 60 * 1000, { category: picked.category, key: picked.key, percentDown });
 
             return {
                 notificationText: `Random Event: Supply Chain Disruption (${itemName})`,
-                modalReplacements: { itemName }
+                modalReplacements: { itemName, percentDown }
             };
         }
     },

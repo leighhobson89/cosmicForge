@@ -316,7 +316,7 @@ export function initialiseDescriptions() {
     modalEventMinerBrokeDownEndedText = `Field repairs complete.<br><br><span class="green-ready-text">{rocketName} has been repaired and is ready to resume mining.</span>`;
 
     modalEventSupplyChainDisruptionHeader = 'SUPPLY CHAIN DISRUPTION!';
-    modalEventSupplyChainDisruptionText = `A major logistics disruption has hit your operations.<br><br><span class="warning-orange-text">{itemName} production reduced to 25% for 15 minutes.</span>`;
+    modalEventSupplyChainDisruptionText = `A major logistics disruption has hit your operations.<br><br><span class="warning-orange-text">{itemName} production reduced by -{percentDown}% for 15 minutes.</span>`;
 
     modalEventSupplyChainDisruptionEndedHeader = 'SUPPLY CHAINS RESTORED!';
     modalEventSupplyChainDisruptionEndedText = `Shipments are flowing again.<br><br><span class="green-ready-text">{itemName} production has returned to normal.</span>`;
