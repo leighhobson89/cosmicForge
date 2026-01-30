@@ -141,6 +141,8 @@ function aggregate(events, options = {}) {
   let starshipLaunched = 0;
   let settleSystem = 0;
 
+  const pioneerPlaytimeMs = new Map();
+
   const philosophyClientsById = new Map();
   const ascendencyPerkPurchaseCounts = new Map();
   const philosophyRepeatableCounts = new Map();
@@ -165,6 +167,11 @@ function aggregate(events, options = {}) {
       const viewId = normaliseKey(payload.view_id);
       const ms = typeof payload.duration_ms === 'number' ? payload.duration_ms : 0;
       viewDurationMs.set(viewId, (viewDurationMs.get(viewId) || 0) + Math.max(0, ms));
+
+      const pioneerName = normaliseKey(e.pioneer_name, null);
+      if (pioneerName) {
+        pioneerPlaytimeMs.set(pioneerName, (pioneerPlaytimeMs.get(pioneerName) || 0) + Math.max(0, ms));
+      }
     }
 
     if (e.event_name === 'dom_click') {
@@ -329,6 +336,7 @@ function aggregate(events, options = {}) {
     total_events: events.length,
     unique_sessions: sessions.size,
     unique_clients: clients.size,
+    pioneer_playtime: takeTop(pioneerPlaytimeMs, 500),
     onboarding_prompt_yes: onboardingPromptYes,
     onboarding_prompt_no: onboardingPromptNo,
     onboarding_exit: onboardingExit,
@@ -377,7 +385,7 @@ async function getEvents({ sinceIso, limit }) {
     const batchLimit = Math.min(pageSize, remaining);
 
     const params = new URLSearchParams();
-    params.set('select', 'event_name,event_time,client_id,session_id,payload');
+    params.set('select', 'event_name,event_time,client_id,session_id,pioneer_name,payload');
     params.set('event_time', `gte.${sinceIso}`);
     params.set('order', 'event_time.desc');
     params.set('limit', String(batchLimit));

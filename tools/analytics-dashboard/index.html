@@ -46,6 +46,13 @@
           <div class="kpi"><div class="label">Legendary Asteroids (Total)</div><div class="value" id="kpiLegendaryAsteroidsTotal">-</div></div>
           <div class="kpi"><div class="label">Legendary Asteroids (Unique Clients)</div><div class="value" id="kpiLegendaryAsteroidsUnique">-</div></div>
         </div>
+        <div style="margin-top:14px">
+          <h2>Pioneer Playtime (Active)</h2>
+          <table>
+            <thead><tr><th>Pioneer</th><th>Total Active Time</th></tr></thead>
+            <tbody id="pioneerPlaytime"></tbody>
+          </table>
+        </div>
         <div style="margin-top:10px" class="muted">
           <span class="mono" id="meta"></span>
         </div>
@@ -263,6 +270,8 @@
           renderRows('topDurations', report.top_view_durations, fmtDuration);
           renderRows('topAchievements', report.top_achievements, fmtInt);
           renderRows('starSystems', report.star_system_activity, fmtInt);
+
+          renderRows('pioneerPlaytime', report.pioneer_playtime, fmtDuration);
 
           renderRows('philosophyPicks', report.philosophy_selected_unique_clients, fmtInt);
           renderRows('ascendencyPerks', report.ascendency_perk_purchases, fmtInt);
