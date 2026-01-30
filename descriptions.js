@@ -136,6 +136,8 @@ export let modalEventAntimatterReactionHeader;
 export let modalEventAntimatterReactionText;
 export let modalEventStockLossHeader;
 export let modalEventStockLossText;
+export let modalEventStarshipLostInSpaceHeader;
+export let modalEventStarshipLostInSpaceText;
 export let modalEventGalacticMarketLockdownHeader;
 export let modalEventGalacticMarketLockdownText;
 export let modalEventGalacticMarketLockdownEndedHeader;
@@ -288,6 +290,9 @@ export function initialiseDescriptions() {
     modalEventStockLossHeader = 'STOCK LOSS!';
     modalEventStockLossText = `A major incident has struck your stores.<br><br><span class="red-disabled-text">-{lostPercent}% {itemName}</span><br>Lost due to {reason}.`;
 
+    modalEventStarshipLostInSpaceHeader = 'STARSHIP LOST IN SPACE!';
+    modalEventStarshipLostInSpaceText = `You lose communications with the Starship while en route.<br><br><span class="red-disabled-text">Starship lost</span><br><span class="red-disabled-text">Destination cleared</span><br><span class="red-disabled-text">All fleet units lost</span>`;
+
     modalEventGalacticMarketLockdownHeader = 'GALACTIC MARKET OFFLINE!';
     modalEventGalacticMarketLockdownText = `A network disruption has shut down access to the Galactic Market.<br><br><span class="red-disabled-text">Trading is unavailable for 30 minutes.</span>`;
 
@@ -320,6 +325,7 @@ export function initialiseDescriptions() {
         rocketInstantArrival: 'A travelling rocket instantly arrives',
         antimatterReaction: 'A mining rocket and its asteroid are destroyed',
         stockLoss: 'Lose 40-80% of an unlocked resource or compound stock',
+        starshipLostInSpace: 'Starship lost in space (reset starship and fleets)',
         galacticMarketLockdown: 'Disable the Galactic Market for 30 minutes',
         minerBrokeDown: 'One mining rocket produces 0 antimatter for 15 minutes',
         supplyChainDisruption: 'One resource or compound produces only 25% for 15 minutes',

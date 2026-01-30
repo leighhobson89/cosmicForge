@@ -8,9 +8,13 @@ import {
     getCurrentlyTravellingToAsteroid,
     getCurrentStarSystemWeatherEfficiency,
     getDestinationAsteroid,
+    getDestinationStar,
+    getDestinationStarScanned,
     getMiningObject,
     getRocketDirection,
     getRocketUserName,
+    getStarShipBuilt,
+    getStarShipTravelling,
     getTechUnlockedArray,
     getUnlockedCompoundsArray,
     getUnlockedResourcesArray,
@@ -19,6 +23,8 @@ import {
     setCheckRocketFuellingStatus,
     setCurrentlyTravellingToAsteroid,
     setDestinationAsteroid,
+    setDestinationStar,
+    setDestinationStarScanned,
     setLaunchedRockets,
     setMiningObject,
     setRocketDirection,
@@ -27,6 +33,17 @@ import {
     setRocketUserName,
     setRocketsFuellerStartedArray,
     setTimeLeftUntilRocketTravelToAsteroidTimerFinishes,
+    setStarShipArrowPosition,
+    setStarShipBuilt,
+    setStarShipDestinationReminderVisible,
+    setStarShipStatus,
+    setStarShipTravelling,
+    setStarTravelDuration,
+    setTimeLeftUntilTravelToDestinationStarTimerFinishes,
+    setStellarScannerBuilt,
+    getAllRepeatableTechMultipliersObject,
+    getPlayerPhilosophy,
+    getStatRun,
     setBuildingTypeOnOff
 } from "./constantsAndGlobalVars.js";
 import {
@@ -34,12 +51,14 @@ import {
     getBlackHolePower,
     getBlackHoleResearchDone,
     getResourceDataObject,
+    resourceDataRebirthCopy,
     setBlackHoleDuration,
     setBlackHolePower,
     setResourceDataObject
 } from "./resourceDataObject.js";
 import { timerManagerDelta } from "./timerManagerDelta.js";
 import { randomEventTriggerDescriptions } from "./descriptions.js";
+import { setFleetPricesAfterRepeatables, setStarshipPartPricesAfterRepeatables } from "./game.js";
 
 let randomEventUiHandlers = {
     showNotification: null,
@@ -216,6 +235,105 @@ const randomEventDefinitions = {
                 rocketName: getRocketUserName(rocket),
                 destination: destination,
                 arrivalType: returning ? 'base' : 'asteroid'
+            };
+        }
+    },
+    starshipLostInSpace: {
+        id: 'starshipLostInSpace',
+        initialProbability: 0.1,
+        canTrigger: () => {
+            const built = typeof getStarShipBuilt === 'function' ? !!getStarShipBuilt() : false;
+            const travelling = typeof getStarShipTravelling === 'function' ? !!getStarShipTravelling() : false;
+            const scanned = typeof getDestinationStarScanned === 'function' ? !!getDestinationStarScanned() : false;
+            const destination = typeof getDestinationStar === 'function' ? getDestinationStar() : null;
+
+            return built && travelling && !scanned && !!destination;
+        },
+        trigger: () => {
+            const destination = typeof getDestinationStar === 'function' ? getDestinationStar() : null;
+
+            if (timerManagerDelta.hasTimer('starShipTravelToDestinationStarTimer')) {
+                timerManagerDelta.removeTimer('starShipTravelToDestinationStarTimer');
+            }
+
+            setStarShipTravelling(false);
+            setStarShipBuilt(false);
+            setStarShipStatus(['preconstruction', null]);
+            setStarShipArrowPosition(0);
+            setStarShipDestinationReminderVisible(false);
+            setStarTravelDuration(0);
+            setTimeLeftUntilTravelToDestinationStarTimerFinishes(0);
+
+            setStellarScannerBuilt(false);
+
+            setDestinationStarScanned(false);
+            setDestinationStar(null);
+
+            const applyRebirthBasePricesForPrefix = (prefix) => {
+                const rebirthUpgrades = resourceDataRebirthCopy?.space?.upgrades;
+                if (!rebirthUpgrades || typeof rebirthUpgrades !== 'object') return;
+
+                Object.keys(rebirthUpgrades).forEach((key) => {
+                    if (!String(key).startsWith(prefix)) return;
+                    const base = rebirthUpgrades[key];
+                    if (!base || typeof base !== 'object') return;
+
+                    if (typeof base.price === 'number') {
+                        setResourceDataObject(base.price, 'space', ['upgrades', key, 'price']);
+                    }
+                    if (Array.isArray(base.resource1Price)) {
+                        setResourceDataObject([...base.resource1Price], 'space', ['upgrades', key, 'resource1Price']);
+                    }
+                    if (Array.isArray(base.resource2Price)) {
+                        setResourceDataObject([...base.resource2Price], 'space', ['upgrades', key, 'resource2Price']);
+                    }
+                    if (Array.isArray(base.resource3Price)) {
+                        setResourceDataObject([...base.resource3Price], 'space', ['upgrades', key, 'resource3Price']);
+                    }
+                });
+            };
+
+            const starshipModules = ['ssStructural', 'ssLifeSupport', 'ssAntimatterEngine', 'ssFleetHangar', 'ssStellarScanner'];
+            starshipModules.forEach((module) => {
+                setResourceDataObject(0, 'space', ['upgrades', module, 'builtParts']);
+                setResourceDataObject(false, 'space', ['upgrades', module, 'finished']);
+            });
+
+            applyRebirthBasePricesForPrefix('ss');
+
+            const fleetUnits = ['fleetEnvoy', 'fleetScout', 'fleetMarauder', 'fleetLandStalker', 'fleetNavalStrafer'];
+            fleetUnits.forEach((unit) => {
+                setResourceDataObject(0, 'space', ['upgrades', unit, 'quantity']);
+            });
+
+            applyRebirthBasePricesForPrefix('fleet');
+
+            if (getStatRun?.() > 2) {
+                const repeatables = getAllRepeatableTechMultipliersObject?.() || {};
+                const philosophy = getPlayerPhilosophy?.();
+
+                if (philosophy === 'supremacist') {
+                    const times = Math.max(0, Number(repeatables['1'] || 1) - 1);
+                    for (let i = 0; i < times; i++) {
+                        setFleetPricesAfterRepeatables();
+                    }
+                }
+
+                if (philosophy === 'expansionist') {
+                    const times = Math.max(0, Number(repeatables['1'] || 1) - 1);
+                    for (let i = 0; i < times; i++) {
+                        setStarshipPartPricesAfterRepeatables();
+                    }
+                }
+            }
+
+            setResourceDataObject(0, 'fleets', ['attackPower']);
+            setResourceDataObject(0, 'fleets', ['defensePower']);
+            setResourceDataObject(false, 'space', ['upgrades', 'fleetEnvoy', 'envoyBuiltYet']);
+
+            return {
+                notificationText: 'Random Event: Starship lost in space',
+                destinationStar: destination
             };
         }
     },

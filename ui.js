@@ -265,6 +265,8 @@ import {
     modalEventAntimatterReactionText,
     modalEventStockLossHeader,
     modalEventStockLossText,
+    modalEventStarshipLostInSpaceHeader,
+    modalEventStarshipLostInSpaceText,
     modalEventGalacticMarketLockdownHeader,
     modalEventGalacticMarketLockdownText,
     modalEventGalacticMarketLockdownEndedHeader,
@@ -983,16 +985,23 @@ function setupStatTooltips() {
         .filter(Boolean);
 
     const updateTooltipContent = ({ statCell, valueElement }) => {
+        if (valueElement?.dataset?.tooltipDisabled === 'true') {
+            tooltip.innerHTML = '';
+            tooltip.textContent = '';
+            return false;
+        }
+
         const customContent = valueElement.dataset.tooltipContent;
 
         if (customContent) {
             tooltip.innerHTML = customContent;
-            return;
+            return true;
         }
 
         const labelText = statCell?.querySelector('.stat-label')?.textContent.trim() ?? '';
         const valueText = valueElement.innerText.replace(/\s+/g, ' ').trim();
         tooltip.textContent = `${labelText} ${valueText}`.trim();
+        return Boolean(tooltip.textContent);
     };
 
     const moveTooltip = (event) => {
@@ -1004,13 +1013,21 @@ function setupStatTooltips() {
         const { statCell, valueElement } = target;
 
         statCell.addEventListener('mouseenter', (event) => {
-            updateTooltipContent(target);
+            const shouldShow = updateTooltipContent(target);
+            if (!shouldShow) {
+                tooltip.style.display = 'none';
+                return;
+            }
             tooltip.style.display = 'block';
             moveTooltip(event);
         });
 
         statCell.addEventListener('mousemove', (event) => {
-            updateTooltipContent(target);
+            const shouldShow = updateTooltipContent(target);
+            if (!shouldShow) {
+                tooltip.style.display = 'none';
+                return;
+            }
             moveTooltip(event);
         });
 
@@ -4927,6 +4944,10 @@ export function statToolBarCustomizations() {
     const stat6Element = document.getElementById('stat6');
     const stat7Element = document.getElementById('stat7');
 
+    const unlockedTechs = getTechUnlockedArray();
+    const hasBasicPowerGeneration = unlockedTechs.includes('basicPowerGeneration');
+    const hasSodiumIonPowerStorage = unlockedTechs.includes('sodiumIonPowerStorage');
+
     if (cashStatElement) {
         const cashAmount = Math.floor(getResourceDataObject('currency', ['cash']) ?? 0);
         const currencySymbol = getCurrencySymbol();
@@ -4937,22 +4958,40 @@ export function statToolBarCustomizations() {
     }
 
     if (stat2Element) {
-        stat2Element.dataset.tooltipContent = buildEnergyTooltipContent(stat2Element.textContent.trim());
+        if (hasBasicPowerGeneration) {
+            stat2Element.dataset.tooltipDisabled = 'false';
+            stat2Element.dataset.tooltipContent = buildEnergyTooltipContent(stat2Element.textContent.trim());
+        } else {
+            stat2Element.dataset.tooltipDisabled = 'true';
+            stat2Element.dataset.tooltipContent = '';
+        }
     }
 
     if (stat3Element) {
-        const stat3Text = stat3Element.textContent.trim();
-        const stat3Class = determineStatClassColor(stat3Text);
-        const plantStatusLines = buildPowerPlantStatusLines();
-        stat3Element.dataset.tooltipContent = [
-            `<div>Power Status: <span class="${stat3Class}">${stat3Text}</span></div>`,
-            `<div class="tooltip-spacer">&nbsp;</div>`,
-            plantStatusLines
-        ].join('');
+        if (hasBasicPowerGeneration) {
+            stat3Element.dataset.tooltipDisabled = 'false';
+            const stat3Text = stat3Element.textContent.trim();
+            const stat3Class = determineStatClassColor(stat3Text);
+            const plantStatusLines = buildPowerPlantStatusLines();
+            stat3Element.dataset.tooltipContent = [
+                `<div>Power Status: <span class="${stat3Class}">${stat3Text}</span></div>`,
+                `<div class="tooltip-spacer">&nbsp;</div>`,
+                plantStatusLines
+            ].join('');
+        } else {
+            stat3Element.dataset.tooltipDisabled = 'true';
+            stat3Element.dataset.tooltipContent = '';
+        }
     }
 
     if (stat4Element) {
-        stat4Element.dataset.tooltipContent = buildBatteryTooltipContent();
+        if (hasSodiumIonPowerStorage) {
+            stat4Element.dataset.tooltipDisabled = 'false';
+            stat4Element.dataset.tooltipContent = buildBatteryTooltipContent();
+        } else {
+            stat4Element.dataset.tooltipDisabled = 'true';
+            stat4Element.dataset.tooltipContent = '';
+        }
     }
 
     if (stat5Element) {
@@ -10644,6 +10683,7 @@ setRandomEventUiHandlers({
             rocketInstantArrival: modalEventRocketInstantArrivalHeader,
             antimatterReaction: modalEventAntimatterReactionHeader,
             stockLoss: modalEventStockLossHeader,
+            starshipLostInSpace: modalEventStarshipLostInSpaceHeader,
             galacticMarketLockdown: modalEventGalacticMarketLockdownHeader,
             galacticMarketLockdownEnded: modalEventGalacticMarketLockdownEndedHeader,
             minerBrokeDown: modalEventMinerBrokeDownHeader,
@@ -10661,6 +10701,7 @@ setRandomEventUiHandlers({
             rocketInstantArrival: modalEventRocketInstantArrivalText,
             antimatterReaction: modalEventAntimatterReactionText,
             stockLoss: modalEventStockLossText,
+            starshipLostInSpace: modalEventStarshipLostInSpaceText,
             galacticMarketLockdown: modalEventGalacticMarketLockdownText,
             galacticMarketLockdownEnded: modalEventGalacticMarketLockdownEndedText,
             minerBrokeDown: modalEventMinerBrokeDownText,
@@ -10670,6 +10711,19 @@ setRandomEventUiHandlers({
             blackHoleInstability: modalEventBlackHoleInstabilityText,
             blackHoleInstabilityEnded: modalEventBlackHoleInstabilityEndedText,
         };
+
+        if (eventId === 'starshipLostInSpace') {
+            ['star map', 'fleet hangar', 'colonise'].forEach((key) => {
+                setFirstAccessArray?.(key);
+            });
+
+            if (getCurrentOptionPane?.() === 'fleet hangar' || getCurrentOptionPane?.() === 'star map' || getCurrentOptionPane?.() === 'colonise') {
+                setLastScreenOpenRegister?.('tab5', null);
+                setCurrentOptionPane?.('');
+                document.querySelectorAll('.row-side-menu')?.forEach(i => i.classList.remove('row-side-menu-selected'));
+                updateContent('Interstellar', 'tab5', 'intro');
+            }
+        }
 
         const header = headerMap[eventId];
         let content = textMap[eventId];
