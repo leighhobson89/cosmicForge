@@ -380,8 +380,11 @@ async function getEvents({ sinceIso, limit }) {
   let offset = 0;
   let pages = 0;
 
-  while (out.length < limit) {
-    const remaining = limit - out.length;
+  const unlimited = limit === null || limit === undefined;
+  const effectiveLimit = unlimited ? Number.POSITIVE_INFINITY : limit;
+
+  while (out.length < effectiveLimit) {
+    const remaining = effectiveLimit - out.length;
     const batchLimit = Math.min(pageSize, remaining);
 
     const params = new URLSearchParams();
@@ -406,7 +409,7 @@ async function getEvents({ sinceIso, limit }) {
     }
   }
 
-  out._meta = { fetched: out.length, pages };
+  out._meta = { fetched: out.length, pages, unlimited };
   return out;
 }
 
@@ -430,7 +433,8 @@ const server = http.createServer(async (req, res) => {
 
       if (url.pathname === '/api/report') {
         const days = clamp(toInt(url.searchParams.get('days'), 7), 1, 365);
-        const limit = clamp(toInt(url.searchParams.get('limit'), 200_000), 1, 500_000);
+        const rawLimit = url.searchParams.get('limit');
+        const limit = rawLimit === null ? null : clamp(toInt(rawLimit, 200_000), 1, 500_000);
         const sinceIso = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 
         const events = await getEvents({ sinceIso, limit });
@@ -438,7 +442,8 @@ const server = http.createServer(async (req, res) => {
         const report = aggregate(events || [], { randomEventIds });
         const fetched = events?._meta?.fetched ?? (Array.isArray(events) ? events.length : 0);
         const pages = events?._meta?.pages ?? null;
-        writeJson(res, 200, { since: sinceIso, days, limit, fetched, pages, report });
+        const limitValue = events?._meta?.unlimited ? 'all' : limit;
+        writeJson(res, 200, { since: sinceIso, days, limit: limitValue, fetched, pages, report });
         return;
       }
 

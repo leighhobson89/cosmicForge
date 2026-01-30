@@ -245,8 +245,7 @@
         try {
           if (currentAbortController) currentAbortController.abort();
           currentAbortController = new AbortController();
-          const requestedLimit = 50000;
-          const res = await fetch(`/api/report?days=${days}&limit=${requestedLimit}`, { signal: currentAbortController.signal });
+          const res = await fetch(`/api/report?days=${days}`, { signal: currentAbortController.signal });
           const json = await res.json();
           if (!res.ok) {
             throw new Error(json?.error || 'Request failed');
