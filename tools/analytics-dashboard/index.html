@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Cosmic Forge - Analytics Dashboard</title>
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="/tools/analytics-dashboard/styles.css" />
   </head>
   <body data-theme="terminal">
     <header>
@@ -69,14 +69,6 @@
         </div>
 
         <div class="card span-6">
-          <h2>Top Click Targets (dom_click sample)</h2>
-          <table>
-            <thead><tr><th>Target</th><th>Count</th></tr></thead>
-            <tbody id="topClicks"></tbody>
-          </table>
-        </div>
-
-        <div class="card span-6">
           <h2>Top Achievements (achievement_granted)</h2>
           <table>
             <thead><tr><th>Achievement</th><th>Count</th></tr></thead>
@@ -101,10 +93,18 @@
         </div>
 
         <div class="card span-6">
-          <h2>Theme Users (Unique Clients)</h2>
+          <h2>Onboarding</h2>
           <table>
-            <thead><tr><th>Theme</th><th>Clients</th></tr></thead>
-            <tbody id="themeUsers"></tbody>
+            <thead><tr><th>Action</th><th>Count</th></tr></thead>
+            <tbody id="onboarding"></tbody>
+          </table>
+        </div>
+
+        <div class="card span-12">
+          <h2>Rocket Parts Built</h2>
+          <table>
+            <thead><tr><th>Rocket</th><th>Parts Built</th></tr></thead>
+            <tbody id="rocketPartsBuilt"></tbody>
           </table>
         </div>
 
@@ -236,7 +236,6 @@
 
           renderRows('topViews', report.top_views, fmtInt);
           renderRows('topDurations', report.top_view_durations, fmtDuration);
-          renderRows('topClicks', report.top_clicks, fmtInt);
           renderRows('topAchievements', report.top_achievements, fmtInt);
           renderRows('starSystems', report.star_system_activity, fmtInt);
 
@@ -245,8 +244,15 @@
           renderRows('philosophyRepeatables', report.philosophy_repeatables_researched, fmtInt);
 
           renderRows('themeSelections', report.theme_selected_counts, fmtInt);
-          renderRows('themeUsers', report.theme_selected_unique_clients, fmtInt);
           renderRows('settingsUsage', report.settings_snapshot_unique_clients, fmtInt);
+
+          renderRows('onboarding', [
+            { key: 'Enter onboarding (YES)', value: report.onboarding_prompt_yes },
+            { key: 'Decline onboarding (NO)', value: report.onboarding_prompt_no },
+            { key: 'Exit onboarding', value: report.onboarding_exit },
+          ], fmtInt);
+
+          renderRows('rocketPartsBuilt', report.rocket_part_build_counts, fmtInt);
 
           $('status').textContent = 'OK';
         } catch (err) {

@@ -89,6 +89,12 @@ function aggregate(events) {
   const achievementCounts = new Map();
   const starSystemSeenCounts = new Map();
 
+  let onboardingPromptYes = 0;
+  let onboardingPromptNo = 0;
+  let onboardingExit = 0;
+
+  const rocketPartBuildCounts = new Map();
+
   const blackHoleDiscoveredClients = new Set();
   const blackHoleResearchedClients = new Set();
 
@@ -131,6 +137,23 @@ function aggregate(events) {
       const tag = payload.tag ? String(payload.tag).toUpperCase() : '(no tag)';
       const key = `${tag} ${id}`;
       clickCounts.set(key, (clickCounts.get(key) || 0) + 1);
+    }
+
+    if (e.event_name === 'onboarding_prompt_yes') {
+      onboardingPromptYes += 1;
+    }
+
+    if (e.event_name === 'onboarding_prompt_no') {
+      onboardingPromptNo += 1;
+    }
+
+    if (e.event_name === 'onboarding_exit') {
+      onboardingExit += 1;
+    }
+
+    if (e.event_name === 'rocket_part_built') {
+      const rocketId = normaliseKey(payload.rocket_id);
+      rocketPartBuildCounts.set(rocketId, (rocketPartBuildCounts.get(rocketId) || 0) + 1);
     }
 
     if (e.event_name === 'achievement_granted') {
@@ -226,6 +249,10 @@ function aggregate(events) {
     total_events: events.length,
     unique_sessions: sessions.size,
     unique_clients: clients.size,
+    onboarding_prompt_yes: onboardingPromptYes,
+    onboarding_prompt_no: onboardingPromptNo,
+    onboarding_exit: onboardingExit,
+    rocket_part_build_counts: takeTop(rocketPartBuildCounts, 10),
     miaplacidus_reached_count: miaplacidusReached,
     black_hole_discovered_unique_clients: blackHoleDiscoveredClients.size,
     black_hole_researched_unique_clients: blackHoleResearchedClients.size,

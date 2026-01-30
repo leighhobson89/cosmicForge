@@ -7,6 +7,8 @@ import { removeTabAttentionIfNoIndicators, createSvgElement, createDropdown, cre
 import { capitaliseString } from './utilityFunctions.js';
 import { sfxPlayer } from './audioManager.js'
 
+import { trackAnalyticsEvent } from './analytics.js';
+
 export function drawTab6Content(heading, optionContentElement) {
     const optionElement = document.getElementById(heading.toLowerCase().replace(/\s(.)/g, (match, group1) => group1.toUpperCase()).replace(/\s+/g, '') + 'Option');
     if (optionElement) {
@@ -276,6 +278,10 @@ export function drawTab6Content(heading, optionContentElement) {
                 null,
                 `${rocket.label}:`,
                 createButton(`Build Rocket Part`, ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check'], () => {
+                    trackAnalyticsEvent('rocket_part_built', {
+                        rocket_id: rocket.id,
+                        ts: new Date().toISOString()
+                    });
                     gain(1, `${rocket.id}BuiltPartsQuantity`, rocket.id, false, null, 'space', 'space')
                 }, 'upgradeCheck', '', 'spaceUpgrade', rocket.id, 'cash', true, null, 'spaceMiningPurchase'),
                 createTextElement(

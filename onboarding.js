@@ -12,6 +12,8 @@ import {
     onboardingModalText
 } from './descriptions.js';
 
+import { trackAnalyticsEvent } from './analytics.js';
+
 let shouldPromptOnboarding = false;
 
 export function setShouldPromptOnboarding(value) {
@@ -37,11 +39,17 @@ export async function promptOnboardingIfNeeded({ callPopupModal, showHideModal }
             false,
             false,
             () => {
+                trackAnalyticsEvent('onboarding_prompt_yes', {
+                    ts: new Date().toISOString()
+                });
                 setOnboardingMode(true);
                 showHideModal?.();
                 resolve();
             },
             () => {
+                trackAnalyticsEvent('onboarding_prompt_no', {
+                    ts: new Date().toISOString()
+                });
                 setOnboardingMode(false);
                 showHideModal?.();
                 resolve();
@@ -84,6 +92,9 @@ function ensureOnboardingExitButton() {
     if (!button.dataset.onboardingExitHandlerAttached) {
         button.dataset.onboardingExitHandlerAttached = 'true';
         button.addEventListener('click', () => {
+            trackAnalyticsEvent('onboarding_exit', {
+                ts: new Date().toISOString()
+            });
             setOnboardingMode(false);
             resetOnboardingProgression();
         });
