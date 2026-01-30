@@ -10,25 +10,69 @@ if (-not (Test-Path $jest)) {
 # Force headless mode for Playwright smoke tests
 $env:HEADLESS = '1'
 
-# Run all tests under tests
+# Discover all tests under tests
+$testsDir = Join-Path $projectRoot 'tests'
 $tests = @(
-  #'tests/launchAndOnboard.test.js',
-  #'tests/launch-app.test.js',
-  #'tests/earlyLoop.test.js',
-  'tests/autobuyer.test.js'
-  #'tests/researchTech.test.js',
-  #'tests/energyMid.test.js',
-  #'tests/spaceAntimatter.test.js'
+  Get-ChildItem -Path $testsDir -Recurse -File -Filter '*.test.js' |
+    ForEach-Object {
+      $rel = $_.FullName.Substring($projectRoot.Length).TrimStart('\', '/')
+      ($rel -replace '\\', '/')
+    } |
+    Sort-Object
 )
 
-$expectedFailures = @(
+<# 
+tests/autobuyer.test.js
+tests/earlyLoop.test.js
+tests/energyMid.test.js
+tests/launchAndOnboard.test.js
+tests/launch-app.test.js
+tests/researchTech.test.js
+tests/spaceAntimatter.test.js 
+#>
+
+$includeInTestSuite = @(
+  'tests/launch-app.test.js'
 )
 
-$anyUnexpectedFailed = $false
+Write-Host "\n=== Available tests (copy/paste into `$includeInTestSuite) ===\n"
+foreach ($t in $tests) {
+  Write-Host $t
+}
+
+Write-Host "\n=== `$includeInTestSuite template ===\n"
+Write-Host "`$includeInTestSuite = @("
+foreach ($t in $tests) {
+  Write-Host "  '$t'"
+}
+Write-Host ")\n"
+
+$testsToRun = @()
+if ($includeInTestSuite.Count -gt 0) {
+  $testsToRun = @($tests | Where-Object { $includeInTestSuite -contains $_ })
+
+  $missing = @($includeInTestSuite | Where-Object { $tests -notcontains $_ })
+  if ($missing.Count -gt 0) {
+    Write-Host "The following `$includeInTestSuite entries were not found on disk:" -ForegroundColor Yellow
+    foreach ($m in $missing) {
+      Write-Host "- $m" -ForegroundColor Yellow
+    }
+    Write-Host "" 
+  }
+} else {
+  $testsToRun = $tests
+}
+
+if ($testsToRun.Count -eq 0) {
+  Write-Error "No tests selected to run. Add tests to `$includeInTestSuite (or leave it empty to run all discovered tests)."
+}
+
+$anyFailed = $false
+
 
 $suiteResults = @()
 
-foreach ($testFile in $tests) {
+foreach ($testFile in $testsToRun) {
   $testName = [System.IO.Path]::GetFileNameWithoutExtension($testFile)
   $reportDir = Join-Path $projectRoot (Join-Path 'html-report' $testName)
   New-Item -ItemType Directory -Force -Path $reportDir | Out-Null
@@ -80,11 +124,7 @@ foreach ($testFile in $tests) {
   }
 
   if ($exitCode -ne 0) {
-    if ($expectedFailures -contains $testFile) {
-      Write-Host "Expected failure: $testFile" -ForegroundColor Yellow
-    } else {
-      $anyUnexpectedFailed = $true
-    }
+    $anyFailed = $true
   }
 
   $suiteResults += [PSCustomObject]@{
@@ -202,7 +242,7 @@ if (Test-Path $suiteReportFile) {
   Start-Process $suiteReportFile
 }
 
-if ($anyUnexpectedFailed) {
+if ($anyFailed) {
   exit 1
 }
 

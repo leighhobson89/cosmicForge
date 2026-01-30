@@ -316,7 +316,7 @@ export function initialiseDescriptions() {
     modalEventMinerBrokeDownEndedText = `Field repairs complete.<br><br><span class="green-ready-text">{rocketName} has been repaired and is ready to resume mining.</span>`;
 
     modalEventSupplyChainDisruptionHeader = 'SUPPLY CHAIN DISRUPTION!';
-    modalEventSupplyChainDisruptionText = `A major logistics disruption has hit your operations.<br><br><span class="warning-orange-text">{itemName} production reduced to 25% for 15 minutes.</span>`;
+    modalEventSupplyChainDisruptionText = `A major logistics disruption has hit your operations.<br><br><span class="warning-orange-text">{itemName} production reduced by -{percentDown}% for 15 minutes.</span>`;
 
     modalEventSupplyChainDisruptionEndedHeader = 'SUPPLY CHAINS RESTORED!';
     modalEventSupplyChainDisruptionEndedText = `Shipments are flowing again.<br><br><span class="green-ready-text">{itemName} production has returned to normal.</span>`;
@@ -462,7 +462,7 @@ export function initialiseDescriptions() {
     };
 
     rocketNames = {
-        version: 0.81,
+        version: 0.82,
         rocketDescription: "Build the launch pad to launch built rockets and mine asteroids for Antimatter.",
         [getRocketUserName('rocket1').toLowerCase()]: "Build the launch pad to launch built rockets and mine asteroids for Antimatter.",
         [getRocketUserName('rocket2').toLowerCase()]: "Build the launch pad to launch built rockets and mine asteroids for Antimatter.",
@@ -1661,6 +1661,11 @@ export function initialiseDescriptions() {
         },
         receptionStatusRow: {
             content1: "You can communicate with civilized species, unless they are Belligerent towards you.",
+            content2: "",
+            updateAt: ""
+        },
+        buffLittleBagOfHydrogenRow: {
+            content1: "On Rebirth, grants enough Hydrogen to immediately buy 1 Tier 1 Auto Buyer.",
             content2: "",
             updateAt: ""
         },

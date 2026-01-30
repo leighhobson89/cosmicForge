@@ -8,7 +8,7 @@ import { showNotification } from "./ui.js";
 
 export let achievementImageUrls;
 export let resourceData = {
-    version: 0.81, //update this whenever changes are made to the structure
+    version: 0.82, //update this whenever changes are made to the structure
     resources: {
         solar: {
             autoSell: false,
@@ -994,7 +994,7 @@ export const miaplacidus = {
 
 
 export let starSystems = {
-    version: 0.81,
+    version: 0.82,
     stars: {
         spica: {
             mapSize: 5.504440179536064, //might need to add this to star object when added dynamically for after rebirth
@@ -1013,7 +1013,7 @@ export let starSystems = {
 };
 
 export let galacticMarket = {
-    version: 0.81,
+    version: 0.82,
     resources: {
         hydrogen: { 
             name: "Hydrogen", 
@@ -1119,7 +1119,17 @@ export let galacticMarket = {
 };
 
 export let ascendencyBuffs = {
-    version: 0.81,
+    version: 0.82,
+    "littleBagOfHydrogen": {
+        name: "Little Bag Of Hydrogen",
+        description: "buffLittleBagOfHydrogenRow",
+        rebuyable: false,
+        rebuyableIncreaseMultiple: 1,
+        baseCostAp: 3,
+        effectCategoryMagnitude: 1,
+        boughtYet: 0,
+        timesRebuyable: 1
+    },
     "nonExhaustiveResources": {
         name: "Non Exhaustive Resources",
         description: "buffNonExhaustiveResourcesRow",
@@ -3149,7 +3159,11 @@ export function resetResourceDataObjectOnRebirthAndAddApAndPermanentBuffsBack() 
         }
     });
 
-    Object.assign(resourceData, resourceDataRebirthCopy);
+    const freshRebirthState = structuredClone(resourceDataRebirthCopy);
+    Object.keys(resourceData).forEach((key) => {
+        delete resourceData[key];
+    });
+    Object.assign(resourceData, freshRebirthState);
     setResourceDataObject(blackHoleResearchDone, 'blackHole', ['blackHoleResearchDone']);
     setResourceDataObject(blackHolePower, 'blackHole', ['power']);
     setResourceDataObject(blackHoleDuration, 'blackHole', ['duration']);

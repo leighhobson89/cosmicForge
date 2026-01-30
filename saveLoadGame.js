@@ -666,6 +666,23 @@ export function migrateResourceData(saveData, objectType) {
             saveData.version = 0.81;
         }
 
+        if (saveData.version < 0.82) {
+            if (objectType === 'ascendencyBuffsData') {
+                saveData.littleBagOfHydrogen = {
+                    name: "Little Bag Of Hydrogen",
+                    description: "buffLittleBagOfHydrogenRow",
+                    rebuyable: false,
+                    rebuyableIncreaseMultiple: 1,
+                    baseCostAp: 3,
+                    effectCategoryMagnitude: 1,
+                    boughtYet: 0,
+                    timesRebuyable: 1
+                };
+            }
+
+            saveData.version = 0.82;
+        }
+
         saveData.version += 0.001;
     }
 

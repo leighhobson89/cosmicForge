@@ -54,6 +54,7 @@ import {
     getBlackHoleRechargeMultiplier,
     setBlackHoleRechargeMultiplier
 } from './resourceDataObject.js';
+import { sfxPlayer } from './audioManager.js';
 import { capitaliseString } from './utilityFunctions.js';
 import { modalRebirthText, modalRebirthHeader } from './descriptions.js';
 import { timerManagerDelta } from './timerManagerDelta.js';
@@ -668,6 +669,8 @@ export function drawTab7Content(heading, optionContentElement) {
 
             if (getBlackHoleChargeReady()) {
                 setBlackHoleChargeReady(false);
+
+                sfxPlayer.playAudio('blackHoleActivated', false);
 
                 const progressBar = document.getElementById('blackHoleChargeProgressBar');
                 if (progressBar) {
