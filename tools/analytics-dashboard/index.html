@@ -108,11 +108,35 @@
           </table>
         </div>
 
+        <div class="card span-6">
+          <h2>Space Actions</h2>
+          <table>
+            <thead><tr><th>Action</th><th>Count</th></tr></thead>
+            <tbody id="spaceActions"></tbody>
+          </table>
+        </div>
+
+        <div class="card span-6">
+          <h2>Diplomacy Choices</h2>
+          <table>
+            <thead><tr><th>Choice</th><th>Count</th></tr></thead>
+            <tbody id="diplomacyChoices"></tbody>
+          </table>
+        </div>
+
         <div class="card span-12">
           <h2>Settings Usage (Unique Clients from Snapshots)</h2>
           <table>
             <thead><tr><th>Setting:State</th><th>Clients</th></tr></thead>
             <tbody id="settingsUsage"></tbody>
+          </table>
+        </div>
+
+        <div class="card span-12">
+          <h2>Triggered Events</h2>
+          <table>
+            <thead><tr><th>Event</th><th>Triggered</th></tr></thead>
+            <tbody id="triggeredEvents"></tbody>
           </table>
         </div>
 
@@ -214,13 +238,14 @@
         try {
           if (currentAbortController) currentAbortController.abort();
           currentAbortController = new AbortController();
-          const res = await fetch(`/api/report?days=${days}`, { signal: currentAbortController.signal });
+          const requestedLimit = 50000;
+          const res = await fetch(`/api/report?days=${days}&limit=${requestedLimit}`, { signal: currentAbortController.signal });
           const json = await res.json();
           if (!res.ok) {
             throw new Error(json?.error || 'Request failed');
           }
 
-          const { report, since, limit } = json;
+          const { report, since, limit, fetched, pages } = json;
 
           $('kpiEvents').textContent = fmtInt(report.total_events);
           $('kpiSessions').textContent = fmtInt(report.unique_sessions);
@@ -232,7 +257,7 @@
           $('kpiLegendaryAsteroidsTotal').textContent = fmtInt(report.legendary_asteroid_discoveries);
           $('kpiLegendaryAsteroidsUnique').textContent = fmtInt(report.legendary_asteroid_unique_clients);
 
-          $('meta').textContent = `since=${since} limit=${limit}`;
+          $('meta').textContent = `since=${since} limit=${limit} fetched=${fetched ?? '-'} pages=${pages ?? '-'}`;
 
           renderRows('topViews', report.top_views, fmtInt);
           renderRows('topDurations', report.top_view_durations, fmtDuration);
@@ -244,7 +269,15 @@
           renderRows('philosophyRepeatables', report.philosophy_repeatables_researched, fmtInt);
 
           renderRows('themeSelections', report.theme_selected_counts, fmtInt);
-          renderRows('settingsUsage', report.settings_snapshot_unique_clients, fmtInt);
+          renderRows('settingsUsage', report.settings_snapshot_unique_clients_complete, fmtInt);
+
+          renderRows('spaceActions', [
+            { key: 'Starship launched', value: report.starship_launched },
+            { key: 'Settle system', value: report.settle_system },
+          ], fmtInt);
+
+          renderRows('diplomacyChoices', report.diplomacy_choice_counts, fmtInt);
+          renderRows('triggeredEvents', report.random_event_triggered_counts, fmtInt);
 
           renderRows('onboarding', [
             { key: 'Enter onboarding (YES)', value: report.onboarding_prompt_yes },

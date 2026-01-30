@@ -82,7 +82,37 @@ function sumTop(map, limit) {
   return rows.slice(0, limit);
 }
 
-function aggregate(events) {
+let cachedRandomEventIds = null;
+
+async function getAllRandomEventIds(repoRoot) {
+  if (Array.isArray(cachedRandomEventIds)) return cachedRandomEventIds;
+  try {
+    const eventsPath = path.join(repoRoot, 'events.js');
+    const src = await fs.readFile(eventsPath, 'utf-8');
+
+    const match = src.match(/const\s+randomEventDefinitions\s*=\s*\{([\s\S]*?)^\};/m);
+    if (!match) {
+      cachedRandomEventIds = [];
+      return cachedRandomEventIds;
+    }
+
+    const block = match[1];
+    const ids = [];
+    const re = /^\s*([a-zA-Z0-9_]+)\s*:\s*\{/gm;
+    let m;
+    while ((m = re.exec(block)) !== null) {
+      ids.push(m[1]);
+    }
+
+    cachedRandomEventIds = Array.from(new Set(ids));
+    return cachedRandomEventIds;
+  } catch {
+    cachedRandomEventIds = [];
+    return cachedRandomEventIds;
+  }
+}
+
+function aggregate(events, options = {}) {
   const viewCounts = new Map();
   const viewDurationMs = new Map();
   const clickCounts = new Map();
@@ -105,6 +135,11 @@ function aggregate(events) {
   const themeSelectionClientsById = new Map();
 
   const settingsSnapshotClientsByKeyValue = new Map();
+
+  const diplomacyChoiceCounts = new Map();
+  const randomEventTriggeredCounts = new Map();
+  let starshipLaunched = 0;
+  let settleSystem = 0;
 
   const philosophyClientsById = new Map();
   const ascendencyPerkPurchaseCounts = new Map();
@@ -221,6 +256,24 @@ function aggregate(events) {
       }
     }
 
+    if (e.event_name === 'starship_launched') {
+      starshipLaunched += 1;
+    }
+
+    if (e.event_name === 'diplomacy_choice') {
+      const choice = normaliseKey(payload.choice);
+      diplomacyChoiceCounts.set(choice, (diplomacyChoiceCounts.get(choice) || 0) + 1);
+    }
+
+    if (e.event_name === 'settle_system') {
+      settleSystem += 1;
+    }
+
+    if (e.event_name === 'random_event_triggered') {
+      const eventId = normaliseKey(payload.event_id);
+      randomEventTriggeredCounts.set(eventId, (randomEventTriggeredCounts.get(eventId) || 0) + 1);
+    }
+
     if (e.event_name === 'black_hole_discovered') {
       if (e.client_id) {
         blackHoleDiscoveredClients.add(e.client_id);
@@ -245,6 +298,33 @@ function aggregate(events) {
     }
   }
 
+  const settingsKeys = [
+    'background_audio:on',
+    'background_audio:off',
+    'sfx:on',
+    'sfx:off',
+    'custom_pointer:on',
+    'custom_pointer:off',
+    'mouse_trail:on',
+    'mouse_trail:off',
+  ];
+
+  const settingsSnapshotUniqueClientsComplete = settingsKeys.map((key) => ({
+    key,
+    value: settingsSnapshotClientsByKeyValue.has(key) ? settingsSnapshotClientsByKeyValue.get(key).size : 0,
+  }));
+
+  const diplomacyChoiceCountsComplete = ['bully', 'passive', 'harmony', 'vassalize', 'conquest'].map((c) => ({
+    key: c,
+    value: diplomacyChoiceCounts.get(c) || 0,
+  }));
+
+  const triggeredIds = Array.isArray(options.randomEventIds) ? options.randomEventIds : [];
+  const triggeredEventsComplete = triggeredIds.map((id) => ({
+    key: id,
+    value: randomEventTriggeredCounts.get(id) || 0,
+  }));
+
   return {
     total_events: events.length,
     unique_sessions: sessions.size,
@@ -253,6 +333,9 @@ function aggregate(events) {
     onboarding_prompt_no: onboardingPromptNo,
     onboarding_exit: onboardingExit,
     rocket_part_build_counts: takeTop(rocketPartBuildCounts, 10),
+    starship_launched: starshipLaunched,
+    settle_system: settleSystem,
+    diplomacy_choice_counts: diplomacyChoiceCountsComplete,
     miaplacidus_reached_count: miaplacidusReached,
     black_hole_discovered_unique_clients: blackHoleDiscoveredClients.size,
     black_hole_researched_unique_clients: blackHoleResearchedClients.size,
@@ -267,6 +350,8 @@ function aggregate(events) {
       new Map(Array.from(settingsSnapshotClientsByKeyValue.entries()).map(([k, set]) => [k, set.size])),
       50
     ),
+    settings_snapshot_unique_clients_complete: settingsSnapshotUniqueClientsComplete,
+    random_event_triggered_counts: triggeredEventsComplete,
     philosophy_selected_unique_clients: takeTop(
       new Map(Array.from(philosophyClientsById.entries()).map(([k, set]) => [k, set.size])),
       50
@@ -282,13 +367,39 @@ function aggregate(events) {
 }
 
 async function getEvents({ sinceIso, limit }) {
-  const params = new URLSearchParams();
-  params.set('select', 'event_name,event_time,client_id,session_id,payload');
-  params.set('event_time', `gte.${sinceIso}`);
-  params.set('order', 'event_time.desc');
-  params.set('limit', String(limit));
+  const pageSize = 1000;
+  const out = [];
+  let offset = 0;
+  let pages = 0;
 
-  return await supabaseFetch(TABLE, params);
+  while (out.length < limit) {
+    const remaining = limit - out.length;
+    const batchLimit = Math.min(pageSize, remaining);
+
+    const params = new URLSearchParams();
+    params.set('select', 'event_name,event_time,client_id,session_id,payload');
+    params.set('event_time', `gte.${sinceIso}`);
+    params.set('order', 'event_time.desc');
+    params.set('limit', String(batchLimit));
+    params.set('offset', String(offset));
+
+    const batch = await supabaseFetch(TABLE, params);
+    pages += 1;
+
+    if (!Array.isArray(batch) || batch.length === 0) {
+      break;
+    }
+
+    out.push(...batch);
+    offset += batch.length;
+
+    if (batch.length < batchLimit) {
+      break;
+    }
+  }
+
+  out._meta = { fetched: out.length, pages };
+  return out;
 }
 
 function writeJson(res, status, value) {
@@ -311,12 +422,15 @@ const server = http.createServer(async (req, res) => {
 
       if (url.pathname === '/api/report') {
         const days = clamp(toInt(url.searchParams.get('days'), 7), 1, 365);
-        const limit = clamp(toInt(url.searchParams.get('limit'), 20000), 1, 50000);
+        const limit = clamp(toInt(url.searchParams.get('limit'), 200_000), 1, 500_000);
         const sinceIso = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 
         const events = await getEvents({ sinceIso, limit });
-        const report = aggregate(events || []);
-        writeJson(res, 200, { since: sinceIso, days, limit, report });
+        const randomEventIds = await getAllRandomEventIds(repoRoot);
+        const report = aggregate(events || [], { randomEventIds });
+        const fetched = events?._meta?.fetched ?? (Array.isArray(events) ? events.length : 0);
+        const pages = events?._meta?.pages ?? null;
+        writeJson(res, 200, { since: sinceIso, days, limit, fetched, pages, report });
         return;
       }
 

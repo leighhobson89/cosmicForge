@@ -11380,6 +11380,10 @@ export function calculateModifiedAttitude(starData) {
 }
 
 export function updateDiplomacySituation(buttonPressed, starData) {
+    trackAnalyticsEvent('diplomacy_choice', {
+        choice: buttonPressed,
+        ts: new Date().toISOString()
+    });
     switch (buttonPressed) {
         case 'bully':
             bullyEnemy(starData);
@@ -11940,6 +11944,10 @@ export function turnAround(unit) {
 }
 
 export async function settleSystemAfterBattle(accessPoint) {
+    trackAnalyticsEvent('settle_system', {
+        access_point: accessPoint,
+        ts: new Date().toISOString()
+    });
     setAchievementFlagArray('settleSystem', 'add');    
     const destinationStarKey = getDestinationStar();
     const destinationFactoryStar = getStarSystemDataObject('stars', [destinationStarKey, 'factoryStar'], true);

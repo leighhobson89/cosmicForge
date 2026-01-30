@@ -3948,6 +3948,10 @@ export function createStarDestinationRow(starData, isInteresting) {
             function() {  
                 const destinationStar = getDestinationStar();  
                 const starData = getStarSystemDataObject('stars', [destinationStar]);  
+                trackAnalyticsEvent('starship_launched', {
+                    destination_star: destinationStar,
+                    ts: new Date().toISOString()
+                }, { immediate: true, flushReason: 'starship' });
                 showNotification(`Travelling to ${capitaliseWordsWithRomanNumerals(starData.name)}`, 'info', 3000, 'special');
                 sfxPlayer.playAudio('starShipLaunch', false);
                 startTravelToDestinationStarTimer([0, 'buttonClick'], false);

@@ -116,6 +116,13 @@ export function drawTab8Content(heading, optionContentElement) {
                     setting_id: 'custom_pointer',
                     enabled: !!isEnabled
                 }, { immediate: true, flushReason: 'settings' });
+                trackAnalyticsEvent('settings_snapshot', {
+                    theme_id: getCurrentTheme(),
+                    background_audio: !!getBackgroundAudio(),
+                    sfx: !!getSfx(),
+                    custom_pointer: !!getCustomPointerEnabled(),
+                    mouse_trail: !!getMouseParticleTrailEnabled()
+                }, { immediate: true, flushReason: 'settings' });
             }, null),
             null,
             null,
@@ -144,6 +151,13 @@ export function drawTab8Content(heading, optionContentElement) {
                 trackAnalyticsEvent('settings_changed', {
                     setting_id: 'mouse_trail',
                     enabled: !!isEnabled
+                }, { immediate: true, flushReason: 'settings' });
+                trackAnalyticsEvent('settings_snapshot', {
+                    theme_id: getCurrentTheme(),
+                    background_audio: !!getBackgroundAudio(),
+                    sfx: !!getSfx(),
+                    custom_pointer: !!getCustomPointerEnabled(),
+                    mouse_trail: !!getMouseParticleTrailEnabled()
                 }, { immediate: true, flushReason: 'settings' });
             }, null),
             null,
@@ -326,6 +340,13 @@ export function drawTab8Content(heading, optionContentElement) {
                     setting_id: 'background_audio',
                     enabled: !!isEnabled
                 }, { immediate: true, flushReason: 'settings' });
+                trackAnalyticsEvent('settings_snapshot', {
+                    theme_id: getCurrentTheme(),
+                    background_audio: !!getBackgroundAudio(),
+                    sfx: !!getSfx(),
+                    custom_pointer: !!getCustomPointerEnabled(),
+                    mouse_trail: !!getMouseParticleTrailEnabled()
+                }, { immediate: true, flushReason: 'settings' });
             }, null),
             null,
             null,
@@ -359,6 +380,13 @@ export function drawTab8Content(heading, optionContentElement) {
                 trackAnalyticsEvent('settings_changed', {
                     setting_id: 'sfx',
                     enabled: !!isEnabled
+                }, { immediate: true, flushReason: 'settings' });
+                trackAnalyticsEvent('settings_snapshot', {
+                    theme_id: getCurrentTheme(),
+                    background_audio: !!getBackgroundAudio(),
+                    sfx: !!getSfx(),
+                    custom_pointer: !!getCustomPointerEnabled(),
+                    mouse_trail: !!getMouseParticleTrailEnabled()
                 }, { immediate: true, flushReason: 'settings' });
             }, null),
             null,

@@ -58,6 +58,7 @@ import {
 } from "./resourceDataObject.js";
 import { sfxPlayer } from "./audioManager.js";
 import { timerManagerDelta } from "./timerManagerDelta.js";
+import { trackAnalyticsEvent } from "./analytics.js";
 import { randomEventTriggerDescriptions } from "./descriptions.js";
 import { forceWeatherCycle, setFleetPricesAfterRepeatables, setStarshipPartPricesAfterRepeatables, setWeatherCycleSecondsRemaining } from "./game.js";
 
@@ -1086,6 +1087,12 @@ function attemptTriggerAtCheckpoint(checkpointType) {
     if (!triggerResult) {
         return false;
     }
+
+    trackAnalyticsEvent('random_event_triggered', {
+        event_id: picked,
+        checkpoint: checkpointType,
+        ts: new Date().toISOString()
+    }, { immediate: true, flushReason: 'random_event' });
 
     const nextProbability = Math.max(0.01, baseP * PROBABILITY_DECAY_ON_TRIGGER);
     setEventState(picked, {
