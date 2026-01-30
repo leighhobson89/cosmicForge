@@ -558,6 +558,17 @@ function grantNonExhaustiveResourcesAfterRebirth() {
     });
 }
 
+function grantLittleBagOfHydrogenAfterRebirth() {
+    const tier1PriceRaw = getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier1', 'price'], true);
+    const tier1Price = Number(tier1PriceRaw);
+    if (!Number.isFinite(tier1Price) || tier1Price <= 0) {
+        return;
+    }
+
+    const currentQuantity = Number(getResourceDataObject('resources', ['hydrogen', 'quantity'], true)) || 0;
+    setResourceDataObject(currentQuantity + tier1Price, 'resources', ['hydrogen', 'quantity']);
+}
+
 export function timeWarp(lengthOfTimeInMs, multiplyRateBy) {
     //console.log('timeWarp invoked with:', lengthOfTimeInMs, multiplyRateBy);
     if (typeof multiplyRateBy === 'number' && Number.isFinite(multiplyRateBy) && multiplyRateBy > 10) {
@@ -12178,6 +12189,11 @@ export function rebirth() {
 
     if (hasNonExhaustivePerk) {
         grantNonExhaustiveResourcesAfterRebirth();
+    }
+
+    const hasLittleBagOfHydrogenPerk = getAscendencyBuffDataObject()?.littleBagOfHydrogen?.boughtYet > 0;
+    if (hasLittleBagOfHydrogenPerk && !hasNonExhaustivePerk) {
+        grantLittleBagOfHydrogenAfterRebirth();
     }
 
     if (getBlackHoleResearchDone() && !getCurrentlyTimeWarpingBlackHole() && !getCurrentlyChargingBlackHole() && !getBlackHoleChargeReady()) {

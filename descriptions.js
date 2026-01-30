@@ -462,7 +462,7 @@ export function initialiseDescriptions() {
     };
 
     rocketNames = {
-        version: 0.81,
+        version: 0.82,
         rocketDescription: "Build the launch pad to launch built rockets and mine asteroids for Antimatter.",
         [getRocketUserName('rocket1').toLowerCase()]: "Build the launch pad to launch built rockets and mine asteroids for Antimatter.",
         [getRocketUserName('rocket2').toLowerCase()]: "Build the launch pad to launch built rockets and mine asteroids for Antimatter.",
@@ -1661,6 +1661,11 @@ export function initialiseDescriptions() {
         },
         receptionStatusRow: {
             content1: "You can communicate with civilized species, unless they are Belligerent towards you.",
+            content2: "",
+            updateAt: ""
+        },
+        buffLittleBagOfHydrogenRow: {
+            content1: "On Rebirth, grants enough Hydrogen to immediately buy 1 Tier 1 Auto Buyer.",
             content2: "",
             updateAt: ""
         },
