@@ -431,6 +431,7 @@ import {
     resetTab5ClassesRebirth,
     resetTab6ClassesRebirth,
     updateAttentionIndicators,
+    clearAllAttentionIndicators,
     appendAttentionIndicator,
     getStarDataAndDistancesToAllStarsFromSettledStar,
     callPopupModal,
@@ -12172,6 +12173,8 @@ export function addPermanentBuffsBackInAfterRebirth() {
 
 export function rebirth() {
     setAchievementFlagArray('rebirth', 'add');
+
+    clearAllAttentionIndicators();
 
     const homeStarLower = getHomeStarName()?.toLowerCase();
     const currentStarLower = getCurrentStarSystem()?.toLowerCase();

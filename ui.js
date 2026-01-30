@@ -2762,6 +2762,11 @@ export function removeAttentionIndicator(element) {
       icon.remove();
     }
   }
+
+export function clearAllAttentionIndicators() {
+    const indicators = document.querySelectorAll('.attention-indicator');
+    indicators.forEach(indicator => indicator.remove());
+}
   
 
 export function createHtmlTableAchievementsGrid(id, classList = [], achievementsData = []) {
