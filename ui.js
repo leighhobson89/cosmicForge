@@ -10012,6 +10012,10 @@ export function playWinCinematic(durationMs = 14000) {
 
     setAchievementFlagArray('completeGame', 'add');
 
+    trackAnalyticsEvent('miaplacidus_settled', {
+        ts: new Date().toISOString()
+    }, { immediate: true, flushReason: 'miaplacidus' });
+
     activeWinCinematicPromise = new Promise((resolve) => {
         const existing = document.getElementById('winCinematicOverlay');
         if (existing) {

@@ -40,7 +40,6 @@
           <div class="kpi"><div class="label">Events</div><div class="value" id="kpiEvents">-</div></div>
           <div class="kpi"><div class="label">Unique Sessions</div><div class="value" id="kpiSessions">-</div></div>
           <div class="kpi"><div class="label">Unique Clients</div><div class="value" id="kpiClients">-</div></div>
-          <div class="kpi"><div class="label">Miaplacidus Reached</div><div class="value" id="kpiMiaplacidus">-</div></div>
           <div class="kpi"><div class="label">Black Hole Discovered (Clients)</div><div class="value" id="kpiBlackHoleDiscovered">-</div></div>
           <div class="kpi"><div class="label">Black Hole Researched (Unique Clients)</div><div class="value" id="kpiBlackHoleResearched">-</div></div>
           <div class="kpi"><div class="label">Legendary Asteroids (Total)</div><div class="value" id="kpiLegendaryAsteroidsTotal">-</div></div>
@@ -59,6 +58,14 @@
       </div>
 
       <div class="grid">
+        <div class="card span-6">
+          <h2>Miaplacidus &amp; Megastructures</h2>
+          <table>
+            <thead><tr><th>Milestone</th><th>Count</th></tr></thead>
+            <tbody id="miaplacidusMegastructures"></tbody>
+          </table>
+        </div>
+
         <div class="card span-6">
           <h2>Top Views (ui_view)</h2>
           <table>
@@ -256,7 +263,6 @@
           $('kpiEvents').textContent = fmtInt(report.total_events);
           $('kpiSessions').textContent = fmtInt(report.unique_sessions);
           $('kpiClients').textContent = fmtInt(report.unique_clients);
-          $('kpiMiaplacidus').textContent = fmtInt(report.miaplacidus_reached_count);
           $('kpiBlackHoleDiscovered').textContent = fmtInt(report.black_hole_discovered_unique_clients);
           $('kpiBlackHoleResearched').textContent = fmtInt(report.black_hole_researched_unique_clients);
 
@@ -278,6 +284,17 @@
 
           renderRows('themeSelections', report.theme_selected_counts, fmtInt);
           renderRows('settingsUsage', report.settings_snapshot_unique_clients_complete, fmtInt);
+
+          const captureMap = new Map((report.megastructure_captured_counts || []).map((r) => [String(r.key), r.value]));
+          renderRows('miaplacidusMegastructures', [
+            { key: 'Miaplacidus reached', value: report.miaplacidus_reached_count },
+            { key: 'Megastructure 1 captured', value: captureMap.get('1') || 0 },
+            { key: 'Megastructure 2 captured', value: captureMap.get('2') || 0 },
+            { key: 'Megastructure 3 captured', value: captureMap.get('3') || 0 },
+            { key: 'Megastructure 4 captured', value: captureMap.get('4') || 0 },
+            { key: 'Miaplacidus force field down', value: report.miaplacidus_forcefield_down_count },
+            { key: 'Miaplacidus settled (win cinematic)', value: report.miaplacidus_settled_count },
+          ], fmtInt);
 
           renderRows('spaceActions', [
             { key: 'Starship launched', value: report.starship_launched },

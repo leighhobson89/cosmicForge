@@ -12473,6 +12473,11 @@ export function applyMegaStructureBonuses(megastructure, tech) {
                     setPermanentAntimatterUnlock(true);
                     const newMiaplacidusMilestoneLevel = getMiaplacidusMilestoneLevel() + 1;
                     setMiaplacidusMilestoneLevel(newMiaplacidusMilestoneLevel);
+                    if (newMiaplacidusMilestoneLevel === 4) {
+                        trackAnalyticsEvent('miaplacidus_forcefield_down', {
+                            ts: new Date().toISOString()
+                        }, { immediate: true, flushReason: 'miaplacidus' });
+                    }
                     if (newMiaplacidusMilestoneLevel >= 4) {
                         setAchievementFlagArray('bringDownMiaplacideanForceField', 'add');
                     }
@@ -12494,6 +12499,11 @@ export function applyMegaStructureBonuses(megastructure, tech) {
                     setMegaStructureTechsResearched([1,5]);
                     setPowerOnOff(true);
 
+                    trackAnalyticsEvent('megastructure_captured', {
+                        megastructure_id: 1,
+                        ts: new Date().toISOString()
+                    }, { immediate: true, flushReason: 'megastructure' });
+
                     sfxPlayer.playAudio('megastructureCaptured', false);
                     return;
             }
@@ -12511,6 +12521,11 @@ export function applyMegaStructureBonuses(megastructure, tech) {
                     setPermanentAntimatterUnlock(true);
                     const newMiaplacidusMilestoneLevel = getMiaplacidusMilestoneLevel() + 1;
                     setMiaplacidusMilestoneLevel(newMiaplacidusMilestoneLevel);
+                    if (newMiaplacidusMilestoneLevel === 4) {
+                        trackAnalyticsEvent('miaplacidus_forcefield_down', {
+                            ts: new Date().toISOString()
+                        }, { immediate: true, flushReason: 'miaplacidus' });
+                    }
                     if (newMiaplacidusMilestoneLevel >= 4) {
                         setAchievementFlagArray('bringDownMiaplacideanForceField', 'add');
                     }
@@ -12527,6 +12542,11 @@ export function applyMegaStructureBonuses(megastructure, tech) {
                     return;
                 case 5:
                     setMegaStructureTechsResearched([2,5]);
+
+                    trackAnalyticsEvent('megastructure_captured', {
+                        megastructure_id: 2,
+                        ts: new Date().toISOString()
+                    }, { immediate: true, flushReason: 'megastructure' });
 
                     sfxPlayer.playAudio('megastructureCaptured', false);
                     return;
@@ -12547,6 +12567,11 @@ export function applyMegaStructureBonuses(megastructure, tech) {
                     setPermanentAntimatterUnlock(true);
                     const newMiaplacidusMilestoneLevel = getMiaplacidusMilestoneLevel() + 1;
                     setMiaplacidusMilestoneLevel(newMiaplacidusMilestoneLevel);
+                    if (newMiaplacidusMilestoneLevel === 4) {
+                        trackAnalyticsEvent('miaplacidus_forcefield_down', {
+                            ts: new Date().toISOString()
+                        }, { immediate: true, flushReason: 'miaplacidus' });
+                    }
                     if (newMiaplacidusMilestoneLevel >= 4) {
                         setAchievementFlagArray('bringDownMiaplacideanForceField', 'add');
                     }
@@ -12567,6 +12592,11 @@ export function applyMegaStructureBonuses(megastructure, tech) {
                     setMegaStructureResourceBonus(true);
                     setMegaStructureTechsResearched([3, 5]);
 
+                    trackAnalyticsEvent('megastructure_captured', {
+                        megastructure_id: 3,
+                        ts: new Date().toISOString()
+                    }, { immediate: true, flushReason: 'megastructure' });
+
                     sfxPlayer.playAudio('megastructureCaptured', false);
                     return;
             }
@@ -12585,6 +12615,11 @@ export function applyMegaStructureBonuses(megastructure, tech) {
                     setPermanentAntimatterUnlock(true);
                     const newMiaplacidusMilestoneLevel = getMiaplacidusMilestoneLevel() + 1;
                     setMiaplacidusMilestoneLevel(newMiaplacidusMilestoneLevel);
+                    if (newMiaplacidusMilestoneLevel === 4) {
+                        trackAnalyticsEvent('miaplacidus_forcefield_down', {
+                            ts: new Date().toISOString()
+                        }, { immediate: true, flushReason: 'miaplacidus' });
+                    }
                     if (newMiaplacidusMilestoneLevel >= 4) {
                         setAchievementFlagArray('bringDownMiaplacideanForceField', 'add');
                     }
@@ -12604,6 +12639,11 @@ export function applyMegaStructureBonuses(megastructure, tech) {
                     addStorageCapacityAndCompoundsToAllResources(10000000000);
                     setStorageAdderBonus(true);
                     setMegaStructureTechsResearched([4,5]);
+
+                    trackAnalyticsEvent('megastructure_captured', {
+                        megastructure_id: 4,
+                        ts: new Date().toISOString()
+                    }, { immediate: true, flushReason: 'megastructure' });
 
                     sfxPlayer.playAudio('megastructureCaptured', false);
                     return;

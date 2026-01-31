@@ -149,6 +149,12 @@ function aggregate(events, options = {}) {
 
   let miaplacidusReached = 0;
 
+  const megastructureCapturedCounts = new Map();
+  let miaplacidusForcefieldDown = 0;
+  const miaplacidusForcefieldDownClients = new Set();
+  let miaplacidusSettled = 0;
+  const miaplacidusSettledClients = new Set();
+
   const sessions = new Set();
   const clients = new Set();
 
@@ -303,6 +309,23 @@ function aggregate(events, options = {}) {
         miaplacidusReached += 1;
       }
     }
+
+    if (e.event_name === 'megastructure_captured') {
+      const id = Number(payload.megastructure_id);
+      if (Number.isFinite(id) && id >= 1 && id <= 4) {
+        megastructureCapturedCounts.set(String(id), (megastructureCapturedCounts.get(String(id)) || 0) + 1);
+      }
+    }
+
+    if (e.event_name === 'miaplacidus_forcefield_down') {
+      miaplacidusForcefieldDown += 1;
+      if (e.client_id) miaplacidusForcefieldDownClients.add(e.client_id);
+    }
+
+    if (e.event_name === 'miaplacidus_settled') {
+      miaplacidusSettled += 1;
+      if (e.client_id) miaplacidusSettledClients.add(e.client_id);
+    }
   }
 
   const settingsKeys = [
@@ -345,6 +368,11 @@ function aggregate(events, options = {}) {
     settle_system: settleSystem,
     diplomacy_choice_counts: diplomacyChoiceCountsComplete,
     miaplacidus_reached_count: miaplacidusReached,
+    megastructure_captured_counts: ['1', '2', '3', '4'].map((k) => ({ key: k, value: megastructureCapturedCounts.get(k) || 0 })),
+    miaplacidus_forcefield_down_count: miaplacidusForcefieldDown,
+    miaplacidus_forcefield_down_unique_clients: miaplacidusForcefieldDownClients.size,
+    miaplacidus_settled_count: miaplacidusSettled,
+    miaplacidus_settled_unique_clients: miaplacidusSettledClients.size,
     black_hole_discovered_unique_clients: blackHoleDiscoveredClients.size,
     black_hole_researched_unique_clients: blackHoleResearchedClients.size,
     legendary_asteroid_discoveries: legendaryAsteroidDiscoveries,
@@ -501,6 +529,12 @@ const server = http.createServer(async (req, res) => {
         return;
       }
 
+      if (url.pathname === '/api/random-event-ids') {
+        const ids = await getAllRandomEventIds(repoRoot);
+        writeJson(res, 200, { ids });
+        return;
+      }
+
       writeJson(res, 404, { error: 'Not found' });
       return;
     }
@@ -526,5 +560,7 @@ const server = http.createServer(async (req, res) => {
 server.listen(0, '127.0.0.1', () => {
   const addr = server.address();
   const port = typeof addr === 'object' && addr ? addr.port : 0;
-  console.log(`Analytics Dashboard running at http://127.0.0.1:${port}/`);
+  console.log(`📊 Cosmic Forge Analytics Dashboard`);
+  console.log(`🌐 Normal dashboard: http://127.0.0.1:${port}`);
+  console.log(`🔁 Persistent (all‑time) dashboard: http://127.0.0.1:${port}/tools/analytics-dashboard/persistent.html`);
 });
