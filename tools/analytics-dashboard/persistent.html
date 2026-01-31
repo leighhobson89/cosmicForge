@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Cosmic Forge Analytics (Persistent)</title>
+    <style>
+      :root {
+        --bg: #0b1020;
+        --card: #111a33;
+        --text: #e6e9f2;
+        --muted: rgba(230, 233, 242, 0.7);
+        --border: rgba(255, 255, 255, 0.08);
+        --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji",
+          "Segoe UI Emoji";
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 18px;
+        font-family: var(--sans);
+        background: radial-gradient(1200px 800px at 20% 0%, rgba(86, 136, 255, 0.15), transparent 60%),
+          radial-gradient(900px 600px at 80% 20%, rgba(255, 122, 214, 0.12), transparent 55%), var(--bg);
+        color: var(--text);
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      .mono {
+        font-family: var(--mono);
+        font-size: 12px;
+      }
+
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: flex-end;
+      }
+
+      button {
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--text);
+        padding: 8px 10px;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: rgba(255, 255, 255, 0.09);
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        gap: 12px;
+      }
+
+      .card {
+        grid-column: span 12;
+        border: 1px solid var(--border);
+        background: rgba(17, 26, 51, 0.7);
+        border-radius: 12px;
+        padding: 12px;
+        overflow: hidden;
+      }
+
+      .span-6 {
+        grid-column: span 6;
+      }
+
+      .span-4 {
+        grid-column: span 4;
+      }
+
+      .span-8 {
+        grid-column: span 8;
+      }
+
+      @media (max-width: 1100px) {
+        .span-6,
+        .span-4,
+        .span-8 {
+          grid-column: span 12;
+        }
+      }
+
+      h2 {
+        margin: 0 0 10px;
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .kpis {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      @media (max-width: 1100px) {
+        .kpis {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      .kpi {
+        border: 1px solid var(--border);
+        background: rgba(0, 0, 0, 0.15);
+        border-radius: 10px;
+        padding: 10px;
+      }
+
+      .kpi .label {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .kpi .value {
+        font-size: 20px;
+        font-weight: 800;
+        margin-top: 4px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        text-align: left;
+        padding: 7px 8px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        font-size: 13px;
+        vertical-align: top;
+      }
+
+      th {
+        color: var(--muted);
+        font-weight: 700;
+        font-size: 12px;
+      }
+
+      .row-right {
+        text-align: right;
+      }
+
+      .notice {
+        padding: 10px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.12);
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1>Cosmic Forge Analytics (Persistent)</h1>
+        <div class="muted" style="margin-top: 6px">
+          This page keeps an <b>all-time local rollup</b> in your browser so totals survive Supabase retention.
+        </div>
+        <div class="mono muted" id="meta" style="margin-top: 8px"></div>
+      </div>
+      <div class="toolbar">
+        <button id="btnRefresh">Refresh now</button>
+        <button id="btnReset">Reset local totals</button>
+        <button id="btnExport">Export JSON</button>
+        <button id="btnImport">Import JSON</button>
+      </div>
+    </header>
+
+    <div class="grid">
+      <div class="card">
+        <h2>All-time Summary</h2>
+        <div class="kpis">
+          <div class="kpi"><div class="label">Events (all-time ingested)</div><div class="value" id="kpiEvents">-</div></div>
+          <div class="kpi"><div class="label">Unique Sessions (all-time)</div><div class="value" id="kpiSessions">-</div></div>
+          <div class="kpi"><div class="label">Unique Clients (all-time)</div><div class="value" id="kpiClients">-</div></div>
+          <div class="kpi"><div class="label">Pioneers Seen</div><div class="value" id="kpiPioneers">-</div></div>
+        </div>
+      </div>
+
+      <div class="card span-6">
+        <h2>Pioneer Playtime (All-time Active)</h2>
+        <table>
+          <thead><tr><th>Pioneer</th><th class="row-right">Total Active Time</th></tr></thead>
+          <tbody id="pioneerPlaytime"></tbody>
+        </table>
+      </div>
+
+      <div class="card span-6">
+        <h2>Space + Diplomacy (All-time)</h2>
+        <table>
+          <thead><tr><th>Metric</th><th class="row-right">Count</th></tr></thead>
+          <tbody id="spaceDiplomacy"></tbody>
+        </table>
+      </div>
+
+      <div class="card span-12">
+        <h2>Triggered Events (All-time)</h2>
+        <div class="notice muted">
+          This is based on ingested <span class="mono">random_event_triggered</span> events. Rows appear once an event id is first seen.
+          (If you want a full zero-filled list, we can additionally fetch definitions from <span class="mono">/api/report</span>.)
+        </div>
+        <table style="margin-top: 10px">
+          <thead><tr><th>Event</th><th class="row-right">Triggered</th></tr></thead>
+          <tbody id="triggeredEvents"></tbody>
+        </table>
+      </div>
+
+      <div class="card span-12">
+        <h2>Settings Usage (All-time Unique Clients)</h2>
+        <table>
+          <thead><tr><th>Setting:State</th><th class="row-right">Clients</th></tr></thead>
+          <tbody id="settingsUsage"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <input id="fileImport" type="file" accept="application/json" style="display:none" />
+
+    <script type="module">
+      const $ = (id) => document.getElementById(id);
+
+      const STORAGE_KEY = 'cf_analytics_persistent_rollup_v1';
+
+      function safeParse(value, fallback) {
+        try {
+          return JSON.parse(value);
+        } catch {
+          return fallback;
+        }
+      }
+
+      function nowIso() {
+        return new Date().toISOString();
+      }
+
+      function fmtInt(n) {
+        return typeof n === 'number' && Number.isFinite(n) ? n.toLocaleString() : '-';
+      }
+
+      function fmtDuration(ms) {
+        if (typeof ms !== 'number' || !Number.isFinite(ms)) return '-';
+        const totalSeconds = Math.floor(ms / 1000);
+        const s = totalSeconds % 60;
+        const totalMinutes = Math.floor(totalSeconds / 60);
+        const m = totalMinutes % 60;
+        const h = Math.floor(totalMinutes / 60);
+        if (h > 0) return `${h}h ${m}m ${s}s`;
+        if (m > 0) return `${m}m ${s}s`;
+        return `${s}s`;
+      }
+
+      function newRollup() {
+        return {
+          version: 1,
+          createdAt: nowIso(),
+          updatedAt: nowIso(),
+          cursorAfterIso: null,
+
+          // Sets
+          uniqueSessions: {},
+          uniqueClients: {},
+          pioneersSeen: {},
+
+          // Totals
+          totalEvents: 0,
+
+          // Playtime
+          pioneerPlaytimeMs: {},
+
+          // Counts
+          starshipLaunched: 0,
+          settleSystem: 0,
+          diplomacyChoiceCounts: {},
+          triggeredEventCounts: {},
+
+          // Settings unique clients snapshot
+          settingsSnapshotClientsByKeyValue: {},
+        };
+      }
+
+      function loadRollup() {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        const parsed = safeParse(raw, null);
+        if (!parsed || typeof parsed !== 'object') return newRollup();
+        return { ...newRollup(), ...parsed };
+      }
+
+      function saveRollup(rollup) {
+        rollup.updatedAt = nowIso();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(rollup));
+      }
+
+      function addToSetObject(setObj, key) {
+        if (!key) return;
+        setObj[key] = true;
+      }
+
+      function inc(mapObj, key, amount = 1) {
+        if (!key) return;
+        mapObj[key] = (mapObj[key] || 0) + amount;
+      }
+
+      function normKey(value, fallback = null) {
+        const s = String(value ?? '').trim();
+        return s.length ? s : fallback;
+      }
+
+      function applyEvent(rollup, e) {
+        rollup.totalEvents += 1;
+
+        if (e.session_id) addToSetObject(rollup.uniqueSessions, e.session_id);
+        if (e.client_id) addToSetObject(rollup.uniqueClients, e.client_id);
+        if (e.pioneer_name) addToSetObject(rollup.pioneersSeen, e.pioneer_name);
+
+        const payload = e.payload && typeof e.payload === 'object' ? e.payload : {};
+
+        if (e.event_name === 'ui_view_duration') {
+          const ms = typeof payload.duration_ms === 'number' ? payload.duration_ms : 0;
+          const pioneer = normKey(e.pioneer_name, null);
+          if (pioneer) {
+            rollup.pioneerPlaytimeMs[pioneer] = (rollup.pioneerPlaytimeMs[pioneer] || 0) + Math.max(0, ms);
+          }
+        }
+
+        if (e.event_name === 'starship_launched') {
+          rollup.starshipLaunched += 1;
+        }
+
+        if (e.event_name === 'settle_system') {
+          rollup.settleSystem += 1;
+        }
+
+        if (e.event_name === 'diplomacy_choice') {
+          const choice = normKey(payload.choice, 'unknown');
+          inc(rollup.diplomacyChoiceCounts, choice, 1);
+        }
+
+        if (e.event_name === 'random_event_triggered') {
+          const eventId = normKey(payload.event_id, 'unknown');
+          inc(rollup.triggeredEventCounts, eventId, 1);
+        }
+
+        if (e.event_name === 'settings_snapshot') {
+          const pairs = [
+            ['background_audio', !!payload.background_audio],
+            ['sfx', !!payload.sfx],
+            ['custom_pointer', !!payload.custom_pointer],
+            ['mouse_trail', !!payload.mouse_trail],
+          ];
+
+          for (const [settingId, enabled] of pairs) {
+            const k = `${settingId}:${enabled ? 'on' : 'off'}`;
+            if (!rollup.settingsSnapshotClientsByKeyValue[k]) {
+              rollup.settingsSnapshotClientsByKeyValue[k] = {};
+            }
+            if (e.client_id) {
+              rollup.settingsSnapshotClientsByKeyValue[k][e.client_id] = true;
+            }
+          }
+        }
+      }
+
+      function renderRows(tbodyId, rows, formatValue) {
+        const tbody = $(tbodyId);
+        tbody.textContent = '';
+        for (const row of rows) {
+          const tr = document.createElement('tr');
+          const td1 = document.createElement('td');
+          const td2 = document.createElement('td');
+          td2.className = 'row-right';
+          td1.textContent = row.key;
+          td2.textContent = formatValue(row.value);
+          tr.appendChild(td1);
+          tr.appendChild(td2);
+          tbody.appendChild(tr);
+        }
+      }
+
+      function render(rollup) {
+        const sessions = Object.keys(rollup.uniqueSessions || {}).length;
+        const clients = Object.keys(rollup.uniqueClients || {}).length;
+        const pioneers = Object.keys(rollup.pioneersSeen || {}).length;
+
+        $('kpiEvents').textContent = fmtInt(rollup.totalEvents);
+        $('kpiSessions').textContent = fmtInt(sessions);
+        $('kpiClients').textContent = fmtInt(clients);
+        $('kpiPioneers').textContent = fmtInt(pioneers);
+
+        const metaParts = [
+          `cursorAfter=${rollup.cursorAfterIso ?? '-'}`,
+          `updatedAt=${rollup.updatedAt}`,
+        ];
+        $('meta').textContent = metaParts.join(' | ');
+
+        const playtimeRows = Object.entries(rollup.pioneerPlaytimeMs || [])
+          .map(([key, value]) => ({ key, value }))
+          .sort((a, b) => b.value - a.value)
+          .slice(0, 500);
+        renderRows('pioneerPlaytime', playtimeRows, fmtDuration);
+
+        const diplomacyRows = ['bully', 'passive', 'harmony', 'vassalize', 'conquest']
+          .map((c) => ({ key: `Diplomacy: ${c}`, value: rollup.diplomacyChoiceCounts?.[c] || 0 }));
+        const spaceRows = [
+          { key: 'Starship launched', value: rollup.starshipLaunched || 0 },
+          { key: 'Settle system', value: rollup.settleSystem || 0 },
+        ];
+        renderRows('spaceDiplomacy', [...spaceRows, ...diplomacyRows], fmtInt);
+
+        const triggeredRows = Object.entries(rollup.triggeredEventCounts || {})
+          .map(([key, value]) => ({ key, value }))
+          .sort((a, b) => b.value - a.value)
+          .slice(0, 500);
+        renderRows('triggeredEvents', triggeredRows, fmtInt);
+
+        const settingsKeys = [
+          'background_audio:on',
+          'background_audio:off',
+          'sfx:on',
+          'sfx:off',
+          'custom_pointer:on',
+          'custom_pointer:off',
+          'mouse_trail:on',
+          'mouse_trail:off',
+        ];
+        const settingsRows = settingsKeys.map((k) => ({
+          key: k,
+          value: rollup.settingsSnapshotClientsByKeyValue?.[k] ? Object.keys(rollup.settingsSnapshotClientsByKeyValue[k]).length : 0,
+        }));
+        renderRows('settingsUsage', settingsRows, fmtInt);
+      }
+
+      let rollup = loadRollup();
+      render(rollup);
+
+      let refreshInFlight = false;
+
+      async function refresh() {
+        if (refreshInFlight) return;
+        refreshInFlight = true;
+
+        try {
+          // Fetch new events since cursor
+          const after = rollup.cursorAfterIso;
+          const url = after ? `/api/events?after=${encodeURIComponent(after)}` : '/api/events';
+
+          const res = await fetch(url);
+          const json = await res.json();
+          if (!res.ok) {
+            throw new Error(json?.error || 'Failed to fetch events');
+          }
+
+          const events = Array.isArray(json.events) ? json.events : [];
+          for (const e of events) {
+            applyEvent(rollup, e);
+          }
+
+          if (json.nextCursor) {
+            rollup.cursorAfterIso = json.nextCursor;
+          }
+
+          saveRollup(rollup);
+          render(rollup);
+        } catch (err) {
+          $('meta').textContent = `ERROR: ${String(err?.message || err)} | ${$('meta').textContent}`;
+        } finally {
+          refreshInFlight = false;
+        }
+      }
+
+      $('btnRefresh').addEventListener('click', refresh);
+
+      $('btnReset').addEventListener('click', () => {
+        if (!confirm('Reset local all-time totals? This cannot be undone.')) return;
+        rollup = newRollup();
+        saveRollup(rollup);
+        render(rollup);
+      });
+
+      $('btnExport').addEventListener('click', () => {
+        const blob = new Blob([JSON.stringify(rollup, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `cosmicforge_analytics_rollup_${Date.now()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(a.href);
+      });
+
+      $('btnImport').addEventListener('click', () => {
+        $('fileImport').value = '';
+        $('fileImport').click();
+      });
+
+      $('fileImport').addEventListener('change', async (ev) => {
+        const file = ev.target.files?.[0];
+        if (!file) return;
+        const text = await file.text();
+        const parsed = safeParse(text, null);
+        if (!parsed || typeof parsed !== 'object') {
+          alert('Invalid JSON');
+          return;
+        }
+        rollup = { ...newRollup(), ...parsed };
+        saveRollup(rollup);
+        render(rollup);
+      });
+
+      // Auto refresh every 10s
+      setInterval(refresh, 10_000);
+      // Initial refresh
+      refresh();
+    </script>
+  </body>
+</html>

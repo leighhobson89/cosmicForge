@@ -421,6 +421,47 @@ function writeJson(res, status, value) {
   res.end(JSON.stringify(value));
 }
 
+async function getEventsAfter({ afterIso, limit }) {
+  const pageSize = 1000;
+  const out = [];
+  let offset = 0;
+  let pages = 0;
+
+  const effectiveLimit = Number.isFinite(limit) ? limit : Number.POSITIVE_INFINITY;
+
+  while (out.length < effectiveLimit) {
+    const remaining = effectiveLimit - out.length;
+    const batchLimit = Math.min(pageSize, remaining);
+
+    const params = new URLSearchParams();
+    params.set('select', 'event_name,event_time,client_id,session_id,pioneer_name,payload');
+    params.set('order', 'event_time.asc');
+    params.set('limit', String(batchLimit));
+    params.set('offset', String(offset));
+    if (afterIso) {
+      params.set('event_time', `gt.${afterIso}`);
+    }
+
+    const batch = await supabaseFetch(TABLE, params);
+    pages += 1;
+
+    if (!Array.isArray(batch) || batch.length === 0) {
+      break;
+    }
+
+    out.push(...batch);
+    offset += batch.length;
+
+    if (batch.length < batchLimit) {
+      break;
+    }
+  }
+
+  const nextCursor = out.length ? out[out.length - 1].event_time : afterIso ?? null;
+  out._meta = { fetched: out.length, pages, nextCursor };
+  return out;
+}
+
 const server = http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url || '/', 'http://localhost');
@@ -444,6 +485,19 @@ const server = http.createServer(async (req, res) => {
         const pages = events?._meta?.pages ?? null;
         const limitValue = events?._meta?.unlimited ? 'all' : limit;
         writeJson(res, 200, { since: sinceIso, days, limit: limitValue, fetched, pages, report });
+        return;
+      }
+
+      if (url.pathname === '/api/events') {
+        const after = url.searchParams.get('after');
+        const rawLimit = url.searchParams.get('limit');
+        const limit = rawLimit === null ? null : clamp(toInt(rawLimit, 10000), 1, 200000);
+
+        const events = await getEventsAfter({ afterIso: after, limit });
+        const fetched = events?._meta?.fetched ?? (Array.isArray(events) ? events.length : 0);
+        const pages = events?._meta?.pages ?? null;
+        const nextCursor = events?._meta?.nextCursor ?? null;
+        writeJson(res, 200, { after: after ?? null, limit: limit ?? 'all', fetched, pages, nextCursor, events });
         return;
       }
 
