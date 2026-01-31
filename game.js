@@ -4422,7 +4422,9 @@ function updateUIQuantities(allQuantities, allStorages, allElements, allDescript
             const storage = allStorages[item];
             const element = allElements[item];
 
-            updateQuantityDisplays(element, quantity, storage, null, null, null, false);
+            if (element) {
+                updateQuantityDisplays(element, quantity, storage, null, null, null, false);
+            }
         }
 
         if (item.startsWith('science')) {
@@ -4502,7 +4504,9 @@ function updateUIQuantities(allQuantities, allStorages, allElements, allDescript
             const resourceData2 = [resource2Price, costResourceOrCompoundName3];
             const resourceData3 = [resource3Price, costResourceOrCompoundName4];
 
-            updateQuantityDisplays(element, price, costResourceOrCompoundName1, resourceData1, resourceData2, resourceData3, true);
+            if (element) {
+                updateQuantityDisplays(element, price, costResourceOrCompoundName1, resourceData1, resourceData2, resourceData3, true);
+            }
         } 
     }
 }
