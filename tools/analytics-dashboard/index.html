@@ -287,7 +287,6 @@
 
           const captureMap = new Map((report.megastructure_captured_counts || []).map((r) => [String(r.key), r.value]));
           renderRows('miaplacidusMegastructures', [
-            { key: 'Miaplacidus reached', value: report.miaplacidus_reached_count },
             { key: 'Megastructure 1 captured', value: captureMap.get('1') || 0 },
             { key: 'Megastructure 2 captured', value: captureMap.get('2') || 0 },
             { key: 'Megastructure 3 captured', value: captureMap.get('3') || 0 },
