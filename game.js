@@ -1225,7 +1225,7 @@ function updateEnergyDelta(deltaMs) {
         const totalRate = newEnergyRate - getTotalEnergyUse();
         if (!getInfinitePower()) {
             if (anyPlantActive) {
-                const shouldForceOff = totalRate <= 0 && powerOnNow && !graceActive;
+                const shouldForceOff = totalRate < 0 && powerOnNow && !graceActive;
                 const shouldForceOn = totalRate > 0 && !powerOnNow;
 
                 if (shouldForceOff) {

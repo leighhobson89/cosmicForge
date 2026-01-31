@@ -32,7 +32,7 @@ tests/spaceAntimatter.test.js
 #>
 
 $includeInTestSuite = @(
-  'tests/launch-app.test.js'
+  'tests/energyMid.test.js'
 )
 
 Write-Host "\n=== Available tests (copy/paste into `$includeInTestSuite) ===\n"

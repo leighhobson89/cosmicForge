@@ -342,6 +342,9 @@ import { enableGlobalClickTracking, initAnalytics, trackAnalyticsEvent } from '.
 
 import { playClickSfx, playSwipeSfx, sfxPlayer } from './audioManager.js';
 
+import { timerManager } from './timerManager.js';
+import { timerManagerDelta } from './timerManagerDelta.js';
+
 import { drawTab1Content } from './drawTab1Content.js';
 import { drawTab2Content } from './drawTab2Content.js';
 import { drawTab3Content } from './drawTab3Content.js';
@@ -1958,6 +1961,7 @@ function buildFuelConsumptionLines(resourceKey, category, timerRatio) {
             setLastSavedTimeStamp(new Date().toISOString());
         } else {
             offlineGains(true);
+            timerManagerDelta.resetTimestamp(null);
         }
     });
 
@@ -11035,6 +11039,26 @@ const grantAllTechsButton = document.getElementById('grantAllTechsButton');
 grantAllTechsButton.addEventListener('click', () => {
     const techArray = getResourceDataObject('techs');
     setResourceDataObject(getResourceDataObject('research', ['quantity']) + 1000000, 'research', ['quantity']);
+
+    const resourcesObject = getResourceDataObject('resources');
+    if (resourcesObject) {
+        Object.keys(resourcesObject).forEach((resourceKey) => {
+            const normalProgression = getResourceDataObject('resources', [resourceKey, 'upgrades', 'autoBuyer', 'normalProgression']);
+            if (normalProgression === true) {
+                setAutoBuyerTierLevel(resourceKey, 4, false, 'resources');
+            }
+        });
+    }
+
+    const compoundsObject = getResourceDataObject('compounds');
+    if (compoundsObject) {
+        Object.keys(compoundsObject).forEach((compoundKey) => {
+            const normalProgression = getResourceDataObject('compounds', [compoundKey, 'upgrades', 'autoBuyer', 'normalProgression']);
+            if (normalProgression === true) {
+                setAutoBuyerTierLevel(compoundKey, 4, false, 'compounds');
+            }
+        });
+    }
 
     const megaStructureTechIds = Object.keys(techArray).filter((techKey) => techArray?.[techKey]?.special === 'megastructure');
     const nonMegaStructureTechIds = Object.keys(techArray).filter((techKey) => techArray?.[techKey]?.special !== 'megastructure');

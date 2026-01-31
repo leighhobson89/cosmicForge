@@ -321,24 +321,26 @@ describe("cloudSave_energyMid", () => {
         await global.smokeStep(
           "assert battery is charging (energy quantity increases)",
           async () => {
-            await page.waitForFunction(
-              async (prevQty) => {
+            const prevQty = Number(energyAfterPowerOn.qty);
+            const timeoutMs = 60000;
+            const pollIntervalMs = 200;
+            const startedAt = Date.now();
+
+            let nowEnergyQty = prevQty;
+            while (Date.now() - startedAt < timeoutMs) {
+              await page.waitForTimeout(pollIntervalMs);
+              nowEnergyQty = await page.evaluate(async () => {
                 const mod = await import("/resourceDataObject.js");
-                const now = mod.resourceData?.buildings?.energy?.quantity ?? 0;
-                return now > prevQty;
-              },
-              energyAfterPowerOn.qty,
-              { timeout: 60000 }
-            );
+                return mod.resourceData?.buildings?.energy?.quantity ?? 0;
+              });
+              if (Number(nowEnergyQty) > prevQty) {
+                break;
+              }
+            }
 
-            const nowEnergyQty = await page.evaluate(async () => {
-              const mod = await import("/resourceDataObject.js");
-              return mod.resourceData?.buildings?.energy?.quantity ?? 0;
-            });
+            expect(Number(nowEnergyQty)).toBeGreaterThan(prevQty);
 
-            expect(Number(nowEnergyQty)).toBeGreaterThan(Number(energyAfterPowerOn.qty));
-
-            return { prevEnergyQty: energyAfterPowerOn.qty, nowEnergyQty };
+            return { prevEnergyQty: prevQty, nowEnergyQty };
           },
           { input: { prevEnergyQty: energyAfterPowerOn.qty } }
         );

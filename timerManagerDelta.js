@@ -171,6 +171,10 @@ class TimerManagerDelta {
         this.lastUpdateTime = currentTime;
         this.update(deltaMs, multiplier);
     }
+
+    resetTimestamp(currentTime = null) {
+        this.lastUpdateTime = currentTime;
+    }
 }
 
 export const timerManagerDelta = new TimerManagerDelta();
