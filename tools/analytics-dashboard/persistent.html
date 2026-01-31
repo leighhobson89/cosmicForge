@@ -84,6 +84,19 @@
           </table>
         </div>
 
+        <div class="card span-6">
+          <h2>Feedback</h2>
+          <table>
+            <thead><tr><th>Metric</th><th>Count</th></tr></thead>
+            <tbody id="feedback"></tbody>
+          </table>
+        </div>
+
+        <div class="card span-12">
+          <h2>Feedback Comments</h2>
+          <div id="feedbackComments" class="mono" style="white-space: pre-wrap; max-height: 260px; overflow: auto;"></div>
+        </div>
+
         <div class="card span-12">
           <h2>Star System Activity</h2>
           <table>
@@ -179,7 +192,6 @@
     <script type="module">
       const $ = (id) => document.getElementById(id);
 
-      const STORAGE_KEY = 'cf_analytics_persistent_rollup_v1';
       const THEME_STORAGE_KEY = 'analytics_dashboard_theme';
 
       function safeParse(value, fallback) {
@@ -216,9 +228,18 @@
           createdAt: nowIso(),
           updatedAt: nowIso(),
           cursorAfterIso: null,
+          cursorTailKeys: {},
 
           // Keep event ids to render triggered events with 0s.
           knownRandomEventIds: [],
+          knownAchievementIds: [],
+
+          // Feedback
+          feedbackThumbUp: 0,
+          feedbackThumbDown: 0,
+          feedbackAccepted: 0,
+          feedbackRefused: 0,
+          feedbackComments: [],
 
           // Sets
           uniqueSessions: {},
@@ -299,16 +320,34 @@
         applyTheme(theme);
       }
 
-      function loadRollup() {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        const parsed = safeParse(raw, null);
-        if (!parsed || typeof parsed !== 'object') return newRollup();
-        return { ...newRollup(), ...parsed };
+      async function loadRollup() {
+        try {
+          const res = await fetch('/api/persistent-rollup');
+          const json = await res.json();
+          if (!res.ok) throw new Error(json?.error || 'Failed to load rollup');
+          const parsed = json?.rollup;
+          if (!parsed || typeof parsed !== 'object') return newRollup();
+          return { ...newRollup(), ...parsed };
+        } catch {
+          return newRollup();
+        }
       }
 
-      function saveRollup(rollup) {
+      async function saveRollup(rollup) {
         rollup.updatedAt = nowIso();
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(rollup));
+        try {
+          const res = await fetch('/api/persistent-rollup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ rollup }),
+          });
+          if (!res.ok) {
+            const json = await res.json().catch(() => ({}));
+            throw new Error(json?.error || 'Failed to save rollup');
+          }
+        } catch {
+          // ignore
+        }
       }
 
       function addToSetObject(setObj, key) {
@@ -324,6 +363,11 @@
       function normKey(value, fallback = null) {
         const s = String(value ?? '').trim();
         return s.length ? s : fallback;
+      }
+
+      function eventKey(e) {
+        const payload = e.payload && typeof e.payload === 'object' ? e.payload : {};
+        return `${e.event_time || ''}|${e.event_name || ''}|${e.client_id || ''}|${e.session_id || ''}|${e.pioneer_name || ''}|${JSON.stringify(payload)}`;
       }
 
       function applyEvent(rollup, e) {
@@ -361,6 +405,25 @@
         if (e.event_name === 'achievement_granted') {
           const id = normKey(payload.achievement_id, 'unknown');
           inc(rollup.achievementCounts, id, 1);
+        }
+
+        if (e.event_name === 'feedback_thumb_up') {
+          rollup.feedbackThumbUp = (rollup.feedbackThumbUp || 0) + 1;
+        }
+
+        if (e.event_name === 'feedback_thumb_down') {
+          rollup.feedbackThumbDown = (rollup.feedbackThumbDown || 0) + 1;
+        }
+
+        if (e.event_name === 'feedback_response') {
+          if (payload.action === 'accepted') rollup.feedbackAccepted = (rollup.feedbackAccepted || 0) + 1;
+          if (payload.action === 'refused') rollup.feedbackRefused = (rollup.feedbackRefused || 0) + 1;
+
+          const comment = typeof payload.comment === 'string' ? payload.comment.trim() : '';
+          if (comment.length > 0) {
+            if (!Array.isArray(rollup.feedbackComments)) rollup.feedbackComments = [];
+            rollup.feedbackComments.push(comment);
+          }
         }
 
         if (e.event_name === 'star_system_seen') {
@@ -520,7 +583,7 @@
           .slice(0, 500);
         renderRows('pioneerPlaytime', playtimeRows, fmtDuration);
 
-        const toRows = (obj, limit = 50) => {
+        const toRows = (obj, limit = 500) => {
           const rows = Object.entries(obj || {}).map(([key, value]) => ({ key, value }));
           rows.sort((a, b) => b.value - a.value);
           return rows.slice(0, limit);
@@ -528,7 +591,13 @@
 
         renderRows('topViews', toRows(rollup.viewCounts, 30), fmtInt);
         renderRows('topDurations', toRows(rollup.viewDurationMs, 30), fmtDuration);
-        renderRows('topAchievements', toRows(rollup.achievementCounts, 30), fmtInt);
+        const achievementIds = Array.isArray(rollup.knownAchievementIds) ? rollup.knownAchievementIds : [];
+        const achievementRows = achievementIds.length
+          ? achievementIds
+            .map((id) => ({ key: id, value: rollup.achievementCounts?.[id] || 0 }))
+            .sort((a, b) => (b.value - a.value) || a.key.localeCompare(b.key))
+          : toRows(rollup.achievementCounts, 200);
+        renderRows('topAchievements', achievementRows, fmtInt);
         renderRows('starSystems', toRows(rollup.starSystemSeenCounts, 30), fmtInt);
         renderRows('themeSelections', toRows(rollup.themeSelectionCounts, 50), fmtInt);
 
@@ -580,25 +649,38 @@
         }));
         renderRows('settingsUsage', settingsRows, fmtInt);
 
-        const triggeredIds = Array.isArray(rollup.knownRandomEventIds) ? rollup.knownRandomEventIds : [];
+        const triggeredIds = Array.isArray(rollup.knownRandomEventIds)
+          ? rollup.knownRandomEventIds.filter((id) => id !== 'modalReplacements')
+          : [];
         const triggeredRows = triggeredIds.length
           ? triggeredIds.map((id) => ({ key: id, value: rollup.triggeredEventCounts?.[id] || 0 }))
           : toRows(rollup.triggeredEventCounts, 50);
         renderRows('triggeredEvents', triggeredRows, fmtInt);
 
+        renderRows('feedback', [
+          { key: 'Thumbs up', value: rollup.feedbackThumbUp || 0 },
+          { key: 'Thumbs down', value: rollup.feedbackThumbDown || 0 },
+          { key: 'Accepted (SEND FEEDBACK)', value: rollup.feedbackAccepted || 0 },
+          { key: 'Refused (NO THANKS)', value: rollup.feedbackRefused || 0 },
+        ], fmtInt);
+
+        const comments = Array.isArray(rollup.feedbackComments) ? rollup.feedbackComments : [];
+        $('feedbackComments').textContent = comments.length
+          ? comments.map((c, i) => `${i + 1}. ${c}`).join('\n\n')
+          : '(no comments)';
+
         const philosophyPicksRows = Object.entries(rollup.philosophyPickClientsById || {})
           .map(([k, setObj]) => ({ key: k, value: setObj ? Object.keys(setObj).length : 0 }))
-          .sort((a, b) => b.value - a.value)
-          .slice(0, 50);
+          .sort((a, b) => (b.value - a.value) || a.key.localeCompare(b.key))
+          .slice(0, 500);
         renderRows('philosophyPicks', philosophyPicksRows, fmtInt);
         renderRows('ascendencyPerks', toRows(rollup.ascendencyPerkPurchaseCounts, 50), fmtInt);
         renderRows('philosophyRepeatables', toRows(rollup.philosophyRepeatableCounts, 50), fmtInt);
       }
 
-      let rollup = loadRollup();
+      let rollup = newRollup();
       loadSavedTheme();
       $('theme')?.addEventListener('change', () => applyTheme($('theme').value));
-      render(rollup);
 
       let refreshInFlight = false;
 
@@ -621,8 +703,20 @@
             }
           }
 
+          if (!Array.isArray(rollup.knownAchievementIds) || rollup.knownAchievementIds.length === 0) {
+            try {
+              const idsRes = await fetch('/api/achievement-ids');
+              const idsJson = await idsRes.json();
+              if (idsRes.ok && Array.isArray(idsJson?.ids)) {
+                rollup.knownAchievementIds = idsJson.ids;
+              }
+            } catch {
+              // ignore
+            }
+          }
+
           const after = rollup.cursorAfterIso;
-          const url = after ? `/api/events?after=${encodeURIComponent(after)}` : '/api/events';
+          const url = after ? `/api/events?after=${encodeURIComponent(after)}&inclusive=1` : '/api/events';
 
           const res = await fetch(url);
           const json = await res.json();
@@ -631,15 +725,32 @@
           }
 
           const events = Array.isArray(json.events) ? json.events : [];
+
+          const lastTime = events.length ? events[events.length - 1].event_time : null;
+          const prevCursor = rollup.cursorAfterIso;
+          const prevTailKeys = rollup.cursorTailKeys && typeof rollup.cursorTailKeys === 'object' ? rollup.cursorTailKeys : {};
+          const nextTailKeys = lastTime && lastTime === prevCursor ? { ...prevTailKeys } : {};
+
           for (const e of events) {
+            const isCursorTime = !!prevCursor && e.event_time === prevCursor;
+            const key = eventKey(e);
+            if (isCursorTime && prevTailKeys[key]) {
+              continue;
+            }
+
             applyEvent(rollup, e);
+
+            if (lastTime && e.event_time === lastTime) {
+              nextTailKeys[key] = true;
+            }
           }
 
           if (json.nextCursor) {
             rollup.cursorAfterIso = json.nextCursor;
+            rollup.cursorTailKeys = nextTailKeys;
           }
 
-          saveRollup(rollup);
+          await saveRollup(rollup);
           render(rollup);
           $('status').textContent = 'OK';
         } catch (err) {
@@ -651,10 +762,10 @@
 
       $('btnRefresh').addEventListener('click', refresh);
 
-      $('btnReset').addEventListener('click', () => {
+      $('btnReset').addEventListener('click', async () => {
         if (!confirm('Reset local all-time totals? This cannot be undone.')) return;
         rollup = newRollup();
-        saveRollup(rollup);
+        await saveRollup(rollup);
         render(rollup);
       });
 
@@ -684,11 +795,13 @@
           return;
         }
         rollup = { ...newRollup(), ...parsed };
-        saveRollup(rollup);
+        await saveRollup(rollup);
         render(rollup);
       });
 
-      setInterval(refresh, 10_000);
+      rollup = await loadRollup();
+      render(rollup);
+      setInterval(refresh, 300_000);
       refresh();
     </script>
   </body>

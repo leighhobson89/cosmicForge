@@ -34,6 +34,8 @@ const SUPABASE_URL = process.env.SUPABASE_URL || 'https://riogcxvtomyjlzkcnujf.s
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJpb2djeHZ0b215amx6a2NudWpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQwMjY1NDgsImV4cCI6MjA1OTYwMjU0OH0.HH7KXPrcORvl6Wiefupl422gRYxAa_kFCRM2-puUcsQ';
 const TABLE = process.env.SUPABASE_ANALYTICS_TABLE || 'CosmicForge_analytics_events';
 
+const PERSISTENT_ROLLUP_PATH = path.join(repoRoot, 'tools', 'analytics-dashboard', 'persistentJSON.json');
+
 async function supabaseFetch(pathname, searchParams) {
   const url = new URL(`${SUPABASE_URL}/rest/v1/${pathname}`);
   for (const [k, v] of searchParams.entries()) {
@@ -83,6 +85,7 @@ function sumTop(map, limit) {
 }
 
 let cachedRandomEventIds = null;
+let cachedAchievementIds = null;
 
 async function getAllRandomEventIds(repoRoot) {
   if (Array.isArray(cachedRandomEventIds)) return cachedRandomEventIds;
@@ -98,17 +101,61 @@ async function getAllRandomEventIds(repoRoot) {
 
     const block = match[1];
     const ids = [];
-    const re = /^\s*([a-zA-Z0-9_]+)\s*:\s*\{/gm;
-    let m;
-    while ((m = re.exec(block)) !== null) {
-      ids.push(m[1]);
+    let depth = 0;
+    const lines = block.split(/\r?\n/);
+
+    for (const line of lines) {
+      if (depth === 0) {
+        const m = line.match(/^\s*([a-zA-Z0-9_]+)\s*:\s*\{/);
+        if (m) ids.push(m[1]);
+      }
+
+      const opens = (line.match(/\{/g) || []).length;
+      const closes = (line.match(/\}/g) || []).length;
+      depth = Math.max(0, depth + opens - closes);
     }
 
-    cachedRandomEventIds = Array.from(new Set(ids));
+    cachedRandomEventIds = Array.from(new Set(ids)).filter((id) => id !== 'modalReplacements');
     return cachedRandomEventIds;
   } catch {
     cachedRandomEventIds = [];
     return cachedRandomEventIds;
+  }
+}
+
+async function getAllAchievementIds(repoRoot) {
+  if (Array.isArray(cachedAchievementIds)) return cachedAchievementIds;
+  try {
+    const filePath = path.join(repoRoot, 'resourceDataObject.js');
+    const src = await fs.readFile(filePath, 'utf-8');
+
+    const match = src.match(/export\s+let\s+achievementsData\s*=\s*\{([\s\S]*?)^\};/m);
+    if (!match) {
+      cachedAchievementIds = [];
+      return cachedAchievementIds;
+    }
+
+    const block = match[1];
+    const ids = [];
+    let depth = 0;
+    const lines = block.split(/\r?\n/);
+
+    for (const line of lines) {
+      if (depth === 0) {
+        const m = line.match(/^\s*([a-zA-Z0-9_]+)\s*:\s*\{/);
+        if (m) ids.push(m[1]);
+      }
+
+      const opens = (line.match(/\{/g) || []).length;
+      const closes = (line.match(/\}/g) || []).length;
+      depth = Math.max(0, depth + opens - closes);
+    }
+
+    cachedAchievementIds = Array.from(new Set(ids)).filter((id) => id !== 'version');
+    return cachedAchievementIds;
+  } catch {
+    cachedAchievementIds = [];
+    return cachedAchievementIds;
   }
 }
 
@@ -449,7 +496,45 @@ function writeJson(res, status, value) {
   res.end(JSON.stringify(value));
 }
 
-async function getEventsAfter({ afterIso, limit }) {
+async function readJsonFileIfExists(filePath) {
+  try {
+    const raw = await fs.readFile(filePath, 'utf-8');
+    if (!raw || !raw.trim()) return null;
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? parsed : null;
+  } catch (err) {
+    if (err?.code === 'ENOENT') return null;
+    throw err;
+  }
+}
+
+async function writeJsonFileAtomic(filePath, value) {
+  const dir = path.dirname(filePath);
+  const tmpPath = path.join(dir, `${path.basename(filePath)}.tmp`);
+  const json = JSON.stringify(value, null, 2);
+  await fs.writeFile(tmpPath, json, 'utf-8');
+  await fs.rename(tmpPath, filePath);
+}
+
+async function readRequestBody(req, maxBytes = 5_000_000) {
+  return await new Promise((resolve, reject) => {
+    let bytes = 0;
+    const chunks = [];
+    req.on('data', (chunk) => {
+      bytes += chunk.length;
+      if (bytes > maxBytes) {
+        reject(new Error('Request too large'));
+        req.destroy();
+        return;
+      }
+      chunks.push(chunk);
+    });
+    req.on('end', () => resolve(Buffer.concat(chunks).toString('utf-8')));
+    req.on('error', reject);
+  });
+}
+
+async function getEventsAfter({ afterIso, limit, inclusive }) {
   const pageSize = 1000;
   const out = [];
   let offset = 0;
@@ -467,7 +552,7 @@ async function getEventsAfter({ afterIso, limit }) {
     params.set('limit', String(batchLimit));
     params.set('offset', String(offset));
     if (afterIso) {
-      params.set('event_time', `gt.${afterIso}`);
+      params.set('event_time', `${inclusive ? 'gte' : 'gt'}.${afterIso}`);
     }
 
     const batch = await supabaseFetch(TABLE, params);
@@ -500,6 +585,38 @@ const server = http.createServer(async (req, res) => {
         return;
       }
 
+      if (url.pathname === '/api/persistent-rollup') {
+        if (req.method === 'GET') {
+          const rollup = await readJsonFileIfExists(PERSISTENT_ROLLUP_PATH);
+          writeJson(res, 200, { rollup });
+          return;
+        }
+
+        if (req.method === 'POST' || req.method === 'PUT') {
+          const text = await readRequestBody(req);
+          let parsed;
+          try {
+            parsed = JSON.parse(text);
+          } catch {
+            writeJson(res, 400, { error: 'Invalid JSON' });
+            return;
+          }
+
+          if (!parsed || typeof parsed !== 'object') {
+            writeJson(res, 400, { error: 'Invalid rollup payload' });
+            return;
+          }
+
+          const rollup = parsed.rollup && typeof parsed.rollup === 'object' ? parsed.rollup : parsed;
+          await writeJsonFileAtomic(PERSISTENT_ROLLUP_PATH, rollup);
+          writeJson(res, 200, { ok: true });
+          return;
+        }
+
+        writeJson(res, 405, { error: 'Method not allowed' });
+        return;
+      }
+
       if (url.pathname === '/api/report') {
         const days = clamp(toInt(url.searchParams.get('days'), 7), 1, 365);
         const rawLimit = url.searchParams.get('limit');
@@ -518,10 +635,11 @@ const server = http.createServer(async (req, res) => {
 
       if (url.pathname === '/api/events') {
         const after = url.searchParams.get('after');
+        const inclusive = url.searchParams.get('inclusive') === '1' || url.searchParams.get('inclusive') === 'true';
         const rawLimit = url.searchParams.get('limit');
         const limit = rawLimit === null ? null : clamp(toInt(rawLimit, 10000), 1, 200000);
 
-        const events = await getEventsAfter({ afterIso: after, limit });
+        const events = await getEventsAfter({ afterIso: after, limit, inclusive });
         const fetched = events?._meta?.fetched ?? (Array.isArray(events) ? events.length : 0);
         const pages = events?._meta?.pages ?? null;
         const nextCursor = events?._meta?.nextCursor ?? null;
@@ -535,11 +653,17 @@ const server = http.createServer(async (req, res) => {
         return;
       }
 
+      if (url.pathname === '/api/achievement-ids') {
+        const ids = await getAllAchievementIds(repoRoot);
+        writeJson(res, 200, { ids });
+        return;
+      }
+
       writeJson(res, 404, { error: 'Not found' });
       return;
     }
 
-    const pathname = url.pathname === '/' ? '/tools/analytics-dashboard/index.html' : url.pathname;
+    const pathname = url.pathname === '/' ? '/tools/analytics-dashboard/persistent.html' : url.pathname;
     const filePath = safeJoin(repoRoot, pathname);
 
     if (!filePath) {
@@ -561,6 +685,5 @@ server.listen(0, '127.0.0.1', () => {
   const addr = server.address();
   const port = typeof addr === 'object' && addr ? addr.port : 0;
   console.log(`📊 Cosmic Forge Analytics Dashboard`);
-  console.log(`🌐 Normal dashboard: http://127.0.0.1:${port}`);
-  console.log(`🔁 Persistent (all‑time) dashboard: http://127.0.0.1:${port}/tools/analytics-dashboard/persistent.html`);
+  console.log(`🔁 Persistent (all‑time) dashboard: http://127.0.0.1:${port}`);
 });
