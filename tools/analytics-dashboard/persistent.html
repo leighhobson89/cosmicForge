@@ -184,6 +184,21 @@
             <tbody id="philosophyRepeatables"></tbody>
           </table>
         </div>
+
+        <div class="card span-12">
+          <h2>JS Errors</h2>
+          <div class="controls" style="margin-bottom: 10px; gap: 14px;">
+            <label><input type="checkbox" id="filterRuntime" checked /> Runtime</label>
+            <label><input type="checkbox" id="filterRejections" checked /> Rejections</label>
+            <label><input type="checkbox" id="filterWithStack" checked /> Only with stack</label>
+            <label><input type="checkbox" id="filterOnlyLocal" /> Only local scripts</label>
+          </div>
+          <table>
+            <thead><tr><th>Count</th><th>Last Seen</th><th>Type</th><th>Message</th><th>Location</th><th></th></tr></thead>
+            <tbody id="jsErrors"></tbody>
+          </table>
+          <div id="jsErrorDetails" class="mono" style="white-space: pre-wrap; margin-top: 10px; max-height: 320px; overflow: auto;"></div>
+        </div>
       </div>
     </main>
 
@@ -199,6 +214,102 @@
           return JSON.parse(value);
         } catch {
           return fallback;
+        }
+      }
+
+      function isLocalScript(filename) {
+        if (!filename) return false;
+        const s = String(filename);
+        if (s.startsWith('/')) return true;
+        if (!s.includes('://')) return true;
+        if (window.location && typeof window.location.origin === 'string') {
+          return s.startsWith(window.location.origin);
+        }
+        return false;
+      }
+
+      function renderJsErrors(rollup) {
+        const tbody = $('jsErrors');
+        if (!tbody) return;
+
+        const showRuntime = $('filterRuntime') ? $('filterRuntime').checked : true;
+        const showRejections = $('filterRejections') ? $('filterRejections').checked : true;
+        const onlyWithStack = $('filterWithStack') ? $('filterWithStack').checked : false;
+        const onlyLocal = $('filterOnlyLocal') ? $('filterOnlyLocal').checked : false;
+
+        const entries = Object.entries(rollup.jsErrorSignatures || {}).map(([signature, rec]) => ({ signature, ...rec }));
+
+        const filtered = entries.filter((rec) => {
+          const sample = rec.sample || {};
+          const eventName = sample.event_name || '';
+          if (!showRuntime && eventName === 'js_error') return false;
+          if (!showRejections && eventName === 'unhandled_promise_rejection') return false;
+          if (onlyWithStack && !(typeof sample.stack === 'string' && sample.stack.trim().length > 0)) return false;
+          if (onlyLocal && !isLocalScript(sample.filename)) return false;
+          return true;
+        });
+
+        filtered.sort((a, b) => (b.count || 0) - (a.count || 0));
+
+        tbody.innerHTML = '';
+        for (const rec of filtered.slice(0, 500)) {
+          const sample = rec.sample || {};
+          const tr = document.createElement('tr');
+
+          const tdCount = document.createElement('td');
+          tdCount.textContent = fmtInt(rec.count || 0);
+          tdCount.className = 'mono';
+
+          const tdLast = document.createElement('td');
+          tdLast.textContent = rec.lastSeen || '-';
+          tdLast.className = 'mono';
+
+          const tdType = document.createElement('td');
+          tdType.textContent = sample.event_name || '-';
+          tdType.className = 'mono';
+
+          const tdMsg = document.createElement('td');
+          tdMsg.textContent = sample.message || '(no message)';
+          tdMsg.className = 'mono';
+
+          const tdLoc = document.createElement('td');
+          const loc = `${sample.filename || '-'}:${sample.lineno ?? '-'}:${sample.colno ?? '-'}`;
+          tdLoc.textContent = loc;
+          tdLoc.className = 'mono';
+
+          const tdBtn = document.createElement('td');
+          const btn = document.createElement('button');
+          btn.textContent = 'View';
+          btn.addEventListener('click', () => {
+            const details = [
+              `event=${sample.event_name || ''}`,
+              `count=${rec.count || 0}`,
+              `lastSeen=${rec.lastSeen || ''}`,
+              `name=${sample.name || ''}`,
+              `message=${sample.message || ''}`,
+              `file=${sample.filename || ''}`,
+              `line=${sample.lineno ?? ''}`,
+              `col=${sample.colno ?? ''}`,
+              `path=${sample.path || ''}`,
+              '',
+              'stack:',
+              sample.stack || '(no stack)'
+            ].join('\n');
+            $('jsErrorDetails').textContent = details;
+          });
+          tdBtn.appendChild(btn);
+
+          tr.appendChild(tdCount);
+          tr.appendChild(tdLast);
+          tr.appendChild(tdType);
+          tr.appendChild(tdMsg);
+          tr.appendChild(tdLoc);
+          tr.appendChild(tdBtn);
+          tbody.appendChild(tr);
+        }
+
+        if (filtered.length === 0) {
+          $('jsErrorDetails').textContent = '(no errors match filters)';
         }
       }
 
@@ -240,6 +351,8 @@
           feedbackAccepted: 0,
           feedbackRefused: 0,
           feedbackComments: [],
+
+          jsErrorSignatures: {},
 
           // Sets
           uniqueSessions: {},
@@ -423,6 +536,39 @@
           if (comment.length > 0) {
             if (!Array.isArray(rollup.feedbackComments)) rollup.feedbackComments = [];
             rollup.feedbackComments.push(comment);
+          }
+        }
+
+        if (e.event_name === 'js_error' || e.event_name === 'unhandled_promise_rejection') {
+          const message = normKey(payload.message, '(no message)');
+          const filename = normKey(payload.filename, null);
+          const lineno = Number.isFinite(payload.lineno) ? payload.lineno : null;
+          const colno = Number.isFinite(payload.colno) ? payload.colno : null;
+          const signature = `${e.event_name}|${message}|${filename || ''}|${lineno || ''}|${colno || ''}`;
+
+          const mapObj = rollup.jsErrorSignatures || (rollup.jsErrorSignatures = {});
+          if (!mapObj[signature]) {
+            if (Object.keys(mapObj).length >= 500) return;
+            mapObj[signature] = {
+              count: 0,
+              lastSeen: null,
+              sample: null
+            };
+          }
+
+          mapObj[signature].count = (mapObj[signature].count || 0) + 1;
+          mapObj[signature].lastSeen = e.event_time || mapObj[signature].lastSeen;
+          if (!mapObj[signature].sample) {
+            mapObj[signature].sample = {
+              event_name: e.event_name,
+              message,
+              name: payload.name ?? null,
+              filename,
+              lineno,
+              colno,
+              stack: typeof payload.stack === 'string' ? payload.stack : null,
+              path: payload.path ?? null
+            };
           }
         }
 
@@ -676,6 +822,8 @@
         renderRows('philosophyPicks', philosophyPicksRows, fmtInt);
         renderRows('ascendencyPerks', toRows(rollup.ascendencyPerkPurchaseCounts, 50), fmtInt);
         renderRows('philosophyRepeatables', toRows(rollup.philosophyRepeatableCounts, 50), fmtInt);
+
+        renderJsErrors(rollup);
       }
 
       let rollup = newRollup();
@@ -801,6 +949,13 @@
 
       rollup = await loadRollup();
       render(rollup);
+
+      for (const id of ['filterRuntime', 'filterRejections', 'filterWithStack', 'filterOnlyLocal']) {
+        const el = $(id);
+        if (el) {
+          el.addEventListener('change', () => render(rollup));
+        }
+      }
       setInterval(refresh, 300_000);
       refresh();
     </script>

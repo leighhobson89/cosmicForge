@@ -968,6 +968,82 @@ function formatThemeToken(theme) {
     return theme.charAt(0).toUpperCase() + theme.slice(1);
 }
 
+function setupGlobalErrorAnalytics() {
+    const sentSignatures = new Map();
+    let totalSent = 0;
+    const maxTotal = 50;
+    const dedupeWindowMs = 30_000;
+
+    const clip = (value, maxLen = 4000) => {
+        const s = String(value ?? '');
+        return s.length > maxLen ? s.slice(0, maxLen) : s;
+    };
+
+    const normaliseFilename = (filename) => {
+        const raw = String(filename ?? '').trim();
+        if (!raw) return null;
+        try {
+            const u = new URL(raw, window.location.href);
+            u.search = '';
+            u.hash = '';
+            return u.toString();
+        } catch {
+            return raw;
+        }
+    };
+
+    const send = (eventName, payload) => {
+        if (totalSent >= maxTotal) return;
+        const now = Date.now();
+        const signature = clip(`${eventName}|${payload.message || ''}|${payload.filename || ''}|${payload.lineno || ''}|${payload.colno || ''}`, 1200);
+        const last = sentSignatures.get(signature);
+        if (typeof last === 'number' && (now - last) < dedupeWindowMs) return;
+        sentSignatures.set(signature, now);
+        totalSent += 1;
+
+        trackAnalyticsEvent(eventName, payload, { immediate: true, flushReason: 'js_error' });
+    };
+
+    window.addEventListener('error', (ev) => {
+        if (!ev) return;
+        const filename = normaliseFilename(ev.filename);
+        const lineno = Number.isFinite(ev.lineno) ? ev.lineno : null;
+        const colno = Number.isFinite(ev.colno) ? ev.colno : null;
+        const err = ev.error;
+        const stack = err && typeof err === 'object' ? err.stack : null;
+        const name = err && typeof err === 'object' ? err.name : null;
+
+        send('js_error', {
+            message: clip(ev.message, 1200),
+            name: name ? clip(name, 200) : null,
+            filename,
+            lineno,
+            colno,
+            stack: stack ? clip(stack, 8000) : null,
+            path: window.location?.pathname,
+            user_agent: clip(navigator?.userAgent, 300)
+        });
+    });
+
+    window.addEventListener('unhandledrejection', (ev) => {
+        if (!ev) return;
+        const reason = ev.reason;
+        const message = (reason && typeof reason === 'object' && typeof reason.message === 'string')
+            ? reason.message
+            : String(reason ?? '');
+        const stack = (reason && typeof reason === 'object') ? reason.stack : null;
+        const name = (reason && typeof reason === 'object') ? reason.name : null;
+
+        send('unhandled_promise_rejection', {
+            message: clip(message, 1200),
+            name: name ? clip(name, 200) : null,
+            stack: stack ? clip(stack, 8000) : null,
+            path: window.location?.pathname,
+            user_agent: clip(navigator?.userAgent, 300)
+        });
+    });
+}
+
 export function applyCustomPointerSetting() {
     if (!document?.body) return;
     const enabled = shouldUseCustomPointer();
@@ -1017,6 +1093,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         allowTags: ['BUTTON'],
         sampleRate: 0.10
     });
+
+    setupGlobalErrorAnalytics();
 
     trackAnalyticsEvent('app_domcontentloaded', {
         ts: new Date().toISOString()
