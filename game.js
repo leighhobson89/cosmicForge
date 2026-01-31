@@ -8188,7 +8188,7 @@ export function purchaseBuff(buff) {
     if (buff === 'roboticResearchAutomation') {
         setResourceDataObject(true, 'research', ['upgrades', 'autoBuyer', 'active']);
     } else if (buff === 'autoSpaceTelescope') {
-        setAutoSpaceTelescopeRowEnabled(true);
+        setResourceDataObject(true, 'space', ['upgrades', 'spaceTelescope', 'autoSpaceTelescopeRowEnabled']);
     }
 
     if (buff === 'smartAutoBuyers') {
