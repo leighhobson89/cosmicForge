@@ -5876,6 +5876,31 @@ function getMarketBiasValue(item) {
     return typeof bias === 'number' ? bias : 0;
 }
 
+function buildGalacticMarketSelectionTooltip(outgoingSelection, incomingSelection) {
+    const outgoingType = getMarketTypeForItem(outgoingSelection);
+    const incomingType = getMarketTypeForItem(incomingSelection);
+
+    if (!outgoingType && !incomingType) {
+        return '';
+    }
+
+    const lines = [
+        '<div class="tooltip-section">',
+        '<div class="tooltip-heading">Current Selection</div>'
+    ];
+
+    if (outgoingType) {
+        lines.push(`<div><strong>Outgoing:</strong> ${capitaliseString(outgoingSelection)}</div>`);
+    }
+
+    if (incomingType) {
+        lines.push(`<div><strong>Incoming:</strong> ${capitaliseString(incomingSelection)}</div>`);
+    }
+
+    lines.push('</div>');
+    return lines.join('');
+}
+
 function getBiasSeverityClass(bias) {
     if (typeof bias !== 'number' || Number.isNaN(bias)) {
         return 'green-ready-text';
@@ -5986,7 +6011,16 @@ function buildGalacticMarketSidebarStatus() {
         return { text: '', className: '' };
     }
 
-    attachSharedTooltip(statusElement, () => statusElement.dataset.galacticTooltipContent || '');
+    attachSharedTooltip(statusElement, () => {
+        const content = statusElement.dataset.galacticTooltipContent;
+        if (content) {
+            return content;
+        }
+        return buildGalacticMarketSelectionTooltip(
+            getGalacticMarketOutgoingStockType(),
+            getGalacticMarketIncomingStockType()
+        );
+    });
 
     if (isTimedEffectActive?.('galacticMarketLockdown')) {
         const remainingMs = getTimedEffectRemainingMs?.('galacticMarketLockdown') || 0;
