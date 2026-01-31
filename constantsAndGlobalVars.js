@@ -2773,7 +2773,16 @@ export function setBlackHoleDiscoveryProbability(value) {
 }
 
 export function getTemporaryCoreTechRowsRepo(key) {
-    return temporaryCoreTechRowsRepo[key];
+    if (!temporaryCoreTechRowsRepo || typeof temporaryCoreTechRowsRepo !== 'object') {
+        if (key === 'rows') return [];
+        return null;
+    }
+
+    const value = temporaryCoreTechRowsRepo[key];
+    if (key === 'rows') {
+        return Array.isArray(value) ? value : [];
+    }
+    return value ?? null;
 }
 
 export function setTemporaryCoreTechRowsRepo(containerValue, rowsValue) {

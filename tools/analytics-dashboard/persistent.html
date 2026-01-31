@@ -192,9 +192,11 @@
             <label><input type="checkbox" id="filterRejections" checked /> Rejections</label>
             <label><input type="checkbox" id="filterWithStack" checked /> Only with stack</label>
             <label><input type="checkbox" id="filterOnlyLocal" /> Only local scripts</label>
+            <span id="jsErrorSelectedCount" class="muted mono"></span>
+            <button id="btnDeleteSelectedJsErrors">Delete selected</button>
           </div>
           <table>
-            <thead><tr><th>Count</th><th>Last Seen</th><th>Type</th><th>Message</th><th>Location</th><th></th></tr></thead>
+            <thead><tr><th></th><th>Count</th><th>Last Seen</th><th>Type</th><th>Message</th><th>Location</th><th></th></tr></thead>
             <tbody id="jsErrors"></tbody>
           </table>
           <div id="jsErrorDetails" class="mono" style="white-space: pre-wrap; margin-top: 10px; max-height: 320px; overflow: auto;"></div>
@@ -206,6 +208,8 @@
 
     <script type="module">
       const $ = (id) => document.getElementById(id);
+
+      const selectedJsErrorSignatures = new Set();
 
       const THEME_STORAGE_KEY = 'analytics_dashboard_theme';
 
@@ -226,6 +230,13 @@
           return s.startsWith(window.location.origin);
         }
         return false;
+      }
+
+      function updateJsErrorSelectedCount() {
+        const el = $('jsErrorSelectedCount');
+        if (!el) return;
+        const n = selectedJsErrorSignatures.size;
+        el.textContent = n > 0 ? `selected=${n}` : '';
       }
 
       function renderJsErrors(rollup) {
@@ -255,6 +266,20 @@
         for (const rec of filtered.slice(0, 500)) {
           const sample = rec.sample || {};
           const tr = document.createElement('tr');
+
+          const tdSel = document.createElement('td');
+          const cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.checked = selectedJsErrorSignatures.has(rec.signature);
+          cb.addEventListener('change', () => {
+            if (cb.checked) {
+              selectedJsErrorSignatures.add(rec.signature);
+            } else {
+              selectedJsErrorSignatures.delete(rec.signature);
+            }
+            updateJsErrorSelectedCount();
+          });
+          tdSel.appendChild(cb);
 
           const tdCount = document.createElement('td');
           tdCount.textContent = fmtInt(rec.count || 0);
@@ -299,6 +324,7 @@
           });
           tdBtn.appendChild(btn);
 
+          tr.appendChild(tdSel);
           tr.appendChild(tdCount);
           tr.appendChild(tdLast);
           tr.appendChild(tdType);
@@ -311,6 +337,8 @@
         if (filtered.length === 0) {
           $('jsErrorDetails').textContent = '(no errors match filters)';
         }
+
+        updateJsErrorSelectedCount();
       }
 
       function nowIso() {
@@ -572,8 +600,8 @@
           }
         }
 
-        if (e.event_name === 'star_system_seen') {
-          const sys = normKey(payload.star_system, 'unknown');
+        if (e.event_name === 'star_system_changed' || e.event_name === 'star_system_seen') {
+          const sys = normKey(payload.to ?? payload.star_system, 'unknown');
           inc(rollup.starSystemSeenCounts, sys, 1);
         }
 
@@ -638,8 +666,9 @@
           if (!rollup.philosophyPickClientsById[philosophyId]) {
             rollup.philosophyPickClientsById[philosophyId] = {};
           }
-          if (e.client_id) {
-            rollup.philosophyPickClientsById[philosophyId][e.client_id] = true;
+          const uniqueKey = e.client_id || e.session_id;
+          if (uniqueKey) {
+            rollup.philosophyPickClientsById[philosophyId][uniqueKey] = true;
           }
         }
 
@@ -653,6 +682,14 @@
           const techId = normKey(payload.tech_id, 'unknown');
           const k = `${philosophyId}:${techId}`;
           inc(rollup.philosophyRepeatableCounts, k, 1);
+
+          if (!rollup.philosophyPickClientsById[philosophyId]) {
+            rollup.philosophyPickClientsById[philosophyId] = {};
+          }
+          const uniqueKey = e.client_id || e.session_id;
+          if (uniqueKey) {
+            rollup.philosophyPickClientsById[philosophyId][uniqueKey] = true;
+          }
         }
 
         if (e.event_name === 'starship_launched') {
@@ -943,6 +980,27 @@
           return;
         }
         rollup = { ...newRollup(), ...parsed };
+        await saveRollup(rollup);
+        render(rollup);
+      });
+
+      $('btnDeleteSelectedJsErrors')?.addEventListener('click', async () => {
+        const signatures = Array.from(selectedJsErrorSignatures);
+        if (signatures.length === 0) {
+          alert('No error signatures selected.');
+          return;
+        }
+        if (!confirm(`Delete ${signatures.length} selected error signature(s) from this rollup?`)) return;
+
+        if (!rollup.jsErrorSignatures || typeof rollup.jsErrorSignatures !== 'object') {
+          rollup.jsErrorSignatures = {};
+        }
+
+        for (const sig of signatures) {
+          delete rollup.jsErrorSignatures[sig];
+        }
+        selectedJsErrorSignatures.clear();
+
         await saveRollup(rollup);
         render(rollup);
       });

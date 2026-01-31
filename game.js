@@ -930,6 +930,11 @@ export async function gameLoop() {
 
             const sortedRows = sortRowsByRenderPosition(getTemporaryCoreTechRowsRepo('rows'), 'techs');
             const containerToRenderTo = getTemporaryCoreTechRowsRepo('container');
+
+            if (!containerToRenderTo || !Array.isArray(sortedRows) || sortedRows.length === 0) {
+                setTechRenderChange(false);
+                setTechRenderCounter(0);
+            }
         
             if (getTechRenderChange()) {
                 setTechRenderCounter(getTechRenderCounter() + 1);
@@ -4453,7 +4458,9 @@ function updateUIQuantities(allQuantities, allStorages, allElements, allDescript
                     ? getRocketPartsNeededInTotalPerRocket 
                     : getStarShipPartsNeededInTotalPerModule;
 
-                partsCountText.innerHTML = `Built: <span id="${item}BuiltPartsQuantity">${quantity}</span> / <span id="${item}TotalPartsQuantity">${getTotalPartsNeeded(item)}</span>`;
+                if (partsCountText) {
+                    partsCountText.innerHTML = `Built: <span id="${item}BuiltPartsQuantity">${quantity}</span> / <span id="${item}TotalPartsQuantity">${getTotalPartsNeeded(item)}</span>`;
+                }
             }
         }
 
@@ -4461,9 +4468,11 @@ function updateUIQuantities(allQuantities, allStorages, allElements, allDescript
             const quantity = allQuantities[item];
             if (quantity || quantity === 0) {
                 const quantityText = document.getElementById(`${item}QuantityText`);
-                quantityText.innerHTML = item === 'fleetEnvoy'
-                    ? `Quantity: <span id="${item}BuiltQuantity">${quantity}</span> / <span id="${item}BuiltQuantityMax">${getMaxFleetShip(item)}</span>`
-                    : `Quantity: <span id="${item}BuiltQuantity">${quantity}</span>`;
+                if (quantityText) {
+                    quantityText.innerHTML = item === 'fleetEnvoy'
+                        ? `Quantity: <span id="${item}BuiltQuantity">${quantity}</span> / <span id="${item}BuiltQuantityMax">${getMaxFleetShip(item)}</span>`
+                        : `Quantity: <span id="${item}BuiltQuantity">${quantity}</span>`;
+                }
             }
         }        
     }
@@ -7785,19 +7794,25 @@ function changeWeather(forcedWeatherType = null) {
     }
 
     function selectNewWeather() {
-        setResourceDataObject(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'quantity']) * getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'rate']), 'buildings', ['energy', 'upgrades', 'powerPlant2', 'purchasedRate']);
+        const powerPlant2Quantity = Number(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'quantity'])) || 0;
+        const powerPlant2Rate = Number(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'rate'])) || 0;
+        setResourceDataObject(powerPlant2Quantity * powerPlant2Rate, 'buildings', ['energy', 'upgrades', 'powerPlant2', 'purchasedRate']);
         setWeatherEfficiencyApplied(false);
         const weatherCurrentStarSystemObject = getStarSystemWeather(getCurrentStarSystem());
 
-        const weatherTypes = Object.keys(weatherCurrentStarSystemObject);
-        const weatherProbabilities = weatherTypes.map(weatherType => weatherCurrentStarSystemObject[weatherType][0]);
+        const weatherTable = (weatherCurrentStarSystemObject && typeof weatherCurrentStarSystemObject === 'object')
+            ? weatherCurrentStarSystemObject
+            : { sunny: [1, '☀️', 1] };
+
+        const weatherTypes = Object.keys(weatherTable);
+        const weatherProbabilities = weatherTypes.map(weatherType => weatherTable[weatherType][0]);
         const totalProbability = weatherProbabilities.reduce((acc, val) => acc + val, 0);
         const randomSelection = Math.random() * totalProbability;
 
         let cumulativeProbability = 0;
         let selectedWeatherType = '';
 
-        if (forcedWeatherType && weatherCurrentStarSystemObject[forcedWeatherType]) {
+        if (forcedWeatherType && weatherTable[forcedWeatherType]) {
             selectedWeatherType = forcedWeatherType;
         } else {
             for (let i = 0; i < weatherTypes.length; i++) {
@@ -7809,36 +7824,40 @@ function changeWeather(forcedWeatherType = null) {
             }
         }
 
-        const [probability, symbolWeather, efficiencyWeather] = weatherCurrentStarSystemObject[selectedWeatherType];
+        const [probability, symbolWeather, efficiencyWeather] = weatherTable[selectedWeatherType];
 
         const statValueSpan = document.getElementById('stat7');
-        const statTitleSpan = statValueSpan.previousElementSibling;
+        const statTitleSpan = statValueSpan?.previousElementSibling;
 
-        switch (selectedWeatherType) {
-            case 'sunny':
-                statValueSpan.classList.add('green-ready-text');
-                statValueSpan.classList.remove('warning-orange-text');
-                statValueSpan.classList.remove('red-disabled-text');
-                break;
-            case 'cloudy':
-            case 'rain':
-                statValueSpan.classList.remove('green-ready-text');
-                statValueSpan.classList.add('warning-orange-text');
-                statValueSpan.classList.remove('red-disabled-text');
-                if (selectedWeatherType === 'rain') {
-                    showWeatherNotification('rain');
-                }
-                break;
-            case 'volcano':
-                statValueSpan.classList.remove('green-ready-text');
-                statValueSpan.classList.remove('warning-orange-text');
-                statValueSpan.classList.add('red-disabled-text');
-                showWeatherNotification('volcano');
-                break;  
+        if (statValueSpan) {
+            switch (selectedWeatherType) {
+                case 'sunny':
+                    statValueSpan.classList.add('green-ready-text');
+                    statValueSpan.classList.remove('warning-orange-text');
+                    statValueSpan.classList.remove('red-disabled-text');
+                    break;
+                case 'cloudy':
+                case 'rain':
+                    statValueSpan.classList.remove('green-ready-text');
+                    statValueSpan.classList.add('warning-orange-text');
+                    statValueSpan.classList.remove('red-disabled-text');
+                    if (selectedWeatherType === 'rain') {
+                        showWeatherNotification('rain');
+                    }
+                    break;
+                case 'volcano':
+                    statValueSpan.classList.remove('green-ready-text');
+                    statValueSpan.classList.remove('warning-orange-text');
+                    statValueSpan.classList.add('red-disabled-text');
+                    showWeatherNotification('volcano');
+                    break;  
+            }
+
+            if (statTitleSpan) {
+                statTitleSpan.textContent = `${capitaliseString(getCurrentStarSystem())}:`;
+            }
+            statValueSpan.textContent = `${Math.floor(efficiencyWeather * 100)}% ${symbolWeather}`;
         }
-
-        statTitleSpan.textContent = `${capitaliseString(getCurrentStarSystem())}:`;
-        statValueSpan.textContent = `${Math.floor(efficiencyWeather * 100)}% ${symbolWeather}`;
         setCurrentStarSystemWeatherEfficiency([getCurrentStarSystem(), efficiencyWeather, selectedWeatherType]);
     }
 
