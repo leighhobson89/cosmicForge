@@ -2465,7 +2465,7 @@ export function setCompoundRecipePricesAfterRepeatables() {
             const currentRatio = getResourceDataObject('compounds', [compoundKey, ratioKey]);
 
             if (currentRatio > 0) {
-                const newRatio = Math.max(1, currentRatio * 0.95);
+                const newRatio = Math.max(1, Math.ceil(currentRatio * 0.95));
                 setResourceDataObject(newRatio, 'compounds', [compoundKey, ratioKey]);
             }
         }
@@ -2510,16 +2510,8 @@ export function setCompoundRecipePricesAfterRepeatables() {
 
         for (const [label, baseMultiplier] of Object.entries(quantitiesToUpdate)) {
             const parts = sources.map(({ compound, ratio }) => {
-                const amount = ratio * baseMultiplier;
-                let formatted;
-
-                if (amount >= 1000000) {
-                    formatted = `${(amount / 1000000).toFixed(amount % 1000000 === 0 ? 0 : 1)}M`;
-                } else if (amount >= 1000) {
-                    formatted = `${(amount / 1000).toFixed(amount % 1000 === 0 ? 0 : 1)}K`;
-                } else {
-                    formatted = Math.round(amount);
-                }
+                const amount = Math.round(ratio * baseMultiplier);
+                const formatted = amount.toLocaleString('en-US');
 
                 return `${formatted} ${compound}`;
             });
@@ -8959,8 +8951,60 @@ function startUpdateEnergyTimers(elementName, action) {
 
 function formatAllNotationElements(element, notationType) {
         const originalContent = element.innerHTML;
-        const formattedContent = originalContent.replace(/-?\d+(\.\d+)?/g, match => {
-            let number = parseFloat(match);
+        const parseDisplayNumber = (raw) => {
+            if (typeof raw !== 'string') {
+                return NaN;
+            }
+
+            const trimmed = raw.trim();
+            if (trimmed === '') {
+                return NaN;
+            }
+
+            if (/e/i.test(trimmed)) {
+                const n = Number(trimmed);
+                return Number.isFinite(n) ? n : NaN;
+            }
+
+            const commaCount = (trimmed.match(/,/g) || []).length;
+            const dotCount = (trimmed.match(/\./g) || []).length;
+
+            let normalised = trimmed;
+
+            if (commaCount > 0 && dotCount > 0) {
+                normalised = normalised.replace(/,/g, '');
+            } else if (dotCount > 1) {
+                const parts = normalised.split('.');
+                normalised = parts.slice(0, -1).join('') + '.' + parts[parts.length - 1];
+            } else if (commaCount > 1) {
+                normalised = normalised.replace(/,/g, '');
+            } else if (commaCount === 1 && dotCount === 0) {
+                normalised = normalised.replace(/,/g, '');
+            }
+
+            const n = Number(normalised);
+            return Number.isFinite(n) ? n : NaN;
+        };
+
+        const formatNormalNumber = (num) => {
+            if (!Number.isFinite(num)) {
+                return String(num);
+            }
+
+            const roundedInt = Math.round(num);
+            if (Math.abs(num - roundedInt) < 1e-6) {
+                return roundedInt.toLocaleString('en-US');
+            }
+
+            const rounded = Math.round(num * 1e6) / 1e6;
+            return rounded.toLocaleString('en-US', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 6,
+            });
+        };
+
+        const formattedContent = originalContent.replace(/-?\d+(?:[.,]\d+)*/g, match => {
+            let number = parseDisplayNumber(match);
 
             if (isNaN(number)) {
                 console.warn(`Invalid number found: ${match}`);
@@ -8968,7 +9012,7 @@ function formatAllNotationElements(element, notationType) {
             }
 
             if (notationType === 'normal') {
-                return number;
+                return formatNormalNumber(number);
             } else if (notationType === 'normalCondensed') {
                 if (element.id === 'cashStat') {
                     const formatNumber = (num, divisor) => {
@@ -9432,7 +9476,7 @@ function getConstituentComponents(createCompoundDescriptionString) {
 
 function unpackConstituentPartsObject(constituentComponents) {
     if (constituentComponents.compoundToCreateQuantity) {
-        constituentComponents.compoundToCreateQuantity = parseNumber(constituentComponents.compoundToCreateQuantity);
+        constituentComponents.compoundToCreateQuantity = Math.round(parseNumber(constituentComponents.compoundToCreateQuantity));
     }
 
     for (let i = 1; i <= 4; i++) {
@@ -9441,7 +9485,7 @@ function unpackConstituentPartsObject(constituentComponents) {
 
         if (quantityValue && quantityValue !== 0) {
             // Convert the numeric string to a number
-            constituentComponents[quantityKey] = parseNumber(quantityValue);
+            constituentComponents[quantityKey] = Math.round(parseNumber(quantityValue));
         }
 
         let nameKey = `constituentPartName${i}`;

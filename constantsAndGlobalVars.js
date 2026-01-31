@@ -2386,10 +2386,10 @@ export function setCreateCompoundPreview(compoundToCreate, dropDownString) {
     const constituentParts3 = getResourceDataObject('compounds', [compoundToCreate, 'createsFrom3'])[0];
     const constituentParts4 = getResourceDataObject('compounds', [compoundToCreate, 'createsFrom4'])[0];
 
-    const constituentPartsRatio1 = getResourceDataObject('compounds', [compoundToCreate, 'createsFromRatio1']) || 0;
-    const constituentPartsRatio2 = getResourceDataObject('compounds', [compoundToCreate, 'createsFromRatio2']) || 0;
-    const constituentPartsRatio3 = getResourceDataObject('compounds', [compoundToCreate, 'createsFromRatio3']) || 0;
-    const constituentPartsRatio4 = getResourceDataObject('compounds', [compoundToCreate, 'createsFromRatio4']) || 0;
+    const constituentPartsRatio1 = Math.max(0, Math.round(getResourceDataObject('compounds', [compoundToCreate, 'createsFromRatio1']) || 0));
+    const constituentPartsRatio2 = Math.max(0, Math.round(getResourceDataObject('compounds', [compoundToCreate, 'createsFromRatio2']) || 0));
+    const constituentPartsRatio3 = Math.max(0, Math.round(getResourceDataObject('compounds', [compoundToCreate, 'createsFromRatio3']) || 0));
+    const constituentPartsRatio4 = Math.max(0, Math.round(getResourceDataObject('compounds', [compoundToCreate, 'createsFromRatio4']) || 0));
 
     const constituentParts1Quantity = type1 ? getResourceDataObject(type1, [constituentParts1, 'quantity']) || 0 : 0;
     const constituentParts2Quantity = type2 ? getResourceDataObject(type2, [constituentParts2, 'quantity']) || 0 : 0;
@@ -2416,87 +2416,87 @@ export function setCreateCompoundPreview(compoundToCreate, dropDownString) {
     switch (amount) {
         case 'Fill To Capacity':
             createAmount = Math.min(maxCompoundToCreate, availableStorage);
-            constituentPartsQuantityNeeded1 = createAmount * constituentPartsRatio1;
-            constituentPartsQuantityNeeded2 = createAmount * constituentPartsRatio2;
-            constituentPartsQuantityNeeded3 = createAmount * constituentPartsRatio3;
-            constituentPartsQuantityNeeded4 = createAmount * constituentPartsRatio4;
+            constituentPartsQuantityNeeded1 = Math.round(createAmount * constituentPartsRatio1);
+            constituentPartsQuantityNeeded2 = Math.round(createAmount * constituentPartsRatio2);
+            constituentPartsQuantityNeeded3 = Math.round(createAmount * constituentPartsRatio3);
+            constituentPartsQuantityNeeded4 = Math.round(createAmount * constituentPartsRatio4);
             break;
         case 'Max Possible':
             createAmount = Math.floor(maxCompoundToCreate * 1);
-            constituentPartsQuantityNeeded1 = createAmount * constituentPartsRatio1;
-            constituentPartsQuantityNeeded2 = createAmount * constituentPartsRatio2;
-            constituentPartsQuantityNeeded3 = createAmount * constituentPartsRatio3;
-            constituentPartsQuantityNeeded4 = createAmount * constituentPartsRatio4;
+            constituentPartsQuantityNeeded1 = Math.round(createAmount * constituentPartsRatio1);
+            constituentPartsQuantityNeeded2 = Math.round(createAmount * constituentPartsRatio2);
+            constituentPartsQuantityNeeded3 = Math.round(createAmount * constituentPartsRatio3);
+            constituentPartsQuantityNeeded4 = Math.round(createAmount * constituentPartsRatio4);
             break;
         case 'Up to 75%':
             createAmount = Math.floor(maxCompoundToCreate * 0.75);
-            constituentPartsQuantityNeeded1 = createAmount * constituentPartsRatio1;
-            constituentPartsQuantityNeeded2 = createAmount * constituentPartsRatio2;
-            constituentPartsQuantityNeeded3 = createAmount * constituentPartsRatio3;
-            constituentPartsQuantityNeeded4 = createAmount * constituentPartsRatio4;
+            constituentPartsQuantityNeeded1 = Math.round(createAmount * constituentPartsRatio1);
+            constituentPartsQuantityNeeded2 = Math.round(createAmount * constituentPartsRatio2);
+            constituentPartsQuantityNeeded3 = Math.round(createAmount * constituentPartsRatio3);
+            constituentPartsQuantityNeeded4 = Math.round(createAmount * constituentPartsRatio4);
             break;
         case 'Up to 67%':
             createAmount = Math.floor(maxCompoundToCreate * (2 / 3));
-            constituentPartsQuantityNeeded1 = createAmount * constituentPartsRatio1;
-            constituentPartsQuantityNeeded2 = createAmount * constituentPartsRatio2;
-            constituentPartsQuantityNeeded3 = createAmount * constituentPartsRatio3;
-            constituentPartsQuantityNeeded4 = createAmount * constituentPartsRatio4;
+            constituentPartsQuantityNeeded1 = Math.round(createAmount * constituentPartsRatio1);
+            constituentPartsQuantityNeeded2 = Math.round(createAmount * constituentPartsRatio2);
+            constituentPartsQuantityNeeded3 = Math.round(createAmount * constituentPartsRatio3);
+            constituentPartsQuantityNeeded4 = Math.round(createAmount * constituentPartsRatio4);
             break;
         case 'Up to 50%':
             createAmount = Math.floor(maxCompoundToCreate * 0.5);
-            constituentPartsQuantityNeeded1 = createAmount * constituentPartsRatio1;
-            constituentPartsQuantityNeeded2 = createAmount * constituentPartsRatio2;
-            constituentPartsQuantityNeeded3 = createAmount * constituentPartsRatio3;
-            constituentPartsQuantityNeeded4 = createAmount * constituentPartsRatio4;
+            constituentPartsQuantityNeeded1 = Math.round(createAmount * constituentPartsRatio1);
+            constituentPartsQuantityNeeded2 = Math.round(createAmount * constituentPartsRatio2);
+            constituentPartsQuantityNeeded3 = Math.round(createAmount * constituentPartsRatio3);
+            constituentPartsQuantityNeeded4 = Math.round(createAmount * constituentPartsRatio4);
             break;
         case 'Up to 33%':
             createAmount = Math.floor(maxCompoundToCreate * (1 / 3));
-            constituentPartsQuantityNeeded1 = createAmount * constituentPartsRatio1;
-            constituentPartsQuantityNeeded2 = createAmount * constituentPartsRatio2;
-            constituentPartsQuantityNeeded3 = createAmount * constituentPartsRatio3;
-            constituentPartsQuantityNeeded4 = createAmount * constituentPartsRatio4;
+            constituentPartsQuantityNeeded1 = Math.round(createAmount * constituentPartsRatio1);
+            constituentPartsQuantityNeeded2 = Math.round(createAmount * constituentPartsRatio2);
+            constituentPartsQuantityNeeded3 = Math.round(createAmount * constituentPartsRatio3);
+            constituentPartsQuantityNeeded4 = Math.round(createAmount * constituentPartsRatio4);
             break;
         case '50000':
             createAmount = Math.min(maxCompoundToCreate, 50000);
-            constituentPartsQuantityNeeded1 = createAmount * constituentPartsRatio1;
-            constituentPartsQuantityNeeded2 = createAmount * constituentPartsRatio2;
-            constituentPartsQuantityNeeded3 = createAmount * constituentPartsRatio3;
-            constituentPartsQuantityNeeded4 = createAmount * constituentPartsRatio4;
+            constituentPartsQuantityNeeded1 = Math.round(createAmount * constituentPartsRatio1);
+            constituentPartsQuantityNeeded2 = Math.round(createAmount * constituentPartsRatio2);
+            constituentPartsQuantityNeeded3 = Math.round(createAmount * constituentPartsRatio3);
+            constituentPartsQuantityNeeded4 = Math.round(createAmount * constituentPartsRatio4);
             break;
         case '5000':
             createAmount = Math.min(maxCompoundToCreate, 5000);
-            constituentPartsQuantityNeeded1 = createAmount * constituentPartsRatio1;
-            constituentPartsQuantityNeeded2 = createAmount * constituentPartsRatio2;
-            constituentPartsQuantityNeeded3 = createAmount * constituentPartsRatio3;
-            constituentPartsQuantityNeeded4 = createAmount * constituentPartsRatio4;
+            constituentPartsQuantityNeeded1 = Math.round(createAmount * constituentPartsRatio1);
+            constituentPartsQuantityNeeded2 = Math.round(createAmount * constituentPartsRatio2);
+            constituentPartsQuantityNeeded3 = Math.round(createAmount * constituentPartsRatio3);
+            constituentPartsQuantityNeeded4 = Math.round(createAmount * constituentPartsRatio4);
             break;
         case '500':
             createAmount = Math.min(maxCompoundToCreate, 500);
-            constituentPartsQuantityNeeded1 = createAmount * constituentPartsRatio1;
-            constituentPartsQuantityNeeded2 = createAmount * constituentPartsRatio2;
-            constituentPartsQuantityNeeded3 = createAmount * constituentPartsRatio3;
-            constituentPartsQuantityNeeded4 = createAmount * constituentPartsRatio4;
+            constituentPartsQuantityNeeded1 = Math.round(createAmount * constituentPartsRatio1);
+            constituentPartsQuantityNeeded2 = Math.round(createAmount * constituentPartsRatio2);
+            constituentPartsQuantityNeeded3 = Math.round(createAmount * constituentPartsRatio3);
+            constituentPartsQuantityNeeded4 = Math.round(createAmount * constituentPartsRatio4);
             break;
         case '50':
             createAmount = Math.min(maxCompoundToCreate, 50);
-            constituentPartsQuantityNeeded1 = createAmount * constituentPartsRatio1;
-            constituentPartsQuantityNeeded2 = createAmount * constituentPartsRatio2;
-            constituentPartsQuantityNeeded3 = createAmount * constituentPartsRatio3;
-            constituentPartsQuantityNeeded4 = createAmount * constituentPartsRatio4;
+            constituentPartsQuantityNeeded1 = Math.round(createAmount * constituentPartsRatio1);
+            constituentPartsQuantityNeeded2 = Math.round(createAmount * constituentPartsRatio2);
+            constituentPartsQuantityNeeded3 = Math.round(createAmount * constituentPartsRatio3);
+            constituentPartsQuantityNeeded4 = Math.round(createAmount * constituentPartsRatio4);
             break;
         case '5':
             createAmount = Math.min(maxCompoundToCreate, 5);
-            constituentPartsQuantityNeeded1 = createAmount * constituentPartsRatio1;
-            constituentPartsQuantityNeeded2 = createAmount * constituentPartsRatio2;
-            constituentPartsQuantityNeeded3 = createAmount * constituentPartsRatio3;
-            constituentPartsQuantityNeeded4 = createAmount * constituentPartsRatio4;
+            constituentPartsQuantityNeeded1 = Math.round(createAmount * constituentPartsRatio1);
+            constituentPartsQuantityNeeded2 = Math.round(createAmount * constituentPartsRatio2);
+            constituentPartsQuantityNeeded3 = Math.round(createAmount * constituentPartsRatio3);
+            constituentPartsQuantityNeeded4 = Math.round(createAmount * constituentPartsRatio4);
             break;
         case '1':
             createAmount = Math.min(maxCompoundToCreate, 1);
-            constituentPartsQuantityNeeded1 = createAmount * constituentPartsRatio1;
-            constituentPartsQuantityNeeded2 = createAmount * constituentPartsRatio2;
-            constituentPartsQuantityNeeded3 = createAmount * constituentPartsRatio3;
-            constituentPartsQuantityNeeded4 = createAmount * constituentPartsRatio4;
+            constituentPartsQuantityNeeded1 = Math.round(createAmount * constituentPartsRatio1);
+            constituentPartsQuantityNeeded2 = Math.round(createAmount * constituentPartsRatio2);
+            constituentPartsQuantityNeeded3 = Math.round(createAmount * constituentPartsRatio3);
+            constituentPartsQuantityNeeded4 = Math.round(createAmount * constituentPartsRatio4);
             break;
         default:
             createAmount = 0;
@@ -2523,16 +2523,16 @@ export function setCompoundCreatePreview(compoundToCreate, createAmount, amountC
     let constituentParts = [];
     
     if (amountConstituentPart1 > 0) {
-        constituentParts.push(`${amountConstituentPart1} ${constituentPartString1}`);
+        constituentParts.push(`${Math.round(amountConstituentPart1)} ${constituentPartString1}`);
     }
     if (amountConstituentPart2 > 0) {
-        constituentParts.push(`${amountConstituentPart2} ${constituentPartString2}`);
+        constituentParts.push(`${Math.round(amountConstituentPart2)} ${constituentPartString2}`);
     }
     if (amountConstituentPart3 > 0) {
-        constituentParts.push(`${amountConstituentPart3} ${constituentPartString3}`);
+        constituentParts.push(`${Math.round(amountConstituentPart3)} ${constituentPartString3}`);
     }
     if (amountConstituentPart4 > 0) {
-        constituentParts.push(`${amountConstituentPart4} ${constituentPartString4}`);
+        constituentParts.push(`${Math.round(amountConstituentPart4)} ${constituentPartString4}`);
     }
     
     const suffix = (compoundToCreateQuantity + createAmount > compoundToCreateStorage) ? '!' : '';

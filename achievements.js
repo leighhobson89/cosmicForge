@@ -196,7 +196,7 @@ export function addAchievementBonus(achievement) {
                             const currentRatio = getResourceDataObject('compounds', [compoundKey, ratioKey]);
 
                             if (currentRatio > 0) {
-                                const newRatio = Math.max(1, currentRatio * quantity);
+                                const newRatio = Math.max(1, Math.round(currentRatio * quantity));
                                 setResourceDataObject(newRatio, 'compounds', [compoundKey, ratioKey]);
                             }
                         }
@@ -241,16 +241,8 @@ export function addAchievementBonus(achievement) {
 
                         for (const [label, baseMultiplier] of Object.entries(quantitiesToUpdate)) {
                             const parts = sources.map(({ compound: compound, ratio }) => {
-                                const amount = ratio * baseMultiplier;
-                                let formatted;
-
-                                if (amount >= 1000000) {
-                                    formatted = `${(amount / 1000000).toFixed(amount % 1000000 === 0 ? 0 : 1)}M`;
-                                } else if (amount >= 1000) {
-                                    formatted = `${(amount / 1000).toFixed(amount % 1000 === 0 ? 0 : 1)}K`;
-                                } else {
-                                    formatted = Math.round(amount);
-                                }
+                                const amount = Math.round(ratio * baseMultiplier);
+                                const formatted = amount.toLocaleString('en-US');
 
                                 return `${formatted} ${compound}`;
                             });
