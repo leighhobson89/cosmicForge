@@ -421,12 +421,12 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
         }
     }
 
-    if (heading === 'Star Data') {        
+    if (heading === 'Star Data') {
         let currentStarName = getCurrentStarSystem();
         let starsData = getStarSystemDataObject('stars');
         const settledStars = getSettledStars();
         const factoryStarsList = getFactoryStarsArray();
-        
+
         let starsObject = Object.fromEntries(
             Object.entries(starsData).filter(([starName]) => {
                 if (starName === currentStarName || starName === 'destinationStar') return false;
@@ -439,18 +439,23 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
 
                 return !isMegastructure;
             })
-        );        
+        );
 
-        const starLegendRow = createOptionRow(
-            `starLegendRow`,
-            null,
-            `Sort By:`,
+        const starLegendCells = document.createElement('div');
+        starLegendCells.classList.add('star-table-cells');
+        starLegendCells.append(
             createTextElement(
                 `Distance`,
                 'starLegendDistance',
                 ['sort-by', 'label-star'],
                 (event) => handleSortStarClick('distance')
-            ),           
+            ),
+            createTextElement(
+                `Type`,
+                'starLegendType',
+                ['sort-by', 'label-star'],
+                (event) => handleSortStarClick('type')
+            ),
             createTextElement(
                 `Weather`,
                 'starLegendWeatherProb',
@@ -474,7 +479,18 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                 'starLegendAscendencyPoints',
                 ['no-sort', 'label-star'],
                 (event) => handleSortStarClick('ascendencyPoints')
-            ),
+            )
+        );
+
+        const starLegendRow = createOptionRow(
+            `starLegendRow`,
+            null,
+            `Sort By:`,
+            starLegendCells,
+            null,
+            null,
+            null,
+            null,
             ``,
             '',
             null,
@@ -488,16 +504,16 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             'star',
             [true, '10%', '90%']
         );
-    
+
         optionContentElement.appendChild(starLegendRow);
-    
+
         let sortedStars = sortStarTable(starsObject, getSortStarMethod());
 
         Object.entries(sortedStars).forEach(([nameStar, star]) => {
             const factoryStarStatus = getStarSystemDataObject('stars', [nameStar, 'factoryStar']);
 
-            const isFactoryStar = factoryStarsList.includes(nameStar) && 
-            (!Number.isInteger(Number(factoryStarStatus)) || isNaN(Number(factoryStarStatus))) 
+            const isFactoryStar = factoryStarsList.includes(nameStar) &&
+            (!Number.isInteger(Number(factoryStarStatus)) || isNaN(Number(factoryStarStatus)))
             ? factoryStarStatus
             : false;
 
@@ -508,41 +524,33 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             const safeDistance = Number.isFinite(distance) ? distance : Number(distance ?? 0);
             const safeFuel = Number.isFinite(fuel) ? fuel : Number(fuel ?? 0);
             const safePrecipitationType = precipitationType ? capitaliseString(precipitationType) : 'Unknown';
+            const safeStarType = star?.starType ?? 'A';
 
-            const starRowName = `starRow_${name}`;
             const weatherIconSpan = `<span class="${safeWeatherTendency[2]}">${safeWeatherTendency[0]}</span>`;
             const weatherText = `${weatherIconSpan} (${safeWeatherTendency[1]}%)`;
 
             const currentAntimatter = getResourceDataObject('antimatter', ['quantity']);
             const hasEnoughFuel = currentAntimatter >= fuel;
-            
             const fuelClass = hasEnoughFuel ? 'green-ready-text' : 'red-disabled-text';
 
-            const starNameClass = !hasEnoughFuel 
-                ? 'red-disabled-text' 
-                : isFactoryStar 
-                    ? 'factory-star-text' 
-                    : 'green-ready-text';
-            
-            const starNameLabel = [
-                `${capitaliseWordsWithRomanNumerals(nameStar)}:`,
-                starNameClass
-            ];
-        
-            const starDataRow = createOptionRow(
-                `${starRowName}`,
-                null,
-                starNameLabel,
+            const starDataCells = document.createElement('div');
+            starDataCells.classList.add('star-table-cells');
+            starDataCells.append(
                 createTextElement(
                     `${safeDistance.toFixed(2)} ly`,
                     'starInfoContainerDistance',
                     ['value-star', 'distance-star', fuelClass]
-                ), 
+                ),
+                createTextElement(
+                    `${safeStarType}`,
+                    'starInfoContainerType',
+                    ['value-star', 'type-star']
+                ),
                 createTextElement(
                     weatherText,
                     'starInfoContainerWeatherTendency',
                     ['value-star']
-                ),                       
+                ),
                 createTextElement(
                     `${safePrecipitationType}`,
                     'starInfoContainerPrecipitationType',
@@ -557,7 +565,31 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                     `${displayAscendencyPoints}`,
                     'starInfoContainerAscendencyPoints',
                     ['value-star', 'fuel-star', 'notation']
-                ),
+                )
+            );
+
+            const starNameClass = !hasEnoughFuel
+                ? 'red-disabled-text'
+                : isFactoryStar
+                    ? 'factory-star-text'
+                    : 'green-ready-text';
+
+            const starNameLabel = [
+                `${capitaliseWordsWithRomanNumerals(nameStar)}:`,
+                starNameClass
+            ];
+
+            const starRowName = `starRow_${name}`;
+
+            const starDataRow = createOptionRow(
+                `${starRowName}`,
+                null,
+                starNameLabel,
+                starDataCells,
+                null,
+                null,
+                null,
+                null,
                 ``,
                 '',
                 null,
@@ -571,11 +603,10 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                 'star',
                 [true, '10%', '90%']
             );
-        
-            optionContentElement.appendChild(starDataRow);
-        });        
-    }
 
+            optionContentElement.appendChild(starDataRow);
+        });
+    }
     if (heading === 'Star Ship') {
         if (!starDestinationInfoRedraw) {
             const destinationStar = getDestinationStar();

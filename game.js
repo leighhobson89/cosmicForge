@@ -478,7 +478,7 @@ import { playClickSfx, sfxPlayer, weatherAmbienceManager, backgroundAudio } from
 import { timerManager } from './timerManager.js';
 import { timerManagerDelta } from './timerManagerDelta.js';
 
-import { initialiseDescriptions, megaStructureTableText } from './descriptions.js';
+import { initialiseDescriptions, megaStructureTableText, getStarTypeByName } from './descriptions.js';
 
 import { drawTab5Content } from './drawTab5Content.js';
 import { handleTechnologyButtonClick } from './drawTab3Content.js';
@@ -10830,7 +10830,8 @@ export function generateStarDataAndAddToDataObject(starElement, distance) {
             volcano: [weatherProbabilities.volcano, weatherTypes.volcano[0], 0.05, weatherTypes.volcano[1]]
         },
         weatherTendency: weatherTendency,
-        factoryStar: factoryStar ? factoryStar : false
+        factoryStar: factoryStar ? factoryStar : false,
+        starType: getStarTypeByName(starElement.id)
     };
 
     setStarSystemDataObject(newStarData, 'stars', [starElement.id.toLowerCase()]);
