@@ -5,3 +5,5 @@ icons
 builds
 html-report
 tools/analytics-dashboard/persistentJSON.json
+analytics.bat
+analytics.ps1

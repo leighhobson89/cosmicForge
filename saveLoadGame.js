@@ -124,6 +124,19 @@ export async function destroySaveGameOnCloud() {
     }
 }
 
+function createCircularReplacer() {
+    const seen = new WeakSet();
+    return function (_key, value) {
+        if (value && typeof value === 'object') {
+            if (seen.has(value)) {
+                return null;
+            }
+            seen.add(value);
+        }
+        return value;
+    };
+}
+
 
 export async function saveGameToCloud(gameData, type) {
     try {
@@ -205,7 +218,29 @@ export function saveGame(type) {
     const gameState = captureGameStatusForSaving(type);
     gameState.timeStamp = new Date().toISOString();
 
-    const serializedGameState = JSON.stringify(gameState);
+    let serializedGameState;
+    try {
+        serializedGameState = JSON.stringify(gameState);
+    } catch (err) {
+        try {
+            for (const key of Object.keys(gameState || {})) {
+                try {
+                    JSON.stringify(gameState[key]);
+                } catch {
+                    console.error('saveGame non-serializable key:', key);
+                }
+            }
+        } catch {
+        }
+        try {
+            serializedGameState = JSON.stringify(gameState, createCircularReplacer());
+        } catch (err2) {
+            console.error('saveGame failed to serialize game state:', err2);
+            setSaveData(null);
+            return;
+        }
+    }
+
     const compressedSaveData = LZString.compressToEncodedURIComponent(serializedGameState);
 
     const saveGameArea = document.getElementById('exportSaveArea');
