@@ -614,6 +614,13 @@ async function getEventsAfter({ afterIso, limit, inclusive }) {
   return out;
 }
 
+const DEFAULT_PORT = 65501;
+const PORT = clamp(
+  toInt(process.env.ANALYTICS_DASHBOARD_PORT ?? process.env.PORT, DEFAULT_PORT),
+  1,
+  65535
+);
+
 const server = http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url || '/', 'http://localhost');
@@ -720,9 +727,16 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(0, '127.0.0.1', () => {
-  const addr = server.address();
-  const port = typeof addr === 'object' && addr ? addr.port : 0;
+server.on('error', (err) => {
+  if (err && err.code === 'EADDRINUSE') {
+    console.error(`Port ${PORT} is already in use. Close the other dashboard server or set ANALYTICS_DASHBOARD_PORT.`);
+    process.exit(1);
+  }
+  console.error(err);
+  process.exit(1);
+});
+
+server.listen(PORT, '127.0.0.1', () => {
   console.log(`📊 Cosmic Forge Analytics Dashboard`);
-  console.log(`🔁 Persistent (all‑time) dashboard: http://127.0.0.1:${port}`);
+  console.log(`🔁 Persistent (all‑time) dashboard: http://127.0.0.1:${PORT}`);
 });
