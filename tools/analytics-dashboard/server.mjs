@@ -34,7 +34,8 @@ const SUPABASE_URL = process.env.SUPABASE_URL || 'https://riogcxvtomyjlzkcnujf.s
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJpb2djeHZ0b215amx6a2NudWpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQwMjY1NDgsImV4cCI6MjA1OTYwMjU0OH0.HH7KXPrcORvl6Wiefupl422gRYxAa_kFCRM2-puUcsQ';
 const TABLE = process.env.SUPABASE_ANALYTICS_TABLE || 'CosmicForge_analytics_events';
 
-const PERSISTENT_ROLLUP_PATH = path.join(repoRoot, 'tools', 'analytics-dashboard', 'persistentJSON.json');
+const ROLLUP_TABLE = process.env.SUPABASE_ROLLUP_TABLE || 'analytics_rollups';
+const ROLLUP_ID = process.env.SUPABASE_ROLLUP_ID || 'latest';
 
 async function supabaseFetch(pathname, searchParams) {
   const url = new URL(`${SUPABASE_URL}/rest/v1/${pathname}`);
@@ -56,6 +57,44 @@ async function supabaseFetch(pathname, searchParams) {
   }
 
   return text ? JSON.parse(text) : null;
+}
+
+async function supabaseUpsert(pathname, rows) {
+  const url = new URL(`${SUPABASE_URL}/rest/v1/${pathname}`);
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`,
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      Prefer: 'resolution=merge-duplicates,return=representation',
+    },
+    body: JSON.stringify(rows),
+  });
+
+  const text = await res.text();
+  if (!res.ok) {
+    throw new Error(`Supabase ${res.status}: ${text}`);
+  }
+  return text ? JSON.parse(text) : null;
+}
+
+async function getPersistentRollup() {
+  const params = new URLSearchParams();
+  params.set('select', 'id,rollup,updated_at');
+  params.set('id', `eq.${ROLLUP_ID}`);
+  const rows = await supabaseFetch(ROLLUP_TABLE, params);
+  const row = Array.isArray(rows) && rows.length ? rows[0] : null;
+  return row?.rollup && typeof row.rollup === 'object' ? row.rollup : null;
+}
+
+async function setPersistentRollup(rollup) {
+  const now = new Date().toISOString();
+  const rows = await supabaseUpsert(ROLLUP_TABLE, [{ id: ROLLUP_ID, rollup, updated_at: now }]);
+  const row = Array.isArray(rows) && rows.length ? rows[0] : null;
+  return row?.rollup && typeof row.rollup === 'object' ? row.rollup : rollup;
 }
 
 function toInt(value, fallback) {
@@ -587,7 +626,7 @@ const server = http.createServer(async (req, res) => {
 
       if (url.pathname === '/api/persistent-rollup') {
         if (req.method === 'GET') {
-          const rollup = await readJsonFileIfExists(PERSISTENT_ROLLUP_PATH);
+          const rollup = await getPersistentRollup();
           writeJson(res, 200, { rollup });
           return;
         }
@@ -608,7 +647,7 @@ const server = http.createServer(async (req, res) => {
           }
 
           const rollup = parsed.rollup && typeof parsed.rollup === 'object' ? parsed.rollup : parsed;
-          await writeJsonFileAtomic(PERSISTENT_ROLLUP_PATH, rollup);
+          await setPersistentRollup(rollup);
           writeJson(res, 200, { ok: true });
           return;
         }

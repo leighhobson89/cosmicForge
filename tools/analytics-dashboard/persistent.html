@@ -467,25 +467,22 @@
           const json = await res.json();
           if (!res.ok) throw new Error(json?.error || 'Failed to load rollup');
           const parsed = json?.rollup;
-          if (!parsed || typeof parsed !== 'object') return newRollup();
+          if (!parsed || typeof parsed !== 'object') {
+            return newRollup();
+          }
           return { ...newRollup(), ...parsed };
         } catch {
           return newRollup();
         }
       }
 
-      async function saveRollup(rollup) {
-        rollup.updatedAt = nowIso();
+      async function saveRollup(next) {
         try {
-          const res = await fetch('/api/persistent-rollup', {
-            method: 'POST',
+          await fetch('/api/persistent-rollup', {
+            method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ rollup }),
+            body: JSON.stringify({ rollup: next }),
           });
-          if (!res.ok) {
-            const json = await res.json().catch(() => ({}));
-            throw new Error(json?.error || 'Failed to save rollup');
-          }
         } catch {
           // ignore
         }
@@ -875,67 +872,7 @@
 
         try {
           $('status').textContent = 'Loading...';
-
-          if (!Array.isArray(rollup.knownRandomEventIds) || rollup.knownRandomEventIds.length === 0) {
-            try {
-              const idsRes = await fetch('/api/random-event-ids');
-              const idsJson = await idsRes.json();
-              if (idsRes.ok && Array.isArray(idsJson?.ids)) {
-                rollup.knownRandomEventIds = idsJson.ids;
-              }
-            } catch {
-              // ignore
-            }
-          }
-
-          if (!Array.isArray(rollup.knownAchievementIds) || rollup.knownAchievementIds.length === 0) {
-            try {
-              const idsRes = await fetch('/api/achievement-ids');
-              const idsJson = await idsRes.json();
-              if (idsRes.ok && Array.isArray(idsJson?.ids)) {
-                rollup.knownAchievementIds = idsJson.ids;
-              }
-            } catch {
-              // ignore
-            }
-          }
-
-          const after = rollup.cursorAfterIso;
-          const url = after ? `/api/events?after=${encodeURIComponent(after)}&inclusive=1` : '/api/events';
-
-          const res = await fetch(url);
-          const json = await res.json();
-          if (!res.ok) {
-            throw new Error(json?.error || 'Failed to fetch events');
-          }
-
-          const events = Array.isArray(json.events) ? json.events : [];
-
-          const lastTime = events.length ? events[events.length - 1].event_time : null;
-          const prevCursor = rollup.cursorAfterIso;
-          const prevTailKeys = rollup.cursorTailKeys && typeof rollup.cursorTailKeys === 'object' ? rollup.cursorTailKeys : {};
-          const nextTailKeys = lastTime && lastTime === prevCursor ? { ...prevTailKeys } : {};
-
-          for (const e of events) {
-            const isCursorTime = !!prevCursor && e.event_time === prevCursor;
-            const key = eventKey(e);
-            if (isCursorTime && prevTailKeys[key]) {
-              continue;
-            }
-
-            applyEvent(rollup, e);
-
-            if (lastTime && e.event_time === lastTime) {
-              nextTailKeys[key] = true;
-            }
-          }
-
-          if (json.nextCursor) {
-            rollup.cursorAfterIso = json.nextCursor;
-            rollup.cursorTailKeys = nextTailKeys;
-          }
-
-          await saveRollup(rollup);
+          rollup = await loadRollup();
           render(rollup);
           $('status').textContent = 'OK';
         } catch (err) {
