@@ -22,6 +22,8 @@ import {
 
 import { setAchievementIconImageUrls } from './resourceDataObject.js';
 
+import { getStarTypeByName } from './descriptions.js';
+
 import { showNotification } from './ui.js';
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getNavigatorLanguage } from './game.js';
@@ -716,6 +718,22 @@ export function migrateResourceData(saveData, objectType) {
             }
 
             saveData.version = 0.82;
+        }
+
+        if (saveData.version < 0.83) {
+            if (objectType === 'starSystemsData') {
+                if (saveData && saveData.stars && typeof saveData.stars === 'object') {
+                    for (const [starKey, starObj] of Object.entries(saveData.stars)) {
+                        if (!starObj || typeof starObj !== 'object') continue;
+                        if (starObj.starType === undefined || starObj.starType === null) {
+                            const lookupName = starObj.name ?? starKey;
+                            starObj.starType = getStarTypeByName(lookupName);
+                        }
+                    }
+                }
+            }
+
+            saveData.version = 0.83;
         }
 
         saveData.version += 0.001;

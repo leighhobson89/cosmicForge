@@ -462,7 +462,7 @@ export function initialiseDescriptions() {
     };
 
     rocketNames = {
-        version: 0.82,
+        version: 0.83,
         rocketDescription: "Build the launch pad to launch built rockets and mine asteroids for Antimatter.",
         [getRocketUserName('rocket1').toLowerCase()]: "Build the launch pad to launch built rockets and mine asteroids for Antimatter.",
         [getRocketUserName('rocket2').toLowerCase()]: "Build the launch pad to launch built rockets and mine asteroids for Antimatter.",
@@ -2690,16 +2690,26 @@ helpContent = {
 }
 
 starNames = [
-    "Sirius","Canopus","Arcturus","Sadalmelik","Capella","Rigel","Procyon","Betelgeuse","Altair","Aldebaran",
-    "Sterope","Antares","Pollux","Fomalhaut","Deneb","Mimosa","Regulus","Adhara","Castor","Shaula",
-    "Bellatrix","Elnath","Miaplacidus","Alnilam","Alnair","Alioth","Alnitak","Dubhe","Mirfak","Wezen",
-    "Sargas","Kaus Australis","Avior","Alkaid","Menkalinan","Atria","Alhena","Peacock","Tureis","Nunki",
-    "Mirzam","Alphard","Rasalhague","Caph","Zubenelgenubi","Electra","Hamal","Mintaka","Alsephina","Menkent",
-    "Enif","Tiaki","Ascella","Algol","Markab","Suhail","Zeta Ophiuchi","Kochab","Ankaa","Denebola",
-    "Vega","Azelfafage","Maia","Arkab Prior","Thuban","Izar","Ruchbah","Albireo","Almaaz","Dschubba",
-    "Algieba","Gomeisa","Hoedus II","Cebalrai","Nashira","Muscida","Kitalpha","Hyadum I","Eltanin","Yildun",
-    "Biham","Zubeneschamali","Alpherg","Alcor","Polaris","Pleione","Spica","Chara","Sadachbia","Rasalgethi",
-    "Barnards Star","Saiph","Hassaleh","Furud","Atik","Sadalsuud","Propus","Botein","Acamar","Anser"
+  ["Sirius", "A"], ["Canopus", "F"], ["Arcturus", "K"], ["Sadalmelik", "G"], ["Capella", "G"],
+  ["Rigel", "B"], ["Procyon", "F"], ["Betelgeuse", "M"], ["Altair", "A"], ["Aldebaran", "K"],
+  ["Sterope", "B"], ["Antares", "M"], ["Pollux", "K"], ["Fomalhaut", "A"], ["Deneb", "A"],
+  ["Mimosa", "B"], ["Regulus", "B"], ["Adhara", "B"], ["Castor", "A"], ["Shaula", "B"],
+  ["Bellatrix", "B"], ["Elnath", "B"], ["Miaplacidus", "A"], ["Alnilam", "B"], ["Alnair", "B"],
+  ["Alioth", "A"], ["Alnitak", "O"], ["Dubhe", "K"], ["Mirfak", "F"], ["Wezen", "F"],
+  ["Sargas", "F"], ["Kaus Australis", "B"], ["Avior", "K"], ["Alkaid", "B"], ["Menkalinan", "A"],
+  ["Atria", "K"], ["Alhena", "A"], ["Peacock", "B"], ["Tureis", "B"], ["Nunki", "B"],
+  ["Mirzam", "B"], ["Alphard", "K"], ["Rasalhague", "A"], ["Caph", "F"], ["Zubenelgenubi", "A"],
+  ["Electra", "B"], ["Hamal", "K"], ["Mintaka", "O"], ["Alsephina", "A"], ["Menkent", "K"],
+  ["Enif", "K"], ["Tiaki", "K"], ["Ascella", "A"], ["Algol", "B"], ["Markab", "B"],
+  ["Suhail", "K"], ["Zeta Ophiuchi", "O"], ["Kochab", "K"], ["Ankaa", "K"], ["Denebola", "A"],
+  ["Vega", "A"], ["Azelfafage", "F"], ["Maia", "B"], ["Arkab Prior", "A"], ["Thuban", "A"],
+  ["Izar", "K"], ["Ruchbah", "A"], ["Albireo", "K"], ["Almaaz", "F"], ["Dschubba", "B"],
+  ["Algieba", "K"], ["Gomeisa", "B"], ["Hoedus II", "G"], ["Cebalrai", "K"], ["Nashira", "F"],
+  ["Muscida", "A"], ["Kitalpha", "F"], ["Hyadum I", "K"], ["Eltanin", "K"], ["Yildun", "A"],
+  ["Biham", "A"], ["Zubeneschamali", "B"], ["Alpherg", "K"], ["Alcor", "A"], ["Polaris", "F"],
+  ["Pleione", "B"], ["Spica", "B"], ["Chara", "G"], ["Sadachbia", "F"], ["Rasalgethi", "M"],
+  ["Barnards Star", "M"], ["Saiph", "B"], ["Hassaleh", "K"], ["Furud", "F"], ["Atik", "F"],
+  ["Sadalsuud", "G"], ["Propus", "M"], ["Botein", "K"], ["Acamar", "A"], ["Anser", "G"]
 ];
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -3568,7 +3578,17 @@ export function replaceRocketNames(value) {
 }
 
 export function getStarNames() {
-    return [...starNames];
+    return starNames.map((entry) => entry?.[0]).filter(Boolean);
+}
+
+export function getStarTypeByName(name) {
+    const normalized = String(name ?? '').trim().toLowerCase();
+    if (!normalized) {
+        return 'A';
+    }
+
+    const match = starNames.find((entry) => String(entry?.[0] ?? '').toLowerCase() === normalized);
+    return match?.[1] ?? 'A';
 }
 
 export function getHelpContent(section, type) {

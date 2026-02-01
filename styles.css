@@ -1729,6 +1729,13 @@ button.red-disabled-text {
     text-align: center;
  }
 
+ .star-table-cells {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+ }
+
  .sort-by {
     color: var(--ready-text);
  }

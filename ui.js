@@ -8667,19 +8667,27 @@ export function handleSortStarClick(sortMethod) {
 export function sortStarTable(starsObject, sortMethod) {
     const labels = {
         distance: document.getElementById('starLegendDistance'),
+        type: document.getElementById('starLegendType'),
         weather: document.getElementById('starLegendWeatherProb'),
         precipitationType: document.getElementById('starLegendPrecipitationType'),
         fuel: document.getElementById('starLegendFuel'),
         ascendencyPoints: document.getElementById('starLegendAscendencyPoints')
     };
 
-    Object.values(labels).forEach(label => label.classList.remove('sort-by'));
+    Object.values(labels).forEach(label => {
+        if (label) {
+            label.classList.remove('sort-by');
+        }
+    });
 
     if (labels[sortMethod]) {
         labels[sortMethod].classList.add('sort-by');
     }
 
     Object.entries(labels).forEach(([key, label]) => {
+        if (!label) {
+            return;
+        }
         if (key !== sortMethod) {
             label.classList.add('no-sort');
         }
@@ -8689,6 +8697,11 @@ export function sortStarTable(starsObject, sortMethod) {
         switch (sortMethod) {
             case "distance":
                 return starA.distance - starB.distance;
+            case "type": {
+                const typeA = String(starA.starType ?? 'A');
+                const typeB = String(starB.starType ?? 'A');
+                return typeA.localeCompare(typeB);
+            }
             case "weather":
                 const weatherPriority = {
                     "☀": 1,
