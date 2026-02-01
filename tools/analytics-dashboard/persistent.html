@@ -248,7 +248,13 @@
         const onlyWithStack = $('filterWithStack') ? $('filterWithStack').checked : false;
         const onlyLocal = $('filterOnlyLocal') ? $('filterOnlyLocal').checked : false;
 
-        const entries = Object.entries(rollup.jsErrorSignatures || {}).map(([signature, rec]) => ({ signature, ...rec }));
+        const hidden = rollup.hiddenJsErrorSignatures && typeof rollup.hiddenJsErrorSignatures === 'object'
+          ? rollup.hiddenJsErrorSignatures
+          : {};
+
+        const entries = Object.entries(rollup.jsErrorSignatures || {})
+          .filter(([signature]) => !hidden[signature])
+          .map(([signature, rec]) => ({ signature, ...rec }));
 
         const filtered = entries.filter((rec) => {
           const sample = rec.sample || {};
@@ -381,6 +387,7 @@
           feedbackComments: [],
 
           jsErrorSignatures: {},
+          hiddenJsErrorSignatures: {},
 
           // Sets
           uniqueSessions: {},
@@ -933,8 +940,13 @@
           rollup.jsErrorSignatures = {};
         }
 
+        if (!rollup.hiddenJsErrorSignatures || typeof rollup.hiddenJsErrorSignatures !== 'object') {
+          rollup.hiddenJsErrorSignatures = {};
+        }
+
         for (const sig of signatures) {
           delete rollup.jsErrorSignatures[sig];
+          rollup.hiddenJsErrorSignatures[sig] = true;
         }
         selectedJsErrorSignatures.clear();
 
