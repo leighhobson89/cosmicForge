@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cosmic Forge - Mechanics Map</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/tools/mechanics-map/styles.css" />
+</head>
+<body data-theme="terminal">
+<header class="topbar">
+  <div class="topbar-left">
+    <h1 class="title">Cosmic Forge - Mechanics Map</h1>
+    <div class="subtitle muted">Flow charts + searchable multipliers table (static dev tool)</div>
+    <div id="envWarning" class="env-warning muted small"></div>
+  </div>
+
+  <div class="topbar-right">
+    <div class="field">
+      <label for="theme">Theme</label>
+      <select id="theme">
+        <option value="terminal" selected>Terminal</option>
+        <option value="dark">Dark</option>
+        <option value="light">Light</option>
+        <option value="frosty">Frosty</option>
+        <option value="summer">Summer</option>
+        <option value="forest">Forest</option>
+      </select>
+    </div>
+  </div>
+</header>
+
+<main class="layout">
+  <section class="card">
+    <div class="card-header">
+      <h2 class="card-title">Flow Charts</h2>
+      <div class="card-actions">
+        <button id="btnDiagramCore" class="btn">Core Loop</button>
+        <button id="btnDiagramAutomation" class="btn">Automation</button>
+        <button id="btnDiagramMeta" class="btn">Meta Progression</button>
+        <button id="btnDiagramSpace" class="btn">Space & Travel</button>
+        <button id="btnDiagramFleet" class="btn">Fleet & Combat</button>
+        <button id="btnDiagramMega" class="btn">Megastructures & Black Hole</button>
+        <button id="btnDiagramUnlocks" class="btn">Unlocks & Stages</button>
+      </div>
+    </div>
+
+    <div id="diagramStatus" class="muted small"></div>
+    <div class="diagram-wrap">
+      <div id="diagram" class="mermaid"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-header">
+      <h2 class="card-title">Multipliers & Modifiers</h2>
+      <div class="card-actions">
+        <input id="search" class="input" placeholder="Search/filter rows (name, id, affects, notes, source...)" />
+        <button id="btnReload" class="btn">Reload From Code</button>
+      </div>
+    </div>
+
+    <div class="muted small">
+      Data is extracted from <span class="mono">resourceDataObject.js</span> by parsing the exported object literals.
+      This avoids importing the full game module graph in the browser.
+    </div>
+
+    <div id="loadStatus" class="muted small"></div>
+
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+        <tr>
+          <th>Source</th>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Affects</th>
+          <th>Magnitude</th>
+          <th>Stacking / Notes</th>
+          <th>Code</th>
+        </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-header">
+      <h2 class="card-title">Key Formulas (Quick Reference)</h2>
+    </div>
+
+    <div class="grid-2">
+      <div class="panel">
+        <h3 class="panel-title">Autobuyers (gross)</h3>
+        <pre class="pre">gross_per_second(resource, timerRatio) =
+  Σ tier( rate[tier] * quantity[tier] * timerRatio )
+
+Then apply situational multipliers (examples):
+- supplyChainDisruption: x(1 - percentDown/100) if it targets that item
+- smartAutoBuyers Ascendency buff: multiplies tier rate values
+- permanent resource/compound multipliers: may multiply tier rate values
+
+Net rates are also limited by storage/capacity and by recipe ratios (compounds).</pre>
+      </div>
+
+      <div class="panel">
+        <h3 class="panel-title">Compounds (auto-create)</h3>
+        <pre class="pre">auto_create_per_second(compound, timerRatio) =
+  min over ingredients i of ( gross_autobuyer_per_second(i) / ratio(i) )
+
+Also affected by:
+- storage full checks
+- supplyChainDisruption (per ingredient item)
+- automation unlocks / buffs</pre>
+      </div>
+    </div>
+
+    <div class="muted small">
+      These are *representative* formulas; the table above is meant to capture the exact modifier sources.
+    </div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script type="module" src="/tools/mechanics-map/script.js"></script>
+</body>
+</html>

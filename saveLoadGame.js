@@ -36,6 +36,7 @@ import { getStarNames, getStarTypeByName } from './descriptions.js';
 
 import { showNotification } from './ui.js';
 import { generateStarfield } from './ui.js';
+import { trackAnalyticsEvent } from './analytics.js';
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getNavigatorLanguage } from './game.js';
 
@@ -475,6 +476,8 @@ function patchOTypeMechanicActivatedForThisSave() {
     let hasRegulus = false;
     let hasMenkalinan = false;
     let foundUnexpectedOStar = false;
+    const foundOStars = [];
+    let unexpectedOStarName = null;
 
     for (const name of names) {
         const safeName = String(name ?? '').trim();
@@ -484,8 +487,10 @@ function patchOTypeMechanicActivatedForThisSave() {
         if (type !== 'O') continue;
 
         const lower = safeName.toLowerCase();
+        foundOStars.push(safeName);
         if (!requiredSet.has(lower)) {
             foundUnexpectedOStar = true;
+            unexpectedOStarName = safeName;
             break;
         }
 
@@ -495,8 +500,28 @@ function patchOTypeMechanicActivatedForThisSave() {
     }
 
     const ok = !foundUnexpectedOStar && hasMintaka && hasRegulus && hasMenkalinan;
-    if (getOTypeMechanicActivatedForThisSave() !== ok) {
+    const previous = getOTypeMechanicActivatedForThisSave();
+    if (previous !== ok) {
         setOTypeMechanicActivatedForThisSave(ok);
+    }
+
+    if (!ok && !globalThis.__oTypeMechanicGateNotActivatedTracked) {
+        globalThis.__oTypeMechanicGateNotActivatedTracked = true;
+        trackAnalyticsEvent(
+            'save_patch_applied',
+            {
+                patch_id: 'o_type_mechanic_flag_not_activated',
+                ok,
+                previous,
+                found_o_stars: foundOStars,
+                unexpected_o_star: unexpectedOStarName,
+                has_mintaka: hasMintaka,
+                has_regulus: hasRegulus,
+                has_menkalinan: hasMenkalinan,
+                ts: new Date().toISOString(),
+            },
+            { immediate: true, flushReason: 'save_patch' }
+        );
     }
 }
 
@@ -507,10 +532,14 @@ function migrateAncientManuscriptsAndFactoryStarsIfNeeded() {
         return;
     }
 
+    const beforeManuscriptsSnapshot = JSON.stringify(getStarsWithAncientManuscripts?.() || []);
+    const beforeFactorySnapshot = JSON.stringify(getFactoryStarsArray?.() || []);
+
     const manuscriptEntries = getStarsWithAncientManuscripts?.() || [];
     const factoryStarsArray = getFactoryStarsArray?.() || [];
 
     const factoryStarsToRemove = new Set();
+    const removedManuscriptEntries = [];
     const cleanedManuscriptEntries = manuscriptEntries.filter((entry) => {
         if (!Array.isArray(entry) || entry.length < 2) {
             return true;
@@ -520,6 +549,7 @@ function migrateAncientManuscriptsAndFactoryStarsIfNeeded() {
         const manuscriptIsO = getStarTypeByName(manuscriptStar) === 'O';
         const factoryIsO = getStarTypeByName(factoryStar) === 'O';
         if (manuscriptIsO || factoryIsO) {
+            removedManuscriptEntries.push(entry);
             if (typeof factoryStar === 'string' && factoryStar) {
                 factoryStarsToRemove.add(factoryStar.toLowerCase());
             }
@@ -688,6 +718,44 @@ function migrateAncientManuscriptsAndFactoryStarsIfNeeded() {
         entriesAdded++;
     }
 
+    const afterManuscriptsSnapshot = JSON.stringify(getStarsWithAncientManuscripts?.() || []);
+    const afterFactorySnapshot = JSON.stringify(getFactoryStarsArray?.() || []);
+    const didChange =
+        beforeManuscriptsSnapshot !== afterManuscriptsSnapshot ||
+        beforeFactorySnapshot !== afterFactorySnapshot;
+
+    if (didChange) {
+        const removedFactoryStars = Array.from(factoryStarsToRemove);
+        const affectedStars = Array.from(
+            new Set(
+                [
+                    ...removedManuscriptEntries.flatMap((entry) => {
+                        if (!Array.isArray(entry)) return [];
+                        return [entry[0], entry[1]];
+                    }),
+                    ...removedFactoryStars
+                ]
+                    .filter(Boolean)
+                    .map((name) => capitaliseWordsWithRomanNumerals(String(name)))
+            )
+        );
+        trackAnalyticsEvent(
+            'save_patch_applied',
+            {
+                patch_id: 'migrate_ancient_manuscripts_and_factory_stars_o_type_cleanup',
+                affected_stars: affectedStars,
+                removed_manuscript_entries: removedManuscriptEntries,
+                removed_factory_stars: removedFactoryStars,
+                manuscripts_before: JSON.parse(beforeManuscriptsSnapshot),
+                manuscripts_after: JSON.parse(afterManuscriptsSnapshot),
+                factory_before: JSON.parse(beforeFactorySnapshot),
+                factory_after: JSON.parse(afterFactorySnapshot),
+                backfilled_entries: entriesAdded,
+                ts: new Date().toISOString(),
+            },
+            { immediate: true, flushReason: 'save_patch' }
+        );
+    }
     if (entriesAdded > 0) {
         showNotification(`Save updated: restored ${entriesAdded} missing Ancient Manuscript lead(s).`, 'info', 4000, 'loadSave');
     }

@@ -725,7 +725,7 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
-    const pathname = url.pathname === '/' ? '/tools/analytics-dashboard/persistent.html' : url.pathname;
+    const pathname = url.pathname === '/' ? '/tools/analytics-dashboard/index.html' : url.pathname;
     const filePath = safeJoin(repoRoot, pathname);
 
     if (!filePath) {
@@ -754,5 +754,5 @@ server.on('error', (err) => {
 
 server.listen(PORT, '127.0.0.1', () => {
   console.log(`📊 Cosmic Forge Analytics Dashboard`);
-  console.log(`🔁 Persistent (all‑time) dashboard: http://127.0.0.1:${PORT}`);
+  console.log(`🔁 All‑time dashboard: http://127.0.0.1:${PORT}`);
 });
