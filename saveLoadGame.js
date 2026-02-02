@@ -455,7 +455,7 @@ function validateSaveString(compressed) {
 
 async function initialiseLoadedGame(gameState, type) {
     await restoreGameStatus(gameState, type);
-    migrateAncientManuscriptsIfNeeded(); //Remove once time has passed for players to finish their saves
+    migrateAncientManuscriptsAndFactoryStarsIfNeeded(); //Remove once time has passed for players to finish their saves
     patchOTypeMechanicActivatedForThisSave(); // Remove once time has passed for players to finish their saves
     setOnboardingMode(false);
 }
@@ -500,11 +500,57 @@ function patchOTypeMechanicActivatedForThisSave() {
     }
 }
 
-function migrateAncientManuscriptsIfNeeded() {
+function migrateAncientManuscriptsAndFactoryStarsIfNeeded() {
     const visionDistance = Number(getStarVisionDistance?.() ?? 0);
     const currentStar = getCurrentStarSystem?.();
     if (!currentStar) {
         return;
+    }
+
+    const manuscriptEntries = getStarsWithAncientManuscripts?.() || [];
+    const factoryStarsArray = getFactoryStarsArray?.() || [];
+
+    const factoryStarsToRemove = new Set();
+    const cleanedManuscriptEntries = manuscriptEntries.filter((entry) => {
+        if (!Array.isArray(entry) || entry.length < 2) {
+            return true;
+        }
+        const manuscriptStar = entry[0];
+        const factoryStar = entry[1];
+        const manuscriptIsO = getStarTypeByName(manuscriptStar) === 'O';
+        const factoryIsO = getStarTypeByName(factoryStar) === 'O';
+        if (manuscriptIsO || factoryIsO) {
+            if (typeof factoryStar === 'string' && factoryStar) {
+                factoryStarsToRemove.add(factoryStar.toLowerCase());
+            }
+            return false;
+        }
+        return true;
+    });
+
+    const cleanedFactoryStars = factoryStarsArray.filter((name) => {
+        const lower = String(name || '').toLowerCase();
+        if (!lower) return false;
+        if (factoryStarsToRemove.has(lower)) return false;
+        return getStarTypeByName(name) !== 'O';
+    });
+
+    if (cleanedManuscriptEntries.length !== manuscriptEntries.length) {
+        manuscriptEntries.splice(0, manuscriptEntries.length, ...cleanedManuscriptEntries);
+        manuscriptEntries
+            .sort((a, b) => {
+                const pa = Number(a?.[2] ?? 0);
+                const pb = Number(b?.[2] ?? 0);
+                return pa - pb;
+            })
+            .forEach((entry, idx) => {
+                if (Array.isArray(entry) && entry.length >= 3) {
+                    entry[2] = idx + 1;
+                }
+            });
+    }
+    if (cleanedFactoryStars.length !== factoryStarsArray.length) {
+        factoryStarsArray.splice(0, factoryStarsArray.length, ...cleanedFactoryStars);
     }
 
     const thresholds = [5, 20, 35, 45];
