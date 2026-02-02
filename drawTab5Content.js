@@ -572,7 +572,9 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                 ? 'red-disabled-text'
                 : isFactoryStar
                     ? 'factory-star-text'
-                    : 'green-ready-text';
+                    : safeStarType === 'O'
+                        ? 'o-star-text'
+                        : 'green-ready-text';
 
             const starNameLabel = [
                 `${capitaliseWordsWithRomanNumerals(nameStar)}:`,

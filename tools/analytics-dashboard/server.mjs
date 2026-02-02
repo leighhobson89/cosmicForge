@@ -217,6 +217,8 @@ function aggregate(events, options = {}) {
   const legendaryAsteroidClients = new Set();
   let legendaryAsteroidDiscoveries = 0;
 
+  const oStarReachedClientsByStar = new Map();
+
   const themeSelectionCounts = new Map();
   const themeSelectionClientsById = new Map();
 
@@ -321,6 +323,16 @@ function aggregate(events, options = {}) {
       legendaryAsteroidDiscoveries += 1;
       if (e.client_id) {
         legendaryAsteroidClients.add(e.client_id);
+      }
+    }
+
+    if (e.event_name === 'o_star_reached') {
+      const star = normaliseKey(payload.star_system, 'unknown');
+      if (!oStarReachedClientsByStar.has(star)) {
+        oStarReachedClientsByStar.set(star, new Set());
+      }
+      if (e.client_id) {
+        oStarReachedClientsByStar.get(star).add(e.client_id);
       }
     }
 
@@ -463,6 +475,10 @@ function aggregate(events, options = {}) {
     black_hole_researched_unique_clients: blackHoleResearchedClients.size,
     legendary_asteroid_discoveries: legendaryAsteroidDiscoveries,
     legendary_asteroid_unique_clients: legendaryAsteroidClients.size,
+    o_star_reached_unique_clients_by_star: takeTop(
+      new Map(Array.from(oStarReachedClientsByStar.entries()).map(([k, set]) => [k, set.size])),
+      10
+    ),
     theme_selected_counts: takeTop(themeSelectionCounts, 50),
     theme_selected_unique_clients: takeTop(
       new Map(Array.from(themeSelectionClientsById.entries()).map(([k, set]) => [k, set.size])),

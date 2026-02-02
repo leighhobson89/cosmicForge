@@ -36,8 +36,6 @@
           <div class="kpi"><div class="label">Events</div><div class="value" id="kpiEvents">-</div></div>
           <div class="kpi"><div class="label">Unique Sessions</div><div class="value" id="kpiSessions">-</div></div>
           <div class="kpi"><div class="label">Unique Clients</div><div class="value" id="kpiClients">-</div></div>
-          <div class="kpi"><div class="label">Legendary Asteroids (Total)</div><div class="value" id="kpiLegendaryAsteroidsTotal">-</div></div>
-          <div class="kpi"><div class="label">Legendary Asteroids (Unique Clients)</div><div class="value" id="kpiLegendaryAsteroidsUnique">-</div></div>
         </div>
         <div style="margin-top:10px" class="muted">
           <span class="mono" id="meta"></span>
@@ -61,11 +59,11 @@
           </table>
         </div>
 
-        <div class="card span-6" data-panel-id="blackHole">
-          <h2>Black Hole</h2>
+        <div class="card span-6" data-panel-id="spaceAnomalies">
+          <h2>Space Anomalies</h2>
           <table>
             <thead><tr><th>Metric</th><th>Count</th></tr></thead>
-            <tbody id="blackHoleStats"></tbody>
+            <tbody id="spaceAnomaliesStats"></tbody>
           </table>
         </div>
 
@@ -577,6 +575,7 @@
           blackHoleDiscoveredClients: {},
           blackHoleResearchedClients: {},
           legendaryAsteroidClients: {},
+          oStarReachedClientsByStar: {},
 
           // Totals
           totalEvents: 0,
@@ -822,6 +821,17 @@
           if (e.client_id) addToSetObject(rollup.legendaryAsteroidClients, e.client_id);
         }
 
+        if (e.event_name === 'o_star_reached') {
+          const star = normKey(payload.star_system, 'unknown');
+          if (!rollup.oStarReachedClientsByStar[star]) {
+            rollup.oStarReachedClientsByStar[star] = {};
+          }
+          const uniqueKey = e.client_id || e.session_id;
+          if (uniqueKey) {
+            rollup.oStarReachedClientsByStar[star][uniqueKey] = true;
+          }
+        }
+
         if (e.event_name === 'theme_selected') {
           const themeId = normKey(payload.theme_id, 'unknown');
           inc(rollup.themeSelectionCounts, themeId, 1);
@@ -939,10 +949,11 @@
         $('kpiEvents').textContent = fmtInt(rollup.totalEvents);
         $('kpiSessions').textContent = fmtInt(sessions);
         $('kpiClients').textContent = fmtInt(clients);
-        if ($('kpiBlackHoleDiscovered')) $('kpiBlackHoleDiscovered').textContent = fmtInt(blackHoleDiscovered);
-        if ($('kpiBlackHoleResearched')) $('kpiBlackHoleResearched').textContent = fmtInt(blackHoleResearched);
-        $('kpiLegendaryAsteroidsTotal').textContent = fmtInt(rollup.legendaryAsteroidDiscoveries || 0);
-        $('kpiLegendaryAsteroidsUnique').textContent = fmtInt(Object.keys(rollup.legendaryAsteroidClients || {}).length);
+
+        const legendaryAsteroidUniqueClients = Object.keys(rollup.legendaryAsteroidClients || {}).length;
+        const oStarMintaka = Object.keys(rollup.oStarReachedClientsByStar?.Mintaka || {}).length;
+        const oStarRegulus = Object.keys(rollup.oStarReachedClientsByStar?.Regulus || {}).length;
+        const oStarMenkalinan = Object.keys(rollup.oStarReachedClientsByStar?.Menkalinan || {}).length;
 
         $('meta').textContent = `cursorAfter=${rollup.cursorAfterIso ?? '-'} updatedAt=${rollup.updatedAt}`;
 
@@ -983,9 +994,14 @@
           { key: 'Miaplacidus settled (win cinematic)', value: rollup.miaplacidusSettled || 0 },
         ], fmtInt);
 
-        renderRows('blackHoleStats', [
-          { key: 'Discovered (unique clients)', value: blackHoleDiscovered },
-          { key: 'Researched (unique clients)', value: blackHoleResearched },
+        renderRows('spaceAnomaliesStats', [
+          { key: 'Black Hole discovered (unique clients)', value: blackHoleDiscovered },
+          { key: 'Black Hole researched (unique clients)', value: blackHoleResearched },
+          { key: 'Legendary Asteroids discovered (total)', value: rollup.legendaryAsteroidDiscoveries || 0 },
+          { key: 'Legendary Asteroids discovered (unique clients)', value: legendaryAsteroidUniqueClients },
+          { key: 'O-star reached: Mintaka (unique clients)', value: oStarMintaka },
+          { key: 'O-star reached: Regulus (unique clients)', value: oStarRegulus },
+          { key: 'O-star reached: Menkalinan (unique clients)', value: oStarMenkalinan },
         ], fmtInt);
 
         renderRows('onboarding', [

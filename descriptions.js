@@ -40,6 +40,8 @@ export let modalRebirthHeader;
 export let modalRebirthText;
 export let modalGalacticTabUnlockHeader;
 export let modalGalacticTabUnlockText;
+export let modalOStarReachedHeader;
+export let modalOStarReachedText;
 export let achievementTooltipDescriptions;
 export let achievementTooltipDescriptionTexts;
 export let modalFeedbackThanksHeaderText;
@@ -196,6 +198,8 @@ export function initialiseDescriptions() {
     modalRebirthText = `You are about to reset your progress and start again at the new System.<br><br>Are you sure you want to do this?<br><br><span class="green-ready-text">You will carry over X AP!</span>`;
     modalGalacticTabUnlockHeader = `Star System reached!`;
     modalGalacticTabUnlockText = `As you approach the new System, your scanners detect a faint communication signal...<br><br>"You have shown great innovation, you may now access our Galactic Trading Platform"<br><br><span class="green-ready-text">Galactic Tab Unlocked!</span>`;
+    modalOStarReachedHeader = `TYPE O STAR REACHED`;
+    modalOStarReachedText = `Your Starship has reached orbit of the <span class="o-star-text">X</span> System.<br><br>The star burns with a ferocity you have only ever seen in theory.<br>An O-type sun: rare, impossibly bright, and violently alive.<br><br>The crew falls silent.<br>Even the instruments hesitate before agreeing on the readings.`;
     modalFeedbackHeaderText = `SEND FEEDBACK`;
     modalFeedbackContentTextGood = `Glad to hear it!<br><br>Let us know what you love and if there’s anything you’d like to see more of.<br>Your feedback helps us improve Cosmic Forge!`;
     modalFeedbackContentTextBad = `Oh no!<br><br>Please let us know what’s not working for you or what you'd like changed.<br>We read everything and really value your thoughts!`;    
@@ -2693,15 +2697,15 @@ starNames = [
   ["Sirius", "A"], ["Canopus", "F"], ["Arcturus", "K"], ["Sadalmelik", "G"], ["Capella", "G"],
   ["Rigel", "B"], ["Procyon", "F"], ["Betelgeuse", "M"], ["Altair", "A"], ["Aldebaran", "K"],
   ["Sterope", "B"], ["Antares", "M"], ["Pollux", "K"], ["Fomalhaut", "A"], ["Deneb", "A"],
-  ["Mimosa", "B"], ["Regulus", "B"], ["Adhara", "B"], ["Castor", "A"], ["Shaula", "B"],
+  ["Mimosa", "B"], ["Regulus", "O"], ["Adhara", "B"], ["Castor", "A"], ["Shaula", "B"],
   ["Bellatrix", "B"], ["Elnath", "B"], ["Miaplacidus", "A"], ["Alnilam", "B"], ["Alnair", "B"],
-  ["Alioth", "A"], ["Alnitak", "O"], ["Dubhe", "K"], ["Mirfak", "F"], ["Wezen", "F"],
-  ["Sargas", "F"], ["Kaus Australis", "B"], ["Avior", "K"], ["Alkaid", "B"], ["Menkalinan", "A"],
+  ["Alioth", "A"], ["Alnitak", "K"], ["Dubhe", "K"], ["Mirfak", "F"], ["Wezen", "F"],
+  ["Sargas", "F"], ["Kaus Australis", "B"], ["Avior", "K"], ["Alkaid", "B"], ["Menkalinan", "O"],
   ["Atria", "K"], ["Alhena", "A"], ["Peacock", "B"], ["Tureis", "B"], ["Nunki", "B"],
   ["Mirzam", "B"], ["Alphard", "K"], ["Rasalhague", "A"], ["Caph", "F"], ["Zubenelgenubi", "A"],
   ["Electra", "B"], ["Hamal", "K"], ["Mintaka", "O"], ["Alsephina", "A"], ["Menkent", "K"],
   ["Enif", "K"], ["Tiaki", "K"], ["Ascella", "A"], ["Algol", "B"], ["Markab", "B"],
-  ["Suhail", "K"], ["Zeta Ophiuchi", "O"], ["Kochab", "K"], ["Ankaa", "K"], ["Denebola", "A"],
+  ["Suhail", "K"], ["Zeta Ophiuchi", "M"], ["Kochab", "K"], ["Ankaa", "K"], ["Denebola", "A"],
   ["Vega", "A"], ["Azelfafage", "F"], ["Maia", "B"], ["Arkab Prior", "A"], ["Thuban", "A"],
   ["Izar", "K"], ["Ruchbah", "A"], ["Albireo", "K"], ["Almaaz", "F"], ["Dschubba", "B"],
   ["Algieba", "K"], ["Gomeisa", "B"], ["Hoedus II", "G"], ["Cebalrai", "K"], ["Nashira", "F"],

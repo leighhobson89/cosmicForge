@@ -41,6 +41,8 @@ import {
     getMaxAncientManuscripts,
     setStarsWithAncientManuscripts,
     getStarsWithAncientManuscripts,
+    getOStarArrivalPopupsShown,
+    markOStarArrivalPopupShown,
     setPlayerPhilosophy,
     getPillageVoidTimerCanContinue,
     setPillageVoidTimerCanContinue,
@@ -466,6 +468,8 @@ import {
     modalPlayerLeaderIntroContentText4,
     modalGalacticTabUnlockHeader,
     modalGalacticTabUnlockText,
+    modalOStarReachedHeader,
+    modalOStarReachedText,
     newsTickerContent,
     refreshAchievementTooltipDescriptions,
     modalBlackHoleDiscoveredHeader,
@@ -8567,6 +8571,46 @@ export function startTravelToDestinationStarTimer(adjustment) {
                     );
                 }
 
+                const destinationStarType =
+                    getStarSystemDataObject('stars', [getDestinationStar(), 'starType'], true) ??
+                    getStarTypeByName(getDestinationStar());
+
+                if (
+                    destinationStarType === 'O' &&
+                    !getOStarArrivalPopupsShown().includes(String(getDestinationStar() || '').toLowerCase())
+                ) {
+                    trackAnalyticsEvent('o_star_reached', {
+                        star_system: getDestinationStar(),
+                        star_type: destinationStarType
+                    }, { immediate: true, flushReason: 'o_star' });
+
+                    const header = modalOStarReachedHeader;
+                    const content = String(modalOStarReachedText || '').replace(
+                        'X',
+                        capitaliseWordsWithRomanNumerals(getDestinationStar())
+                    );
+                    callPopupModal(
+                        header,
+                        content,
+                        true,
+                        false,
+                        false,
+                        false,
+                        function() {
+                            markOStarArrivalPopupShown(getDestinationStar());
+                            showHideModal();
+                        },
+                        null,
+                        null,
+                        null,
+                        'CONFIRM',
+                        null,
+                        null,
+                        null,
+                        false
+                    );
+                }
+
                 if (getFactoryStarsArray().includes(getDestinationStar())) {
                     const header = 'MEGASTRUCTURE';
                     const content = `Your Starship arrived at the <span class="factory-star-text">${capitaliseWordsWithRomanNumerals(getDestinationStar())}</span> System!<br>You gasp at what you see! The main star has been completely enveloped by a gigantic structure!<br>It looks to be some kind of <span class="factory-star-text">${getStarSystemDataObject('stars', [getDestinationStar(), 'factoryStar'])}</span><br>No wonder we didn't discover this System before,<br>the star is not visible due to the size of this structure!<br>This system is going to be heavily defended for sure, but if we can conquer it,<br>for sure it will open up vast opportunities for us...`;
@@ -10397,16 +10441,30 @@ function getAncientManuscriptGenerationProbability() {
 }
 
 function rollForAncientManuscriptGeneration(previousVisionDistance, newVisionDistance) {
-    const probability = getAncientManuscriptGenerationProbability();
+    let probability = getAncientManuscriptGenerationProbability();
     if (!probability) {
         return;
+    }
+
+    const oldRange = typeof previousVisionDistance === 'number' ? previousVisionDistance : 0;
+    const newRange = typeof newVisionDistance === 'number' ? newVisionDistance : getStarVisionDistance();
+
+    const ancientManuscriptsGenerated = getStarsWithAncientManuscripts().length;
+
+    if (ancientManuscriptsGenerated === 0 && oldRange < 5 && newRange >= 5) {
+        probability = 100;
+    } else if (ancientManuscriptsGenerated < 2 && oldRange < 20 && newRange >= 20) {
+        probability = 100;
+    } else if (ancientManuscriptsGenerated < 3 && oldRange < 35 && newRange >= 35) {
+        probability = 100;
+    } else if (ancientManuscriptsGenerated < 4 && oldRange < 45 && newRange >= 45) {
+        probability = 100;
     }
 
     if (Math.random() * 100 >= probability) {
         return;
     }
 
-    const ancientManuscriptsGenerated = getStarsWithAncientManuscripts().length;
     const position = ancientManuscriptsGenerated + 1;
 
     const dummyContainer = document.createElement('div');
@@ -10420,8 +10478,6 @@ function rollForAncientManuscriptGeneration(previousVisionDistance, newVisionDis
         false
     ) || { stars: [], starDistanceData: {} };
 
-    const oldRange = typeof previousVisionDistance === 'number' ? previousVisionDistance : 0;
-    const newRange = typeof newVisionDistance === 'number' ? newVisionDistance : getStarVisionDistance();
     const currentStarLower = String(getCurrentStarSystem() || '').toLowerCase();
     const existingManuscriptStars = new Set(
         (getStarsWithAncientManuscripts() || [])
@@ -10444,6 +10500,7 @@ function rollForAncientManuscriptGeneration(previousVisionDistance, newVisionDis
             if (nameLower === currentStarLower) return false;
             if (existingManuscriptStars.has(nameLower)) return false;
             if (existingFactoryStars.has(nameLower)) return false;
+            if (getStarTypeByName(entry.starName) === 'O') return false;
             if (typeof entry.distance !== 'number') return false;
             return entry.distance > oldRange && entry.distance <= newRange;
         })
@@ -10876,7 +10933,10 @@ export function selectFactoryStarSystem(position) {
     }
 
     const filteredCandidates = factoryStarCandidates.filter(
-        ([name, distance]) => distance >= minDistance && distance <= maxDistance
+        ([name, distance]) =>
+            distance >= minDistance &&
+            distance <= maxDistance &&
+            getStarTypeByName(name) !== 'O'
     );
 
     if (filteredCandidates.length === 0) return null;

@@ -1938,6 +1938,11 @@ button.red-disabled-text {
     border: 1px solid black;
 }
 
+.o-star {
+    background-color: magenta;
+    border: 1px solid black;
+}
+
 .home-star {
     background-color: red;
 }
@@ -1991,6 +1996,10 @@ button.red-disabled-text {
 
 .factory-star::after {
     color: yellow;
+}
+
+.o-star::after {
+    color: magenta;
 }
 
 .home-star::after {
@@ -2866,6 +2875,10 @@ body.debug-window-open {
 
 .factory-star-text {
     color: yellow;
+}
+
+.o-star-text {
+    color: magenta;
 }
 
  .settled-star-text {

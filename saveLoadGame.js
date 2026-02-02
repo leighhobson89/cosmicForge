@@ -17,14 +17,25 @@ import {
     getTimeWarpMultiplier,
     getBlackHoleAlwaysOn,
     getOnboardingMode,
-    setOnboardingMode
+    setOnboardingMode,
+    getStarVisionDistance,
+    getCurrentStarSystem,
+    getStarsWithAncientManuscripts,
+    setStarsWithAncientManuscripts,
+    getFactoryStarsArray,
+    setFactoryStarsArray,
+    NUMBER_OF_STARS,
+    STAR_FIELD_SEED,
+    getOTypeMechanicActivatedForThisSave,
+    setOTypeMechanicActivatedForThisSave
 } from './constantsAndGlobalVars.js';
 
 import { setAchievementIconImageUrls } from './resourceDataObject.js';
 
-import { getStarTypeByName } from './descriptions.js';
+import { getStarNames, getStarTypeByName } from './descriptions.js';
 
 import { showNotification } from './ui.js';
+import { generateStarfield } from './ui.js';
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getNavigatorLanguage } from './game.js';
 
@@ -444,7 +455,196 @@ function validateSaveString(compressed) {
 
 async function initialiseLoadedGame(gameState, type) {
     await restoreGameStatus(gameState, type);
+    migrateAncientManuscriptsIfNeeded();
+    patchOTypeMechanicActivatedForThisSave();
     setOnboardingMode(false);
+}
+
+function patchOTypeMechanicActivatedForThisSave() {
+    // TODO: remove this gate and always enable the O-type mechanic after enough time has passed.
+    const names = getStarNames?.() || [];
+    if (!Array.isArray(names) || names.length === 0) {
+        setOTypeMechanicActivatedForThisSave(false);
+        return;
+    }
+
+    const requiredOStars = ['Mintaka', 'Regulus', 'Menkalinan'];
+    const requiredSet = new Set(requiredOStars.map((n) => n.toLowerCase()));
+
+    let hasMintaka = false;
+    let hasRegulus = false;
+    let hasMenkalinan = false;
+    let foundUnexpectedOStar = false;
+
+    for (const name of names) {
+        const safeName = String(name ?? '').trim();
+        if (!safeName) continue;
+
+        const type = getStarTypeByName(safeName);
+        if (type !== 'O') continue;
+
+        const lower = safeName.toLowerCase();
+        if (!requiredSet.has(lower)) {
+            foundUnexpectedOStar = true;
+            break;
+        }
+
+        if (lower === 'mintaka') hasMintaka = true;
+        if (lower === 'regulus') hasRegulus = true;
+        if (lower === 'menkalinan') hasMenkalinan = true;
+    }
+
+    const ok = !foundUnexpectedOStar && hasMintaka && hasRegulus && hasMenkalinan;
+    if (getOTypeMechanicActivatedForThisSave() !== ok) {
+        setOTypeMechanicActivatedForThisSave(ok);
+    }
+}
+
+function migrateAncientManuscriptsIfNeeded() {
+    const visionDistance = Number(getStarVisionDistance?.() ?? 0);
+    const currentStar = getCurrentStarSystem?.();
+    if (!currentStar) {
+        return;
+    }
+
+    const thresholds = [5, 20, 35, 45];
+    const desiredCount = thresholds.reduce((acc, t) => (visionDistance >= t ? acc + 1 : acc), 0);
+    if (!desiredCount) {
+        return;
+    }
+
+    const existingEntries = getStarsWithAncientManuscripts?.() || [];
+    if (existingEntries.length >= desiredCount) {
+        return;
+    }
+
+    const dummyContainer = document.createElement('div');
+    const { stars, starDistanceData } = generateStarfield(
+        dummyContainer,
+        NUMBER_OF_STARS,
+        STAR_FIELD_SEED,
+        null,
+        true,
+        currentStar,
+        false
+    ) || { stars: [], starDistanceData: {} };
+
+    const existingManuscriptStars = new Set(
+        (getStarsWithAncientManuscripts() || [])
+            .filter((entry) => Array.isArray(entry) && typeof entry[0] === 'string')
+            .map((entry) => entry[0].toLowerCase())
+    );
+    const existingFactoryStars = new Set((getFactoryStarsArray() || []).map((n) => String(n).toLowerCase()));
+    const currentStarLower = String(currentStar || '').toLowerCase();
+
+    const pickRandom = (items) => items[Math.floor(Math.random() * items.length)];
+
+    const pickManuscriptStarInBand = (low, high) => {
+        const candidates = (stars || [])
+            .map((star) => {
+                const starName = star?.name;
+                if (!starName) return null;
+                const distance = starDistanceData?.[starName];
+                return { starName, distance };
+            })
+            .filter((entry) => {
+                if (!entry) return false;
+                const nameLower = String(entry.starName).toLowerCase();
+                if (nameLower === 'miaplacidus') return false;
+                if (nameLower === currentStarLower) return false;
+                if (existingManuscriptStars.has(nameLower)) return false;
+                if (existingFactoryStars.has(nameLower)) return false;
+                if (getStarTypeByName(entry.starName) === 'O') return false;
+                if (typeof entry.distance !== 'number') return false;
+                return entry.distance > low && entry.distance <= high;
+            })
+            .map((entry) => entry.starName.toLowerCase());
+
+        if (!candidates.length) {
+            return null;
+        }
+        return pickRandom(candidates);
+    };
+
+    const pickFactoryStarForPosition = (position) => {
+        let minDistance = 0;
+        let maxDistance = 100;
+
+        switch (position) {
+            case 1:
+                minDistance = 5;
+                maxDistance = 15;
+                break;
+            case 2:
+                minDistance = 16;
+                maxDistance = 25;
+                break;
+            case 3:
+                minDistance = 26;
+                maxDistance = 40;
+                break;
+            case 4:
+                minDistance = 41;
+                maxDistance = 60;
+                break;
+        }
+
+        const candidates = (stars || [])
+            .map((star) => {
+                const starName = star?.name;
+                if (!starName) return null;
+                const distance = starDistanceData?.[starName];
+                return { starName, distance };
+            })
+            .filter((entry) => {
+                if (!entry) return false;
+                const nameLower = String(entry.starName).toLowerCase();
+                if (nameLower === 'miaplacidus') return false;
+                if (nameLower === currentStarLower) return false;
+                if (existingManuscriptStars.has(nameLower)) return false;
+                if (existingFactoryStars.has(nameLower)) return false;
+                if (getStarTypeByName(entry.starName) === 'O') return false;
+                if (typeof entry.distance !== 'number') return false;
+                return entry.distance >= minDistance && entry.distance <= maxDistance;
+            })
+            .map((entry) => entry.starName.toLowerCase());
+
+        if (!candidates.length) {
+            return null;
+        }
+        return pickRandom(candidates);
+    };
+
+    let entriesAdded = 0;
+    while (getStarsWithAncientManuscripts().length < desiredCount) {
+        const position = getStarsWithAncientManuscripts().length + 1;
+        if (position > 4) {
+            break;
+        }
+
+        const bandLow = position === 1 ? 0 : thresholds[position - 2];
+        const bandHigh = thresholds[position - 1];
+
+        const manuscriptStar = pickManuscriptStarInBand(bandLow, bandHigh);
+        if (!manuscriptStar) {
+            break;
+        }
+
+        const factoryStarToPointTo = pickFactoryStarForPosition(position);
+        if (!factoryStarToPointTo) {
+            break;
+        }
+
+        existingManuscriptStars.add(manuscriptStar);
+        existingFactoryStars.add(factoryStarToPointTo);
+        setFactoryStarsArray(factoryStarToPointTo);
+        setStarsWithAncientManuscripts([manuscriptStar, factoryStarToPointTo, position, false]);
+        entriesAdded++;
+    }
+
+    if (entriesAdded > 0) {
+        showNotification(`Save updated: restored ${entriesAdded} missing Ancient Manuscript lead(s).`, 'info', 4000, 'loadSave');
+    }
 }
 
 export function generateRandomPioneerName() {

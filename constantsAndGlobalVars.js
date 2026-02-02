@@ -318,6 +318,8 @@ let starsWithAncientManuscripts = [];
 let factoryStarsArray = [];
 let manuscriptCluesShown = {};
 let megaStructuresInPossessionArray = [];
+let oStarArrivalPopupsShown = [];
+let oTypeMechanicActivatedForThisSave = false;
 
 let battleUnits = { 
     player: [], 
@@ -1564,6 +1566,8 @@ export function captureGameStatusForSaving(type) {
     gameState.factoryStarsArray = factoryStarsArray;
     gameState.manuscriptCluesShown = manuscriptCluesShown;
     gameState.megaStructuresInPossessionArray = megaStructuresInPossessionArray;
+    gameState.oStarArrivalPopupsShown = oStarArrivalPopupsShown;
+    gameState.oTypeMechanicActivatedForThisSave = oTypeMechanicActivatedForThisSave;
     gameState.miaplacidusMilestoneLevel = miaplacidusMilestoneLevel;
     gameState.megaStructureTechsResearched = megaStructureTechsResearched;
     gameState.megaStructureAntimatterAmount = megastructureAntimatterAmount;
@@ -1855,6 +1859,8 @@ export function restoreGameStatus(gameState, type) {
             factoryStarsArray = gameState.factoryStarsArray ?? [];
             manuscriptCluesShown = gameState.manuscriptCluesShown ?? {};
             megaStructuresInPossessionArray = (gameState.megaStructuresInPossessionArray ?? []).map(mapFactoryStarValue);
+            oStarArrivalPopupsShown = (gameState.oStarArrivalPopupsShown ?? []).filter((item) => item !== '').map((n) => String(n).toLowerCase());
+            oTypeMechanicActivatedForThisSave = !!gameState.oTypeMechanicActivatedForThisSave;
             miaplacidusMilestoneLevel = gameState.miaplacidusMilestoneLevel ?? 0;
             megaStructureTechsResearched = gameState.megaStructureTechsResearched ?? [];
             megastructureAntimatterAmount = gameState.megaStructureAntimatterAmount ?? 0;
@@ -4177,6 +4183,29 @@ export function getStarsWithAncientManuscripts() {
 
 export function setStarsWithAncientManuscripts(value) {
     starsWithAncientManuscripts.push(value);
+}
+
+export function getOStarArrivalPopupsShown() {
+    return Array.isArray(oStarArrivalPopupsShown) ? oStarArrivalPopupsShown : [];
+}
+
+export function markOStarArrivalPopupShown(starName) {
+    if (!starName) {
+        return;
+    }
+
+    const normalized = String(starName).toLowerCase();
+    if (!oStarArrivalPopupsShown.includes(normalized)) {
+        oStarArrivalPopupsShown.push(normalized);
+    }
+}
+
+export function getOTypeMechanicActivatedForThisSave() {
+    return !!oTypeMechanicActivatedForThisSave;
+}
+
+export function setOTypeMechanicActivatedForThisSave(value) {
+    oTypeMechanicActivatedForThisSave = !!value;
 }
 
 export function getMaxAncientManuscripts() {

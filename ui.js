@@ -248,6 +248,7 @@ import {
     rocketNames,
     getHeaderDescriptions,
     getStarNames,
+    getStarTypeByName,
     getAchievementTooltipDescription,
     refreshAchievementTooltipDescriptions,
     modalPlayerLeaderIntroContentText1,
@@ -3858,6 +3859,10 @@ export function generateStarfield(starfieldContainer, numberOfStars = 70, seed =
 
         if (starElement.id.includes("settledStar")) {
             starElement.classList.add("settled-star");
+        }
+
+        if (!isSettled && !showFactoryAppearance && isInteresting && getStarTypeByName(star.name) === 'O') {
+            starElement.classList.add('o-star');
         }
 
         if (starElement.id.includes("settledStar")) {
