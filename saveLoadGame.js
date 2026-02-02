@@ -455,8 +455,8 @@ function validateSaveString(compressed) {
 
 async function initialiseLoadedGame(gameState, type) {
     await restoreGameStatus(gameState, type);
-    migrateAncientManuscriptsIfNeeded();
-    patchOTypeMechanicActivatedForThisSave();
+    migrateAncientManuscriptsIfNeeded(); //Remove once time has passed for players to finish their saves
+    patchOTypeMechanicActivatedForThisSave(); // Remove once time has passed for players to finish their saves
     setOnboardingMode(false);
 }
 

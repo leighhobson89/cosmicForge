@@ -1,10 +1,10 @@
 import { removeTabAttentionIfNoIndicators, createColoniseOpinionProgressBar, setColoniseOpinionProgressBar, spaceTravelButtonHideAndShowDescription, drawStarConnectionDrawings, createStarDestinationRow, sortStarTable, handleSortStarClick, createTextElement, createOptionRow, createButton, generateStarfield, showNotification, showEnterWarModeModal, setWarUI, removeStarConnectionTooltip } from './ui.js';
 import { sfxPlayer } from './audioManager.js';
+import { getStarNames, getStarTypeByName } from './descriptions.js';
 import { getFactoryStarsArray, getSettledStars, setInFormation, setRedrawBattleDescription, setFleetChangedSinceLastDiplomacy, setDestinationStarScanned, getDestinationStarScanned, getStellarScannerBuilt, getStarShipTravelling, getDestinationStar, getCurrencySymbol, getSortStarMethod, getCurrentStarSystem, STAR_FIELD_SEED, NUMBER_OF_STARS, getStarMapMode, setStarMapMode, getWarMode, replaceBattleUnits, setNeedNewBattleCanvas, setFormationGoal, setBattleResolved, getBelligerentEnemyFlag, setAchievementFlagArray, getStarsWithAncientManuscripts, getStarShipDestinationReminderVisible, getStarVisionDistance, getMiaplacidusMilestoneLevel } from './constantsAndGlobalVars.js';
 import { getMaxFleetShip, getFleetShips, copyStarDataToDestinationStarField, getResourceDataObject, getStarShipParts, getStarShipPartsNeededInTotalPerModule, getStarSystemDataObject, setStarSystemDataObject } from './resourceDataObject.js';
 import { capitaliseString, capitaliseWordsWithRomanNumerals } from './utilityFunctions.js';
 import { updateDiplomacySituation, calculateModifiedAttitude, increaseAttackAndDefensePower, generateDestinationStarData, gain, getAscendencyPointsWithRepeatableBonus } from './game.js';
-import { getStarNames } from './descriptions.js';
 
 function getWeatherDisplayData(weatherTendency, weather) {
     if (Array.isArray(weatherTendency) && weatherTendency.length >= 3 && weatherTendency.every(value => value !== undefined)) {
@@ -284,6 +284,11 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
 
                 if (settledStars.has(normalizedLower)) {
                     classes.push('settled-star-text');
+                    return classes;
+                }
+
+                if (getStarTypeByName(starName) === 'O') {
+                    classes.push('o-star-text');
                     return classes;
                 }
 
