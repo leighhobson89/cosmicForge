@@ -165,6 +165,81 @@ const timedEffectDefinitions = {
     }
 };
 
+const TIMED_RANDOM_EVENT_IDS = new Set([
+    'galacticMarketLockdown',
+    'endlessSummer',
+    'minerBrokeDown',
+    'supplyChainDisruption',
+    'blackHoleInstability'
+]);
+
+function buildInstantEventUiDescription(eventId, triggerResult) {
+    const safe = (triggerResult && typeof triggerResult === 'object') ? triggerResult : {};
+
+    if (eventId === 'powerPlantExplosion') {
+        return safe.destroyedBuilding ? `${safe.destroyedBuilding} destroyed.` : 'Power plant destroyed.';
+    }
+
+    if (eventId === 'batteryExplosion') {
+        return safe.destroyedBuilding ? `${safe.destroyedBuilding} destroyed.` : 'Battery destroyed.';
+    }
+
+    if (eventId === 'scienceTheft') {
+        const amount = Number(safe.amountStolen);
+        if (Number.isFinite(amount) && amount > 0) {
+            return `Research halved (-${amount}).`;
+        }
+        return 'Research halved.';
+    }
+
+    if (eventId === 'researchBreakthrough') {
+        const amount = Number(safe.amountGained);
+        if (Number.isFinite(amount) && amount > 0) {
+            return `Research doubled (+${amount}).`;
+        }
+        return 'Research doubled.';
+    }
+
+    if (eventId === 'rocketInstantArrival') {
+        const rocketName = safe.rocketName;
+        return rocketName ? `${rocketName} instantly arrived.` : 'A travelling rocket instantly arrived.';
+    }
+
+    if (eventId === 'antimatterReaction') {
+        const rocketName = safe.rocketName ? String(safe.rocketName) : 'A mining rocket';
+        const asteroidName = safe.asteroidName ? String(safe.asteroidName) : 'an asteroid';
+        const antimatterLost = Number(safe.antimatterLost);
+        const lossText = Number.isFinite(antimatterLost) && antimatterLost > 0 ? ` -${antimatterLost} antimatter.` : '';
+        return `${rocketName} lost; ${asteroidName} destroyed.${lossText}`;
+    }
+
+    if (eventId === 'stockLoss') {
+        const itemName = safe.itemName ? String(safe.itemName) : 'Stock';
+        const lostPercent = Number(safe.lostPercent);
+        if (Number.isFinite(lostPercent) && lostPercent > 0) {
+            return `-${lostPercent}% ${itemName}.`;
+        }
+        return `Stock loss (${itemName}).`;
+    }
+
+    if (eventId === 'starshipLostInSpace') {
+        return 'Starship lost; destination cleared; fleets reset.';
+    }
+
+    return getEventTriggerDescription(eventId);
+}
+
+function recordInstantEventHistory(eventId, triggerResult) {
+    pushInstantEventHistoryEntry({
+        id: eventId,
+        name: formatEventName(eventId),
+        endedAtMs: Date.now(),
+        durationLabel: 'Instant',
+        description: buildInstantEventUiDescription(eventId, triggerResult),
+        context: (triggerResult && typeof triggerResult === 'object') ? { ...triggerResult } : null
+    });
+}
+
 const randomEventDefinitions = {
     powerPlantExplosion: {
         id: 'powerPlantExplosion',
@@ -672,6 +747,115 @@ function getTimedEffectsRoot() {
     return getResourceDataObject('randomEvents', ['timedEffects'], true) || {};
 }
 
+function getTimedEffectsHistoryRoot() {
+    const root = getRandomEventsRoot();
+    const stored = root?.timedEffectsHistory;
+    if (Array.isArray(stored)) {
+        return stored;
+    }
+
+    setResourceDataObject([], 'randomEvents', ['timedEffectsHistory']);
+    return getResourceDataObject('randomEvents', ['timedEffectsHistory'], true) || [];
+}
+
+function getInstantEventsHistoryRoot() {
+    const root = getRandomEventsRoot();
+    const stored = root?.instantEventsHistory;
+    if (Array.isArray(stored)) {
+        return stored;
+    }
+
+    setResourceDataObject([], 'randomEvents', ['instantEventsHistory']);
+    return getResourceDataObject('randomEvents', ['instantEventsHistory'], true) || [];
+}
+
+function pushInstantEventHistoryEntry(entry) {
+    if (!entry || typeof entry !== 'object') {
+        return;
+    }
+
+    const history = getInstantEventsHistoryRoot();
+    const next = Array.isArray(history) ? [...history, entry] : [entry];
+    const maxEntries = 300;
+    const trimmed = next.length > maxEntries ? next.slice(next.length - maxEntries) : next;
+    setResourceDataObject(trimmed, 'randomEvents', ['instantEventsHistory']);
+}
+
+function pushTimedEffectHistoryEntry(entry) {
+    if (!entry || typeof entry !== 'object') {
+        return;
+    }
+
+    const history = getTimedEffectsHistoryRoot();
+    const next = Array.isArray(history) ? [...history, entry] : [entry];
+    const maxEntries = 200;
+    const trimmed = next.length > maxEntries ? next.slice(next.length - maxEntries) : next;
+    setResourceDataObject(trimmed, 'randomEvents', ['timedEffectsHistory']);
+}
+
+function buildTimedEffectUiDescription(effectId, state) {
+    const safeState = (state && typeof state === 'object') ? state : {};
+
+    if (effectId === 'galacticMarketLockdown') {
+        return 'Galactic Market is offline.';
+    }
+
+    if (effectId === 'endlessSummer') {
+        return 'Weather remains Sunny.';
+    }
+
+    if (effectId === 'minerBrokeDown') {
+        const rocketKey = safeState.rocket;
+        const fallbackRocketName = rocketKey ? formatEventName(String(rocketKey)) : null;
+        const rocketName = rocketKey ? (getRocketUserName(rocketKey) || fallbackRocketName) : null;
+        return rocketName
+            ? `${rocketName} mining rate is 0.`
+            : 'One mining rocket rate is 0.';
+    }
+
+    if (effectId === 'supplyChainDisruption') {
+        const category = safeState.category;
+        const key = safeState.key;
+        const itemName = (category && key) ? getItemDisplayName(category, key) : null;
+        const percentDown = Math.max(0, Math.min(100, Math.round(Number(safeState.percentDown) || 0)));
+        return itemName
+            ? `${itemName} production reduced by -${percentDown}%.`
+            : `Production reduced by -${percentDown}%.`;
+    }
+
+    if (effectId === 'blackHoleInstability') {
+        return 'Black Hole strength (and duration) shift every minute.';
+    }
+
+    return 'Ongoing timed effect.';
+}
+
+function recordTimedEffectHistory(effectId) {
+    const state = getTimedEffectState(effectId);
+    if (!state || typeof state !== 'object') {
+        return;
+    }
+
+    const endedAtMs = Date.now();
+    const startedAtMs = Number(state.startedAtMs);
+    const totalDurationMs = Number(state.totalDurationMs);
+    const durationMs = Number.isFinite(totalDurationMs) && totalDurationMs >= 0
+        ? totalDurationMs
+        : (Number.isFinite(startedAtMs) && startedAtMs > 0)
+            ? Math.max(0, endedAtMs - startedAtMs)
+            : null;
+
+    pushTimedEffectHistoryEntry({
+        id: effectId,
+        name: formatEventName(effectId),
+        startedAtMs: Number.isFinite(startedAtMs) ? startedAtMs : null,
+        endedAtMs,
+        durationMs,
+        description: buildTimedEffectUiDescription(effectId, state),
+        context: { ...state }
+    });
+}
+
 function getTimedEffectState(effectId) {
     getTimedEffectsRoot();
     const stored = getResourceDataObject('randomEvents', ['timedEffects', effectId], true);
@@ -708,7 +892,7 @@ export function getTimedEffectStateSnapshot(effectId) {
 function startTimedEffect(effectId, durationMs, extraState = null) {
     const safeDuration = Math.max(0, Number(durationMs) || 0);
     const extra = (extraState && typeof extraState === 'object') ? extraState : null;
-    setTimedEffectState(effectId, { remainingMs: safeDuration, ...(extra || {}) });
+    setTimedEffectState(effectId, { remainingMs: safeDuration, totalDurationMs: safeDuration, startedAtMs: Date.now(), ...(extra || {}) });
 
     if (typeof randomEventUiHandlers.onTimedEffectStarted === 'function') {
         randomEventUiHandlers.onTimedEffectStarted(effectId);
@@ -785,6 +969,7 @@ function scheduleTimedEffectsTimer() {
 
                 const nextRemaining = remaining - deltaForEffect;
                 if (nextRemaining <= 0) {
+                    recordTimedEffectHistory(effectId);
                     setTimedEffectState(effectId, { remainingMs: 0 });
                     handleTimedEffectExpired(effectId);
                     return;
@@ -820,6 +1005,55 @@ function scheduleTimedEffectsTimer() {
             });
         }
     });
+}
+
+export function getTimedEffectsUiSnapshot() {
+    const root = getTimedEffectsRoot();
+    const ids = Object.keys(root || {});
+    return ids
+        .map((effectId) => {
+            const state = getTimedEffectStateSnapshot(effectId) || {};
+            const remainingMs = Math.max(0, Number(state?.remainingMs) || 0);
+            if (remainingMs <= 0) {
+                return null;
+            }
+            return {
+                id: effectId,
+                name: formatEventName(effectId),
+                remainingMs,
+                description: buildTimedEffectUiDescription(effectId, state),
+                state
+            };
+        })
+        .filter(Boolean);
+}
+
+export function getTimedEffectsHistorySnapshot() {
+    const history = getTimedEffectsHistoryRoot();
+    const entries = Array.isArray(history) ? history.slice() : [];
+    entries.sort((a, b) => {
+        const aEnded = Number(a?.endedAtMs) || 0;
+        const bEnded = Number(b?.endedAtMs) || 0;
+        return bEnded - aEnded;
+    });
+    return entries;
+}
+
+export function getEventsHistorySnapshot() {
+    const timed = getTimedEffectsHistoryRoot();
+    const instant = getInstantEventsHistoryRoot();
+    const combined = [];
+
+    if (Array.isArray(timed)) combined.push(...timed);
+    if (Array.isArray(instant)) combined.push(...instant);
+
+    combined.sort((a, b) => {
+        const aEnded = Number(a?.endedAtMs) || 0;
+        const bEnded = Number(b?.endedAtMs) || 0;
+        return bEnded - aEnded;
+    });
+
+    return combined;
 }
 
 function getEventTriggerDescription(eventId) {
@@ -922,6 +1156,9 @@ function getRandomEventsRoot() {
         if (!root.timedEffects || typeof root.timedEffects !== 'object') {
             setResourceDataObject({}, 'randomEvents', ['timedEffects']);
         }
+        if (!root.instantEventsHistory || !Array.isArray(root.instantEventsHistory)) {
+            setResourceDataObject([], 'randomEvents', ['instantEventsHistory']);
+        }
         if (root.version === undefined) {
             setResourceDataObject(1, 'randomEvents', ['version']);
         }
@@ -930,6 +1167,7 @@ function getRandomEventsRoot() {
 
     setResourceDataObject({}, 'randomEvents', ['events']);
     setResourceDataObject({}, 'randomEvents', ['timedEffects']);
+    setResourceDataObject([], 'randomEvents', ['instantEventsHistory']);
     setResourceDataObject(1, 'randomEvents', ['version']);
     return getResourceDataObject('randomEvents', null, true);
 }
@@ -1328,6 +1566,7 @@ export function initialiseRandomEventTimers() {
     getRandomEventsRoot();
     getGlobalEventsState();
     getTimedEffectsRoot();
+    getInstantEventsHistoryRoot();
 
     Object.keys(randomEventDefinitions).forEach((eventId) => {
         ensureEventStateExists(eventId);
@@ -1361,6 +1600,10 @@ export function triggerRandomEventDebug() {
     const triggerResult = def.trigger();
     if (!triggerResult) {
         return;
+    }
+
+    if (!TIMED_RANDOM_EVENT_IDS.has(picked)) {
+        recordInstantEventHistory(picked, triggerResult);
     }
 
     const nextProbability = Math.max(0.01, baseP * PROBABILITY_DECAY_ON_TRIGGER);
@@ -1403,6 +1646,10 @@ export function triggerSpecificRandomEventDebug(eventId) {
     if (!triggerResult) {
         randomEventUiHandlers.showNotification?.(`Random Event failed to trigger: ${formatEventName(eventId)}`, 'info', 3000, 'debug');
         return;
+    }
+
+    if (!TIMED_RANDOM_EVENT_IDS.has(eventId)) {
+        recordInstantEventHistory(eventId, triggerResult);
     }
 
     const nextProbability = Math.max(0.01, baseP * PROBABILITY_DECAY_ON_TRIGGER);

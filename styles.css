@@ -2055,6 +2055,55 @@ button.red-disabled-text {
     padding: 2px 12px;
 }
 
+.events-container {
+    width: 100%;
+    pointer-events: auto;
+    overflow-y: auto;
+    max-height: 62vh;
+}
+
+.events-intro {
+    margin-bottom: 10px;
+}
+
+.events-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 0.9rem;
+    margin-top: 6px;
+}
+
+.events-table th,
+.events-table td {
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--container-border-color);
+    vertical-align: top;
+}
+
+.events-table th {
+    text-align: left;
+    font-weight: 700;
+}
+
+.events-table th:nth-child(1),
+.events-table td:nth-child(1) {
+    width: 26%;
+    word-break: break-word;
+}
+
+.events-table th:nth-child(2),
+.events-table td:nth-child(2) {
+    width: 18%;
+    white-space: nowrap;
+}
+
+.events-table th:nth-child(3),
+.events-table td:nth-child(3) {
+    width: 56%;
+    word-break: break-word;
+}
+
 .left-column {
     border-top: none;
     border-bottom: none;

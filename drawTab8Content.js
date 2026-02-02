@@ -16,6 +16,7 @@ export function drawTab8Content(heading, optionContentElement) {
     if (heading === 'Philosophies') createHelpSectionRow('philosophies', []);
     if (heading === 'Statistics') createStatisticsSectionRow('statisticsRow');
     if (heading === 'Achievements') createAchievementsSectionRow('achievementsRow');
+    if (heading === 'Events') createEventsSectionRow('eventsRow');
 
     if (heading === 'Visual') {
         const settingsCurrencySymbolRow = createOptionRow(
@@ -774,4 +775,83 @@ export function drawTab8Content(heading, optionContentElement) {
     
         optionContentElement.appendChild(statisticsRow);
     }    
+
+    function createEventsSectionRow(rowId) {
+        const container = document.createElement('div');
+        container.id = `${rowId}Container`;
+        container.classList.add('events-container');
+
+        const activeTitle = document.createElement('div');
+        activeTitle.id = `${rowId}ActiveTitle`;
+        activeTitle.classList.add('help-sub-header-text');
+        activeTitle.innerHTML = 'Active Events';
+        container.appendChild(activeTitle);
+
+        const activeTable = document.createElement('table');
+        activeTable.id = `${rowId}ActiveTable`;
+        activeTable.classList.add('events-table');
+        activeTable.innerHTML = `
+            <thead>
+                <tr>
+                    <th>Event</th>
+                    <th>Active Until</th>
+                    <th>Effect</th>
+                </tr>
+            </thead>
+            <tbody id="timedEventsActiveBody">
+                <tr><td colspan="3">No active timed events.</td></tr>
+            </tbody>
+        `;
+        container.appendChild(activeTable);
+
+        const historyTitle = document.createElement('div');
+        historyTitle.id = `${rowId}HistoryTitle`;
+        historyTitle.classList.add('help-sub-header-text');
+        historyTitle.style.marginTop = '14px';
+        historyTitle.innerHTML = 'Event History';
+        container.appendChild(historyTitle);
+
+        const historyTable = document.createElement('table');
+        historyTable.id = `${rowId}HistoryTable`;
+        historyTable.classList.add('events-table');
+        historyTable.innerHTML = `
+            <thead>
+                <tr>
+                    <th>Event</th>
+                    <th>Total Duration</th>
+                    <th>Effect</th>
+                </tr>
+            </thead>
+            <tbody id="timedEventsHistoryBody">
+                <tr><td colspan="3">No completed timed events yet.</td></tr>
+            </tbody>
+        `;
+        container.appendChild(historyTable);
+
+        const eventsRow = createOptionRow(
+            rowId,
+            null,
+            '',
+            container,
+            null,
+            null,
+            null,
+            null,
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+            null,
+            false,
+            null,
+            null,
+            '',
+            [true, 'invisible', '100%'],
+            ['no-left-margin']
+        );
+
+        optionContentElement.appendChild(eventsRow);
+    }
 }

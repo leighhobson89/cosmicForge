@@ -404,6 +404,7 @@ export function initialiseDescriptions() {
         'Space Mining': 'Here you can build vessels to mine asteroids for valuable Antimatter, enabling you to visit locations in the Star Map, and really start to conquer the galaxy!',
         'Galactic': 'Here you can exchange your AP for permanent buffs, and reset runs.',
         'Settings': 'Change the game settings to your liking.',
+        'events': 'Here you can see any ongoing timed events and the effects they have.',
         
         'hydrogen': 'The most basic element known to man, very cheap to produce and has a pretty low value, but anything can be created from it.',
         'helium': 'Lighter than air this one will make you float away!',

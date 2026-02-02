@@ -298,7 +298,7 @@ import {
     
 } from "./descriptions.js";
 
-import { getRandomEventDebugOptions, getTimedEffectRemainingMs, getTimedEffectStateSnapshot, isTimedEffectActive, setRandomEventUiHandlers, triggerSpecificRandomEventDebug } from "./events.js";
+import { getEventsHistorySnapshot, getRandomEventDebugOptions, getTimedEffectRemainingMs, getTimedEffectStateSnapshot, getTimedEffectsUiSnapshot, isTimedEffectActive, setRandomEventUiHandlers, triggerSpecificRandomEventDebug } from "./events.js";
 
 import { saveGame, loadGameFromCloud, generateRandomPioneerName, saveGameToCloud } from './saveLoadGame.js';
 
@@ -363,6 +363,182 @@ const closeButton = document.querySelector('.close-btn');
 
 let hoveredButtonElement = null;
 let holdEnterRapidClickIntervalId = null;
+
+function formatCountdownMs(ms) {
+    const totalSeconds = Math.max(0, Math.ceil((Number(ms) || 0) / 1000));
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    if (hours > 0) {
+        return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+
+    return `${minutes}:${String(seconds).padStart(2, '0')}`;
+}
+
+function formatDurationMs(ms) {
+    const totalSeconds = Math.max(0, Math.round((Number(ms) || 0) / 1000));
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    if (hours > 0) {
+        return `${hours}h ${minutes}m ${seconds}s`;
+    }
+    if (minutes > 0) {
+        return `${minutes}m ${seconds}s`;
+    }
+    return `${seconds}s`;
+}
+
+function formatDurationMinutesOnly(ms) {
+    const totalMinutes = Math.max(0, Math.round((Number(ms) || 0) / 60000));
+    return `${totalMinutes}m`;
+}
+
+const timedEffectSentimentMap = {
+    endlessSummer: 'good',
+    galacticMarketLockdown: 'bad',
+    minerBrokeDown: 'bad',
+    supplyChainDisruption: 'bad',
+    blackHoleInstability: 'bad'
+};
+
+const instantEventSentimentMap = {
+    researchBreakthrough: 'good',
+    rocketInstantArrival: 'good'
+};
+
+function formatHistoryAmount(value) {
+    const num = Number(value);
+    if (!Number.isFinite(num)) {
+        return null;
+    }
+
+    if (getNotationType?.() === 'normal') {
+        return String(Math.floor(num));
+    }
+
+    return formatNumber?.(num) ?? String(num);
+}
+
+function buildInstantHistoryEffectText(eventId, context) {
+    const safe = (context && typeof context === 'object') ? context : {};
+
+    if (eventId === 'scienceTheft') {
+        const amount = formatHistoryAmount(safe.amountStolen);
+        return amount ? `Research halved (-${amount}).` : 'Research halved.';
+    }
+
+    if (eventId === 'researchBreakthrough') {
+        const amount = formatHistoryAmount(safe.amountGained);
+        return amount ? `Research doubled (+${amount}).` : 'Research doubled.';
+    }
+
+    if (eventId === 'rocketInstantArrival') {
+        const rocketName = safe.rocketName;
+        return rocketName ? `${rocketName} instantly arrived.` : 'A travelling rocket instantly arrived.';
+    }
+
+    if (eventId === 'antimatterReaction') {
+        const rocketName = safe.rocketName ? String(safe.rocketName) : 'A mining rocket';
+        const asteroidName = safe.asteroidName ? String(safe.asteroidName) : 'an asteroid';
+        const lost = formatHistoryAmount(safe.antimatterLost);
+        const lossText = lost ? ` -${lost} antimatter.` : '';
+        return `${rocketName} lost; ${asteroidName} destroyed.${lossText}`;
+    }
+
+    if (eventId === 'stockLoss') {
+        const itemName = safe.itemName ? String(safe.itemName) : 'Stock';
+        const lostPercent = Number(safe.lostPercent);
+        if (Number.isFinite(lostPercent) && lostPercent > 0) {
+            return `-${lostPercent}% ${itemName}.`;
+        }
+        return `Stock loss (${itemName}).`;
+    }
+
+    if (eventId === 'powerPlantExplosion') {
+        return safe.destroyedBuilding ? `${safe.destroyedBuilding} destroyed.` : 'Power plant destroyed.';
+    }
+
+    if (eventId === 'batteryExplosion') {
+        return safe.destroyedBuilding ? `${safe.destroyedBuilding} destroyed.` : 'Battery destroyed.';
+    }
+
+    if (eventId === 'starshipLostInSpace') {
+        return 'Starship lost; destination cleared; fleets reset.';
+    }
+
+    return String(safe.description ?? safe.notificationText ?? '');
+}
+
+function updateTimedEventsPanel() {
+    const activeTbody = document.getElementById('timedEventsActiveBody');
+    const historyTbody = document.getElementById('timedEventsHistoryBody');
+    if (!activeTbody && !historyTbody) {
+        return;
+    }
+
+    if (activeTbody) {
+        const active = getTimedEffectsUiSnapshot?.() || [];
+        active.sort((a, b) => (Number(a?.remainingMs) || 0) - (Number(b?.remainingMs) || 0));
+
+        if (!active.length) {
+            activeTbody.innerHTML = '<tr><td colspan="3">No active timed events.</td></tr>';
+        } else {
+            activeTbody.innerHTML = active.map((entry) => {
+                const name = String(entry?.name ?? entry?.id ?? 'Unknown');
+                const remainingMs = Number(entry?.remainingMs) || 0;
+                const description = String(entry?.description ?? '');
+                const effectId = String(entry?.id ?? '').trim();
+                const sentiment = timedEffectSentimentMap[effectId] || 'bad';
+                const effectClass = sentiment === 'good' ? 'green-ready-text' : 'red-disabled-text';
+                return `
+                    <tr>
+                        <td class="${effectClass}">${name}</td>
+                        <td class="notation ${effectClass}">${formatCountdownMs(remainingMs)}</td>
+                        <td class="${effectClass}">${description}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+    }
+
+    if (historyTbody) {
+        const history = getEventsHistorySnapshot?.() || [];
+        if (!history.length) {
+            historyTbody.innerHTML = '<tr><td colspan="3">No completed timed events yet.</td></tr>';
+        } else {
+            historyTbody.innerHTML = history.map((entry) => {
+                const name = String(entry?.name ?? entry?.id ?? 'Unknown');
+                const durationMs = entry?.durationMs;
+                const durationLabel = entry?.durationLabel;
+                const durationText = (durationLabel === 'Instant')
+                    ? 'Instant'
+                    : (durationMs === null || durationMs === undefined)
+                        ? '--'
+                        : `${formatDurationMinutesOnly(durationMs)}`;
+                const eventId = String(entry?.id ?? '').trim();
+                const description = (durationLabel === 'Instant')
+                    ? buildInstantHistoryEffectText(eventId, entry?.context)
+                    : String(entry?.description ?? '');
+
+                const sentiment = (durationLabel === 'Instant')
+                    ? (instantEventSentimentMap[eventId] || 'bad')
+                    : (timedEffectSentimentMap[eventId] || 'bad');
+                const effectClass = sentiment === 'good' ? 'green-ready-text' : 'red-disabled-text';
+                return `
+                    <tr>
+                        <td class="${effectClass}">${name}</td>
+                        <td class="notation">${durationText}</td>
+                        <td class="${effectClass}">${description}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+    }
+}
 
 function shouldIgnoreHoldEnterRapidClick(eventTarget) {
     const target = eventTarget ?? document.activeElement;
@@ -5574,6 +5750,8 @@ export function updateDynamicUiContent() {
 
     refreshSpaceMiningRocketSidebar();
 
+    updateTimedEventsPanel();
+
     if (!document.getElementById('energyConsumptionStats').classList.contains('invisible')) {
         const powerPlant1PurchasedRate = getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'purchasedRate']);
         const powerPlant2PurchasedRate = getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'purchasedRate']);
@@ -7637,6 +7815,16 @@ function initializeTabEventListeners() {
             updateContent('Achievements', 'tab8', 'content');
             setFirstAccessArray('achievements');
         });    
+    });
+
+    document.querySelectorAll('[class*="tab8"][class*="option14"]').forEach(function(element) {
+        element.addEventListener('click', function() {
+            selectRowCss(this);
+            setLastScreenOpenRegister('tab8', 'events');
+            setCurrentOptionPane('events');
+            updateContent('Events', 'tab8', 'content');
+            setFirstAccessArray('events');
+        });
     });
 
     document.querySelectorAll('[class*="tab8"][class*="option11"]').forEach(function(element) {
