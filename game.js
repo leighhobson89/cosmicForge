@@ -3107,11 +3107,25 @@ export function fuseResource(resource, fuseTargets) {
         let fuseData, amountToDeductFromResource, amountToAddToResource, realAmountToAdd = 0, lostQuantity = 0;
 
         if (!getUnlockedResourcesArray().includes(fuseTo)) {
-            resourceRowToShow.classList.remove('invisible');
-            mainCategoryToShow.classList.remove('invisible');
-            categoryToShow.classList.remove('invisible');
+            const optionElement = document.getElementById(`${fuseTo}Option`);
+            const resolvedResourceRowToShow = resourceRowToShow || optionElement?.closest('.row-side-menu');
+            const resolvedMainCategoryToShow = mainCategoryToShow || optionElement?.closest('.collapsible');
+            const resolvedCategoryToShow = categoryToShow || optionElement?.closest('.collapsible');
+
+            const mainWasHidden = !!resolvedMainCategoryToShow?.classList?.contains('invisible');
+
+            resolvedResourceRowToShow?.classList.remove('invisible');
+            resolvedMainCategoryToShow?.classList.remove('invisible');
+            resolvedCategoryToShow?.classList.remove('invisible');
+
+            if (resolvedMainCategoryToShow?.id === 'solids' && mainWasHidden) {
+                globalThis.__forceOpenCollapsible?.('solids');
+            }
+
             setUnlockedResourcesArray(fuseTo);
-            appendAttentionIndicator(document.getElementById(`${fuseTo}Option`));
+            if (optionElement) {
+                appendAttentionIndicator(optionElement);
+            }
             fuseData = getResourceSalePreview(resource);
             amountToDeductFromResource = parseInt(fuseData.match(/\((\d+)/)[1], 10);
             const amountToAdd = Math.ceil((amountToDeductFromResource * ratio) / 4);

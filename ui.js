@@ -397,6 +397,79 @@ function formatDurationMinutesOnly(ms) {
     return `${totalMinutes}m`;
 }
 
+function getUiCollapsibleStateRoot() {
+    const stored = getResourceDataObject('ui', ['collapsibles'], true);
+    if (stored && typeof stored === 'object') {
+        return stored;
+    }
+
+    setResourceDataObject({}, 'ui', ['collapsibles']);
+    return getResourceDataObject('ui', ['collapsibles'], true) || {};
+}
+
+function setUiCollapsibleState(collapsibleId, isOpen) {
+    if (!collapsibleId) {
+        return;
+    }
+    getUiCollapsibleStateRoot();
+    setResourceDataObject(!!isOpen, 'ui', ['collapsibles', collapsibleId]);
+}
+
+function applySavedCollapsibleStates() {
+    const map = getUiCollapsibleStateRoot();
+    if (!map || typeof map !== 'object') {
+        return;
+    }
+
+    Object.entries(map).forEach(([collapsibleId, isOpen]) => {
+        const container = document.getElementById(collapsibleId);
+        if (!container || !container.classList || !container.classList.contains('collapsible')) {
+            return;
+        }
+
+        const header = container.querySelector('.collapsible-header');
+        const content = container.querySelector('.collapsible-content');
+        if (!header || !content) {
+            return;
+        }
+
+        if (isOpen) {
+            container.classList.add('open');
+            header.classList.add('active');
+            content.classList.add('open');
+        } else {
+            container.classList.remove('open');
+            header.classList.remove('active');
+            content.classList.remove('open');
+        }
+    });
+}
+
+globalThis.__applySavedCollapsibleStates = applySavedCollapsibleStates;
+globalThis.__setUiCollapsibleState = setUiCollapsibleState;
+
+globalThis.__forceOpenCollapsible = (collapsibleId) => {
+    if (!collapsibleId) {
+        return;
+    }
+
+    const container = document.getElementById(collapsibleId);
+    if (!container || !container.classList || !container.classList.contains('collapsible')) {
+        return;
+    }
+
+    const header = container.querySelector('.collapsible-header');
+    const content = container.querySelector('.collapsible-content');
+    if (!header || !content) {
+        return;
+    }
+
+    container.classList.add('open');
+    header.classList.add('active');
+    content.classList.add('open');
+    setUiCollapsibleState(collapsibleId, true);
+};
+
 const timedEffectSentimentMap = {
     endlessSummer: 'good',
     galacticMarketLockdown: 'bad',
@@ -2191,8 +2264,15 @@ function buildFuelConsumptionLines(resourceKey, category, timerRatio) {
             const content = this.nextElementSibling;
             content.classList.toggle('open');
             this.classList.toggle('active');
+
+            const container = this.parentElement;
+            if (container && container.id && container.classList && container.classList.contains('collapsible')) {
+                setUiCollapsibleState(container.id, content.classList.contains('open'));
+            }
         });
     });
+
+    applySavedCollapsibleStates();
 
     //handleLanguageChange(getLanguageSelected()); //if we are using localise later on
 
@@ -5741,6 +5821,32 @@ function syncResourceSidebarVisibility() {
             }
         }
     });
+
+    const solidsContainer = document.getElementById('solids');
+    if (solidsContainer) {
+        const wasHidden = solidsContainer.classList.contains('invisible');
+        const solidKeys = ['carbon', 'silicon', 'sodium', 'iron'];
+        const anySolidsVisible = solidKeys.some((resourceKey) => {
+            const optionElement = document.getElementById(`${resourceKey}Option`);
+            const row = optionElement?.closest('.row-side-menu');
+            return row && !row.classList.contains('invisible');
+        });
+
+        if (anySolidsVisible) {
+            solidsContainer.classList.remove('invisible');
+
+            if (wasHidden) {
+                const solidsHeader = solidsContainer.querySelector('.collapsible-header');
+                const solidsContent = solidsContainer.querySelector('.collapsible-content');
+                solidsContainer.classList.add('open');
+                solidsHeader?.classList.add('active');
+                solidsContent?.classList.add('open');
+                setUiCollapsibleState('solids', true);
+            }
+        } else {
+            solidsContainer.classList.add('invisible');
+        }
+    }
 }
 
 export function updateDynamicUiContent() {
@@ -10016,7 +10122,7 @@ function renderBattleExplosions(ctx, now) {
 
     //reset classes on rebirth
     export function resetTab1ClassesRebirth() {
-        const collapsibles = document.querySelectorAll('.collapsible');
+        const collapsibles = document.querySelectorAll('.tab-1 .collapsible');
         collapsibles.forEach(collapsible => {
             if (collapsible.id === "gas" || collapsible.id === "solids") {
                 collapsible.classList.add('open');
@@ -10024,18 +10130,44 @@ function renderBattleExplosions(ctx, now) {
                 collapsible.classList.remove('open');
             }
         });
+
+        const solidsCollapsible = document.getElementById('solids');
+        if (solidsCollapsible) {
+            solidsCollapsible.classList.add('invisible');
+            solidsCollapsible.classList.remove('open');
+
+            const solidsHeader = solidsCollapsible.querySelector('.collapsible-header');
+            const solidsContent = solidsCollapsible.querySelector('.collapsible-content');
+            solidsHeader?.classList.remove('active');
+            solidsContent?.classList.remove('open');
+        }
     
-        const collapsibleHeaders = document.querySelectorAll('.collapsible-header');
+        const collapsibleHeaders = document.querySelectorAll('.tab-1 .collapsible-header');
         collapsibleHeaders.forEach(header => {
+            if (header.closest('#solids')) {
+                return;
+            }
             header.classList.add('active');
         });
     
-        const collapsibleContents = document.querySelectorAll('.collapsible-content');
+        const collapsibleContents = document.querySelectorAll('.tab-1 .collapsible-content');
         collapsibleContents.forEach(content => {
+            if (content.closest('#solids')) {
+                return;
+            }
             content.classList.add('open');
         });
+
+        if (solidsCollapsible) {
+            const solidsHeader = solidsCollapsible.querySelector('.collapsible-header');
+            const solidsContent = solidsCollapsible.querySelector('.collapsible-content');
+            solidsCollapsible.classList.add('invisible');
+            solidsCollapsible.classList.remove('open');
+            solidsHeader?.classList.remove('active');
+            solidsContent?.classList.remove('open');
+        }
     
-        const rowSideMenuItems = document.querySelectorAll('.row-side-menu');
+        const rowSideMenuItems = document.querySelectorAll('.tab-1 .row-side-menu');
         rowSideMenuItems.forEach(row => {
             if (row.classList.contains('invisible')) {
                 row.classList.add('invisible');
@@ -10044,7 +10176,7 @@ function renderBattleExplosions(ctx, now) {
             }
         });
     
-        const invisibleElements = document.querySelectorAll('.row-side-menu');
+        const invisibleElements = document.querySelectorAll('.tab-1 .row-side-menu');
         invisibleElements.forEach(element => {
             if (element.querySelector('.invisible')) {
                 element.classList.add('invisible');
@@ -10079,7 +10211,7 @@ function renderBattleExplosions(ctx, now) {
     }
 
     export function resetTab2ClassesRebirth() {
-        const collapsibles = document.querySelectorAll('.collapsible');
+        const collapsibles = document.querySelectorAll('.tab-2 .collapsible');
         collapsibles.forEach(collapsible => {
             if (collapsible.id === "energyBuildings") {
                 collapsible.classList.add('open');
@@ -10088,17 +10220,17 @@ function renderBattleExplosions(ctx, now) {
             }
         });
     
-        const collapsibleHeaders = document.querySelectorAll('.collapsible-header');
+        const collapsibleHeaders = document.querySelectorAll('.tab-2 .collapsible-header');
         collapsibleHeaders.forEach(header => {
             header.classList.add('active');
         });
     
-        const collapsibleContents = document.querySelectorAll('.collapsible-content');
+        const collapsibleContents = document.querySelectorAll('.tab-2 .collapsible-content');
         collapsibleContents.forEach(content => {
             content.classList.add('open');
         });
     
-        const rowSideMenuItems = document.querySelectorAll('.row-side-menu');
+        const rowSideMenuItems = document.querySelectorAll('.tab-2 .row-side-menu');
         rowSideMenuItems.forEach(row => {
             if (row.classList.contains('invisible')) {
                 row.classList.add('invisible');
@@ -10167,7 +10299,7 @@ function renderBattleExplosions(ctx, now) {
     }
 
     export function resetTab5ClassesRebirth() {
-        const collapsibles = document.querySelectorAll('.collapsible');
+        const collapsibles = document.querySelectorAll('.tab-5 .collapsible');
         collapsibles.forEach(collapsible => {
             if (collapsible.id === "starMapOption" || collapsible.id === "starShipOption") {
                 collapsible.classList.add('open');
@@ -10176,12 +10308,12 @@ function renderBattleExplosions(ctx, now) {
             }
         });
 
-        const collapsibleHeaders = document.querySelectorAll('.collapsible-header');
+        const collapsibleHeaders = document.querySelectorAll('.tab-5 .collapsible-header');
         collapsibleHeaders.forEach(header => {
             header.classList.add('active');
         });
     
-        const collapsibleContents = document.querySelectorAll('.collapsible-content');
+        const collapsibleContents = document.querySelectorAll('.tab-5 .collapsible-content');
         collapsibleContents.forEach(content => {
             content.classList.add('open');
         });

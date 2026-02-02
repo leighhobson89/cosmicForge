@@ -458,6 +458,7 @@ async function initialiseLoadedGame(gameState, type) {
     await restoreGameStatus(gameState, type);
     migrateAncientManuscriptsAndFactoryStarsIfNeeded(); //Remove once time has passed for players to finish their saves
     patchOTypeMechanicActivatedForThisSave(); // Remove once time has passed for players to finish their saves
+    globalThis.__applySavedCollapsibleStates?.();
     setOnboardingMode(false);
 }
 
