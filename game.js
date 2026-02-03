@@ -45,6 +45,7 @@ import {
     getStarsWithAncientManuscripts,
     getOStarArrivalPopupsShown,
     markOStarArrivalPopupShown,
+    getOTypeMechanicActivatedForThisSave,
     setPlayerPhilosophy,
     getPillageVoidTimerCanContinue,
     setPillageVoidTimerCanContinue,
@@ -312,6 +313,7 @@ import {
     setRocketTravelSpeed,
     setStarShipTravelSpeed,
     getSettledStars,
+    getOTypePowerPlantStrengthBoost,
     getBasePillageVoidTimerDuration,
     getInfinitePowerRate,
     getCurrentTheme,
@@ -391,7 +393,9 @@ import {
     setBlackHoleResearchDone,
     setAchievementIconImageUrls,
     megaStructureImageUrls,
-    miaplacidus 
+    miaplacidus,
+    getOTypePowerPlantBuffs,
+    setOTypePowerPlantBuffs
 } from "./resourceDataObject.js";
 
 import { autoGrantAchievementsOnRebirth, checkForAchievements, resetAchievementsOnRebirth } from "./achievements.js";
@@ -484,12 +488,46 @@ import { playClickSfx, sfxPlayer, weatherAmbienceManager, backgroundAudio } from
 import { timerManager } from './timerManager.js';
 import { timerManagerDelta } from './timerManagerDelta.js';
 
-import { initialiseDescriptions, megaStructureTableText, getStarTypeByName } from './descriptions.js';
+import { initialiseDescriptions, megaStructureTableText, getStarTypeByName, modalOTypeStarTechAcquiredHeader, modalOTypeStarTechAcquiredText } from './descriptions.js';
 
 import { drawTab5Content } from './drawTab5Content.js';
 import { handleTechnologyButtonClick } from './drawTab3Content.js';
+import { drawTab6Content } from './drawTab6Content.js';
 
 let weatherCountDownToChangeInterval = null;
+
+export function getOTypePowerPlantBoostMultiplierForCurrentSystem(powerPlantKey) {
+    if (!powerPlantKey) return 1;
+
+    if (!getOTypeMechanicActivatedForThisSave?.()) {
+        return 1;
+    }
+
+    const buffs = getOTypePowerPlantBuffs?.();
+    if (!buffs || typeof buffs !== 'object') return 1;
+
+    const mapping = {
+        powerPlant1: 'basicPowerPlantStar',
+        powerPlant2: 'solarPowerPlantStar',
+        powerPlant3: 'advancedPowerPlantStar'
+    };
+
+    const buffKey = mapping[powerPlantKey];
+    if (!buffKey) return 1;
+
+    const entry = buffs[buffKey];
+    if (!entry || typeof entry !== 'object') return 1;
+
+    if (!entry.settled) return 1;
+
+    const requiredStar = String(entry.starName || '').toLowerCase();
+    if (!requiredStar) return 1;
+
+    const settledStarSet = new Set((getSettledStars?.() || []).map((name) => String(name || '').toLowerCase()));
+    if (!settledStarSet.has(requiredStar)) return 1;
+
+    return getOTypePowerPlantStrengthBoost?.() || 1;
+}
 
 function updateProductionRateText(elementId, rateValue) {
     if (!isFinite(rateValue)) {
@@ -1151,13 +1189,16 @@ function updateEnergyDelta(deltaMs) {
     if (Math.floor(currentEnergyQuantity) <= energyStorageCapacity) {
         if (getPowerOnOff()) {
             if (getBuildingTypeOnOff('powerPlant1')) {
-                newEnergyRate += getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'purchasedRate']);
+                newEnergyRate += getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'purchasedRate']) *
+                    getOTypePowerPlantBoostMultiplierForCurrentSystem('powerPlant1');
             }
             if (getBuildingTypeOnOff('powerPlant2')) {
-                newEnergyRate += getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'purchasedRate']);
+                newEnergyRate += getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'purchasedRate']) *
+                    getOTypePowerPlantBoostMultiplierForCurrentSystem('powerPlant2');
             }
             if (getBuildingTypeOnOff('powerPlant3')) {
-                newEnergyRate += getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant3', 'purchasedRate']);
+                newEnergyRate += getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant3', 'purchasedRate']) *
+                    getOTypePowerPlantBoostMultiplierForCurrentSystem('powerPlant3');
             }
 
             let totalRate = getInfinitePower() ? getInfinitePowerRate() : newEnergyRate - getTotalEnergyUse();
@@ -2792,7 +2833,12 @@ function updateAllPowerPlantRates() {
       
           const energyRateElement = getElements()[building + 'Rate'];
           if (energyRateElement) {
-            const totalRate = rateBuilding * newQuantityBuilding * getTimerRateRatio();
+            const boostMultiplier = getOTypePowerPlantBoostMultiplierForCurrentSystem(building);
+            let totalRate = rateBuilding * newQuantityBuilding * boostMultiplier;
+            if (building === 'powerPlant2') {
+                totalRate *= getCurrentStarSystemWeatherEfficiency()[1];
+            }
+            totalRate *= getTimerRateRatio();
             energyRateElement.innerHTML = `${Math.floor(totalRate)} KW / s`;
 
             if (totalRate > 0) {
@@ -7486,7 +7532,15 @@ export function sellBuilding(quantityToSell, building) {
     const newQuantityBuilding = getResourceDataObject('buildings', ['energy', 'upgrades', building, 'quantity']); 
 
     const energyRateElement = getElements()[building + 'Rate'];
-    energyRateElement.innerHTML = `${Math.floor(rateBuilding * newQuantityBuilding * getTimerRateRatio())} KW / s`
+    if (energyRateElement) {
+        const boostMultiplier = getOTypePowerPlantBoostMultiplierForCurrentSystem(building);
+        let totalRate = rateBuilding * newQuantityBuilding * boostMultiplier;
+        if (building === 'powerPlant2') {
+            totalRate *= getCurrentStarSystemWeatherEfficiency()[1];
+        }
+        totalRate *= getTimerRateRatio();
+        energyRateElement.innerHTML = `${Math.floor(totalRate)} KW / s`;
+    }
 
     const priceKeys = [
         { key: 'price', isArray: false },
@@ -8592,6 +8646,7 @@ export function startTravelToDestinationStarTimer(adjustment) {
                     getStarTypeByName(getDestinationStar());
 
                 if (
+                    getOTypeMechanicActivatedForThisSave?.() &&
                     destinationStarType === 'O' &&
                     !getOStarArrivalPopupsShown().includes(String(getDestinationStar() || '').toLowerCase())
                 ) {
@@ -11174,8 +11229,19 @@ export function generateDestinationStarData() {
     setStarSystemDataObject(updatedData, 'stars', ['destinationStar']);
 }
 
+function isHardModeDestinationStar() {
+    const dest = String(getDestinationStar?.() || '').toLowerCase();
+    if (!dest) return false;
+
+    const isFactory = (getFactoryStarsArray?.() || []).some((name) => String(name || '').toLowerCase() === dest);
+    if (isFactory) return true;
+
+    const type = getStarTypeByName?.(dest);
+    return type === 'O';
+}
+
 function generateLifeDetection() {
-    if (getFactoryStarsArray().includes(getDestinationStar())) {
+    if (isHardModeDestinationStar()) {
         return true;
     } 
 
@@ -11183,7 +11249,7 @@ function generateLifeDetection() {
 }
 
 function generateLifeformTraits(civilizationLevel) {
-    if (getFactoryStarsArray().includes(getDestinationStar())) {
+    if (isHardModeDestinationStar()) {
         return [['Aggressive', 'red-disabled-text'], ['Mechanized', ''], ['Armored', 'red-disabled-text']];
     }
 
@@ -11203,7 +11269,7 @@ function generateLifeformTraits(civilizationLevel) {
 }
 
 function generateCivilizationLevel(starData) {
-    if (getFactoryStarsArray().includes(getDestinationStar())) {
+    if (isHardModeDestinationStar()) {
         return 'Robotic';
     } 
 
@@ -11223,7 +11289,7 @@ function generateCivilizationLevel(starData) {
 function generatePopulationEstimate(lifeformTraits) {
     let population;
 
-    if (getFactoryStarsArray().includes(getDestinationStar())) {
+    if (isHardModeDestinationStar()) {
         population = Math.floor(Math.random() * (100000000 - 50000000 + 1)) + 50000000;
     } else {
         population = Math.floor(Math.random() * (50000000 - 1000000 + 1)) + 1000000;
@@ -11237,7 +11303,7 @@ function generatePopulationEstimate(lifeformTraits) {
 }
 
 function generateThreatLevel(civilizationLevel, population, lifeformTraits) {
-    if (getFactoryStarsArray().includes(getDestinationStar())) {
+    if (isHardModeDestinationStar()) {
         return 'Extreme';
     } 
 
@@ -11343,7 +11409,7 @@ function generateEnemyFleets(threatLevel, population, lifeformTraits) {
 }
 
 function generateAnomalies(defenseRating, enemyFleets) {
-    if (getFactoryStarsArray().includes(getDestinationStar())) {
+    if (isHardModeDestinationStar()) {
         return [
             ["Stalwart"],
             defenseRating,
@@ -11557,7 +11623,7 @@ function calculateInitialImpression(lifeformTraits, civilizationLevel, threatLev
 
 function calculateAttitude(impression, civilizationLevel) {
 
-    if (getFactoryStarsArray().includes(getDestinationStar())) {
+    if (isHardModeDestinationStar()) {
         return 'Belligerent';
     }
 
@@ -12183,14 +12249,21 @@ export async function settleSystemAfterBattle(accessPoint) {
     const destinationStarKey = getDestinationStar();
     const destinationFactoryStar = getStarSystemDataObject('stars', [destinationStarKey, 'factoryStar'], true);
     const isFactoryStar = Boolean(destinationFactoryStar) || getFactoryStarsArray().includes(destinationStarKey);
+    const destinationStarType = destinationStarKey
+        ? (getStarSystemDataObject('stars', [destinationStarKey, 'starType'], true) ?? getStarTypeByName(destinationStarKey))
+        : null;
+    const isOTypeStar = destinationStarType === 'O';
     let apModifier = accessPoint === 'battle' || accessPoint === 'surrender' ? 2 : 1;
     
     if (accessPoint !== 'battle') {
         setBattleResolved(true, 'player');
     }
 
-    if (isFactoryStar) {
+    if (isFactoryStar || isOTypeStar) {
         apModifier *= 2;
+    }
+
+    if (isFactoryStar) {
         if (getMegaStructureAssignmentMode?.() === 'legacy') { //can remove later
             setMegaStructuresInPossessionArray(destinationFactoryStar);
         } else {
@@ -12469,6 +12542,59 @@ export function rebirth() {
     autoSelectOption('hydrogenOption');
     setCurrentStarSystem(getStarSystemDataObject('stars', ['destinationStar', 'name']));
     setSettledStars(getCurrentStarSystem());
+
+    const rebirthStarName = getCurrentStarSystem();
+    const rebirthStarKey = String(rebirthStarName || '').toLowerCase();
+    const rebirthStarType = rebirthStarKey
+        ? (getStarSystemDataObject('stars', [rebirthStarKey, 'starType'], true) ?? getStarTypeByName(rebirthStarKey))
+        : null;
+
+    if (rebirthStarType === 'O' && getOTypeMechanicActivatedForThisSave?.()) {
+        const buffs = JSON.parse(JSON.stringify(getOTypePowerPlantBuffs?.() || {}));
+
+        const candidates = [];
+        if (!buffs.basicPowerPlantStar?.settled) candidates.push(['basicPowerPlantStar', 'Power Plant', 'powerPlant1']);
+        if (!buffs.solarPowerPlantStar?.settled) candidates.push(['solarPowerPlantStar', 'Solar Power Plant', 'powerPlant2']);
+        if (!buffs.advancedPowerPlantStar?.settled) candidates.push(['advancedPowerPlantStar', 'Advanced Power Plant', 'powerPlant3']);
+
+        if (candidates.length > 0) {
+            const chosen = candidates[Math.floor(Math.random() * candidates.length)];
+            const [buffKey, displayName] = chosen;
+
+            buffs[buffKey] = {
+                starName: rebirthStarKey,
+                settled: true
+            };
+
+            setOTypePowerPlantBuffs(buffs);
+
+            const strengthBoost = getOTypePowerPlantStrengthBoost?.() || 8;
+            const content = String(modalOTypeStarTechAcquiredText)
+                .replaceAll('{STAR}', capitaliseWordsWithRomanNumerals(rebirthStarName))
+                .replaceAll('{DISPLAY_NAME}', displayName)
+                .replaceAll('{STRENGTH_BOOST}', strengthBoost);
+
+            callPopupModal(
+                modalOTypeStarTechAcquiredHeader,
+                content,
+                true,
+                false,
+                false,
+                false,
+                function() {
+                    showHideModal();
+                },
+                null,
+                null,
+                null,
+                'CONFIRM',
+                null,
+                null,
+                null,
+                false
+            );
+        }
+    }
 
     if (getPlayerPhilosophy() === 'expansionist' && getPhilosophyAbilityActive()) {
         const extraSystems = getAdditionalSystemsToSettleThisRun();

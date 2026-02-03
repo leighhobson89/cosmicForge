@@ -18,6 +18,8 @@ var debugHoldEnterToGainEnabled = false;
 let blackHoleDiscovered = false;
 let blackHoleDiscoveryProbability = 0;
 
+let oTypePowerPlantStrengthBoost = 8;
+
 //ELEMENTS
 let elements;
 let saveData = null;
@@ -69,6 +71,8 @@ export const factoryStarMap = {
     3: "Plasma Forge",
     4: "Galactic Memory Archive"
 };
+
+
 
 export function mapFactoryStarValue(value) {
     if (value === null || value === undefined || value === false) {
@@ -3847,6 +3851,17 @@ export function getDestinationStarScanned() {
 
 export function setDestinationStarScanned(value) {
     destinationStarScanned = value;
+}
+
+export function getOTypePowerPlantStrengthBoost() {
+    return oTypePowerPlantStrengthBoost;
+}
+
+export function setOTypePowerPlantStrengthBoost(value) {
+    if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) {
+        return;
+    }
+    oTypePowerPlantStrengthBoost = value;
 }
 
 export function getStellarScannerRange() {

@@ -329,6 +329,7 @@ import {
     getAscendencyPointsWithRepeatableBonus,
     formatProductionRateValue,
     formatNumber,
+    getOTypePowerPlantBoostMultiplierForCurrentSystem,
     timeWarp,
     forceClearWeather
 } from './game.js';
@@ -5861,12 +5862,25 @@ export function updateDynamicUiContent() {
     if (!document.getElementById('energyConsumptionStats').classList.contains('invisible')) {
         const powerPlant1PurchasedRate = getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'purchasedRate']);
         const powerPlant2PurchasedRate = getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'purchasedRate']);
-        const solarPlantMaxPurchasedRate = getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'maxPurchasedRate']) * getTimerRateRatio();
         const powerPlant3PurchasedRate = getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant3', 'purchasedRate']);
+
+        const powerPlant1Boost = getOTypePowerPlantBoostMultiplierForCurrentSystem?.('powerPlant1') || 1;
+        const powerPlant2Boost = getOTypePowerPlantBoostMultiplierForCurrentSystem?.('powerPlant2') || 1;
+        const powerPlant3Boost = getOTypePowerPlantBoostMultiplierForCurrentSystem?.('powerPlant3') || 1;
+
+        const solarPlantMaxPurchasedRate =
+            getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'maxPurchasedRate']) *
+            getCurrentStarSystemWeatherEfficiency()[1] *
+            powerPlant2Boost *
+            getTimerRateRatio();
 
         const powerConsumption = getResourceDataObject('buildings', ['energy', 'consumption']);
         
-        const generationValues = [powerPlant1PurchasedRate * getTimerRateRatio(), powerPlant2PurchasedRate * getTimerRateRatio(), powerPlant3PurchasedRate * getTimerRateRatio()];
+        const generationValues = [
+            powerPlant1PurchasedRate * powerPlant1Boost * getTimerRateRatio(),
+            powerPlant2PurchasedRate * powerPlant2Boost * getTimerRateRatio(),
+            powerPlant3PurchasedRate * powerPlant3Boost * getTimerRateRatio()
+        ];
         const consumptionValues = [powerConsumption * getTimerRateRatio()];
         drawStackedBarChart('powerGenerationConsumptionChart', generationValues, consumptionValues, solarPlantMaxPurchasedRate);
     }
@@ -9198,12 +9212,153 @@ export function setColoniseOpinionProgressBar(value, parentElement) {
 const battleVisualLasers = [];
 const battleVisualExplosions = [];
 
+let battleStarField = null;
+let battleBackdropStar = null;
+
 let lastLaserGunSfxAt = 0;
 let lastShipBattleExplodeSfxAt = 0;
 
 
 function wrapAngle(angle) {
     return ((angle % (2 * Math.PI)) + (2 * Math.PI)) % (2 * Math.PI);
+}
+
+function getBattleBackdropStarFillStops(starType) {
+    const t = String(starType || '').trim().toUpperCase();
+    switch (t) {
+        case 'O':
+            return { inner: 'rgba(255,0,255,0.52)', mid: 'rgba(255,0,255,0.16)', outer: 'rgba(255,0,255,0)' };
+        case 'B':
+            return { inner: 'rgba(110,170,255,0.45)', mid: 'rgba(110,170,255,0.14)', outer: 'rgba(110,170,255,0)' };
+        case 'A':
+            return { inner: 'rgba(220,245,255,0.40)', mid: 'rgba(220,245,255,0.12)', outer: 'rgba(220,245,255,0)' };
+        case 'F':
+            return { inner: 'rgba(255,250,220,0.40)', mid: 'rgba(255,250,220,0.12)', outer: 'rgba(255,250,220,0)' };
+        case 'G':
+            return { inner: 'rgba(255,230,140,0.42)', mid: 'rgba(255,230,140,0.13)', outer: 'rgba(255,230,140,0)' };
+        case 'K':
+            return { inner: 'rgba(255,170,90,0.45)', mid: 'rgba(255,170,90,0.14)', outer: 'rgba(255,170,90,0)' };
+        case 'M':
+            return { inner: 'rgba(255,90,70,0.46)', mid: 'rgba(255,90,70,0.14)', outer: 'rgba(255,90,70,0)' };
+        default:
+            return { inner: 'rgba(200,200,200,0.22)', mid: 'rgba(200,200,200,0.08)', outer: 'rgba(200,200,200,0)' };
+    }
+}
+
+function ensureBattleBackdropStar(canvas, starData) {
+    const w = canvas?.offsetWidth || canvas?.width || 0;
+    const h = canvas?.offsetHeight || canvas?.height || 0;
+    const dest = String(getDestinationStar?.() || starData?.name || '').trim();
+    const destKey = dest.toLowerCase();
+    const starType = getStarTypeByName?.(dest) ?? starData?.starType;
+    const signature = `${destKey}|${starType}|${w}|${h}`;
+
+    if (battleBackdropStar && battleBackdropStar.signature === signature) {
+        return battleBackdropStar;
+    }
+
+    const diameter = (1 + Math.random() * 1) * h;
+    const radius = diameter / 2;
+    const outsideFactor = 0.02 + Math.random() * 0.06;
+    const side = Math.floor(Math.random() * 4);
+
+    let x;
+    let y;
+
+    if (side === 0) {
+        x = -radius * outsideFactor;
+        y = Math.random() * (h * 0.9) + (h * 0.05);
+    } else if (side === 1) {
+        x = w + radius * outsideFactor;
+        y = Math.random() * (h * 0.9) + (h * 0.05);
+    } else if (side === 2) {
+        x = Math.random() * (w * 0.9) + (w * 0.05);
+        y = -radius * outsideFactor;
+    } else {
+        x = Math.random() * (w * 0.9) + (w * 0.05);
+        y = h + radius * outsideFactor;
+    }
+
+    battleBackdropStar = {
+        signature,
+        x,
+        y,
+        radius,
+        starType
+    };
+
+    return battleBackdropStar;
+}
+
+function drawBattleBackdropStar(ctx, canvas, starData) {
+    const star = ensureBattleBackdropStar(canvas, starData);
+    if (!star) return;
+
+    const stops = getBattleBackdropStarFillStops(star.starType);
+
+    ctx.save();
+    const g = ctx.createRadialGradient(star.x, star.y, Math.max(1, star.radius * 0.06), star.x, star.y, star.radius);
+    g.addColorStop(0, stops.inner);
+    g.addColorStop(0.62, stops.mid);
+    g.addColorStop(1, stops.outer);
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+}
+
+function createStarFieldBattleCanvas(canvas, starCount = 200) {
+    const ctx = canvas.getContext('2d');
+
+    if (!battleStarField) {
+        battleStarField = [];
+
+        for (let i = 0; i < starCount; i++) {
+            const depth = Math.random();
+
+            battleStarField.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                radius: depth > 0.85 ? 1 : 0.5,
+                grey: Math.floor(140 + depth * 100),
+                alpha: 0.3 + depth * 0.7
+            });
+        }
+    }
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (const star of battleStarField) {
+        ctx.fillStyle = `rgba(${star.grey}, ${star.grey}, ${star.grey}, ${star.alpha})`;
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+function getEnemyBattleUnitFillStyle(starData) {
+    const themeElement = document.querySelector('[data-theme]');
+    const fallback = themeElement ? getComputedStyle(themeElement).getPropertyValue('--disabled-text').trim() : 'white';
+
+    const isRobotic = String(starData?.civilizationLevel || '').trim().toLowerCase() === 'robotic';
+    if (!isRobotic) return fallback;
+
+    const dest = String(getDestinationStar?.() || '').trim().toLowerCase();
+    const home = String(getHomeStarName?.() || '').trim().toLowerCase();
+    const isMiaplacidus = dest && home && dest === home;
+    const isFactory = Boolean(starData?.factoryStar) || (getFactoryStarsArray?.() || []).some((name) => String(name || '').toLowerCase() === dest);
+
+    if (isFactory || isMiaplacidus) {
+        return 'rgba(80,140,255,1)';
+    }
+
+    const type = getStarTypeByName?.(dest);
+    if (type === 'O') {
+        return 'rgba(195, 0, 195, 1)';
+    }
+
+    return fallback;
 }
 
 
@@ -9384,6 +9539,8 @@ function renderBattleExplosions(ctx, now) {
         canvas.height = canvasHeight;
     
         ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+        ensureBattleBackdropStar(canvas, starData);
 
         let idCounter = 0;
     
@@ -9788,6 +9945,9 @@ function renderBattleExplosions(ctx, now) {
     
         ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
 
+        createStarFieldBattleCanvas(canvas);
+        drawBattleBackdropStar(ctx, canvas, starData);
+
         const now = performance.now();
 
         const highestColumnEnemy = battleUnits.enemy.reduce((max, unit) =>
@@ -9906,8 +10066,7 @@ function renderBattleExplosions(ctx, now) {
             //     (unit.currentGoal?.id ? 'blue' : 
             //     getComputedStyle(document.querySelector('[data-theme]')).getPropertyValue('--disabled-text').trim());
             
-            const themeElement = document.querySelector('[data-theme]');
-            ctx.fillStyle = themeElement ? getComputedStyle(themeElement).getPropertyValue('--disabled-text').trim() : 'white';
+            ctx.fillStyle = getEnemyBattleUnitFillStyle(starData);
             drawUnit(ctx, unit);
             }
         });

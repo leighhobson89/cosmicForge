@@ -42,6 +42,8 @@ export let modalGalacticTabUnlockHeader;
 export let modalGalacticTabUnlockText;
 export let modalOStarReachedHeader;
 export let modalOStarReachedText;
+export let modalOTypeStarTechAcquiredHeader;
+export let modalOTypeStarTechAcquiredText;
 export let achievementTooltipDescriptions;
 export let achievementTooltipDescriptionTexts;
 export let modalFeedbackThanksHeaderText;
@@ -200,6 +202,8 @@ export function initialiseDescriptions() {
     modalGalacticTabUnlockText = `As you approach the new System, your scanners detect a faint communication signal...<br><br>"You have shown great innovation, you may now access our Galactic Trading Platform"<br><br><span class="green-ready-text">Galactic Tab Unlocked!</span>`;
     modalOStarReachedHeader = `TYPE O STAR REACHED`;
     modalOStarReachedText = `Your Starship has reached orbit of the <span class="o-star-text">X</span> System.<br><br>The star burns with a ferocity you have only ever seen in theory.<br>An O-type sun: rare, impossibly bright, and violently alive.<br><br>The crew falls silent.<br>Even the instruments hesitate before agreeing on the readings.`;
+    modalOTypeStarTechAcquiredHeader = 'O-TYPE STAR TECHNOLOGY ACQUIRED';
+    modalOTypeStarTechAcquiredText = `The conquered enemies of <span class="o-star-text">{STAR}</span> had a special technology that we have obtained!<br><br>It has caused <span class="green-ready-text">{DISPLAY_NAME}</span> to become <span class="green-ready-text">{STRENGTH_BOOST}x</span> more powerful!`;
     modalFeedbackHeaderText = `SEND FEEDBACK`;
     modalFeedbackContentTextGood = `Glad to hear it!<br><br>Let us know what you love and if there’s anything you’d like to see more of.<br>Your feedback helps us improve Cosmic Forge!`;
     modalFeedbackContentTextBad = `Oh no!<br><br>Please let us know what’s not working for you or what you'd like changed.<br>We read everything and really value your thoughts!`;    
@@ -2162,6 +2166,9 @@ export function initialiseDescriptions() {
             "Guardians deploy a new class of warships in response to rebel advances.",
             "A secret meeting between rebel leaders outlines the next offensive.",
             "A new alliance forms among systems opposing the Guardians.",
+            "Galactic whispers suggest Mintaka hides advanced energy technologies — investigators urged to verify the rumours.",
+            "Rumours ripple through the sector: Regulus may hold forbidden energy tech, waiting for a bold study team.",
+            "Hushed reports claim Menkalinan shelters advanced energy breakthroughs — the brave are advised to investigate.",
             "Rebirth technology allows for rapid colonization of new systems.",
             "The force field's integrity drops below critical thresholds.",
             "Rebels attempt to negotiate with Guardian factions.",
