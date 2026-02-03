@@ -30,7 +30,8 @@ class WeatherAmbienceManager {
     resumeAll() {
         Object.keys(this.tracks).forEach(key => {
             if (this.tracks[key]) {
-                this.tracks[key].play();
+                this.tracks[key].play().catch(() => {
+                });
             }
         });
     }
