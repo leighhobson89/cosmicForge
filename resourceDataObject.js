@@ -917,21 +917,6 @@ export let resourceData = {
             warpDrive: { idWithinCategory: 4, multiplier: 1, price: 10000, affects: 'starshipTravelTime', philosophy: 'expansionist', repeatable: true, setPrice: 'warpDriveTechPhilosophyPrice' } // reduce starship travel time
         }
     },
-    megastructureTechs: {
-        //one mini tech tree for each will unlock one expensive tech per run and only advance to the next when the run advances to the next and the previous tech is completed
-        constructor: {
-
-        },
-        supremacist: {
-
-        },
-        voidborn: {
-
-        },
-        expansionist: {
-
-        }
-    },
     currency: {
         cash: 10,
     },
