@@ -408,7 +408,7 @@ export function initialiseDescriptions() {
         'Space Mining': 'Here you can build vessels to mine asteroids for valuable Antimatter, enabling you to visit locations in the Star Map, and really start to conquer the galaxy!',
         'Galactic': 'Here you can exchange your AP for permanent buffs, and reset runs.',
         'Settings': 'Change the game settings to your liking.',
-        'events': 'Here you can see any ongoing timed events and the effects they have.',
+        'events': 'Here you can see any ongoing or historical events and the effects they have.',
         
         'hydrogen': 'The most basic element known to man, very cheap to produce and has a pretty low value, but anything can be created from it.',
         'helium': 'Lighter than air this one will make you float away!',
@@ -2664,14 +2664,11 @@ helpContent = {
         subHeading10: "Ascendency Perks",
         subBody10: "You can spend acquired AP on permanent buffs that make future runs easier, and the game more replayable and fun!",
 
-        subHeading11: "Events",
-        subBody11: "Random Events can occur as you progress, bringing unexpected opportunities or challenges. They appear without warning and can offer unique rewards, impose temporary setbacks, or unlock new paths. Pay attention to notifications—some Events are fleeting, while others may alter the course of your run if you act wisely.",
+        subHeading11: "Black Hole",
+        subBody11: "You can accidentally discover a Black Hole, and once researched it can be used to Time Warp, speeding up travel times and Resource collection. It needs to be charged which takes time, but the time can be reduced with upgrades. You can also increase the time it stays active for and the power of it with further upgrades, and once it is unlocked it is available across different runs.",
 
-        subHeading12: "Black Hole",
-        subBody12: "You can accidentally discover a Black Hole, and once researched it can be used to Time Warp, speeding up travel times and Resource collection. It needs to be charged which takes time, but the time can be reduced with upgrades. You can also increase the time it stays active for and the power of it with further upgrades, and once it is unlocked it is available across different runs.",
-
-        subHeading13: "O-type Stars",
-        subBody13: "O-type stars are the rarest and most violent stars in the galaxy. Each one you control dramatically amplifies the power output of a Power Building type. Expect hardened defenses when attempting to conquer these systems."
+        subHeading12: "O-type Stars",
+        subBody12: "O-type stars are the rarest and most violent stars in the galaxy. Each one you control dramatically amplifies the power output of a Power Building type. Expect hardened defenses when attempting to conquer these systems."
     },
     'concepts - end goal': {
         subHeading1: "Ancient Manuscripts",
