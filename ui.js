@@ -4758,17 +4758,21 @@ export function drawStarConnectionDrawings(fromStar, toStar, isInteresting) {
             fromStar = getFromStarObject();
             toStarData = getStarSystemDataObject('stars', [toStar.toLowerCase()]);
             toStar = getToStarObject();
-            fuelNeeded = toStarData.fuel;
-            apGranted = toStarData.ascendencyPoints;  
+            if (toStarData) {
+                fuelNeeded = toStarData.fuel;
+                apGranted = toStarData.ascendencyPoints;
+            }
         } else if (isInteresting) {
             toStarData = getStarSystemDataObject('stars', [toStar.name.toLowerCase()]);
-            fuelNeeded = toStarData.fuel;
-            apGranted = toStarData.ascendencyPoints;  
+            if (toStarData) {
+                fuelNeeded = toStarData.fuel;
+                apGranted = toStarData.ascendencyPoints;
+            }
         }
     
         const currentAntimatter = getResourceDataObject('antimatter', ['quantity']);
         const isTravellingLine = isInteresting === 'travelling';
-        const canTravel = isInteresting && fuelNeeded <= currentAntimatter;
+        const canTravel = isInteresting && toStarData && fuelNeeded <= currentAntimatter;
     
         const themeElement = document.querySelector('[data-theme]') || document.documentElement;
         const themeStyles = getComputedStyle(themeElement);
@@ -4819,9 +4823,9 @@ export function drawStarConnectionDrawings(fromStar, toStar, isInteresting) {
             labelElement = document.createElement('div');
             labelElement.id = 'star-connection-label';
             labelElement.classList.add('star-connection-label');
-            const displayAp = isInteresting ? getAscendencyPointsWithRepeatableBonus(apGranted) : null;
-            labelElement.innerHTML = isInteresting 
-                ? `Antimatter: ${fuelNeeded}<br>AP: ${displayAp}` 
+            const displayAp = (isInteresting && toStarData) ? getAscendencyPointsWithRepeatableBonus(apGranted) : null;
+            labelElement.innerHTML = (isInteresting && toStarData)
+                ? `Antimatter: ${fuelNeeded}<br>AP: ${displayAp}`
                 : `??? <br> ???`;
             labelElement.style.color = labelColor;
             labelElement.style.textAlign = 'center';
