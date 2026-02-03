@@ -7824,7 +7824,7 @@ function changeWeather(forcedWeatherType = null) {
 
         const weatherTable = (weatherCurrentStarSystemObject && typeof weatherCurrentStarSystemObject === 'object')
             ? weatherCurrentStarSystemObject
-            : { sunny: [1, '☀️', 1] };
+            : { sunny: [1, '☀', 1] };
 
         const weatherTypes = Object.keys(weatherTable);
         const weatherProbabilities = weatherTypes.map(weatherType => weatherTable[weatherType][0]);
