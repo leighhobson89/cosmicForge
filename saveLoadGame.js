@@ -20,6 +20,7 @@ import {
     setOnboardingMode,
     getStarVisionDistance,
     getCurrentStarSystem,
+    getSettledStars,
     getStarsWithAncientManuscripts,
     setStarsWithAncientManuscripts,
     getFactoryStarsArray,
@@ -1059,6 +1060,37 @@ export function migrateResourceData(saveData, objectType) {
             }
 
             saveData.version = 0.83;
+        }
+
+        if (saveData.version < 0.84) {
+            if (objectType === 'oTypePowerPlantBuffs') {
+                if (!saveData || typeof saveData !== 'object') {
+                    saveData = {};
+                }
+
+                if (!saveData.basicPowerPlantStar || typeof saveData.basicPowerPlantStar !== 'object') {
+                    saveData.basicPowerPlantStar = { starName: null, settled: false };
+                } else {
+                    if (saveData.basicPowerPlantStar.starName === undefined) saveData.basicPowerPlantStar.starName = null;
+                    if (saveData.basicPowerPlantStar.settled === undefined) saveData.basicPowerPlantStar.settled = false;
+                }
+
+                if (!saveData.solarPowerPlantStar || typeof saveData.solarPowerPlantStar !== 'object') {
+                    saveData.solarPowerPlantStar = { starName: null, settled: false };
+                } else {
+                    if (saveData.solarPowerPlantStar.starName === undefined) saveData.solarPowerPlantStar.starName = null;
+                    if (saveData.solarPowerPlantStar.settled === undefined) saveData.solarPowerPlantStar.settled = false;
+                }
+
+                if (!saveData.advancedPowerPlantStar || typeof saveData.advancedPowerPlantStar !== 'object') {
+                    saveData.advancedPowerPlantStar = { starName: null, settled: false };
+                } else {
+                    if (saveData.advancedPowerPlantStar.starName === undefined) saveData.advancedPowerPlantStar.starName = null;
+                    if (saveData.advancedPowerPlantStar.settled === undefined) saveData.advancedPowerPlantStar.settled = false;
+                }
+            }
+
+            saveData.version = 0.84;
         }
 
         saveData.version += 0.001;

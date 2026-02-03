@@ -1,4 +1,4 @@
-import { restoreAchievementsDataObject, restoreAscendencyBuffsDataObject, restoreGalacticMarketDataObject, restoreRocketNamesObject, restoreResourceDataObject, restoreStarSystemsDataObject, resourceData, starSystems, getResourceDataObject, setResourceDataObject, galacticMarket, ascendencyBuffs, achievementsData, getStarSystemDataObject, getBlackHoleResearchDone, getBlackHolePower, getBlackHoleDuration, getBlackHoleRechargeMultiplier, getBlackHoleResearchPrice, getBlackHolePowerPrice, getBlackHoleDurationPrice, getBlackHoleRechargePrice } from "./resourceDataObject.js";
+import { restoreAchievementsDataObject, restoreAscendencyBuffsDataObject, restoreGalacticMarketDataObject, restoreRocketNamesObject, restoreResourceDataObject, restoreStarSystemsDataObject, resourceData, starSystems, getResourceDataObject, setResourceDataObject, galacticMarket, ascendencyBuffs, achievementsData, getStarSystemDataObject, getBlackHoleResearchDone, getBlackHolePower, getBlackHoleDuration, getBlackHoleRechargeMultiplier, getBlackHoleResearchPrice, getBlackHolePowerPrice, getBlackHoleDurationPrice, getBlackHoleRechargePrice, oTypePowerPlantBuffs, restoreOTypePowerPlantBuffsObject } from "./resourceDataObject.js";
 import { achievementFunctionsMap } from "./achievements.js";
 import { drawNativeTechTree, selectTheme, startWeatherEffect, stopWeatherEffect, applyCustomPointerSetting } from "./ui.js";
 import { capitaliseWordsWithRomanNumerals, capitaliseString } from './utilityFunctions.js';
@@ -25,7 +25,7 @@ let saveData = null;
 //CONSTANTS
 export const HOMESTAR = 'miaplacidus';
 export const MINIMUM_GAME_VERSION_FOR_SAVES = 0.70;
-export const GAME_VERSION_FOR_SAVES = 0.83;
+export const GAME_VERSION_FOR_SAVES = 0.84;
 export const deferredActions = [];
 
 //NOTIFICATIONS
@@ -1568,6 +1568,7 @@ export function captureGameStatusForSaving(type) {
     gameState.megaStructuresInPossessionArray = megaStructuresInPossessionArray;
     gameState.oStarArrivalPopupsShown = oStarArrivalPopupsShown;
     gameState.oTypeMechanicActivatedForThisSave = oTypeMechanicActivatedForThisSave;
+    gameState.oTypePowerPlantBuffs = JSON.parse(JSON.stringify(oTypePowerPlantBuffs));
     gameState.miaplacidusMilestoneLevel = miaplacidusMilestoneLevel;
     gameState.megaStructureTechsResearched = megaStructureTechsResearched;
     gameState.megaStructureAntimatterAmount = megastructureAntimatterAmount;
@@ -1701,6 +1702,12 @@ export function restoreGameStatus(gameState, type) {
                 restoreAchievementsDataObject(parsed);
             } else {
                 gameState.achievementsData = achievementsData;
+            }
+
+            if (gameState.oTypePowerPlantBuffs) {
+                restoreOTypePowerPlantBuffsObject(JSON.parse(JSON.stringify(gameState.oTypePowerPlantBuffs)));
+            } else {
+                gameState.oTypePowerPlantBuffs = oTypePowerPlantBuffs;
             }
             
 

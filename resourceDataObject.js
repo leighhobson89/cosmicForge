@@ -8,7 +8,7 @@ import { showNotification } from "./ui.js";
 
 export let achievementImageUrls;
 export let resourceData = {
-    version: 0.83, //update this whenever changes are made to the structure
+    version: 0.84, //update this whenever changes are made to the structure
     resources: {
         solar: {
             autoSell: false,
@@ -915,8 +915,8 @@ export let resourceData = {
             launchPadMassProduction: { idWithinCategory: 2, multiplier: 1, price: 10000, affects: 'rocketPartsCost', philosophy: 'expansionist', repeatable: true, setPrice: 'launchPadMassProductionTechPhilosophyPrice' }, // reduce rocket parts costs
             asteroidAttractors: { idWithinCategory: 3, multiplier: 1, price: 10000, affects: 'rocketTravelTime', philosophy: 'expansionist', repeatable: true, setPrice: 'asteroidAttractorsTechPhilosophyPrice' }, // reduce rocket travel time
             warpDrive: { idWithinCategory: 4, multiplier: 1, price: 10000, affects: 'starshipTravelTime', philosophy: 'expansionist', repeatable: true, setPrice: 'warpDriveTechPhilosophyPrice' } // reduce starship travel time
-        }    
-    },  
+        }
+    },
     megastructureTechs: {
         //one mini tech tree for each will unlock one expensive tech per run and only advance to the next when the run advances to the next and the previous tech is completed
         constructor: {
@@ -994,7 +994,7 @@ export const miaplacidus = {
 
 
 export let starSystems = {
-    version: 0.83,
+    version: 0.84,
     stars: {
         spica: {
             mapSize: 5.504440179536064, //might need to add this to star object when added dynamically for after rebirth
@@ -1012,8 +1012,15 @@ export let starSystems = {
     }
 };
 
+export let oTypePowerPlantBuffs = {
+    version: 0.84,
+    basicPowerPlantStar: { starName: null, settled: false },
+    solarPowerPlantStar: { starName: null, settled: false },
+    advancedPowerPlantStar: { starName: null, settled: false }
+};
+
 export let galacticMarket = {
-    version: 0.83,
+    version: 0.84,
     resources: {
         hydrogen: { 
             name: "Hydrogen", 
@@ -1119,7 +1126,7 @@ export let galacticMarket = {
 };
 
 export let ascendencyBuffs = {
-    version: 0.83,
+    version: 0.84,
     "littleBagOfHydrogen": {
         name: "Little Bag Of Hydrogen",
         description: "buffLittleBagOfHydrogenRow",
@@ -2832,13 +2839,29 @@ export function restoreStarSystemsDataObject(value) {
     starSystems = value;
 }
 
+export function restoreOTypePowerPlantBuffsObject(value) {
+    value = migrateResourceData(value, 'oTypePowerPlantBuffs');
+    oTypePowerPlantBuffs = value;
+}
+
+export function getOTypePowerPlantBuffs() {
+    return oTypePowerPlantBuffs;
+}
+
+export function setOTypePowerPlantBuffs(value) {
+    if (!value || typeof value !== 'object') {
+        return;
+    }
+    oTypePowerPlantBuffs = value;
+}
+
 export function getBlackHoleResearchPrice() {
     return getResourceDataObject('blackHole', ['researchPrice']);
 }
 
 export function setBlackHoleResearchPrice(value) {
     setResourceDataObject(value, 'blackHole', ['researchPrice']);
-    }
+}
 
 export function getBlackHoleResearchDone() {
     return getResourceDataObject('blackHole', ['blackHoleResearchDone']);

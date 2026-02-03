@@ -28,24 +28,18 @@ IGNORE_LIST = [
     "bugs.txt",
     "node_modules",
     "temp_build",
-    "resourceDataObject.js",
-    "production_resources",
     "html-report",
     "tools",
     "tests",
 ]
 
 def copy_files_to_temp(src_dir, temp_dir):
-    """Copy selected files to a temporary directory, ensuring that the `resourceDataObject.js` from `production_resources` is included."""
+    """Copy selected files to a temporary directory."""
     for root, dirs, files in os.walk(src_dir):
         # Exclude ignored directories from the walk
         dirs[:] = [d for d in dirs if d not in IGNORE_LIST]
 
         for file_name in files:
-            # Ignore the resourceDataObject.js file in the root directory
-            if file_name == "resourceDataObject.js" and os.path.basename(root) == os.path.basename(src_dir):
-                continue
-
             src_path = os.path.join(root, file_name)
             rel_path = os.path.relpath(src_path, src_dir)
             dest_path = os.path.join(temp_dir, rel_path)
@@ -53,18 +47,6 @@ def copy_files_to_temp(src_dir, temp_dir):
             os.makedirs(os.path.dirname(dest_path), exist_ok=True)
             shutil.copy2(src_path, dest_path)
             logging.info(f"Copied: {src_path} -> {dest_path}")
-
-    # Explicitly copy the `resourceDataObject.js` from `production_resources`
-    production_resources_dir = os.path.join(src_dir, "production_resources")
-    resource_data_path = os.path.join(production_resources_dir, "resourceDataObject.js")
-
-    if os.path.exists(resource_data_path):
-        dest_path = os.path.join(temp_dir, "resourceDataObject.js")
-        os.makedirs(os.path.dirname(dest_path), exist_ok=True)
-        shutil.copy2(resource_data_path, dest_path)
-        logging.info(f"Copied resourceDataObject.js from production_resources: {resource_data_path} -> {dest_path}")
-    else:
-        logging.warning(f"resourceDataObject.js not found in {production_resources_dir}")
 
 def minify_files(root_dir):
     """Minify and obfuscate JS and HTML files in the temp directory."""
