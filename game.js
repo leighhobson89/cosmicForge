@@ -38,6 +38,8 @@ import {
     STAR_FIELD_SEED,
     activateFactoryStar,
     factoryStarMap,
+    mapFactoryStarValue,
+    getMegaStructureAssignmentMode,
     getMaxAncientManuscripts,
     setStarsWithAncientManuscripts,
     getStarsWithAncientManuscripts,
@@ -8627,6 +8629,9 @@ export function startTravelToDestinationStarTimer(adjustment) {
 
                 if (getFactoryStarsArray().includes(getDestinationStar())) {
                     const header = 'MEGASTRUCTURE';
+                    if (getMegaStructureAssignmentMode?.() !== 'legacy') { //can remove later
+                        ensureFactoryStarMegaStructureAssigned(getDestinationStar());
+                    }
                     const content = `Your Starship arrived at the <span class="factory-star-text">${capitaliseWordsWithRomanNumerals(getDestinationStar())}</span> System!<br>You gasp at what you see! The main star has been completely enveloped by a gigantic structure!<br>It looks to be some kind of <span class="factory-star-text">${getStarSystemDataObject('stars', [getDestinationStar(), 'factoryStar'])}</span><br>No wonder we didn't discover this System before,<br>the star is not visible due to the size of this structure!<br>This system is going to be heavily defended for sure, but if we can conquer it,<br>for sure it will open up vast opportunities for us...`;
                     callPopupModal(
                         header,
@@ -10493,6 +10498,7 @@ function rollForAncientManuscriptGeneration(previousVisionDistance, newVisionDis
     ) || { stars: [], starDistanceData: {} };
 
     const currentStarLower = String(getCurrentStarSystem() || '').toLowerCase();
+    const settledStarSet = new Set((getSettledStars?.() || []).map((name) => String(name || '').toLowerCase()));
     const existingManuscriptStars = new Set(
         (getStarsWithAncientManuscripts() || [])
             .filter((entry) => Array.isArray(entry) && typeof entry[0] === 'string')
@@ -10512,6 +10518,7 @@ function rollForAncientManuscriptGeneration(previousVisionDistance, newVisionDis
             const nameLower = String(entry.starName).toLowerCase();
             if (nameLower === 'miaplacidus') return false;
             if (nameLower === currentStarLower) return false;
+            if (settledStarSet.has(nameLower)) return false;
             if (existingManuscriptStars.has(nameLower)) return false;
             if (existingFactoryStars.has(nameLower)) return false;
             if (getStarTypeByName(entry.starName) === 'O') return false;
@@ -10909,20 +10916,83 @@ export function generateStarDataAndAddToDataObject(starElement, distance) {
 }
 
 function checkIfFactoryStar(starName) {
-    const entries = getStarsWithAncientManuscripts();
+    const normalized = typeof starName === 'string' ? starName.toLowerCase() : starName;
+    const existing = getStarSystemDataObject('stars', [normalized, 'factoryStar'], true);
+    const mapped = mapFactoryStarValue(existing);
 
-    for (const [manuscriptStar, factoryStarName, value, reported] of entries) {
-        if (factoryStarName === starName) {
-            return value;
+    if (Object.values(factoryStarMap).includes(mapped)) {
+        if (mapped !== existing) {
+            setStarSystemDataObject(mapped, 'stars', [normalized, 'factoryStar']);
+        }
+        return mapped;
+    }
+
+    if (getMegaStructureAssignmentMode?.() === 'legacy') { //can remove later
+        const entries = getStarsWithAncientManuscripts();
+        for (const [, factoryStarName, value] of entries) {
+            if (factoryStarName === normalized) {
+                return mapFactoryStarValue(value);
+            }
         }
     }
 
     return false;
 }
 
+function ensureFactoryStarMegaStructureAssigned(starName) {
+    if (!starName) return null;
+    const normalized = String(starName).toLowerCase();
+
+    const knownStructures = Object.values(factoryStarMap);
+    const nonDysonStructures = knownStructures.filter((name) => name !== 'Dyson Sphere');
+
+    const existing = getStarSystemDataObject('stars', [normalized, 'factoryStar'], true);
+    const existingMapped = mapFactoryStarValue(existing);
+    if (knownStructures.includes(existingMapped)) {
+        if (existingMapped !== existing) {
+            setStarSystemDataObject(existingMapped, 'stars', [normalized, 'factoryStar']);
+        }
+        return existingMapped;
+    }
+
+    const assignedSet = new Set();
+    (getFactoryStarsArray() || []).forEach((factoryStarName) => {
+        const nameLower = String(factoryStarName || '').toLowerCase();
+        if (!nameLower) return;
+        const v = getStarSystemDataObject('stars', [nameLower, 'factoryStar'], true);
+        const mapped = mapFactoryStarValue(v);
+        if (knownStructures.includes(mapped)) {
+            assignedSet.add(mapped);
+        }
+    });
+
+    let chosen;
+
+    if (!assignedSet.has('Dyson Sphere') && assignedSet.size >= 3) {
+        chosen = 'Dyson Sphere';
+    } else {
+        const remaining = nonDysonStructures.filter((name) => !assignedSet.has(name));
+        chosen = remaining.length
+            ? remaining[Math.floor(Math.random() * remaining.length)]
+            : 'Dyson Sphere';
+    }
+
+    setStarSystemDataObject(chosen, 'stars', [normalized, 'factoryStar']);
+    return chosen;
+}
+
 export function selectFactoryStarSystem(position) {
     const dummyContainer = document.createElement('div');
     const factoryStarCandidates = generateStarfield(dummyContainer, NUMBER_OF_STARS, STAR_FIELD_SEED, null, false, null, true);
+
+    const currentStarLower = String(getCurrentStarSystem?.() || '').toLowerCase();
+    const settledStarSet = new Set((getSettledStars?.() || []).map((name) => String(name || '').toLowerCase()));
+    const existingManuscriptStars = new Set(
+        (getStarsWithAncientManuscripts?.() || [])
+            .filter((entry) => Array.isArray(entry) && typeof entry[1] === 'string')
+            .map((entry) => String(entry[1]).toLowerCase())
+    );
+    const existingFactoryStars = new Set((getFactoryStarsArray?.() || []).map((n) => String(n).toLowerCase()));
 
     let minDistance = 0;
     let maxDistance = 100;
@@ -10946,12 +11016,19 @@ export function selectFactoryStarSystem(position) {
             break;
     }
 
-    const filteredCandidates = factoryStarCandidates.filter(
-        ([name, distance]) =>
+    const filteredCandidates = factoryStarCandidates.filter(([name, distance]) => {
+        const nameLower = String(name || '').toLowerCase();
+        if (nameLower === 'miaplacidus') return false;
+        if (nameLower === currentStarLower) return false;
+        if (settledStarSet.has(nameLower)) return false;
+        if (existingManuscriptStars.has(nameLower)) return false;
+        if (existingFactoryStars.has(nameLower)) return false;
+        return (
             distance >= minDistance &&
             distance <= maxDistance &&
             getStarTypeByName(name) !== 'O'
-    );
+        );
+    });
 
     if (filteredCandidates.length === 0) return null;
 
@@ -11335,7 +11412,19 @@ function generateAnomalies(defenseRating, enemyFleets) {
 
 function generateRaceName(civilizationLevel) {
     if (getFactoryStarsArray().includes(getDestinationStar())) {
-        const baseName = getStarSystemDataObject('stars', [getDestinationStar(), 'factoryStar']);
+        const destinationStar = getDestinationStar();
+        let baseName = getStarSystemDataObject('stars', [destinationStar, 'factoryStar']);
+
+        if (!baseName || baseName === false) {
+            if (getMegaStructureAssignmentMode?.() !== 'legacy') {
+                ensureFactoryStarMegaStructureAssigned(destinationStar);
+                baseName = getStarSystemDataObject('stars', [destinationStar, 'factoryStar']);
+            }
+        }
+
+        if (!baseName || baseName === false) {
+            baseName = 'Megastructure';
+        }
         const suffixes = ['Sentinels', 'Wardens', 'Guardians', 'Protectors', 'Custodians', 'Overseers', 'Aegis'];
         const randomSuffix = suffixes[Math.floor(Math.random() * suffixes.length)];
         return `${baseName} ${randomSuffix}`;
@@ -12102,7 +12191,12 @@ export async function settleSystemAfterBattle(accessPoint) {
 
     if (isFactoryStar) {
         apModifier *= 2;
-        setMegaStructuresInPossessionArray(destinationFactoryStar);
+        if (getMegaStructureAssignmentMode?.() === 'legacy') { //can remove later
+            setMegaStructuresInPossessionArray(destinationFactoryStar);
+        } else {
+            const ensuredStructure = ensureFactoryStarMegaStructureAssigned(destinationStarKey);
+            setMegaStructuresInPossessionArray(ensuredStructure || destinationFactoryStar);
+        }
         setMegaStructureTabUnlocked(true);
         setAchievementFlagArray('conquerMegastructureSystem', 'add');
     }

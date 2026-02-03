@@ -579,6 +579,7 @@ let rocketReadyToTravel = {
 let storageAdderBonus = false;
 let megaStructureResourceBonus = false;
 let infinitePower = false;
+let megaStructureAssignmentMode = 'arrival';
 let nonExhaustiveResources = false;
 let currentRunIsMegaStructureRun = false;
 let megaStructureTabNotificationShown = false;
@@ -1348,7 +1349,6 @@ export function resetAllVariablesOnRebirth() {
     asteroidsMinedThisRun = 0;
     formationGoal = null;
     liquidationValue = 0;
-    megastructureAntimatterAmount = 0;
 
     //FLAGS
     checkRocketFuellingStatus = {
@@ -1652,6 +1652,7 @@ export function captureGameStatusForSaving(type) {
         infinitePower: infinitePower,
         megaStructureResourceBonus: megaStructureResourceBonus,
         storageAdderBonus: storageAdderBonus,
+        megaStructureAssignmentMode: megaStructureAssignmentMode,
         permanentAntimatterUnlock: permanentAntimatterUnlock,
         nonExhaustiveResources: nonExhaustiveResources,
         miaplacidusEndgameStoryShown: miaplacidusEndgameStoryShown,
@@ -1915,6 +1916,7 @@ export function restoreGameStatus(gameState, type) {
             infinitePower = gameState.flags.infinitePower ?? false;
             megaStructureResourceBonus = gameState.flags.megaStructureResourceBonus ?? false;
             storageAdderBonus = gameState.flags.storageAdderBonus ?? false;
+            megaStructureAssignmentMode = gameState.flags.megaStructureAssignmentMode ?? 'legacy';
             permanentAntimatterUnlock = gameState.flags.permanentAntimatterUnlock ?? false;
             nonExhaustiveResources = gameState.flags.nonExhaustiveResources ?? (ascendencyBuffs?.nonExhaustiveResources?.boughtYet > 0) ?? false;
             miaplacidusEndgameStoryShown = gameState.flags.miaplacidusEndgameStoryShown ?? false;
@@ -4322,6 +4324,14 @@ export function getHasVisitedMegaStructure() {
 
 export function setHasVisitedMegaStructure(value) {
     hasVisitedMegaStructure = value;
+}
+
+export function getMegaStructureAssignmentMode() {
+    return megaStructureAssignmentMode;
+}
+
+export function setMegaStructureAssignmentMode(value) {
+    megaStructureAssignmentMode = value;
 }
 
 export function getMegaStructureTabUnlocked() {

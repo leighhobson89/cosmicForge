@@ -2605,23 +2605,26 @@ helpContent = {
         subHeading5: "Space Mining",
         subBody5: "Space Mining allows for the extraction of rare Antimatter from Asteroids.",
 
-        subHeading6: "Space Telescope",
-        subBody6: "The Space Telescope is used to scan for Asteroids that can be Mined by your Rocket Miners, and in the Late Game, to Study Stars.  Using the Space Telescope requires a lot of Energy, and it has a high build cost.",
+        subHeading6: "Events",
+        subBody6: "Random Events can occur as you progress, bringing unexpected opportunities or challenges. They appear without warning and can offer unique rewards, impose temporary setbacks, or unlock new paths. Pay attention to notifications—some Events are fleeting, while others may alter the course of your run if you act wisely. You can track current and historical Events in the Events panel on the Menu tab.",
 
-        subHeading7: "Asteroids",
-        subBody7: "Asteroids contain Antimatter. Mining asteroids requires the Construction and Launching of Rocket Miners. Some Asteroids are easy to Travel To and Mine, whereas others require more time. The quantity of Antimatter varies, and so the Asteroids have different classes based on their quality. If you are really lucky, you may even find a Legendary Asteroid and have it named after you!",
+        subHeading7: "Space Telescope",
+        subBody7: "The Space Telescope is used to scan for Asteroids that can be Mined by your Rocket Miners, and in the Late Game, to Study Stars.  Using the Space Telescope requires a lot of Energy, and it has a high build cost.",
 
-        subHeading8: "Launch Pad",
-        subBody8: "The Launch Pad is a prerequisite to building Rocket Miners.  It is an expensive Upgrade, and once built, you can see the number of Rocket Miners you have, and their stages of Construction, or Launch state.",
+        subHeading8: "Asteroids",
+        subBody8: "Asteroids contain Antimatter. Mining asteroids requires the Construction and Launching of Rocket Miners. Some Asteroids are easy to Travel To and Mine, whereas others require more time. The quantity of Antimatter varies, and so the Asteroids have different classes based on their quality. If you are really lucky, you may even find a Legendary Asteroid and have it named after you!",
 
-        subHeading9: "Rocket Miners - Building",
-        subBody9: "You can build up to 4 Rocket Miners using advanced Compounds and a lot of Cash, provided you have built a Launch Pad. They each require a number of modules or Parts to build, which get progressively more expensive.  By default they are named as Rocket 1 etc but can be renamed.",
+        subHeading9: "Launch Pad",
+        subBody9: "The Launch Pad is a prerequisite to building Rocket Miners.  It is an expensive Upgrade, and once built, you can see the number of Rocket Miners you have, and their stages of Construction, or Launch state.",
 
-        subHeading10: "Rocket Miners - Launching & Travelling",
-        subBody10: "Rockets must be Fuelled and Launched. They can Travel To to any Asteroid you have discovered with the Space Telescope, provided they are Fuelled and Launched.  Fuelling requires Power and time, and Launching requires good weather.  Once Launched, you can select a destination for your rocket from the discovered Asteroids dropdown, and then click to Travel To it.",
+        subHeading10: "Rocket Miners - Building",
+        subBody10: "You can build up to 4 Rocket Miners using advanced Compounds and a lot of Cash, provided you have built a Launch Pad. They each require a number of modules or Parts to build, which get progressively more expensive.  By default they are named as Rocket 1 etc but can be renamed.",
 
-        subHeading11: "Rocket Miners - Mining",
-        subBody11: "Once a Rocket Miner has travelled to an Asteroid, it will automatically Mine Antimatter from the Asteroid until it is exhausted, and will then return and require Fuelling to be used again.  While at an Asteroid, a Rocket Miner can Mine faster if the Boost option is used, available in the Mining panel."
+        subHeading11: "Rocket Miners - Launching & Travelling",
+        subBody11: "Rockets must be Fuelled and Launched. They can Travel To to any Asteroid you have discovered with the Space Telescope, provided they are Fuelled and Launched.  Fuelling requires Power and time, and Launching requires good weather.  Once Launched, you can select a destination for your rocket from the discovered Asteroids dropdown, and then click to Travel To it.",
+
+        subHeading12: "Rocket Miners - Mining",
+        subBody12: "Once a Rocket Miner has travelled to an Asteroid, it will automatically Mine Antimatter from the Asteroid until it is exhausted, and will then return and require Fuelling to be used again.  While at an Asteroid, a Rocket Miner can Mine faster if the Boost option is used, available in the Mining panel."
     },
     'concepts - late': {
         subHeading1: "Star Map",
@@ -2654,8 +2657,14 @@ helpContent = {
         subHeading10: "Ascendency Perks",
         subBody10: "You can spend acquired AP on permanent buffs that make future runs easier, and the game more replayable and fun!",
 
-        subHeading11: "Black Hole",
-        subBody11: "You can accidentally discover a Black Hole, and once researched it can be used to Time Warp, speeding up travel times and Resource collection. It needs to be charged which takes time, but the time can be reduced with upgrades. You can also increase the time it stays active for and the power of it with further upgrades, and once it is unlocked it is available across different runs."
+        subHeading11: "Events",
+        subBody11: "Random Events can occur as you progress, bringing unexpected opportunities or challenges. They appear without warning and can offer unique rewards, impose temporary setbacks, or unlock new paths. Pay attention to notifications—some Events are fleeting, while others may alter the course of your run if you act wisely.",
+
+        subHeading12: "Black Hole",
+        subBody12: "You can accidentally discover a Black Hole, and once researched it can be used to Time Warp, speeding up travel times and Resource collection. It needs to be charged which takes time, but the time can be reduced with upgrades. You can also increase the time it stays active for and the power of it with further upgrades, and once it is unlocked it is available across different runs.",
+
+        subHeading13: "O-type Stars",
+        subBody13: "O-type stars are the rarest and most violent stars in the galaxy. Each one you control can be linked to your Dyson Sphere, dramatically amplifying its power output. Expect hardened defenses, environmental hazards, and unique rewards for those brave enough to settle these brilliant systems."
     },
     'concepts - end goal': {
         subHeading1: "Ancient Manuscripts",

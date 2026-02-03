@@ -533,6 +533,9 @@ function migrateAncientManuscriptsAndFactoryStarsIfNeeded() {
         return;
     }
 
+    const settledStarSet = new Set((getSettledStars?.() || []).map((name) => String(name || '').toLowerCase()));
+    const currentStarLower = String(currentStar || '').toLowerCase();
+
     const beforeManuscriptsSnapshot = JSON.stringify(getStarsWithAncientManuscripts?.() || []);
     const beforeFactorySnapshot = JSON.stringify(getFactoryStarsArray?.() || []);
 
@@ -547,9 +550,13 @@ function migrateAncientManuscriptsAndFactoryStarsIfNeeded() {
         }
         const manuscriptStar = entry[0];
         const factoryStar = entry[1];
+        const manuscriptLower = String(manuscriptStar || '').toLowerCase();
+        const factoryLower = String(factoryStar || '').toLowerCase();
         const manuscriptIsO = getStarTypeByName(manuscriptStar) === 'O';
         const factoryIsO = getStarTypeByName(factoryStar) === 'O';
-        if (manuscriptIsO || factoryIsO) {
+        const manuscriptIsSettledOrCurrent = manuscriptLower === currentStarLower || settledStarSet.has(manuscriptLower);
+        const factoryIsSettledOrCurrent = factoryLower === currentStarLower || settledStarSet.has(factoryLower);
+        if (manuscriptIsO || factoryIsO || manuscriptIsSettledOrCurrent || factoryIsSettledOrCurrent) {
             removedManuscriptEntries.push(entry);
             if (typeof factoryStar === 'string' && factoryStar) {
                 factoryStarsToRemove.add(factoryStar.toLowerCase());
@@ -562,6 +569,8 @@ function migrateAncientManuscriptsAndFactoryStarsIfNeeded() {
     const cleanedFactoryStars = factoryStarsArray.filter((name) => {
         const lower = String(name || '').toLowerCase();
         if (!lower) return false;
+        if (lower === currentStarLower) return false;
+        if (settledStarSet.has(lower)) return false;
         if (factoryStarsToRemove.has(lower)) return false;
         return getStarTypeByName(name) !== 'O';
     });
@@ -612,7 +621,6 @@ function migrateAncientManuscriptsAndFactoryStarsIfNeeded() {
             .map((entry) => entry[0].toLowerCase())
     );
     const existingFactoryStars = new Set((getFactoryStarsArray() || []).map((n) => String(n).toLowerCase()));
-    const currentStarLower = String(currentStar || '').toLowerCase();
 
     const pickRandom = (items) => items[Math.floor(Math.random() * items.length)];
 
@@ -629,6 +637,7 @@ function migrateAncientManuscriptsAndFactoryStarsIfNeeded() {
                 const nameLower = String(entry.starName).toLowerCase();
                 if (nameLower === 'miaplacidus') return false;
                 if (nameLower === currentStarLower) return false;
+                if (settledStarSet.has(nameLower)) return false;
                 if (existingManuscriptStars.has(nameLower)) return false;
                 if (existingFactoryStars.has(nameLower)) return false;
                 if (getStarTypeByName(entry.starName) === 'O') return false;
@@ -678,6 +687,7 @@ function migrateAncientManuscriptsAndFactoryStarsIfNeeded() {
                 const nameLower = String(entry.starName).toLowerCase();
                 if (nameLower === 'miaplacidus') return false;
                 if (nameLower === currentStarLower) return false;
+                if (settledStarSet.has(nameLower)) return false;
                 if (existingManuscriptStars.has(nameLower)) return false;
                 if (existingFactoryStars.has(nameLower)) return false;
                 if (getStarTypeByName(entry.starName) === 'O') return false;

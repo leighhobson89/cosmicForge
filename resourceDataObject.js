@@ -3440,6 +3440,11 @@ export function setStarSystemDataObject(value, key, subKeys = []) {
 
 export function setupNewRunStarSystem() {
     const destinationStar = getStarSystemDataObject('stars', ['destinationStar']);
+    const destinationStarCode = destinationStar?.starCode ? String(destinationStar.starCode).toLowerCase() : null;
+    const persistentFactoryStar = destinationStarCode
+        ? getStarSystemDataObject('stars', [destinationStarCode, 'factoryStar'], true)
+        : null;
+
     const starObject = {
         mapSize: destinationStar.mapSize || 5.504440179536064,
         startingStar: destinationStar.startingStar || true,
@@ -3447,7 +3452,7 @@ export function setupNewRunStarSystem() {
         precipitationResourceCategory: destinationStar.precipitationResourceCategory,
         precipitationType: destinationStar.precipitationType,
         weather: destinationStar.weather,
-        factoryStar: destinationStar.factoryStar
+        factoryStar: persistentFactoryStar ?? destinationStar.factoryStar
     };
 
     setRebirthStarSystemToStarSystemDataObject(starObject);

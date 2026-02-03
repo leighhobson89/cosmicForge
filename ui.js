@@ -10406,12 +10406,6 @@ export function createMegaStructureTable() {
 
     const megaStructures = [
         {
-            name: 'Dyson Sphere',
-            key: 'DysonSphere',
-            research: ['ds1', 'ds2', 'ds3', 'ds4', 'ds5'],
-            effects: ['effect1', 'effect2', 'effect3', 'effect4', 'effect5']
-        },
-        {
             name: 'Celestial Processing Core',
             key: 'CelestialProcessingCore',
             research: ['cpc1', 'cpc2', 'cpc3', 'cpc4', 'cpc5'],
@@ -10427,6 +10421,12 @@ export function createMegaStructureTable() {
             name: 'Galactic Memory Archive',
             key: 'GalacticMemoryArchive',
             research: ['gma1', 'gma2', 'gma3', 'gma4', 'gma5'],
+            effects: ['effect1', 'effect2', 'effect3', 'effect4', 'effect5']
+        },
+        {
+            name: 'Dyson Sphere',
+            key: 'DysonSphere',
+            research: ['ds1', 'ds2', 'ds3', 'ds4', 'ds5'],
             effects: ['effect1', 'effect2', 'effect3', 'effect4', 'effect5']
         }
     ];
