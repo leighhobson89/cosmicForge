@@ -2538,9 +2538,9 @@ export function createOptionRow(
     }
 
     if (getCurrentOptionPane() === 'launch pad') {
-        if (objectSectionArgument2.startsWith('rocket') && !getResourceDataObject('space', ['upgrades', 'launchPad', 'launchPadBoughtYet'])) {
+        if (objectSectionArgument2?.startsWith('rocket') && !getResourceDataObject('space', ['upgrades', 'launchPad', 'launchPadBoughtYet'])) {
             wrapper.classList.add('invisible');
-        } else if (objectSectionArgument2.startsWith('rocket')) {
+        } else if (objectSectionArgument2?.startsWith('rocket')) {
             wrapper.classList.remove('invisible');
         }
     }

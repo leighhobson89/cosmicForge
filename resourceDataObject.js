@@ -1,7 +1,7 @@
-import { replaceRocketNames } from "./descriptions.js";
-import { migrateResourceData } from "./saveLoadGame.js";
+import { replaceRocketNames, getStarTypeByName } from "./descriptions.js";
+import { migrateResourceData } from "./patches.js";
 import { addPermanentBuffsBackInAfterRebirth, setResourceAutobuyerPricesAfterRepeatables, setCompoundRecipePricesAfterRepeatables, setEnergyAndResearchBuildingPricesAfterRepeatables, setFleetPricesAfterRepeatables, setFleetArmorBuffsAfterRepeatables, setFleetSpeedsAfterRepeatables, setFleetAttackDamageAfterRepeatables, setInitialImpressionBaseAfterRepeatables, setStarStudyEfficiencyAfterRepeatables, setAsteroidSearchEfficiencyAfterRepeatables, calculateAndAddExtraAPFromPhilosophyRepeatable, setStarshipPartPricesAfterRepeatables, setRocketPartPricesAfterRepeatables, setRocketTravelTimeReductionAfterRepeatables, setStarshipTravelTimeReductionAfterRepeatables, applyRateMultiplierToAllResources, addStorageCapacityAndCompoundsToAllResources } from './game.js';
-import { getMultiplierPermanentCompounds, getMultiplierPermanentResources, getCurrentTheme, setCompoundCreateDropdownRecipeText, getCompoundCreateDropdownRecipeText, getStatRun, getPlayerPhilosophy, getAllRepeatableTechMultipliersObject, getFactoryStarsArray, getMegaStructureTechsResearched, getMegaStructureResourceBonus, getStorageAdderBonus, mapFactoryStarValue, getTechUnlockedArray, setTechUnlockedArrayDirect } from "./constantsAndGlobalVars.js";
+import { getMultiplierPermanentCompounds, getMultiplierPermanentResources, getCurrentTheme, setCompoundCreateDropdownRecipeText, getCompoundCreateDropdownRecipeText, getStatRun, getPlayerPhilosophy, getAllRepeatableTechMultipliersObject, getFactoryStarsArray, getMegaStructureTechsResearched, getMegaStructureResourceBonus, getStorageAdderBonus, mapFactoryStarValue, getTechUnlockedArray, setTechUnlockedArrayDirect, getCurrentGameVersion, getMinimumVersion } from "./constantsAndGlobalVars.js";
 
 import { achievementAchieve100FusionEfficiency, achievementActivateAllWackyNewsTickers, achievementAdoptPhilosophy, achievementBeatEnemy, achievementBringDownMiaplacideanForceField, achievementCollect100Precipitation, achievementCollect100TitaniumAsPrecipitation, achievementCompleteGame, achievementCompleteRunOnMiaplacidus, achievementConquerMegastructureSystem, achievementConquerStarSystems, achievementCreateCompound, achievementDiscoverAsteroid, achievementDiscoverBlackHole, achievementDiscoverLegendaryAsteroid, achievementFindAncientManuscript, achievementHave4RocketsMiningAntimatter, achievementHave50HoursWithOnePioneer, achievementHaveFleetSizeOf50EachShipType, achievementInitiateDiplomacyWithAlienRace, achievementLaunchRocket, achievementLaunchStarShip, achievementLiquidateAllAssets, achievementMineAllAntimatterAsteroid, achievementPerformGalaticMarketTransaction, achievementRebirth, achievementResearchAllTechnologies, achievementSeeAllNewsTickers, achievementSpendAp, achievementStudyAllStarsInOneRun, achievementStudyAStar, achievementTrade10APForCash, achievementTripPower, achievementActivateBlackHoleOver10x, achievementTryAllThemes } from "./achievements.js";
 import { showNotification } from "./ui.js";
@@ -889,32 +889,16 @@ export let resourceData = {
     },
     philosophyRepeatableTechs: {
         constructor: {
-            spaceStorageTankResearch: { idWithinCategory: 0, multiplier: 0, price: 500000, affects: 'specialAbility', philosophy: 'constructor', repeatable: false, setPrice: 'spaceStorageTankResearchTechPhilosophyPrice' }, // ABILITY : storage increases not x2 but x5 every time
-            efficientAssembly: { idWithinCategory: 1, multiplier: 1, price: 10000, affects: 'space', philosophy: 'constructor', repeatable: true, setPrice: 'efficientAssemblyTechPhilosophyPrice' }, // cheaper one off buildings
-            laserMining: { idWithinCategory: 2, multiplier: 1, price: 10000, affects: 'resources', philosophy: 'constructor', repeatable: true, setPrice: 'laserMiningTechPhilosophyPrice' }, // cheaper resource autobuyers
-            massCompoundAssembly: { idWithinCategory: 3, multiplier: 1, price: 10000, affects: 'compounds', philosophy: 'constructor', repeatable: true, setPrice: 'massCompoundAssemblyTechPhilosophyPrice' }, // cheaper compound recipes
-            energyDrones: { idWithinCategory: 4, multiplier: 1, price: 10000, affects: 'buildings', philosophy: 'constructor', repeatable: true, setPrice: 'energyDronesTechPhilosophyPrice' } // cheaper energy and research buildings
+
         },
         supremacist: {
-            fleetHolograms: { idWithinCategory: 0, multiplier: 0, price: 500000, affects: 'specialAbility', philosophy: 'supremacist', repeatable: false, setPrice: 'fleetHologramsTechPhilosophyPrice' }, // ABILITY : guaranteed vassalization if fleet 3x larger, regardless of leader traits
-            hangarAutomation: { idWithinCategory: 1, multiplier: 1, price: 10000, affects: 'fleetCosts', philosophy: 'supremacist', repeatable: true, setPrice: 'hangarAutomationTechPhilosophyPrice' }, // cheaper fleets
-            syntheticPlating: { idWithinCategory: 2, multiplier: 1, price: 10000, affects: 'fleetHealth', philosophy: 'supremacist', repeatable: true, setPrice: 'syntheticPlatingTechPhilosophyPrice' }, // fleets higher health armor
-            antimatterEngineMinaturization: { idWithinCategory: 3, multiplier: 1, price: 10000, affects: 'fleetSpeed', philosophy: 'supremacist', repeatable: true, setPrice: 'antimatterEngineMinaturizationTechPhilosophyPrice' }, // fleets faster
-            laserIntensityResearch: { idWithinCategory: 4, multiplier: 1, price: 10000, affects: 'fleetAttackPower', philosophy: 'supremacist', repeatable: true, setPrice: 'laserIntensityResearchTechPhilosophyPrice' } // fleets more damage dealt
+
         },
         voidborn: {
-            voidSeers: { idWithinCategory: 0, multiplier: 0, price: 500000, affects: 'specialAbility', philosophy: 'voidborn', repeatable: false, setPrice: 'voidSeersTechPhilosophyPrice' }, // ABILITY: unlock space telescope ability search void instant credits of resources / compounds
-            stellarWhispers: { idWithinCategory: 1, multiplier: 1, price: 10000, affects: 'initialImpression', philosophy: 'voidborn', repeatable: true, setPrice: 'stellarWhispersTechPhilosophyPrice' }, // improve starting impression of enemies
-            stellarInsightManifold: { idWithinCategory: 2, multiplier: 1, price: 10000, affects: 'starStudy', philosophy: 'voidborn', repeatable: true, setPrice: 'stellarInsightManifoldTechPhilosophyPrice' }, // star study quicker
-            asteroidDwellers: { idWithinCategory: 3, multiplier: 1, price: 10000, affects: 'asteroidSearch', philosophy: 'voidborn', repeatable: true, setPrice: 'asteroidDwellersTechPhilosophyPrice' }, // asteroid search quicker
-            ascendencyPhilosophy: { idWithinCategory: 4, multiplier: 0, price: 10000, affects: 'ascendencyPoints', philosophy: 'voidborn', repeatable: true, setPrice: 'ascendencyPhilosophyTechPhilosophyPrice' } // improve base awarded AP by 1pt each time
+
         },
         expansionist: {
-            rapidExpansion: { idWithinCategory: 0, multiplier: 0, price: 500000, affects: 'specialAbility', philosophy: 'expansionist', repeatable: false, setPrice: 'rapidExpansionTechPhilosophyPrice' }, // ABILITY: chance to capture up to 3 neighbouring systems when capturing one
-            spaceElevator: { idWithinCategory: 1, multiplier: 1, price: 10000, affects: 'starshipPartsCost', philosophy: 'expansionist', repeatable: true, setPrice: 'spaceElevatorTechPhilosophyPrice' }, // reduce starship parts costs
-            launchPadMassProduction: { idWithinCategory: 2, multiplier: 1, price: 10000, affects: 'rocketPartsCost', philosophy: 'expansionist', repeatable: true, setPrice: 'launchPadMassProductionTechPhilosophyPrice' }, // reduce rocket parts costs
-            asteroidAttractors: { idWithinCategory: 3, multiplier: 1, price: 10000, affects: 'rocketTravelTime', philosophy: 'expansionist', repeatable: true, setPrice: 'asteroidAttractorsTechPhilosophyPrice' }, // reduce rocket travel time
-            warpDrive: { idWithinCategory: 4, multiplier: 1, price: 10000, affects: 'starshipTravelTime', philosophy: 'expansionist', repeatable: true, setPrice: 'warpDriveTechPhilosophyPrice' } // reduce starship travel time
+
         }
     },
     megastructureTechs: {
@@ -2826,21 +2810,33 @@ export function copyStarDataToDestinationStarField(starName) {
 }
 
 export function restoreResourceDataObject(value) {
-    if (value.version && value.version < 0.70) {
+    if (value?.version && value.version < getMinimumVersion()) {
         showNotification('Philosophies - This save file will no longer work correctly. Please Hard Reset the game in the Save Settings Menu to continue playing, or choose a new Pioneer Name.', 'error', 20000000, 'special2');
     } else {
-        value = migrateResourceData(value, 'resourceData');
+        value = migrateResourceData(value, 'resourceData', {
+            getCurrentGameVersion,
+            getMinimumVersion,
+        });
         resourceData = value;
     }
 }
 
 export function restoreStarSystemsDataObject(value) {
-    value = migrateResourceData(value, 'starSystemsData');
+    value = migrateResourceData(value, 'starSystemsData', {
+        getCurrentGameVersion,
+        getMinimumVersion,
+        getStarTypeByName: (name) => {
+            return getStarTypeByName(name);
+        },
+    });
     starSystems = value;
 }
 
 export function restoreOTypePowerPlantBuffsObject(value) {
-    value = migrateResourceData(value, 'oTypePowerPlantBuffs');
+    value = migrateResourceData(value, 'oTypePowerPlantBuffs', {
+        getCurrentGameVersion,
+        getMinimumVersion,
+    });
     oTypePowerPlantBuffs = value;
 }
 
@@ -2872,7 +2868,10 @@ export function setBlackHoleResearchDone(value) {
 }
 
 export function restoreRocketNamesObject(value) {
-    value = migrateResourceData(value, 'rocketNames');
+    value = migrateResourceData(value, 'rocketNames', {
+        getCurrentGameVersion,
+        getMinimumVersion,
+    });
     replaceRocketNames(value);
 }
 
@@ -2955,17 +2954,26 @@ export function setBlackHoleRechargeMultiplier(value) {
 }
 
 export function restoreGalacticMarketDataObject(value) {
-    value = migrateResourceData(value, 'galacticMarketData');
+    value = migrateResourceData(value, 'galacticMarketData', {
+        getCurrentGameVersion,
+        getMinimumVersion,
+    });
     galacticMarket = value;
 }
 
 export function restoreAscendencyBuffsDataObject(value) {
-    value = migrateResourceData(value, 'ascendencyBuffsData')
+    value = migrateResourceData(value, 'ascendencyBuffsData', {
+        getCurrentGameVersion,
+        getMinimumVersion,
+    })
     ascendencyBuffs = value;
 }
 
 export function restoreAchievementsDataObject(value) {
-    value = migrateResourceData(value, 'achievementsData')
+    value = migrateResourceData(value, 'achievementsData', {
+        getCurrentGameVersion,
+        getMinimumVersion,
+    })
     const template = achievementsData;
     const merged = { ...template };
 

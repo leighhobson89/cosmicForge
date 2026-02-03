@@ -1,10 +1,12 @@
 import { restoreAchievementsDataObject, restoreAscendencyBuffsDataObject, restoreGalacticMarketDataObject, restoreRocketNamesObject, restoreResourceDataObject, restoreStarSystemsDataObject, resourceData, starSystems, getResourceDataObject, setResourceDataObject, galacticMarket, ascendencyBuffs, achievementsData, getStarSystemDataObject, getBlackHoleResearchDone, getBlackHolePower, getBlackHoleDuration, getBlackHoleRechargeMultiplier, getBlackHoleResearchPrice, getBlackHolePowerPrice, getBlackHoleDurationPrice, getBlackHoleRechargePrice, oTypePowerPlantBuffs, restoreOTypePowerPlantBuffsObject } from "./resourceDataObject.js";
 import { achievementFunctionsMap } from "./achievements.js";
-import { drawNativeTechTree, selectTheme, startWeatherEffect, stopWeatherEffect, applyCustomPointerSetting } from "./ui.js";
+import { drawNativeTechTree, selectTheme, startWeatherEffect, stopWeatherEffect, applyCustomPointerSetting, showNotification, generateStarfield } from "./ui.js";
 import { capitaliseWordsWithRomanNumerals, capitaliseString } from './utilityFunctions.js';
 import { offlineGains, startNewsTickerTimer } from './game.js';
-import { rocketNames } from './descriptions.js';
+import { rocketNames, getStarNames, getStarTypeByName } from './descriptions.js';
 import { boostSoundManager } from './audioManager.js';
+import { trackAnalyticsEvent } from './analytics.js';
+import { applyPatchesAfterRestoreGameStatus } from './patches.js';
 
 //DEBUG
 export let debugFlag = false;
@@ -26,7 +28,7 @@ let saveData = null;
 
 //CONSTANTS
 export const HOMESTAR = 'miaplacidus';
-export const MINIMUM_GAME_VERSION_FOR_SAVES = 0.70;
+export const MINIMUM_GAME_VERSION_FOR_SAVES = 0.80;
 export const GAME_VERSION_FOR_SAVES = 0.84;
 export const deferredActions = [];
 
@@ -71,34 +73,6 @@ export const factoryStarMap = {
     3: "Plasma Forge",
     4: "Galactic Memory Archive"
 };
-
-
-
-export function mapFactoryStarValue(value) {
-    if (value === null || value === undefined || value === false) {
-        return value;
-    }
-
-    if (typeof value === 'string') {
-        const trimmed = value.trim();
-        if (trimmed === '') {
-            return value;
-        }
-
-        const parsed = Number(trimmed);
-        if (!Number.isNaN(parsed) && factoryStarMap[parsed]) {
-            return factoryStarMap[parsed];
-        }
-
-        return trimmed;
-    }
-
-    if (typeof value === 'number' && factoryStarMap[value]) {
-        return factoryStarMap[value];
-    }
-
-    return value;
-}
 
 export const enemyFleetData = {
     air: {
@@ -1061,6 +1035,32 @@ export function getElements() {
     return elements;
 }
 
+export function mapFactoryStarValue(value) {
+    if (value === null || value === undefined || value === false) {
+        return value;
+    }
+
+    if (typeof value === 'string') {
+        const trimmed = value.trim();
+        if (trimmed === '') {
+            return value;
+        }
+
+        const parsed = Number(trimmed);
+        if (!Number.isNaN(parsed) && factoryStarMap[parsed]) {
+            return factoryStarMap[parsed];
+        }
+
+        return trimmed;
+    }
+
+    if (typeof value === 'number' && factoryStarMap[value]) {
+        return factoryStarMap[value];
+    }
+
+    return value;
+}
+
 export function resetAllVariablesOnRebirth() {
     if (!getMegaStructureTechsResearched().some(arr => Array.isArray(arr) && arr[0] === 1 && arr[1] === 5)) {
         infinitePower = false;
@@ -1429,7 +1429,6 @@ export function resetAllVariablesOnRebirth() {
 }
 
 export function captureGameStatusForSaving(type) {
-    // Always refresh platform metadata before saving
     detectAndSetUserPlatform();
     let gameState = {};
 
@@ -1669,6 +1668,14 @@ export function captureGameStatusForSaving(type) {
 export function restoreGameStatus(gameState, type) {
     return new Promise((resolve, reject) => {
         try {
+            if (gameState?.resourceData) {
+                const resourceVersion = Number(gameState.resourceData.version ?? 0);
+                if (resourceVersion < MINIMUM_GAME_VERSION_FOR_SAVES) {
+                    showNotification('Philosophies - This save file will no longer work correctly. Please Hard Reset the game in the Save Settings Menu to continue playing, or choose a new Pioneer Name.', 'error', 20000000, 'special2');
+                    return reject(new Error('Save version below minimum supported version'));
+                }
+            }
+
             // Game variables
             if (gameState.resourceData) {
                 restoreResourceDataObject(JSON.parse(JSON.stringify(gameState.resourceData)));
@@ -1941,9 +1948,33 @@ export function restoreGameStatus(gameState, type) {
                 battleUnits = { player: [], enemy: [] };
             }
 
-            patchNeonAutoBuyers();
-            patchAchievementsPrecipitation();
-            fixLaunchPadAndSpaceTelescope(rocketsBuilt, asteroidArray);
+            applyPatchesAfterRestoreGameStatus({
+                getTechUnlockedArray,
+                getUnlockedCompoundsArray,
+                setUnlockedCompoundsArray,
+                getRocketsBuilt,
+                getAsteroidArray,
+                getStarVisionDistance,
+                getCanFuelRockets,
+                setCanFuelRockets,
+                getCurrentStarSystem,
+                getSettledStars,
+                getStarsWithAncientManuscripts,
+                setStarsWithAncientManuscripts,
+                getFactoryStarsArray,
+                setFactoryStarsArray,
+                NUMBER_OF_STARS,
+                STAR_FIELD_SEED,
+                getOTypeMechanicActivatedForThisSave,
+                setOTypeMechanicActivatedForThisSave,
+                getStarNames,
+                getStarTypeByName,
+                trackAnalyticsEvent,
+                getResourceDataObject,
+                setResourceDataObject,
+                showNotification,
+                generateStarfield,
+            });
             
             const autoSaveToggleElement = document.getElementById('autoSaveToggle');
             const autoSaveFrequencyElement = document.getElementById('autoSaveFrequency');
@@ -2000,61 +2031,6 @@ function attachAchievementFunctions(data) {
     }
 
     return data;
-}
-
-export function patchNeonAutoBuyers() {
-    setResourceDataObject(true, 'resources', ['neon', 'upgrades', 'autoBuyer', 'normalProgression']);
-
-    const tech = getTechUnlockedArray();
-    const tier =
-        tech.includes('rocketComposites') ? 4 :
-        tech.includes('quantumComputers') ? 2 :
-        getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'currentTierLevel']) === 0 ? 1 :
-        null;
-
-    if (tier) {
-        setResourceDataObject(tier, 'resources', ['neon', 'upgrades', 'autoBuyer', 'currentTierLevel']);
-    }
-}
-
-export function patchAchievementsPrecipitation() { //to add unlocked compounds to saves
-    const unlockedTechs = getTechUnlockedArray();
-    const unlockedCompounds = getUnlockedCompoundsArray();
-
-    const techToCompoundMap = {
-        hydroCarbons: 'diesel',
-        glassManufacture: 'glass',
-        aggregateMixing: 'concrete',
-        steelFoundries: 'steel',
-        neutronCapture: 'titanium',
-        neonFusion: 'water'
-    };
-
-    for (const tech in techToCompoundMap) {
-        const compound = techToCompoundMap[tech];
-        if (unlockedTechs.includes(tech) && !unlockedCompounds.includes(compound)) {
-            setUnlockedCompoundsArray(compound);
-        }
-    }
-}
-
-function fixLaunchPadAndSpaceTelescope(rocketsBuilt, asteroidArray) { //for fixing saves broken by my carelessness in migration.
-    if (rocketsBuilt.length > 0) {
-        setResourceDataObject(true, 'space', ['upgrades', 'launchPad', 'launchPadBoughtYet']);
-    
-        if (!canFuelRockets && getTechUnlockedArray().includes('advancedFuels')) {
-            canFuelRockets = true;
-        }
-    
-        rocketsBuilt.forEach(rocket => {
-            const partsRequired = getResourceDataObject('space', ['upgrades', rocket, 'parts']);
-            setResourceDataObject(partsRequired, 'space', ['upgrades', rocket, 'builtParts']);
-        });
-    }
-    
-    if (asteroidArray.length > 0 || starVisionDistance > 0) {
-        setResourceDataObject(true, 'space', ['upgrades', 'spaceTelescope', 'spaceTelescopeBoughtYet']);
-    }
 }
 
 export function getHomeStarName() {
