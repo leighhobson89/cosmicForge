@@ -2664,7 +2664,7 @@ helpContent = {
         subBody12: "You can accidentally discover a Black Hole, and once researched it can be used to Time Warp, speeding up travel times and Resource collection. It needs to be charged which takes time, but the time can be reduced with upgrades. You can also increase the time it stays active for and the power of it with further upgrades, and once it is unlocked it is available across different runs.",
 
         subHeading13: "O-type Stars",
-        subBody13: "O-type stars are the rarest and most violent stars in the galaxy. Each one you control can be linked to your Dyson Sphere, dramatically amplifying its power output. Expect hardened defenses, environmental hazards, and unique rewards for those brave enough to settle these brilliant systems."
+        subBody13: "O-type stars are the rarest and most violent stars in the galaxy. Each one you control dramatically amplifies the power output of all Power Buildings. Expect hardened defenses when attempting to conquer these systems."
     },
     'concepts - end goal': {
         subHeading1: "Ancient Manuscripts",
