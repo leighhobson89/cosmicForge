@@ -1671,7 +1671,6 @@ export function restoreGameStatus(gameState, type) {
             if (gameState?.resourceData) {
                 const resourceVersion = Number(gameState.resourceData.version ?? 0);
                 if (resourceVersion < MINIMUM_GAME_VERSION_FOR_SAVES) {
-                    showNotification('Philosophies - This save file will no longer work correctly. Please Hard Reset the game in the Save Settings Menu to continue playing, or choose a new Pioneer Name.', 'error', 20000000, 'special2');
                     return reject(new Error('Save version below minimum supported version'));
                 }
             }
