@@ -8,7 +8,7 @@ import { showNotification } from "./ui.js";
 
 export let achievementImageUrls;
 export let resourceData = {
-    version: 0.84, //update this whenever changes are made to the structure
+    version: 0.85, //update this whenever changes are made to the structure
     resources: {
         solar: {
             autoSell: false,
@@ -814,7 +814,7 @@ export let resourceData = {
                 rate: 0.2,
                 quantity: 0, 
                 setPrice: 'scienceLabPrice',
-                energyUse: 0.5
+                energyUse: 0.35
             }
         }    
     },    
@@ -979,7 +979,7 @@ export const miaplacidus = {
 
 
 export let starSystems = {
-    version: 0.84,
+    version: 0.85,
     stars: {
         spica: {
             mapSize: 5.504440179536064, //might need to add this to star object when added dynamically for after rebirth
@@ -998,14 +998,14 @@ export let starSystems = {
 };
 
 export let oTypePowerPlantBuffs = {
-    version: 0.84,
+    version: 0.85,
     basicPowerPlantStar: { starName: null, settled: false },
     solarPowerPlantStar: { starName: null, settled: false },
     advancedPowerPlantStar: { starName: null, settled: false }
 };
 
 export let galacticMarket = {
-    version: 0.84,
+    version: 0.85,
     resources: {
         hydrogen: { 
             name: "Hydrogen", 
@@ -1111,7 +1111,7 @@ export let galacticMarket = {
 };
 
 export let ascendencyBuffs = {
-    version: 0.84,
+    version: 0.85,
     "littleBagOfHydrogen": {
         name: "Little Bag Of Hydrogen",
         description: "buffLittleBagOfHydrogenRow",

@@ -67,7 +67,8 @@ let randomEventUiHandlers = {
     showEventModal: null,
     refreshSpaceMiningRocketSidebar: null,
     isGalacticTabUnlocked: null,
-    onTimedEffectStarted: null
+    onTimedEffectStarted: null,
+    onAnyEventTriggered: null
 };
 
 let eventsMasterSwitch = true; //TRUE TO HAVE EVENTS WORKING IN GAME NOT TO BE CHANGED BY AI
@@ -1326,6 +1327,10 @@ function attemptTriggerAtCheckpoint(checkpointType) {
         return false;
     }
 
+    if (typeof randomEventUiHandlers.onAnyEventTriggered === 'function') {
+        randomEventUiHandlers.onAnyEventTriggered(picked);
+    }
+
     trackAnalyticsEvent('random_event_triggered', {
         event_id: picked,
         checkpoint: checkpointType,
@@ -1602,6 +1607,10 @@ export function triggerRandomEventDebug() {
         return;
     }
 
+    if (typeof randomEventUiHandlers.onAnyEventTriggered === 'function') {
+        randomEventUiHandlers.onAnyEventTriggered(picked);
+    }
+
     if (!TIMED_RANDOM_EVENT_IDS.has(picked)) {
         recordInstantEventHistory(picked, triggerResult);
     }
@@ -1648,6 +1657,10 @@ export function triggerSpecificRandomEventDebug(eventId) {
         return;
     }
 
+    if (typeof randomEventUiHandlers.onAnyEventTriggered === 'function') {
+        randomEventUiHandlers.onAnyEventTriggered(eventId);
+    }
+
     if (!TIMED_RANDOM_EVENT_IDS.has(eventId)) {
         recordInstantEventHistory(eventId, triggerResult);
     }
@@ -1678,7 +1691,8 @@ export function setRandomEventUiHandlers({
     showEventModal,
     refreshSpaceMiningRocketSidebar,
     isGalacticTabUnlocked,
-    onTimedEffectStarted
+    onTimedEffectStarted,
+    onAnyEventTriggered
 } = {}) {
     if (typeof showNotification === 'function') {
         randomEventUiHandlers.showNotification = showNotification;
@@ -1694,6 +1708,9 @@ export function setRandomEventUiHandlers({
     }
     if (typeof onTimedEffectStarted === 'function') {
         randomEventUiHandlers.onTimedEffectStarted = onTimedEffectStarted;
+    }
+    if (typeof onAnyEventTriggered === 'function') {
+        randomEventUiHandlers.onAnyEventTriggered = onAnyEventTriggered;
     }
 }
 

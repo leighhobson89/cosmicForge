@@ -29,7 +29,7 @@ let saveData = null;
 //CONSTANTS
 export const HOMESTAR = 'miaplacidus';
 export const MINIMUM_GAME_VERSION_FOR_SAVES = 0.80;
-export const GAME_VERSION_FOR_SAVES = 0.84;
+export const GAME_VERSION_FOR_SAVES = 0.85;
 export const deferredActions = [];
 
 //NOTIFICATIONS
@@ -616,6 +616,8 @@ let belligerentEnemyFlag = false;
 let feedbackCanBeRequested = true;
 let philosophyAbilityActive = false;
 let onboardingMode = false;
+
+let eventsTriggeredOnce = false;
 
 let miaplacidusEndgameStoryShown = false;
 
@@ -1649,6 +1651,7 @@ export function captureGameStatusForSaving(type) {
         belligerentEnemyFlag: belligerentEnemyFlag,
         feedbackCanBeRequested: feedbackCanBeRequested,
         philosophyAbilityActive: philosophyAbilityActive,
+        eventsTriggeredOnce: eventsTriggeredOnce,
         currentRunIsMegaStructureRun: currentRunIsMegaStructureRun,
         megaStructureTabNotificationShown: megaStructureTabNotificationShown,
         hasVisitedMegaStructure: hasVisitedMegaStructure,
@@ -1926,6 +1929,7 @@ export function restoreGameStatus(gameState, type) {
             belligerentEnemyFlag = gameState.flags.belligerentEnemyFlag ?? false;
             feedbackCanBeRequested = gameState.flags.feedbackCanBeRequested ?? true;
             philosophyAbilityActive = gameState.flags.philosophyAbilityActive ?? false;
+            eventsTriggeredOnce = gameState.flags.eventsTriggeredOnce ?? false;
             currentRunIsMegaStructureRun = gameState.flags.currentRunIsMegaStructureRun ?? false;
             megaStructureTabNotificationShown = gameState.flags.megaStructureTabNotificationShown ?? false;
             hasVisitedMegaStructure = gameState.flags.hasVisitedMegaStructure ?? false;
@@ -5212,6 +5216,14 @@ export function getFeedbackCanBeRequested() {
 
 export function setFeedbackCanBeRequested(value) {
     feedbackCanBeRequested = value;
+}
+
+export function getEventsTriggeredOnce() {
+    return eventsTriggeredOnce;
+}
+
+export function setEventsTriggeredOnce(value) {
+    eventsTriggeredOnce = value;
 }
 
 export function setFeedbackContent(value) {

@@ -133,10 +133,11 @@ import {
     getFirstAccessArray,
     getFeedbackCanBeRequested,
     setFeedbackCanBeRequested,
+    getEventsTriggeredOnce,
+    setEventsTriggeredOnce,
     getRepeatableTechMultipliers,
-    STAR_FIELD_SEED,
-    NUMBER_OF_STARS,
-    getStarMapMode,
+    setRepeatableTechMultipliers,
+    getAllRepeatableTechMultipliersObject,
     getPhilosophyAbilityActive,
     getStarsWithAncientManuscripts,
     getManuscriptCluesShown,
@@ -11438,6 +11439,17 @@ setRandomEventUiHandlers({
     isGalacticTabUnlocked: () => {
         const tab7 = document.getElementById('tab7');
         return !!tab7 && !String(tab7.textContent || '').includes('???');
+    },
+    onAnyEventTriggered: () => {
+        if (getEventsTriggeredOnce?.()) {
+            return;
+        }
+
+        setEventsTriggeredOnce?.(true);
+        const eventsOption = document.querySelector('p.tab8.option14');
+        if (eventsOption) {
+            appendAttentionIndicator(eventsOption);
+        }
     },
     onTimedEffectStarted: (effectId) => {
         if (effectId !== 'galacticMarketLockdown') {

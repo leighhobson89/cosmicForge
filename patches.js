@@ -467,6 +467,25 @@ export function migrateResourceData(saveData, objectType, options = {}) {
             saveData.version = 0.84;
         }
 
+        if (saveData.version < 0.85) {
+            if (objectType === 'resourceData') {
+                if (saveData?.research?.upgrades?.scienceLab) {
+                    saveData.research.upgrades.scienceLab.energyUse = 0.35;
+                }
+            }
+
+            if (objectType === 'gameState') {
+                if (!saveData.flags || typeof saveData.flags !== 'object') {
+                    saveData.flags = {};
+                }
+                if (saveData.flags.eventsTriggeredOnce === undefined) {
+                    saveData.flags.eventsTriggeredOnce = false;
+                }
+            }
+
+            saveData.version = 0.85;
+        }
+
         saveData.version += 0.001;
     }
 

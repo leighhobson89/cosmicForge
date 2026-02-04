@@ -8909,6 +8909,9 @@ export function startInvestigateStarTimer(adjustment) {
                         true, 
                         function() {  
                             setPlayerPhilosophy('constructor');
+                            if (getStatRun() === 2) {
+                                setFirstAccessArray('philosophy');
+                            }
                             trackAnalyticsEvent('philosophy_selected', {
                                 philosophy_id: 'constructor',
                                 source: 'star_study_modal'
@@ -8920,6 +8923,9 @@ export function startInvestigateStarTimer(adjustment) {
                         }, 
                         function() {  
                             setPlayerPhilosophy('supremacist');
+                            if (getStatRun() === 2) {
+                                setFirstAccessArray('philosophy');
+                            }
                             trackAnalyticsEvent('philosophy_selected', {
                                 philosophy_id: 'supremacist',
                                 source: 'star_study_modal'
@@ -8931,6 +8937,9 @@ export function startInvestigateStarTimer(adjustment) {
                         }, 
                         function() {  
                             setPlayerPhilosophy('voidborn');
+                            if (getStatRun() === 2) {
+                                setFirstAccessArray('philosophy');
+                            }
                             trackAnalyticsEvent('philosophy_selected', {
                                 philosophy_id: 'voidborn',
                                 source: 'star_study_modal'
@@ -8942,6 +8951,9 @@ export function startInvestigateStarTimer(adjustment) {
                         }, 
                         function() {  
                             setPlayerPhilosophy('expansionist');
+                            if (getStatRun() === 2) {
+                                setFirstAccessArray('philosophy');
+                            }
                             trackAnalyticsEvent('philosophy_selected', {
                                 philosophy_id: 'expansionist',
                                 source: 'star_study_modal'
@@ -12679,12 +12691,7 @@ export function rebirth() {
     changeWeather(1000);
     setRunStartTime();
 
-    if (getStatRun() === 2 && getPlayerPhilosophy() !== null) {
-        const targetElement = [...document.querySelectorAll('p[class*="tab3"]')].find(
-            el => el.innerHTML.includes('Philosophy')
-        );
-        appendAttentionIndicator(targetElement);
-    }
+    
 }
 
 function resetUIElementsOnRebirth() {
