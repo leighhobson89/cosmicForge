@@ -543,6 +543,7 @@ function updateProductionRateText(elementId, rateValue) {
     const displayRateValue = rateValue * (displayWarpMultiplier || 1);
 
     const formattedValue = formatProductionRateValue(displayRateValue);
+
     rateElement.textContent = `${formattedValue} / s`;
 
     rateElement.classList.remove('green-ready-text', 'red-disabled-text', 'warning-orange-text');
@@ -1520,6 +1521,55 @@ function updateCompoundAutoBuyerDelta(compound, tier, deltaMs) {
     const supplyChainMultiplier = getSupplyChainDisruptionMultiplier('compounds', compound);
 
     if (getPowerOnOff()) {
+        if (tier === 1) {
+            const smoothingWindowMs = 1000;
+            const smoothingAlpha = Math.min(1, Math.max(0, deltaMs / smoothingWindowMs));
+            const prevSmoothedPerSecond = getResourceDataObject('compounds', [compound, 'autoCreateRatePerSecondSmoothed'], true) || 0;
+
+            let amountCreatedThisUpdate = 0;
+
+            if (getResourceDataObject('compounds', [compound, 'autoCreate'])) {
+                const resources = [1, 2, 3, 4].map(i => getResourceDataObject('compounds', [compound, `createsFrom${i}`])?.[0]);
+                resources.forEach(resourceName => {
+                    if (resourceName !== '' && resourceName !== undefined) {
+                        setResourceDataObject(false, 'resources', [resourceName, 'autoSell']);
+                    }
+                });
+
+                currentQuantity = getResourceDataObject('compounds', [compound, 'quantity']) || 0;
+                const availableStorage = Math.max(0, storageCapacity - currentQuantity);
+
+                if (availableStorage > 0) {
+                    const amountToCreateArray = calculateCreatableCompoundAmount(compound, { buffer: 0 });
+                    const maxCreatable = amountToCreateArray[0] || 0;
+                    const amountToCreateRaw = Math.min(maxCreatable, availableStorage) * supplyChainMultiplier;
+                    const amountToCreate = Math.max(0, amountToCreateRaw);
+
+                    if (amountToCreate > 0) {
+                        amountCreatedThisUpdate = amountToCreate;
+                        setResourceDataObject(currentQuantity + amountToCreate, 'compounds', [compound, 'quantity']);
+                        currentQuantity += amountToCreate;
+
+                        amountToCreateArray.slice(1).forEach(([amountPerUnit, resourceName]) => {
+                            if (resourceName && amountPerUnit > 0 && maxCreatable > 0) {
+                                const currentResourceQuantity = getResourceDataObject('resources', [resourceName, 'quantity']) || 0;
+                                const newResourceQuantity = currentResourceQuantity - ((amountToCreate / maxCreatable) * amountPerUnit);
+                                setResourceDataObject(newResourceQuantity, 'resources', [resourceName, 'quantity']);
+                            }
+                        });
+                    }
+                }
+            }
+
+            const instantPerSecond = deltaMs > 0 ? (amountCreatedThisUpdate / deltaMs) * 1000 : 0;
+            const nextSmoothedPerSecond = prevSmoothedPerSecond + ((instantPerSecond - prevSmoothedPerSecond) * smoothingAlpha);
+            setResourceDataObject(nextSmoothedPerSecond, 'compounds', [compound, 'autoCreateRatePerSecondSmoothed']);
+
+            const timerRatio = getTimerRateRatio?.() || 0;
+            const perInterval = timerRatio > 0 ? (nextSmoothedPerSecond / timerRatio) : 0;
+            setResourceDataObject(perInterval, 'compounds', [compound, 'autoCreateRate']);
+        }
+
         const autoBuyerExtractionRate = getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', `tier${tier}`, 'rate']) || 0;
         const currentTierAutoBuyerQuantity = getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', `tier${tier}`, 'quantity']) || 0;
         const activeAutoBuyer = getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', `tier${tier}`, 'active']);
@@ -1561,7 +1611,7 @@ function updateCompoundAutoBuyerDelta(compound, tier, deltaMs) {
             allCompoundRatesAddedTogether += (getCurrentPrecipitationRate() * supplyChainMultiplier);
         }
 
-        allCompoundRatesAddedTogether += calculateCompoundAutoCreateRatePerInterval(compound);
+        allCompoundRatesAddedTogether += (getResourceDataObject('compounds', [compound, 'autoCreateRate'], true) || 0);
 
         const powerPlant3FuelType = 'diesel';
         const powerPlant3ConsumptionPerTick =
@@ -1588,6 +1638,8 @@ function updateCompoundAutoBuyerDelta(compound, tier, deltaMs) {
         const netCompoundRateDisplay = (allCompoundRatesAddedTogether - amountToDeductForConsumption) * getTimerRateRatio();
         updateProductionRateText(`${compound}Rate`, netCompoundRateDisplay);
     } else if (tier === 1) {
+        setResourceDataObject(0, 'compounds', [compound, 'autoCreateRate']);
+        setResourceDataObject(0, 'compounds', [compound, 'autoCreateRatePerSecondSmoothed']);
         const autoBuyerExtractionRate = getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', 'tier1', 'rate']) || 0;
         const currentTierAutoBuyerQuantity = getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', 'tier1', 'quantity']) || 0;
         const activeAutoBuyer = getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', 'tier1', 'active']);
@@ -1614,7 +1666,7 @@ function updateCompoundAutoBuyerDelta(compound, tier, deltaMs) {
             compoundTier1Rate += (getCurrentPrecipitationRate() * supplyChainMultiplier);
         }
 
-        compoundTier1Rate += calculateCompoundAutoCreateRatePerInterval(compound);
+        compoundTier1Rate += (getResourceDataObject('compounds', [compound, 'autoCreateRate'], true) || 0);
 
         setResourceDataObject(compoundTier1Rate, 'compounds', [compound, 'rate']);
         updateProductionRateText(`${compound}Rate`, compoundTier1Rate * getTimerRateRatio());
@@ -1633,34 +1685,6 @@ function updateCompoundAutoBuyerDelta(compound, tier, deltaMs) {
             const autoSellQuantity = updatedQuantity - 100;
             setResourceDataObject(100, 'compounds', [compound, 'quantity']);
             processAutoSell(compound, autoSellQuantity, 'compounds');
-        }
-    }
-
-    if (getResourceDataObject('compounds', [compound, 'autoCreate'])) {
-        const resources = [1, 2, 3, 4].map(i => getResourceDataObject('compounds', [compound, `createsFrom${i}`])?.[0]);
-
-        resources.forEach(resourceName => {
-            if (resourceName !== '' && resourceName !== undefined) {
-                setResourceDataObject(false, 'resources', [resourceName, 'autoSell']);
-            }
-        });
-
-        currentQuantity = getResourceDataObject('compounds', [compound, 'quantity']) || 0;
-
-        if (currentQuantity < storageCapacity) {
-            const amountToCreateArray = calculateCreatableCompoundAmount(compound);
-            const availableStorage = Math.floor(storageCapacity - currentQuantity);
-            const amountToCreate = Math.floor(Math.min(amountToCreateArray[0], availableStorage) * supplyChainMultiplier);
-
-            setResourceDataObject(currentQuantity + amountToCreate, 'compounds', [compound, 'quantity']);
-
-            amountToCreateArray.slice(1).forEach(([amountPerUnit, resourceName]) => {
-                if (resourceName && amountPerUnit > 0) {
-                    const currentResourceQuantity = getResourceDataObject('resources', [resourceName, 'quantity']) || 0;
-                    const newResourceQuantity = currentResourceQuantity - Math.floor((amountToCreate / Math.max(1, amountToCreateArray[0])) * amountPerUnit);
-                    setResourceDataObject(newResourceQuantity, 'resources', [resourceName, 'quantity']);
-                }
-            });
         }
     }
 }
@@ -1699,6 +1723,10 @@ function calculateGrossAutoBuyerGenerationPerInterval(category, resourceKey) {
 function calculateCompoundAutoCreateRatePerInterval(compoundKey) {
     const compoundData = getResourceDataObject('compounds', [compoundKey]);
     if (!compoundData?.autoCreate) {
+        return 0;
+    }
+
+    if (!getPowerOnOff()) {
         return 0;
     }
 
@@ -3391,7 +3419,7 @@ function updateAllCreatePreviews() {
                 createPreviewElement.innerHTML = cleanedString;
             }
 
-            if (getResourceDataObject('compounds', [compound, 'autoCreate'])) {
+            if (getPowerOnOff() && getResourceDataObject('compounds', [compound, 'autoCreate'])) {
                 createPreviewElement.innerHTML = '<span class="red-disabled-text">Auto Creating...</span>';
             }
         }
@@ -5324,6 +5352,7 @@ function compoundCostSellCreateChecks(element) {  //to refactor
     }
 
     if (element.classList.contains('create') || element.dataset.conditionCheck === 'createCompound') { //sell           
+        const powerOn = getPowerOnOff();
         const createCompoundDescriptionString = document.getElementById('create' + capitaliseString(checkQuantityString) + 'Description').innerHTML;
         const accompanyingLabel = element.parentElement.nextElementSibling.querySelector('label');
         if (accompanyingLabel.textContent.startsWith('0')) {
@@ -5346,6 +5375,9 @@ function compoundCostSellCreateChecks(element) {  //to refactor
             const requiredQuantity = constituentComponents[quantityKey];
     
             if (constituentComponents.compoundToCreateQuantity <= 0) {
+                element.classList.remove('warning-orange-text');
+                element.classList.add('red-disabled-text');
+                setSellFuseCreateTextDescriptionClassesBasedOnButtonStates(element, 'create');
                 isDisabled = true;
                 break;
             }
@@ -5369,11 +5401,16 @@ function compoundCostSellCreateChecks(element) {  //to refactor
             if (!createCompoundDescriptionString.includes('!')) {
                 element.classList.remove('warning-orange-text');
             }
-            if (getPowerOnOff()) {
+            if (powerOn) {
                 element.classList.remove('red-disabled-text');
             } else {
                 element.classList.add('red-disabled-text');
             }
+            setSellFuseCreateTextDescriptionClassesBasedOnButtonStates(element, 'create');
+        }
+
+        if (!powerOn) {
+            element.classList.add('red-disabled-text');
             setSellFuseCreateTextDescriptionClassesBasedOnButtonStates(element, 'create');
         }
 
@@ -8033,8 +8070,8 @@ export function setWeatherCycleSecondsRemaining(secondsRemaining = 10) {
     }, 1000);
 }
 
-function calculateCreatableCompoundAmount(compoundToCreate) {
-    const buffer = 100;
+function calculateCreatableCompoundAmount(compoundToCreate, options = {}) {
+    const buffer = (typeof options?.buffer === 'number') ? options.buffer : 100;
 
     const parts = [1, 2, 3, 4].map(i => {
         const ratio = getResourceDataObject('compounds', [compoundToCreate, `createsFromRatio${i}`]) || 0;

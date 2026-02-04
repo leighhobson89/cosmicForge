@@ -2003,20 +2003,11 @@ function buildAutoCreateGenerationLine(resourceKey, category, timerRatio) {
         return '';
     }
 
-    const supplyChainState = isTimedEffectActive?.('supplyChainDisruption')
-        ? (getTimedEffectStateSnapshot?.('supplyChainDisruption') || null)
-        : null;
-    const supplyChainMultiplier = (supplyChainState && typeof supplyChainState === 'object' && supplyChainState.category === category && supplyChainState.key === resourceKey)
-        ? (1 - (Math.max(0, Math.min(100, Math.round(Number(supplyChainState.percentDown) || 0))) / 100))
-        : 1;
-
-    const autoCreateRate = calculateAutoCreateRatePerSecond(resourceKey, timerRatio) * supplyChainMultiplier;
-    if (autoCreateRate <= 0) {
-        return '';
-    }
-
+    const autoCreatePerInterval = getResourceDataObject('compounds', [resourceKey, 'autoCreateRate'], true) || 0;
+    const autoCreateRate = autoCreatePerInterval * timerRatio;
     const formatted = formatProductionRateValue(autoCreateRate);
-    return `<div class="stats-text">Auto Creation: ${formatted} / s</div>`;
+    const className = autoCreateRate > 0 ? 'green-ready-text' : 'red-disabled-text';
+    return `<div>Auto Creation: <span class="${className}">${formatted} / s</span></div>`;
 }
 
 function buildPrecipitationGenerationLine(resourceKey, category, timerRatio) {
