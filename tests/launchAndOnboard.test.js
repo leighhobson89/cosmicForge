@@ -564,10 +564,10 @@ describe("launchAndOnboard", () => {
         await step({
           page,
           text: "Click Cosmicopedia",
-          targetLocator: page.locator("#cosmicopedia .sub-category-text"),
+          targetLocator: page.locator("#cosmicopedia .main-category-text"),
           action: async () => {
             await page.waitForTimeout(200);
-            await page.locator("#cosmicopedia .sub-category-text").click();
+            await page.locator("#cosmicopedia .main-category-text").click();
           }
         });
 
@@ -622,9 +622,22 @@ describe("launchAndOnboard", () => {
         await step({
           page,
           text: "Click 'Saving / Loading'",
-          targetLocator: page.locator("p.tab8\\.option2", { hasText: "Saving / Loading" }),
+          targetLocator: page.locator("#options .collapsible-content.open p.tab8\\.option2", { hasText: "Saving / Loading" }),
           action: async () => {
-            await page.locator("p.tab8\\.option2", { hasText: "Saving / Loading" }).click();
+            const optionsContent = page.locator("#options .collapsible-content");
+            const optionsIsOpen = await optionsContent
+              .evaluate((el) => el.classList.contains("open"))
+              .catch(() => false);
+
+            if (!optionsIsOpen) {
+              await page.locator("#options .collapsible-header").click();
+              await page.locator("#options .collapsible-content.open").waitFor({
+                state: "visible",
+                timeout: 60000
+              });
+            }
+
+            await page.locator("#options .collapsible-content.open p.tab8\\.option2", { hasText: "Saving / Loading" }).click();
           }
         });
 
