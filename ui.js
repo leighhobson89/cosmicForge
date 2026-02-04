@@ -7940,6 +7940,8 @@ function initializeTabEventListeners() {
             setCurrentOptionPane('events');
             updateContent('Events', 'tab8', 'content');
             setFirstAccessArray('events');
+            removeAttentionIndicator(this);
+            removeTabAttentionIfNoIndicators('tab8');
         });
     });
 
@@ -11446,10 +11448,14 @@ setRandomEventUiHandlers({
         }
 
         setEventsTriggeredOnce?.(true);
-        const eventsOption = document.querySelector('p.tab8.option14');
+
+        const eventsOption = document.getElementById('eventsOption')
+            || document.querySelector('[class*="tab8"][class*="option14"]');
         if (eventsOption) {
             appendAttentionIndicator(eventsOption);
         }
+
+        updateAttentionIndicators?.();
     },
     onTimedEffectStarted: (effectId) => {
         if (effectId !== 'galacticMarketLockdown') {

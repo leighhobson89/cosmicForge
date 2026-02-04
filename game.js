@@ -8909,9 +8909,6 @@ export function startInvestigateStarTimer(adjustment) {
                         true, 
                         function() {  
                             setPlayerPhilosophy('constructor');
-                            if (getStatRun() === 2) {
-                                setFirstAccessArray('philosophy');
-                            }
                             trackAnalyticsEvent('philosophy_selected', {
                                 philosophy_id: 'constructor',
                                 source: 'star_study_modal'
@@ -8923,9 +8920,6 @@ export function startInvestigateStarTimer(adjustment) {
                         }, 
                         function() {  
                             setPlayerPhilosophy('supremacist');
-                            if (getStatRun() === 2) {
-                                setFirstAccessArray('philosophy');
-                            }
                             trackAnalyticsEvent('philosophy_selected', {
                                 philosophy_id: 'supremacist',
                                 source: 'star_study_modal'
@@ -8937,9 +8931,6 @@ export function startInvestigateStarTimer(adjustment) {
                         }, 
                         function() {  
                             setPlayerPhilosophy('voidborn');
-                            if (getStatRun() === 2) {
-                                setFirstAccessArray('philosophy');
-                            }
                             trackAnalyticsEvent('philosophy_selected', {
                                 philosophy_id: 'voidborn',
                                 source: 'star_study_modal'
@@ -8951,9 +8942,6 @@ export function startInvestigateStarTimer(adjustment) {
                         }, 
                         function() {  
                             setPlayerPhilosophy('expansionist');
-                            if (getStatRun() === 2) {
-                                setFirstAccessArray('philosophy');
-                            }
                             trackAnalyticsEvent('philosophy_selected', {
                                 philosophy_id: 'expansionist',
                                 source: 'star_study_modal'
@@ -10139,10 +10127,18 @@ export function buildSpaceMiningBuilding(spaceMiningBuilding, debug) {
 }
 
 export function getBatteryLevel() {
-    const totalBatteryCapacity = getResourceDataObject('buildings', ['energy', 'storageCapacity']);
-    const totalBatteryCharge = getResourceDataObject('buildings', ['energy', 'quantity']);
+    const totalBatteryCapacity = Number(getResourceDataObject('buildings', ['energy', 'storageCapacity'])) || 0;
+    const totalBatteryCharge = Number(getResourceDataObject('buildings', ['energy', 'quantity'])) || 0;
+
+    if (totalBatteryCapacity <= 0) {
+        return 0;
+    }
 
     const batteryPercentage = (totalBatteryCharge / totalBatteryCapacity) * 100;
+    if (!Number.isFinite(batteryPercentage)) {
+        return 0;
+    }
+
     return Math.min(100, Math.max(0, batteryPercentage));
 }
 
@@ -12579,6 +12575,8 @@ export function addPermanentBuffsBackInAfterRebirth() {
 export function rebirth() {
     setAchievementFlagArray('rebirth', 'add');
 
+    const rebirthCalledOnRun1 = getStatRun() === 1;
+
     clearAllAttentionIndicators();
 
     const homeStarLower = getHomeStarName()?.toLowerCase();
@@ -12691,7 +12689,14 @@ export function rebirth() {
     changeWeather(1000);
     setRunStartTime();
 
-    
+    if (rebirthCalledOnRun1) {
+        const philosophyOption = document.getElementById('philosophyOption');
+        if (philosophyOption && getPlayerPhilosophy() !== null) {
+            philosophyOption.parentElement?.parentElement?.classList.remove('invisible');
+            appendAttentionIndicator(philosophyOption);
+            updateAttentionIndicators();
+        }
+    }
 }
 
 function resetUIElementsOnRebirth() {
