@@ -138,6 +138,18 @@ export function genericAchievementChecker(achievement) {
 }
 
 export function grantAchievement(achievement) {
+    if (typeof achievement === 'string') {
+        achievement = getAchievementDataObject(achievement);
+    }
+
+    if (!achievement || typeof achievement !== 'object') {
+        throw new TypeError(`grantAchievement expected an achievement object but received: ${String(achievement)}`);
+    }
+
+    if (!achievement.gives || typeof achievement.gives !== 'object') {
+        throw new TypeError(`Achievement ${String(achievement.id)} is missing gives data.`);
+    }
+
     setAchievementDataObject(true, achievement.id, ['active']);
     showNotification(getAchievementNotification(achievement.notification), 'achievement', 4000, 'default');
 
@@ -499,10 +511,10 @@ export function achievementConquerStarSystems(conqueredQuantity) {
     if (getStatRun() - 1 >= conqueredQuantity) {
         switch (conqueredQuantity) {
             case 10:
-                grantAchievement('conquer10StarSystems');
+                grantAchievement(getAchievementDataObject('conquer10StarSystems'));
                 break;
             case 50:
-                grantAchievement('conquer50StarSystems');
+                grantAchievement(getAchievementDataObject('conquer50StarSystems'));
                 break;
         }
     }
