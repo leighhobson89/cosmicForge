@@ -10152,7 +10152,6 @@ function renderBattleExplosions(ctx, now) {
                         
                         if (unitIndex !== -1) {
                             battleUnits[owner][unitIndex].inFormation = true;
-                            setBattleUnits(owner, battleUnits[owner]);
                         }
                     }
                 }
@@ -10234,19 +10233,6 @@ function renderBattleExplosions(ctx, now) {
         if (type === 'fight') {
             updateUnitRotation(newMovementVector, unit);  
         }
-
-        const latestUnits = getBattleUnits()[key];
-        const latestUnit = latestUnits.find(u => u.id === unit.id);
-
-        const mergedUnit = {
-            ...unit,
-            currentGoal: latestUnit.currentGoal !== unit.currentGoal ? latestUnit.currentGoal : unit.currentGoal,
-            huntX: latestUnit.huntX !== unit.huntX ? latestUnit.huntX : unit.huntX,
-            huntY: latestUnit.huntY !== unit.huntY ? latestUnit.huntY : unit.huntY
-        };
-
-        const updatedUnits = latestUnits.map(u => (u.id === unit.id ? mergedUnit : u));
-        setBattleUnits(key, updatedUnits);
     }
 
     function updateUnitRotation(movementVector, unit) {

@@ -12192,23 +12192,13 @@ function getPreferredTarget(unit, visibleEnemies) {
         }
     }
 
-    const stealthyTargets = potentialTargets.filter(target => {
-        return !getVisibleEnemies(target, false).includes(unit);
-    });
-
-    if (stealthyTargets.length > 0) {
-        preferredTarget = stealthyTargets.reduce((prev, curr) => (prev.health < curr.health ? prev : curr));
-    } else {
-        preferredTarget = potentialTargets.reduce((prev, curr) => (prev.health < curr.health ? prev : curr));
-    }
+    preferredTarget = potentialTargets.reduce((prev, curr) => (prev.health < curr.health ? prev : curr));
 
     return preferredTarget ? preferredTarget : 'hunt';
 }
 
 export function calculateMovementVectorToTarget(unit, objective) {
     if (!objective) return [0, 0];
-    const battleUnits = getBattleUnits();
-    const owner = unit.owner;
 
     if (objective && objective.id === 'hunt') {     
         const dx = unit.huntX - unit.x;
@@ -12221,24 +12211,12 @@ export function calculateMovementVectorToTarget(unit, objective) {
     
             unit.movementVector = movementVector;
             unit.rotation = Math.atan2(dy, dx);
-    
-            const updatedUnits = battleUnits[owner].map(u => 
-                u.id === unit.id ? { ...u, movementVector, rotation: unit.rotation } : u
-            ); 
-    
-            setBattleUnits(owner, updatedUnits);
-    
+
             return movementVector;
         } else {
-            const updatedUnits = battleUnits[owner].map(u => {
-                if (u.id === unit.id) {
-                    const updatedUnit = { ...u, huntX: null, huntY: null, currentGoal: null };
-                    return updatedUnit;
-                }
-                return u;
-            });
-            
-            setBattleUnits(owner, updatedUnits);
+            unit.huntX = null;
+            unit.huntY = null;
+            unit.currentGoal = null;
 
             return unit.movementVector;
         }
@@ -12272,17 +12250,12 @@ export function calculateMovementVectorToTarget(unit, objective) {
 }
 
 export function turnAround(unit) {
-    const battleUnits = getBattleUnits();
-
     if (unit.rotation + Math.PI <= 2 * Math.PI) {
         unit.rotation += Math.PI;
     } else {
         unit.rotation -= Math.PI;
     }
     unit.currentSpeed = -unit.currentSpeed;
-
-    const updatedUnits = battleUnits[unit.owner].map(u => u.id === unit.id ? { ...u, currentSpeed: unit.currentSpeed } : u);
-    setBattleUnits(unit.owner, updatedUnits);
 }
 
 export async function settleSystemAfterBattle(accessPoint) {
