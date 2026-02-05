@@ -93,7 +93,6 @@ export function migrateAncientManuscriptsAndFactoryStarsIfNeeded(deps = {}) {
         getStarsWithAncientManuscripts,
         setStarsWithAncientManuscripts,
         getFactoryStarsArray,
-        setFactoryStarsArray,
         NUMBER_OF_STARS,
         STAR_FIELD_SEED,
         getStarTypeByName,
@@ -109,7 +108,6 @@ export function migrateAncientManuscriptsAndFactoryStarsIfNeeded(deps = {}) {
         !getStarsWithAncientManuscripts ||
         !setStarsWithAncientManuscripts ||
         !getFactoryStarsArray ||
-        !setFactoryStarsArray ||
         !NUMBER_OF_STARS ||
         !STAR_FIELD_SEED ||
         !getStarTypeByName ||
@@ -131,9 +129,7 @@ export function migrateAncientManuscriptsAndFactoryStarsIfNeeded(deps = {}) {
     const beforeFactorySnapshot = JSON.stringify(getFactoryStarsArray() || []);
 
     const manuscriptEntries = getStarsWithAncientManuscripts() || [];
-    const factoryStarsArray = getFactoryStarsArray() || [];
 
-    const factoryStarsToRemove = new Set();
     const removedManuscriptEntries = [];
     const cleanedManuscriptEntries = manuscriptEntries.filter((entry) => {
         if (!Array.isArray(entry) || entry.length < 2) {
@@ -149,21 +145,9 @@ export function migrateAncientManuscriptsAndFactoryStarsIfNeeded(deps = {}) {
         const factoryIsSettledOrCurrent = factoryLower === currentStarLower || settledStarSet.has(factoryLower);
         if (manuscriptIsO || factoryIsO || manuscriptIsSettledOrCurrent || factoryIsSettledOrCurrent) {
             removedManuscriptEntries.push(entry);
-            if (typeof factoryStar === 'string' && factoryStar) {
-                factoryStarsToRemove.add(factoryStar.toLowerCase());
-            }
             return false;
         }
         return true;
-    });
-
-    const cleanedFactoryStars = factoryStarsArray.filter((name) => {
-        const lower = String(name || '').toLowerCase();
-        if (!lower) return false;
-        if (lower === currentStarLower) return false;
-        if (settledStarSet.has(lower)) return false;
-        if (factoryStarsToRemove.has(lower)) return false;
-        return getStarTypeByName(name) !== 'O';
     });
 
     if (cleanedManuscriptEntries.length !== manuscriptEntries.length) {
@@ -179,9 +163,6 @@ export function migrateAncientManuscriptsAndFactoryStarsIfNeeded(deps = {}) {
                     entry[2] = idx + 1;
                 }
             });
-    }
-    if (cleanedFactoryStars.length !== factoryStarsArray.length) {
-        factoryStarsArray.splice(0, factoryStarsArray.length, ...cleanedFactoryStars);
     }
 
     const thresholds = [5, 20, 35, 45];
@@ -315,7 +296,6 @@ export function migrateAncientManuscriptsAndFactoryStarsIfNeeded(deps = {}) {
 
         existingManuscriptStars.add(manuscriptStar);
         existingFactoryStars.add(factoryStarToPointTo);
-        setFactoryStarsArray(factoryStarToPointTo);
         setStarsWithAncientManuscripts([manuscriptStar, factoryStarToPointTo, position, false]);
         entriesAdded++;
     }
@@ -327,7 +307,14 @@ export function migrateAncientManuscriptsAndFactoryStarsIfNeeded(deps = {}) {
         beforeFactorySnapshot !== afterFactorySnapshot;
 
     if (didChange && trackAnalyticsEvent) {
-        const removedFactoryStars = Array.from(factoryStarsToRemove);
+        const removedFactoryStars = Array.from(
+            new Set(
+                removedManuscriptEntries
+                    .map((entry) => (Array.isArray(entry) ? entry[1] : null))
+                    .filter(Boolean)
+                    .map((name) => String(name).toLowerCase())
+            )
+        );
         const affectedStars = Array.from(
             new Set(
                 [

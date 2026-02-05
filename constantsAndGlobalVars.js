@@ -297,6 +297,24 @@ let factoryStarsArray = [];
 let manuscriptCluesShown = {};
 let megaStructuresInPossessionArray = [];
 let oStarArrivalPopupsShown = [];
+
+function syncFactoryStarsArrayFromAncientManuscripts() {
+    const next = [];
+    const seen = new Set();
+    const entries = Array.isArray(starsWithAncientManuscripts) ? starsWithAncientManuscripts : [];
+
+    for (let i = 0; i < entries.length && next.length < 4; i++) {
+        const entry = entries[i];
+        const factoryStar = Array.isArray(entry) ? entry[1] : null;
+        const lower = typeof factoryStar === 'string' ? factoryStar.toLowerCase() : '';
+        if (!lower) continue;
+        if (seen.has(lower)) continue;
+        seen.add(lower);
+        next.push(lower);
+    }
+
+    factoryStarsArray = next;
+}
 let oTypeMechanicActivatedForThisSave = false;
 
 let battleUnits = { 
@@ -4186,6 +4204,7 @@ export function getStarsWithAncientManuscripts() {
 
 export function setStarsWithAncientManuscripts(value) {
     starsWithAncientManuscripts.push(value);
+    syncFactoryStarsArrayFromAncientManuscripts();
 }
 
 export function getOStarArrivalPopupsShown() {
@@ -4262,6 +4281,8 @@ export function activateFactoryStar(star) {
         factoryStarsArray.push(factoryStarName);
     }
 
+    syncFactoryStarsArrayFromAncientManuscripts();
+
     const factoryStarObject = starSystems?.stars?.[factoryStarName];
     if (!factoryStarObject) {
         return;
@@ -4285,22 +4306,25 @@ export function getMegaStructuresInPossessionArray() {
 }
 
 export function getFactoryStarsArray() {
-    const base = Array.isArray(factoryStarsArray) ? factoryStarsArray : [];
-    const derived = starSystems?.stars
-        ? Object.keys(starSystems.stars).filter((starName) => Boolean(starSystems.stars?.[starName]?.factoryStar))
-        : [];
-
-    return Array.from(
-        new Set(
-            [...base, ...derived]
-                .filter(Boolean)
-                .map((starName) => (typeof starName === 'string' ? starName.toLowerCase() : starName))
-        )
-    );
+    return Array.isArray(factoryStarsArray) ? [...factoryStarsArray] : [];
 }
 
-export function setFactoryStarsArray(value) {
+export function setFactoryStarsArray(value, override = false) {
+    if (override) {
+        if (Array.isArray(value)) {
+            factoryStarsArray = value
+                .filter(Boolean)
+                .map((v) => (typeof v === 'string' ? v.toLowerCase() : v))
+                .slice(0, 4);
+        } else {
+            factoryStarsArray = [];
+        }
+        syncFactoryStarsArrayFromAncientManuscripts();
+        return;
+    }
+
     factoryStarsArray.push(typeof value === 'string' ? value.toLowerCase() : value);
+    syncFactoryStarsArrayFromAncientManuscripts();
 }
 
 export function getCurrentRunIsMegaStructureRun() {
