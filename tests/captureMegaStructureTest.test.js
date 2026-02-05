@@ -750,6 +750,75 @@ describe("captureMegaStructureTest", () => {
         );
 
         await globalThis.smokeStep(
+          "rebirth via Galactic tab",
+          async () => {
+            await page.evaluate(() => {
+              const tab7 = document.getElementById("tab7");
+              if (tab7) tab7.click();
+            });
+
+            const rebirthOption = page.locator("#rebirthOption");
+            await rebirthOption.waitFor({ state: "visible", timeout: 60000 });
+            await rebirthOption.click();
+
+            const rebirthButton = page.locator("#rebirthRow button", { hasText: /^REBIRTH$/ });
+            await rebirthButton.waitFor({ state: "visible", timeout: 60000 });
+            await rebirthButton.click();
+
+            const confirm = page.locator("#modalConfirm");
+            await confirm.waitFor({ state: "visible", timeout: 60000 });
+            await confirm.click();
+            await page.locator("#overlay").waitFor({ state: "hidden", timeout: 10000 }).catch(() => {});
+
+            await page.waitForSelector("#tab1", { timeout: 60000 });
+          },
+          { input: { selectors: ["#tab7", "#rebirthOption", "#rebirthRow", "#modalConfirm", "#tab1"] } }
+        );
+
+        await globalThis.smokeStep(
+          "validate hydrogen reset and storage",
+          async () => {
+            const state = await page.evaluate(async () => {
+              const rdo = await import("/resourceDataObject.js");
+              return {
+                hydrogen: rdo.getResourceDataObject?.("resources", ["hydrogen", "quantity"]),
+                hydrogenStorage: rdo.getResourceDataObject?.("resources", ["hydrogen", "storageCapacity"])
+              };
+            });
+
+            expect(state.hydrogen).toBe(0);
+            expect(state.hydrogenStorage).toBe(150);
+            return state;
+          },
+          { input: { asserts: ["hydrogen=0", "hydrogenStorageCapacity=150"] } }
+        );
+
+        await globalThis.smokeStep(
+          "open debug window again (late)",
+          async () => {
+            await page.keyboard.press("NumpadSubtract");
+            await page.locator("#debugWindow").waitFor({ state: "visible", timeout: 60000 });
+          },
+          { input: { key: "NumpadSubtract", selector: "#debugWindow" } }
+        );
+
+        await globalThis.smokeStep(
+          "run debug Prepare again (late)",
+          async () => {
+            await page.click("#prepareRunForStarshipLaunchButton");
+            await page.waitForFunction(
+              async () => {
+                const globals = await import("/constantsAndGlobalVars.js");
+                return Boolean(globals.getStarShipBuilt?.());
+              },
+              null,
+              { timeout: 60000 }
+            );
+          },
+          { input: { selector: "#prepareRunForStarshipLaunchButton" } }
+        );
+
+        await globalThis.smokeStep(
           "clear notification queues after debug Prepare (late)",
           async () => {
             await page.evaluate(async () => {
@@ -1021,7 +1090,7 @@ describe("captureMegaStructureTest", () => {
         );
 
         await globalThis.smokeStep(
-          "rebirth via Galactic tab",
+          "rebirth via Galactic tab (pre-research)",
           async () => {
             await page.evaluate(() => {
               const tab7 = document.getElementById("tab7");
@@ -1047,25 +1116,7 @@ describe("captureMegaStructureTest", () => {
         );
 
         await globalThis.smokeStep(
-          "validate hydrogen reset and storage",
-          async () => {
-            const state = await page.evaluate(async () => {
-              const rdo = await import("/resourceDataObject.js");
-              return {
-                hydrogen: rdo.getResourceDataObject?.("resources", ["hydrogen", "quantity"]),
-                hydrogenStorage: rdo.getResourceDataObject?.("resources", ["hydrogen", "storageCapacity"])
-              };
-            });
-
-            expect(state.hydrogen).toBe(0);
-            expect(state.hydrogenStorage).toBe(150);
-            return state;
-          },
-          { input: { asserts: ["hydrogen=0", "hydrogenStorageCapacity=150"] } }
-        );
-
-        await globalThis.smokeStep(
-          "open debug window again",
+          "open debug window (pre-research)",
           async () => {
             await page.keyboard.press("NumpadSubtract");
             await page.locator("#debugWindow").waitFor({ state: "visible", timeout: 60000 });
@@ -1074,7 +1125,7 @@ describe("captureMegaStructureTest", () => {
         );
 
         await globalThis.smokeStep(
-          "debug: prepare star ship flight",
+          "debug: prepare star ship flight (pre-research)",
           async () => {
             await page.click("#prepareRunForStarshipLaunchButton");
             await page.waitForFunction(
@@ -1090,7 +1141,7 @@ describe("captureMegaStructureTest", () => {
         );
 
         await globalThis.smokeStep(
-          "close debug window",
+          "close debug window (pre-research)",
           async () => {
             const debugWindow = page.locator("#debugWindow");
             if (!(await debugWindow.isVisible({ timeout: 1500 }).catch(() => false))) {
@@ -1121,32 +1172,46 @@ describe("captureMegaStructureTest", () => {
             await researchOption.waitFor({ state: "visible", timeout: 60000 });
             await researchOption.click();
           },
-          { input: { selectors: ["#tab3", "#researchOption"] } }
+          { input: { selectors: ["#tab3", "#researchOption", ".tab3.option2"] } }
+        );
+
+        await globalThis.smokeStep(
+          "click Technology option",
+          async () => {
+            await page.waitForTimeout(500);
+
+            const clicked = await page.evaluate(() => {
+              const candidates = Array.from(document.querySelectorAll("p.tab3\\.option2"));
+              const technology = candidates.find((el) => /\bTechnology\b/i.test(String(el.textContent ?? "")));
+              if (!technology) return false;
+              technology.click();
+              return true;
+            });
+
+            expect(clicked).toBe(true);
+
+            const anyResearchButton = page.locator("button", { hasText: /^Research$/i });
+            await anyResearchButton.first().waitFor({ state: "attached", timeout: 60000 });
+          },
+          { input: { selectors: ["p.tab3\\.option2", "button:has-text('Research')"] } }
         );
 
         await globalThis.smokeStep(
           "research 5 megastructure techs",
           async () => {
-            const techRowIds = [
-              "#techDysonSphereUnderstandingRow",
-              "#techDysonSphereCapabilitiesRow",
-              "#techDysonSphereDisconnectRow",
-              "#techDysonSpherePowerRow",
-              "#techDysonSphereConnectRow"
-            ];
-
             const researched = [];
-            for (const rowId of techRowIds) {
-              const button = page.locator(`${rowId} button`, { hasText: /^Research$/i });
-              await button.waitFor({ state: "visible", timeout: 60000 });
-              await button.click();
+
+            for (let i = 0; i < 5; i++) {
+              const readyButtons = page.locator("button.green-ready-text", { hasText: /^Research$/i });
+              await readyButtons.first().waitFor({ state: "visible", timeout: 60000 });
+              await readyButtons.first().click();
 
               const confirm = page.locator("#modalConfirm");
               await confirm.waitFor({ state: "visible", timeout: 60000 });
               await confirm.click();
               await page.locator("#overlay").waitFor({ state: "hidden", timeout: 10000 }).catch(() => {});
 
-              researched.push(rowId);
+              researched.push({ index: i });
               await page.waitForTimeout(100);
             }
 

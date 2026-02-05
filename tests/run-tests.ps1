@@ -10,6 +10,9 @@ if (-not (Test-Path $jest)) {
 # Force headless mode for Playwright smoke tests
 $env:HEADLESS = '1'
 
+# Pass Playwright debug flag when running tests
+$env:PWDEBUG = '0'
+
 # Discover all tests under tests
 $testsDir = Join-Path $projectRoot 'tests'
 $tests = @(
