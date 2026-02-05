@@ -145,6 +145,10 @@ function createCircularReplacer() {
 export async function saveGameToCloud(gameData, type) {
     try {
         const userId = getSaveName();
+        if (!userId || (typeof userId === 'string' && userId.trim() === '')) {
+            showNotification('Error saving game to cloud! Pioneer name is missing.', 'error', 3000, 'loadSave');
+            return false;
+        }
         const currentTimestamp = new Date().toISOString();
 
         const { data: existingData, error: fetchError } = await supabase
@@ -198,9 +202,11 @@ export async function saveGameToCloud(gameData, type) {
                 showNotification('Game saved to the cloud!', 'info', 3000, 'loadSave');
             }
         }
-
+        return true;
     } catch (error) {
+        console.error('Error saving game to cloud:', error);
         showNotification('Error saving game to cloud!', 'error', 3000, 'loadSave');
+        return false;
     }
 }
 
@@ -254,7 +260,7 @@ export function saveGame(type) {
         saveGameArea.readOnly = true;
     }
 
-    if (type === 'initialise' || type === 'autoSave' || type === 'feedbackSave') {
+    if (type === 'initialise' || type === 'autoSave' || type === 'feedbackSave' || type === 'manualExportCloud') {
         setSaveData(compressedSaveData);
     }
 }

@@ -7970,6 +7970,28 @@ function initializeTabEventListeners() {
         });    
     });
 
+    const ua = (typeof window !== 'undefined' && window.navigator?.userAgent) ? window.navigator.userAgent.toLowerCase() : '';
+    const isElectron = ua.includes('electron') || (typeof window !== 'undefined' && window.process?.versions?.electron);
+    const exitGameOption = document.getElementById('exitGameOption');
+    if (exitGameOption) {
+        const row = exitGameOption.closest('.row-side-menu');
+        if (isElectron) {
+            row?.classList.remove('invisible');
+        } else {
+            row?.classList.add('invisible');
+        }
+    }
+
+    document.querySelectorAll('[class*="tab8"][class*="option15"]').forEach(function(element) {
+        element.addEventListener('click', function() {
+            selectRowCss(this);
+            setLastScreenOpenRegister('tab8', 'exit game');
+            setCurrentOptionPane('exit game');
+            updateContent('Exit Game', 'tab8', 'content');
+            setFirstAccessArray('exit game');
+        });
+    });
+
     function selectRowCss(clickedItem) {
         const tabClassName = Array.from(clickedItem.classList).find(cls => cls.startsWith('tab'));
         if (!tabClassName) return;

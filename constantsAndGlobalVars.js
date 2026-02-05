@@ -1453,7 +1453,10 @@ export function captureGameStatusForSaving(type) {
     let gameState = {};
 
     if (type === 'manualExportCloud') {
-        setSaveName(document.getElementById('saveName').value);
+        const saveNameElement = document.getElementById('saveName');
+        if (saveNameElement && typeof saveNameElement.value === 'string') {
+            setSaveName(saveNameElement.value);
+        }
         localStorage.setItem('saveName', getSaveName());
     }
 

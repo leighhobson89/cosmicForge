@@ -409,6 +409,7 @@ export function initialiseDescriptions() {
         'Galactic': 'Here you can exchange your AP for permanent buffs, and reset runs.',
         'Settings': 'Change the game settings to your liking.',
         'events': 'Here you can see any ongoing or historical events and the effects they have.',
+        'exit game': 'Here you can Exit The Game',
         
         'hydrogen': 'The most basic element known to man, very cheap to produce and has a pretty low value, but anything can be created from it.',
         'helium': 'Lighter than air this one will make you float away!',

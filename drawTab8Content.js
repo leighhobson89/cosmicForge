@@ -18,6 +18,97 @@ export function drawTab8Content(heading, optionContentElement) {
     if (heading === 'Achievements') createAchievementsSectionRow('achievementsRow');
     if (heading === 'Events') createEventsSectionRow('eventsRow');
 
+    if (heading === 'Exit Game') {
+        const exitGameRow = createOptionRow(
+            'exitGameRow',
+            null,
+            'Exit Game:',
+            createButton('EXIT GAME', ['option-button', 'green-ready-text'], () => {
+                const ua = (typeof window !== 'undefined' && window.navigator?.userAgent) ? window.navigator.userAgent.toLowerCase() : '';
+                const isElectron = ua.includes('electron') || (typeof window !== 'undefined' && window.process?.versions?.electron);
+                if (!isElectron) {
+                    return;
+                }
+
+                callPopupModal(
+                    'EXIT GAME',
+                    'Would you like to save to the cloud before exiting?',
+                    true,
+                    true,
+                    true,
+                    false,
+                    function() {
+                        showHideModal();
+                        window.close();
+                    },
+                    function() {
+                        showHideModal();
+                    },
+                    function() {
+                        (async () => {
+                            if (getOnboardingMode()) {
+                                showNotification("You can't save while onboarding mode is active!", 'info', 4000, 'loadSave');
+                                return;
+                            }
+
+                            saveGame('manualExportCloud');
+                            const saveData = getSaveData();
+                            if (!saveData) {
+                                showNotification('No save data available to export.', 'error', 3000, 'loadSave');
+                                return;
+                            }
+
+                            let savedOk = false;
+                            try {
+                                savedOk = await saveGameToCloud(saveData, 'manualExportCloud');
+                                if (savedOk) {
+                                    setSaveExportCloudFlag(saveData);
+                                }
+                            } finally {
+                                setSaveData(null);
+                            }
+
+                            if (!savedOk) {
+                                return;
+                            }
+
+                            showHideModal();
+                            await new Promise(resolve => setTimeout(resolve, 1000));
+                            window.close();
+                        })().catch((error) => {
+                            console.error('Exit & Save failed:', error);
+                            showNotification('Error saving game to cloud!', 'error', 3000, 'loadSave');
+                        });
+                    },
+                    null,
+                    "EXIT AND DON'T SAVE",
+                    'CANCEL',
+                    'EXIT AND SAVE',
+                    null,
+                    false
+                );
+            }),
+            null,
+            null,
+            null,
+            null,
+            'Here you can Exit The Game',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            false,
+            null,
+            null,
+            null,
+            [true, '25%', '80%']
+        );
+
+        optionContentElement.appendChild(exitGameRow);
+    }
+
     if (heading === 'Visual') {
         const settingsCurrencySymbolRow = createOptionRow(
             'settingsCurrencySymbolRow',
