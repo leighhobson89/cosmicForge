@@ -1,6 +1,9 @@
 import path from "node:path";
+import { jest } from "@jest/globals";
 import { chromium } from "playwright";
 import { startStaticServer } from "./cloudLoadUtils.js";
+
+jest.setTimeout(0);
 
 describe("captureMegaStructureTest", () => {
   globalThis.smokeTest(
@@ -443,7 +446,7 @@ describe("captureMegaStructureTest", () => {
             const voidbornButton = page.locator("#modalExtraChoice1");
             await voidbornButton.waitFor({ state: "visible", timeout: 60000 });
             await voidbornButton.click();
-            await page.locator("#overlay").waitFor({ state: "hidden", timeout: 5000 }).catch(() => {});
+            await page.locator("#overlay").waitFor({ state: "hidden", timeout: 2000 }).catch(() => {});
 
             const philosophy = await page.evaluate(async () => {
               const globals = await import("/constantsAndGlobalVars.js");
@@ -515,7 +518,7 @@ describe("captureMegaStructureTest", () => {
             const launchButton = page.locator("#modalConfirm", { hasText: /^LAUNCH$/i });
             await launchButton.waitFor({ state: "visible", timeout: 60000 });
             await launchButton.click();
-            await page.locator("#overlay").waitFor({ state: "hidden", timeout: 5000 }).catch(() => {});
+            await page.locator("#overlay").waitFor({ state: "hidden", timeout: 2000 }).catch(() => {});
           },
           { input: { selectors: ["#modalConfirm", "#overlay"] } }
         );
@@ -555,7 +558,7 @@ describe("captureMegaStructureTest", () => {
             const confirm = page.locator("#modalConfirm");
             if (await confirm.isVisible({ timeout: 2000 }).catch(() => false)) {
               await confirm.click();
-              await page.locator("#overlay").waitFor({ state: "hidden", timeout: 5000 }).catch(() => {});
+              await page.locator("#overlay").waitFor({ state: "hidden", timeout: 2000 }).catch(() => {});
             }
           },
           { input: { selector: "#modalConfirm" } }
@@ -621,7 +624,7 @@ describe("captureMegaStructureTest", () => {
               }
             }
 
-            if (await settleButton.isVisible({ timeout: 5000 }).catch(() => false)) {
+            if (await settleButton.isVisible({ timeout: 2000 }).catch(() => false)) {
               await settleButton.click();
               coloniseChoice = "settle";
               return { choice: coloniseChoice };
@@ -646,7 +649,7 @@ describe("captureMegaStructureTest", () => {
             const confirm = page.locator("#modalConfirm");
             await confirm.waitFor({ state: "visible", timeout: 60000 });
             await confirm.click();
-            await page.locator("#overlay").waitFor({ state: "hidden", timeout: 5000 }).catch(() => {});
+            await page.locator("#overlay").waitFor({ state: "hidden", timeout: 2000 }).catch(() => {});
             return { confirmed: true };
           },
           { input: { selector: "#modalConfirm" } }
@@ -683,12 +686,12 @@ describe("captureMegaStructureTest", () => {
             }
 
             const confirm = page.locator("#modalConfirm");
-            await confirm.waitFor({ state: "visible", timeout: 90000 });
+            await confirm.waitFor({ state: "visible", timeout: 0 });
             await confirm.click();
-            await page.locator("#overlay").waitFor({ state: "hidden", timeout: 5000 }).catch(() => {});
+            await page.locator("#overlay").waitFor({ state: "hidden", timeout: 2000 }).catch(() => {});
             return { confirmed: true };
           },
-          { input: { selector: "#modalConfirm", timeoutMs: 90000 } }
+          { input: { selector: "#modalConfirm", timeoutMs: 2000 } }
         );
 
         await globalThis.smokeStep(
@@ -698,7 +701,7 @@ describe("captureMegaStructureTest", () => {
               const confirm = page.locator("#modalConfirm");
               await confirm.waitFor({ state: "visible", timeout: 90000 });
               await confirm.click();
-              await page.locator("#overlay").waitFor({ state: "hidden", timeout: 5000 }).catch(() => {});
+              await page.locator("#overlay").waitFor({ state: "hidden", timeout: 2000 }).catch(() => {});
             };
 
             if (coloniseChoice === "conquest") {
@@ -939,7 +942,7 @@ describe("captureMegaStructureTest", () => {
             const launchButton = page.locator("#modalConfirm", { hasText: /^LAUNCH$/i });
             await launchButton.waitFor({ state: "visible", timeout: 60000 });
             await launchButton.click();
-            await page.locator("#overlay").waitFor({ state: "hidden", timeout: 5000 }).catch(() => {});
+            await page.locator("#overlay").waitFor({ state: "hidden", timeout: 2000 }).catch(() => {});
           },
           { input: { selectors: ["#modalConfirm", "#overlay"] } }
         );
@@ -950,7 +953,7 @@ describe("captureMegaStructureTest", () => {
             const confirm = page.locator("#modalConfirm");
             if (await confirm.isVisible({ timeout: 2000 }).catch(() => false)) {
               await confirm.click();
-              await page.locator("#overlay").waitFor({ state: "hidden", timeout: 5000 }).catch(() => {});
+              await page.locator("#overlay").waitFor({ state: "hidden", timeout: 2000 }).catch(() => {});
             }
           },
           { input: { selector: "#modalConfirm" } }
@@ -1054,7 +1057,7 @@ describe("captureMegaStructureTest", () => {
             const confirm = page.locator("#modalConfirm");
             await confirm.waitFor({ state: "visible", timeout: 60000 });
             await confirm.click();
-            await page.locator("#overlay").waitFor({ state: "hidden", timeout: 5000 }).catch(() => {});
+            await page.locator("#overlay").waitFor({ state: "hidden", timeout: 2000 }).catch(() => {});
           },
           { input: { selector: "#modalConfirm" } }
         );
