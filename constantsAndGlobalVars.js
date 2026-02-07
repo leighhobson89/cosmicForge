@@ -6,7 +6,6 @@ import { offlineGains, startNewsTickerTimer } from './game.js';
 import { rocketNames, getStarNames, getStarTypeByName } from './descriptions.js';
 import { boostSoundManager } from './audioManager.js';
 import { trackAnalyticsEvent } from './analytics.js';
-import { applyPatchesAfterRestoreGameStatus } from './patches.js';
 
 //DEBUG
 export let debugFlag = false;
@@ -1972,33 +1971,6 @@ export function restoreGameStatus(gameState, type) {
                 battleUnits = { player: [], enemy: [] };
             }
 
-            applyPatchesAfterRestoreGameStatus({
-                getTechUnlockedArray,
-                getUnlockedCompoundsArray,
-                setUnlockedCompoundsArray,
-                getRocketsBuilt,
-                getAsteroidArray,
-                getStarVisionDistance,
-                getCanFuelRockets,
-                setCanFuelRockets,
-                getCurrentStarSystem,
-                getSettledStars,
-                getStarsWithAncientManuscripts,
-                setStarsWithAncientManuscripts,
-                getFactoryStarsArray,
-                setFactoryStarsArray,
-                NUMBER_OF_STARS,
-                STAR_FIELD_SEED,
-                getOTypeMechanicActivatedForThisSave,
-                setOTypeMechanicActivatedForThisSave,
-                getStarNames,
-                getStarTypeByName,
-                trackAnalyticsEvent,
-                getResourceDataObject,
-                setResourceDataObject,
-                showNotification,
-                generateStarfield,
-            });
             
             const autoSaveToggleElement = document.getElementById('autoSaveToggle');
             const autoSaveFrequencyElement = document.getElementById('autoSaveFrequency');
