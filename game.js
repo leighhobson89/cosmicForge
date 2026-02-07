@@ -1,4 +1,5 @@
 import {
+    getDemoBuild,
     setSuppressUiClickSfx,
     setFirstAccessArray,
     setCurrentOptionPane,
@@ -5737,13 +5738,22 @@ function setPriceForAllPurchases(element, type, resource, scienceUpgradeType, bu
 
 function handleTechnologyScreenButtonAndDescriptionStates(element, quantity, techName) {
     const prerequisiteArray = getResourceDataObject('techs', [techName, 'appearsAt']).slice(1).filter(prereq => prereq !== null && prereq !== '');
+    const shouldApplyDemoLock = getDemoBuild() && techName === 'orbitalConstruction';
     
     if (element && quantity >= getResourceDataObject('techs', [techName, 'price'])) {
         element.classList.remove('red-disabled-text');
-        element.classList.add('green-ready-text');
+        if (shouldApplyDemoLock) {
+            element.classList.remove('green-ready-text');
+            element.classList.add('electron-purple-demo-button');
+            setElementPointerEvents(element, 'none');
+        } else {
+            element.classList.remove('electron-purple-demo-button');
+            element.classList.add('green-ready-text');
+        }
     } else if (element) {
         element.classList.add('red-disabled-text');
         element.classList.remove('green-ready-text');
+        element.classList.remove('electron-purple-demo-button');
     }
 
     if (element.tagName.toLowerCase() === 'button') {
@@ -5751,7 +5761,9 @@ function handleTechnologyScreenButtonAndDescriptionStates(element, quantity, tec
             const allPrerequisitesUnlocked = prerequisiteArray.every(prerequisite => getTechUnlockedArray().includes(prerequisite));
 
             if (allPrerequisitesUnlocked) {
-                element.classList.remove('red-disabled-text');
+                if (!shouldApplyDemoLock) {
+                    element.classList.remove('red-disabled-text');
+                }
             } else {
                 element.classList.add('red-disabled-text');
             }

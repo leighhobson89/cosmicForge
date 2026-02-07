@@ -1,4 +1,5 @@
-import { getCurrentlyPillagingVoid, getTimeLeftUntilPillageVoidTimerFinishes, getTimeLeftUntilStarInvestigationTimerFinishes, getCurrentlyInvestigatingStar, getRocketUserName, setRocketUserName, setRocketDirection, getRocketDirection, getDestinationAsteroid, deferredActions, getSortAsteroidMethod, getAsteroidArray, setCheckRocketFuellingStatus, getCurrencySymbol, setRocketsFuellerStartedArray, getLaunchedRockets, getRocketsFuellerStartedArray, getCurrentlySearchingAsteroid, getTimeLeftUntilAsteroidScannerTimerFinishes, setDestinationAsteroid, getMiningObject, setAsteroidArray, getCurrentStarSystemWeatherEfficiency, getPlayerPhilosophy, getPhilosophyAbilityActive, getStatRun } from './constantsAndGlobalVars.js';
+import { getCurrentlyPillagingVoid, getTimeLeftUntilPillageVoidTimerFinishes, getTimeLeftUntilStarInvestigationTimerFinishes, getCurrentlyInvestigatingStar, getRocketUserName, setRocketUserName, setRocketDirection, getRocketDirection, getDestinationAsteroid, deferredActions, getSortAsteroidMethod, getAsteroidArray, setCheckRocketFuellingStatus, getCurrencySymbol, setRocketsFuellerStartedArray, getLaunchedRockets, getRocketsFuellerStartedArray, getCurrentlySearchingAsteroid, getTimeLeftUntilAsteroidScannerTimerFinishes, setDestinationAsteroid, getMiningObject, setAsteroidArray, getCurrentStarSystemWeatherEfficiency, getPlayerPhilosophy, getPhilosophyAbilityActive, getStatRun, getDemoBuild } from './constantsAndGlobalVars.js';
+
 import { getRocketPartsNeededInTotalPerRocket, getRocketParts, getResourceDataObject, setResourceDataObject } from './resourceDataObject.js';
 import { startTravelToAndFromAsteroidTimer, startInvestigateStarTimer, startSearchAsteroidTimer, launchRocket, gain, startUpdateTimersAndRates, addBuildingPotentialRate, buildSpaceMiningBuilding, addToResourceAllTimeStat, startPillageVoidTimer } from './game.js';
 import { timerManagerDelta } from './timerManagerDelta.js';
@@ -139,10 +140,13 @@ export function drawTab6Content(heading, optionContentElement) {
                     'spaceTelescopeInvestigateStarRow',
                     'Study Stars',
                     'Study Stars',
-                    createButton(`Study Stars`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check'], () => {
+                    (() => {
+                        const extraClasses = getDemoBuild() ? ['electron-purple-demo-button'] : [];
+                        return createButton(`Study Stars`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', ...extraClasses], () => {
                         startInvestigateStarTimer([0, 'buttonClick']);
                         sfxPlayer.playAudio('starStudy', false);
-                    }, 'upgradeCheck', '', 'autoBuyer', 'investigateStar', 'time', true, null, 'spaceMiningPurchase'),
+                        }, 'upgradeCheck', '', 'autoBuyer', 'investigateStar', 'time', true, null, 'spaceMiningPurchase');
+                    })(),
                     createTextElement(
                         `<div id="spaceTelescopeInvestigateStarProgressBar">`,
                         'spaceTelescopeInvestigateStarProgressBarContainer',
@@ -273,11 +277,13 @@ export function drawTab6Content(heading, optionContentElement) {
         ];
 
         rockets.forEach(rocket => {
+            const isDemoLocked = getDemoBuild() && ['rocket2', 'rocket3', 'rocket4'].includes(rocket.id);
+            const extraClasses = isDemoLocked ? ['electron-purple-demo-button'] : [];
             const rocketBuildRow = createOptionRow(
                 `space${capitaliseString(rocket.id)}BuildRow`,
                 null,
                 `${rocket.label}:`,
-                createButton(`Build Rocket Part`, ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check'], () => {
+                createButton(`Build Rocket Part`, ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check', ...extraClasses], () => {
                     trackAnalyticsEvent('rocket_part_built', {
                         rocket_id: rocket.id,
                         ts: new Date().toISOString()

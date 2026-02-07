@@ -1,4 +1,4 @@
-import { getCurrentOptionPane, getCurrentTheme, setAutoSaveToggle, getAutoSaveToggle, getAutoSaveFrequency, setAutoSaveFrequency, getSaveData, setSaveData, getCurrencySymbol, setCurrencySymbol, getNotationType, setNotationType, setNotificationsToggle, getNotificationsToggle, getSaveName, getWeatherEffectSetting, setWeatherEffectSetting, setNewsTickerSetting, getNewsTickerSetting, setSaveExportCloudFlag, getBackgroundAudio, setBackgroundAudio, getSfx, setSfx, setWasAutoSaveToggled, setMouseParticleTrailEnabled, getMouseParticleTrailEnabled, setCustomPointerEnabled, getCustomPointerEnabled, getOnboardingMode } from './constantsAndGlobalVars.js';
+import { getCurrentOptionPane, getCurrentTheme, setAutoSaveToggle, getAutoSaveToggle, getAutoSaveFrequency, setAutoSaveFrequency, getSaveData, setSaveData, getCurrencySymbol, setCurrencySymbol, getNotationType, setNotationType, setNotificationsToggle, getNotificationsToggle, getSaveName, getWeatherEffectSetting, setWeatherEffectSetting, setNewsTickerSetting, getNewsTickerSetting, setSaveExportCloudFlag, getBackgroundAudio, setBackgroundAudio, getSfx, setSfx, setWasAutoSaveToggled, setMouseParticleTrailEnabled, getMouseParticleTrailEnabled, setCustomPointerEnabled, getCustomPointerEnabled, getOnboardingMode, getDemoBuild } from './constantsAndGlobalVars.js';
 import { setupAchievementTooltip, createHtmlTableAchievementsGrid, createHtmlTableStatistics, createHtmlTextAreaProse, toggleGameFullScreen, createButton, createTextFieldArea, createOptionRow, createDropdown, createToggleSwitch, selectTheme, callPopupModal, showHideModal, showNotification, applyCustomPointerSetting, setElementPointerEvents, fadeInStartupOverlay } from './ui.js';
 import { importSaveStringFileFromComputer, downloadSaveStringToComputer, initializeAutoSave, saveGame, saveGameToCloud, loadGameFromCloud, copySaveStringToClipBoard, loadGame, destroySaveGameOnCloud } from './saveLoadGame.js';
 import { hardResetWarningHeader, hardResetWarningText, getStatisticsContent, getHelpContent } from './descriptions.js';
@@ -512,6 +512,7 @@ export function drawTab8Content(heading, optionContentElement) {
     }
 
     if (heading === 'Saving / Loading') {   
+        const demoExtraClasses = getDemoBuild() ? ['electron-purple-demo-button'] : [];
         const autoSaveConfigRow = createOptionRow(
             'autoSaveConfigRow',
             null,
@@ -552,10 +553,10 @@ export function drawTab8Content(heading, optionContentElement) {
             null,
             'Export Save:',
             createTextFieldArea('exportSaveArea', ['export-save'], 'Save Data should appear here', null),
-            createButton(`Export`, ['option-button', 'save-load-button'], () => {
+            createButton(`Export`, ['option-button', 'save-load-button', ...demoExtraClasses], () => {
                 copySaveStringToClipBoard();
             }),
-            createButton(`Export File`, ['option-button', 'save-load-file-export'], () => {
+            createButton(`Export File`, ['option-button', 'save-load-file-export', ...demoExtraClasses], () => {
                 downloadSaveStringToComputer();
             }),
             null,
@@ -580,10 +581,10 @@ export function drawTab8Content(heading, optionContentElement) {
             null,
             'Import Save:',
             createTextFieldArea('importSaveArea', ['import-save'], 'Please paste your Save Data here...', null),
-            createButton(`Import`, ['option-button', 'save-load-button'], () => {
+            createButton(`Import`, ['option-button', 'save-load-button', ...demoExtraClasses], () => {
                 loadGame();
             }),
-            createButton(`Import File`, ['option-button', 'save-load-file-export'], () => {
+            createButton(`Import File`, ['option-button', 'save-load-file-export', ...demoExtraClasses], () => {
                 importSaveStringFileFromComputer();
             }),
             null,
@@ -607,7 +608,7 @@ export function drawTab8Content(heading, optionContentElement) {
             'exportCloudSaveRow',
             null,
             'Export Cloud Save:',
-            createButton(`Export Cloud Save`, ['option-button', 'save-load-button'], () => {
+            createButton(`Export Cloud Save`, ['option-button', 'save-load-button', ...demoExtraClasses], () => {
                 if (getOnboardingMode()) {
                     showNotification("You can't save while onboarding mode is active!", 'info', 4000, 'loadSave');
                     return;
@@ -644,7 +645,7 @@ export function drawTab8Content(heading, optionContentElement) {
             'importCloudSaveRow',
             null,
             'Import Cloud Save:',
-            createButton(`Import Cloud Save`, ['option-button', 'save-load-button'], () => {
+            createButton(`Import Cloud Save`, ['option-button', 'save-load-button', ...demoExtraClasses], () => {
                 loadGameFromCloud();
             }),
             null,

@@ -1,4 +1,6 @@
 import {
+    getDemoBuild,
+    setDemoBuild,
     getInfinitePowerRate,
     getStatRun,
     getAdditionalSystemsToSettleThisRun,
@@ -517,6 +519,22 @@ function applySavedCollapsibleStates() {
             container.classList.remove('open');
             header.classList.remove('active');
             content.classList.remove('open');
+        }
+    });
+}
+
+function applyInterstellarSidebarDemoLockdownUi() {
+    if (!getDemoBuild()) return;
+
+    const optionIdsToLock = ['starDataOption', 'starShipOption', 'fleetHangarOption', 'coloniseOption'];
+    optionIdsToLock.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        el.classList.add('electron-purple-demo-button');
+        const row = el.closest('.row-side-menu');
+        if (row) {
+            row.classList.add('electron-purple-demo-button');
         }
     });
 }
@@ -1387,7 +1405,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     setElements();
     setupStatTooltips();
     attachEnergyTooltipMirrors();
+    const ua = (typeof window !== 'undefined' && window.navigator?.userAgent) ? window.navigator.userAgent.toLowerCase() : '';
+    const isElectron = ua.includes('electron') || (typeof window !== 'undefined' && window.process?.versions?.electron);
+    if (isElectron) {
+        setDemoBuild(true); //MAIN DEMO SWITCH
+    }
     applyGalacticMarketLockdownUi();
+    applyInterstellarSidebarDemoLockdownUi();
+    setupDemoTooltips();
     setupProductionRateTooltips();
     setupMouseParticleTrail();
     adjustGalacticSidebarWidths();
@@ -1489,6 +1514,93 @@ function spawnMouseParticle(x, y, container) {
         particle.remove();
     }, particleLifetime);
 }
+function setupDemoTooltips() {
+    if (document.getElementById('demo-tooltip')) {
+        return;
+    }
+
+    const tooltip = document.createElement('div');
+    tooltip.id = 'demo-tooltip';
+    tooltip.style.position = 'absolute';
+    tooltip.style.padding = '8px 12px';
+    tooltip.style.pointerEvents = 'none';
+    tooltip.style.background = '#3b0f4a';
+    tooltip.style.color = '#ffffff';
+    tooltip.style.border = '2px solid #b026ff';
+    tooltip.style.borderRadius = '6px';
+    tooltip.style.fontSize = '13px';
+    tooltip.style.zIndex = '100001';
+    tooltip.style.display = 'none';
+    tooltip.style.boxShadow = '0 4px 12px rgba(176, 38, 255, 0.4)';
+    tooltip.style.maxWidth = '280px';
+    tooltip.style.wordWrap = 'break-word';
+    tooltip.style.whiteSpace = 'normal';
+    tooltip.style.textAlign = 'center';
+    tooltip.style.lineHeight = '1.4';
+    document.body.appendChild(tooltip);
+
+    const getDemoElementUnderCursor = (x, y) => {
+        const originalPointerEvents = [];
+        const demoElements = document.querySelectorAll('.electron-purple-demo-button');
+        demoElements.forEach(el => {
+            originalPointerEvents.push(el.style.pointerEvents);
+            el.style.pointerEvents = 'auto';
+        });
+
+        const element = document.elementFromPoint(x, y);
+        demoElements.forEach((el, i) => {
+            el.style.pointerEvents = originalPointerEvents[i] || '';
+        });
+
+        return element?.closest('.electron-purple-demo-button');
+    };
+
+    const showTooltip = (event, target) => {
+        if (!target) {
+            tooltip.style.display = 'none';
+            return;
+        }
+        tooltip.innerHTML = 'Not Available in Demo Version, if you love the game consider supporting the Developer and buy the game on Steam :)';
+        tooltip.style.display = 'block';
+
+        const pointerOffset = 12;
+        const scrollX = window.scrollX ?? document.documentElement.scrollLeft ?? 0;
+        const scrollY = window.scrollY ?? document.documentElement.scrollTop ?? 0;
+
+        let left = event.pageX + pointerOffset;
+        let top = event.pageY + pointerOffset;
+
+        const tooltipWidth = tooltip.offsetWidth;
+        const tooltipHeight = tooltip.offsetHeight;
+        const viewportRight = scrollX + window.innerWidth;
+        const viewportBottom = scrollY + window.innerHeight;
+
+        if (left + tooltipWidth > viewportRight) {
+            left = Math.max(scrollX + 8, event.pageX - tooltipWidth - pointerOffset);
+        }
+
+        if (top + tooltipHeight > viewportBottom) {
+            top = Math.max(scrollY + 8, event.pageY - tooltipHeight - pointerOffset);
+        }
+
+        tooltip.style.left = `${left}px`;
+        tooltip.style.top = `${top}px`;
+    };
+
+    const hideTooltip = () => {
+        tooltip.style.display = 'none';
+    };
+
+    document.addEventListener('mousemove', (event) => {
+        const target = getDemoElementUnderCursor(event.clientX, event.clientY);
+        if (target) {
+            showTooltip(event, target);
+        } else {
+            hideTooltip();
+        }
+    });
+}
+
 function setupStatTooltips() {
     if (document.getElementById('stat-tooltip')) {
         return;
@@ -2321,7 +2433,7 @@ function buildFuelConsumptionLines(resourceKey, category, timerRatio) {
     startGame();
 
     document.addEventListener('keydown', (event) => {
-        if (event.code === 'NumpadSubtract') {
+        if (!getDemoBuild() && event.code === 'NumpadSubtract') {
             toggleDebugWindow();
         }
     });
@@ -2975,6 +3087,10 @@ export function createButton(text, classNames, onClick, dataConditionCheck, reso
             button.dataset.autoBuyerTier = autoBuyerTier;
             button.dataset.rowCategory = rowCategory;
         }
+    }
+
+    if (getDemoBuild() && objectSectionArgument1 === 'autoBuyer' && (autoBuyerTier === 'tier3' || autoBuyerTier === 'tier4')) {
+        button.classList.add('electron-purple-demo-button');
     }
 
     button.addEventListener('click', function(event) {
@@ -7303,6 +7419,8 @@ export function showTabsUponUnlock() {
     const tabs = document.querySelectorAll('.tab');
     const unlockedTechs = getTechUnlockedArray();
 
+    const shouldApplyDemoLock = getDemoBuild();
+
     tabs.forEach(tab => {
         const tabTech = tab.getAttribute('data-tab') ?? '';
         const tabName = tab.getAttribute('data-name') ?? '';
@@ -7312,6 +7430,12 @@ export function showTabsUponUnlock() {
                 tab.classList.remove('tab-not-yet');
             }
             tab.textContent = tabName;
+
+            if (shouldApplyDemoLock && tab.id === 'tab7') {
+                tab.classList.remove('green-ready-text');
+                tab.classList.add('electron-purple-demo-button');
+            }
+
             const containerGroup = document.getElementById(`${tab.id}ContainerGroup`);
 
             if (containerGroup) {
@@ -12119,7 +12243,7 @@ function toggleVariableDebuggerWindow() {
 }
 
 document.addEventListener('keydown', (e) => {
-    if (e.code === 'NumpadMultiply') {
+    if (!getDemoBuild() && e.code === 'NumpadMultiply') {
         toggleVariableDebuggerWindow();
     }
 });

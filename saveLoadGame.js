@@ -16,6 +16,7 @@ import {
     getBlackHoleAlwaysOn,
     getOnboardingMode,
     setOnboardingMode,
+    getDemoBuild,
 } from './constantsAndGlobalVars.js';
 
 import { setAchievementIconImageUrls } from './resourceDataObject.js';
@@ -40,10 +41,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 let autoSaveTimer = null;
 
+function isElectronDemoBuild() {
+    return getDemoBuild();
+}
+
 export function initializeAutoSave() {
     if (autoSaveTimer) {
         //console.log("Clearing existing auto-save timer.");
         clearTimeout(autoSaveTimer);
+    }
+
+    if (isElectronDemoBuild()) {
+        autoSaveTimer = null;
+        return;
     }
 
     const frequency = getAutoSaveFrequency();
@@ -211,6 +221,11 @@ export async function saveGameToCloud(gameData, type) {
 }
 
 export function saveGame(type) {
+    if (isElectronDemoBuild()) {
+        setSaveData(null);
+        return;
+    }
+
     if (getOnboardingMode()) {
         if (type !== 'onSaveScreen') {
             showNotification("You can't save while onboarding mode is active!", 'info', 4000, 'loadSave');
@@ -299,6 +314,11 @@ export function importSaveStringFileFromComputer() {
 }
 
 export function downloadSaveStringToComputer() {
+    if (isElectronDemoBuild()) {
+        showNotification("Saving is disabled in the demo build!", 'info', 4000, 'loadSave');
+        return;
+    }
+
     if (getOnboardingMode()) {
         showNotification("You can't save while onboarding mode is active!", 'info', 4000, 'loadSave');
         return;
@@ -327,6 +347,11 @@ export function downloadSaveStringToComputer() {
 }
 
 export function copySaveStringToClipBoard() {
+    if (isElectronDemoBuild()) {
+        showNotification("Saving is disabled in the demo build!", 'info', 4000, 'loadSave');
+        return;
+    }
+
     if (getOnboardingMode()) {
         showNotification("You can't save while onboarding mode is active!", 'info', 4000, 'loadSave');
         return;

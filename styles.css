@@ -1391,6 +1391,18 @@ body {
     background-color: var(--button-bg-active) !important;
 }
 
+.electron-purple-demo-button {
+    background-color: #3b0f4a !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 0 2px rgba(176, 38, 255, 0.35) inset;
+    pointer-events: none;
+}
+
+.electron-purple-demo-button:hover {
+    background-color: #521264 !important;
+    color: #ffffff !important;
+}
+
 .row-side-menu {
     display: flex;
     width: 100%;

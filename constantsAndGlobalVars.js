@@ -91,6 +91,14 @@ export const enemyFleetData = {
     }
 }
 
+export function getDemoBuild() {
+    return demoBuild;
+}
+
+export function setDemoBuild(value) {
+    demoBuild = !!value;
+}
+
 export let notificationQueues = {};
 export let notificationStatus = {};
 export let notificationContainers = {};
@@ -633,6 +641,8 @@ let belligerentEnemyFlag = false;
 let feedbackCanBeRequested = true;
 let philosophyAbilityActive = false;
 let onboardingMode = false;
+
+let demoBuild = false;
 
 let eventsTriggeredOnce = false;
 
