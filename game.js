@@ -905,18 +905,8 @@ export async function gameLoop() {
         checkResearchAutoBuyerRowVisibility();
         handleResearchAutoBuyer();
 
-        const elementsToCheck = [
-            ...document.querySelectorAll(
-                '#autoCreateToggle, #autoSellToggle, .energy-check, .fuel-check, .resource-cost-sell-check, .compound-cost-sell-check, [class*="travel-starship"], .diplomacy-button'
-            ),
-            ...Array.from(document.querySelectorAll('*')).filter(element =>
-                /^.+[1-4]Toggle$/.test(element.id) ||
-                ['scienceKitToggle', 'scienceClubToggle', 'scienceLabToggle'].includes(element.id) ||
-                element.id.endsWith('Description') && !element.id.startsWith('tech')
-            )
-        ];
-        
-        elementsToCheck.forEach(checkStatusAndSetTextClasses);        
+        const elementsToCheck = getCachedElementsToCheck();
+        elementsToCheck.forEach(checkStatusAndSetTextClasses);
         
         handleAutoCreateResourceSellRows();
 
@@ -1034,6 +1024,106 @@ export async function gameLoop() {
 
         requestAnimationFrame(gameLoop);
     }
+}
+
+let cachedElementsToCheck = [];
+let cachedElementsToCheckPaneKey = null;
+let cachedElementsToCheckDirty = true;
+let elementsToCheckObserver = null;
+let elementsToCheckObserverScheduled = false;
+
+function scheduleElementsToCheckRefresh() {
+    cachedElementsToCheckDirty = true;
+    if (elementsToCheckObserverScheduled) return;
+    elementsToCheckObserverScheduled = true;
+    window.setTimeout(() => {
+        elementsToCheckObserverScheduled = false;
+        cachedElementsToCheckDirty = true;
+    }, 100);
+}
+
+function ensureElementsToCheckObserver() {
+    if (elementsToCheckObserver || typeof MutationObserver === 'undefined') {
+        return;
+    }
+
+    elementsToCheckObserver = new MutationObserver((mutations) => {
+        for (const m of mutations) {
+            if (m.type !== 'childList') continue;
+
+            const nodes = [
+                ...(m.addedNodes ? Array.from(m.addedNodes) : []),
+                ...(m.removedNodes ? Array.from(m.removedNodes) : []),
+            ];
+
+            for (const node of nodes) {
+                if (!(node instanceof HTMLElement)) continue;
+
+                const id = node.id || '';
+                if (
+                    (id && (id.endsWith('Toggle') || id.endsWith('Description'))) ||
+                    node.classList.contains('energy-check') ||
+                    node.classList.contains('fuel-check') ||
+                    node.classList.contains('resource-cost-sell-check') ||
+                    node.classList.contains('compound-cost-sell-check') ||
+                    node.classList.contains('diplomacy-button')
+                ) {
+                    scheduleElementsToCheckRefresh();
+                    return;
+                }
+
+                if (
+                    node.querySelector &&
+                    node.querySelector('[id$="Toggle"], [id$="Description"], .energy-check, .fuel-check, .resource-cost-sell-check, .compound-cost-sell-check, [class*="travel-starship"], .diplomacy-button')
+                ) {
+                    scheduleElementsToCheckRefresh();
+                    return;
+                }
+            }
+        }
+    });
+
+    if (document.body) {
+        elementsToCheckObserver.observe(document.body, { childList: true, subtree: true });
+    }
+}
+
+function buildElementsToCheck() {
+    const base = Array.from(
+        document.querySelectorAll(
+            '#autoCreateToggle, #autoSellToggle, .energy-check, .fuel-check, .resource-cost-sell-check, .compound-cost-sell-check, [class*="travel-starship"], .diplomacy-button'
+        )
+    );
+
+    const potential = Array.from(document.querySelectorAll('[id$="Toggle"], [id$="Description"]'));
+    const filtered = potential.filter((element) => {
+        const id = element?.id || '';
+        return (
+            /^.+[1-4]Toggle$/.test(id) ||
+            ['scienceKitToggle', 'scienceClubToggle', 'scienceLabToggle'].includes(id) ||
+            (id.endsWith('Description') && !id.startsWith('tech'))
+        );
+    });
+
+    return Array.from(new Set([...base, ...filtered]));
+}
+
+function getCachedElementsToCheck() {
+    ensureElementsToCheckObserver();
+
+    const paneKey = typeof getCurrentOptionPane === 'function' ? getCurrentOptionPane() : null;
+    if (paneKey !== cachedElementsToCheckPaneKey) {
+        cachedElementsToCheckPaneKey = paneKey;
+        cachedElementsToCheckDirty = true;
+    }
+
+    if (!cachedElementsToCheckDirty) {
+        return cachedElementsToCheck;
+    }
+
+    cachedElementsToCheckDirty = false;
+    cachedElementsToCheck = buildElementsToCheck();
+    return cachedElementsToCheck;
 }
 
 function initialiseResearchDeltaTimer() {
