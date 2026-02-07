@@ -5233,8 +5233,12 @@ async function getUserSaveName() {
                 saveNameButton.innerText = 'START';
                 showHideModal();
 
-                const loadSucceeded = await loadGameFromCloud();
-                setShouldPromptOnboarding(!loadSucceeded);
+                if (getDemoBuild()) {
+                    setShouldPromptOnboarding(true);
+                } else {
+                    const loadSucceeded = await loadGameFromCloud();
+                    setShouldPromptOnboarding(!loadSucceeded);
+                }
 
                 saveGame('initialise');
                 saveNameButton.removeEventListener('click', handleSaveNameClick); // Remove handler after successful input
