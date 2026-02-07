@@ -337,7 +337,6 @@ import {
     timeWarp,
     forceClearWeather
 } from './game.js';
-
 import { 
     capitaliseString, 
     capitaliseWordsWithRomanNumerals,
@@ -359,6 +358,59 @@ import { drawTab5Content } from './drawTab5Content.js';
 import { drawTab6Content } from './drawTab6Content.js';
 import { drawTab7Content } from './drawTab7Content.js';
 import { drawTab8Content } from './drawTab8Content.js';
+
+let startupOverlayEl = null;
+let startupOverlayFadeStarted = false;
+
+function mountStartupOverlay() {
+    if (startupOverlayEl && startupOverlayEl.isConnected) {
+        return;
+    }
+
+    const existing = document.getElementById('startupOverlay');
+    if (existing) {
+        startupOverlayEl = existing;
+        return;
+    }
+
+    const mount = () => {
+        if (startupOverlayEl && startupOverlayEl.isConnected) {
+            return;
+        }
+
+        const el = document.createElement('div');
+        el.id = 'startupOverlay';
+        el.className = 'startup-overlay';
+        document.body.appendChild(el);
+        startupOverlayEl = el;
+    };
+
+    if (document.body) {
+        mount();
+    } else {
+        document.addEventListener('DOMContentLoaded', mount, { once: true });
+    }
+}
+
+function fadeOutAndRemoveStartupOverlay() {
+    mountStartupOverlay();
+
+    if (!startupOverlayEl || !startupOverlayEl.isConnected || startupOverlayFadeStarted) {
+        return;
+    }
+
+    startupOverlayFadeStarted = true;
+    startupOverlayEl.classList.add('startup-overlay--fadeout');
+
+    window.setTimeout(() => {
+        if (startupOverlayEl && startupOverlayEl.isConnected) {
+            startupOverlayEl.remove();
+        }
+        startupOverlayEl = null;
+    }, 2000);
+}
+
+mountStartupOverlay();
 
 let modalTooltipHandlers = {};
 
@@ -2233,6 +2285,7 @@ function buildFuelConsumptionLines(resourceKey, category, timerRatio) {
     const modalConfirmBtn = document.getElementById('modalConfirm');
 
     const startGameClickHandler = async () => {
+        fadeOutAndRemoveStartupOverlay();
         if (document.getElementById('fullScreenCheckBox').classList.contains('checked')) {
             toggleGameFullScreen();
         }
