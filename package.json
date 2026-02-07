@@ -22,11 +22,12 @@
     },
     "linux": {
       "target": "zip",
-      "icon": "icon.png"
+      "icon": "icon.png",
+      "artifactName": "Cosmic Forge Full.${ext}"
     },
     "portable": {
       "unicode": false,
-      "artifactName": "Cosmic Forge.exe"
+      "artifactName": "Cosmic Forge Full.exe"
     },
     "files": [
       "index.html",
@@ -51,7 +52,12 @@
     "build-icons": "mkdir -p icons && icon-gen -i icon.png -o icons",
     "build:mac": "bun run build-icons && electron-builder --mac --universal -c.mac.identity=null --publish never",
     "build:win": "bun run build-icons && electron-builder --win",
+    "build:win:full": "node tools/build-stamp.mjs win full",
+    "build:win:demo": "node tools/build-stamp.mjs win demo",
     "build:linux": "bun run build-icons && electron-builder --linux",
+    "build:linux:full": "node tools/build-stamp.mjs linux full",
+    "build:linux:demo": "node tools/build-stamp.mjs linux demo",
+    "build:all": "node tools/build-all.mjs",
     "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js",
     "test:smoke": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js tests",
     "test:playwright": "playwright test",

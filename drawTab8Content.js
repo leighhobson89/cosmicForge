@@ -57,6 +57,11 @@ export function drawTab8Content(heading, optionContentElement) {
                                 return;
                             }
 
+                            if (getDemoBuild()) {
+                                showNotification('Saving is disabled in the demo build!', 'info', 4000, 'loadSave');
+                                return;
+                            }
+
                             saveGame('manualExportCloud');
                             const saveData = getSaveData();
                             if (!saveData) {
@@ -547,6 +552,18 @@ export function drawTab8Content(heading, optionContentElement) {
             null
         );
         optionContentElement.appendChild(autoSaveConfigRow);
+
+        if (getDemoBuild()) {
+            const autoSaveToggleElement = document.getElementById('autoSaveToggle');
+            if (autoSaveToggleElement) {
+                autoSaveToggleElement.classList.add('electron-purple-demo-button');
+            }
+
+            const autoSaveToggleLabelElement = document.querySelector('label[for="autoSaveToggle"]');
+            if (autoSaveToggleLabelElement) {
+                autoSaveToggleLabelElement.classList.add('electron-purple-demo-button');
+            }
+        }
 
         const exportSaveRow = createOptionRow(
             'exportSaveRow',

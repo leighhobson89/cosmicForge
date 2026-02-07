@@ -1407,9 +1407,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     attachEnergyTooltipMirrors();
     const ua = (typeof window !== 'undefined' && window.navigator?.userAgent) ? window.navigator.userAgent.toLowerCase() : '';
     const isElectron = ua.includes('electron') || (typeof window !== 'undefined' && window.process?.versions?.electron);
-    if (isElectron) {
-        setDemoBuild(true); //MAIN DEMO SWITCH
-    }
+    const demoFlagFromBuild = typeof window !== 'undefined' && window.__DEMO_BUILD__ === true;
+    setDemoBuild(isElectron ? demoFlagFromBuild : false);
     applyGalacticMarketLockdownUi();
     applyInterstellarSidebarDemoLockdownUi();
     setupDemoTooltips();
