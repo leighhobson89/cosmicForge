@@ -7,3 +7,6 @@ html-report
 tools/analytics-dashboard/persistentJSON.json
 analytics.bat
 analytics.ps1
+buildFlags.js
+bun.lock
+package.json

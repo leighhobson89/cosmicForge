@@ -10,6 +10,7 @@
   "main": "main.js",
   "type": "module",
   "build": {
+    "compression": "store",
     "appId": "net.leighhobson.cosmicforge",
     "mac": {
       "target": "zip",
@@ -79,5 +80,8 @@
     "jest-html-reporters": "^3.1.7",
     "playwright": "^1.41.2"
   },
-  "private": true
+  "private": true,
+  "peerDependencies": {
+    "typescript": "^5"
+  }
 }
