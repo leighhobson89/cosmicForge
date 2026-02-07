@@ -1,5 +1,5 @@
 import { getCurrentOptionPane, getCurrentTheme, setAutoSaveToggle, getAutoSaveToggle, getAutoSaveFrequency, setAutoSaveFrequency, getSaveData, setSaveData, getCurrencySymbol, setCurrencySymbol, getNotationType, setNotationType, setNotificationsToggle, getNotificationsToggle, getSaveName, getWeatherEffectSetting, setWeatherEffectSetting, setNewsTickerSetting, getNewsTickerSetting, setSaveExportCloudFlag, getBackgroundAudio, setBackgroundAudio, getSfx, setSfx, setWasAutoSaveToggled, setMouseParticleTrailEnabled, getMouseParticleTrailEnabled, setCustomPointerEnabled, getCustomPointerEnabled, getOnboardingMode } from './constantsAndGlobalVars.js';
-import { setupAchievementTooltip, createHtmlTableAchievementsGrid, createHtmlTableStatistics, createHtmlTextAreaProse, toggleGameFullScreen, createButton, createTextFieldArea, createOptionRow, createDropdown, createToggleSwitch, selectTheme, callPopupModal, showHideModal, showNotification, applyCustomPointerSetting, setElementPointerEvents } from './ui.js';
+import { setupAchievementTooltip, createHtmlTableAchievementsGrid, createHtmlTableStatistics, createHtmlTextAreaProse, toggleGameFullScreen, createButton, createTextFieldArea, createOptionRow, createDropdown, createToggleSwitch, selectTheme, callPopupModal, showHideModal, showNotification, applyCustomPointerSetting, setElementPointerEvents, fadeInStartupOverlay } from './ui.js';
 import { importSaveStringFileFromComputer, downloadSaveStringToComputer, initializeAutoSave, saveGame, saveGameToCloud, loadGameFromCloud, copySaveStringToClipBoard, loadGame, destroySaveGameOnCloud } from './saveLoadGame.js';
 import { hardResetWarningHeader, hardResetWarningText, getStatisticsContent, getHelpContent } from './descriptions.js';
 import { setAchievementIconImageUrls, getAchievementPositionData } from './resourceDataObject.js';
@@ -39,7 +39,13 @@ export function drawTab8Content(heading, optionContentElement) {
                     false,
                     function() {
                         showHideModal();
-                        window.close();
+                        (async () => {
+                            await fadeInStartupOverlay(2000);
+                            window.close();
+                        })().catch((error) => {
+                            console.error('Exit & Don\'t Save failed:', error);
+                            window.close();
+                        });
                     },
                     function() {
                         showHideModal();
@@ -73,7 +79,7 @@ export function drawTab8Content(heading, optionContentElement) {
                             }
 
                             showHideModal();
-                            await new Promise(resolve => setTimeout(resolve, 1000));
+                            await fadeInStartupOverlay(2000);
                             window.close();
                         })().catch((error) => {
                             console.error('Exit & Save failed:', error);

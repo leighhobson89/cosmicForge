@@ -410,6 +410,25 @@ function fadeOutAndRemoveStartupOverlay() {
     }, 2000);
 }
 
+export function fadeInStartupOverlay(durationMs = 2000) {
+    startupOverlayFadeStarted = false;
+    startupOverlayEl = null;
+    mountStartupOverlay();
+
+    if (!startupOverlayEl || !startupOverlayEl.isConnected) {
+        return Promise.resolve();
+    }
+
+    startupOverlayEl.classList.remove('startup-overlay--fadeout');
+    startupOverlayEl.style.opacity = '0';
+    void startupOverlayEl.offsetHeight;
+    startupOverlayEl.style.opacity = '1';
+
+    return new Promise(resolve => {
+        window.setTimeout(resolve, durationMs);
+    });
+}
+
 mountStartupOverlay();
 
 let modalTooltipHandlers = {};
