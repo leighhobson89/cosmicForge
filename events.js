@@ -1337,6 +1337,10 @@ function attemptTriggerAtCheckpoint(checkpointType) {
         ts: new Date().toISOString()
     }, { immediate: true, flushReason: 'random_event' });
 
+    if (!TIMED_RANDOM_EVENT_IDS.has(picked)) {
+        recordInstantEventHistory(picked, triggerResult);
+    }
+
     const nextProbability = Math.max(0.01, baseP * PROBABILITY_DECAY_ON_TRIGGER);
     setEventState(picked, {
         currentProbability: nextProbability,

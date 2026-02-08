@@ -10846,16 +10846,9 @@ function enforceUninteractedAsteroidCap({ maxUninteracted = 100 } = {}) {
 globalThis.__pruneUninteractedAsteroids = (max = 100) => enforceUninteractedAsteroidCap({ maxUninteracted: max });
 
 export function discoverAsteroid(debug) {
-    // Always prune on completion to prevent the asteroid list from growing unbounded.
     const { removableCount } = enforceUninteractedAsteroidCap({ maxUninteracted: 100 });
 
-    if (Math.random() < 0.07 && !debug) {
-        showNotification('Asteroid not found after search!', 'warning', 3000, 'special');
-        return;
-    }
-
-    // If we already have 100+ uninteracted asteroids, treat the new discovery as "nothing found".
-    if (removableCount >= 100 && !debug) {
+    if ((Math.random() < 0.07 && !debug) || removableCount >= 100) {
         showNotification('Asteroid not found after search!', 'warning', 3000, 'special');
         return;
     }
