@@ -62,7 +62,9 @@ export function drawTab6Content(heading, optionContentElement) {
         const autoTelescopeOptions = [
             { value: 'studyAsteroid', text: 'Study Asteroid' },
             { value: 'studyStars', text: 'Study Stars' },
-            { value: 'pillageVoid', text: 'Pillage The Void' }
+            ...(getPlayerPhilosophy() === 'voidborn' && getPhilosophyAbilityActive() && getStatRun() > 1
+                ? [{ value: 'pillageVoid', text: 'Pillage The Void' }]
+                : [])
         ];
 
         const spaceTelescopeAutoRow = createOptionRow(
@@ -198,6 +200,13 @@ export function drawTab6Content(heading, optionContentElement) {
                     null
                 );
                 optionContentElement.appendChild(spaceTelescopePhilosophyBoostResourcesAndCompoundsRow);
+
+                const shouldShowPillageVoidRow =
+                    (getPlayerPhilosophy() === 'voidborn' && getPhilosophyAbilityActive() && getStatRun() > 1) ||
+                    getCurrentlyPillagingVoid();
+                if (!shouldShowPillageVoidRow) {
+                    spaceTelescopePhilosophyBoostResourcesAndCompoundsRow.classList.add('invisible');
+                }
 
                 if (getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'spaceTelescopeBoughtYet'])) {
                     spaceBuildTelescopeRow.classList.add('invisible');
