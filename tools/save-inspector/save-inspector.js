@@ -7,6 +7,7 @@ const collapseAllBtn = document.getElementById('collapseAllBtn');
 const themeSelect = document.getElementById('themeSelect');
 const editedSaveContainer = document.getElementById('editedSaveContainer');
 const editedSaveOutput = document.getElementById('editedSaveOutput');
+const exportJsonBtn = document.getElementById('exportJsonBtn');
 const output = document.getElementById('output');
 const errorEl = document.getElementById('error');
 const metaEl = document.getElementById('meta');
@@ -548,6 +549,7 @@ function onDecode() {
     sessionHasEdits = false;
     if (editedSaveContainer) editedSaveContainer.classList.add('d-none');
     if (editedSaveOutput) editedSaveOutput.value = '';
+    if (exportJsonBtn) exportJsonBtn.disabled = false;
     updateMeta({ decompressedLength, rawLength: raw.trim().length });
     renderGameState(gameState);
   } catch (e) {
@@ -557,6 +559,7 @@ function onDecode() {
     sessionHasEdits = false;
     if (editedSaveContainer) editedSaveContainer.classList.add('d-none');
     if (editedSaveOutput) editedSaveOutput.value = '';
+    if (exportJsonBtn) exportJsonBtn.disabled = true;
     setError(e);
   }
 }
@@ -571,6 +574,41 @@ function onClear() {
   sessionHasEdits = false;
   if (editedSaveContainer) editedSaveContainer.classList.add('d-none');
   if (editedSaveOutput) editedSaveOutput.value = '';
+  if (exportJsonBtn) exportJsonBtn.disabled = true;
+}
+
+function buildJsonFilename() {
+  const now = new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  const stamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
+  return `cosmic_forge_save_${stamp}.json`;
+}
+
+function downloadTextFile(filename, text, mime = 'application/json') {
+  const blob = new Blob([text], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function onExportJson() {
+  clearError();
+  if (!lastGameState) {
+    setError('Decode a save first.');
+    return;
+  }
+
+  try {
+    const json = JSON.stringify(lastGameState, null, 2);
+    downloadTextFile(buildJsonFilename(), json);
+  } catch (e) {
+    setError(e);
+  }
 }
 
 function expandTopLevel() {
@@ -587,6 +625,7 @@ function collapseAll() {
 
 decodeBtn.addEventListener('click', onDecode);
 clearBtn.addEventListener('click', onClear);
+if (exportJsonBtn) exportJsonBtn.addEventListener('click', onExportJson);
 expandAllBtn.addEventListener('click', expandTopLevel);
 collapseAllBtn.addEventListener('click', collapseAll);
 

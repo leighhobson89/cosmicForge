@@ -10791,8 +10791,71 @@ function handleBlackHoleDiscoveryRoll() {
     }
 }
 
+function enforceUninteractedAsteroidCap({ maxUninteracted = 100 } = {}) {
+    const asteroids = getAsteroidArray();
+    if (!Array.isArray(asteroids) || asteroids.length === 0) {
+        return { removableCount: 0, removedCount: 0 };
+    }
+
+    const miningObject = getMiningObject?.() || {};
+    const miningTargets = new Set(Object.values(miningObject).filter(v => typeof v === 'string' && v.trim() !== '' && v !== 'refuel'));
+
+    const protectedByTravel = new Set();
+    for (let i = 1; i <= 4; i++) {
+        const rocketName = `rocket${i}`;
+        const destination = getDestinationAsteroid?.(rocketName);
+        if (!destination) continue;
+        if (getCurrentlyTravellingToAsteroid?.(rocketName)) {
+            protectedByTravel.add(destination);
+        }
+    }
+
+    const removableIndicesNewestFirst = [];
+    for (let i = asteroids.length - 1; i >= 0; i--) {
+        const wrapper = asteroids[i];
+        if (!wrapper || typeof wrapper !== 'object') continue;
+
+        const key = Object.keys(wrapper)[0];
+        if (!key) continue;
+        const data = wrapper[key] || {};
+
+        const destroyed = !!data.destroyed;
+        const exhausted = Array.isArray(data.quantity) ? (Number(data.quantity[0]) <= 0) : false;
+        const beingMined = !!data.beingMined;
+
+        const protectedAsteroid = destroyed || exhausted || beingMined || miningTargets.has(key) || protectedByTravel.has(key);
+        if (!protectedAsteroid) {
+            removableIndicesNewestFirst.push(i);
+        }
+    }
+
+    const removableCount = removableIndicesNewestFirst.length;
+    if (removableCount <= maxUninteracted) {
+        return { removableCount, removedCount: 0 };
+    }
+
+    const toRemove = removableCount - maxUninteracted;
+    for (let j = 0; j < toRemove; j++) {
+        const idx = removableIndicesNewestFirst[j];
+        asteroids.splice(idx, 1);
+    }
+
+    return { removableCount, removedCount: toRemove };
+}
+
+globalThis.__pruneUninteractedAsteroids = (max = 100) => enforceUninteractedAsteroidCap({ maxUninteracted: max });
+
 export function discoverAsteroid(debug) {
+    // Always prune on completion to prevent the asteroid list from growing unbounded.
+    const { removableCount } = enforceUninteractedAsteroidCap({ maxUninteracted: 100 });
+
     if (Math.random() < 0.07 && !debug) {
+        showNotification('Asteroid not found after search!', 'warning', 3000, 'special');
+        return;
+    }
+
+    // If we already have 100+ uninteracted asteroids, treat the new discovery as "nothing found".
+    if (removableCount >= 100 && !debug) {
         showNotification('Asteroid not found after search!', 'warning', 3000, 'special');
         return;
     }
@@ -10809,6 +10872,8 @@ export function discoverAsteroid(debug) {
     document.getElementById('asteroidsOption').parentElement.parentElement.classList.remove('invisible');
     setBaseSearchAsteroidTimerDuration(getBaseSearchAsteroidTimerDuration() * getAsteroidCostMultiplier());
     setAsteroidArray(asteroid);
+
+    enforceUninteractedAsteroidCap({ maxUninteracted: 100 });
 
     const keyName = Object.keys(asteroid)[0];
     if (!debug) {
