@@ -12613,6 +12613,14 @@ function decideIfMoreSystemsAreAutomaticallySettled() {
     const settledStars = getSettledStars();
     const playerFleetPower = getResourceDataObject('fleets', ['attackPower']);
 
+    const factoryStars = new Set((getFactoryStarsArray?.() || []).map((name) => String(name || '').toLowerCase()).filter(Boolean));
+    const manuscriptEntries = getStarsWithAncientManuscripts?.() || [];
+    const manuscriptStars = new Set(
+        manuscriptEntries
+            .filter((entry) => Array.isArray(entry) && typeof entry[0] === 'string')
+            .map((entry) => entry[0].toLowerCase())
+    );
+
     const filteredStars = stars
         .filter(star => {
             const starNameLower = star.name.toLowerCase();
@@ -12620,7 +12628,25 @@ function decideIfMoreSystemsAreAutomaticallySettled() {
                 return false;
             }
 
-            return !settledStars.some(settled => capitaliseWordsWithRomanNumerals(settled) === star.name);
+            if (settledStars.some(settled => capitaliseWordsWithRomanNumerals(settled) === star.name)) {
+                return false;
+            }
+
+            if (manuscriptStars.has(starNameLower)) {
+                return false;
+            }
+
+            const isFactoryStar = !!getStarSystemDataObject('stars', [starNameLower, 'factoryStar'], true) || factoryStars.has(starNameLower);
+            if (isFactoryStar) {
+                return false;
+            }
+
+            const starType = getStarSystemDataObject('stars', [starNameLower, 'starType'], true) ?? getStarTypeByName(starNameLower);
+            if (starType === 'O') {
+                return false;
+            }
+
+            return true;
         })
         .map(star => ({
             ...star,

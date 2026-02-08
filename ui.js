@@ -2432,7 +2432,9 @@ function buildFuelConsumptionLines(resourceKey, category, timerRatio) {
     startGame();
 
     document.addEventListener('keydown', (event) => {
-        if (!getDemoBuild() && event.code === 'NumpadSubtract') {
+        const ua = (typeof window !== 'undefined' && window.navigator?.userAgent) ? window.navigator.userAgent.toLowerCase() : '';
+        const isElectron = ua.includes('electron') || (typeof window !== 'undefined' && window.process?.versions?.electron);
+        if (!isElectron && !getDemoBuild() && event.code === 'NumpadSubtract') {
             toggleDebugWindow();
         }
     });
@@ -12246,7 +12248,9 @@ function toggleVariableDebuggerWindow() {
 }
 
 document.addEventListener('keydown', (e) => {
-    if (!getDemoBuild() && e.code === 'NumpadMultiply') {
+    const ua = (typeof window !== 'undefined' && window.navigator?.userAgent) ? window.navigator.userAgent.toLowerCase() : '';
+    const isElectron = ua.includes('electron') || (typeof window !== 'undefined' && window.process?.versions?.electron);
+    if (!isElectron && !getDemoBuild() && e.code === 'NumpadMultiply') {
         toggleVariableDebuggerWindow();
     }
 });
