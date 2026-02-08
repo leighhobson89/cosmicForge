@@ -477,6 +477,7 @@ function validateSaveString(compressed) {
 
 async function initialiseLoadedGame(gameState, type) {
     await restoreGameStatus(gameState, type);
+    globalThis.__pruneUninteractedAsteroids?.(100);
     globalThis.__applySavedCollapsibleStates?.();
     setOnboardingMode(false);
 }
