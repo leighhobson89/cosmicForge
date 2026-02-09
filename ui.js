@@ -2472,13 +2472,33 @@ function buildFuelConsumptionLines(resourceKey, category, timerRatio) {
         }
     });
 
+    let lastOfflineGainsAppliedAt = 0;
+    const applyOfflineGains = () => {
+        const now = Date.now();
+        if (now - lastOfflineGainsAppliedAt < 250) return;
+        lastOfflineGainsAppliedAt = now;
+        offlineGains(true);
+        timerManagerDelta.resetTimestamp(null);
+    };
+
+    const markInactiveTimestamp = () => {
+        setLastSavedTimeStamp(new Date().toISOString());
+    };
+
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
-            setLastSavedTimeStamp(new Date().toISOString());
+            markInactiveTimestamp();
         } else {
-            offlineGains(true);
-            timerManagerDelta.resetTimestamp(null);
+            applyOfflineGains();
         }
+    });
+
+    window.addEventListener('blur', () => {
+        markInactiveTimestamp();
+    });
+
+    window.addEventListener('focus', () => {
+        applyOfflineGains();
     });
 
     document.addEventListener("mouseenter", (e) => {
