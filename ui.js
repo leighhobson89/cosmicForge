@@ -8274,6 +8274,7 @@ function initializeTabEventListeners() {
                     } else if (["power plant", "advanced power plant", "solar power plant"].includes(lastOpenOptionPane)) {
                         const optionContentElement = document.getElementById(`optionContentTab2`);
                         optionContentElement.innerHTML = '';
+                        setCurrentOptionPane(lastOpenOptionPane);
                         const formattedPaneName = lastOpenOptionPane
                             .split(' ')
                             .map(word => word.charAt(0).toUpperCase() + word.slice(1))
