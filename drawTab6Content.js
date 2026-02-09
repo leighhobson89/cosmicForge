@@ -1,4 +1,4 @@
-import { getCurrentlyPillagingVoid, getTimeLeftUntilPillageVoidTimerFinishes, getTimeLeftUntilStarInvestigationTimerFinishes, getCurrentlyInvestigatingStar, getRocketUserName, setRocketUserName, setRocketDirection, getRocketDirection, getDestinationAsteroid, deferredActions, getSortAsteroidMethod, getAsteroidArray, setCheckRocketFuellingStatus, getCurrencySymbol, setRocketsFuellerStartedArray, getLaunchedRockets, getRocketsFuellerStartedArray, getCurrentlySearchingAsteroid, getTimeLeftUntilAsteroidScannerTimerFinishes, setDestinationAsteroid, getMiningObject, setAsteroidArray, getCurrentStarSystemWeatherEfficiency, getPlayerPhilosophy, getPhilosophyAbilityActive, getStatRun, getDemoBuild } from './constantsAndGlobalVars.js';
+import { getCurrentlyPillagingVoid, getTimeLeftUntilPillageVoidTimerFinishes, getTimeLeftUntilStarInvestigationTimerFinishes, getCurrentlyInvestigatingStar, getRocketUserName, setRocketUserName, setRocketDirection, getRocketDirection, getDestinationAsteroid, deferredActions, getSortAsteroidMethod, getAsteroidArray, setCheckRocketFuellingStatus, getCurrencySymbol, setRocketsFuellerStartedArray, getLaunchedRockets, getRocketsFuellerStartedArray, getCurrentlySearchingAsteroid, getTimeLeftUntilAsteroidScannerTimerFinishes, setDestinationAsteroid, getMiningObject, setAsteroidArray, getCurrentStarSystemWeatherEfficiency, getPlayerPhilosophy, getPhilosophyAbilityActive, getStatRun, getDemoBuild, setCurrentDestinationDropdownText } from './constantsAndGlobalVars.js';
 
 import { getRocketPartsNeededInTotalPerRocket, getRocketParts, getResourceDataObject, setResourceDataObject } from './resourceDataObject.js';
 import { startTravelToAndFromAsteroidTimer, startInvestigateStarTimer, startSearchAsteroidTimer, launchRocket, gain, startUpdateTimersAndRates, addBuildingPotentialRate, buildSpaceMiningBuilding, addToResourceAllTimeStat, startPillageVoidTimer } from './game.js';
@@ -657,6 +657,7 @@ function createRocketUI(rocketId, optionContentElement, asteroids, asteroidsBein
         createButton(`Travel`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', `${rocketId}-travel-to-asteroid-button`], () => {
             startTravelToAndFromAsteroidTimer([0, 'buttonClick'], rocketId, false);
             setRocketDirection(rocketId, false);
+            setCurrentDestinationDropdownText('Select an option');
         }, 'upgradeCheck', '', 'autoBuyer', 'travelToAsteroid', 'time', true, null, 'spaceMiningPurchase'),
         createTextElement(`<div id="spaceTravelToAsteroidProgressBar${capitaliseString(rocketId)}">`, `spaceTravelToAsteroidProgressBar${capitaliseString(rocketId)}Container`, ['progress-bar-container', 'invisible']),
         null,
