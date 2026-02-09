@@ -23,6 +23,7 @@ export function drawTab6Content(heading, optionContentElement) {
     const asteroids = getAsteroidArray();
     const asteroidsBeingMinedOrExhausted = getMiningObject();
     if (heading === 'Space Telescope') {
+        const telescopeBuilt = getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'spaceTelescopeBoughtYet']);
         const spaceBuildTelescopeRow = createOptionRow(
                     'spaceBuildTelescopeRow',
                     null,
@@ -136,6 +137,9 @@ export function drawTab6Content(heading, optionContentElement) {
                     null,
                     null
                 );
+                if (!telescopeBuilt) {
+                    spaceTelescopeSearchAsteroidRow.classList.add('invisible');
+                }
                 optionContentElement.appendChild(spaceTelescopeSearchAsteroidRow);
 
         const spaceTelescopeInvestigateStarRow = createOptionRow(
@@ -169,6 +173,9 @@ export function drawTab6Content(heading, optionContentElement) {
                     null,
                     null
                 );
+                if (!telescopeBuilt) {
+                    spaceTelescopeInvestigateStarRow.classList.add('invisible');
+                }
                 optionContentElement.appendChild(spaceTelescopeInvestigateStarRow);
 
                 const spaceTelescopePhilosophyBoostResourcesAndCompoundsRow = createOptionRow(
@@ -199,16 +206,19 @@ export function drawTab6Content(heading, optionContentElement) {
                     null,
                     null
                 );
+                if (!telescopeBuilt) {
+                    spaceTelescopePhilosophyBoostResourcesAndCompoundsRow.classList.add('invisible');
+                }
                 optionContentElement.appendChild(spaceTelescopePhilosophyBoostResourcesAndCompoundsRow);
 
                 const shouldShowPillageVoidRow =
                     (getPlayerPhilosophy() === 'voidborn' && getPhilosophyAbilityActive() && getStatRun() > 1) ||
                     getCurrentlyPillagingVoid();
-                if (!shouldShowPillageVoidRow) {
+                if (!telescopeBuilt || !shouldShowPillageVoidRow) {
                     spaceTelescopePhilosophyBoostResourcesAndCompoundsRow.classList.add('invisible');
                 }
 
-                if (getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'spaceTelescopeBoughtYet'])) {
+                if (telescopeBuilt) {
                     spaceBuildTelescopeRow.classList.add('invisible');
                     
                     if (getCurrentlySearchingAsteroid()) {
