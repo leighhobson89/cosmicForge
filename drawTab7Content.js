@@ -333,7 +333,7 @@ export function drawTab7Content(heading, optionContentElement) {
         Object.keys(ascendencyBuffsArray).forEach(buffKey => {
             const buff = ascendencyBuffsArray[buffKey];
     
-            const buffRowDescription = `${buff.description}`;
+            const buffRowDescription = `buff${capitaliseString(buffKey)}Row`;
             const cost = buff.rebuyable ? buff.baseCostAp * Math.pow(buff.rebuyableIncreaseMultiple, buff.boughtYet) : buff.baseCostAp;
             const buyStatus = buff.boughtYet > 0 ? (buff.rebuyable ? `Bought ${buff.boughtYet} times` : "Purchased") : "Not Bought";
     
