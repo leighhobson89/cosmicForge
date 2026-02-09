@@ -1126,6 +1126,7 @@ export function resetAllVariablesOnRebirth() {
     originalFrameNumbers = {};
     baseSearchAsteroidTimerDuration = 120000;
     baseInvestigateStarTimerDuration = 400000;
+    basePillageVoidTimerDuration = 500000;
     currentAsteroidSearchTimerDurationTotal = 0;
     currentInvestigateStarTimerDurationTotal = 0;
     currentPillageVoidTimerDurationTotal = 0;

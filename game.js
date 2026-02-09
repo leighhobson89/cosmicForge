@@ -2644,7 +2644,7 @@ export function setCompoundRecipePricesAfterRepeatables() {
         const originalCompoundText = getCompoundCreateDropdownRecipeText(compoundKey);
         const updatedCompoundText = {};
 
-        for (const key of ['max', 'threeQuarters', 'twoThirds', 'half', 'oneThird']) {
+        for (const key of ['max', 'fillToCapacity', 'threeQuarters', 'twoThirds', 'half', 'oneThird']) {
             if (originalCompoundText[key]) {
                 updatedCompoundText[key] = originalCompoundText[key];
             }
