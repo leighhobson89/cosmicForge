@@ -415,10 +415,10 @@ export function initialiseDescriptions() {
         'helium': 'Lighter than air this one will make you float away!',
         'carbon': 'This is the first stable solid element, made from fused Helium.',
         'neon': 'The first noble gas! Very "bright" of you to discover it!',
-        'oxygen': 'A vital element for most, oxygen is highly reactive and essential for combustion and respiration.',
+        'oxygen': 'A vital element for most, Oxygen is highly reactive and essential for combustion and respiration.',
         'sodium': 'A soft, silvery metal.',
         'silicon': 'The backbone of modern technology, it is a crucial component in electronics and solar panels.',
-        'iron': 'A strong and versatile metal, iron is the foundation of construction and industry.',
+        'iron': 'A strong and versatile metal, Iron is the foundation of construction and industry.',
 
         'energy storage': "Any buildings beyond the first level require power to operate, you can store that energy here.",
         'power plant': "These buildings provide the energy resource, and it is used by advanced buildings, without which they won't operate.",
@@ -1675,7 +1675,7 @@ export function initialiseDescriptions() {
             updateAt: ""
         },
         buffLittleBagOfHydrogenRow: {
-            content1: "On Rebirth, grants enough Hydrogen to immediately buy 1 Tier 1 Auto Buyer.",
+            content1: "On Rebirth, grants enough Hydrogen to immediately buy 1 Tier 1 Hydrogen Auto Buyer.",
             content2: "",
             updateAt: ""
         },
