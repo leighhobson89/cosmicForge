@@ -1033,6 +1033,28 @@ body {
     flex-direction: column;
 }
 
+ .container-item-menu-header.sidebar-intro-header {
+     flex-direction: row;
+     flex-wrap: nowrap;
+     align-items: center;
+ }
+
+ .container-item-menu-header.sidebar-intro-header #tab1Intro,
+ .container-item-menu-header.sidebar-intro-header #tab4Intro {
+     flex: 0 0 80%;
+     max-width: 80%;
+     margin: 0;
+ }
+
+ .container-item-menu-header.sidebar-intro-header #sellAllResourcesButton,
+ .container-item-menu-header.sidebar-intro-header #sellAllCompoundsButton {
+     flex: 0 0 20%;
+     max-width: 20%;
+     padding: 6px 8px;
+     font-size: 0.9rem;
+     white-space: nowrap;
+ }
+
 .option-pane-description {
     margin-top: 10px;
     box-sizing: border-box;

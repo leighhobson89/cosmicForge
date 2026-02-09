@@ -3388,6 +3388,54 @@ export function sellResource(resource) {
     sfxPlayer.playAudio('kaching', false);
 }
 
+export function sellAllUnlockedResources() {
+    const unlocked = new Set((getUnlockedResourcesArray?.() || []).map((v) => String(v || '').toLowerCase()));
+    const resources = getResourceDataObject('resources') || {};
+    const currentCash = getResourceDataObject('currency', ['cash']) || 0;
+
+    let totalCashRaised = 0;
+    let totalQuantitySold = 0;
+
+    Object.keys(resources).forEach((key) => {
+        const resourceKey = String(key || '').toLowerCase();
+        if (!unlocked.has(resourceKey)) {
+            return;
+        }
+        const quantity = Number(getResourceDataObject('resources', [resourceKey, 'quantity'], true)) || 0;
+        if (quantity <= 0) {
+            return;
+        }
+        const saleValue = Number(getResourceDataObject('resources', [resourceKey, 'saleValue'], true)) || 0;
+        totalCashRaised += quantity * saleValue;
+        totalQuantitySold += quantity;
+        setResourceDataObject(0, 'resources', [resourceKey, 'quantity']);
+    });
+
+    if (totalQuantitySold <= 0 || totalCashRaised <= 0) {
+        return;
+    }
+
+    setResourceDataObject(currentCash + totalCashRaised, 'currency', ['cash']);
+
+    if (getCurrencySymbol() === '€') {
+        showNotification(
+            `You sold all resources for ${totalCashRaised.toFixed(2)}${getCurrencySymbol()}!`,
+            'info',
+            3000,
+            'sold'
+        );
+    } else {
+        showNotification(
+            `You sold all resources for ${getCurrencySymbol()}${totalCashRaised.toFixed(2)}!`,
+            'info',
+            3000,
+            'sold'
+        );
+    }
+
+    sfxPlayer.playAudio('kaching', false);
+}
+
 export function createCompound(compound) {
     const constituentPartsObject = getConstituentPartsObject();
     const existingCompoundQuantity = getResourceDataObject('compounds', [compound, 'quantity']);
@@ -3484,6 +3532,54 @@ export function sellCompound(compound) {
         showNotification(
             `You sold ${quantityToDeduct} ${capitaliseString(compound)} for ${getCurrencySymbol()}${cashRaised}!`,
             'info', 3000, 'special'
+        );
+    }
+
+    sfxPlayer.playAudio('kaching', false);
+}
+
+export function sellAllUnlockedCompounds() {
+    const unlocked = new Set((getUnlockedCompoundsArray?.() || []).map((v) => String(v || '').toLowerCase()));
+    const compounds = getResourceDataObject('compounds') || {};
+    const currentCash = getResourceDataObject('currency', ['cash']) || 0;
+
+    let totalCashRaised = 0;
+    let totalQuantitySold = 0;
+
+    Object.keys(compounds).forEach((key) => {
+        const compoundKey = String(key || '').toLowerCase();
+        if (!unlocked.has(compoundKey)) {
+            return;
+        }
+        const quantity = Number(getResourceDataObject('compounds', [compoundKey, 'quantity'], true)) || 0;
+        if (quantity <= 0) {
+            return;
+        }
+        const saleValue = Number(getResourceDataObject('compounds', [compoundKey, 'saleValue'], true)) || 0;
+        totalCashRaised += quantity * saleValue;
+        totalQuantitySold += quantity;
+        setResourceDataObject(0, 'compounds', [compoundKey, 'quantity']);
+    });
+
+    if (totalQuantitySold <= 0 || totalCashRaised <= 0) {
+        return;
+    }
+
+    setResourceDataObject(currentCash + totalCashRaised, 'currency', ['cash']);
+
+    if (getCurrencySymbol() === '€') {
+        showNotification(
+            `You sold all compounds for ${totalCashRaised.toFixed(2)}${getCurrencySymbol()}!`,
+            'info',
+            3000,
+            'special'
+        );
+    } else {
+        showNotification(
+            `You sold all compounds for ${getCurrencySymbol()}${totalCashRaised.toFixed(2)}!`,
+            'info',
+            3000,
+            'special'
         );
     }
 
@@ -6760,6 +6856,59 @@ function galacticMarketChecks() {
         const galacticMarketConfirmSellApButton = document.querySelector('.galactic-market-confirm-sell-ap-button');
         const galacticMarketLiquidateForApConfirmButton = document.querySelector('.galactic-market-confirm-liquidate-button');
 
+        const setDropdownTextToSelect = (dropdown) => {
+            if (!dropdown) return;
+            const textEl = dropdown.querySelector('.dropdown-text');
+            if (textEl) {
+                textEl.textContent = 'Select Resource / Compound';
+            }
+        };
+
+        const updateTradeDropdownOptionStates = (dropdown, selectionType) => {
+            if (!dropdown) return;
+            const unlockedResources = new Set((getUnlockedResourcesArray?.() || []).map((v) => String(v || '').toLowerCase()));
+            const unlockedCompounds = new Set((getUnlockedCompoundsArray?.() || []).map((v) => String(v || '').toLowerCase()));
+
+            const options = dropdown.querySelectorAll('.dropdown-option');
+            options.forEach((opt) => {
+                const value = String(opt.getAttribute('data-value') || '').toLowerCase();
+                const type = String(opt.getAttribute('data-type') || '').toLowerCase();
+
+                let isUnlocked = true;
+                if (value === 'select') {
+                    isUnlocked = true;
+                } else if (type === 'resources') {
+                    isUnlocked = unlockedResources.has(value);
+                } else if (type === 'compounds') {
+                    isUnlocked = unlockedCompounds.has(value);
+                }
+
+                opt.classList.toggle('red-disabled-text', !isUnlocked);
+                opt.style.pointerEvents = isUnlocked ? 'auto' : 'none';
+            });
+
+            if (selectionType !== 'select') {
+                const selectedType = dropdown.querySelector(`.dropdown-option[data-value="${selectionType}"]`)?.getAttribute('data-type');
+                const isResource = String(selectedType || '').toLowerCase() === 'resources';
+                const isCompound = String(selectedType || '').toLowerCase() === 'compounds';
+                const stillUnlocked =
+                    (isResource && unlockedResources.has(selectionType)) ||
+                    (isCompound && unlockedCompounds.has(selectionType));
+
+                if (!stillUnlocked) {
+                    setDropdownTextToSelect(dropdown);
+                    if (dropdown === galacticMarketOutgoingStockTypeDropDown) {
+                        setGalacticMarketOutgoingStockType('select');
+                    } else if (dropdown === galacticMarketIncomingStockTypeDropDown) {
+                        setGalacticMarketIncomingStockType('select');
+                    }
+                }
+            }
+        };
+
+        updateTradeDropdownOptionStates(galacticMarketOutgoingStockTypeDropDown, getGalacticMarketOutgoingStockType());
+        updateTradeDropdownOptionStates(galacticMarketIncomingStockTypeDropDown, getGalacticMarketIncomingStockType());
+
         if (getGalacticMarketOutgoingStockType() !== 'select' && getHasClickedOutgoingOptionGalacticMarket()) {
             removeAndReplaceOutgoingOptionFromIncomingDropDown(galacticMarketOutgoingStockTypeDropDown, galacticMarketIncomingStockTypeDropDown);
             setHasClickedOutgoingOptionGalacticMarket(false);
@@ -7060,6 +7209,9 @@ function removeAndReplaceOutgoingOptionFromIncomingDropDown(outgoingDropdown, in
         'steel', 'concrete', 'water', 'titanium'
     ];
 
+    const resourceValues = new Set(['hydrogen', 'helium', 'carbon', 'neon', 'oxygen', 'sodium', 'silicon', 'iron']);
+    const compoundValues = new Set(['diesel', 'glass', 'steel', 'concrete', 'water', 'titanium']);
+
     const optionsContainer = incomingDropdown.querySelector('.dropdown-options');
     const outgoingOption = Array.from(optionsContainer.querySelectorAll('.dropdown-option')).find(option => {
         return option.getAttribute('data-value') === selectedOutgoingValue && selectedOutgoingValue !== 'select';
@@ -7077,6 +7229,11 @@ function removeAndReplaceOutgoingOptionFromIncomingDropDown(outgoingDropdown, in
             const newOption = document.createElement('div');
             newOption.classList.add('dropdown-option');
             newOption.setAttribute('data-value', staticValue);
+            if (resourceValues.has(staticValue)) {
+                newOption.setAttribute('data-type', 'resources');
+            } else if (compoundValues.has(staticValue)) {
+                newOption.setAttribute('data-type', 'compounds');
+            }
             newOption.innerHTML = capitaliseString(staticValue);
 
             newOption.addEventListener('click', (event) => {

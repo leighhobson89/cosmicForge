@@ -287,11 +287,6 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                     return classes;
                 }
 
-                if (getStarTypeByName(starName) === 'O') {
-                    classes.push('o-star-text');
-                    return classes;
-                }
-
                 if (normalizedLower === currentStarLower) {
                     return classes;
                 }
@@ -299,7 +294,11 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                 const distance = starDistanceData?.[capitaliseWordsWithRomanNumerals(starName)];
                 const isStudied = typeof distance === 'number' && distance <= studiedDistance;
                 if (isStudied) {
-                    classes.push('green-ready-text');
+                    if (getStarTypeByName(starName) === 'O') {
+                        classes.push('o-star-text');
+                    } else {
+                        classes.push('green-ready-text');
+                    }
                 }
                 return classes;
             };

@@ -205,6 +205,7 @@ import {
     getTimeWarpEndTimestampMs,
     setStellarScannerBuilt,
     getNotationType,
+    getUnlockedCompoundsArray,
 } from './constantsAndGlobalVars.js';
 import {
     getResourceDataObject,
@@ -337,7 +338,9 @@ import {
     formatNumber,
     getOTypePowerPlantBoostMultiplierForCurrentSystem,
     timeWarp,
-    forceClearWeather
+    forceClearWeather,
+    sellAllUnlockedResources,
+    sellAllUnlockedCompounds
 } from './game.js';
 import { 
     capitaliseString, 
@@ -391,6 +394,46 @@ function mountStartupOverlay() {
         mount();
     } else {
         document.addEventListener('DOMContentLoaded', mount, { once: true });
+    }
+}
+
+function updateSellAllButtonStates() {
+    const resourcesButton = document.getElementById('sellAllResourcesButton');
+    if (resourcesButton) {
+        const unlockedResources = new Set((getUnlockedResourcesArray?.() || []).map((v) => String(v || '').toLowerCase()));
+        const resources = getResourceDataObject('resources') || {};
+        const hasAny = Object.keys(resources).some((key) => {
+            const resourceKey = String(key || '').toLowerCase();
+            if (!unlockedResources.has(resourceKey)) return false;
+            const quantity = Number(getResourceDataObject('resources', [resourceKey, 'quantity'], true)) || 0;
+            return quantity > 0;
+        });
+
+        resourcesButton.classList.toggle('green-ready-text', hasAny);
+        resourcesButton.classList.toggle('red-disabled-text', !hasAny);
+        setElementPointerEvents(resourcesButton, hasAny);
+        if ('disabled' in resourcesButton) {
+            resourcesButton.disabled = !hasAny;
+        }
+    }
+
+    const compoundsButton = document.getElementById('sellAllCompoundsButton');
+    if (compoundsButton) {
+        const unlockedCompounds = new Set((getUnlockedCompoundsArray?.() || []).map((v) => String(v || '').toLowerCase()));
+        const compounds = getResourceDataObject('compounds') || {};
+        const hasAny = Object.keys(compounds).some((key) => {
+            const compoundKey = String(key || '').toLowerCase();
+            if (!unlockedCompounds.has(compoundKey)) return false;
+            const quantity = Number(getResourceDataObject('compounds', [compoundKey, 'quantity'], true)) || 0;
+            return quantity > 0;
+        });
+
+        compoundsButton.classList.toggle('green-ready-text', hasAny);
+        compoundsButton.classList.toggle('red-disabled-text', !hasAny);
+        setElementPointerEvents(compoundsButton, hasAny);
+        if ('disabled' in compoundsButton) {
+            compoundsButton.disabled = !hasAny;
+        }
     }
 }
 
@@ -1405,6 +1448,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     setElements();
     setupStatTooltips();
     attachEnergyTooltipMirrors();
+
+    const sellAllResourcesButton = document.getElementById('sellAllResourcesButton');
+    if (sellAllResourcesButton) {
+        sellAllResourcesButton.addEventListener('click', () => {
+            sellAllUnlockedResources();
+        });
+    }
+
+    const sellAllCompoundsButton = document.getElementById('sellAllCompoundsButton');
+    if (sellAllCompoundsButton) {
+        sellAllCompoundsButton.addEventListener('click', () => {
+            sellAllUnlockedCompounds();
+        });
+    }
     const ua = (typeof window !== 'undefined' && window.navigator?.userAgent) ? window.navigator.userAgent.toLowerCase() : '';
     const isElectron = ua.includes('electron') || (typeof window !== 'undefined' && window.process?.versions?.electron);
     const demoFlagFromBuild = typeof window !== 'undefined' && window.__DEMO_BUILD__ === true;
@@ -6064,6 +6121,8 @@ function syncResourceSidebarVisibility() {
 
 export function updateDynamicUiContent() {
     syncResourceSidebarVisibility();
+
+    updateSellAllButtonStates();
 
     applyGalacticMarketLockdownUi();
 

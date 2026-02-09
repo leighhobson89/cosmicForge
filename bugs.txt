@@ -1,6 +1,3 @@
-make galactic market resources compounds unavailable until available in the run
 "something to do" - mini game gimmick for when waiting for resources to build up etc
-stop o type stars being colored in the list in star map before studied
-sell all resources and sell all compounds buttons in the sidebar for those tabs
 maybe broken compound recipe reduction doesnt seem to be falling
 offline gains not triggering on lose focus, only on load
