@@ -32,6 +32,8 @@ import {
     setTimeLeftUntilRocketTravelToAsteroidTimerFinishes,
     getRocketUserName,
     getRocketDirection,
+    setRocketDirection,
+    setRocketTravelDuration,
     getDestinationAsteroid,
     setCurrentlyTravellingToAsteroid,
     setMiningObject,
@@ -126,18 +128,28 @@ function warpRocketInstantly(rocketKey) {
     }
 
     if (returning) {
-        resetRocketForNextJourney?.(rocketKey);
+        const warpReturnMs = 2000;
+        setRocketDirection?.(rocketKey, true);
+        setRocketTravelDuration?.(rocketKey, warpReturnMs);
+        setTimeLeftUntilRocketTravelToAsteroidTimerFinishes?.(rocketKey, warpReturnMs);
+        setCurrentlyTravellingToAsteroid?.(rocketKey, true);
+        startTravelToAndFromAsteroidTimer([warpReturnMs, 'wheelPrize'], rocketKey, true);
         return { rocketKey, name, warpedTo: 'Base' };
     }
 
     if (destination) {
-        setAntimatterUnlocked?.(true);
-        setMiningObject?.(rocketKey, destination);
+        const warpToAsteroidMs = 2000;
+        setRocketDirection?.(rocketKey, false);
+        setRocketTravelDuration?.(rocketKey, warpToAsteroidMs);
+        setTimeLeftUntilRocketTravelToAsteroidTimerFinishes?.(rocketKey, warpToAsteroidMs);
+        setCurrentlyTravellingToAsteroid?.(rocketKey, true);
+        startTravelToAndFromAsteroidTimer([warpToAsteroidMs, 'wheelPrize'], rocketKey, false);
+        return { rocketKey, name, warpedTo: `Asteroid ${destination}` };
     }
+
     setTimeLeftUntilRocketTravelToAsteroidTimerFinishes?.(rocketKey, 0);
     setCurrentlyTravellingToAsteroid?.(rocketKey, false);
-
-    return { rocketKey, name, warpedTo: destination ? `Asteroid ${destination}` : 'Destination' };
+    return { rocketKey, name, warpedTo: 'Destination' };
 }
 
 function warpStarshipInstantly() {
@@ -721,9 +733,10 @@ export function playWheelOfFortune({ wheelId, costCp = 1, durationMs = 5000 } = 
         spinButton.classList.remove('green-ready-text');
     }
     setGalacticCasinoDataObject(Math.max(0, currentCp - cost), 'casinoPoints', ['quantity']);
-    const segmentCount = 13;
+    const segmentCount = 16;
     const segmentAngle = 360 / segmentCount;
-    //globalThis.__wheelForceSpecial = true; debug to win special prize
+
+    globalThis.__wheelForceSpecial = true; //debug to win special prize
     const forcedIndexRaw = globalThis.__wheelForceIndex;
     const forcedIndex = Number.isFinite(Number(forcedIndexRaw)) ? Math.floor(Number(forcedIndexRaw)) : null;
     const selectedIndex = globalThis.__wheelForceSpecial
@@ -763,11 +776,12 @@ export function playWheelOfFortune({ wheelId, costCp = 1, durationMs = 5000 } = 
                     spinButton.classList.toggle('green-ready-text', canSpin);
                     spinButton.classList.toggle('red-disabled-text', !canSpin);
                 }
-                if (selectedIndex % 2 === 1) {
-                    showNotification('LOSE! Better luck next time.', 'error', 2000, 'galacticCasino');
-                } else if (selectedIndex === 0) {
+
+                if (selectedIndex === 0) {
                     wheelEl.setAttribute('data-special-ready', 'true');
                     showNotification('WIN! Special Prize! - Select a Prize from the dropdown to continue.', 'info', 3500, 'galacticCasino');
+                } else if (selectedIndex % 2 === 1) {
+                    showNotification('LOSE! Better luck next time.', 'error', 2000, 'galacticCasino');
                 } else {
                     const prize = awardRegularPrize(cost);
 

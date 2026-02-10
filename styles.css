@@ -209,19 +209,22 @@
     inset: 0;
     border-radius: 50%;
     background: conic-gradient(
-        var(--ready-text) 0deg 27.692deg,
-        var(--disabled-text) 27.692deg 55.384deg,
-        var(--text-color) 55.384deg 83.076deg,
-        var(--disabled-text) 83.076deg 110.768deg,
-        var(--text-color) 110.768deg 138.46deg,
-        var(--disabled-text) 138.46deg 166.152deg,
-        var(--text-color) 166.152deg 193.844deg,
-        var(--disabled-text) 193.844deg 221.536deg,
-        var(--text-color) 221.536deg 249.228deg,
-        var(--disabled-text) 249.228deg 276.92deg,
-        var(--text-color) 276.92deg 304.612deg,
-        var(--disabled-text) 304.612deg 332.304deg,
-        var(--text-color) 332.304deg 360deg
+        var(--ready-text) 0deg 22.5deg,
+        var(--disabled-text) 22.5deg 45deg,
+        var(--text-color) 45deg 67.5deg,
+        var(--disabled-text) 67.5deg 90deg,
+        var(--text-color) 90deg 112.5deg,
+        var(--disabled-text) 112.5deg 135deg,
+        var(--text-color) 135deg 157.5deg,
+        var(--disabled-text) 157.5deg 180deg,
+        var(--text-color) 180deg 202.5deg,
+        var(--disabled-text) 202.5deg 225deg,
+        var(--text-color) 225deg 247.5deg,
+        var(--disabled-text) 247.5deg 270deg,
+        var(--text-color) 270deg 292.5deg,
+        var(--disabled-text) 292.5deg 315deg,
+        var(--text-color) 315deg 337.5deg,
+        var(--disabled-text) 337.5deg 360deg
     );
     transform: rotate(0deg);
     will-change: transform;

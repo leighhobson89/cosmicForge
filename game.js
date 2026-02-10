@@ -8987,20 +8987,19 @@ export function startTravelToAndFromAsteroidTimer(adjustment, rocket, direction)
     if (adjustment[1] === 'offlineGains' && !getCurrentlyTravellingToAsteroid(rocket)) {
         return;
     }
+    const timerName = direction ? `${rocket}TravelReturnTimer` : `${rocket}TravelToAsteroidTimer`;
+    const destination = getDestinationAsteroid(rocket);
+
+    if (timerManagerDelta.hasTimer(timerName)) {
+        return;
+    }
 
     setRocketReadyToTravel(rocket, false);
     setCurrentlyTravellingToAsteroid(rocket, true);
 
-    const timerName = direction ? `${rocket}TravelReturnTimer` : `${rocket}TravelToAsteroidTimer`;
-    const destination = getDestinationAsteroid(rocket);
-
     if (direction) {
         setAchievementFlagArray('mineAllAntimatterAsteroid', 'add');
         setMiningObject(rocket, null);
-    }
-
-    if (timerManagerDelta.hasTimer(timerName)) {
-        return;
     }
 
     let totalDuration = getRocketTravelDuration()[rocket];

@@ -1,3 +1,2 @@
-"something to do" - mini game gimmick for when waiting for resources to build up etc
 maybe broken compound recipe reduction doesnt seem to be falling
 offline gains not triggering on lose focus, only on load
