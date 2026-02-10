@@ -1661,7 +1661,7 @@ export function initialiseDescriptions() {
             updateAt: ""
         },
         galacticCasinoGame3Row: {
-            content1: "",
+            content1: "Higher Or Lower. Spend 5CP per game. Choose Higher or Lower and cash out for the prize shown at any stage.",
             content2: "",
             updateAt: ""
         },

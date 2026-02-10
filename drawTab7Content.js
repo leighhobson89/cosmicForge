@@ -565,7 +565,119 @@ export function drawTab7Content(heading, optionContentElement) {
             ['no-left-margin', 'galactic-casino-input-container'],
             false
         );
-        const game3Row = createOptionRow('galacticCasinoGame3Row', null, 'Game 3:', null, null, null, null, null, null, null, null, '', '', null, null, null, null, null, null, 'galacticCasinoGame3', null, false);
+
+        const game3CardRow = document.createElement('div');
+        game3CardRow.id = 'galacticCasinoGame3CardRow';
+        game3CardRow.classList.add('galactic-casino-hilo-card-row');
+
+        for (let i = 0; i < 6; i += 1) {
+            const card = document.createElement('div');
+            card.classList.add('galactic-casino-hilo-card');
+            card.setAttribute('data-card-index', String(i));
+
+            if (i < 3) {
+                const valueEl = document.createElement('div');
+                valueEl.classList.add('galactic-casino-hilo-card-value');
+                const rank = i === 0 ? '2' : (i === 1 ? '8' : 'K');
+                const suit = i === 0 ? '♦' : (i === 1 ? '♠' : '♣');
+                valueEl.innerHTML = `<span class="galactic-casino-hilo-card-rank">${rank}</span><span class="galactic-casino-hilo-card-suit">${suit}</span>`;
+                card.appendChild(valueEl);
+            } else {
+                card.classList.add('galactic-casino-hilo-card-back');
+            }
+
+            game3CardRow.appendChild(card);
+        }
+
+        const game3LowerButton = createButton(
+            'LOWER',
+            ['id_galacticCasinoGame3LowerButton', 'option-button', 'red-disabled-text', 'galactic-casino-spin-button'],
+            () => {
+            },
+            null,
+            null,
+            null,
+            null,
+            null,
+            true,
+            null,
+            'galacticCasinoGame3'
+        );
+
+        const game3HigherButton = createButton(
+            'HIGHER',
+            ['id_galacticCasinoGame3HigherButton', 'option-button', 'red-disabled-text', 'galactic-casino-spin-button'],
+            () => {
+            },
+            null,
+            null,
+            null,
+            null,
+            null,
+            true,
+            null,
+            'galacticCasinoGame3'
+        );
+
+        const game3HiloContainer = document.createElement('div');
+        game3HiloContainer.id = 'galacticCasinoGame3HiloContainer';
+        game3HiloContainer.classList.add('galactic-casino-hilo-container');
+
+        const game3ButtonRow = document.createElement('div');
+        game3ButtonRow.id = 'galacticCasinoGame3ButtonRow';
+        game3ButtonRow.classList.add('galactic-casino-hilo-button-row');
+        game3ButtonRow.appendChild(game3LowerButton);
+        game3ButtonRow.appendChild(game3HigherButton);
+
+        game3HiloContainer.appendChild(game3CardRow);
+        game3HiloContainer.appendChild(game3ButtonRow);
+
+        const game3CashOutButton = createButton(
+            'CASH OUT',
+            ['id_galacticCasinoGame3CashOutButton', 'option-button', 'red-disabled-text', 'galactic-casino-spin-button'],
+            () => {
+            },
+            null,
+            null,
+            null,
+            null,
+            null,
+            true,
+            null,
+            'galacticCasinoGame3'
+        );
+
+        const game3PrizeInfo = createTextElement(
+            `Prize: <span id="galacticCasinoGame3PrizePreview" class="green-ready-text notation">---</span>`,
+            'galacticCasinoGame3PrizePreviewText',
+            ['galactic-market-summary-text'],
+            null
+        );
+
+        const game3Row = createOptionRow(
+            'galacticCasinoGame3Row',
+            null,
+            'Higher Or Lower:',
+            game3HiloContainer,
+            null,
+            null,
+            game3CashOutButton,
+            game3PrizeInfo,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            'galacticCasinoGame3',
+            null,
+            ['no-left-margin', 'galactic-casino-input-container'],
+            false
+        );
         optionContentElement.appendChild(game1Row);
         optionContentElement.appendChild(game2Row);
         optionContentElement.appendChild(game3Row);
