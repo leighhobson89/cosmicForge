@@ -565,7 +565,7 @@ function galacticCasinoChecks() {
             if (!enableDropdown) {
                 const dropdownTextEl = wheelPrizeDropdown.querySelector('.dropdown-text');
                 if (dropdownTextEl) {
-                    dropdownTextEl.textContent = 'Select a prize';
+                    dropdownTextEl.textContent = 'Select Special Prize';
                 }
             }
         }

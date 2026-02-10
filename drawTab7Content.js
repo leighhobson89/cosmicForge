@@ -465,7 +465,7 @@ export function drawTab7Content(heading, optionContentElement) {
         const prizeDropdown = createDropdown(
             'galacticCasinoGame2PrizeDropdown',
             [
-                { value: 'select', text: 'Select a prize', type: 'select' },
+                { value: 'select', text: 'Select Special Prize', type: 'select' },
                 { value: 'prize1', text: 'Prize 1', type: 'prize' },
                 { value: 'prize2', text: 'Prize 2', type: 'prize' },
                 { value: 'prize3', text: 'Prize 3', type: 'prize' }
@@ -503,7 +503,7 @@ export function drawTab7Content(heading, optionContentElement) {
 
                     const dropdownTextEl = dd.querySelector('.dropdown-text');
                     if (dropdownTextEl) {
-                        dropdownTextEl.textContent = 'Select a prize';
+                        dropdownTextEl.textContent = 'Select Special Prize';
                     }
                 }
 

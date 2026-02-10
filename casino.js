@@ -1,9 +1,282 @@
 import { showNotification } from './ui.js';
 import { getGalacticCasinoDataObject, setGalacticCasinoDataObject } from './resourceDataObject.js';
+import { getResourceDataObject, setResourceDataObject } from './resourceDataObject.js';
+import {
+    startTravelToAndFromAsteroidTimer,
+    startTravelToDestinationStarTimer,
+    startSearchAsteroidTimer,
+    startInvestigateStarTimer,
+    startPillageVoidTimer,
+} from './game.js';
+import { timerManagerDelta } from './timerManagerDelta.js';
+import {
+    getUnlockedResourcesArray,
+    getUnlockedCompoundsArray,
+    getCurrentlySearchingAsteroid,
+    getCurrentlyInvestigatingStar,
+    getCurrentlyPillagingVoid,
+    getTimeLeftUntilAsteroidScannerTimerFinishes,
+    setTimeLeftUntilAsteroidScannerTimerFinishes,
+    getTimeLeftUntilStarInvestigationTimerFinishes,
+    setTimeLeftUntilStarInvestigationTimerFinishes,
+    getTimeLeftUntilPillageVoidTimerFinishes,
+    setTimeLeftUntilPillageVoidTimerFinishes,
+    getStarShipTravelling,
+    getTimeLeftUntilTravelToDestinationStarTimerFinishes,
+    setTimeLeftUntilTravelToDestinationStarTimerFinishes,
+    getCurrentlyTravellingToAsteroid,
+    getTimeLeftUntilRocketTravelToAsteroidTimerFinishes,
+    setTimeLeftUntilRocketTravelToAsteroidTimerFinishes,
+    getRocketUserName,
+    getRocketDirection,
+} from './constantsAndGlobalVars.js';
 
 export function getBaseProbabilityCasino() {
     const value = getGalacticCasinoDataObject('settings', ['baseProbabilityCasino']);
     return (typeof value === 'number' && Number.isFinite(value)) ? value : 0.4;
+}
+
+function randomIntInclusive(min, max) {
+    const mn = Math.ceil(min);
+    const mx = Math.floor(max);
+    if (mx < mn) return mn;
+    return Math.floor(Math.random() * (mx - mn + 1)) + mn;
+}
+
+function pickRandom(array) {
+    if (!Array.isArray(array) || array.length === 0) return null;
+    return array[Math.floor(Math.random() * array.length)];
+}
+
+function titleCaseFromKey(value) {
+    return String(value || '')
+        .replace(/[_-]+/g, ' ')
+        .split(' ')
+        .filter(Boolean)
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+}
+
+function awardCpPrize(cost) {
+    const current = getGalacticCasinoDataObject('casinoPoints', ['quantity']) ?? 0;
+    const payout = Math.max(0, Math.floor(cost * 2));
+    setGalacticCasinoDataObject(Math.max(0, current + payout), 'casinoPoints', ['quantity']);
+    return { type: 'cp', amount: payout };
+}
+
+function awardCashPrize() {
+    const currentCash = Number(getResourceDataObject('currency', ['cash']) ?? 0);
+    const maxAdd = Math.floor(currentCash * 0.05);
+    if (!Number.isFinite(maxAdd) || maxAdd <= 0) {
+        return null;
+    }
+    const amount = randomIntInclusive(1, maxAdd);
+    setResourceDataObject(Math.max(0, currentCash + amount), 'currency', ['cash']);
+    return { type: 'cash', amount };
+}
+
+function awardResearchPrize() {
+    const current = Number(getResourceDataObject('research', ['quantity']) ?? 0);
+    const maxAdd = Math.floor(current * 0.05);
+    if (!Number.isFinite(maxAdd) || maxAdd <= 0) {
+        return null;
+    }
+    const amount = randomIntInclusive(1, maxAdd);
+    setResourceDataObject(Math.max(0, current + amount), 'research', ['quantity']);
+    return { type: 'research', amount };
+}
+
+function awardStockPrize(category) {
+    const unlockedRaw = category === 'resources'
+        ? (getUnlockedResourcesArray?.() || [])
+        : (getUnlockedCompoundsArray?.() || []);
+
+    const unlocked = Array.from(new Set((unlockedRaw || []).map((v) => String(v || '').toLowerCase())));
+    if (category === 'resources' && !unlocked.includes('hydrogen')) {
+        unlocked.unshift('hydrogen');
+    }
+
+    const eligible = unlocked.filter((key) => {
+        const qty = Number(getResourceDataObject(category, [key, 'quantity']) ?? 0);
+        const cap = Number(getResourceDataObject(category, [key, 'storageCapacity']) ?? 0);
+        return Number.isFinite(cap) && cap > qty;
+    });
+
+    const chosenKey = pickRandom(eligible);
+    if (!chosenKey) {
+        return null;
+    }
+
+    const currentQty = Number(getResourceDataObject(category, [chosenKey, 'quantity']) ?? 0);
+    const cap = Number(getResourceDataObject(category, [chosenKey, 'storageCapacity']) ?? 0);
+    const headroom = Math.max(0, cap - currentQty);
+    const maxInc = Math.max(1, Math.floor(currentQty * 0.1));
+    const maxAward = Math.min(headroom, maxInc);
+    if (!Number.isFinite(maxAward) || maxAward <= 0) {
+        return null;
+    }
+
+    const amount = randomIntInclusive(1, maxAward);
+    setResourceDataObject(Math.max(0, currentQty + amount), category, [chosenKey, 'quantity']);
+    return { type: category, key: chosenKey, amount };
+}
+
+function awardTimePrize(cost) {
+    const candidates = [];
+
+    if (getCurrentlySearchingAsteroid?.() && (getTimeLeftUntilAsteroidScannerTimerFinishes?.() > 0)) {
+        candidates.push({
+            id: 'spaceTelescopeSearchAsteroids',
+            label: 'Space Telescope: Asteroid Scan',
+            timerName: 'searchAsteroidTimer',
+            getMs: () => getTimeLeftUntilAsteroidScannerTimerFinishes(),
+            setMs: (ms) => setTimeLeftUntilAsteroidScannerTimerFinishes(ms),
+            restart: (ms) => {
+                timerManagerDelta.removeTimer('searchAsteroidTimer');
+                startSearchAsteroidTimer([ms, 'wheelPrize']);
+            }
+        });
+    }
+
+    if (getCurrentlyInvestigatingStar?.() && (getTimeLeftUntilStarInvestigationTimerFinishes?.() > 0)) {
+        candidates.push({
+            id: 'spaceTelescopeStudyStars',
+            label: 'Space Telescope: Star Investigation',
+            timerName: 'investigateStarTimer',
+            getMs: () => getTimeLeftUntilStarInvestigationTimerFinishes(),
+            setMs: (ms) => setTimeLeftUntilStarInvestigationTimerFinishes(ms),
+            restart: (ms) => {
+                timerManagerDelta.removeTimer('investigateStarTimer');
+                startInvestigateStarTimer([ms, 'wheelPrize']);
+            }
+        });
+    }
+
+    if (getCurrentlyPillagingVoid?.() && (getTimeLeftUntilPillageVoidTimerFinishes?.() > 0)) {
+        candidates.push({
+            id: 'spaceTelescopePillageVoid',
+            label: 'Space Telescope: Void Pillage',
+            timerName: 'pillageVoidTimer',
+            getMs: () => getTimeLeftUntilPillageVoidTimerFinishes(),
+            setMs: (ms) => setTimeLeftUntilPillageVoidTimerFinishes(ms),
+            restart: (ms) => {
+                timerManagerDelta.removeTimer('pillageVoidTimer');
+                startPillageVoidTimer([ms, 'wheelPrize']);
+            }
+        });
+    }
+
+    if (getStarShipTravelling?.() && (getTimeLeftUntilTravelToDestinationStarTimerFinishes?.() > 0)) {
+        candidates.push({
+            id: 'starshipTravelling',
+            label: 'Starship Journey',
+            timerName: 'starShipTravelToDestinationStarTimer',
+            getMs: () => getTimeLeftUntilTravelToDestinationStarTimerFinishes(),
+            setMs: (ms) => setTimeLeftUntilTravelToDestinationStarTimerFinishes(ms),
+            restart: (ms) => {
+                timerManagerDelta.removeTimer('starShipTravelToDestinationStarTimer');
+                startTravelToDestinationStarTimer([ms, 'wheelPrize']);
+            }
+        });
+    }
+
+    ['rocket1', 'rocket2', 'rocket3', 'rocket4'].forEach((rocketKey) => {
+        try {
+            const active = getCurrentlyTravellingToAsteroid?.(rocketKey);
+            const remaining = Number(getTimeLeftUntilRocketTravelToAsteroidTimerFinishes?.(rocketKey) ?? 0);
+            if (active && remaining > 0) {
+                const returning = !!getRocketDirection?.(rocketKey);
+                const timerName = returning ? `${rocketKey}TravelReturnTimer` : `${rocketKey}TravelToAsteroidTimer`;
+                candidates.push({
+                    id: `${rocketKey}Travelling`,
+                    label: getRocketUserName?.(rocketKey) ?? titleCaseFromKey(rocketKey),
+                    timerName,
+                    getMs: () => Number(getTimeLeftUntilRocketTravelToAsteroidTimerFinishes(rocketKey) ?? 0),
+                    setMs: (ms) => setTimeLeftUntilRocketTravelToAsteroidTimerFinishes(rocketKey, ms),
+                    restart: (ms) => {
+                        timerManagerDelta.removeTimer(timerName);
+                        startTravelToAndFromAsteroidTimer([ms, 'wheelPrize'], rocketKey, returning);
+                    }
+                });
+            }
+        } catch (e) {
+            // ignore
+        }
+    });
+
+    const chosen = pickRandom(candidates);
+    if (!chosen) {
+        return { type: 'cp_fallback', ...awardCpPrize(cost) };
+    }
+
+    const remainingMs = Number(chosen.getMs?.() ?? 0);
+    if (!Number.isFinite(remainingMs) || remainingMs <= 0) {
+        return { type: 'cp_fallback', ...awardCpPrize(cost) };
+    }
+
+    const maxReduce = Math.floor(remainingMs * 0.1);
+    if (maxReduce <= 0) {
+        return { type: 'cp_fallback', ...awardCpPrize(cost) };
+    }
+
+    const reduceMs = randomIntInclusive(1, maxReduce);
+    const newMs = Math.max(0, remainingMs - reduceMs);
+    if (typeof chosen.restart === 'function') {
+        chosen.restart(newMs);
+    } else if (typeof chosen.setMs === 'function') {
+        chosen.setMs(newMs);
+    }
+    return {
+        type: 'time',
+        timerId: chosen.id,
+        timerLabel: chosen.label,
+        oldSeconds: Math.ceil(remainingMs / 1000),
+        newSeconds: Math.ceil(newMs / 1000),
+    };
+}
+
+const regularPrizes = {
+    resources: { type: 'resources' },
+    compounds: { type: 'compounds' },
+    cash: { type: 'cash' },
+    research: { type: 'research' },
+    time: { type: 'time' },
+    cp: { type: 'cp' }
+};
+
+function awardRegularPrize(cost) {
+    const keys = Object.keys(regularPrizes);
+    const chosen = pickRandom(keys);
+    if (!chosen) {
+        return awardCpPrize(cost);
+    }
+
+    if (chosen === 'resources') {
+        return awardStockPrize('resources') || awardCpPrize(cost);
+    }
+
+    if (chosen === 'compounds') {
+        return awardStockPrize('compounds') || awardCpPrize(cost);
+    }
+
+    if (chosen === 'cash') {
+        return awardCashPrize() || awardCpPrize(cost);
+    }
+
+    if (chosen === 'research') {
+        return awardResearchPrize() || awardCpPrize(cost);
+    }
+
+    if (chosen === 'time') {
+        const result = awardTimePrize(cost);
+        return result || awardCpPrize(cost);
+    }
+
+    if (chosen === 'cp') {
+        return awardCpPrize(cost);
+    }
+
+    return awardCpPrize(cost);
 }
 
 export function setBaseProbabilityCasino(value) {
@@ -47,9 +320,6 @@ export function spinDoubleOrNothing(spinnerId, durationMs = 5000) {
     const winProbability = getBaseProbabilityCasino();
     const roll = Math.random();
     const outcome = (roll < winProbability) ? 'win' : 'lose';
-    if (globalThis.__casinoDebug) {
-        console.log('[casino] spin', { winProbability, roll, outcome });
-    }
 
     const preferredItem = outcome === 'win'
         ? items.find(el => el.dataset.value === 'win')
@@ -176,71 +446,54 @@ export function playWheelOfFortune({ wheelId, costCp = 1, durationMs = 5000 } = 
     if (!id) {
         return Promise.resolve(null);
     }
-
     const wheelEl = document.getElementById(id);
     if (!wheelEl) {
         return Promise.resolve(null);
     }
-
     const face = wheelEl.querySelector('.galactic-casino-roulette-face');
     if (!face) {
         return Promise.resolve(null);
     }
-
     const spinButton = document.getElementById('galacticCasinoGame2SpinWheelButton');
-
     const currentCp = getGalacticCasinoDataObject('casinoPoints', ['quantity']) ?? 0;
     const cost = Number.isFinite(Number(costCp)) ? Math.max(0, Number(costCp)) : 1;
     if (cost <= 0) {
         return Promise.resolve(null);
     }
-
     const specialReady = String(wheelEl.getAttribute('data-special-ready') || 'false') === 'true';
     if (specialReady) {
         showNotification('Claim your prize before spinning again.', 'info', 2500, 'galacticCasino');
         return Promise.resolve(null);
     }
-
     if (currentCp < cost) {
         showNotification('Not enough CP to spin the wheel.', 'info', 2500, 'galacticCasino');
         return Promise.resolve(null);
     }
-
     const spinning = String(wheelEl.getAttribute('data-spinning') || 'false') === 'true';
     if (spinning) {
         return Promise.resolve(null);
     }
-
     wheelEl.setAttribute('data-special-ready', 'false');
     wheelEl.setAttribute('data-prize-selection', 'select');
-
     wheelEl.setAttribute('data-spinning', 'true');
     if (spinButton) {
         spinButton.disabled = true;
         spinButton.classList.add('red-disabled-text');
         spinButton.classList.remove('green-ready-text');
     }
-
     setGalacticCasinoDataObject(Math.max(0, currentCp - cost), 'casinoPoints', ['quantity']);
-
     const segmentCount = 13;
     const segmentAngle = 360 / segmentCount;
     const selectedIndex = Math.floor(Math.random() * segmentCount);
     const selectedCenter = (selectedIndex * segmentAngle) + (segmentAngle / 2);
-
     const currentRotation = Number.parseFloat(String(wheelEl.getAttribute('data-rotation') || '0')) || 0;
     const normalizedCurrent = ((currentRotation % 360) + 360) % 360;
-
     const desiredNormalized = ((-selectedCenter % 360) + 360) % 360;
     const delta = ((desiredNormalized - normalizedCurrent) + 360) % 360;
-
     const extraSpins = 6;
     const targetRotation = currentRotation + (extraSpins * 360) + delta;
-
     face.style.willChange = 'transform';
-
     const startTime = performance.now();
-
     return new Promise((resolve) => {
         const tick = (now) => {
             const t = Math.min(1, (now - startTime) / durationMs);
@@ -252,10 +505,11 @@ export function playWheelOfFortune({ wheelId, costCp = 1, durationMs = 5000 } = 
                 requestAnimationFrame(tick);
             } else {
                 face.style.willChange = '';
+
                 face.style.transform = `rotate(${Math.round(targetRotation)}deg)`;
+
                 wheelEl.setAttribute('data-rotation', String(targetRotation));
                 wheelEl.setAttribute('data-spinning', 'false');
-
                 const cpAfter = getGalacticCasinoDataObject('casinoPoints', ['quantity']) ?? 0;
                 if (spinButton) {
                     const canSpin = cpAfter >= cost;
@@ -263,23 +517,36 @@ export function playWheelOfFortune({ wheelId, costCp = 1, durationMs = 5000 } = 
                     spinButton.classList.toggle('green-ready-text', canSpin);
                     spinButton.classList.toggle('red-disabled-text', !canSpin);
                 }
-
                 if (selectedIndex % 2 === 1) {
-                    showNotification('LOSE!', 'error', 2500, 'galacticCasino');
+                    showNotification('LOSE!', 'error', 2000, 'galacticCasino');
                 } else if (selectedIndex === 0) {
                     wheelEl.setAttribute('data-special-ready', 'true');
-                    showNotification('WIN! Special prize segment hit - please select a prize from the dropdown to continue.', 'info', 4000, 'galacticCasino');
+                    showNotification('WIN! Special Prize! - Select a Prize from the dropdown to continue.', 'info', 3500, 'galacticCasino');
                 } else {
-                    const regularPrizes = ['Prize 1', 'Prize 2', 'Prize 3'];
-                    const prizeName = regularPrizes[(selectedIndex - 1) % regularPrizes.length];
-                    wheelEl.setAttribute('data-last-regular-prize', String(prizeName));
-                    showNotification(`WIN! ${prizeName} awarded.`, 'info', 3000, 'galacticCasino');
+                    const prize = awardRegularPrize(cost);
+
+                    if (prize?.type === 'resources' || prize?.type === 'compounds') {
+                        showNotification(`Won! ${prize.amount} ${titleCaseFromKey(prize.key)}`, 'info', 3500, 'galacticCasino');
+                    } else if (prize?.type === 'cash') {
+                        showNotification(`Won! ${prize.amount} Cash`, 'info', 3500, 'galacticCasino');
+                    } else if (prize?.type === 'research') {
+                        showNotification(`Won! ${prize.amount} Research Points`, 'info', 3500, 'galacticCasino');
+                    } else if (prize?.type === 'time') {
+                        const label = prize?.timerLabel || 'Timer';
+                        const fromS = Number(prize?.oldSeconds ?? 0);
+                        const toS = Number(prize?.newSeconds ?? 0);
+                        showNotification(`Won! ${label}: Time reduced from ${fromS}s to ${toS}s`, 'info', 3500, 'galacticCasino');
+                    } else if (prize?.type === 'cp_fallback' || prize?.type === 'cp') {
+                        const amount = prize?.amount ?? 0;
+                        showNotification(`Won! ${amount} CP`, 'info', 3500, 'galacticCasino');
+                    } else {
+                        showNotification('Won!', 'info', 2500, 'galacticCasino');
+                    }
                 }
 
                 resolve({ selectedIndex });
             }
         };
-
         requestAnimationFrame(tick);
     });
 }
