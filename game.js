@@ -567,6 +567,67 @@ function galacticCasinoChecks() {
                 if (dropdownTextEl) {
                     dropdownTextEl.textContent = 'Select Special Prize';
                 }
+            } else {
+                const unlockedResources = new Set((getUnlockedResourcesArray?.() || []).map((v) => String(v || '').toLowerCase()));
+                const unlockedCompounds = new Set((getUnlockedCompoundsArray?.() || []).map((v) => String(v || '').toLowerCase()));
+
+                const hasTravellingRocket = ['rocket1', 'rocket2', 'rocket3', 'rocket4'].some((rocketKey) => {
+                    try {
+                        return !!getCurrentlyTravellingToAsteroid?.(rocketKey) && (getTimeLeftUntilRocketTravelToAsteroidTimerFinishes?.(rocketKey) > 0);
+                    } catch (e) {
+                        return false;
+                    }
+                });
+
+                const starshipStatus = getStarShipStatus?.() || ['preconstruction', null];
+                const hasStarshipTravel = (String(starshipStatus?.[0] || '') === 'travelling') && (getTimeLeftUntilTravelToDestinationStarTimerFinishes?.() > 0);
+
+                const hasAsteroidSearch = !!getCurrentlySearchingAsteroid?.() && (getTimeLeftUntilAsteroidScannerTimerFinishes?.() > 0);
+                const hasStarStudy = !!getCurrentlyInvestigatingStar?.() && (getTimeLeftUntilStarInvestigationTimerFinishes?.() > 0);
+                const hasVoidPillage = !!getCurrentlyPillagingVoid?.() && (getTimeLeftUntilPillageVoidTimerFinishes?.() > 0);
+
+                const options = wheelPrizeDropdown.querySelectorAll('.dropdown-option');
+                options.forEach((opt) => {
+                    const value = String(opt.getAttribute('data-value') || '').toLowerCase();
+                    let enabled = true;
+
+                    if (value === 'select') {
+                        enabled = true;
+                    } else if (value === 'special_double_titanium') {
+                        enabled = unlockedCompounds.has('titanium') || unlockedResources.has('titanium');
+                    } else if (value === 'special_double_steel') {
+                        enabled = unlockedCompounds.has('steel') || unlockedResources.has('steel');
+                    } else if (value === 'special_double_silicon') {
+                        enabled = unlockedResources.has('silicon') || unlockedCompounds.has('silicon');
+                    } else if (value === 'special_double_iron') {
+                        enabled = unlockedResources.has('iron') || unlockedCompounds.has('iron');
+                    } else if (value === 'special_double_sodium') {
+                        enabled = unlockedResources.has('sodium') || unlockedCompounds.has('sodium');
+                    } else if (value === 'special_rocket_warp') {
+                        enabled = hasTravellingRocket;
+                    } else if (value === 'special_starship_warp') {
+                        enabled = hasStarshipTravel;
+                    } else if (value === 'special_telescope_discover_asteroid') {
+                        enabled = hasAsteroidSearch;
+                    } else if (value === 'special_telescope_finish_star_study') {
+                        enabled = hasStarStudy;
+                    } else if (value === 'special_telescope_finish_void_pillage') {
+                        enabled = hasVoidPillage;
+                    }
+
+                    opt.classList.toggle('red-disabled-text', !enabled);
+                    opt.style.pointerEvents = enabled ? 'auto' : 'none';
+                });
+
+                const selectedOption = wheelPrizeDropdown.querySelector(`.dropdown-option[data-value="${selection}"]`);
+                const selectedDisabled = !!selectedOption?.classList?.contains('red-disabled-text');
+                if (selection !== 'select' && selectedDisabled) {
+                    wheelEl.setAttribute('data-prize-selection', 'select');
+                    const dropdownTextEl = wheelPrizeDropdown.querySelector('.dropdown-text');
+                    if (dropdownTextEl) {
+                        dropdownTextEl.textContent = 'Select Special Prize';
+                    }
+                }
             }
         }
 

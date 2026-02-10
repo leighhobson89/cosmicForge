@@ -58,7 +58,7 @@ import {
     setBlackHoleRechargeMultiplier
 } from './resourceDataObject.js';
 
-import { playDoubleOrNothing, playWheelOfFortune } from './casino.js';
+import { playDoubleOrNothing, playWheelOfFortune, claimWheelSpecialPrize } from './casino.js';
 import { sfxPlayer } from './audioManager.js';
 import { capitaliseString } from './utilityFunctions.js';
 import { modalRebirthText, modalRebirthHeader } from './descriptions.js';
@@ -466,9 +466,18 @@ export function drawTab7Content(heading, optionContentElement) {
             'galacticCasinoGame2PrizeDropdown',
             [
                 { value: 'select', text: 'Select Special Prize', type: 'select' },
-                { value: 'prize1', text: 'Prize 1', type: 'prize' },
-                { value: 'prize2', text: 'Prize 2', type: 'prize' },
-                { value: 'prize3', text: 'Prize 3', type: 'prize' }
+                { value: 'special_rocket_warp', text: 'Rocket Warp To Asteroid / Base', type: 'special' },
+                { value: 'special_starship_warp', text: 'Starship Warp Instantly', type: 'special' },
+                { value: 'special_telescope_discover_asteroid', text: 'Space Telescope Discovered Asteroid', type: 'special' },
+                { value: 'special_telescope_finish_star_study', text: 'Space Telescope Finished Star Study!', type: 'special' },
+                { value: 'special_telescope_finish_void_pillage', text: 'Space Telescope Finished Pillaging The Void!', type: 'special' },
+                { value: 'special_100cp', text: '100CP', type: 'special' },
+                { value: 'special_double_titanium', text: 'Double your quantity of Titanium', type: 'special' },
+                { value: 'special_double_steel', text: 'Double your quantity of Steel', type: 'special' },
+                { value: 'special_double_silicon', text: 'Double your quantity of Silicon', type: 'special' },
+                { value: 'special_double_iron', text: 'Double your quantity of Iron', type: 'special' },
+                { value: 'special_double_sodium', text: 'Double your quantity of Sodium', type: 'special' },
+                { value: 'special_100k_research', text: '100,000 Research Points', type: 'special' }
             ],
             'select',
             (value) => {
@@ -491,6 +500,11 @@ export function drawTab7Content(heading, optionContentElement) {
                 const dd = document.getElementById('galacticCasinoGame2PrizeDropdown');
                 const claimBtn = document.getElementById('galacticCasinoGame2ClaimButton');
                 const spinBtn = document.getElementById('galacticCasinoGame2SpinWheelButton');
+
+                const claimed = claimWheelSpecialPrize({ wheelId: 'galacticCasinoGame2Wheel' });
+                if (!claimed) {
+                    return;
+                }
 
                 if (w) {
                     w.setAttribute('data-special-ready', 'false');

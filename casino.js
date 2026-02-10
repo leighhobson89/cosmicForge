@@ -7,6 +7,10 @@ import {
     startSearchAsteroidTimer,
     startInvestigateStarTimer,
     startPillageVoidTimer,
+    resetRocketForNextJourney,
+    discoverAsteroid,
+    extendStarDataRange,
+    gainPillageVoidResourcesAndCompounds,
 } from './game.js';
 import { timerManagerDelta } from './timerManagerDelta.js';
 import {
@@ -23,12 +27,25 @@ import {
     setTimeLeftUntilPillageVoidTimerFinishes,
     getStarShipTravelling,
     getTimeLeftUntilTravelToDestinationStarTimerFinishes,
-    setTimeLeftUntilTravelToDestinationStarTimerFinishes,
     getCurrentlyTravellingToAsteroid,
     getTimeLeftUntilRocketTravelToAsteroidTimerFinishes,
     setTimeLeftUntilRocketTravelToAsteroidTimerFinishes,
     getRocketUserName,
     getRocketDirection,
+    getDestinationAsteroid,
+    setCurrentlyTravellingToAsteroid,
+    setMiningObject,
+    setAntimatterUnlocked,
+    getStarShipStatus,
+    setStarShipStatus,
+    getDestinationStar,
+    setStarShipArrowPosition,
+    setTimeLeftUntilTravelToDestinationStarTimerFinishes,
+    setTelescopeReadyToSearch,
+    setCurrentlySearchingAsteroid,
+    setCurrentlyInvestigatingStar,
+    setCurrentlyPillagingVoid,
+    getAsteroidArray,
 } from './constantsAndGlobalVars.js';
 
 export function getBaseProbabilityCasino() {
@@ -55,6 +72,228 @@ function titleCaseFromKey(value) {
         .filter(Boolean)
         .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
         .join(' ');
+}
+
+function clampNumber(n, fallback = 0) {
+    const num = Number(n);
+    return Number.isFinite(num) ? num : fallback;
+}
+
+function doubleStockQuantity(category, key) {
+    const cat = String(category || '').toLowerCase();
+    if (cat !== 'resources' && cat !== 'compounds') {
+        return null;
+    }
+
+    const qty = getResourceDataObject(cat, [key, 'quantity']);
+    if (typeof qty !== 'number' || !Number.isFinite(qty)) {
+        return null;
+    }
+
+    const doubled = Math.max(0, qty * 2);
+    setResourceDataObject(doubled, cat, [key, 'quantity']);
+    return { type: cat, key, oldQuantity: qty, newQuantity: doubled };
+}
+
+function getEligibleTravellingRocket() {
+    const rockets = ['rocket1', 'rocket2', 'rocket3', 'rocket4'];
+    const eligible = rockets.filter((rocketKey) => {
+        try {
+            const active = !!getCurrentlyTravellingToAsteroid?.(rocketKey);
+            const remaining = clampNumber(getTimeLeftUntilRocketTravelToAsteroidTimerFinishes?.(rocketKey), 0);
+            return active && remaining > 0;
+        } catch (e) {
+            return false;
+        }
+    });
+    return pickRandom(eligible);
+}
+
+function warpRocketInstantly(rocketKey) {
+    const defaultLabel = titleCaseFromKey(rocketKey);
+    const customName = getRocketUserName?.(rocketKey) ?? defaultLabel;
+    const name = String(customName || defaultLabel);
+    const returning = !!getRocketDirection?.(rocketKey);
+    const destination = getDestinationAsteroid?.(rocketKey);
+
+    const toTimer = `${rocketKey}TravelToAsteroidTimer`;
+    const returnTimer = `${rocketKey}TravelReturnTimer`;
+    if (timerManagerDelta.hasTimer(toTimer)) {
+        timerManagerDelta.removeTimer(toTimer);
+    }
+    if (timerManagerDelta.hasTimer(returnTimer)) {
+        timerManagerDelta.removeTimer(returnTimer);
+    }
+
+    if (returning) {
+        resetRocketForNextJourney?.(rocketKey);
+        return { rocketKey, name, warpedTo: 'Base' };
+    }
+
+    if (destination) {
+        setAntimatterUnlocked?.(true);
+        setMiningObject?.(rocketKey, destination);
+    }
+    setTimeLeftUntilRocketTravelToAsteroidTimerFinishes?.(rocketKey, 0);
+    setCurrentlyTravellingToAsteroid?.(rocketKey, false);
+
+    return { rocketKey, name, warpedTo: destination ? `Asteroid ${destination}` : 'Destination' };
+}
+
+function warpStarshipInstantly() {
+    const status = getStarShipStatus?.() || ['preconstruction', null];
+    const destination = getDestinationStar?.();
+    const dest = String(status?.[1] || destination || '').toLowerCase();
+
+    if (String(status?.[0] || '') !== 'travelling') {
+        return null;
+    }
+
+    if (timerManagerDelta.hasTimer('starShipTravelToDestinationStarTimer')) {
+        timerManagerDelta.removeTimer('starShipTravelToDestinationStarTimer');
+    }
+
+    setTimeLeftUntilTravelToDestinationStarTimerFinishes?.(0);
+    setStarShipStatus?.(['orbiting', dest]);
+    setStarShipArrowPosition?.(1);
+    return dest;
+}
+
+function discoverAsteroidSilentAndGetName() {
+    discoverAsteroid?.(true);
+
+    const arr = getAsteroidArray?.() || [];
+    const last = arr.length > 0 ? arr[arr.length - 1] : null;
+    if (!last || typeof last !== 'object') return null;
+    const key = Object.keys(last)[0];
+    const data = last[key];
+    const named = data?.specialName ? data?.name : null;
+    return named || key;
+}
+
+function finishStarStudyInstantly() {
+    if (timerManagerDelta.hasTimer('investigateStarTimer')) {
+        timerManagerDelta.removeTimer('investigateStarTimer');
+    }
+    extendStarDataRange?.(false);
+    setTelescopeReadyToSearch?.(true);
+    setCurrentlyInvestigatingStar?.(false);
+    setTimeLeftUntilStarInvestigationTimerFinishes?.(0);
+}
+
+function finishVoidPillageInstantly() {
+    if (timerManagerDelta.hasTimer('pillageVoidTimer')) {
+        timerManagerDelta.removeTimer('pillageVoidTimer');
+    }
+    gainPillageVoidResourcesAndCompounds?.();
+    setTelescopeReadyToSearch?.(true);
+    setCurrentlyPillagingVoid?.(false);
+    setTimeLeftUntilPillageVoidTimerFinishes?.(0);
+}
+
+export function claimWheelSpecialPrize({ wheelId } = {}) {
+    const id = String(wheelId || '');
+    if (!id) return null;
+
+    const wheelEl = document.getElementById(id);
+    if (!wheelEl) return null;
+
+    const specialReady = String(wheelEl.getAttribute('data-special-ready') || 'false') === 'true';
+    const spinning = String(wheelEl.getAttribute('data-spinning') || 'false') === 'true';
+    if (!specialReady || spinning) return null;
+
+    const selection = String(wheelEl.getAttribute('data-prize-selection') || 'select').toLowerCase();
+    if (!selection || selection === 'select') return null;
+
+    if (selection === 'special_100cp') {
+        const current = getGalacticCasinoDataObject('casinoPoints', ['quantity']) ?? 0;
+        setGalacticCasinoDataObject(Math.max(0, current + 100), 'casinoPoints', ['quantity']);
+        showNotification('Special Prize Claimed! 100CP', 'info', 3500, 'galacticCasino');
+        return { type: 'cp', amount: 100 };
+    }
+
+    if (selection === 'special_100k_research') {
+        const current = clampNumber(getResourceDataObject('research', ['quantity']) ?? 0, 0);
+        const newQty = Math.max(0, current + 100000);
+        setResourceDataObject(newQty, 'research', ['quantity']);
+        showNotification('Special Prize Claimed! 100,000 Research Points', 'info', 3500, 'galacticCasino');
+        return { type: 'research', amount: 100000 };
+    }
+
+    if (selection.startsWith('special_double_')) {
+        const key = selection.replace('special_double_', '');
+        const unlockedResources = new Set((getUnlockedResourcesArray?.() || []).map((v) => String(v || '').toLowerCase()));
+        const unlockedCompounds = new Set((getUnlockedCompoundsArray?.() || []).map((v) => String(v || '').toLowerCase()));
+        const isUnlocked = unlockedResources.has(key) || unlockedCompounds.has(key);
+        if (!isUnlocked) {
+            return null;
+        }
+
+        const categoryByKey = {
+            titanium: 'compounds',
+            steel: 'compounds',
+            silicon: 'resources',
+            iron: 'resources',
+            sodium: 'resources'
+        };
+        const category = categoryByKey[key] || (unlockedCompounds.has(key) ? 'compounds' : 'resources');
+
+        const result = doubleStockQuantity(category, key);
+        if (result) {
+            showNotification(`Special Prize Claimed! ${titleCaseFromKey(key)} doubled`, 'info', 3500, 'galacticCasino');
+        }
+        return result;
+    }
+
+    if (selection === 'special_starship_warp') {
+        const dest = warpStarshipInstantly();
+        if (!dest) return null;
+        showNotification(`Special Prize Claimed! Starship warped instantly to ${titleCaseFromKey(dest)}`, 'info', 3500, 'galacticCasino');
+        return { type: 'starship_warp', destinationStar: dest };
+    }
+
+    if (selection === 'special_rocket_warp') {
+        const rocketKey = getEligibleTravellingRocket();
+        if (!rocketKey) return null;
+        const result = warpRocketInstantly(rocketKey);
+        const rocketIndexMatch = String(rocketKey).match(/rocket(\d+)/i);
+        const rocketIndex = rocketIndexMatch ? rocketIndexMatch[1] : '';
+        const displayName = String(result?.name || titleCaseFromKey(rocketKey));
+        const prefix = rocketIndex ? `Rocket ${rocketIndex} ${displayName}` : displayName;
+        showNotification(`Special Prize Claimed! ${prefix} warped to ${result.warpedTo}`, 'info', 3500, 'galacticCasino');
+        return { type: 'rocket_warp', ...result };
+    }
+
+    if (selection === 'special_telescope_discover_asteroid') {
+        if (!(getCurrentlySearchingAsteroid?.() && (getTimeLeftUntilAsteroidScannerTimerFinishes?.() > 0))) {
+            return null;
+        }
+        const name = discoverAsteroidSilentAndGetName();
+        if (name) {
+            showNotification(`Special Prize Claimed! Space Telescope discovered Asteroid ${name}`, 'info', 3500, 'galacticCasino');
+        }
+        return { type: 'telescope_discover_asteroid', asteroid: name };
+    }
+
+    if (selection === 'special_telescope_finish_star_study') {
+        if (!(getCurrentlyInvestigatingStar?.() && (getTimeLeftUntilStarInvestigationTimerFinishes?.() > 0))) {
+            return null;
+        }
+        finishStarStudyInstantly();
+        showNotification('Special Prize Claimed! Space Telescope finished Star Study!', 'info', 3500, 'galacticCasino');
+        return { type: 'telescope_finish_star_study' };
+    }
+
+    if (selection === 'special_telescope_finish_void_pillage') {
+        if (!(getCurrentlyPillagingVoid?.() && (getTimeLeftUntilPillageVoidTimerFinishes?.() > 0))) {
+            return null;
+        }
+        finishVoidPillageInstantly();
+        showNotification('Special Prize Claimed! Space Telescope finished Pillaging The Void!', 'info', 3500, 'galacticCasino');
+        return { type: 'telescope_finish_void_pillage' };
+    }
+
+    return null;
 }
 
 function awardCpPrize(cost) {
@@ -484,7 +723,14 @@ export function playWheelOfFortune({ wheelId, costCp = 1, durationMs = 5000 } = 
     setGalacticCasinoDataObject(Math.max(0, currentCp - cost), 'casinoPoints', ['quantity']);
     const segmentCount = 13;
     const segmentAngle = 360 / segmentCount;
-    const selectedIndex = Math.floor(Math.random() * segmentCount);
+    globalThis.__wheelForceSpecial = true;
+    const forcedIndexRaw = globalThis.__wheelForceIndex;
+    const forcedIndex = Number.isFinite(Number(forcedIndexRaw)) ? Math.floor(Number(forcedIndexRaw)) : null;
+    const selectedIndex = globalThis.__wheelForceSpecial
+        ? 0
+        : (forcedIndex !== null
+            ? ((forcedIndex % segmentCount) + segmentCount) % segmentCount
+            : Math.floor(Math.random() * segmentCount));
     const selectedCenter = (selectedIndex * segmentAngle) + (segmentAngle / 2);
     const currentRotation = Number.parseFloat(String(wheelEl.getAttribute('data-rotation') || '0')) || 0;
     const normalizedCurrent = ((currentRotation % 360) + 360) % 360;
