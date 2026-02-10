@@ -585,7 +585,8 @@ function galacticCasinoChecks() {
     const selectionIsUnlocked =
         selection !== 'select' &&
         ((selectionType === 'resources' && unlockedResources.has(selection)) ||
-            (selectionType === 'compounds' && unlockedCompounds.has(selection)));
+            (selectionType === 'compounds' && unlockedCompounds.has(selection)) ||
+            (selectionType === 'currency' && selection === 'cash'));
 
     const rawDesiredCp = String(purchaseQuantityTextArea.value ?? '');
     const cleanedDesiredCp = rawDesiredCp.replace(/[^0-9]/g, '');
@@ -600,12 +601,16 @@ function galacticCasinoChecks() {
 
     let playerQuantity = 0;
     if (selectionIsUnlocked) {
-        playerQuantity = getResourceDataObject(selectionType, [selection, 'quantity']) ?? 0;
+        if (selectionType === 'currency' && selection === 'cash') {
+            playerQuantity = getResourceDataObject('currency', ['cash']) ?? 0;
+        } else {
+            playerQuantity = getResourceDataObject(selectionType, [selection, 'quantity']) ?? 0;
+        }
     } else {
         if (selection !== 'select') {
             const dropdownTextEl = purchaseDropdown.querySelector('.dropdown-text');
             if (dropdownTextEl) {
-                dropdownTextEl.textContent = 'Select Resource / Compound';
+                dropdownTextEl.textContent = 'Select Currency';
             }
             setGalacticCasinoPurchaseItem('select');
         }
@@ -615,7 +620,9 @@ function galacticCasinoChecks() {
 
     const cpBaseCost = getGalacticCasinoDataObject('casinoPoints', ['cpBaseCost']) ?? 0;
     const baseValue = selectionIsUnlocked
-        ? getGalacticCasinoDataObject('casinoPoints', ['valueOfOneCP', selectionType, selection]) ?? 0
+        ? (selectionType === 'currency' && selection === 'cash'
+            ? 1
+            : (getGalacticCasinoDataObject('casinoPoints', ['valueOfOneCP', selectionType, selection]) ?? 0))
         : 0;
     const costPerCp = baseValue > 0 ? cpBaseCost / baseValue : Infinity;
     const maxAffordableCp = selectionIsUnlocked && Number.isFinite(costPerCp) && costPerCp > 0
@@ -653,7 +660,7 @@ export function buyCasinoPoints() {
 
     const option = purchaseDropdown.querySelector(`.dropdown-option[data-value="${selection}"]`);
     const selectionType = String(option?.getAttribute('data-type') || '').toLowerCase();
-    if (selectionType !== 'resources' && selectionType !== 'compounds') {
+    if (selectionType !== 'resources' && selectionType !== 'compounds' && selectionType !== 'currency') {
         return;
     }
 
@@ -662,17 +669,22 @@ export function buyCasinoPoints() {
 
     const selectionIsUnlocked =
         (selectionType === 'resources' && unlockedResources.has(selection)) ||
-        (selectionType === 'compounds' && unlockedCompounds.has(selection));
+        (selectionType === 'compounds' && unlockedCompounds.has(selection)) ||
+        (selectionType === 'currency' && selection === 'cash');
     if (!selectionIsUnlocked) {
         return;
     }
 
-    const playerQuantity = getResourceDataObject(selectionType, [selection, 'quantity']) ?? 0;
+    const playerQuantity = (selectionType === 'currency' && selection === 'cash')
+        ? (getResourceDataObject('currency', ['cash']) ?? 0)
+        : (getResourceDataObject(selectionType, [selection, 'quantity']) ?? 0);
     const enteredDesiredCp = parseInt(purchaseQuantityTextArea.value || '0', 10);
     let desiredCp = Number.isFinite(enteredDesiredCp) ? Math.max(enteredDesiredCp, 0) : 0;
 
     const cpBaseCost = getGalacticCasinoDataObject('casinoPoints', ['cpBaseCost']) ?? 0;
-    const baseValue = getGalacticCasinoDataObject('casinoPoints', ['valueOfOneCP', selectionType, selection]) ?? 0;
+    const baseValue = (selectionType === 'currency' && selection === 'cash')
+        ? 1
+        : (getGalacticCasinoDataObject('casinoPoints', ['valueOfOneCP', selectionType, selection]) ?? 0);
     const costPerCp = baseValue > 0 ? cpBaseCost / baseValue : Infinity;
     const maxAffordableCp = Number.isFinite(costPerCp) && costPerCp > 0 ? Math.floor(playerQuantity / costPerCp) : 0;
     desiredCp = Math.min(desiredCp, maxAffordableCp);
@@ -685,7 +697,11 @@ export function buyCasinoPoints() {
         return;
     }
 
-    setResourceDataObject(Math.max(0, playerQuantity - costToPay), selectionType, [selection, 'quantity']);
+    if (selectionType === 'currency' && selection === 'cash') {
+        setResourceDataObject(Math.max(0, playerQuantity - costToPay), 'currency', ['cash']);
+    } else {
+        setResourceDataObject(Math.max(0, playerQuantity - costToPay), selectionType, [selection, 'quantity']);
+    }
 
     const currentCp = getGalacticCasinoDataObject('casinoPoints', ['quantity']) ?? 0;
     setGalacticCasinoDataObject(Math.max(0, currentCp + desiredCp), 'casinoPoints', ['quantity']);

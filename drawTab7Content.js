@@ -332,7 +332,8 @@ export function drawTab7Content(heading, optionContentElement) {
             null,
             'Purchase CP:',
             createDropdown('galacticCasinoPurchaseItemDropDown', [
-                { value: 'select', text: 'Select Resource / Compound', type: 'select' },
+                { value: 'select', text: 'Select Currency', type: 'select' },
+                { value: 'cash', text: '<strong>Cash</strong>', type: 'currency' },
                 { value: 'hydrogen', text: 'Hydrogen', type: 'resources' },
                 { value: 'helium', text: 'Helium', type: 'resources' },
                 { value: 'carbon', text: 'Carbon', type: 'resources' },
@@ -384,8 +385,8 @@ export function drawTab7Content(heading, optionContentElement) {
         const game1Spinner = createSpinningDropdown(
             'galacticCasinoGame1Spinner',
             [
-                { value: 'win', text: 'WIN', className: 'green-ready-text' },
-                { value: 'lose', text: 'LOSE', className: 'red-disabled-text' }
+                { value: 'win', text: 'WIN WIN WIN WIN', className: 'green-ready-text' },
+                { value: 'lose', text: 'LOSE LOSE LOSE LOSE', className: 'red-disabled-text' }
             ],
             'win',
             ['galactic-casino-spinner']

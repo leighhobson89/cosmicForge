@@ -2674,10 +2674,10 @@ helpContent = {
         subBody9: "The Galactic market is a major unlock, and arrives after your ship arrives at the new System in the first run.  In it, you can trade Resources, Cash and AP.",
 
         subHeading10: "Galactic Casino",
-        subBody10: "The Galactic Casino allows you to gamble your hard earned products for instant gratification. Test your luck and risk your resources for potential rewards.",
+        subBody10: "The Galactic Casino allows you to gamble your hard earned products for instant gratification. Test your luck and risk your resources for potential rewards. Rewards gained are for the current run only, not long-term or multi-run prizes.",
 
         subHeading11: "Casino Points (CP)",
-        subBody11: "Casino Points (CP) are the currency of the Galactic Casino. You must buy CP using Resources or Compounds, and CP is the only way to play the casino games for the various prizes.",
+        subBody11: "Casino Points (CP) are the currency of the Galactic Casino. You must buy CP using Resources or Compounds, and CP is the only way to play the casino games for the various prizes. CP are reset on rebirth.",
 
         subHeading12: "Ascendency Perks",
         subBody12: "You can spend acquired AP on permanent buffs that make future runs easier, and the game more replayable and fun!",
