@@ -1,4 +1,7 @@
 import {
+    getGalacticCasinoUnlocked,
+    getGalacticCasinoPurchaseItem,
+    setGalacticCasinoPurchaseItem,
     getDemoBuild,
     setSuppressUiClickSfx,
     setFirstAccessArray,
@@ -352,6 +355,7 @@ import {
     getMinimumBlackHoleChargeTime,
     getBlackHoleAlwaysOn,
     setBlackHoleAlwaysOn,
+    setGalacticCasinoUnlocked,
 } from './constantsAndGlobalVars.js';
 
 import { onboardingChecks } from './onboarding.js';
@@ -359,6 +363,8 @@ import { onboardingChecks } from './onboarding.js';
 import {
     setGalacticMarketDataObject,
     getGalacticMarketDataObject,
+    getGalacticCasinoDataObject,
+    setGalacticCasinoDataObject,
     getStarSystemDataObject,
     setStarSystemDataObject,
     getAutoBuyerTierLevel,
@@ -528,6 +534,151 @@ export function getOTypePowerPlantBoostMultiplierForCurrentSystem(powerPlantKey)
     if (!settledStarSet.has(requiredStar)) return 1;
 
     return getOTypePowerPlantStrengthBoost?.() || 1;
+}
+
+function galacticCasinoChecks() {
+    if (!(getCurrentTab()[1].includes('Galactic') && getCurrentOptionPane() === 'galactic casino')) {
+        return;
+    }
+
+    const purchaseDropdown = document.getElementById('galacticCasinoPurchaseItemDropDown');
+    const purchaseQuantityTextArea = document.getElementById('galacticCasinoPurchaseQuantityTextArea');
+    const previewEl = document.getElementById('galacticCasinoPurchaseCpPreview');
+    const buyButton = document.querySelector('.galactic-casino-buy-cp-button');
+
+    if (!purchaseDropdown || !purchaseQuantityTextArea || !previewEl || !buyButton) {
+        return;
+    }
+
+    const unlockedResources = new Set((getUnlockedResourcesArray?.() || []).map((v) => String(v || '').toLowerCase()));
+    const unlockedCompounds = new Set((getUnlockedCompoundsArray?.() || []).map((v) => String(v || '').toLowerCase()));
+
+    const options = purchaseDropdown.querySelectorAll('.dropdown-option');
+    options.forEach((opt) => {
+        const value = String(opt.getAttribute('data-value') || '').toLowerCase();
+        const type = String(opt.getAttribute('data-type') || '').toLowerCase();
+
+        let isUnlocked = true;
+        if (value === 'select') {
+            isUnlocked = true;
+        } else if (type === 'resources') {
+            isUnlocked = unlockedResources.has(value);
+        } else if (type === 'compounds') {
+            isUnlocked = unlockedCompounds.has(value);
+        }
+
+        opt.classList.toggle('red-disabled-text', !isUnlocked);
+        opt.style.pointerEvents = isUnlocked ? 'auto' : 'none';
+    });
+
+    const selection = String(getGalacticCasinoPurchaseItem?.() || 'select').toLowerCase();
+    const selectionOption = purchaseDropdown.querySelector(`.dropdown-option[data-value="${selection}"]`);
+    const selectionType = String(selectionOption?.getAttribute('data-type') || '').toLowerCase();
+
+    const selectionIsUnlocked =
+        selection !== 'select' &&
+        ((selectionType === 'resources' && unlockedResources.has(selection)) ||
+            (selectionType === 'compounds' && unlockedCompounds.has(selection)));
+
+    let desiredCp = parseInt(purchaseQuantityTextArea.value || '0', 10);
+    if (!Number.isFinite(desiredCp) || desiredCp < 0) {
+        desiredCp = 0;
+    }
+
+    let playerQuantity = 0;
+    if (selectionIsUnlocked) {
+        playerQuantity = getResourceDataObject(selectionType, [selection, 'quantity']) ?? 0;
+    } else {
+        if (selection !== 'select') {
+            const dropdownTextEl = purchaseDropdown.querySelector('.dropdown-text');
+            if (dropdownTextEl) {
+                dropdownTextEl.textContent = 'Select Resource / Compound';
+            }
+            setGalacticCasinoPurchaseItem('select');
+        }
+        desiredCp = 0;
+        purchaseQuantityTextArea.value = '0';
+    }
+
+    const cpBaseCost = getGalacticCasinoDataObject('casinoPoints', ['cpBaseCost']) ?? 0;
+    const baseValue = selectionIsUnlocked
+        ? getGalacticCasinoDataObject('casinoPoints', ['valueOfOneCP', selectionType, selection]) ?? 0
+        : 0;
+    const costPerCp = baseValue > 0 ? cpBaseCost / baseValue : Infinity;
+    const maxAffordableCp = selectionIsUnlocked && Number.isFinite(costPerCp) && costPerCp > 0
+        ? Math.floor(playerQuantity / costPerCp)
+        : 0;
+
+    if (desiredCp > maxAffordableCp) {
+        desiredCp = maxAffordableCp;
+        purchaseQuantityTextArea.value = String(maxAffordableCp);
+    }
+
+    const costToPay = selectionIsUnlocked && desiredCp > 0 && Number.isFinite(costPerCp) && costPerCp > 0
+        ? Math.ceil(desiredCp * costPerCp)
+        : 0;
+
+    previewEl.textContent = String(costToPay);
+
+    const canBuy = selectionIsUnlocked && desiredCp > 0 && costToPay > 0 && costToPay <= playerQuantity;
+    setButtonState(buyButton, { enabled: canBuy, ready: canBuy });
+}
+
+export function buyCasinoPoints() {
+    const purchaseDropdown = document.getElementById('galacticCasinoPurchaseItemDropDown');
+    const purchaseQuantityTextArea = document.getElementById('galacticCasinoPurchaseQuantityTextArea');
+    const previewEl = document.getElementById('galacticCasinoPurchaseCpPreview');
+
+    if (!purchaseDropdown || !purchaseQuantityTextArea || !previewEl) {
+        return;
+    }
+
+    const selection = String(getGalacticCasinoPurchaseItem?.() || 'select').toLowerCase();
+    if (selection === 'select') {
+        return;
+    }
+
+    const option = purchaseDropdown.querySelector(`.dropdown-option[data-value="${selection}"]`);
+    const selectionType = String(option?.getAttribute('data-type') || '').toLowerCase();
+    if (selectionType !== 'resources' && selectionType !== 'compounds') {
+        return;
+    }
+
+    const unlockedResources = new Set((getUnlockedResourcesArray?.() || []).map((v) => String(v || '').toLowerCase()));
+    const unlockedCompounds = new Set((getUnlockedCompoundsArray?.() || []).map((v) => String(v || '').toLowerCase()));
+
+    const selectionIsUnlocked =
+        (selectionType === 'resources' && unlockedResources.has(selection)) ||
+        (selectionType === 'compounds' && unlockedCompounds.has(selection));
+    if (!selectionIsUnlocked) {
+        return;
+    }
+
+    const playerQuantity = getResourceDataObject(selectionType, [selection, 'quantity']) ?? 0;
+    const enteredDesiredCp = parseInt(purchaseQuantityTextArea.value || '0', 10);
+    let desiredCp = Number.isFinite(enteredDesiredCp) ? Math.max(enteredDesiredCp, 0) : 0;
+
+    const cpBaseCost = getGalacticCasinoDataObject('casinoPoints', ['cpBaseCost']) ?? 0;
+    const baseValue = getGalacticCasinoDataObject('casinoPoints', ['valueOfOneCP', selectionType, selection]) ?? 0;
+    const costPerCp = baseValue > 0 ? cpBaseCost / baseValue : Infinity;
+    const maxAffordableCp = Number.isFinite(costPerCp) && costPerCp > 0 ? Math.floor(playerQuantity / costPerCp) : 0;
+    desiredCp = Math.min(desiredCp, maxAffordableCp);
+    if (desiredCp <= 0) {
+        return;
+    }
+
+    const costToPay = Math.ceil(desiredCp * costPerCp);
+    if (!Number.isFinite(costToPay) || costToPay <= 0 || costToPay > playerQuantity) {
+        return;
+    }
+
+    setResourceDataObject(Math.max(0, playerQuantity - costToPay), selectionType, [selection, 'quantity']);
+
+    const currentCp = getGalacticCasinoDataObject('casinoPoints', ['quantity']) ?? 0;
+    setGalacticCasinoDataObject(Math.max(0, currentCp + desiredCp), 'casinoPoints', ['quantity']);
+
+    purchaseQuantityTextArea.value = '0';
+    previewEl.textContent = '0';
 }
 
 function updateProductionRateText(elementId, rateValue) {
@@ -916,6 +1067,7 @@ export async function gameLoop() {
         fleetHangarChecks();
         coloniseChecks();
         galacticMarketChecks();
+        galacticCasinoChecks();
         ascendencyBuffChecks();
         megastructureUIChecks();
         blackHoleUIChecks();
@@ -6845,6 +6997,11 @@ function ascendencyBuffChecks() {
 }
 
 function galacticMarketChecks() {
+/*     if (getTechUnlockedArray().includes('apAwardedThisRun') && !getGalacticCasinoUnlocked()) {
+        setGalacticCasinoUnlocked(true);
+    }
+// ENABLE VISIBILITY HERE */
+
     if (getCurrentTab()[1].includes('Galactic') && getCurrentOptionPane() === 'galactic market') {
         const galacticMarketOutgoingStockTypeDropDown = document.getElementById('galacticMarketOutgoingStockTypeDropDown');
         const galacticMarketIncomingStockTypeDropDown = document.getElementById('galacticMarketIncomingStockTypeDropDown');

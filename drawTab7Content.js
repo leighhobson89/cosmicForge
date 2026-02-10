@@ -31,14 +31,16 @@ import {
     deferredActions,
     setAchievementFlagArray,
     getMinimumBlackHoleChargeTime,
-    getBlackHoleAlwaysOn
+    getBlackHoleAlwaysOn,
+    setGalacticCasinoPurchaseItem
 } from './constantsAndGlobalVars.js';
-import { purchaseBuff, galacticMarketLiquidateForAp, galacticMarketSellApForCash, galacticMarketTrade, rebirth, startBlackHoleChargeTimer, timeWarp } from './game.js';
+import { purchaseBuff, buyCasinoPoints, galacticMarketLiquidateForAp, galacticMarketSellApForCash, galacticMarketTrade, rebirth, startBlackHoleChargeTimer, timeWarp } from './game.js';
 import { trackAnalyticsEvent } from './analytics.js';
 import {
     getAscendencyBuffDataObject,
     getResourceDataObject,
     setResourceDataObject,
+    getGalacticCasinoDataObject,
     getBlackHoleResearchDone,
     getBlackHoleResearchPrice,
     setBlackHoleResearchDone,
@@ -321,6 +323,68 @@ export function drawTab7Content(heading, optionContentElement) {
             'galacticMarketLiquidateForApConfirm'
         );
         optionContentElement.appendChild(galacticMarketLiquidateForAPRow);
+    }
+
+    if (heading === 'Galactic Casino') {
+        const purchaseCpRow = createOptionRow(
+            'galacticCasinoPurchaseCpRow',
+            null,
+            'Purchase CP:',
+            createDropdown('galacticCasinoPurchaseItemDropDown', [
+                { value: 'select', text: 'Select Resource / Compound', type: 'select' },
+                { value: 'hydrogen', text: 'Hydrogen', type: 'resources' },
+                { value: 'helium', text: 'Helium', type: 'resources' },
+                { value: 'carbon', text: 'Carbon', type: 'resources' },
+                { value: 'neon', text: 'Neon', type: 'resources' },
+                { value: 'oxygen', text: 'Oxygen', type: 'resources' },
+                { value: 'sodium', text: 'Sodium', type: 'resources' },
+                { value: 'silicon', text: 'Silicon', type: 'resources' },
+                { value: 'iron', text: 'Iron', type: 'resources' },
+                { value: 'diesel', text: 'Diesel', type: 'compounds' },
+                { value: 'glass', text: 'Glass', type: 'compounds' },
+                { value: 'steel', text: 'Steel', type: 'compounds' },
+                { value: 'concrete', text: 'Concrete', type: 'compounds' },
+                { value: 'water', text: 'Water', type: 'compounds' },
+                { value: 'titanium', text: 'Titanium', type: 'compounds' }
+            ], 'select', (value) => {
+                setGalacticCasinoPurchaseItem(value);
+            }),
+            createTextFieldArea('galacticCasinoPurchaseQuantityTextArea', ['galactic-market-textarea'], 'CP:', ''),
+            createTextElement(`Cost: <span id="galacticCasinoPurchaseCpPreview" class="green-ready-text notation">0</span>`, 'galacticCasinoPurchaseCpPreviewText', ['galactic-market-summary-text'], null),
+            createButton(`BUY`, ['option-button', 'red-disabled-text', 'galactic-casino-buy-cp-button'], () => {
+                buyCasinoPoints();
+            }, null, null, null, null, null, true, null, 'galacticCasinoBuyCp'),
+            null,
+            'You can buy CP to use in the casino by trading Resources or Compounds.',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            'galacticCasinoPurchaseCp',
+            [true, '20%', '80%']
+        );
+        optionContentElement.appendChild(purchaseCpRow);
+
+        document.getElementById('galacticCasinoPurchaseQuantityTextArea').addEventListener('input', (event) => {
+            if (event.target.value.startsWith('0') && event.target.value.length > 1) {
+                event.target.value = event.target.value.replace(/^0+/, '');
+            }
+
+            document.getElementById('galacticCasinoPurchaseQuantityTextArea').value = event.target.value;
+        });
+
+        const game1Row = createOptionRow('galacticCasinoGame1Row', null, 'Game 1:', null, null, null, null, null, null, null, null, '', '', null, null, null, null, null, null, null, 'galacticCasinoGame1');
+        const game2Row = createOptionRow('galacticCasinoGame2Row', null, 'Game 2:', null, null, null, null, null, null, null, null, '', '', null, null, null, null, null, null, null, 'galacticCasinoGame2');
+        const game3Row = createOptionRow('galacticCasinoGame3Row', null, 'Game 3:', null, null, null, null, null, null, null, null, '', '', null, null, null, null, null, null, null, 'galacticCasinoGame3');
+        optionContentElement.appendChild(game1Row);
+        optionContentElement.appendChild(game2Row);
+        optionContentElement.appendChild(game3Row);
+
+        document.getElementById('galacticCasinoPurchaseCpPreview').textContent = '0';
     }
 
     if (heading === 'Ascendency Perks') {

@@ -452,6 +452,7 @@ export function initialiseDescriptions() {
             : `Here you can reset the run at your new system, once settled!`,
 
         'galactic market': "Here you can make various trades in the Galactic Market.",
+        'galactic casino': "Here you can gamble your hard earned products for instant gratification.",
         'ascendency perks': "Here you can spend AP for permanent buffs to speed up your runs!",
         'megastructures': "This shows your progress in harnessing the power of MegaStructures, and the slow dismantling of the Miaplacidus Force Field!",
         'black hole': "This shows the Black Hole time warp feature, once unlocked.",
@@ -2662,14 +2663,20 @@ helpContent = {
         subHeading9: "Galactic Market",
         subBody9: "The Galactic market is a major unlock, and arrives after your ship arrives at the new System in the first run.  In it, you can trade Resources, Cash and AP.",
 
-        subHeading10: "Ascendency Perks",
-        subBody10: "You can spend acquired AP on permanent buffs that make future runs easier, and the game more replayable and fun!",
+        subHeading10: "Galactic Casino",
+        subBody10: "The Galactic Casino allows you to gamble your hard earned products for instant gratification. Test your luck and risk your resources for potential rewards.",
 
-        subHeading11: "Black Hole",
-        subBody11: "You can accidentally discover a Black Hole, and once researched it can be used to Time Warp, speeding up travel times and Resource collection. It needs to be charged which takes time, but the time can be reduced with upgrades. You can also increase the time it stays active for and the power of it with further upgrades, and once it is unlocked it is available across different runs.",
+        subHeading11: "Casino Points (CP)",
+        subBody11: "Casino Points (CP) are the currency of the Galactic Casino. You must buy CP using Resources or Compounds, and CP is the only way to play the casino games for the various prizes.",
 
-        subHeading12: "O-type Stars",
-        subBody12: "O-type stars are the rarest and most violent stars in the galaxy. Each one you control dramatically amplifies the power output of a Power Building type. Expect hardened defenses when attempting to conquer these systems."
+        subHeading12: "Ascendency Perks",
+        subBody12: "You can spend acquired AP on permanent buffs that make future runs easier, and the game more replayable and fun!",
+
+        subHeading13: "Black Hole",
+        subBody13: "You can accidentally discover a Black Hole, and once researched it can be used to Time Warp, speeding up travel times and Resource collection. It needs to be charged which takes time, but the time can be reduced with upgrades. You can also increase the time it stays active for and the power of it with further upgrades, and once it is unlocked it is available across different runs.",
+
+        subHeading14: "O-type Stars",
+        subBody14: "O-type stars are the rarest and most violent stars in the galaxy. Each one you control dramatically amplifies the power output of a Power Building type. Expect hardened defenses when attempting to conquer these systems."
     },
     'concepts - end goal': {
         subHeading1: "Ancient Manuscripts",

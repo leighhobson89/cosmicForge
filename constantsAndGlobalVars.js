@@ -1,4 +1,4 @@
-import { restoreAchievementsDataObject, restoreAscendencyBuffsDataObject, restoreGalacticMarketDataObject, restoreRocketNamesObject, restoreResourceDataObject, restoreStarSystemsDataObject, resourceData, starSystems, getResourceDataObject, setResourceDataObject, galacticMarket, ascendencyBuffs, achievementsData, getStarSystemDataObject, getBlackHoleResearchDone, getBlackHolePower, getBlackHoleDuration, getBlackHoleRechargeMultiplier, getBlackHoleResearchPrice, getBlackHolePowerPrice, getBlackHoleDurationPrice, getBlackHoleRechargePrice, oTypePowerPlantBuffs, restoreOTypePowerPlantBuffsObject } from "./resourceDataObject.js";
+import { restoreAchievementsDataObject, restoreAscendencyBuffsDataObject, restoreGalacticMarketDataObject, restoreGalacticCasinoDataObject, restoreRocketNamesObject, restoreResourceDataObject, restoreStarSystemsDataObject, resourceData, starSystems, getResourceDataObject, setResourceDataObject, galacticMarket, galacticCasino, ascendencyBuffs, achievementsData, getStarSystemDataObject, getBlackHoleResearchDone, getBlackHolePower, getBlackHoleDuration, getBlackHoleRechargeMultiplier, getBlackHoleResearchPrice, getBlackHolePowerPrice, getBlackHoleDurationPrice, getBlackHoleRechargePrice, oTypePowerPlantBuffs, restoreOTypePowerPlantBuffsObject } from "./resourceDataObject.js";
 import { achievementFunctionsMap } from "./achievements.js";
 import { drawNativeTechTree, selectTheme, startWeatherEffect, stopWeatherEffect, applyCustomPointerSetting, showNotification, generateStarfield } from "./ui.js";
 import { capitaliseWordsWithRomanNumerals, capitaliseString } from './utilityFunctions.js';
@@ -427,6 +427,8 @@ let galacticMarketSellApForCashQuantity = 'select';
 let galacticMarketIncomingQuantity = 0;
 let currentGalacticMarketCommission = 10;
 
+let galacticCasinoPurchaseItem = 'select';
+
 let currentTab = [1, 'Resources'];
 let currentOptionPane = null;
 let notationType = 'normalCondensed';
@@ -641,6 +643,7 @@ let belligerentEnemyFlag = false;
 let feedbackCanBeRequested = true;
 let philosophyAbilityActive = false;
 let onboardingMode = false;
+let galacticCasinoUnlocked = false;
 
 let demoBuild = false;
 
@@ -1316,6 +1319,7 @@ export function resetAllVariablesOnRebirth() {
     galacticMarketIncomingStockType = 'select';
     galacticMarketOutgoingQuantitySelectionType = 'select';
     galacticMarketSellApForCashQuantity = 'select';
+    galacticCasinoPurchaseItem = 'select';
     currentGalacticMarketCommission = 10;
     apSellForCashPrice = AP_BASE_SELL_PRICE;
     apBuyForCashPrice = AP_BASE_BUY_PRICE;
@@ -1452,6 +1456,7 @@ export function resetAllVariablesOnRebirth() {
     hasClickedOutgoingOptionGalacticMarket = false;
     liquidatedThisRun = false;
     belligerentEnemyFlag = false;
+    galacticCasinoUnlocked = false;
 
     setCurrentPrecipitationRate(0);
     stopWeatherEffect();
@@ -1478,6 +1483,7 @@ export function captureGameStatusForSaving(type) {
     gameState.resourceData = JSON.parse(JSON.stringify(resourceData));
     gameState.starSystems = JSON.parse(JSON.stringify(starSystems));
     gameState.galacticMarket = JSON.parse(JSON.stringify(galacticMarket));
+    gameState.galacticCasino = JSON.parse(JSON.stringify(galacticCasino));
     gameState.ascendencyBuffs = JSON.parse(JSON.stringify(ascendencyBuffs));
     gameState.achievementsData = JSON.parse(JSON.stringify(achievementsData));
 
@@ -1694,6 +1700,7 @@ export function captureGameStatusForSaving(type) {
         permanentAntimatterUnlock: permanentAntimatterUnlock,
         nonExhaustiveResources: nonExhaustiveResources,
         miaplacidusEndgameStoryShown: miaplacidusEndgameStoryShown,
+        galacticCasinoUnlocked: galacticCasinoUnlocked,
     }
 
     return gameState;
@@ -1732,6 +1739,12 @@ export function restoreGameStatus(gameState, type) {
                 restoreGalacticMarketDataObject(JSON.parse(JSON.stringify(gameState.galacticMarket)));
             } else {
                 gameState.galacticMarket = galacticMarket;
+            }
+
+            if (gameState.galacticCasino) {
+                restoreGalacticCasinoDataObject(JSON.parse(JSON.stringify(gameState.galacticCasino)));
+            } else {
+                gameState.galacticCasino = galacticCasino;
             }
 
             if (gameState.ascendencyBuffs) {
@@ -1972,6 +1985,7 @@ export function restoreGameStatus(gameState, type) {
             permanentAntimatterUnlock = gameState.flags.permanentAntimatterUnlock ?? false;
             nonExhaustiveResources = gameState.flags.nonExhaustiveResources ?? (ascendencyBuffs?.nonExhaustiveResources?.boughtYet > 0) ?? false;
             miaplacidusEndgameStoryShown = gameState.flags.miaplacidusEndgameStoryShown ?? false;
+            galacticCasinoUnlocked = gameState.flags.galacticCasinoUnlocked ?? false;
 
             selectTheme(getCurrentTheme());
             applyCustomPointerSetting();
@@ -4037,6 +4051,14 @@ export function setGalacticMarketOutgoingQuantitySelectionTypeDisabledStatus(val
     galacticMarketOutgoingQuantitySelectionTypeDisabledStatus = value;
 }
 
+export function getGalacticCasinoPurchaseItem() {
+    return galacticCasinoPurchaseItem;
+}
+
+export function setGalacticCasinoPurchaseItem(value) {
+    galacticCasinoPurchaseItem = value;
+}
+
 export function getGalacticMarketOutgoingQuantitySelectionTypeDisabledStatus() {
     return galacticMarketOutgoingQuantitySelectionTypeDisabledStatus;
 }
@@ -4351,6 +4373,14 @@ export function getMegaStructureTabUnlocked() {
 
 export function setMegaStructureTabUnlocked(value) {
     megaStructureTabUnlocked = value;
+}
+
+export function getGalacticCasinoUnlocked() {
+    return galacticCasinoUnlocked;
+}
+
+export function setGalacticCasinoUnlocked(value) {
+    galacticCasinoUnlocked = Boolean(value);
 }
 
 export function setMiaplacidusMilestoneLevel(value) {

@@ -1,4 +1,6 @@
 import {
+    getGalacticCasinoUnlocked,
+    setGalacticCasinoUnlocked,
     getDemoBuild,
     setDemoBuild,
     getInfinitePowerRate,
@@ -971,6 +973,7 @@ function shouldUseCustomPointer() {
 function adjustGalacticSidebarWidths() {
     const entries = [
         ['galacticMarketOption2', 'galacticMarketOption3'],
+        ['galacticCasinoOption2', 'galacticCasinoOption3'],
         ['ascendencyOption2', 'ascendencyOption3'],
         ['megastructuresOption2', 'megastructuresOption3']
     ];
@@ -6072,6 +6075,19 @@ export function removeAllIndicatorIcons(iconText = '⚠️', indicatorClass = 'a
     });
 }
 
+function syncGalacticSidebarVisibility() {
+    const casinoOption = document.getElementById('galacticCasinoOption');
+    const casinoRow = casinoOption?.closest('.row-side-menu');
+    if (casinoRow) {
+        if (getGalacticCasinoUnlocked()) {
+            casinoRow.classList.remove('invisible');
+        } else {
+            casinoRow.classList.add('invisible');
+            removeAttentionIndicator(casinoOption);
+        }
+    }
+}
+
 function syncResourceSidebarVisibility() {
     const unlockedResources = getUnlockedResourcesArray();
     const resourceKeys = ['hydrogen', 'helium', 'carbon', 'neon', 'oxygen', 'sodium', 'silicon', 'iron'];
@@ -6121,6 +6137,8 @@ function syncResourceSidebarVisibility() {
 
 export function updateDynamicUiContent() {
     syncResourceSidebarVisibility();
+
+    syncGalacticSidebarVisibility();
 
     updateSellAllButtonStates();
 
@@ -8102,6 +8120,16 @@ function initializeTabEventListeners() {
             setCurrentOptionPane('black hole');
             updateContent('Black Hole', 'tab7', 'content');
             setFirstAccessArray('black hole');
+        });
+    });
+
+    document.querySelectorAll('[class*="tab7"][class*="option6"]').forEach(function(element) {
+        element.addEventListener('click', function() {
+            selectRowCss(this);
+            setLastScreenOpenRegister('tab7', 'galactic casino');
+            setCurrentOptionPane('galactic casino');
+            updateContent('Galactic Casino', 'tab7', 'content');
+            setFirstAccessArray('galactic casino');
         });
     });
     

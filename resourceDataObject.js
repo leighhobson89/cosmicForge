@@ -1004,6 +1004,34 @@ export let oTypePowerPlantBuffs = {
     advancedPowerPlantStar: { starName: null, settled: false }
 };
 
+export let galacticCasino = {
+    version: 0.90,
+    casinoPoints: {
+        quantity: 0,
+        cpBaseCost: 10000,
+        valueOfOneCP: {
+            resources: {
+                hydrogen: 0.02,
+                helium: 0.01,
+                carbon: 0.1,
+                neon: 0.06,
+                oxygen: 0.05,
+                silicon: 0.08,
+                iron: 0.12,
+                sodium: 0.1
+            },
+            compounds: {
+                water: 0.08,
+                diesel: 0.2,
+                glass: 0.8,
+                steel: 1.2,
+                concrete: 0.8,
+                titanium: 6
+            }
+        }
+    }
+};
+
 export let galacticMarket = {
     version: 0.85,
     resources: {
@@ -2962,6 +2990,14 @@ export function restoreGalacticMarketDataObject(value) {
     galacticMarket = value;
 }
 
+export function restoreGalacticCasinoDataObject(value) {
+    value = migrateResourceData(value, 'galacticCasinoData', {
+        getCurrentGameVersion,
+        getMinimumVersion,
+    });
+    galacticCasino = value;
+}
+
 export function restoreAscendencyBuffsDataObject(value) {
     value = migrateResourceData(value, 'ascendencyBuffsData', {
         getCurrentGameVersion,
@@ -3152,6 +3188,47 @@ export function setGalacticMarketDataObject(value, key, subKeys = []) {
     }
 
     let current = galacticMarket;
+    current = current[key] || (current[key] = {});
+
+    for (let i = 0; i < subKeys.length; i++) {
+        const subKey = subKeys[i];
+
+        if (i === subKeys.length - 1) {
+            current[subKey] = value;
+        } else {
+            current = current[subKey] || (current[subKey] = {});
+        }
+    }
+}
+
+export function getGalacticCasinoDataObject(key, subKeys) {
+    let current = galacticCasino[key];
+
+    if (!current) {
+        console.warn(`Galactic casino data not found for key: ${key}`);
+        return undefined;
+    }
+
+    if (subKeys) {
+        for (const subKey of subKeys) {
+            current = current?.[subKey];
+            if (current === undefined) {
+                console.warn(`Missing subKey: ${subKey}`);
+                return undefined;
+            }
+        }
+    }
+
+    return current;
+}
+
+export function setGalacticCasinoDataObject(value, key, subKeys = []) {
+    if (!key) {
+        console.warn("Main key is required.");
+        return;
+    }
+
+    let current = galacticCasino;
     current = current[key] || (current[key] = {});
 
     for (let i = 0; i < subKeys.length; i++) {
