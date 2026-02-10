@@ -541,6 +541,13 @@ function galacticCasinoChecks() {
         return;
     }
 
+    const cpBalanceEl = document.getElementById('galacticCasinoCpBalance');
+    if (cpBalanceEl) {
+        const cpQuantity = getGalacticCasinoDataObject('casinoPoints', ['quantity']) ?? 0;
+        cpBalanceEl.textContent = String(cpQuantity);
+        cpBalanceEl.classList.toggle('green-ready-text', cpQuantity > 0);
+    }
+
     const purchaseDropdown = document.getElementById('galacticCasinoPurchaseItemDropDown');
     const purchaseQuantityTextArea = document.getElementById('galacticCasinoPurchaseQuantityTextArea');
     const previewEl = document.getElementById('galacticCasinoPurchaseCpPreview');
@@ -597,7 +604,7 @@ function galacticCasinoChecks() {
             setGalacticCasinoPurchaseItem('select');
         }
         desiredCp = 0;
-        purchaseQuantityTextArea.value = '0';
+        purchaseQuantityTextArea.value = '';
     }
 
     const cpBaseCost = getGalacticCasinoDataObject('casinoPoints', ['cpBaseCost']) ?? 0;
@@ -677,7 +684,7 @@ export function buyCasinoPoints() {
     const currentCp = getGalacticCasinoDataObject('casinoPoints', ['quantity']) ?? 0;
     setGalacticCasinoDataObject(Math.max(0, currentCp + desiredCp), 'casinoPoints', ['quantity']);
 
-    purchaseQuantityTextArea.value = '0';
+    purchaseQuantityTextArea.value = '';
     previewEl.textContent = '0';
 }
 

@@ -2722,7 +2722,11 @@ export function updateContent(heading, tab, type) {
                 break;
             case 'tab7':
                 optionDescriptionElement = optionDescriptionElements[6];
-                optionDescriptionElement.innerHTML = optionDescription;
+                if (heading.toLowerCase() === 'galactic casino') {
+                    optionDescriptionElement.innerHTML = `${optionDescription}CP Balance: <strong><span id="galacticCasinoCpBalance">0</span></strong>`;
+                } else {
+                    optionDescriptionElement.innerHTML = optionDescription;
+                }
                 optionDescriptionElement.style.border = `1px dashed var(--container-border-color)`;
                 drawTab7Content(heading, optionContentElement);
                 break;

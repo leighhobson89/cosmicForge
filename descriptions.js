@@ -439,7 +439,7 @@ export function initialiseDescriptions() {
         'star map': "This is a map of the known galaxy.",
         'star data': "Here you can find information about studied stars.",
         'star ship': "Here you can build and manage your Star Ship to travel to and scan studied Stars.",
-        'fleet hangar': `Build your fleets to conquer visited Systems - Fleet Power: <span class="green-ready-text">${getResourceDataObject('fleets', ['attackPower']).toFixed(0)}</span>`,
+        'fleet hangar': `Build your fleets to conquer visited Systems - Fleet Strength: <span class="green-ready-text">${getResourceDataObject('fleets', ['attackPower']).toFixed(0)}</span>`,
         'colonise': `Engage in Diplomacy and War to establish your new colony at <span class="green-ready-text">${capitaliseWordsWithRomanNumerals(getDestinationStar())}</span> - Fleet Power: <span class="green-ready-text">${getResourceDataObject('fleets', ['attackPower']).toFixed(0)}</span>`,
 
         'mining': "This shows Antimatter being produced, where, and by which Rocket Miner.",
@@ -452,7 +452,7 @@ export function initialiseDescriptions() {
             : `Here you can reset the run at your new system, once settled!`,
 
         'galactic market': "Here you can make various trades in the Galactic Market.",
-        'galactic casino': "Here you can gamble your hard earned products for instant gratification.",
+        'galactic casino': "Here you can gamble your hard earned products for instant gratification - ",
         'ascendency perks': "Here you can spend AP for permanent buffs to speed up your runs!",
         'megastructures': "This shows your progress in harnessing the power of MegaStructures, and the slow dismantling of the Miaplacidus Force Field!",
         'black hole': "This shows the Black Hole time warp feature, once unlocked.",
@@ -473,7 +473,7 @@ export function initialiseDescriptions() {
     };
 
     rocketNames = {
-        version: 0.85,
+        version: 0.90,
         rocketDescription: "Build the launch pad to launch built rockets and mine asteroids for Antimatter.",
         [getRocketUserName('rocket1').toLowerCase()]: "Build the launch pad to launch built rockets and mine asteroids for Antimatter.",
         [getRocketUserName('rocket2').toLowerCase()]: "Build the launch pad to launch built rockets and mine asteroids for Antimatter.",
@@ -1643,6 +1643,11 @@ export function initialiseDescriptions() {
         galacticMarketLiquidateForAPRow: {
             content1: "Liquidate ALL Cash, Resources and Compounds, to AP.  You can only do this once per run so choose your moment wisely!",
             content2: `Liquidate ALL Cash, Resources and Compounds, to AP. <span class="red-disabled-text">Already done this run!</span>`,
+            updateAt: ""
+        },
+        galacticCasinoPurchaseCpRow: {
+            content1: "You can buy CP to use in the casino by trading Resources or Compounds.",
+            content2: "",
             updateAt: ""
         },
         settingsCurrencySymbolRow: {

@@ -348,14 +348,15 @@ export function drawTab7Content(heading, optionContentElement) {
                 { value: 'titanium', text: 'Titanium', type: 'compounds' }
             ], 'select', (value) => {
                 setGalacticCasinoPurchaseItem(value);
-            }),
-            createTextFieldArea('galacticCasinoPurchaseQuantityTextArea', ['galactic-market-textarea'], 'CP:', ''),
-            createTextElement(`Cost: <span id="galacticCasinoPurchaseCpPreview" class="green-ready-text notation">0</span>`, 'galacticCasinoPurchaseCpPreviewText', ['galactic-market-summary-text'], null),
+            }, ['galactic-casino-dropdown']),
+            null,
+            createTextFieldArea('galacticCasinoPurchaseQuantityTextArea', ['galactic-market-textarea', 'galactic-casino-quantity-textarea'], 'Buy CP Quantity', ''),
             createButton(`BUY`, ['option-button', 'red-disabled-text', 'galactic-casino-buy-cp-button'], () => {
                 buyCasinoPoints();
             }, null, null, null, null, null, true, null, 'galacticCasinoBuyCp'),
+            createTextElement(`Cost: <span id="galacticCasinoPurchaseCpPreview" class="green-ready-text notation">0</span>`, 'galacticCasinoPurchaseCpPreviewText', ['galactic-market-summary-text'], null),
             null,
-            'You can buy CP to use in the casino by trading Resources or Compounds.',
+            '',
             null,
             null,
             null,
@@ -365,7 +366,8 @@ export function drawTab7Content(heading, optionContentElement) {
             null,
             null,
             'galacticCasinoPurchaseCp',
-            [true, '20%', '80%']
+            [true, '20%', '80%'],
+            ['no-left-margin', 'galactic-casino-input-container']
         );
         optionContentElement.appendChild(purchaseCpRow);
 

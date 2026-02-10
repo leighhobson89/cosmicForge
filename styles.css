@@ -103,8 +103,30 @@
     width: 8vw;
 }
 
+.galactic-casino-quantity-textarea {
+    height: 5vh;
+    width: 10vw;
+}
+
+.galactic-casino-quantity-textarea.galactic-market-textarea {
+    margin-left: 5%;
+}
+
+.galactic-casino-input-container {
+    justify-content: flex-start;
+    gap: 12px;
+}
+
+.galactic-casino-dropdown {
+    margin-left: 0;
+}
+
+.galactic-casino-buy-cp-button {
+    margin-left: 5%;
+}
+
 .galactic-market-summary-text {
-    margin-left: 10px;
+    margin-left: 5%;
 }
 
 .galactic-market-summary-text-wide {

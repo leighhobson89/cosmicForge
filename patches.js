@@ -123,6 +123,56 @@ export function migrateResourceData(saveData, objectType, options = {}) {
             saveData.version = 0.85;
         }
 
+        if (saveData.version < 0.90) {
+            if (objectType === 'galacticCasinoData') {
+                if (!saveData || typeof saveData !== 'object') {
+                    saveData = {};
+                }
+
+                if (!saveData.casinoPoints || typeof saveData.casinoPoints !== 'object') {
+                    saveData.casinoPoints = {};
+                }
+
+                if (saveData.casinoPoints.quantity === undefined) {
+                    saveData.casinoPoints.quantity = 0;
+                }
+
+                if (saveData.casinoPoints.cpBaseCost === undefined) {
+                    saveData.casinoPoints.cpBaseCost = 10000;
+                }
+
+                if (!saveData.casinoPoints.valueOfOneCP || typeof saveData.casinoPoints.valueOfOneCP !== 'object') {
+                    saveData.casinoPoints.valueOfOneCP = {};
+                }
+
+                if (!saveData.casinoPoints.valueOfOneCP.resources || typeof saveData.casinoPoints.valueOfOneCP.resources !== 'object') {
+                    saveData.casinoPoints.valueOfOneCP.resources = {
+                        hydrogen: 0.02,
+                        helium: 0.01,
+                        carbon: 0.1,
+                        neon: 0.06,
+                        oxygen: 0.05,
+                        silicon: 0.08,
+                        iron: 0.12,
+                        sodium: 0.1
+                    };
+                }
+
+                if (!saveData.casinoPoints.valueOfOneCP.compounds || typeof saveData.casinoPoints.valueOfOneCP.compounds !== 'object') {
+                    saveData.casinoPoints.valueOfOneCP.compounds = {
+                        water: 0.08,
+                        diesel: 0.2,
+                        glass: 0.8,
+                        steel: 1.2,
+                        concrete: 0.8,
+                        titanium: 6
+                    };
+                }
+            }
+
+            saveData.version = 0.90;
+        }
+
         saveData.version += 0.001;
     }
 
