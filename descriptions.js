@@ -1655,6 +1655,16 @@ export function initialiseDescriptions() {
             content2: "",
             updateAt: ""
         },
+        galacticCasinoGame2Row: {
+            content1: "Wheel Of Fortune. Spend CP to spin the wheel and test your luck.",
+            content2: "",
+            updateAt: ""
+        },
+        galacticCasinoGame3Row: {
+            content1: "",
+            content2: "",
+            updateAt: ""
+        },
         settingsCurrencySymbolRow: {
             content1: "Change the currency symbol displayed in the game.",
             content2: "",

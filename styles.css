@@ -170,6 +170,75 @@
     margin-left: 5%;
 }
 
+.galactic-casino-wheel-input-container {
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+}
+
+.galactic-casino-wheel-spin-button {
+    width: 100%;
+    margin-left: 0;
+}
+
+.galactic-casino-wheel-stack {
+    width: 10vw;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.galactic-casino-roulette-wheel {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    border: 2px solid var(--container-border-color);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#galacticCasinoGame2PrizeDropdown {
+    margin-left: 5%;
+}
+
+.galactic-casino-roulette-face {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: conic-gradient(
+        var(--ready-text) 0deg 27.692deg,
+        var(--disabled-text) 27.692deg 55.384deg,
+        var(--text-color) 55.384deg 83.076deg,
+        var(--disabled-text) 83.076deg 110.768deg,
+        var(--text-color) 110.768deg 138.46deg,
+        var(--disabled-text) 138.46deg 166.152deg,
+        var(--text-color) 166.152deg 193.844deg,
+        var(--disabled-text) 193.844deg 221.536deg,
+        var(--text-color) 221.536deg 249.228deg,
+        var(--disabled-text) 249.228deg 276.92deg,
+        var(--text-color) 276.92deg 304.612deg,
+        var(--disabled-text) 304.612deg 332.304deg,
+        var(--text-color) 332.304deg 360deg
+    );
+    transform: rotate(0deg);
+    will-change: transform;
+}
+
+.galactic-casino-roulette-indicator {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(calc(-50% + 2px));
+    width: 2px;
+    height: 50%;
+    background: var(--container-bg-color);
+    pointer-events: none;
+    z-index: 2;
+}
+
 #galacticCasinoPurchaseCpPreviewText.galactic-market-summary-text {
     margin-left: 5% !important;
 }

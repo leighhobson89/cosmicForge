@@ -170,3 +170,116 @@ export function playDoubleOrNothing({ stake, spinnerId }) {
             }
         });
 }
+
+export function playWheelOfFortune({ wheelId, costCp = 1, durationMs = 5000 } = {}) {
+    const id = String(wheelId || '');
+    if (!id) {
+        return Promise.resolve(null);
+    }
+
+    const wheelEl = document.getElementById(id);
+    if (!wheelEl) {
+        return Promise.resolve(null);
+    }
+
+    const face = wheelEl.querySelector('.galactic-casino-roulette-face');
+    if (!face) {
+        return Promise.resolve(null);
+    }
+
+    const spinButton = document.getElementById('galacticCasinoGame2SpinWheelButton');
+
+    const currentCp = getGalacticCasinoDataObject('casinoPoints', ['quantity']) ?? 0;
+    const cost = Number.isFinite(Number(costCp)) ? Math.max(0, Number(costCp)) : 1;
+    if (cost <= 0) {
+        return Promise.resolve(null);
+    }
+
+    const specialReady = String(wheelEl.getAttribute('data-special-ready') || 'false') === 'true';
+    if (specialReady) {
+        showNotification('Claim your prize before spinning again.', 'info', 2500, 'galacticCasino');
+        return Promise.resolve(null);
+    }
+
+    if (currentCp < cost) {
+        showNotification('Not enough CP to spin the wheel.', 'info', 2500, 'galacticCasino');
+        return Promise.resolve(null);
+    }
+
+    const spinning = String(wheelEl.getAttribute('data-spinning') || 'false') === 'true';
+    if (spinning) {
+        return Promise.resolve(null);
+    }
+
+    wheelEl.setAttribute('data-special-ready', 'false');
+    wheelEl.setAttribute('data-prize-selection', 'select');
+
+    wheelEl.setAttribute('data-spinning', 'true');
+    if (spinButton) {
+        spinButton.disabled = true;
+        spinButton.classList.add('red-disabled-text');
+        spinButton.classList.remove('green-ready-text');
+    }
+
+    setGalacticCasinoDataObject(Math.max(0, currentCp - cost), 'casinoPoints', ['quantity']);
+
+    const segmentCount = 13;
+    const segmentAngle = 360 / segmentCount;
+    const selectedIndex = Math.floor(Math.random() * segmentCount);
+    const selectedCenter = (selectedIndex * segmentAngle) + (segmentAngle / 2);
+
+    const currentRotation = Number.parseFloat(String(wheelEl.getAttribute('data-rotation') || '0')) || 0;
+    const normalizedCurrent = ((currentRotation % 360) + 360) % 360;
+
+    const desiredNormalized = ((-selectedCenter % 360) + 360) % 360;
+    const delta = ((desiredNormalized - normalizedCurrent) + 360) % 360;
+
+    const extraSpins = 6;
+    const targetRotation = currentRotation + (extraSpins * 360) + delta;
+
+    face.style.willChange = 'transform';
+
+    const startTime = performance.now();
+
+    return new Promise((resolve) => {
+        const tick = (now) => {
+            const t = Math.min(1, (now - startTime) / durationMs);
+            const eased = easeOutCubic(t);
+            const current = currentRotation + (targetRotation - currentRotation) * eased;
+            face.style.transform = `rotate(${current}deg)`;
+
+            if (t < 1) {
+                requestAnimationFrame(tick);
+            } else {
+                face.style.willChange = '';
+                face.style.transform = `rotate(${Math.round(targetRotation)}deg)`;
+                wheelEl.setAttribute('data-rotation', String(targetRotation));
+                wheelEl.setAttribute('data-spinning', 'false');
+
+                const cpAfter = getGalacticCasinoDataObject('casinoPoints', ['quantity']) ?? 0;
+                if (spinButton) {
+                    const canSpin = cpAfter >= cost;
+                    spinButton.disabled = !canSpin;
+                    spinButton.classList.toggle('green-ready-text', canSpin);
+                    spinButton.classList.toggle('red-disabled-text', !canSpin);
+                }
+
+                if (selectedIndex % 2 === 1) {
+                    showNotification('LOSE!', 'error', 2500, 'galacticCasino');
+                } else if (selectedIndex === 0) {
+                    wheelEl.setAttribute('data-special-ready', 'true');
+                    showNotification('WIN! Special prize segment hit - please select a prize from the dropdown to continue.', 'info', 4000, 'galacticCasino');
+                } else {
+                    const regularPrizes = ['Prize 1', 'Prize 2', 'Prize 3'];
+                    const prizeName = regularPrizes[(selectedIndex - 1) % regularPrizes.length];
+                    wheelEl.setAttribute('data-last-regular-prize', String(prizeName));
+                    showNotification(`WIN! ${prizeName} awarded.`, 'info', 3000, 'galacticCasino');
+                }
+
+                resolve({ selectedIndex });
+            }
+        };
+
+        requestAnimationFrame(tick);
+    });
+}

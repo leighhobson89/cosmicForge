@@ -542,10 +542,44 @@ function galacticCasinoChecks() {
     }
 
     const cpBalanceEl = document.getElementById('galacticCasinoCpBalance');
+    const cpQuantity = getGalacticCasinoDataObject('casinoPoints', ['quantity']) ?? 0;
     if (cpBalanceEl) {
-        const cpQuantity = getGalacticCasinoDataObject('casinoPoints', ['quantity']) ?? 0;
         cpBalanceEl.textContent = String(cpQuantity);
         cpBalanceEl.classList.toggle('green-ready-text', cpQuantity > 0);
+    }
+
+    const spinWheelButton = document.getElementById('galacticCasinoGame2SpinWheelButton');
+    const wheelEl = document.getElementById('galacticCasinoGame2Wheel');
+    const wheelPrizeDropdown = document.getElementById('galacticCasinoGame2PrizeDropdown');
+    const wheelClaimButton = document.getElementById('galacticCasinoGame2ClaimButton');
+    if (wheelEl) {
+        const spinning = String(wheelEl.getAttribute('data-spinning') || 'false') === 'true';
+        const specialReady = String(wheelEl.getAttribute('data-special-ready') || 'false') === 'true';
+        const selection = String(wheelEl.getAttribute('data-prize-selection') || 'select').toLowerCase();
+
+        if (wheelPrizeDropdown) {
+            const enableDropdown = specialReady && !spinning;
+            wheelPrizeDropdown.classList.toggle('red-disabled-text', !enableDropdown);
+            wheelPrizeDropdown.style.pointerEvents = enableDropdown ? 'auto' : 'none';
+
+            if (!enableDropdown) {
+                const dropdownTextEl = wheelPrizeDropdown.querySelector('.dropdown-text');
+                if (dropdownTextEl) {
+                    dropdownTextEl.textContent = 'Select a prize';
+                }
+            }
+        }
+
+        if (wheelClaimButton) {
+            const canClaim = specialReady && !spinning && selection !== 'select';
+            setButtonState(wheelClaimButton, { enabled: canClaim, ready: canClaim });
+        }
+
+        if (spinWheelButton) {
+            const dropdownActive = specialReady && !spinning;
+            const canSpinWheel = cpQuantity >= 1 && !spinning && !dropdownActive;
+            setButtonState(spinWheelButton, { enabled: canSpinWheel, ready: canSpinWheel });
+        }
     }
 
     const purchaseDropdown = document.getElementById('galacticCasinoPurchaseItemDropDown');

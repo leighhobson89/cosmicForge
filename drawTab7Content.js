@@ -57,11 +57,12 @@ import {
     getBlackHoleRechargeMultiplier,
     setBlackHoleRechargeMultiplier
 } from './resourceDataObject.js';
+
+import { playDoubleOrNothing, playWheelOfFortune } from './casino.js';
 import { sfxPlayer } from './audioManager.js';
 import { capitaliseString } from './utilityFunctions.js';
 import { modalRebirthText, modalRebirthHeader } from './descriptions.js';
 import { timerManagerDelta } from './timerManagerDelta.js';
-import { playDoubleOrNothing } from './casino.js';
 
 export function drawTab7Content(heading, optionContentElement) {
     const optionElement = document.getElementById(heading.toLowerCase().replace(/\s(.)/g, (match, group1) => group1.toUpperCase()).replace(/\s+/g, '') + 'Option');
@@ -424,8 +425,132 @@ export function drawTab7Content(heading, optionContentElement) {
             false
         );
 
-        
-        const game2Row = createOptionRow('galacticCasinoGame2Row', null, 'Game 2:', null, null, null, null, null, null, null, null, '', '', null, null, null, null, null, null, 'galacticCasinoGame2', null, false);
+        const wheel = document.createElement('div');
+        wheel.id = 'galacticCasinoGame2Wheel';
+        wheel.classList.add('galactic-casino-roulette-wheel');
+        wheel.setAttribute('data-rotation', '0');
+        wheel.setAttribute('data-spinning', 'false');
+        wheel.setAttribute('data-special-ready', 'false');
+        wheel.setAttribute('data-prize-selection', 'select');
+
+        const wheelFace = document.createElement('div');
+        wheelFace.classList.add('galactic-casino-roulette-face');
+        wheel.appendChild(wheelFace);
+
+        const wheelIndicator = document.createElement('div');
+        wheelIndicator.classList.add('galactic-casino-roulette-indicator');
+        wheel.appendChild(wheelIndicator);
+
+        const game2SpinButton = createButton(
+            'SPIN WHEEL',
+            ['id_galacticCasinoGame2SpinWheelButton', 'option-button', 'red-disabled-text', 'galactic-casino-spin-button', 'galactic-casino-wheel-spin-button'],
+            () => {
+                playWheelOfFortune({ wheelId: 'galacticCasinoGame2Wheel' });
+            },
+            null,
+            null,
+            null,
+            null,
+            null,
+            true,
+            null,
+            'galacticCasinoGame2'
+        );
+
+        const wheelStack = document.createElement('div');
+        wheelStack.classList.add('galactic-casino-wheel-stack');
+        wheelStack.appendChild(wheel);
+        wheelStack.appendChild(game2SpinButton);
+
+        const prizeDropdown = createDropdown(
+            'galacticCasinoGame2PrizeDropdown',
+            [
+                { value: 'select', text: 'Select a prize', type: 'select' },
+                { value: 'prize1', text: 'Prize 1', type: 'prize' },
+                { value: 'prize2', text: 'Prize 2', type: 'prize' },
+                { value: 'prize3', text: 'Prize 3', type: 'prize' }
+            ],
+            'select',
+            (value) => {
+                const w = document.getElementById('galacticCasinoGame2Wheel');
+                if (w) {
+                    w.setAttribute('data-prize-selection', String(value || 'select'));
+                }
+            },
+            ['galactic-casino-wheel-prize-dropdown']
+        );
+
+        prizeDropdown.classList.add('red-disabled-text');
+        prizeDropdown.style.pointerEvents = 'none';
+
+        const claimButton = createButton(
+            'CLAIM',
+            ['id_galacticCasinoGame2ClaimButton', 'option-button', 'red-disabled-text', 'galactic-casino-spin-button'],
+            () => {
+                const w = document.getElementById('galacticCasinoGame2Wheel');
+                const dd = document.getElementById('galacticCasinoGame2PrizeDropdown');
+                const claimBtn = document.getElementById('galacticCasinoGame2ClaimButton');
+                const spinBtn = document.getElementById('galacticCasinoGame2SpinWheelButton');
+
+                if (w) {
+                    w.setAttribute('data-special-ready', 'false');
+                    w.setAttribute('data-prize-selection', 'select');
+                }
+
+                if (dd) {
+                    dd.classList.add('red-disabled-text');
+                    dd.style.pointerEvents = 'none';
+
+                    const dropdownTextEl = dd.querySelector('.dropdown-text');
+                    if (dropdownTextEl) {
+                        dropdownTextEl.textContent = 'Select a prize';
+                    }
+                }
+
+                if (claimBtn) {
+                    setButtonState(claimBtn, { enabled: false, ready: false });
+                }
+
+                if (spinBtn) {
+                    const cpBalance = getGalacticCasinoDataObject('casinoPoints', ['quantity']) ?? 0;
+                    const canSpin = cpBalance >= 1;
+                    setButtonState(spinBtn, { enabled: canSpin, ready: canSpin });
+                }
+            },
+            null,
+            null,
+            null,
+            null,
+            null,
+            true,
+            null,
+            'galacticCasinoGame2'
+        );
+
+        const game2Row = createOptionRow(
+            'galacticCasinoGame2Row',
+            null,
+            'Wheel Of Fortune:',
+            wheelStack,
+            null,
+            null,
+            prizeDropdown,
+            claimButton,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            'galacticCasinoGame2',
+            [true, '20%', '80%'],
+            ['no-left-margin', 'galactic-casino-input-container'],
+            false
+        );
         const game3Row = createOptionRow('galacticCasinoGame3Row', null, 'Game 3:', null, null, null, null, null, null, null, null, '', '', null, null, null, null, null, null, 'galacticCasinoGame3', null, false);
         optionContentElement.appendChild(game1Row);
         optionContentElement.appendChild(game2Row);
@@ -434,6 +559,16 @@ export function drawTab7Content(heading, optionContentElement) {
         const spinButton = document.getElementById('galacticCasinoGame1SpinButton');
         if (spinButton) {
             setButtonState(spinButton, { enabled: false, ready: false });
+        }
+
+        const spinWheelButton = document.getElementById('galacticCasinoGame2SpinWheelButton');
+        if (spinWheelButton) {
+            setButtonState(spinWheelButton, { enabled: false, ready: false });
+        }
+
+        const claimBtn = document.getElementById('galacticCasinoGame2ClaimButton');
+        if (claimBtn) {
+            setButtonState(claimBtn, { enabled: false, ready: false });
         }
 
         const stakeTextArea = document.getElementById('galacticCasinoGame1StakeTextArea');
