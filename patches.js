@@ -129,6 +129,14 @@ export function migrateResourceData(saveData, objectType, options = {}) {
                     saveData = {};
                 }
 
+                if (!saveData.settings || typeof saveData.settings !== 'object') {
+                    saveData.settings = {};
+                }
+
+                if (saveData.settings.baseProbabilityCasino === undefined) {
+                    saveData.settings.baseProbabilityCasino = 0.4;
+                }
+
                 if (!saveData.casinoPoints || typeof saveData.casinoPoints !== 'object') {
                     saveData.casinoPoints = {};
                 }

@@ -3042,6 +3042,46 @@ export function createDropdown(id, options, selectedValue, onChange, classes = [
     return selectContainer;
 }
 
+export function createSpinningDropdown(id, items, defaultValue, classes = []) {
+    const container = document.createElement('div');
+    container.id = id;
+    container.classList.add('casino-spinner');
+
+    if (Array.isArray(classes)) {
+        classes.forEach(className => container.classList.add(className));
+    }
+
+    container.setAttribute('data-value', defaultValue);
+
+    const viewport = document.createElement('div');
+    viewport.classList.add('casino-spinner-viewport');
+    container.appendChild(viewport);
+
+    const track = document.createElement('div');
+    track.classList.add('casino-spinner-track');
+    viewport.appendChild(track);
+
+    const baseItems = Array.isArray(items) ? items : [];
+    const firstMatch = baseItems.find((it) => it?.value === defaultValue) || baseItems[0];
+    const ordered = firstMatch ? [firstMatch, ...baseItems.filter((it) => it !== firstMatch)] : baseItems;
+
+    const repeats = 40;
+    for (let r = 0; r < repeats; r += 1) {
+        ordered.forEach((item) => {
+            const row = document.createElement('div');
+            row.classList.add('casino-spinner-item');
+            if (item?.className) {
+                row.classList.add(item.className);
+            }
+            row.dataset.value = item?.value;
+            row.textContent = item?.text ?? '';
+            track.appendChild(row);
+        });
+    }
+
+    return container;
+}
+
 export function createToggleSwitch(id, isChecked, onChange, extraClasses) {
     const toggleContainer = document.createElement('div');
     toggleContainer.classList.add('toggle-container');

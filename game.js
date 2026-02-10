@@ -587,7 +587,13 @@ function galacticCasinoChecks() {
         ((selectionType === 'resources' && unlockedResources.has(selection)) ||
             (selectionType === 'compounds' && unlockedCompounds.has(selection)));
 
-    let desiredCp = parseInt(purchaseQuantityTextArea.value || '0', 10);
+    const rawDesiredCp = String(purchaseQuantityTextArea.value ?? '');
+    const cleanedDesiredCp = rawDesiredCp.replace(/[^0-9]/g, '');
+    if (cleanedDesiredCp !== rawDesiredCp) {
+        purchaseQuantityTextArea.value = cleanedDesiredCp;
+    }
+
+    let desiredCp = cleanedDesiredCp === '' ? 0 : parseInt(cleanedDesiredCp, 10);
     if (!Number.isFinite(desiredCp) || desiredCp < 0) {
         desiredCp = 0;
     }
@@ -618,7 +624,7 @@ function galacticCasinoChecks() {
 
     if (desiredCp > maxAffordableCp) {
         desiredCp = maxAffordableCp;
-        purchaseQuantityTextArea.value = String(maxAffordableCp);
+        purchaseQuantityTextArea.value = maxAffordableCp > 0 ? String(maxAffordableCp) : '';
     }
 
     const costToPay = selectionIsUnlocked && desiredCp > 0 && Number.isFinite(costPerCp) && costPerCp > 0

@@ -1,4 +1,4 @@
-import { removeTabAttentionIfNoIndicators, createOptionRow, createButton, createDropdown, createTextElement, createTextFieldArea, callPopupModal, showHideModal, createMegaStructureDiagram, createMegaStructureTable, createBlackHole, setButtonState } from './ui.js';
+import { removeTabAttentionIfNoIndicators, createOptionRow, createButton, createDropdown, createTextElement, createTextFieldArea, createSpinningDropdown, callPopupModal, showHideModal, createMegaStructureDiagram, createMegaStructureTable, createBlackHole, setButtonState } from './ui.js';
 import {
     setApLiquidationQuantity,
     setGalacticMarketIncomingQuantity,
@@ -61,6 +61,7 @@ import { sfxPlayer } from './audioManager.js';
 import { capitaliseString } from './utilityFunctions.js';
 import { modalRebirthText, modalRebirthHeader } from './descriptions.js';
 import { timerManagerDelta } from './timerManagerDelta.js';
+import { playDoubleOrNothing } from './casino.js';
 
 export function drawTab7Content(heading, optionContentElement) {
     const optionElement = document.getElementById(heading.toLowerCase().replace(/\s(.)/g, (match, group1) => group1.toUpperCase()).replace(/\s+/g, '') + 'Option');
@@ -379,12 +380,86 @@ export function drawTab7Content(heading, optionContentElement) {
             document.getElementById('galacticCasinoPurchaseQuantityTextArea').value = event.target.value;
         });
 
-        const game1Row = createOptionRow('galacticCasinoGame1Row', null, 'Game 1:', null, null, null, null, null, null, null, null, '', '', null, null, null, null, null, null, null, 'galacticCasinoGame1');
-        const game2Row = createOptionRow('galacticCasinoGame2Row', null, 'Game 2:', null, null, null, null, null, null, null, null, '', '', null, null, null, null, null, null, null, 'galacticCasinoGame2');
-        const game3Row = createOptionRow('galacticCasinoGame3Row', null, 'Game 3:', null, null, null, null, null, null, null, null, '', '', null, null, null, null, null, null, null, 'galacticCasinoGame3');
+        const game1StakeInput = createTextFieldArea('galacticCasinoGame1StakeTextArea', ['galactic-market-textarea', 'galactic-casino-stake-textarea'], 'Stake', '');
+        const game1Spinner = createSpinningDropdown(
+            'galacticCasinoGame1Spinner',
+            [
+                { value: 'win', text: 'WIN', className: 'green-ready-text' },
+                { value: 'lose', text: 'LOSE', className: 'red-disabled-text' }
+            ],
+            'win',
+            ['galactic-casino-spinner']
+        );
+        const game1SpinButton = createButton('SPIN', ['id_galacticCasinoGame1SpinButton', 'option-button', 'red-disabled-text', 'galactic-casino-spin-button'], () => {
+            const stakeEl = document.getElementById('galacticCasinoGame1StakeTextArea');
+            playDoubleOrNothing({
+                stake: stakeEl?.value,
+                spinnerId: 'galacticCasinoGame1Spinner'
+            });
+        }, null, null, null, null, null, true, null, 'galacticCasinoGame1');
+
+        const game1Row = createOptionRow(
+            'galacticCasinoGame1Row',
+            null,
+            'Double Or Nothing:',
+            game1StakeInput,
+            null,
+            game1Spinner,
+            game1SpinButton,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            'galacticCasinoGame1',
+            [true, '20%', '80%'],
+            ['no-left-margin', 'galactic-casino-input-container'],
+            false
+        );
+
+        
+        const game2Row = createOptionRow('galacticCasinoGame2Row', null, 'Game 2:', null, null, null, null, null, null, null, null, '', '', null, null, null, null, null, null, 'galacticCasinoGame2', null, false);
+        const game3Row = createOptionRow('galacticCasinoGame3Row', null, 'Game 3:', null, null, null, null, null, null, null, null, '', '', null, null, null, null, null, null, 'galacticCasinoGame3', null, false);
         optionContentElement.appendChild(game1Row);
         optionContentElement.appendChild(game2Row);
         optionContentElement.appendChild(game3Row);
+
+        const spinButton = document.getElementById('galacticCasinoGame1SpinButton');
+        if (spinButton) {
+            setButtonState(spinButton, { enabled: false, ready: false });
+        }
+
+        const stakeTextArea = document.getElementById('galacticCasinoGame1StakeTextArea');
+        if (stakeTextArea) {
+            stakeTextArea.addEventListener('input', (event) => {
+                const raw = String(event.target.value ?? '');
+                let cleaned = raw.replace(/[^0-9]/g, '');
+                if (cleaned.startsWith('0') && cleaned.length > 1) {
+                    cleaned = cleaned.replace(/^0+/, '');
+                }
+
+                const cpBalance = getGalacticCasinoDataObject('casinoPoints', ['quantity']) ?? 0;
+                const n = cleaned === '' ? 0 : parseInt(cleaned, 10);
+                if (Number.isFinite(n) && n > cpBalance) {
+                    cleaned = cpBalance > 0 ? String(cpBalance) : '';
+                }
+
+                stakeTextArea.value = cleaned;
+
+                const stakeValue = cleaned === '' ? 0 : parseInt(cleaned, 10);
+                const canSpin = Number.isFinite(stakeValue) && stakeValue > 0;
+                const spinButtonEl = document.getElementById('galacticCasinoGame1SpinButton');
+                if (spinButtonEl) {
+                    setButtonState(spinButtonEl, { enabled: canSpin, ready: canSpin });
+                }
+            });
+        }
 
         document.getElementById('galacticCasinoPurchaseCpPreview').textContent = '0';
     }

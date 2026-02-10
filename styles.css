@@ -112,6 +112,14 @@
     margin-left: 5%;
 }
 
+.galactic-casino-stake-textarea.galactic-market-textarea {
+    margin-left: 0;
+}
+
+.galactic-casino-stake-textarea {
+    width: 10vw;
+}
+
 .galactic-casino-input-container {
     justify-content: flex-start;
     gap: 12px;
@@ -125,8 +133,55 @@
     margin-left: 5%;
 }
 
-.galactic-market-summary-text {
+.casino-spinner {
+    pointer-events: none;
+    user-select: none;
+    border: 2px solid;
+    border-radius: 10px;
+    box-sizing: border-box;
+    overflow: hidden;
+    background-color: var(--bg-color);
+}
+
+.casino-spinner-viewport {
+    height: 5vh;
+    width: 100%;
+    display: block;
+    overflow: hidden;
+}
+
+.casino-spinner-track {
+    display: flex;
+    flex-direction: column;
+    transform: translateY(0);
+}
+
+.casino-spinner-item {
+    height: 5vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.galactic-casino-spin-button {
     margin-left: 5%;
+}
+
+#galacticCasinoPurchaseCpPreviewText.galactic-market-summary-text {
+    margin-left: 5% !important;
+}
+
+.galactic-casino-spinner {
+    width: 300px;
+    max-width: 300px;
+    margin-left: 5%;
+}
+
+.galactic-market-summary-text {
+    margin-left: 0 !important;
 }
 
 .galactic-market-summary-text-wide {

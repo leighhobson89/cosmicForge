@@ -1650,6 +1650,11 @@ export function initialiseDescriptions() {
             content2: "",
             updateAt: ""
         },
+        galacticCasinoGame1Row: {
+            content1: "Double or Nothing. Stake CP and spin for a chance to win double your stake.",
+            content2: "",
+            updateAt: ""
+        },
         settingsCurrencySymbolRow: {
             content1: "Change the currency symbol displayed in the game.",
             content2: "",
@@ -2311,7 +2316,7 @@ export function initialiseDescriptions() {
             "Pressing '-' on the numpad doesn't do anything.",
             "Apparently there are Ancient Manuscripts dotted around the Galaxy that point to Ancient Megastructures...",
             "If you are playing in the United States, there is an 87% chance you are American, but only a 66% chance that at least one of your parents is.",
-            "If you think this game is worth paying for, then tough, you can't pay for it, MUHAHAHAH!",
+            "If you think this game is worth paying for, then tough, you can't pay for it, MUHAHAHAH!  Wait, actually there is a way on itch if you get the Downloadable version, Phew!",
             "What do Rome, Italy, Santander, Spain, Chicago, IL, Buffalo, NY, Detroit, MI, Portland, OR, and Boston, MA all have in common? Somewhere in Canada is further South than all of them!"
         ]
     };

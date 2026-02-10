@@ -1006,6 +1006,9 @@ export let oTypePowerPlantBuffs = {
 
 export let galacticCasino = {
     version: 0.90,
+    settings: {
+        baseProbabilityCasino: 0.4,
+    },
     casinoPoints: {
         quantity: 0,
         cpBaseCost: 10000,
