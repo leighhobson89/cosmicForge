@@ -571,7 +571,7 @@ function applySavedCollapsibleStates() {
 function applyInterstellarSidebarDemoLockdownUi() {
     if (!getDemoBuild()) return;
 
-    const optionIdsToLock = ['starDataOption', 'starShipOption', 'fleetHangarOption', 'coloniseOption'];
+    const optionIdsToLock = ['starDataOption', 'starShipOption', 'fleetHangarOption', 'coloniseOption', 'galacticCasinoOption'];
     optionIdsToLock.forEach(id => {
         const el = document.getElementById(id);
         if (!el) return;

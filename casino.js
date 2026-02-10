@@ -723,7 +723,7 @@ export function playWheelOfFortune({ wheelId, costCp = 1, durationMs = 5000 } = 
     setGalacticCasinoDataObject(Math.max(0, currentCp - cost), 'casinoPoints', ['quantity']);
     const segmentCount = 13;
     const segmentAngle = 360 / segmentCount;
-    globalThis.__wheelForceSpecial = true;
+    //globalThis.__wheelForceSpecial = true; debug to win special prize
     const forcedIndexRaw = globalThis.__wheelForceIndex;
     const forcedIndex = Number.isFinite(Number(forcedIndexRaw)) ? Math.floor(Number(forcedIndexRaw)) : null;
     const selectedIndex = globalThis.__wheelForceSpecial
@@ -764,7 +764,7 @@ export function playWheelOfFortune({ wheelId, costCp = 1, durationMs = 5000 } = 
                     spinButton.classList.toggle('red-disabled-text', !canSpin);
                 }
                 if (selectedIndex % 2 === 1) {
-                    showNotification('LOSE!', 'error', 2000, 'galacticCasino');
+                    showNotification('LOSE! Better luck next time.', 'error', 2000, 'galacticCasino');
                 } else if (selectedIndex === 0) {
                     wheelEl.setAttribute('data-special-ready', 'true');
                     showNotification('WIN! Special Prize! - Select a Prize from the dropdown to continue.', 'info', 3500, 'galacticCasino');
@@ -772,21 +772,21 @@ export function playWheelOfFortune({ wheelId, costCp = 1, durationMs = 5000 } = 
                     const prize = awardRegularPrize(cost);
 
                     if (prize?.type === 'resources' || prize?.type === 'compounds') {
-                        showNotification(`Won! ${prize.amount} ${titleCaseFromKey(prize.key)}`, 'info', 3500, 'galacticCasino');
+                        showNotification(`WON! ${prize.amount} ${titleCaseFromKey(prize.key)}`, 'info', 3500, 'galacticCasino');
                     } else if (prize?.type === 'cash') {
-                        showNotification(`Won! ${prize.amount} Cash`, 'info', 3500, 'galacticCasino');
+                        showNotification(`WON! ${prize.amount} Cash`, 'info', 3500, 'galacticCasino');
                     } else if (prize?.type === 'research') {
-                        showNotification(`Won! ${prize.amount} Research Points`, 'info', 3500, 'galacticCasino');
+                        showNotification(`WON! ${prize.amount} Research Points`, 'info', 3500, 'galacticCasino');
                     } else if (prize?.type === 'time') {
                         const label = prize?.timerLabel || 'Timer';
                         const fromS = Number(prize?.oldSeconds ?? 0);
                         const toS = Number(prize?.newSeconds ?? 0);
-                        showNotification(`Won! ${label}: Time reduced from ${fromS}s to ${toS}s`, 'info', 3500, 'galacticCasino');
+                        showNotification(`WON! ${label}: Time reduced from ${fromS}s to ${toS}s`, 'info', 3500, 'galacticCasino');
                     } else if (prize?.type === 'cp_fallback' || prize?.type === 'cp') {
                         const amount = prize?.amount ?? 0;
-                        showNotification(`Won! ${amount} CP`, 'info', 3500, 'galacticCasino');
+                        showNotification(`WON! ${amount} CP`, 'info', 3500, 'galacticCasino');
                     } else {
-                        showNotification('Won!', 'info', 2500, 'galacticCasino');
+                        showNotification('WON!', 'info', 2500, 'galacticCasino');
                     }
                 }
 
