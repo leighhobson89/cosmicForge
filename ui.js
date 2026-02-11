@@ -9107,7 +9107,7 @@ function addWackyEffectsEventListeners() {
         }
 
         if (effectItem === 'feedback') {
-            setActivatedWackyNewsEffectsArray(effectItem, 'good');
+            setActivatedWackyNewsEffectsArray(effectItem, getDemoBuild() ? 'good (demo)' : 'good');
             if (getFeedbackCanBeRequested()) {
                 trackAnalyticsEvent('feedback_thumb_up', {
                     source: 'news_ticker'
@@ -9157,7 +9157,7 @@ function addWackyEffectsEventListeners() {
             }
         
             if (effectItem === 'feedback') {
-                setActivatedWackyNewsEffectsArray(effectItem, 'bad');
+                setActivatedWackyNewsEffectsArray(effectItem, getDemoBuild() ? 'bad (demo)' : 'bad');
                 if (getFeedbackCanBeRequested()) {
                     trackAnalyticsEvent('feedback_thumb_down', {
                         source: 'news_ticker'

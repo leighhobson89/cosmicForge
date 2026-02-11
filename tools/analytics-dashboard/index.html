@@ -99,6 +99,30 @@
           </table>
         </div>
 
+        <div class="card span-6" data-panel-id="casinoGames">
+          <h2>Casino - Games Played</h2>
+          <table>
+            <thead><tr><th>Game</th><th>Plays</th></tr></thead>
+            <tbody id="casinoGames"></tbody>
+          </table>
+        </div>
+
+        <div class="card span-6" data-panel-id="casinoVisits">
+          <h2>Casino - Visits &amp; Time</h2>
+          <table>
+            <thead><tr><th>Metric</th><th>Value</th></tr></thead>
+            <tbody id="casinoVisits"></tbody>
+          </table>
+        </div>
+
+        <div class="card span-12" data-panel-id="casinoPrizes">
+          <h2>Casino - Prizes Won</h2>
+          <table>
+            <thead><tr><th>Prize</th><th>Wins</th></tr></thead>
+            <tbody id="casinoPrizes"></tbody>
+          </table>
+        </div>
+
         <div class="card span-12">
           <h2>Feedback Comments</h2>
           <div id="feedbackComments" class="mono" style="white-space: pre-wrap; max-height: 260px; overflow: auto;"></div>
@@ -564,6 +588,9 @@
           feedbackRefused: 0,
           feedbackComments: [],
 
+          casinoGamePlayCounts: {},
+          casinoPrizeWinCounts: {},
+
           jsErrorSignatures: {},
           hiddenJsErrorSignatures: {},
 
@@ -737,6 +764,18 @@
 
         if (e.event_name === 'feedback_thumb_down') {
           rollup.feedbackThumbDown = (rollup.feedbackThumbDown || 0) + 1;
+        }
+
+        if (e.event_name === 'casino_game_played') {
+          const gameId = normKey(payload.game_id, 'unknown');
+          if (!rollup.casinoGamePlayCounts || typeof rollup.casinoGamePlayCounts !== 'object') rollup.casinoGamePlayCounts = {};
+          inc(rollup.casinoGamePlayCounts, gameId, 1);
+        }
+
+        if (e.event_name === 'casino_prize_won') {
+          const prizeKey = normKey(payload.prize_key, 'unknown');
+          if (!rollup.casinoPrizeWinCounts || typeof rollup.casinoPrizeWinCounts !== 'object') rollup.casinoPrizeWinCounts = {};
+          inc(rollup.casinoPrizeWinCounts, prizeKey, 1);
         }
 
         if (e.event_name === 'feedback_response') {
@@ -1052,6 +1091,81 @@
           { key: 'Accepted (SEND FEEDBACK)', value: rollup.feedbackAccepted || 0 },
           { key: 'Refused (NO THANKS)', value: rollup.feedbackRefused || 0 },
         ], fmtInt);
+
+        const casinoGameRows = ['game1_double_or_nothing', 'game2_wheel', 'game2_wheel_special', 'game3_hilo']
+          .map((id) => ({ key: id, value: rollup.casinoGamePlayCounts?.[id] || 0 }));
+        renderRows('casinoGames', casinoGameRows, fmtInt);
+
+        const casinoViewKeys = Object.keys(rollup.viewCounts || {}).filter((k) => String(k).endsWith(':galactic casino'));
+        const casinoVisitCount = casinoViewKeys.reduce((sum, k) => sum + (rollup.viewCounts?.[k] || 0), 0);
+
+        const casinoDurationKeys = Object.keys(rollup.viewDurationMs || {}).filter((k) => String(k).endsWith(':galactic casino'));
+        const casinoDurationMs = casinoDurationKeys.reduce((sum, k) => sum + (rollup.viewDurationMs?.[k] || 0), 0);
+
+        renderRows('casinoVisits', [
+          { key: 'Visits', value: casinoVisitCount },
+          { key: 'Time spent', value: casinoDurationMs },
+        ], (v) => (typeof v === 'number' ? (v === casinoDurationMs ? fmtDuration(v) : fmtInt(v)) : '-'));
+
+        const knownCasinoPrizeKeys = [
+          'game1_stake_doubled',
+          'cp',
+          'cash',
+          'research',
+          'time',
+          'resources',
+          'compounds',
+          'special_100cp',
+          'special_100k_research',
+          'special_starship_warp',
+          'special_rocket_warp',
+          'special_finish_rocket_journey',
+          'special_finish_starship_journey',
+          'special_telescope_discover_asteroid',
+          'special_telescope_finish_asteroid_search',
+          'special_telescope_finish_star_study',
+          'special_telescope_finish_void_pillage',
+          'special_double_hydrogen',
+          'special_double_carbon',
+          'special_double_silicon',
+          'special_double_iron',
+          'special_double_sodium',
+          'special_double_steel',
+          'special_double_concrete',
+          'special_double_titanium',
+          'hilo_resource_topup',
+          'hilo_compound_topup',
+          'hilo_cash_boost_small',
+          'hilo_cash_boost_medium',
+          'hilo_cash_boost_large',
+          'hilo_cash_flat',
+          'hilo_cash_mega',
+          'hilo_research_boost_small',
+          'hilo_research_boost_medium',
+          'hilo_research_boost_large',
+          'hilo_research_flat',
+          'hilo_research_big_flat',
+          'hilo_research_mega',
+          'hilo_cp_5',
+          'hilo_cp_10',
+          'hilo_cp_25',
+          'hilo_cp_50',
+          'hilo_cp_75',
+          'hilo_cp_100',
+          'hilo_cp_150',
+          'hilo_timewarp_25_20000',
+          'hilo_timewarp_50_15000',
+          'hilo_timewarp_75_15000',
+          'hilo_timewarp_100_12000',
+          'hilo_timewarp_200_20000',
+        ];
+
+        const seenCasinoPrizeKeys = Object.keys(rollup.casinoPrizeWinCounts || {});
+        const prizeKeySet = new Set([...knownCasinoPrizeKeys, ...seenCasinoPrizeKeys]);
+        const casinoPrizeRows = Array.from(prizeKeySet)
+          .map((k) => ({ key: k, value: rollup.casinoPrizeWinCounts?.[k] || 0 }))
+          .sort((a, b) => (b.value - a.value) || a.key.localeCompare(b.key));
+        renderRows('casinoPrizes', casinoPrizeRows, fmtInt);
 
         const comments = Array.isArray(rollup.feedbackComments) ? rollup.feedbackComments : [];
         $('feedbackComments').textContent = comments.length

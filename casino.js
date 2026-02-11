@@ -50,6 +50,7 @@ import {
     getAsteroidArray,
     getPlayerPhilosophy,
 } from './constantsAndGlobalVars.js';
+import { trackAnalyticsEvent } from './analytics.js';
 
 export function getBaseProbabilityCasino() {
     const value = getGalacticCasinoDataObject('settings', ['baseProbabilityCasino']);
@@ -418,7 +419,19 @@ export function claimWheelSpecialPrize({ wheelId } = {}) {
     const selection = String(wheelEl.getAttribute('data-prize-selection') || 'select').toLowerCase();
     if (!selection || selection === 'select') return null;
 
-    return claimCasinoSpecialPrizeByKey(selection, { notify: true });
+    const claimed = claimCasinoSpecialPrizeByKey(selection, { notify: true });
+    if (claimed) {
+        trackAnalyticsEvent('casino_prize_won', {
+            game_id: 'game2_wheel_special',
+            prize_key: selection,
+            awarded_type: claimed.type ?? null,
+            awarded_key: claimed.key ?? null,
+            amount: claimed.amount ?? null,
+            old_quantity: claimed.oldQuantity ?? null,
+            new_quantity: claimed.newQuantity ?? null,
+        }, { immediate: true, flushReason: 'casino' });
+    }
+    return claimed;
 }
 
 function awardCpPrize(cost) {
@@ -759,6 +772,10 @@ export function spinDoubleOrNothing(spinnerId, durationMs = 5000) {
 }
 
 export function playDoubleOrNothing({ stake, spinnerId }) {
+    trackAnalyticsEvent('casino_game_played', {
+        game_id: 'game1_double_or_nothing'
+    }, { immediate: true, flushReason: 'casino' });
+
     const currentCp = getGalacticCasinoDataObject('casinoPoints', ['quantity']) ?? 0;
     const stakeInt = parseInt(String(stake ?? '0'), 10);
     const desiredStake = Number.isFinite(stakeInt) ? Math.max(0, stakeInt) : 0;
@@ -787,10 +804,17 @@ export function playDoubleOrNothing({ stake, spinnerId }) {
                 const cpAfterSpin = getGalacticCasinoDataObject('casinoPoints', ['quantity']) ?? 0;
                 setGalacticCasinoDataObject(Math.max(0, cpAfterSpin + (desiredStake * 2)), 'casinoPoints', ['quantity']);
                 showNotification('WIN! Stake doubled.', 'info', 2500, 'galacticCasino');
+
+                trackAnalyticsEvent('casino_prize_won', {
+                    game_id: 'game1_double_or_nothing',
+                    prize_key: 'game1_stake_doubled',
+                    amount: desiredStake * 2,
+                }, { immediate: true, flushReason: 'casino' });
             } else {
                 showNotification('LOSE! Better luck next time.', 'error', 2500, 'galacticCasino');
             }
         })
+
         .finally(() => {
             if (spinButton) {
                 const stakeEl = document.getElementById('galacticCasinoGame1StakeTextArea');
@@ -806,10 +830,15 @@ export function playDoubleOrNothing({ stake, spinnerId }) {
 }
 
 export function playWheelOfFortune({ wheelId, costCp = 1, durationMs = 5000 } = {}) {
+    trackAnalyticsEvent('casino_game_played', {
+        game_id: 'game2_wheel'
+    }, { immediate: true, flushReason: 'casino' });
+
     const id = String(wheelId || '');
     if (!id) {
         return Promise.resolve(null);
     }
+
     const wheelEl = document.getElementById(id);
     if (!wheelEl) {
         return Promise.resolve(null);
@@ -846,6 +875,7 @@ export function playWheelOfFortune({ wheelId, costCp = 1, durationMs = 5000 } = 
         spinButton.classList.remove('green-ready-text');
     }
     setGalacticCasinoDataObject(Math.max(0, currentCp - cost), 'casinoPoints', ['quantity']);
+
     const segmentCount = 16;
     const segmentAngle = 360 / segmentCount;
 
@@ -865,6 +895,7 @@ export function playWheelOfFortune({ wheelId, costCp = 1, durationMs = 5000 } = 
     const extraSpins = 6;
     const targetRotation = currentRotation + (extraSpins * 360) + delta;
     face.style.willChange = 'transform';
+
     const startTime = performance.now();
     return new Promise((resolve) => {
         const tick = (now) => {
@@ -897,6 +928,20 @@ export function playWheelOfFortune({ wheelId, costCp = 1, durationMs = 5000 } = 
                     showNotification('LOSE! Better luck next time.', 'error', 2000, 'galacticCasino');
                 } else {
                     const prize = awardRegularPrize(cost);
+
+                    if (prize) {
+                        trackAnalyticsEvent('casino_prize_won', {
+                            game_id: 'game2_wheel',
+                            prize_key: prize.type === 'resources' || prize.type === 'compounds'
+                                ? `${prize.type}:${prize.key}`
+                                : String(prize.type || 'unknown'),
+                            awarded_type: prize.type ?? null,
+                            awarded_key: prize.key ?? null,
+                            amount: prize.amount ?? null,
+                            old_seconds: prize.oldSeconds ?? null,
+                            new_seconds: prize.newSeconds ?? null,
+                        }, { immediate: true, flushReason: 'casino' });
+                    }
 
                     if (prize?.type === 'resources' || prize?.type === 'compounds') {
                         showNotification(`WON! ${prize.amount} ${titleCaseFromKey(prize.key)}`, 'info', 3500, 'galacticCasino');

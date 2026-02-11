@@ -1244,6 +1244,11 @@ export function drawTab7Content(heading, optionContentElement) {
                         showNotification('Not enough CP to play.', 'info', 2500, 'galacticCasino');
                         return;
                     }
+
+                    trackAnalyticsEvent('casino_game_played', {
+                        game_id: 'game3_hilo'
+                    }, { immediate: true, flushReason: 'casino' });
+
                     setGalacticCasinoDataObject(Math.max(0, cpBalance - 5), 'casinoPoints', ['quantity']);
                     const deck = createRandomHiloDeck(9);
                     setHiloActiveUi(deck);
@@ -1259,6 +1264,18 @@ export function drawTab7Content(heading, optionContentElement) {
                     const prizeNameRaw = String(game3HiloContainer.getAttribute('data-hilo-tier-prize') || '---') || '---';
                     const prizeKey = String(game3HiloContainer.getAttribute('data-hilo-tier-prize-key') || '');
                     const awarded = awardHiloPrize({ key: prizeKey });
+
+                    if (awarded) {
+                        trackAnalyticsEvent('casino_prize_won', {
+                            game_id: 'game3_hilo',
+                            prize_key: prizeKey || prizeNameRaw,
+                            awarded_type: awarded.type ?? null,
+                            awarded_key: awarded.key ?? null,
+                            amount: awarded.amount ?? null,
+                            multiplier: awarded.multiplier ?? null,
+                            duration_ms: awarded.durationMs ?? null,
+                        }, { immediate: true, flushReason: 'casino' });
+                    }
                     const prizeName = getHiloNotificationPrizeName(prizeNameRaw, awarded);
                     const details = formatHiloAwardDetails(awarded);
                     const suffix = shouldAppendHiloAwardDetails(prizeName, awarded, details) ? ` - ${details}` : '';
