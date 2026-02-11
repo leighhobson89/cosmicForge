@@ -245,6 +245,19 @@ export function claimCasinoSpecialPrizeByKey(selection, { notify = true } = {}) 
     const key = String(selection || '').toLowerCase();
     if (!key || key === 'select') return null;
 
+    const awardCpFallback = (amount) => {
+        const add = Number(amount);
+        if (!Number.isFinite(add) || add <= 0) {
+            return null;
+        }
+        const current = getGalacticCasinoDataObject('casinoPoints', ['quantity']) ?? 0;
+        setGalacticCasinoDataObject(Math.max(0, current + add), 'casinoPoints', ['quantity']);
+        if (notify) {
+            showNotification(`Special Prize Claimed! ${Math.floor(add)}CP`, 'info', 3500, 'galacticCasino');
+        }
+        return { type: 'cp', amount: Math.floor(add) };
+    };
+
     if (key === 'special_100cp') {
         const current = getGalacticCasinoDataObject('casinoPoints', ['quantity']) ?? 0;
         setGalacticCasinoDataObject(Math.max(0, current + 100), 'casinoPoints', ['quantity']);
@@ -270,7 +283,7 @@ export function claimCasinoSpecialPrizeByKey(selection, { notify = true } = {}) 
         const unlockedCompounds = new Set((getUnlockedCompoundsArray?.() || []).map((v) => String(v || '').toLowerCase()));
         const isUnlocked = unlockedResources.has(stockKey) || unlockedCompounds.has(stockKey);
         if (!isUnlocked) {
-            return null;
+            return awardCpFallback(20);
         }
 
         const categoryByKey = {
@@ -283,7 +296,10 @@ export function claimCasinoSpecialPrizeByKey(selection, { notify = true } = {}) 
         const category = categoryByKey[stockKey] || (unlockedCompounds.has(stockKey) ? 'compounds' : 'resources');
 
         const result = doubleStockQuantity(category, stockKey);
-        if (result && notify) {
+        if (!result) {
+            return awardCpFallback(20);
+        }
+        if (notify) {
             showNotification(`Special Prize Claimed! ${titleCaseFromKey(stockKey)} doubled`, 'info', 3500, 'galacticCasino');
         }
         return result;
@@ -833,7 +849,7 @@ export function playWheelOfFortune({ wheelId, costCp = 1, durationMs = 5000 } = 
     const segmentCount = 16;
     const segmentAngle = 360 / segmentCount;
 
-    //globalThis.__wheelForceSpecial = true; //debug to win special prize
+    globalThis.__wheelForceSpecial = true; //debug to win special prize
     const forcedIndexRaw = globalThis.__wheelForceIndex;
     const forcedIndex = Number.isFinite(Number(forcedIndexRaw)) ? Math.floor(Number(forcedIndexRaw)) : null;
     const selectedIndex = globalThis.__wheelForceSpecial

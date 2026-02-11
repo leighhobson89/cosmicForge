@@ -7136,10 +7136,9 @@ function ascendencyBuffChecks() {
 }
 
 function galacticMarketChecks() {
-/*     if (getTechUnlockedArray().includes('apAwardedThisRun') && !getGalacticCasinoUnlocked()) {
+    if (getTechUnlockedArray().includes('apAwardedThisRun') && !getGalacticCasinoUnlocked()) {
         setGalacticCasinoUnlocked(true);
     }
-// ENABLE VISIBILITY HERE */
 
     if (getCurrentTab()[1].includes('Galactic') && getCurrentOptionPane() === 'galactic market') {
         const galacticMarketOutgoingStockTypeDropDown = document.getElementById('galacticMarketOutgoingStockTypeDropDown');
@@ -13269,6 +13268,8 @@ export function rebirth() {
     resetAchievementsOnRebirth();
     autoGrantAchievementsOnRebirth();
     resetResourceDataObjectOnRebirthAndAddApAndPermanentBuffsBack(); //resets resource data, adds permanent buffs, and adds AP back in
+
+    setGalacticCasinoDataObject(0, 'casinoPoints', ['quantity']);
 
     const hasNonExhaustivePerk =
         (getAscendencyBuffDataObject()?.nonExhaustiveResources?.boughtYet > 0) ||
