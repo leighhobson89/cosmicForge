@@ -1,4 +1,4 @@
-import { getGameActiveCountTime, getTimerRateRatio, getSaveName, getRocketUserName, getDestinationStar, getCurrencySymbol, getPlayerPhilosophy, getRepeatableTechMultipliers, getStatRun, getCurrentRunIsMegaStructureRun } from "./constantsAndGlobalVars.js";
+import { getGameActiveCountTime, getTimerRateRatio, getSaveName, getRocketUserName, getDestinationStar, getCurrencySymbol, getPlayerPhilosophy, getRepeatableTechMultipliers, getStatRun, getCurrentRunIsMegaStructureRun, getPriceCasinoGame2, getPriceCasinoGame3 } from "./constantsAndGlobalVars.js";
 import { calculateAndAddExtraAPFromPhilosophyRepeatable, formatNumber } from "./game.js";
 import { getAchievementDataObject, getResourceDataObject } from "./resourceDataObject.js";
 import { capitaliseWordsWithRomanNumerals } from "./utilityFunctions.js";
@@ -1656,12 +1656,12 @@ export function initialiseDescriptions() {
             updateAt: ""
         },
         galacticCasinoGame2Row: {
-            content1: "Wheel Of Fortune. Spend CP to spin the wheel and test your luck.",
+            content1: `Wheel Of Fortune. Spend CP to spin the wheel and test your luck -&nbsp;<strong>${getPriceCasinoGame2()}CP</strong>`,
             content2: "",
             updateAt: ""
         },
         galacticCasinoGame3Row: {
-            content1: "Higher Or Lower. Spend 5CP per game. Choose Higher or Lower and cash out for the prize shown at any stage.",
+            content1: `Higher Or Lower. Choose Higher or Lower and cash out for the prize shown at any stage -&nbsp;<strong>${getPriceCasinoGame3()}CP</strong>`,
             content2: "",
             updateAt: ""
         },

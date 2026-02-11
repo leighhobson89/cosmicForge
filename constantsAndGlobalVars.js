@@ -60,6 +60,8 @@ export const OFFLINE_GAINS_RATE = 0.334;
 export const ENEMY_FLEET_SPEED_AIR = 5;
 export const ENEMY_FLEET_SPEED_LAND = 2;
 export const ENEMY_FLEET_SPEED_SEA = 1;
+export const PRICE_CASINO_GAME_2 = 1;
+export const PRICE_CASINO_GAME_3 = 5;
 export const AP_BASE_SELL_PRICE = 100000;
 export const AP_BASE_BUY_PRICE = 1000000;
 export const CASH_LIQUIDATION_MODIFIER = 10;
@@ -4085,6 +4087,14 @@ export function setHasClickedOutgoingOptionGalacticMarket(value) {
 
 export function getHasClickedOutgoingOptionGalacticMarket(value) {
     return hasClickedOutgoingOptionGalacticMarket;
+}
+
+export function getPriceCasinoGame2() {
+    return PRICE_CASINO_GAME_2;
+}
+
+export function getPriceCasinoGame3() {
+    return PRICE_CASINO_GAME_3;
 }
 
 export function setGalacticMarketIncomingQuantity(value) {
