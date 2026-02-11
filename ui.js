@@ -2875,9 +2875,13 @@ export function createOptionRow(
     const inputContainer = document.createElement('div');
     inputContainer.classList.add('input-container');
     if (specialInputContainerClasses) {
-        specialInputContainerClasses.forEach(className => {
-            inputContainer.classList.add(className);
-        });
+        if (Array.isArray(specialInputContainerClasses)) {
+            specialInputContainerClasses.forEach(className => {
+                if (className) inputContainer.classList.add(className);
+            });
+        } else {
+            inputContainer.classList.add(String(specialInputContainerClasses));
+        }
     }
 
     if (noDescriptionContainer) {
