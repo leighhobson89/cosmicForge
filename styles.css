@@ -291,8 +291,8 @@
     width: 42px;
     height: 58px;
     border-radius: 8px;
-    border: 2px solid var(--container-border-color);
-    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid var(--text-color);
+    background: var(--text-color);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.35);
     display: flex;
     align-items: center;
@@ -302,32 +302,44 @@
 }
 
 .galactic-casino-hilo-card-value {
+    position: absolute;
+    inset: 0;
     font-weight: bold;
-    font-size: 20px;
     line-height: 1;
 }
 
 .galactic-casino-hilo-card-rank {
-    font-size: 40px;
+    position: absolute;
+    top: 4px;
+    left: 5px;
+    font-size: 38px;
+    margin-right: 4px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-variant-numeric: proportional-nums lining-nums;
+    font-feature-settings: "zero" 0;
+    letter-spacing: -0.04em;
+    -webkit-text-stroke: 1px var(--container-bg-color);
 }
 
 .galactic-casino-hilo-card-suit {
-    font-size: 30px;
-    margin-left: -2px;
+    position: absolute;
+    right: 2px;
+    bottom: 2px;
+    font-size: 18px;
+    -webkit-text-stroke: 1px var(--container-bg-color);
 }
 
 .galactic-casino-hilo-card-back {
-    background: linear-gradient(180deg, rgba(18, 96, 134, 1), rgba(13, 66, 92, 1));
-    border-color: rgba(255, 255, 255, 0.25);
+    background-color: var(--container-bg-color);
+    border-color: var(--text-color);
+    background-image: var(--hilo-card-back-image);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 80% 80%;
 }
 
 .galactic-casino-hilo-card-back::after {
-    content: '';
-    position: absolute;
-    inset: 8px;
-    border-radius: 6px;
-    border: 2px solid rgba(255, 255, 255, 0.65);
-    transform: rotate(45deg);
+    content: none;
 }
 
 #galacticCasinoGame3PrizePreviewText.galactic-market-summary-text {

@@ -1,4 +1,4 @@
-import { removeTabAttentionIfNoIndicators, createOptionRow, createButton, createDropdown, createTextElement, createTextFieldArea, createSpinningDropdown, callPopupModal, showHideModal, createMegaStructureDiagram, createMegaStructureTable, createBlackHole, setButtonState } from './ui.js';
+import { removeTabAttentionIfNoIndicators, createOptionRow, createButton, createDropdown, createTextElement, createTextFieldArea, createSpinningDropdown, callPopupModal, showHideModal, createMegaStructureDiagram, createMegaStructureTable, createBlackHole, setButtonState, showNotification } from './ui.js';
 import {
     setApLiquidationQuantity,
     setGalacticMarketIncomingQuantity,
@@ -32,7 +32,8 @@ import {
     setAchievementFlagArray,
     getMinimumBlackHoleChargeTime,
     getBlackHoleAlwaysOn,
-    setGalacticCasinoPurchaseItem
+    setGalacticCasinoPurchaseItem,
+    getCurrentTheme
 } from './constantsAndGlobalVars.js';
 import { purchaseBuff, buyCasinoPoints, galacticMarketLiquidateForAp, galacticMarketSellApForCash, galacticMarketTrade, rebirth, startBlackHoleChargeTimer, timeWarp } from './game.js';
 import { trackAnalyticsEvent } from './analytics.js';
@@ -41,6 +42,7 @@ import {
     getResourceDataObject,
     setResourceDataObject,
     getGalacticCasinoDataObject,
+    setGalacticCasinoDataObject,
     getBlackHoleResearchDone,
     getBlackHoleResearchPrice,
     setBlackHoleResearchDone,
@@ -570,7 +572,7 @@ export function drawTab7Content(heading, optionContentElement) {
         game3CardRow.id = 'galacticCasinoGame3CardRow';
         game3CardRow.classList.add('galactic-casino-hilo-card-row');
 
-        for (let i = 0; i < 6; i += 1) {
+        for (let i = 0; i < 9; i += 1) {
             const card = document.createElement('div');
             card.classList.add('galactic-casino-hilo-card');
             card.setAttribute('data-card-index', String(i));
@@ -623,6 +625,13 @@ export function drawTab7Content(heading, optionContentElement) {
         game3HiloContainer.id = 'galacticCasinoGame3HiloContainer';
         game3HiloContainer.classList.add('galactic-casino-hilo-container');
 
+        let hiloEndResetTimeoutId = null;
+
+        document.documentElement.style.setProperty(
+            '--hilo-card-back-image',
+            `url(./images/achievements/${getCurrentTheme()}/images/studyAllStarsInOneRun.png)`
+        );
+
         const game3ButtonRow = document.createElement('div');
         game3ButtonRow.id = 'galacticCasinoGame3ButtonRow';
         game3ButtonRow.classList.add('galactic-casino-hilo-button-row');
@@ -632,10 +641,262 @@ export function drawTab7Content(heading, optionContentElement) {
         game3HiloContainer.appendChild(game3CardRow);
         game3HiloContainer.appendChild(game3ButtonRow);
 
+        const rankLabelFromValue = (value) => {
+            const v = Number(value);
+            if (v === 11) return 'J';
+            if (v === 12) return 'Q';
+            if (v === 13) return 'K';
+            if (v === 14) return 'A';
+            return String(v);
+        };
+
+        const createRandomHiloDeck = (count) => {
+            const suits = ['♦', '♠', '♣', '♥'];
+            const values = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
+
+            const pool = [];
+            suits.forEach((suit) => {
+                values.forEach((value) => {
+                    pool.push({ value, suit });
+                });
+            });
+
+            const deck = [];
+            const desired = Math.min(Math.max(0, Number(count) || 0), pool.length);
+            for (let i = 0; i < desired; i += 1) {
+                const prev = deck[i - 1];
+                const eligible = prev
+                    ? pool.filter((c) => c.value !== prev.value)
+                    : pool;
+
+                const source = eligible.length > 0 ? eligible : pool;
+                const chosen = source[Math.floor(Math.random() * source.length)];
+                if (!chosen) {
+                    break;
+                }
+
+                deck.push(chosen);
+
+                const idx = pool.findIndex((c) => c.value === chosen.value && c.suit === chosen.suit);
+                if (idx >= 0) {
+                    pool.splice(idx, 1);
+                }
+            }
+
+            return deck;
+        };
+
+        const setCardHidden = (cardEl) => {
+            if (!cardEl) return;
+            cardEl.classList.add('galactic-casino-hilo-card-back');
+            const valueEl = cardEl.querySelector('.galactic-casino-hilo-card-value');
+            if (valueEl) {
+                valueEl.remove();
+            }
+        };
+
+        const setCardRevealed = (cardEl, card) => {
+            if (!cardEl || !card) return;
+            cardEl.classList.remove('galactic-casino-hilo-card-back');
+
+            const existing = cardEl.querySelector('.galactic-casino-hilo-card-value');
+            if (existing) {
+                existing.remove();
+            }
+
+            const valueEl = document.createElement('div');
+            valueEl.classList.add('galactic-casino-hilo-card-value');
+            const rank = rankLabelFromValue(card.value);
+            const suit = card.suit;
+
+            const isRed = suit === '♦' || suit === '♥';
+            if (isRed) {
+                valueEl.style.color = 'red';
+            } else {
+                valueEl.classList.add('green-ready-text');
+            }
+
+            valueEl.innerHTML = `<span class="galactic-casino-hilo-card-rank">${rank}</span><span class="galactic-casino-hilo-card-suit">${suit}</span>`;
+            cardEl.appendChild(valueEl);
+        };
+
+        const setHiloIdleUi = () => {
+            if (hiloEndResetTimeoutId) {
+                clearTimeout(hiloEndResetTimeoutId);
+                hiloEndResetTimeoutId = null;
+            }
+            game3HiloContainer.setAttribute('data-hilo-state', 'idle');
+            game3HiloContainer.setAttribute('data-hilo-index', '0');
+            game3HiloContainer.setAttribute('data-hilo-deck', '');
+            game3HiloContainer.setAttribute('data-hilo-has-guessed', 'false');
+
+            const prizePreview = document.getElementById('galacticCasinoGame3PrizePreview');
+            if (prizePreview) {
+                prizePreview.textContent = '---';
+            }
+
+            const cards = Array.from(game3CardRow.querySelectorAll('.galactic-casino-hilo-card'));
+            cards.forEach(setCardHidden);
+
+            const cashOutBtn = document.getElementById('galacticCasinoGame3CashOutButton');
+            if (cashOutBtn) {
+                cashOutBtn.textContent = 'PLAY';
+                setButtonState(cashOutBtn, { enabled: true, ready: true });
+            }
+
+            const lowerBtn = document.getElementById('galacticCasinoGame3LowerButton');
+            const higherBtn = document.getElementById('galacticCasinoGame3HigherButton');
+            setButtonState(lowerBtn, { enabled: false, ready: false });
+            setButtonState(higherBtn, { enabled: false, ready: false });
+        };
+
+        const setHiloActiveUi = (deck) => {
+            game3HiloContainer.setAttribute('data-hilo-state', 'active');
+            game3HiloContainer.setAttribute('data-hilo-index', '0');
+            game3HiloContainer.setAttribute('data-hilo-deck', JSON.stringify(deck || []));
+            game3HiloContainer.setAttribute('data-hilo-has-guessed', 'false');
+
+            const cashOutBtn = document.getElementById('galacticCasinoGame3CashOutButton');
+            if (cashOutBtn) {
+                cashOutBtn.textContent = 'CASH OUT';
+                setButtonState(cashOutBtn, { enabled: false, ready: false });
+            }
+
+            const lowerBtn = document.getElementById('galacticCasinoGame3LowerButton');
+            const higherBtn = document.getElementById('galacticCasinoGame3HigherButton');
+            setButtonState(lowerBtn, { enabled: true, ready: true });
+            setButtonState(higherBtn, { enabled: true, ready: true });
+
+            const cards = Array.from(game3CardRow.querySelectorAll('.galactic-casino-hilo-card'));
+            cards.forEach(setCardHidden);
+            if (cards[0]) {
+                setCardRevealed(cards[0], deck?.[0]);
+            }
+        };
+
+        const hiloResetImmediate = () => {
+            if (hiloEndResetTimeoutId) {
+                clearTimeout(hiloEndResetTimeoutId);
+                hiloEndResetTimeoutId = null;
+            }
+            setHiloIdleUi();
+        };
+
+        const hiloResetAfterDelay = (delayMs = 2000) => {
+            if (hiloEndResetTimeoutId) {
+                clearTimeout(hiloEndResetTimeoutId);
+                hiloEndResetTimeoutId = null;
+            }
+
+            setHiloEndingUi();
+            hiloEndResetTimeoutId = setTimeout(() => {
+                hiloResetImmediate();
+            }, delayMs);
+        };
+
+        const enableCashOutAfterFirstGuess = () => {
+            const cashOutBtn = document.getElementById('galacticCasinoGame3CashOutButton');
+            if (cashOutBtn) {
+                setButtonState(cashOutBtn, { enabled: true, ready: true });
+            }
+        };
+
+        const setHiloEndingUi = () => {
+            game3HiloContainer.setAttribute('data-hilo-state', 'ending');
+            const lowerBtn = document.getElementById('galacticCasinoGame3LowerButton');
+            const higherBtn = document.getElementById('galacticCasinoGame3HigherButton');
+            const cashOutBtn = document.getElementById('galacticCasinoGame3CashOutButton');
+            setButtonState(lowerBtn, { enabled: false, ready: false });
+            setButtonState(higherBtn, { enabled: false, ready: false });
+            setButtonState(cashOutBtn, { enabled: false, ready: false });
+        };
+
+        const hiloRevealNextCard = (guess) => {
+            const deckRaw = game3HiloContainer.getAttribute('data-hilo-deck') || '';
+            let deck = [];
+            try {
+                deck = JSON.parse(deckRaw || '[]');
+            } catch (e) {
+                deck = [];
+            }
+
+            const idx = parseInt(game3HiloContainer.getAttribute('data-hilo-index') || '0', 10);
+            const nextIndex = Number.isFinite(idx) ? idx + 1 : 1;
+            const cards = Array.from(game3CardRow.querySelectorAll('.galactic-casino-hilo-card'));
+
+            const currentCard = deck[idx];
+            const nextCard = deck[nextIndex];
+            if (!currentCard || !nextCard) {
+                hiloResetImmediate();
+                return;
+            }
+
+            const currentValue = Number(currentCard.value);
+            const nextValue = Number(nextCard.value);
+            const isHigher = nextValue > currentValue;
+            const isLower = nextValue < currentValue;
+
+            if (guess === 'higher' && !isHigher) {
+                if (cards[nextIndex]) {
+                    setCardRevealed(cards[nextIndex], nextCard);
+                    game3HiloContainer.setAttribute('data-hilo-index', String(nextIndex));
+                }
+                showNotification('LOSE! Better luck next time.', 'error', 2500, 'galacticCasino');
+                hiloResetAfterDelay(2000);
+                return;
+            }
+
+            if (guess === 'lower' && !isLower) {
+                if (cards[nextIndex]) {
+                    setCardRevealed(cards[nextIndex], nextCard);
+                    game3HiloContainer.setAttribute('data-hilo-index', String(nextIndex));
+                }
+                showNotification('LOSE! Better luck next time.', 'error', 2500, 'galacticCasino');
+                hiloResetAfterDelay(2000);
+                return;
+            }
+
+            if (!deck[nextIndex] || !cards[nextIndex]) {
+                hiloResetImmediate();
+                return;
+            }
+
+            setCardRevealed(cards[nextIndex], deck[nextIndex]);
+            game3HiloContainer.setAttribute('data-hilo-index', String(nextIndex));
+
+            if (nextIndex >= cards.length - 1) {
+                showNotification('WON! Well done you guessed all Cards!', 'info', 2500, 'galacticCasino');
+                hiloResetAfterDelay(2000);
+            }
+        };
+
         const game3CashOutButton = createButton(
-            'CASH OUT',
-            ['id_galacticCasinoGame3CashOutButton', 'option-button', 'red-disabled-text', 'galactic-casino-spin-button'],
+            'PLAY',
+            ['id_galacticCasinoGame3CashOutButton', 'option-button', 'green-ready-text', 'galactic-casino-spin-button'],
             () => {
+                const state = String(game3HiloContainer.getAttribute('data-hilo-state') || 'idle');
+                if (state === 'idle') {
+                    const cpBalance = getGalacticCasinoDataObject('casinoPoints', ['quantity']) ?? 0;
+                    if (cpBalance < 5) {
+                        showNotification('Not enough CP to play.', 'info', 2500, 'galacticCasino');
+                        return;
+                    }
+                    setGalacticCasinoDataObject(Math.max(0, cpBalance - 5), 'casinoPoints', ['quantity']);
+                    const deck = createRandomHiloDeck(9);
+                    setHiloActiveUi(deck);
+                    return;
+                }
+
+                if (state === 'active') {
+                    const hasGuessed = String(game3HiloContainer.getAttribute('data-hilo-has-guessed') || 'false') === 'true';
+                    if (!hasGuessed) {
+                        return;
+                    }
+                    const idx = parseInt(game3HiloContainer.getAttribute('data-hilo-index') || '0', 10);
+                    const revealedCount = Number.isFinite(idx) ? (idx + 1) : 1;
+                    showNotification(`You cashed out at ${revealedCount} cards - Check your prize!`, 'info', 2500, 'galacticCasino');
+                    hiloResetImmediate();
+                }
             },
             null,
             null,
@@ -653,6 +914,28 @@ export function drawTab7Content(heading, optionContentElement) {
             ['galactic-market-summary-text'],
             null
         );
+
+        game3LowerButton.addEventListener('click', () => {
+            const state = String(game3HiloContainer.getAttribute('data-hilo-state') || 'idle');
+            if (state !== 'active') return;
+            const hasGuessed = String(game3HiloContainer.getAttribute('data-hilo-has-guessed') || 'false') === 'true';
+            if (!hasGuessed) {
+                game3HiloContainer.setAttribute('data-hilo-has-guessed', 'true');
+                enableCashOutAfterFirstGuess();
+            }
+            hiloRevealNextCard('lower');
+        });
+
+        game3HigherButton.addEventListener('click', () => {
+            const state = String(game3HiloContainer.getAttribute('data-hilo-state') || 'idle');
+            if (state !== 'active') return;
+            const hasGuessed = String(game3HiloContainer.getAttribute('data-hilo-has-guessed') || 'false') === 'true';
+            if (!hasGuessed) {
+                game3HiloContainer.setAttribute('data-hilo-has-guessed', 'true');
+                enableCashOutAfterFirstGuess();
+            }
+            hiloRevealNextCard('higher');
+        });
 
         const game3Row = createOptionRow(
             'galacticCasinoGame3Row',
@@ -681,6 +964,8 @@ export function drawTab7Content(heading, optionContentElement) {
         optionContentElement.appendChild(game1Row);
         optionContentElement.appendChild(game2Row);
         optionContentElement.appendChild(game3Row);
+
+        setHiloIdleUi();
 
         const spinButton = document.getElementById('galacticCasinoGame1SpinButton');
         if (spinButton) {

@@ -537,6 +537,21 @@ export function getOTypePowerPlantBoostMultiplierForCurrentSystem(powerPlantKey)
 }
 
 function galacticCasinoChecks() {
+    if (getCurrentTab()?.[1]?.includes('Galactic')) {
+        const theme = String(getCurrentTheme?.() || '');
+        if (theme) {
+            const root = document.documentElement;
+            const lastTheme = String(root.getAttribute('data-hilo-theme') || '');
+            if (lastTheme !== theme) {
+                root.setAttribute('data-hilo-theme', theme);
+                root.style.setProperty(
+                    '--hilo-card-back-image',
+                    `url(./images/achievements/${theme}/images/studyAllStarsInOneRun.png)`
+                );
+            }
+        }
+    }
+
     if (!(getCurrentTab()[1].includes('Galactic') && getCurrentOptionPane() === 'galactic casino')) {
         return;
     }
