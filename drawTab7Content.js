@@ -33,9 +33,13 @@ import {
     getMinimumBlackHoleChargeTime,
     getBlackHoleAlwaysOn,
     setGalacticCasinoPurchaseItem,
-    getCurrentTheme
+    getCurrentTheme,
+    getPlayerPhilosophy,
+    getUnlockedResourcesArray,
+    getUnlockedCompoundsArray
 } from './constantsAndGlobalVars.js';
 import { purchaseBuff, buyCasinoPoints, galacticMarketLiquidateForAp, galacticMarketSellApForCash, galacticMarketTrade, rebirth, startBlackHoleChargeTimer, timeWarp } from './game.js';
+import { claimCasinoSpecialPrizeByKey } from './casino.js';
 import { trackAnalyticsEvent } from './analytics.js';
 import {
     getAscendencyBuffDataObject,
@@ -625,22 +629,313 @@ export function drawTab7Content(heading, optionContentElement) {
         game3HiloContainer.id = 'galacticCasinoGame3HiloContainer';
         game3HiloContainer.classList.add('galactic-casino-hilo-container');
 
+        // Debug: set true to force every Higher/Lower guess to be treated as correct.
+        const DEBUG_HILO_ALWAYS_WIN = false;
+
         let hiloEndResetTimeoutId = null;
 
         const hiloPrizeTiers = {
-            1: ['Tier 1 - Prize 1', 'Tier 1 - Prize 2', 'Tier 1 - Prize 3', 'Tier 1 - Prize 4', 'Tier 1 - Prize 5'],
-            2: ['Tier 2 - Prize 1', 'Tier 2 - Prize 2', 'Tier 2 - Prize 3', 'Tier 2 - Prize 4', 'Tier 2 - Prize 5'],
-            3: ['Tier 3 - Prize 1', 'Tier 3 - Prize 2', 'Tier 3 - Prize 3', 'Tier 3 - Prize 4', 'Tier 3 - Prize 5'],
-            4: ['Tier 4 - Prize 1', 'Tier 4 - Prize 2', 'Tier 4 - Prize 3', 'Tier 4 - Prize 4', 'Tier 4 - Prize 5'],
-            5: ['Tier 5 - Prize 1', 'Tier 5 - Prize 2', 'Tier 5 - Prize 3', 'Tier 5 - Prize 4', 'Tier 5 - Prize 5'],
-            6: ['Tier 6 - Prize 1', 'Tier 6 - Prize 2', 'Tier 6 - Prize 3', 'Tier 6 - Prize 4', 'Tier 6 - Prize 5'],
-            7: ['Tier 7 - Prize 1', 'Tier 7 - Prize 2', 'Tier 7 - Prize 3', 'Tier 7 - Prize 4', 'Tier 7 - Prize 5']
+            1: [
+                { label: '+5 CP', key: 'hilo_cp_5' },
+                { label: 'Cash Boost', key: 'hilo_cash_boost_small' },
+                { label: 'Research Boost', key: 'hilo_research_boost_small' },
+                { label: 'Resource Top-Up', key: 'hilo_resource_topup' },
+                { label: 'Compound Top-Up', key: 'hilo_compound_topup' }
+            ],
+            2: [
+                { label: '+10 CP', key: 'hilo_cp_10' },
+                { label: 'Cash Boost', key: 'hilo_cash_boost_medium' },
+                { label: 'Research Boost', key: 'hilo_research_boost_medium' },
+                { label: 'Double Hydrogen', key: 'special_double_hydrogen' },
+                { label: 'Double Carbon', key: 'special_double_carbon' }
+            ],
+            3: [
+                { label: '+20 CP', key: 'hilo_cp_20' },
+                { label: 'Cash Boost', key: 'hilo_cash_boost_large' },
+                { label: 'Research Boost', key: 'hilo_research_boost_large' },
+                { label: 'Double Iron', key: 'special_double_iron' },
+                { label: 'Double Silicon', key: 'special_double_silicon' }
+            ],
+            4: [
+                { label: '+40 CP', key: 'hilo_cp_40' },
+                { label: 'Research Grant', key: 'hilo_research_flat' },
+                { label: 'Cash Grant', key: 'hilo_cash_flat' },
+                { label: 'Double Steel', key: 'special_double_steel' },
+                { label: 'Double Concrete', key: 'special_double_concrete' }
+            ],
+            5: [
+                { label: '+70 CP', key: 'hilo_cp_70' },
+                { label: 'Research Grant+', key: 'hilo_research_big_flat' },
+                { label: 'Double Titanium', key: 'special_double_titanium' },
+                { label: 'TimeWarp x25', key: 'hilo_timewarp_25_20000' },
+                { label: 'TimeWarp x50', key: 'hilo_timewarp_50_15000' }
+            ],
+            6: [
+                { label: '+100 CP', key: 'hilo_cp_100' },
+                { label: 'Research Mega', key: 'hilo_research_mega' },
+                { label: 'Cash Mega', key: 'hilo_cash_mega' },
+                { label: 'TimeWarp x75', key: 'hilo_timewarp_75_15000' },
+                { label: 'TimeWarp x100', key: 'hilo_timewarp_100_12000' }
+            ]
+        };
+
+        const getTier7PrizeList = () => {
+            const list = [
+                { label: 'Finish Rocket', key: 'special_finish_rocket_journey' },
+                { label: 'Finish Starship', key: 'special_finish_starship_journey' },
+                { label: 'Finish Asteroid', key: 'special_telescope_finish_asteroid_search' },
+                { label: 'Finish Star Study', key: 'special_telescope_finish_star_study' },
+                { label: 'TimeWarp x200', key: 'hilo_timewarp_200_20000' }
+            ];
+
+            const philosophy = String(getPlayerPhilosophy?.() || '');
+            if (philosophy === 'voidborn') {
+                list[3] = { label: 'Finish Void', key: 'special_telescope_finish_void_pillage' };
+            }
+            return list;
         };
 
         const pickRandomTierPrize = (tier) => {
-            const list = hiloPrizeTiers[tier];
-            if (!Array.isArray(list) || list.length === 0) return '';
-            return String(list[Math.floor(Math.random() * list.length)]);
+            const t = Number(tier);
+            const list = t === 7 ? getTier7PrizeList() : hiloPrizeTiers[t];
+            if (!Array.isArray(list) || list.length === 0) return null;
+            return list[Math.floor(Math.random() * list.length)] || null;
+        };
+
+        const awardHiloPrize = ({ key } = {}) => {
+            const prizeKey = String(key || '');
+            if (!prizeKey) return null;
+
+            const awardCp = (amount) => {
+                const add = Number(amount);
+                if (!Number.isFinite(add) || add <= 0) return null;
+                const current = getGalacticCasinoDataObject('casinoPoints', ['quantity']) ?? 0;
+                setGalacticCasinoDataObject(Math.max(0, current + add), 'casinoPoints', ['quantity']);
+                return { type: 'cp', amount: add };
+            };
+
+            const awardStockTopUp = (category) => {
+                const cat = String(category || '').toLowerCase();
+                if (cat !== 'resources' && cat !== 'compounds') return null;
+
+                const unlockedRaw = cat === 'resources'
+                    ? (getUnlockedResourcesArray?.() || [])
+                    : (getUnlockedCompoundsArray?.() || []);
+
+                const unlocked = Array.from(new Set((unlockedRaw || []).map((v) => String(v || '').toLowerCase())));
+                if (cat === 'resources' && !unlocked.includes('hydrogen')) {
+                    unlocked.unshift('hydrogen');
+                }
+
+                const eligible = unlocked.filter((stockKey) => {
+                    const qty = Number(getResourceDataObject(cat, [stockKey, 'quantity']) ?? 0);
+                    const cap = Number(getResourceDataObject(cat, [stockKey, 'storageCapacity']) ?? 0);
+                    return Number.isFinite(cap) && cap > qty;
+                });
+
+                if (eligible.length === 0) return null;
+                const chosenKey = eligible[Math.floor(Math.random() * eligible.length)];
+                const currentQty = Number(getResourceDataObject(cat, [chosenKey, 'quantity']) ?? 0);
+                const cap = Number(getResourceDataObject(cat, [chosenKey, 'storageCapacity']) ?? 0);
+                const headroom = Math.max(0, cap - currentQty);
+                const maxInc = Math.max(1, Math.floor(currentQty * 0.1));
+                const maxAward = Math.min(headroom, maxInc);
+                if (!Number.isFinite(maxAward) || maxAward <= 0) return null;
+                const amount = 1 + Math.floor(Math.random() * maxAward);
+                setResourceDataObject(Math.max(0, currentQty + amount), cat, [chosenKey, 'quantity']);
+                return { type: cat, key: chosenKey, amount };
+            };
+
+            if (prizeKey === 'hilo_resource_topup') {
+                return awardStockTopUp('resources') || awardCp(5);
+            }
+
+            if (prizeKey === 'hilo_compound_topup') {
+                return awardStockTopUp('compounds') || awardCp(5);
+            }
+
+            const cpAddMatch = prizeKey.match(/^hilo_cp_(\d+)$/);
+            if (cpAddMatch) {
+                const amount = parseInt(cpAddMatch[1], 10);
+                return awardCp(amount);
+            }
+
+            if (prizeKey === 'hilo_cash_boost_small' || prizeKey === 'hilo_cash_boost_medium' || prizeKey === 'hilo_cash_boost_large') {
+                const pct = prizeKey === 'hilo_cash_boost_small' ? 0.02 : (prizeKey === 'hilo_cash_boost_medium' ? 0.05 : 0.1);
+                const currentCash = Number(getResourceDataObject('currency', ['cash']) ?? 0);
+                const amount = Math.max(0, Math.floor(currentCash * pct));
+                if (amount > 0) {
+                    setResourceDataObject(Math.max(0, currentCash + amount), 'currency', ['cash']);
+                    return { type: 'cash', amount };
+                }
+                return null;
+            }
+
+            if (prizeKey === 'hilo_research_boost_small' || prizeKey === 'hilo_research_boost_medium' || prizeKey === 'hilo_research_boost_large') {
+                const pct = prizeKey === 'hilo_research_boost_small' ? 0.02 : (prizeKey === 'hilo_research_boost_medium' ? 0.05 : 0.1);
+                const current = Number(getResourceDataObject('research', ['quantity']) ?? 0);
+                const amount = Math.max(0, Math.floor(current * pct));
+                if (amount > 0) {
+                    setResourceDataObject(Math.max(0, current + amount), 'research', ['quantity']);
+                    return { type: 'research', amount };
+                }
+                return null;
+            }
+
+            if (prizeKey === 'hilo_research_flat' || prizeKey === 'hilo_research_big_flat' || prizeKey === 'hilo_research_mega') {
+                const amount = prizeKey === 'hilo_research_flat' ? 5000 : (prizeKey === 'hilo_research_big_flat' ? 100000 : 500000);
+                const current = Number(getResourceDataObject('research', ['quantity']) ?? 0);
+                setResourceDataObject(Math.max(0, current + amount), 'research', ['quantity']);
+                return { type: 'research', amount };
+            }
+
+            if (prizeKey === 'hilo_cash_flat' || prizeKey === 'hilo_cash_mega') {
+                const amount = prizeKey === 'hilo_cash_flat' ? 5000 : 250000;
+                const currentCash = Number(getResourceDataObject('currency', ['cash']) ?? 0);
+                setResourceDataObject(Math.max(0, currentCash + amount), 'currency', ['cash']);
+                return { type: 'cash', amount };
+            }
+
+            if (prizeKey.startsWith('hilo_timewarp_')) {
+                const parts = prizeKey.split('_');
+                const mult = Number(parts[2]);
+                const ms = Number(parts[3]);
+                if (Number.isFinite(mult) && mult > 0 && Number.isFinite(ms) && ms > 0) {
+                    return { type: 'timewarp', multiplier: mult, durationMs: ms };
+                }
+                return null;
+            }
+
+            const special = claimCasinoSpecialPrizeByKey(prizeKey, { notify: false });
+            if (special) return special;
+
+            const tier7FinishKeys = new Set([
+                'special_finish_rocket_journey',
+                'special_finish_starship_journey',
+                'special_telescope_finish_asteroid_search',
+                'special_telescope_finish_star_study',
+                'special_telescope_finish_void_pillage'
+            ]);
+
+            if (tier7FinishKeys.has(prizeKey)) {
+                const fallback = awardCp(150);
+                return fallback;
+            }
+
+            return awardCp(5);
+        };
+
+        const formatHiloAwardDetails = (awarded) => {
+            if (!awarded || typeof awarded !== 'object') {
+                return '';
+            }
+
+            const titleCaseFromKey = (value) => {
+                return String(value || '')
+                    .replace(/[_-]+/g, ' ')
+                    .split(' ')
+                    .filter(Boolean)
+                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                    .join(' ');
+            };
+
+            const type = String(awarded.type || '').toLowerCase();
+
+            if (type === 'cp' && Number.isFinite(Number(awarded.amount))) {
+                return `${Math.floor(Number(awarded.amount))} CP`;
+            }
+
+            if (type === 'cash' && Number.isFinite(Number(awarded.amount))) {
+                return `${Math.floor(Number(awarded.amount))} Cash`;
+            }
+
+            if (type === 'research' && Number.isFinite(Number(awarded.amount))) {
+                return `${Math.floor(Number(awarded.amount))} Research Points`;
+            }
+
+            if ((type === 'resources' || type === 'compounds') && awarded.key && Number.isFinite(Number(awarded.amount))) {
+                return `${Math.floor(Number(awarded.amount))} ${titleCaseFromKey(awarded.key)}`;
+            }
+
+            if ((type === 'resources' || type === 'compounds') && awarded.key && Number.isFinite(Number(awarded.oldQuantity)) && Number.isFinite(Number(awarded.newQuantity))) {
+                return `${titleCaseFromKey(awarded.key)} doubled`;
+            }
+
+            if (type === 'timewarp' && Number.isFinite(Number(awarded.multiplier)) && Number.isFinite(Number(awarded.durationMs))) {
+                const seconds = Math.max(0, Math.round(Number(awarded.durationMs) / 1000));
+                return `TimeWarp x${Number(awarded.multiplier)} for ${seconds}s`;
+            }
+
+            if (type === 'telescope_finish_asteroid_search') {
+                const asteroid = awarded.asteroid ? ` (${String(awarded.asteroid)})` : '';
+                return `Finished Asteroid Search${asteroid}`;
+            }
+
+            if (type === 'telescope_finish_star_study') {
+                return 'Finished Star Study';
+            }
+
+            if (type === 'telescope_finish_void_pillage') {
+                return 'Finished Void Pillage';
+            }
+
+            if (type === 'finish_starship_journey' && awarded.destinationStar) {
+                return `Finished Starship Journey (${String(awarded.destinationStar)})`;
+            }
+
+            if (type === 'finish_rocket_journey') {
+                const name = awarded.name ? ` ${String(awarded.name)}` : '';
+                return `Finished Rocket Journey${name}`;
+            }
+
+            return '';
+        };
+
+        const getHiloNotificationPrizeName = (defaultPrizeName, awarded) => {
+            if (awarded && typeof awarded === 'object') {
+                const type = String(awarded.type || '').toLowerCase();
+                if (type === 'cp' && Number.isFinite(Number(awarded.amount))) {
+                    return `${Math.floor(Number(awarded.amount))}CP`;
+                }
+            }
+            if (awarded && typeof awarded === 'object' && awarded.hiloOverridePrizeName) {
+                return String(awarded.hiloOverridePrizeName);
+            }
+            return String(defaultPrizeName || '---') || '---';
+        };
+
+        const shouldAppendHiloAwardDetails = (prizeName, awarded, details) => {
+            if (!details) {
+                return false;
+            }
+            if (!awarded || typeof awarded !== 'object') {
+                return true;
+            }
+
+            const type = String(awarded.type || '').toLowerCase();
+
+            if (type === 'cp') {
+                return false;
+            }
+            if ((type === 'resources' || type === 'compounds')
+                && awarded.key
+                && Number.isFinite(Number(awarded.oldQuantity))
+                && Number.isFinite(Number(awarded.newQuantity))) {
+                const keyName = String(awarded.key || '');
+                const keyTitle = keyName
+                    .replace(/[_-]+/g, ' ')
+                    .split(' ')
+                    .filter(Boolean)
+                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                    .join(' ');
+
+                const name = String(prizeName || '').toLowerCase();
+                if (name.includes('double') && name.includes(keyTitle.toLowerCase())) {
+                    return false;
+                }
+            }
+
+            return true;
         };
 
         const updateHiloPrizePreview = (text) => {
@@ -655,6 +950,7 @@ export function drawTab7Content(heading, optionContentElement) {
             if (!Number.isFinite(count) || count < 3) {
                 game3HiloContainer.setAttribute('data-hilo-tier', '0');
                 game3HiloContainer.setAttribute('data-hilo-tier-prize', '');
+                game3HiloContainer.setAttribute('data-hilo-tier-prize-key', '');
                 updateHiloPrizePreview('---');
 
                 const cashOutBtn = document.getElementById('galacticCasinoGame3CashOutButton');
@@ -674,9 +970,12 @@ export function drawTab7Content(heading, optionContentElement) {
             }
 
             const prize = pickRandomTierPrize(tier);
+            const label = String(prize?.label || '---');
+            const key = String(prize?.key || '');
             game3HiloContainer.setAttribute('data-hilo-tier', String(tier));
-            game3HiloContainer.setAttribute('data-hilo-tier-prize', prize);
-            updateHiloPrizePreview(prize || '---');
+            game3HiloContainer.setAttribute('data-hilo-tier-prize', label);
+            game3HiloContainer.setAttribute('data-hilo-tier-prize-key', key);
+            updateHiloPrizePreview(label || '---');
         };
 
         document.documentElement.style.setProperty(
@@ -783,6 +1082,7 @@ export function drawTab7Content(heading, optionContentElement) {
             game3HiloContainer.setAttribute('data-hilo-has-guessed', 'false');
             game3HiloContainer.setAttribute('data-hilo-tier', '0');
             game3HiloContainer.setAttribute('data-hilo-tier-prize', '');
+            game3HiloContainer.setAttribute('data-hilo-tier-prize-key', '');
 
             updateHiloPrizePreview('---');
 
@@ -808,6 +1108,7 @@ export function drawTab7Content(heading, optionContentElement) {
             game3HiloContainer.setAttribute('data-hilo-has-guessed', 'false');
             game3HiloContainer.setAttribute('data-hilo-tier', '0');
             game3HiloContainer.setAttribute('data-hilo-tier-prize', '');
+            game3HiloContainer.setAttribute('data-hilo-tier-prize-key', '');
 
             updateHiloPrizePreview('---');
 
@@ -884,7 +1185,7 @@ export function drawTab7Content(heading, optionContentElement) {
             const isHigher = nextValue > currentValue;
             const isLower = nextValue < currentValue;
 
-            if (guess === 'higher' && !isHigher) {
+            if (!DEBUG_HILO_ALWAYS_WIN && guess === 'higher' && !isHigher) {
                 if (cards[nextIndex]) {
                     setCardRevealed(cards[nextIndex], nextCard);
                     game3HiloContainer.setAttribute('data-hilo-index', String(nextIndex));
@@ -894,7 +1195,7 @@ export function drawTab7Content(heading, optionContentElement) {
                 return;
             }
 
-            if (guess === 'lower' && !isLower) {
+            if (!DEBUG_HILO_ALWAYS_WIN && guess === 'lower' && !isLower) {
                 if (cards[nextIndex]) {
                     setCardRevealed(cards[nextIndex], nextCard);
                     game3HiloContainer.setAttribute('data-hilo-index', String(nextIndex));
@@ -916,8 +1217,18 @@ export function drawTab7Content(heading, optionContentElement) {
             updatePrizeTierForRevealedCount(revealedCount);
 
             if (nextIndex >= cards.length - 1) {
-                const prizeName = String(game3HiloContainer.getAttribute('data-hilo-tier-prize') || '---') || '---';
-                showNotification(`WON! Well done you guessed all Cards! ${prizeName}`, 'info', 2500, 'galacticCasino');
+                const prizeNameRaw = String(game3HiloContainer.getAttribute('data-hilo-tier-prize') || '---') || '---';
+                const prizeKey = String(game3HiloContainer.getAttribute('data-hilo-tier-prize-key') || '');
+                const awarded = awardHiloPrize({ key: prizeKey });
+                const prizeName = getHiloNotificationPrizeName(prizeNameRaw, awarded);
+                const details = formatHiloAwardDetails(awarded);
+                const suffix = shouldAppendHiloAwardDetails(prizeName, awarded, details) ? ` - ${details}` : '';
+                showNotification(`WON! Well done you guessed all Cards! ${prizeName}${suffix}`, 'info', 2500, 'galacticCasino');
+                if (awarded?.type === 'timewarp') {
+                    setTimeout(() => {
+                        timeWarp(awarded.durationMs, awarded.multiplier);
+                    }, 3000);
+                }
                 hiloResetAfterDelay(2000);
             }
         };
@@ -945,8 +1256,18 @@ export function drawTab7Content(heading, optionContentElement) {
                     if (revealedCount < 3) {
                         return;
                     }
-                    const prizeName = String(game3HiloContainer.getAttribute('data-hilo-tier-prize') || '---') || '---';
-                    showNotification(`You cashed out at ${revealedCount} cards - ${prizeName}`, 'info', 2500, 'galacticCasino');
+                    const prizeNameRaw = String(game3HiloContainer.getAttribute('data-hilo-tier-prize') || '---') || '---';
+                    const prizeKey = String(game3HiloContainer.getAttribute('data-hilo-tier-prize-key') || '');
+                    const awarded = awardHiloPrize({ key: prizeKey });
+                    const prizeName = getHiloNotificationPrizeName(prizeNameRaw, awarded);
+                    const details = formatHiloAwardDetails(awarded);
+                    const suffix = shouldAppendHiloAwardDetails(prizeName, awarded, details) ? ` - ${details}` : '';
+                    showNotification(`You cashed out at ${revealedCount} cards - ${prizeName}${suffix}`, 'info', 2500, 'galacticCasino');
+                    if (awarded?.type === 'timewarp') {
+                        setTimeout(() => {
+                            timeWarp(awarded.durationMs, awarded.multiplier);
+                        }, 3000);
+                    }
                     hiloResetImmediate();
                 }
             },

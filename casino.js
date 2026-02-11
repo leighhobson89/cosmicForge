@@ -48,6 +48,7 @@ import {
     setCurrentlyInvestigatingStar,
     setCurrentlyPillagingVoid,
     getAsteroidArray,
+    getPlayerPhilosophy,
 } from './constantsAndGlobalVars.js';
 
 export function getBaseProbabilityCasino() {
@@ -183,6 +184,43 @@ function discoverAsteroidSilentAndGetName() {
     return named || key;
 }
 
+function finishAsteroidSearchInstantly() {
+    if (timerManagerDelta.hasTimer('searchAsteroidTimer')) {
+        timerManagerDelta.removeTimer('searchAsteroidTimer');
+    }
+    discoverAsteroid?.(false);
+    setTelescopeReadyToSearch?.(true);
+    setCurrentlySearchingAsteroid?.(false);
+    setTimeLeftUntilAsteroidScannerTimerFinishes?.(0);
+
+    const arr = getAsteroidArray?.() || [];
+    const last = arr.length > 0 ? arr[arr.length - 1] : null;
+    if (!last || typeof last !== 'object') return null;
+    const asteroidKey = Object.keys(last)[0];
+    const data = last[asteroidKey];
+    const named = data?.specialName ? data?.name : null;
+    return named || asteroidKey;
+}
+
+function finishRocketJourneyInstantly(rocketKey) {
+    const toTimer = `${rocketKey}TravelToAsteroidTimer`;
+    const returnTimer = `${rocketKey}TravelReturnTimer`;
+    if (timerManagerDelta.hasTimer(toTimer)) {
+        timerManagerDelta.removeTimer(toTimer);
+    }
+    if (timerManagerDelta.hasTimer(returnTimer)) {
+        timerManagerDelta.removeTimer(returnTimer);
+    }
+
+    setTimeLeftUntilRocketTravelToAsteroidTimerFinishes?.(rocketKey, 0);
+    setCurrentlyTravellingToAsteroid?.(rocketKey, false);
+
+    const defaultLabel = titleCaseFromKey(rocketKey);
+    const customName = getRocketUserName?.(rocketKey) ?? defaultLabel;
+    const name = String(customName || defaultLabel);
+    return { rocketKey, name };
+}
+
 function finishStarStudyInstantly() {
     if (timerManagerDelta.hasTimer('investigateStarTimer')) {
         timerManagerDelta.removeTimer('investigateStarTimer');
@@ -203,6 +241,153 @@ function finishVoidPillageInstantly() {
     setTimeLeftUntilPillageVoidTimerFinishes?.(0);
 }
 
+export function claimCasinoSpecialPrizeByKey(selection, { notify = true } = {}) {
+    const key = String(selection || '').toLowerCase();
+    if (!key || key === 'select') return null;
+
+    if (key === 'special_100cp') {
+        const current = getGalacticCasinoDataObject('casinoPoints', ['quantity']) ?? 0;
+        setGalacticCasinoDataObject(Math.max(0, current + 100), 'casinoPoints', ['quantity']);
+        if (notify) {
+            showNotification('Special Prize Claimed! 100CP', 'info', 3500, 'galacticCasino');
+        }
+        return { type: 'cp', amount: 100 };
+    }
+
+    if (key === 'special_100k_research') {
+        const current = clampNumber(getResourceDataObject('research', ['quantity']) ?? 0, 0);
+        const newQty = Math.max(0, current + 100000);
+        setResourceDataObject(newQty, 'research', ['quantity']);
+        if (notify) {
+            showNotification('Special Prize Claimed! 100,000 Research Points', 'info', 3500, 'galacticCasino');
+        }
+        return { type: 'research', amount: 100000 };
+    }
+
+    if (key.startsWith('special_double_')) {
+        const stockKey = key.replace('special_double_', '');
+        const unlockedResources = new Set((getUnlockedResourcesArray?.() || []).map((v) => String(v || '').toLowerCase()));
+        const unlockedCompounds = new Set((getUnlockedCompoundsArray?.() || []).map((v) => String(v || '').toLowerCase()));
+        const isUnlocked = unlockedResources.has(stockKey) || unlockedCompounds.has(stockKey);
+        if (!isUnlocked) {
+            return null;
+        }
+
+        const categoryByKey = {
+            titanium: 'compounds',
+            steel: 'compounds',
+            silicon: 'resources',
+            iron: 'resources',
+            sodium: 'resources'
+        };
+        const category = categoryByKey[stockKey] || (unlockedCompounds.has(stockKey) ? 'compounds' : 'resources');
+
+        const result = doubleStockQuantity(category, stockKey);
+        if (result && notify) {
+            showNotification(`Special Prize Claimed! ${titleCaseFromKey(stockKey)} doubled`, 'info', 3500, 'galacticCasino');
+        }
+        return result;
+    }
+
+    if (key === 'special_starship_warp') {
+        const dest = warpStarshipInstantly();
+        if (!dest) return null;
+        if (notify) {
+            showNotification(`Special Prize Claimed! Starship warped instantly to ${titleCaseFromKey(dest)}`, 'info', 3500, 'galacticCasino');
+        }
+        return { type: 'starship_warp', destinationStar: dest };
+    }
+
+    if (key === 'special_finish_starship_journey') {
+        const dest = warpStarshipInstantly();
+        if (!dest) return null;
+        if (notify) {
+            showNotification(`Special Prize Claimed! Starship journey finished to ${titleCaseFromKey(dest)}`, 'info', 3500, 'galacticCasino');
+        }
+        return { type: 'finish_starship_journey', destinationStar: dest };
+    }
+
+    if (key === 'special_rocket_warp') {
+        const rocketKey = getEligibleTravellingRocket();
+        if (!rocketKey) return null;
+        const result = warpRocketInstantly(rocketKey);
+
+        const rocketIndexMatch = String(rocketKey).match(/rocket(\d+)/i);
+        const rocketIndex = rocketIndexMatch ? rocketIndexMatch[1] : '';
+        const displayName = String(result?.name || titleCaseFromKey(rocketKey));
+        const prefix = rocketIndex ? `Rocket ${rocketIndex} ${displayName}` : displayName;
+        if (notify) {
+            showNotification(`Special Prize Claimed! ${prefix} warped to ${result.warpedTo}`, 'info', 3500, 'galacticCasino');
+        }
+        return { type: 'rocket_warp', ...result };
+    }
+
+    if (key === 'special_finish_rocket_journey') {
+        const rocketKey = getEligibleTravellingRocket();
+        if (!rocketKey) return null;
+        const result = finishRocketJourneyInstantly(rocketKey);
+        const rocketIndexMatch = String(rocketKey).match(/rocket(\d+)/i);
+        const rocketIndex = rocketIndexMatch ? rocketIndexMatch[1] : '';
+        const displayName = String(result?.name || titleCaseFromKey(rocketKey));
+        const prefix = rocketIndex ? `Rocket ${rocketIndex} ${displayName}` : displayName;
+        if (notify) {
+            showNotification(`Special Prize Claimed! ${prefix} journey finished`, 'info', 3500, 'galacticCasino');
+        }
+        return { type: 'finish_rocket_journey', ...result };
+    }
+
+    if (key === 'special_telescope_discover_asteroid') {
+        if (!(getCurrentlySearchingAsteroid?.() && (getTimeLeftUntilAsteroidScannerTimerFinishes?.() > 0))) {
+            return null;
+        }
+        const name = discoverAsteroidSilentAndGetName();
+        if (name && notify) {
+            showNotification(`Special Prize Claimed! Space Telescope discovered Asteroid ${name}`, 'info', 3500, 'galacticCasino');
+        }
+        return { type: 'telescope_discover_asteroid', asteroid: name };
+    }
+
+    if (key === 'special_telescope_finish_star_study') {
+        if (!(getCurrentlyInvestigatingStar?.() && (getTimeLeftUntilStarInvestigationTimerFinishes?.() > 0))) {
+            return null;
+        }
+        finishStarStudyInstantly();
+
+        if (notify) {
+            showNotification('Special Prize Claimed! Space Telescope finished Star Study!', 'info', 3500, 'galacticCasino');
+        }
+        return { type: 'telescope_finish_star_study' };
+    }
+
+    if (key === 'special_telescope_finish_asteroid_search') {
+        if (!(getCurrentlySearchingAsteroid?.() && (getTimeLeftUntilAsteroidScannerTimerFinishes?.() > 0))) {
+            return null;
+        }
+        const name = finishAsteroidSearchInstantly();
+        if (notify) {
+            showNotification('Special Prize Claimed! Space Telescope finished Asteroid Search!', 'info', 3500, 'galacticCasino');
+        }
+        return { type: 'telescope_finish_asteroid_search', asteroid: name };
+    }
+
+    if (key === 'special_telescope_finish_void_pillage') {
+        if (String(getPlayerPhilosophy?.() || '') !== 'voidborn') {
+            return null;
+        }
+        if (!(getCurrentlyPillagingVoid?.() && (getTimeLeftUntilPillageVoidTimerFinishes?.() > 0))) {
+            return null;
+        }
+        finishVoidPillageInstantly();
+
+        if (notify) {
+            showNotification('Special Prize Claimed! Space Telescope finished Pillaging The Void!', 'info', 3500, 'galacticCasino');
+        }
+        return { type: 'telescope_finish_void_pillage' };
+    }
+
+    return null;
+}
+
 export function claimWheelSpecialPrize({ wheelId } = {}) {
     const id = String(wheelId || '');
     if (!id) return null;
@@ -217,95 +402,7 @@ export function claimWheelSpecialPrize({ wheelId } = {}) {
     const selection = String(wheelEl.getAttribute('data-prize-selection') || 'select').toLowerCase();
     if (!selection || selection === 'select') return null;
 
-    if (selection === 'special_100cp') {
-        const current = getGalacticCasinoDataObject('casinoPoints', ['quantity']) ?? 0;
-        setGalacticCasinoDataObject(Math.max(0, current + 100), 'casinoPoints', ['quantity']);
-        showNotification('Special Prize Claimed! 100CP', 'info', 3500, 'galacticCasino');
-        return { type: 'cp', amount: 100 };
-    }
-
-    if (selection === 'special_100k_research') {
-        const current = clampNumber(getResourceDataObject('research', ['quantity']) ?? 0, 0);
-        const newQty = Math.max(0, current + 100000);
-        setResourceDataObject(newQty, 'research', ['quantity']);
-        showNotification('Special Prize Claimed! 100,000 Research Points', 'info', 3500, 'galacticCasino');
-        return { type: 'research', amount: 100000 };
-    }
-
-    if (selection.startsWith('special_double_')) {
-        const key = selection.replace('special_double_', '');
-        const unlockedResources = new Set((getUnlockedResourcesArray?.() || []).map((v) => String(v || '').toLowerCase()));
-        const unlockedCompounds = new Set((getUnlockedCompoundsArray?.() || []).map((v) => String(v || '').toLowerCase()));
-        const isUnlocked = unlockedResources.has(key) || unlockedCompounds.has(key);
-        if (!isUnlocked) {
-            return null;
-        }
-
-        const categoryByKey = {
-            titanium: 'compounds',
-            steel: 'compounds',
-            silicon: 'resources',
-            iron: 'resources',
-            sodium: 'resources'
-        };
-        const category = categoryByKey[key] || (unlockedCompounds.has(key) ? 'compounds' : 'resources');
-
-        const result = doubleStockQuantity(category, key);
-        if (result) {
-            showNotification(`Special Prize Claimed! ${titleCaseFromKey(key)} doubled`, 'info', 3500, 'galacticCasino');
-        }
-        return result;
-    }
-
-    if (selection === 'special_starship_warp') {
-        const dest = warpStarshipInstantly();
-        if (!dest) return null;
-        showNotification(`Special Prize Claimed! Starship warped instantly to ${titleCaseFromKey(dest)}`, 'info', 3500, 'galacticCasino');
-        return { type: 'starship_warp', destinationStar: dest };
-    }
-
-    if (selection === 'special_rocket_warp') {
-        const rocketKey = getEligibleTravellingRocket();
-        if (!rocketKey) return null;
-        const result = warpRocketInstantly(rocketKey);
-        const rocketIndexMatch = String(rocketKey).match(/rocket(\d+)/i);
-        const rocketIndex = rocketIndexMatch ? rocketIndexMatch[1] : '';
-        const displayName = String(result?.name || titleCaseFromKey(rocketKey));
-        const prefix = rocketIndex ? `Rocket ${rocketIndex} ${displayName}` : displayName;
-        showNotification(`Special Prize Claimed! ${prefix} warped to ${result.warpedTo}`, 'info', 3500, 'galacticCasino');
-        return { type: 'rocket_warp', ...result };
-    }
-
-    if (selection === 'special_telescope_discover_asteroid') {
-        if (!(getCurrentlySearchingAsteroid?.() && (getTimeLeftUntilAsteroidScannerTimerFinishes?.() > 0))) {
-            return null;
-        }
-        const name = discoverAsteroidSilentAndGetName();
-        if (name) {
-            showNotification(`Special Prize Claimed! Space Telescope discovered Asteroid ${name}`, 'info', 3500, 'galacticCasino');
-        }
-        return { type: 'telescope_discover_asteroid', asteroid: name };
-    }
-
-    if (selection === 'special_telescope_finish_star_study') {
-        if (!(getCurrentlyInvestigatingStar?.() && (getTimeLeftUntilStarInvestigationTimerFinishes?.() > 0))) {
-            return null;
-        }
-        finishStarStudyInstantly();
-        showNotification('Special Prize Claimed! Space Telescope finished Star Study!', 'info', 3500, 'galacticCasino');
-        return { type: 'telescope_finish_star_study' };
-    }
-
-    if (selection === 'special_telescope_finish_void_pillage') {
-        if (!(getCurrentlyPillagingVoid?.() && (getTimeLeftUntilPillageVoidTimerFinishes?.() > 0))) {
-            return null;
-        }
-        finishVoidPillageInstantly();
-        showNotification('Special Prize Claimed! Space Telescope finished Pillaging The Void!', 'info', 3500, 'galacticCasino');
-        return { type: 'telescope_finish_void_pillage' };
-    }
-
-    return null;
+    return claimCasinoSpecialPrizeByKey(selection, { notify: true });
 }
 
 function awardCpPrize(cost) {
