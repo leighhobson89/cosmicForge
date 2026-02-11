@@ -674,7 +674,7 @@ export function drawTab7Content(heading, optionContentElement) {
             null,
             null,
             'galacticCasinoGame3',
-            null,
+            [true, '20%', '80%'],
             ['no-left-margin', 'galactic-casino-input-container'],
             false
         );
