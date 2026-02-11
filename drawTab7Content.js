@@ -627,6 +627,58 @@ export function drawTab7Content(heading, optionContentElement) {
 
         let hiloEndResetTimeoutId = null;
 
+        const hiloPrizeTiers = {
+            1: ['Tier 1 - Prize 1', 'Tier 1 - Prize 2', 'Tier 1 - Prize 3', 'Tier 1 - Prize 4', 'Tier 1 - Prize 5'],
+            2: ['Tier 2 - Prize 1', 'Tier 2 - Prize 2', 'Tier 2 - Prize 3', 'Tier 2 - Prize 4', 'Tier 2 - Prize 5'],
+            3: ['Tier 3 - Prize 1', 'Tier 3 - Prize 2', 'Tier 3 - Prize 3', 'Tier 3 - Prize 4', 'Tier 3 - Prize 5'],
+            4: ['Tier 4 - Prize 1', 'Tier 4 - Prize 2', 'Tier 4 - Prize 3', 'Tier 4 - Prize 4', 'Tier 4 - Prize 5'],
+            5: ['Tier 5 - Prize 1', 'Tier 5 - Prize 2', 'Tier 5 - Prize 3', 'Tier 5 - Prize 4', 'Tier 5 - Prize 5'],
+            6: ['Tier 6 - Prize 1', 'Tier 6 - Prize 2', 'Tier 6 - Prize 3', 'Tier 6 - Prize 4', 'Tier 6 - Prize 5'],
+            7: ['Tier 7 - Prize 1', 'Tier 7 - Prize 2', 'Tier 7 - Prize 3', 'Tier 7 - Prize 4', 'Tier 7 - Prize 5']
+        };
+
+        const pickRandomTierPrize = (tier) => {
+            const list = hiloPrizeTiers[tier];
+            if (!Array.isArray(list) || list.length === 0) return '';
+            return String(list[Math.floor(Math.random() * list.length)]);
+        };
+
+        const updateHiloPrizePreview = (text) => {
+            const prizePreview = document.getElementById('galacticCasinoGame3PrizePreview');
+            if (prizePreview) {
+                prizePreview.textContent = text || '---';
+            }
+        };
+
+        const updatePrizeTierForRevealedCount = (revealedCount) => {
+            const count = Number(revealedCount);
+            if (!Number.isFinite(count) || count < 3) {
+                game3HiloContainer.setAttribute('data-hilo-tier', '0');
+                game3HiloContainer.setAttribute('data-hilo-tier-prize', '');
+                updateHiloPrizePreview('---');
+
+                const cashOutBtn = document.getElementById('galacticCasinoGame3CashOutButton');
+                setButtonState(cashOutBtn, { enabled: false, ready: false });
+                return;
+            }
+
+            const cashOutBtn = document.getElementById('galacticCasinoGame3CashOutButton');
+            setButtonState(cashOutBtn, { enabled: true, ready: true });
+
+            const tier = Math.min(7, Math.max(1, count - 2));
+            const currentTier = parseInt(game3HiloContainer.getAttribute('data-hilo-tier') || '0', 10);
+            if (currentTier === tier) {
+                const existingPrize = String(game3HiloContainer.getAttribute('data-hilo-tier-prize') || '');
+                updateHiloPrizePreview(existingPrize || '---');
+                return;
+            }
+
+            const prize = pickRandomTierPrize(tier);
+            game3HiloContainer.setAttribute('data-hilo-tier', String(tier));
+            game3HiloContainer.setAttribute('data-hilo-tier-prize', prize);
+            updateHiloPrizePreview(prize || '---');
+        };
+
         document.documentElement.style.setProperty(
             '--hilo-card-back-image',
             `url(./images/achievements/${getCurrentTheme()}/images/studyAllStarsInOneRun.png)`
@@ -729,11 +781,10 @@ export function drawTab7Content(heading, optionContentElement) {
             game3HiloContainer.setAttribute('data-hilo-index', '0');
             game3HiloContainer.setAttribute('data-hilo-deck', '');
             game3HiloContainer.setAttribute('data-hilo-has-guessed', 'false');
+            game3HiloContainer.setAttribute('data-hilo-tier', '0');
+            game3HiloContainer.setAttribute('data-hilo-tier-prize', '');
 
-            const prizePreview = document.getElementById('galacticCasinoGame3PrizePreview');
-            if (prizePreview) {
-                prizePreview.textContent = '---';
-            }
+            updateHiloPrizePreview('---');
 
             const cards = Array.from(game3CardRow.querySelectorAll('.galactic-casino-hilo-card'));
             cards.forEach(setCardHidden);
@@ -755,6 +806,10 @@ export function drawTab7Content(heading, optionContentElement) {
             game3HiloContainer.setAttribute('data-hilo-index', '0');
             game3HiloContainer.setAttribute('data-hilo-deck', JSON.stringify(deck || []));
             game3HiloContainer.setAttribute('data-hilo-has-guessed', 'false');
+            game3HiloContainer.setAttribute('data-hilo-tier', '0');
+            game3HiloContainer.setAttribute('data-hilo-tier-prize', '');
+
+            updateHiloPrizePreview('---');
 
             const cashOutBtn = document.getElementById('galacticCasinoGame3CashOutButton');
             if (cashOutBtn) {
@@ -792,13 +847,6 @@ export function drawTab7Content(heading, optionContentElement) {
             hiloEndResetTimeoutId = setTimeout(() => {
                 hiloResetImmediate();
             }, delayMs);
-        };
-
-        const enableCashOutAfterFirstGuess = () => {
-            const cashOutBtn = document.getElementById('galacticCasinoGame3CashOutButton');
-            if (cashOutBtn) {
-                setButtonState(cashOutBtn, { enabled: true, ready: true });
-            }
         };
 
         const setHiloEndingUi = () => {
@@ -864,8 +912,12 @@ export function drawTab7Content(heading, optionContentElement) {
             setCardRevealed(cards[nextIndex], deck[nextIndex]);
             game3HiloContainer.setAttribute('data-hilo-index', String(nextIndex));
 
+            const revealedCount = nextIndex + 1;
+            updatePrizeTierForRevealedCount(revealedCount);
+
             if (nextIndex >= cards.length - 1) {
-                showNotification('WON! Well done you guessed all Cards!', 'info', 2500, 'galacticCasino');
+                const prizeName = String(game3HiloContainer.getAttribute('data-hilo-tier-prize') || '---') || '---';
+                showNotification(`WON! Well done you guessed all Cards! ${prizeName}`, 'info', 2500, 'galacticCasino');
                 hiloResetAfterDelay(2000);
             }
         };
@@ -888,13 +940,13 @@ export function drawTab7Content(heading, optionContentElement) {
                 }
 
                 if (state === 'active') {
-                    const hasGuessed = String(game3HiloContainer.getAttribute('data-hilo-has-guessed') || 'false') === 'true';
-                    if (!hasGuessed) {
-                        return;
-                    }
                     const idx = parseInt(game3HiloContainer.getAttribute('data-hilo-index') || '0', 10);
                     const revealedCount = Number.isFinite(idx) ? (idx + 1) : 1;
-                    showNotification(`You cashed out at ${revealedCount} cards - Check your prize!`, 'info', 2500, 'galacticCasino');
+                    if (revealedCount < 3) {
+                        return;
+                    }
+                    const prizeName = String(game3HiloContainer.getAttribute('data-hilo-tier-prize') || '---') || '---';
+                    showNotification(`You cashed out at ${revealedCount} cards - ${prizeName}`, 'info', 2500, 'galacticCasino');
                     hiloResetImmediate();
                 }
             },
@@ -921,7 +973,6 @@ export function drawTab7Content(heading, optionContentElement) {
             const hasGuessed = String(game3HiloContainer.getAttribute('data-hilo-has-guessed') || 'false') === 'true';
             if (!hasGuessed) {
                 game3HiloContainer.setAttribute('data-hilo-has-guessed', 'true');
-                enableCashOutAfterFirstGuess();
             }
             hiloRevealNextCard('lower');
         });
@@ -932,7 +983,6 @@ export function drawTab7Content(heading, optionContentElement) {
             const hasGuessed = String(game3HiloContainer.getAttribute('data-hilo-has-guessed') || 'false') === 'true';
             if (!hasGuessed) {
                 game3HiloContainer.setAttribute('data-hilo-has-guessed', 'true');
-                enableCashOutAfterFirstGuess();
             }
             hiloRevealNextCard('higher');
         });

@@ -736,7 +736,7 @@ export function playWheelOfFortune({ wheelId, costCp = 1, durationMs = 5000 } = 
     const segmentCount = 16;
     const segmentAngle = 360 / segmentCount;
 
-    globalThis.__wheelForceSpecial = true; //debug to win special prize
+    //globalThis.__wheelForceSpecial = true; //debug to win special prize
     const forcedIndexRaw = globalThis.__wheelForceIndex;
     const forcedIndex = Number.isFinite(Number(forcedIndexRaw)) ? Math.floor(Number(forcedIndexRaw)) : null;
     const selectedIndex = globalThis.__wheelForceSpecial
