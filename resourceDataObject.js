@@ -2998,7 +2998,45 @@ export function restoreGalacticCasinoDataObject(value) {
         getCurrentGameVersion,
         getMinimumVersion,
     });
-    galacticCasino = value;
+
+    const template = galacticCasino;
+    const merged = JSON.parse(JSON.stringify(template));
+
+    if (value && typeof value === 'object') {
+        merged.settings = {
+            ...(template.settings || {}),
+            ...(value.settings && typeof value.settings === 'object' ? value.settings : {})
+        };
+
+        const savedCasinoPoints = value.casinoPoints && typeof value.casinoPoints === 'object' ? value.casinoPoints : {};
+        merged.casinoPoints = {
+            ...(template.casinoPoints || {}),
+            ...savedCasinoPoints,
+        };
+
+        const templateVo = template?.casinoPoints?.valueOfOneCP && typeof template.casinoPoints.valueOfOneCP === 'object'
+            ? template.casinoPoints.valueOfOneCP
+            : {};
+        const savedVo = savedCasinoPoints?.valueOfOneCP && typeof savedCasinoPoints.valueOfOneCP === 'object'
+            ? savedCasinoPoints.valueOfOneCP
+            : {};
+
+        merged.casinoPoints.valueOfOneCP = {
+            ...templateVo,
+            ...savedVo,
+            resources: {
+                ...(templateVo.resources || {}),
+                ...(savedVo.resources && typeof savedVo.resources === 'object' ? savedVo.resources : {})
+            },
+            compounds: {
+                ...(templateVo.compounds || {}),
+                ...(savedVo.compounds && typeof savedVo.compounds === 'object' ? savedVo.compounds : {})
+            }
+        };
+    }
+
+    merged.version = template.version;
+    galacticCasino = merged;
 }
 
 export function restoreAscendencyBuffsDataObject(value) {
