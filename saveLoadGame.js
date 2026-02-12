@@ -266,7 +266,22 @@ export function saveGame(type) {
         }
     }
 
-    const compressedSaveData = LZString.compressToEncodedURIComponent(serializedGameState);
+    if (typeof LZString === 'undefined') {
+        console.error('saveGame: LZString is not available');
+        showNotification('Save failed: compression library not available. Please refresh and try again.', 'error', 5000, 'loadSave');
+        setSaveData(null);
+        return;
+    }
+
+    let compressedSaveData;
+    try {
+        compressedSaveData = LZString.compressToEncodedURIComponent(serializedGameState);
+    } catch (err) {
+        console.error('saveGame failed to compress game state:', err);
+        showNotification('Save failed: compression library not available. Please refresh and try again.', 'error', 5000, 'loadSave');
+        setSaveData(null);
+        return;
+    }
 
     const saveGameArea = document.getElementById('exportSaveArea');
     if (saveGameArea) {
@@ -404,7 +419,17 @@ export async function loadGameFromCloud() {
         }
 
         const gameData = data.data;
-        const decompressedJson = LZString.decompressFromEncodedURIComponent(gameData);
+        if (typeof LZString === 'undefined') {
+            throw new Error('LZString is not available');
+        }
+        let decompressedJson;
+        try {
+            decompressedJson = LZString.decompressFromEncodedURIComponent(gameData);
+        } catch (err) {
+            console.error('loadGameFromCloud failed to decompress game state:', err);
+            showNotification('Error loading game data from the cloud.', 'error', 3000, 'loadSave');
+            return false;
+        }
         const gameState = JSON.parse(decompressedJson);
 
         await initialiseLoadedGame(gameState, 'cloud');
@@ -437,7 +462,17 @@ export function loadGame() {
                 return reject('Invalid game data string');
             }
 
-            const decompressedJson = LZString.decompressFromEncodedURIComponent(compressed);
+            if (typeof LZString === 'undefined') {
+                return reject('LZString is not available');
+            }
+            let decompressedJson;
+            try {
+                decompressedJson = LZString.decompressFromEncodedURIComponent(compressed);
+            } catch (err) {
+                console.error('loadGame failed to decompress game state:', err);
+                showNotification('Error loading game. Please make sure the string contains valid game data.', 'error', 3000, 'loadSave');
+                return reject(err);
+            }
             const gameState = JSON.parse(decompressedJson);
 
             initialiseLoadedGame(gameState, 'textImport')
@@ -467,6 +502,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 function validateSaveString(compressed) {
     try {
+        if (typeof LZString === 'undefined') {
+            return false;
+        }
         const decompressedJson = LZString.decompressFromEncodedURIComponent(compressed);
         JSON.parse(decompressedJson);
         return decompressedJson !== null;

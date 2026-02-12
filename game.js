@@ -3368,7 +3368,8 @@ function checkAndRevealNewBuildings(type) {
                     const revealedTech = upgrade.revealedBy;
                     if (getTechUnlockedArray().includes(revealedTech)) {
                         const elementUpgradeOptionElement = key + 'Option';
-                        document.getElementById(elementUpgradeOptionElement).parentElement.parentElement.classList.remove('invisible');
+                        const opt = document.getElementById(elementUpgradeOptionElement);
+                        opt?.parentElement?.parentElement?.classList.remove('invisible');
                     }
                 }
             }
@@ -3376,23 +3377,23 @@ function checkAndRevealNewBuildings(type) {
         case 'space':
             element = document.getElementById('launchPadOption');
             if (getTechUnlockedArray().includes('rocketComposites') && getCurrentTab()[1].includes('Space Mining')) {
-                element.parentElement.parentElement.classList.remove('invisible');
+                element?.parentElement?.parentElement?.classList.remove('invisible');
             } else {
-                element.parentElement.parentElement.classList.add('invisible');
+                element?.parentElement?.parentElement?.classList.add('invisible');
             }
             element = document.getElementById('asteroidsOption');
             if (getAsteroidArray().length > 0 && getCurrentTab()[1].includes('Space Mining')) {
-                element.parentElement.parentElement.classList.remove('invisible');
+                element?.parentElement?.parentElement?.classList.remove('invisible');
             } else {
-                element.parentElement.parentElement.classList.add('invisible');
+                element?.parentElement?.parentElement?.classList.add('invisible');
             }
             break;
         case 'starShip':
             element = document.getElementById('starShipOption');
             if (getTechUnlockedArray().includes('orbitalConstruction') && getCurrentTab()[1].includes('Interstellar')) {
-                element.parentElement.parentElement.classList.remove('invisible');
+                element?.parentElement?.parentElement?.classList.remove('invisible');
             } else {
-                element.parentElement.parentElement.classList.add('invisible');
+                element?.parentElement?.parentElement?.classList.add('invisible');
             }
             if (getCurrentOptionPane() === 'star ship') {
                 const ssModules = {
@@ -3429,9 +3430,9 @@ function checkAndRevealNewBuildings(type) {
         case 'fleetHangar':
             element = document.getElementById('fleetHangarOption');
             if (getStarShipBuilt() && getCurrentTab()[1].includes('Interstellar')) {
-                element.parentElement.parentElement.classList.remove('invisible');
+                element?.parentElement?.parentElement?.classList.remove('invisible');
             } else {
-                element.parentElement.parentElement.classList.add('invisible');
+                element?.parentElement?.parentElement?.classList.add('invisible');
             }
             break;
         case 'colonise':
@@ -3445,17 +3446,17 @@ function checkAndRevealNewBuildings(type) {
             })();
         
             if (!getApAwardedThisRun() && getDestinationStarScanned() && getStarShipStatus()[0] === 'orbiting' && quantitiesFleets.some(qty => qty > 0) && getCurrentTab()[1].includes('Interstellar')) {
-                element.parentElement.parentElement.classList.remove('invisible');
+                element?.parentElement?.parentElement?.classList.remove('invisible');
             } else {
-                element.parentElement.parentElement.classList.add('invisible');
+                element?.parentElement?.parentElement?.classList.add('invisible');
             }
             break;
         case 'philosophy':
             element = [...document.querySelectorAll('p[class*="tab3"]')].find(el => el.innerHTML.includes('Philosophy'));
             if (getStatRun() > 1 && getPlayerPhilosophy() !== null) {
-                element.parentElement.parentElement.classList.remove('invisible');
+                element?.parentElement?.parentElement?.classList.remove('invisible');
             } else {
-                element.parentElement.parentElement.classList.add('invisible');
+                element?.parentElement?.parentElement?.classList.add('invisible');
             }
     }
 }
@@ -3585,7 +3586,13 @@ export function fuseResource(resource, fuseTargets) {
                 appendAttentionIndicator(optionElement);
             }
             fuseData = getResourceSalePreview(resource);
-            amountToDeductFromResource = parseInt(fuseData.match(/\((\d+)/)[1], 10);
+            const dedMatch = String(fuseData || '').match(/\((\d+)/);
+            if (!dedMatch) {
+                console.warn('fuseResource: unexpected preview string (deduct parse failed):', fuseData);
+                showNotification('Fusion failed due to invalid preview data.', 'error', 3000, 'fuse');
+                return;
+            }
+            amountToDeductFromResource = parseInt(dedMatch[1], 10);
             const amountToAdd = Math.ceil((amountToDeductFromResource * ratio) / 4);
 
             showNotification(
@@ -3608,8 +3615,31 @@ export function fuseResource(resource, fuseTargets) {
             }
 
             fuseData = getResourceSalePreview(resource);
-            amountToDeductFromResource = parseInt(fuseData.match(/\((\d+)/)[1], 10);
-            iterationCounter === 1 ? amountToAddToResource = parseInt(fuseData.match(/->\s*(\d+)/)[1], 10) : amountToAddToResource = parseInt(fuseData.match(/(?<=,\s)\d+/)[0], 10)
+            const dedMatch2 = String(fuseData || '').match(/\((\d+)/);
+            if (!dedMatch2) {
+                console.warn('fuseResource: unexpected preview string (deduct parse failed):', fuseData);
+                showNotification('Fusion failed due to invalid preview data.', 'error', 3000, 'fuse');
+                return;
+            }
+            amountToDeductFromResource = parseInt(dedMatch2[1], 10);
+
+            if (iterationCounter === 1) {
+                const addMatch = String(fuseData || '').match(/->\s*(\d+)/);
+                if (!addMatch) {
+                    console.warn('fuseResource: unexpected preview string (add parse failed):', fuseData);
+                    showNotification('Fusion failed due to invalid preview data.', 'error', 3000, 'fuse');
+                    return;
+                }
+                amountToAddToResource = parseInt(addMatch[1], 10);
+            } else {
+                const addMatch = String(fuseData || '').match(/,\s*(\d+)/);
+                if (!addMatch) {
+                    console.warn('fuseResource: unexpected preview string (add parse failed):', fuseData);
+                    showNotification('Fusion failed due to invalid preview data.', 'error', 3000, 'fuse');
+                    return;
+                }
+                amountToAddToResource = parseInt(addMatch[1], 10);
+            }
 
             realAmountToAdd = Math.floor(amountToAddToResource * fusionEfficiency);
             const energyLossFuseToQuantity = Math.floor(amountToAddToResource - realAmountToAdd);
@@ -8473,17 +8503,22 @@ function changeWeather(forcedWeatherType = null) {
             ? weatherCurrentStarSystemObject
             : { sunny: [1, '☀', 1] };
 
-        const weatherTypes = Object.keys(weatherTable);
-        const weatherProbabilities = weatherTypes.map(weatherType => weatherTable[weatherType][0]);
+        const weatherTypes = Object.keys(weatherTable || {});
+        if (!Array.isArray(weatherTypes) || weatherTypes.length === 0) {
+            setCurrentStarSystemWeatherEfficiency([getCurrentStarSystem(), 1, 'sunny']);
+            return;
+        }
+
+        const weatherProbabilities = weatherTypes.map((weatherType) => Number(weatherTable?.[weatherType]?.[0]) || 0);
         const totalProbability = weatherProbabilities.reduce((acc, val) => acc + val, 0);
-        const randomSelection = Math.random() * totalProbability;
+        const randomSelection = totalProbability > 0 ? (Math.random() * totalProbability) : 0;
 
         let cumulativeProbability = 0;
         let selectedWeatherType = '';
 
-        if (forcedWeatherType && weatherTable[forcedWeatherType]) {
+        if (forcedWeatherType && weatherTable?.[forcedWeatherType]) {
             selectedWeatherType = forcedWeatherType;
-        } else {
+        } else if (totalProbability > 0) {
             for (let i = 0; i < weatherTypes.length; i++) {
                 cumulativeProbability += weatherProbabilities[i];
                 if (randomSelection <= cumulativeProbability) {
@@ -8491,9 +8526,15 @@ function changeWeather(forcedWeatherType = null) {
                     break;
                 }
             }
+        } else {
+            selectedWeatherType = 'sunny';
         }
 
-        const [probability, symbolWeather, efficiencyWeather] = weatherTable[selectedWeatherType];
+        if (!selectedWeatherType || !weatherTable?.[selectedWeatherType]) {
+            selectedWeatherType = 'sunny';
+        }
+
+        const [, symbolWeather, efficiencyWeather] = weatherTable[selectedWeatherType] || [1, '☀', 1];
 
         const statValueSpan = document.getElementById('stat7');
         const statTitleSpan = statValueSpan?.previousElementSibling;
