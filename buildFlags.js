@@ -1,1 +1,1 @@
-window.__DEMO_BUILD__ = true;
+window.__DEMO_BUILD__ = false;

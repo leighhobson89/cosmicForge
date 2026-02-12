@@ -24,11 +24,11 @@
     "linux": {
       "target": "zip",
       "icon": "icon.png",
-      "artifactName": "Cosmic Forge Demo.${ext}"
+      "artifactName": "Cosmic Forge Full.${ext}"
     },
     "portable": {
       "unicode": false,
-      "artifactName": "Cosmic Forge Demo.exe"
+      "artifactName": "Cosmic Forge Full.exe"
     },
     "files": [
       "index.html",

@@ -4510,9 +4510,10 @@ export function generateStarfield(starfieldContainer, numberOfStars = 70, seed =
                     setFromStarObject(currentStar);
                     setToStarObject(star);
                     drawStarConnectionDrawings(currentStar, star, true);
-                    createStarDestinationRow(starData[star.name.toLowerCase()] || star.name, true);
-                    if (starData[star.name.toLowerCase()]) {
-                        setDestinationStar(starData[star.name.toLowerCase()].name);
+                    const destinationStarData = starData?.[star.name.toLowerCase()] || null;
+                    createStarDestinationRow(destinationStarData || star.name, !!destinationStarData);
+                    if (destinationStarData) {
+                        setDestinationStar(destinationStarData.name);
                     }
                 } else if (isHomeStar) {
                     if (getMiaplacidusMilestoneLevel() === 4) {
@@ -4540,7 +4541,9 @@ export function generateStarfield(starfieldContainer, numberOfStars = 70, seed =
 }
 
 export function createStarDestinationRow(starData, isInteresting) {
-    const starName = typeof starData === "object" ? starData.name.toLowerCase() : starData.toLowerCase();
+    const isObj = !!starData && typeof starData === 'object';
+    const interesting = !!isInteresting && isObj;
+    const starName = isObj ? String(starData.name || '').toLowerCase() : String(starData || '').toLowerCase();
 
     if (getSettledStars().includes(starName)) {
         return;
@@ -4556,14 +4559,16 @@ export function createStarDestinationRow(starData, isInteresting) {
     const readyTextColor = themeStyles.getPropertyValue('--ready-text').trim();
     const disabledTextColor = themeStyles.getPropertyValue('--disabled-text').trim();
 
-    const canTravel = isInteresting ? currentAntimatter >= starData.fuel : false;
+    const fuel = interesting ? Number(starData.fuel) : NaN;
+    const distance = interesting ? Number(starData.distance) : NaN;
+    const canTravel = interesting && Number.isFinite(fuel) ? currentAntimatter >= fuel : false;
     const textColor = canTravel ? readyTextColor : disabledTextColor;
 
     elementRow.innerHTML = `
         <div class="option-row-main d-flex no-vertical-padding">
-            <div id="starDestinationName">Name: ${isInteresting ? capitaliseWordsWithRomanNumerals(starData.name) : starData}</div>
-            <div id="starDestinationDistance" class="travel-starship-info">Distance: <span style="color: ${textColor};">${isInteresting ? `${starData.distance.toFixed(2)}ly` : '???'}</span></div>
-            <div id="starDestinationFuel" class="travel-starship-info">Fuel: <span style="color: ${textColor};">${isInteresting ? `${starData.fuel} AM` : '???'}</span></div>
+            <div id="starDestinationName">Name: ${interesting ? capitaliseWordsWithRomanNumerals(starData.name) : starData}</div>
+            <div id="starDestinationDistance" class="travel-starship-info">Distance: <span style="color: ${textColor};">${interesting && Number.isFinite(distance) ? `${distance.toFixed(2)}ly` : '???'}</span></div>
+            <div id="starDestinationFuel" class="travel-starship-info">Fuel: <span style="color: ${textColor};">${interesting && Number.isFinite(fuel) ? `${fuel} AM` : '???'}</span></div>
             <div id="starDestinationButton"></div>
             <div id="starDestinationDescription" class="green-ready-text invisible">Travelling...</div>
         </div>
