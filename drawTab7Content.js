@@ -474,7 +474,7 @@ export function drawTab7Content(heading, optionContentElement) {
                 { value: 'select', text: 'Select Special Prize', type: 'select' },
                 { value: 'special_rocket_warp', text: 'Rocket Warp To Asteroid / Base', type: 'special' },
                 { value: 'special_starship_warp', text: 'Starship Warp Instantly', type: 'special' },
-                { value: 'special_telescope_discover_asteroid', text: 'Space Telescope Discovered Asteroid', type: 'special' },
+                { value: 'special_telescope_finish_asteroid_search', text: 'Space Telescope Finished Asteroid Search!', type: 'special' },
                 { value: 'special_telescope_finish_star_study', text: 'Space Telescope Finished Star Study!', type: 'special' },
                 { value: 'special_telescope_finish_void_pillage', text: 'Space Telescope Finished Pillaging The Void!', type: 'special' },
                 { value: 'special_100cp', text: '100CP', type: 'special' },

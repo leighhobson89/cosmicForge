@@ -163,83 +163,119 @@ function warpStarshipInstantly() {
         return null;
     }
 
-    if (timerManagerDelta.hasTimer('starShipTravelToDestinationStarTimer')) {
-        timerManagerDelta.removeTimer('starShipTravelToDestinationStarTimer');
+    const msLeft = Number(getTimeLeftUntilTravelToDestinationStarTimerFinishes?.() ?? 0);
+    if (!(Number.isFinite(msLeft) && msLeft > 0)) {
+        return null;
     }
 
-    setTimeLeftUntilTravelToDestinationStarTimerFinishes?.(0);
-    setStarShipStatus?.(['orbiting', dest]);
-    setStarShipArrowPosition?.(1);
+    const warpMs = 2000;
+    timerManagerDelta.removeTimer('starShipTravelToDestinationStarTimer');
+    setTimeLeftUntilTravelToDestinationStarTimerFinishes?.(warpMs);
+    startTravelToDestinationStarTimer([warpMs, 'wheelPrize']);
     return dest;
 }
 
-function discoverAsteroidSilentAndGetName() {
-    discoverAsteroid?.(true);
-
-    const arr = getAsteroidArray?.() || [];
-    const last = arr.length > 0 ? arr[arr.length - 1] : null;
-    if (!last || typeof last !== 'object') return null;
-    const key = Object.keys(last)[0];
-    const data = last[key];
-    const named = data?.specialName ? data?.name : null;
-    return named || key;
+function finishTimerPrize({
+    isActive,
+    getMsLeft,
+    setMsLeft,
+    timerName,
+    onFinish,
+    getResult,
+}) {
+    if (!(typeof isActive === 'function' && isActive())) {
+        return null;
+    }
+    const msLeft = Number(typeof getMsLeft === 'function' ? getMsLeft() : 0);
+    if (!(Number.isFinite(msLeft) && msLeft > 0)) {
+        return null;
+    }
+    if (timerName && timerManagerDelta.hasTimer(timerName)) {
+        timerManagerDelta.removeTimer(timerName);
+    }
+    if (typeof onFinish === 'function') {
+        onFinish();
+    }
+    if (typeof setMsLeft === 'function') {
+        setMsLeft(0);
+    }
+    return typeof getResult === 'function' ? getResult() : null;
 }
 
 function finishAsteroidSearchInstantly() {
-    if (timerManagerDelta.hasTimer('searchAsteroidTimer')) {
-        timerManagerDelta.removeTimer('searchAsteroidTimer');
-    }
-    discoverAsteroid?.(false);
-    setTelescopeReadyToSearch?.(true);
-    setCurrentlySearchingAsteroid?.(false);
-    setTimeLeftUntilAsteroidScannerTimerFinishes?.(0);
+    return finishTimerPrize({
+        isActive: () => !!getCurrentlySearchingAsteroid?.(),
+        getMsLeft: () => getTimeLeftUntilAsteroidScannerTimerFinishes?.(),
+        setMsLeft: (ms) => setTimeLeftUntilAsteroidScannerTimerFinishes?.(ms),
+        timerName: 'searchAsteroidTimer',
+        onFinish: () => {
+            discoverAsteroid?.(false);
+            setTelescopeReadyToSearch?.(true);
+            setCurrentlySearchingAsteroid?.(false);
+        },
+        getResult: () => {
+            const arr = getAsteroidArray?.() || [];
+            const last = arr.length > 0 ? arr[arr.length - 1] : null;
+            if (!last || typeof last !== 'object') return null;
+            const asteroidKey = Object.keys(last)[0];
+            const data = last[asteroidKey];
+            const named = data?.specialName ? data?.name : null;
+            return named || asteroidKey;
+        }
+    });
+}
 
-    const arr = getAsteroidArray?.() || [];
-    const last = arr.length > 0 ? arr[arr.length - 1] : null;
-    if (!last || typeof last !== 'object') return null;
-    const asteroidKey = Object.keys(last)[0];
-    const data = last[asteroidKey];
-    const named = data?.specialName ? data?.name : null;
-    return named || asteroidKey;
+function finishStarStudyInstantly() {
+    return finishTimerPrize({
+        isActive: () => !!getCurrentlyInvestigatingStar?.(),
+        getMsLeft: () => getTimeLeftUntilStarInvestigationTimerFinishes?.(),
+        setMsLeft: (ms) => setTimeLeftUntilStarInvestigationTimerFinishes?.(ms),
+        timerName: 'investigateStarTimer',
+        onFinish: () => {
+            extendStarDataRange?.(false);
+            setTelescopeReadyToSearch?.(true);
+            setCurrentlyInvestigatingStar?.(false);
+        },
+        getResult: () => true,
+    });
+}
+
+function finishVoidPillageInstantly() {
+    return finishTimerPrize({
+        isActive: () => !!getCurrentlyPillagingVoid?.(),
+        getMsLeft: () => getTimeLeftUntilPillageVoidTimerFinishes?.(),
+        setMsLeft: (ms) => setTimeLeftUntilPillageVoidTimerFinishes?.(ms),
+        timerName: 'pillageVoidTimer',
+        onFinish: () => {
+            gainPillageVoidResourcesAndCompounds?.();
+            setTelescopeReadyToSearch?.(true);
+            setCurrentlyPillagingVoid?.(false);
+        },
+        getResult: () => true,
+    });
 }
 
 function finishRocketJourneyInstantly(rocketKey) {
-    const toTimer = `${rocketKey}TravelToAsteroidTimer`;
-    const returnTimer = `${rocketKey}TravelReturnTimer`;
-    if (timerManagerDelta.hasTimer(toTimer)) {
-        timerManagerDelta.removeTimer(toTimer);
-    }
-    if (timerManagerDelta.hasTimer(returnTimer)) {
-        timerManagerDelta.removeTimer(returnTimer);
+    const active = !!getCurrentlyTravellingToAsteroid?.(rocketKey);
+    const msLeft = Number(getTimeLeftUntilRocketTravelToAsteroidTimerFinishes?.(rocketKey) ?? 0);
+    if (!active || !(Number.isFinite(msLeft) && msLeft > 0)) {
+        return null;
     }
 
-    setTimeLeftUntilRocketTravelToAsteroidTimerFinishes?.(rocketKey, 0);
-    setCurrentlyTravellingToAsteroid?.(rocketKey, false);
+    const warpMs = 2000;
+    const returning = !!getRocketDirection?.(rocketKey);
+    const toTimer = `${rocketKey}TravelToAsteroidTimer`;
+    const returnTimer = `${rocketKey}TravelReturnTimer`;
+    timerManagerDelta.removeTimer(toTimer);
+    timerManagerDelta.removeTimer(returnTimer);
+
+    setTimeLeftUntilRocketTravelToAsteroidTimerFinishes?.(rocketKey, warpMs);
+    startTravelToAndFromAsteroidTimer([warpMs, 'wheelPrize'], rocketKey, returning);
 
     const defaultLabel = titleCaseFromKey(rocketKey);
     const customName = getRocketUserName?.(rocketKey) ?? defaultLabel;
     const name = String(customName || defaultLabel);
     return { rocketKey, name };
-}
-
-function finishStarStudyInstantly() {
-    if (timerManagerDelta.hasTimer('investigateStarTimer')) {
-        timerManagerDelta.removeTimer('investigateStarTimer');
-    }
-    extendStarDataRange?.(false);
-    setTelescopeReadyToSearch?.(true);
-    setCurrentlyInvestigatingStar?.(false);
-    setTimeLeftUntilStarInvestigationTimerFinishes?.(0);
-}
-
-function finishVoidPillageInstantly() {
-    if (timerManagerDelta.hasTimer('pillageVoidTimer')) {
-        timerManagerDelta.removeTimer('pillageVoidTimer');
-    }
-    gainPillageVoidResourcesAndCompounds?.();
-    setTelescopeReadyToSearch?.(true);
-    setCurrentlyPillagingVoid?.(false);
-    setTimeLeftUntilPillageVoidTimerFinishes?.(0);
 }
 
 export function claimCasinoSpecialPrizeByKey(selection, { notify = true } = {}) {
@@ -353,22 +389,9 @@ export function claimCasinoSpecialPrizeByKey(selection, { notify = true } = {}) 
         return { type: 'finish_rocket_journey', ...result };
     }
 
-    if (key === 'special_telescope_discover_asteroid') {
-        if (!(getCurrentlySearchingAsteroid?.() && (getTimeLeftUntilAsteroidScannerTimerFinishes?.() > 0))) {
-            return null;
-        }
-        const name = discoverAsteroidSilentAndGetName();
-        if (name && notify) {
-            showNotification(`Special Prize Claimed! Space Telescope discovered Asteroid ${name}`, 'info', 3500, 'galacticCasino');
-        }
-        return { type: 'telescope_discover_asteroid', asteroid: name };
-    }
-
     if (key === 'special_telescope_finish_star_study') {
-        if (!(getCurrentlyInvestigatingStar?.() && (getTimeLeftUntilStarInvestigationTimerFinishes?.() > 0))) {
-            return null;
-        }
-        finishStarStudyInstantly();
+        const ok = finishStarStudyInstantly();
+        if (!ok) return null;
 
         if (notify) {
             showNotification('Special Prize Claimed! Space Telescope finished Star Study!', 'info', 3500, 'galacticCasino');
@@ -377,10 +400,8 @@ export function claimCasinoSpecialPrizeByKey(selection, { notify = true } = {}) 
     }
 
     if (key === 'special_telescope_finish_asteroid_search') {
-        if (!(getCurrentlySearchingAsteroid?.() && (getTimeLeftUntilAsteroidScannerTimerFinishes?.() > 0))) {
-            return null;
-        }
         const name = finishAsteroidSearchInstantly();
+        if (!name) return null;
         if (notify) {
             showNotification('Special Prize Claimed! Space Telescope finished Asteroid Search!', 'info', 3500, 'galacticCasino');
         }
@@ -391,10 +412,8 @@ export function claimCasinoSpecialPrizeByKey(selection, { notify = true } = {}) 
         if (String(getPlayerPhilosophy?.() || '') !== 'voidborn') {
             return null;
         }
-        if (!(getCurrentlyPillagingVoid?.() && (getTimeLeftUntilPillageVoidTimerFinishes?.() > 0))) {
-            return null;
-        }
-        finishVoidPillageInstantly();
+        const ok = finishVoidPillageInstantly();
+        if (!ok) return null;
 
         if (notify) {
             showNotification('Special Prize Claimed! Space Telescope finished Pillaging The Void!', 'info', 3500, 'galacticCasino');

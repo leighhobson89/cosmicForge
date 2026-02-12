@@ -572,6 +572,8 @@ function galacticCasinoChecks() {
         const specialReady = String(wheelEl.getAttribute('data-special-ready') || 'false') === 'true';
         const selection = String(wheelEl.getAttribute('data-prize-selection') || 'select').toLowerCase();
 
+        let selectedDisabled = false;
+
         if (wheelPrizeDropdown) {
             const enableDropdown = specialReady && !spinning;
             wheelPrizeDropdown.classList.toggle('red-disabled-text', !enableDropdown);
@@ -622,10 +624,10 @@ function galacticCasinoChecks() {
                         enabled = hasTravellingRocket;
                     } else if (value === 'special_starship_warp') {
                         enabled = hasStarshipTravel;
-                    } else if (value === 'special_telescope_discover_asteroid') {
-                        enabled = hasAsteroidSearch;
                     } else if (value === 'special_telescope_finish_star_study') {
                         enabled = hasStarStudy;
+                    } else if (value === 'special_telescope_finish_asteroid_search') {
+                        enabled = hasAsteroidSearch;
                     } else if (value === 'special_telescope_finish_void_pillage') {
                         enabled = hasVoidPillage;
                     }
@@ -635,7 +637,7 @@ function galacticCasinoChecks() {
                 });
 
                 const selectedOption = wheelPrizeDropdown.querySelector(`.dropdown-option[data-value="${selection}"]`);
-                const selectedDisabled = !!selectedOption?.classList?.contains('red-disabled-text');
+                selectedDisabled = !!selectedOption?.classList?.contains('red-disabled-text');
                 if (selection !== 'select' && selectedDisabled) {
                     wheelEl.setAttribute('data-prize-selection', 'select');
                     const dropdownTextEl = wheelPrizeDropdown.querySelector('.dropdown-text');
@@ -647,7 +649,7 @@ function galacticCasinoChecks() {
         }
 
         if (wheelClaimButton) {
-            const canClaim = specialReady && !spinning && selection !== 'select';
+            const canClaim = specialReady && !spinning && selection !== 'select' && !selectedDisabled;
             setButtonState(wheelClaimButton, { enabled: canClaim, ready: canClaim });
         }
 
