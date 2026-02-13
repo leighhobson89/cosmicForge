@@ -3233,6 +3233,13 @@ export function createButton(text, classNames, onClick, dataConditionCheck, reso
     
     if (disableKeyboardForButton) {
         button.setAttribute('tabindex', '-1');
+    }
+
+    if (dataConditionCheck === 'sellResource' && quantityArgument === 'hydrogen') {
+        button.id = 'hydrogenSellButton';
+    }
+
+    if (disableKeyboardForButton) {
         button.addEventListener('keydown', (event) => {
             if (event.key === 'Enter' || event.key === ' ') {
                 event.preventDefault();
@@ -7530,7 +7537,7 @@ function setupNativeTechTreeZoom(container, stage) {
 
     if (!container.nativeTechZoom) {
         container.nativeTechZoom = {
-            levelIndex: 0,
+            levelIndex: 2,
             applyZoom(targetStage) {
                 const scale = zoomLevels[this.levelIndex];
                 if (targetStage) {

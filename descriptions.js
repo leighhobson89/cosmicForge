@@ -426,7 +426,7 @@ export function initialiseDescriptions() {
         'solar power plant': "Solar power plants provide renewable energy without using any resources.",
         'research': "Here you can buy upgrades to generate research points for unlocking new technology.",
         'technology': "Here you can unlock new technologies to improve your game, provided you have enough research points!",
-        'tech tree': 'Here you can see a visual representation of technologies and what they provide.',
+        'tech tree': 'Here you can see a visual representation of technologies and what they provide.  You can zoom with the mouse wheel.',
         'philosophy': 'Here you can unlock special abilities for your philosophy, and research repeatable techs that improve your game.',
     
         'diesel': 'The first compound created by your hands, it is a useful early fuel.',

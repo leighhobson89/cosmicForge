@@ -2,7 +2,8 @@ import {
     getOnboardingMode,
     setOnboardingMode,
     getCurrentTab,
-    getCurrentTheme
+    getCurrentTheme,
+    getTechUnlockedArray
 } from './constantsAndGlobalVars.js';
 
 import { getResourceDataObject } from './resourceDataObject.js';
@@ -852,6 +853,8 @@ function checkOnboardingCondition(conditionStep, calculateResearchRatePerTick) {
             currentRaw = calculateResearchRatePerTick?.();
         } else if (computedKey === 'currentTheme') {
             currentRaw = getCurrentTheme?.();
+        } else if (computedKey === 'techUnlocked') {
+            currentRaw = getTechUnlockedArray?.() || [];
         } else {
             return false;
         }
@@ -1021,7 +1024,7 @@ export function onboardingChecks(
             ['timedSpotlight', ['hydrogenQuantity', 1], 'It cost you all your Hydrogen but now you can store double.', 3000, 'Resources'],
             ['timedSpotlight', ['Gain', 0], 'Feel free to click Gain to help your Auto Buyer along.', 3000, 'Resources'],
             ['condition', ['hydrogenQuantity', 1], ['resources', 'hydrogen', 'quantity'], 300],
-            ['spotlight', ['Sell', 0], 'Click the Sell Button.', 'Resources'],
+            ['spotlight', ['hydrogenSellButton', 1], 'Click the Sell Button.', 'Resources'],
             ['timedSpotlight', ['cashStat', 1], 'Your Cash is shown here.', 3000, 'Resources'],
             ['spotlight', ['tab3', 1], "Let's return to the Research Tab", 'Resources'],
             ['spotlight', ['Technology', 0], 'Click Technology', 'Research'],
@@ -1029,8 +1032,9 @@ export function onboardingChecks(
             ['spotlight', ['Tech Tree', 0], 'Click Tech Tree', 'Research'],
             ['timedSpotlight', ['Tech Tree', 0], 'Here you see a graphical representation of techs. * It will grow out as you continue progression in the game.', 4000, 'Research'],
             ['spotlight', ['Technology', 0], 'Return to the Technology Option', 'Research'],
-            ['spotlight', ['RESEARCH', 0], 'When you have 150 Research, click Research on Knowledge Sharing', 'Research'],
-            ['spotlight', ['researchOption', 1], 'Click Research', 'Research'],
+            ['spotlight', ['RESEARCH', 0], 'When you have 150 Research, click Research on Knowledge Sharing', { waitForClick: false }, 'Research'],
+            ['condition', ['RESEARCH', 0], ['computed', 'techUnlocked'], 'knowledgeSharing', 'contains'],
+            ['spotlight', ['researchOption', 1], 'Click Research', { waitForClick: false }, 'Research'],
             ['timedSpotlight', ['Add 8 Research /s', 0], 'Once you save up more Cash you can buy a Science Club * You will Research much faster!', 4000, 'Research'],
             ['spotlight', ['tab8', 1], 'Next we will take a look at the Settings Tab.', 'Research'],
             ['spotlight', ['Visual', 0], 'While we are here, lets change the look and feel.', 'Settings'],
@@ -1047,10 +1051,7 @@ export function onboardingChecks(
             ['spotlight', ['Concepts - Early', 0], "Click 'Concepts - Early'", 'Settings'],
             ['spotlight', ['Concepts - Mid', 0], "When you are done Click 'Concepts - Mid Game'", 'Settings'],
             ['spotlight', ['Concepts - Late', 0], "When you are done Click 'Concepts - Late'", 'Settings'],
-            ['timedSpotlight', ['Concepts - Late', 0], 'This is all the background you need!  One last thing before I leave * you to explore and Forge!', 4000, 'Settings'],
-            ['spotlight', ['Saving / Loading', 0], "Click 'Saving / Loading'", 'Settings'],
-            ['spotlight', ['autoSaveToggle', 1], 'Click The Autosave Toggle Switch', 'Settings'],
-            ['timedSpotlight', ['autoSaveToggle', 1], "You game will now save periodically*Thats it!  Go forth and Forge, Mia'Plac!", 7000, 'Settings'],
+            ['timedSpotlight', ['Concepts - Late', 0], "That's it — have fun exploring and forging!", 4000, 'Settings'],
         ]);
     }
 
