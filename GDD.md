@@ -435,7 +435,7 @@ Megastructure research provides powerful bonuses and reduces the Miaplacidus for
 - **Help content:** structured by sections (Get Started, Concepts, End Goal, etc.).
 
 ### 8.3 Settings and themes
-- Multiple themes (terminal/light/frosty/summer/forest/dark).
+- Multiple themes (terminal, dark, misty, light, frosty, summer, supernova, galaxy, space).
 - Settings include audio toggles and other UX preferences.
 
 ---

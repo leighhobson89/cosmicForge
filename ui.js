@@ -4022,7 +4022,7 @@ export function selectTheme(theme) {
     }, { immediate: true, flushReason: 'theme' });
 
     setThemesTriedArray(theme, 'add');
-    const requiredThemes = ['terminal', 'dark', 'misty', 'light', 'frosty', 'summer', 'forest'];
+    const requiredThemes = ['terminal', 'dark', 'misty', 'light', 'frosty', 'summer', 'supernova', 'galaxy', 'space'];
     const triedThemes = getThemesTriedArray();
     const hasAllThemes = requiredThemes.every(t => triedThemes.includes(t));
     if (hasAllThemes) {

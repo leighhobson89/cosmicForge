@@ -14,10 +14,12 @@
         <select id="theme">
           <option value="terminal" selected>Terminal</option>
           <option value="dark">Dark</option>
+          <option value="supernova">Supernova</option>
+          <option value="galaxy">Galaxy</option>
+          <option value="space">Space</option>
           <option value="light">Light</option>
           <option value="frosty">Frosty</option>
           <option value="summer">Summer</option>
-          <option value="forest">Forest</option>
         </select>
         <button id="btnRefresh">Refresh</button>
         <button id="btnExpandAllPanels">Expand panels</button>
@@ -569,6 +571,17 @@
         return `${s}s`;
       }
 
+      const THEMES_ORDERED = [
+        'terminal',
+        'dark',
+        'supernova',
+        'galaxy',
+        'space',
+        'light',
+        'frosty',
+        'summer',
+      ];
+
       function newRollup() {
         return {
           version: 1,
@@ -977,6 +990,18 @@
         }
       }
 
+      function ensureThemeCountsShape(themeCounts) {
+        const obj = (themeCounts && typeof themeCounts === 'object') ? themeCounts : {};
+        const out = {};
+        for (const theme of THEMES_ORDERED) {
+          out[theme] = Number.isFinite(obj[theme]) ? obj[theme] : (obj[theme] || 0);
+        }
+        for (const [k, v] of Object.entries(obj)) {
+          if (!(k in out)) out[k] = Number.isFinite(v) ? v : (v || 0);
+        }
+        return out;
+      }
+
       function render(rollup) {
         const sessions = Object.keys(rollup.uniqueSessions || {}).length;
         const clients = Object.keys(rollup.uniqueClients || {}).length;
@@ -1017,7 +1042,7 @@
           : toRows(rollup.achievementCounts, 200);
         renderRows('topAchievements', achievementRows, fmtInt);
         renderRows('starSystems', toRows(rollup.starSystemSeenCounts, 30), fmtInt);
-        renderRows('themeSelections', toRows(rollup.themeSelectionCounts, 50), fmtInt);
+        renderRows('themeSelections', toRows(ensureThemeCountsShape(rollup.themeSelectionCounts), 50), fmtInt);
 
         const capture1 = (rollup.megastructureCapturedCounts || {})['1'] || 0;
         const capture2 = (rollup.megastructureCapturedCounts || {})['2'] || 0;

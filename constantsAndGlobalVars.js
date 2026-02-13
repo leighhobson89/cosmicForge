@@ -450,7 +450,9 @@ const CUSTOM_POINTER_THEMES = [
     'light',
     'frosty',
     'summer',
-    'forest'
+    'supernova',
+    'galaxy',
+    'space'
 ];
 
 const CUSTOM_POINTER_ASSET_KEYS = new Set(

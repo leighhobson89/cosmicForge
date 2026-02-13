@@ -166,6 +166,183 @@
     letter-spacing: 1px;
 }
 
+/* ------------------------------------------------------------
+   Modern theme styling enhancements
+   ------------------------------------------------------------ */
+
+/* Default fallbacks for new theme tokens (keep existing themes stable) */
+[data-theme] {
+    --ui-radius: 10px;
+    --ui-radius-sm: 8px;
+    --ui-shadow: none;
+    --ui-shadow-strong: none;
+    --ui-glow: none;
+    --ui-glow-strong: none;
+    --ui-surface-border: var(--container-border-color);
+    --ui-surface-bg: var(--container-bg-color);
+    --ui-surface-bg-2: var(--bg-color);
+}
+
+/* Global “modernization” hooks via existing shared classes */
+body {
+    background: var(--bg-color);
+    color: var(--text-color);
+}
+
+.option-button,
+button.option-button {
+    border-radius: var(--ui-radius-sm);
+    box-shadow: var(--ui-shadow);
+    transition: transform 120ms ease, box-shadow 120ms ease, background-color 120ms ease, border-color 120ms ease;
+}
+
+.option-button:not(.red-disabled-text):hover {
+    transform: translateY(-1px);
+    box-shadow: var(--ui-shadow-strong);
+}
+
+.container-item-menu,
+.container-item-content,
+.option-pane-description,
+.text-area-style,
+.casino-spinner,
+.galactic-casino-roulette-wheel {
+    border-radius: var(--ui-radius);
+    box-shadow: var(--ui-shadow);
+}
+
+.collapsible-header,
+.main-category-header {
+    border-radius: var(--ui-radius-sm);
+}
+
+.tab {
+    border-radius: var(--ui-radius-sm);
+    box-shadow: var(--ui-shadow);
+}
+
+.tab.selected {
+    box-shadow: var(--ui-shadow-strong);
+}
+
+.green-ready-text {
+    text-shadow: var(--ui-glow);
+}
+
+/* Supernova Theme Variables (warm, high-contrast light) */
+[data-theme="supernova"] {
+    --battleBgImg: url('./resources/images/battleImage1_light.png');
+    --disabled-text: #ff4d4d;
+    --ready-text: #ffd54f;
+    --warning-text: #ffb300;
+    --stats-this-run-text: #8be9ff;
+    --stats-all-time-text: #ffd54f;
+    --bg-color: #140307;
+    --text-color: rgba(240, 247, 255, 1);
+    --text-color-rgb: 240, 247, 255;
+    --text-color-hex: #f0f7ff;
+    --text-hover-color: #8be9ff;
+    --text-focus-color: #8be9ff;
+    --tab-bg-color: rgba(255, 141, 92, 0.10);
+    --tab-bg-hover: rgba(255, 213, 79, 0.14);
+    --tab-selected-bg-color: rgba(255, 109, 0, 0.20);
+    --tab-border-color: rgba(255, 213, 79, 0.28);
+    --tab-invisible-bg-color: rgba(255, 141, 92, 0.06);
+    --tab-invisible-text-color: rgba(240, 247, 255, 0.30);
+    --container-border-color: rgba(255, 213, 79, 0.28);
+    --container-bg-color: rgba(38, 6, 12, 0.86);
+    --button-bg-color: rgba(255, 141, 92, 0.10);
+    --button-bg-active: rgba(255, 109, 0, 0.26);
+    --star-color-prominent: #ffd54f;
+    --star-color-settled: #8be9ff;
+    --current-star-border: #ff4500;
+    --generation-colors: #ffd54f, #ff6d00, #ff3d00;
+    --consumption-colors: #ff4d4d, #ff2bd6, #8be9ff;
+
+    --ui-radius: 14px;
+    --ui-radius-sm: 10px;
+    --ui-shadow: 0 18px 70px rgba(0, 0, 0, 0.65);
+    --ui-shadow-strong: 0 22px 90px rgba(0, 0, 0, 0.78);
+    --ui-glow: 0 0 12px rgba(255, 109, 0, 0.40);
+    --ui-glow-strong: 0 0 20px rgba(139, 233, 255, 0.35);
+}
+
+/* Galaxy Theme Variables */
+[data-theme="galaxy"] {
+    --battleBgImg: url('./resources/images/battleImage1_dark.png');
+    --disabled-text: #ff4d4d;
+    --ready-text: #2ce6a6;
+    --warning-text: #ffb020;
+    --stats-this-run-text: #58a6ff;
+    --stats-all-time-text: #c678ff;
+    --bg-color: #0b0f17;
+    --text-color: rgba(230, 235, 245, 1);
+    --text-color-rgb: 230, 235, 245;
+    --text-color-hex: #e6ebf5;
+    --text-hover-color: #9bbcff;
+    --text-focus-color: #9bbcff;
+    --tab-bg-color: rgba(255, 255, 255, 0.04);
+    --tab-bg-hover: rgba(88, 166, 255, 0.10);
+    --tab-selected-bg-color: rgba(88, 166, 255, 0.16);
+    --tab-border-color: rgba(255, 255, 255, 0.10);
+    --tab-invisible-bg-color: rgba(255, 255, 255, 0.02);
+    --tab-invisible-text-color: rgba(230, 235, 245, 0.28);
+    --container-border-color: rgba(255, 255, 255, 0.10);
+    --container-bg-color: rgba(15, 20, 30, 0.86);
+    --button-bg-color: rgba(255, 255, 255, 0.06);
+    --button-bg-active: rgba(88, 166, 255, 0.16);
+    --star-color-prominent: #ffcc00;
+    --star-color-settled: #8fc5ff;
+    --current-star-border: #ff4500;
+    --generation-colors: #2ce6a6, #2ea043, #0f7b57;
+    --consumption-colors: #ff4d4d, #e53935, #7a1a1a;
+
+    --ui-radius: 14px;
+    --ui-radius-sm: 10px;
+    --ui-shadow: 0 16px 50px rgba(0, 0, 0, 0.45);
+    --ui-shadow-strong: 0 18px 65px rgba(0, 0, 0, 0.55);
+    --ui-glow: 0 0 10px rgba(44, 230, 166, 0.28);
+    --ui-glow-strong: 0 0 18px rgba(88, 166, 255, 0.25);
+}
+
+/* Space Theme Variables (wacky) */
+[data-theme="space"] {
+    --battleBgImg: url('./resources/images/battleImage1_dark.png');
+    --disabled-text: #ff2bd6;
+    --ready-text: #00f5ff;
+    --warning-text: #ffe600;
+    --stats-this-run-text: #00f5ff;
+    --stats-all-time-text: #ff2bd6;
+    --bg-color: #05010a;
+    --text-color: rgba(238, 238, 255, 1);
+    --text-color-rgb: 238, 238, 255;
+    --text-color-hex: #eeeeff;
+    --text-hover-color: #00f5ff;
+    --text-focus-color: #ffe600;
+    --tab-bg-color: rgba(255, 255, 255, 0.04);
+    --tab-bg-hover: rgba(0, 245, 255, 0.12);
+    --tab-selected-bg-color: rgba(255, 43, 214, 0.16);
+    --tab-border-color: rgba(0, 245, 255, 0.35);
+    --tab-invisible-bg-color: rgba(255, 255, 255, 0.02);
+    --tab-invisible-text-color: rgba(238, 238, 255, 0.25);
+    --container-border-color: rgba(0, 245, 255, 0.35);
+    --container-bg-color: rgba(10, 4, 18, 0.82);
+    --button-bg-color: rgba(255, 255, 255, 0.05);
+    --button-bg-active: rgba(0, 245, 255, 0.18);
+    --star-color-prominent: #ffe600;
+    --star-color-settled: #00f5ff;
+    --current-star-border: #ff4500;
+    --generation-colors: #00f5ff, #00ff7b, #ffe600;
+    --consumption-colors: #ff2bd6, #ff4d4d, #ffe600;
+
+    --ui-radius: 18px;
+    --ui-radius-sm: 14px;
+    --ui-shadow: 0 18px 70px rgba(0, 0, 0, 0.65);
+    --ui-shadow-strong: 0 22px 90px rgba(0, 0, 0, 0.75);
+    --ui-glow: 0 0 12px rgba(0, 245, 255, 0.45);
+    --ui-glow-strong: 0 0 22px rgba(255, 43, 214, 0.35);
+}
+
 .galactic-casino-spin-button {
     margin-left: 5%;
 }
@@ -1004,37 +1181,6 @@ button {
     --current-star-border: #ff4500;
     --generation-colors: #ffcc80, #ffb74d, #ffa726;
     --consumption-colors: #ff8a65, #ff7043, #d84315;
-}
-
-/* Forest Theme Variables */
-[data-theme="forest"] {
-    --battleBgImg: url('./resources/images/battleImage1_forest.png');
-    --disabled-text: red;
-    --ready-text: rgba(0, 255, 0, 1);
-    --warning-text: orange;
-    --stats-this-run-text: #32a132; /* Strong green for forest theme */
-    --stats-all-time-text: #7a4118; /* Bold magenta for contrast */
-    --bg-color: #2f4f4f;
-    --text-color: rgba(122, 65, 24, 1);
-    --text-color-rgb: 122, 65, 24;
-    --text-color-hex: #7a4118;
-    --text-hover-color: #91ca2e;
-    --text-focus-color: #32a132;
-    --tab-bg-color: #46a361;
-    --tab-bg-hover: #0c4318;
-    --tab-selected-bg-color: #91ca2e;
-    --tab-border-color: #8b4513;
-    --tab-invisible-bg-color: #2e8b57;
-    --tab-invisible-text-color: #90ee90;
-    --container-border-color: #228b22;
-    --container-bg-color: #46a361;
-    --button-bg-color: #87ca87;
-    --button-bg-active: #c6f9c6;
-    --star-color-prominent: #bdbf32;
-    --star-color-settled: #7fc8ff;
-    --current-star-border: #ff4500;
-    --generation-colors: #66bb6a, #4caf50, #388e3c;
-    --consumption-colors: #d32f2f, #c62828, #b71c1c;
 }
 
 /* Terminal Theme Variables */

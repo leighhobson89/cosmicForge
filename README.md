@@ -258,7 +258,7 @@ This hybrid approach keeps legacy simple intervals where they make sense while e
 
 ### UI Structure and Styling (index.html & styles.css)
 - The UI consists of a notification area, news ticker, stats bar, tab navigation for game sections, a main content container with resource menus, and debug tools.
-- Styling is handled via styles.css, using Bootstrap 4, CSS variables for themes, responsive layouts, and animations. Multiple color themes are defined (terminal, light, frosty, summer, forest, dark).
+- Styling is handled via styles.css, using Bootstrap 4, CSS variables for themes, responsive layouts, and animations. Multiple color themes are defined (terminal, light, frosty, summer, dark).
 
 ---
 

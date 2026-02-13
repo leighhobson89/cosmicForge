@@ -288,11 +288,13 @@ export function drawTab8Content(heading, optionContentElement) {
             createDropdown('themeSelect', [
                 { value: 'terminal', text: 'Terminal' },
                 { value: 'dark', text: 'Dark' },
+                { value: 'supernova', text: 'Supernova' },
+                { value: 'galaxy', text: 'Galaxy' },
+                { value: 'space', text: 'Space' },
                 { value: 'misty', text: 'Misty' },
                 { value: 'light', text: 'Light' },
                 { value: 'frosty', text: 'Frosty' },
                 { value: 'summer', text: 'Summer' },
-                { value: 'forest', text: 'Forest' },
             ], document.body.getAttribute('data-theme'), (value) => {
                 selectTheme(value);
                 setAchievementIconImageUrls();

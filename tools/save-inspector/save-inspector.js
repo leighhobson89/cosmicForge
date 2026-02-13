@@ -17,7 +17,9 @@ let sessionHasEdits = false;
 let editCommitCounter = 0;
 
 const THEME_STORAGE_KEY = 'cosmicForge.saveInspector.theme';
-const fallbackThemes = ['terminal', 'dark', 'light', 'frosty', 'summer', 'forest'];
+const fallbackThemes = ['terminal', 'dark', 'supernova', 'galaxy', 'space', 'light', 'frosty', 'summer'];
+
+const PREFERRED_THEME_ORDER = ['terminal', 'dark', 'supernova', 'galaxy', 'space', 'light', 'frosty', 'summer'];
 
 const preferredTopLevelOrder = [
   'resourceData',
@@ -74,8 +76,13 @@ async function detectThemesFromCss() {
 
     // Prefer terminal first if present.
     list.sort((a, b) => {
-      if (a === 'terminal') return -1;
-      if (b === 'terminal') return 1;
+      const ai = PREFERRED_THEME_ORDER.indexOf(a);
+      const bi = PREFERRED_THEME_ORDER.indexOf(b);
+      if (ai !== -1 || bi !== -1) {
+        if (ai === -1) return 1;
+        if (bi === -1) return -1;
+        return ai - bi;
+      }
       return a.localeCompare(b);
     });
     return list;
