@@ -4564,11 +4564,14 @@ export function createStarDestinationRow(starData, isInteresting) {
     const canTravel = interesting && Number.isFinite(fuel) ? currentAntimatter >= fuel : false;
     const textColor = canTravel ? readyTextColor : disabledTextColor;
 
+    const distanceText = interesting && Number.isFinite(distance) ? `${distance.toFixed(2)}ly` : '???';
+    const fuelText = interesting && Number.isFinite(fuel) ? `${fuel} AM` : '???';
+
     elementRow.innerHTML = `
         <div class="option-row-main d-flex no-vertical-padding">
             <div id="starDestinationName">Name: ${interesting ? capitaliseWordsWithRomanNumerals(starData.name) : starData}</div>
-            <div id="starDestinationDistance" class="travel-starship-info">Distance: <span style="color: ${textColor};">${interesting && Number.isFinite(distance) ? `${distance.toFixed(2)}ly` : '???'}</span></div>
-            <div id="starDestinationFuel" class="travel-starship-info">Fuel: <span style="color: ${textColor};">${interesting && Number.isFinite(fuel) ? `${fuel} AM` : '???'}</span></div>
+            <div id="starDestinationDistance" class="travel-starship-info">Distance: <span style="color: ${textColor};">${distanceText}</span></div>
+            <div id="starDestinationFuel" class="travel-starship-info">Fuel: <span style="color: ${textColor};">${fuelText}</span></div>
             <div id="starDestinationButton"></div>
             <div id="starDestinationDescription" class="green-ready-text invisible">Travelling...</div>
         </div>
