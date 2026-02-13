@@ -24,6 +24,12 @@
 
 ---
 
+## Game Design Document (GDD)
+
+See `GDD.md` for the high-level design overview and system write-ups (including Tab 7 systems like the Galactic Market and Galactic Casino).
+
+---
+
 ## 1. Project Overview & File Checklist
 
 This section provides a checklist of all source files in the project, marking off those that have been fully documented in this file. Use this as a quick reference for file coverage and to locate documentation for each module.

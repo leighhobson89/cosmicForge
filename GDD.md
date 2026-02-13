@@ -265,6 +265,104 @@ When arriving at a system:
 
 ---
 
+## 7.12.1 Galactic Casino (CP, Risk Games, and Utility Prizes)
+
+**Concept:** The Galactic Casino is a CP-driven (Casino Points) risk/reward + utility system in Tab 7 (Galactic). Players can buy CP by trading resources/compounds/cash, then spend CP across three mini-games that award CP back, grant resources/cash/research, or “finish” active travel/telescope timers.
+
+**Where it lives (code entry points):**
+- `resourceDataObject.js`: persistent casino state (`galacticCasino`, `getGalacticCasinoDataObject`, `setGalacticCasinoDataObject`).
+- `constantsAndGlobalVars.js`: global unlock + pricing (`getGalacticCasinoUnlocked`, `getPriceCasinoGame2`, `getPriceCasinoGame3`).
+- `drawTab7Content.js`: renders the Galactic Casino UI (CP purchase row + Game 1/2/3 UI blocks).
+- `game.js`: `galacticCasinoChecks()` runs every tick to enable/disable casino UI and keep it safe/consistent.
+- `casino.js`: authoritative game logic for playing/animating games and awarding prizes.
+- `descriptions.js`: in-game help strings for the casino rows.
+- `ui.js`: displays CP balance in the option header when the casino option is open.
+
+### A) CP (Casino Points) economy
+
+**Persistent state:**
+- `galacticCasino.settings.baseProbabilityCasino` (default `0.4`): base win probability for chance-based outcomes.
+- `galacticCasino.casinoPoints.quantity`: player CP balance.
+- `galacticCasino.casinoPoints.cpBaseCost`: baseline exchange rate multiplier.
+- `galacticCasino.casinoPoints.valueOfOneCP.resources|compounds`: relative values used to price CP purchases.
+
+**CP purchase:**
+- UI: “Purchase CP” row in Galactic Casino (dropdown for currency + quantity input + BUY button).
+- Logic: computed each tick in `galacticCasinoChecks()` to show the preview cost and enable BUY only when affordable.
+- Cost model: `costPerCp = cpBaseCost / valueOfOneCP[selectionType][selection]` (cash is treated as a currency with base value `1`).
+
+### B) Game 1 — Double or Nothing
+
+**Pitch:** Stake CP and spin a win/lose outcome. Win awards 2× stake, lose forfeits stake.
+
+**Implementation notes:**
+- Uses animated spinner UI (track + easing) and a probabilistic result driven by `baseProbabilityCasino`.
+- Primary functions live in `casino.js` (spin logic + stake resolution).
+
+### C) Game 2 — Wheel Of Fortune (special prize claim)
+
+**Pitch:** Spend CP to spin a wheel. If a “special” outcome is hit, the player chooses a *special prize* from a dropdown and must press **CLAIM**.
+
+**Key behavior / safety invariants:**
+- The dropdown and claim button are only enabled when the wheel has `data-special-ready=true` and is not spinning.
+- The selected dropdown option is revalidated every tick in `game.js`:
+  - If a timer-finishing prize becomes invalid (e.g., the underlying timer completed while the player had it selected), that option is marked `red-disabled-text`, selection is reset back to `select`, and **CLAIM** becomes disabled.
+  - This prevents claiming stale/ineligible specials.
+
+**Special prize keys (examples):**
+- CP flat grants: `special_100cp`.
+- Research grant: `special_100k_research`.
+- Double stock: `special_double_*` (e.g. `special_double_titanium`).
+- Timer utilities:
+  - `special_starship_warp` (shorten starship travel to 2s).
+  - `special_rocket_warp` (shorten a rocket travel/return to 2s).
+  - `special_telescope_finish_asteroid_search`
+  - `special_telescope_finish_star_study`
+  - `special_telescope_finish_void_pillage` (VoidBorn only)
+
+**Analytics:**
+- On successful claim, `casino_prize_won` is emitted with `game_id: game2_wheel_special` and `prize_key` plus award details.
+
+### D) Game 3 — Higher Or Lower (tier prizes)
+
+**Pitch:** A staged risk ladder. The player chooses Higher/Lower repeatedly and can cash out at any stage for the currently displayed tier prize.
+
+**Tier 7 “finish” / utility prizes:**
+- `special_finish_rocket_journey`
+- `special_finish_starship_journey`
+- `special_telescope_finish_asteroid_search`
+- `special_telescope_finish_star_study`
+- `special_telescope_finish_void_pillage` (VoidBorn)
+
+**Unification note:** Tier 7 utility prizes call the same authoritative prize-claim handler as Game 2 via `claimCasinoSpecialPrizeByKey(...)`.
+
+### E) Timer-finishing prize architecture (single shared helper)
+
+Timer-finishing specials should share one completion/checking mechanism so Game 2 and Game 3 behave identically.
+
+**Central helper:**
+- `finishTimerPrize({...})` in `casino.js`
+  - Validates “active” + ms remaining.
+  - Removes the timer by name.
+  - Applies the finish side-effect.
+  - Sets remaining time to `0`.
+
+**Telescope/void/star timers:**
+- `finishAsteroidSearchInstantly()` (removes `searchAsteroidTimer`, discovers asteroid, resets telescope state)
+- `finishStarStudyInstantly()` (removes `investigateStarTimer`, finalizes star study)
+- `finishVoidPillageInstantly()` (removes `pillageVoidTimer`, grants pillage rewards)
+
+**Travel/warp timers (2-second settle pattern):**
+- Starship warp/finish uses a “reduce to 2 seconds then restart the normal timer” approach so the normal completion logic runs:
+  - remove `starShipTravelToDestinationStarTimer`
+  - set remaining to `2000ms`
+  - call `startTravelToDestinationStarTimer([2000, 'wheelPrize'])`
+- Rocket finish uses the same pattern via `startTravelToAndFromAsteroidTimer([2000, 'wheelPrize'], rocketKey, returning)`.
+
+**Design goal:** Timer prizes should never desync state/UI; they should converge by letting the normal timer completion code finish the journey.
+
+---
+
 ## 7.13 Rebirth
 Rebirth:
 - Resets run progress.
