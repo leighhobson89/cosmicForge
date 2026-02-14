@@ -6651,7 +6651,7 @@ function handleSpaceUpgradeResourceType(element) {
             partBuyButton.classList.add('red-disabled-text');
         }
 
-        if (builtParts === totalParts) {
+        if (builtParts >= totalParts) {
             const builtPartsElement = document.getElementById(`${dataName}BuiltPartsQuantity`);
             const totalPartsElement = document.getElementById(`${dataName}TotalPartsQuantity`);
             partBuyButton.classList.add('red-disabled-text');
@@ -8399,15 +8399,20 @@ export function gain(incrementAmount, elementId, item, ABOrTechPurchase, tierAB,
             getElements()[elementId].classList.remove('green-ready-text');
             setResourceDataObject(currentQuantity + incrementAmount, 'research', ['quantity']);
         } else if (resourceType === 'space' && !item.startsWith('fleet')) {
-            setResourceDataObject(currentQuantity + incrementAmount, 'space', ['upgrades', item, 'builtParts']);
-            const builtParts = getResourceDataObject('space', ['upgrades', item, 'builtParts']);
             const totalParts = getResourceDataObject('space', ['upgrades', item, 'parts']);
+            const maxParts = (typeof totalParts === 'number' && Number.isFinite(totalParts)) ? totalParts : null;
 
-            if (builtParts === totalParts && item.startsWith('rocket')) {
+            const nextValueRaw = currentQuantity + incrementAmount;
+            const nextValue = maxParts === null ? nextValueRaw : Math.min(nextValueRaw, maxParts);
+            setResourceDataObject(nextValue, 'space', ['upgrades', item, 'builtParts']);
+
+            const builtParts = getResourceDataObject('space', ['upgrades', item, 'builtParts']);
+
+            if (maxParts !== null && builtParts >= maxParts && item.startsWith('rocket')) {
                 setRocketsBuilt(item);
             }
 
-            if (builtParts === totalParts && item.startsWith('ss')) {
+            if (maxParts !== null && builtParts >= maxParts && item.startsWith('ss')) {
                 setStarShipModulesBuilt(item);
             }
         } else if (item.startsWith('fleet')) {
