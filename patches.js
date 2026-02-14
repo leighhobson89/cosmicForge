@@ -181,6 +181,57 @@ export function migrateResourceData(saveData, objectType, options = {}) {
             saveData.version = 0.90;
         }
 
+        if (saveData.version < 0.91) {
+            if (objectType === 'resourceData') {
+                const upgrades = saveData?.space?.upgrades;
+                if (upgrades && typeof upgrades === 'object') {
+                    // Update launch pad prices
+                    const launchPad = upgrades?.launchPad;
+                    if (launchPad && typeof launchPad === 'object') {
+                        // Update basePrices[2] (titanium cost) to 700
+                        if (Array.isArray(launchPad.basePrices) && launchPad.basePrices.length > 2) {
+                            launchPad.basePrices[2] = 700;
+                        }
+                        // Update resource1Price: change resource to iron
+                        if (Array.isArray(launchPad.resource1Price) && launchPad.resource1Price.length >= 2) {
+                            launchPad.resource1Price[1] = 'iron';
+                            launchPad.resource1Price[2] = 'resources';
+                        }
+                        // Update resource2Price[0] (titanium cost) to 700
+                        if (Array.isArray(launchPad.resource2Price) && launchPad.resource2Price.length >= 1) {
+                            launchPad.resource2Price[0] = 700;
+                        }
+                    }
+
+                    // Update rocket prices and parts
+                    const applyRocketPatch = (rocketKey, parts, titaniumCostPerPart, oldParts) => {
+                        const rocket = upgrades?.[rocketKey];
+                        if (!rocket || typeof rocket !== 'object') {
+                            return;
+                        }
+                        if (rocket.parts !== undefined) rocket.parts = parts;
+                        if (rocket.builtParts !== undefined) {
+                            const built = Number(rocket.builtParts) || 0;
+                            if (built >= oldParts) {
+                                rocket.builtParts = parts;
+                            }
+                        }
+                        // Update resource2Price[0] (titanium cost per part) to 700
+                        if (Array.isArray(rocket.resource2Price) && rocket.resource2Price.length >= 1) {
+                            rocket.resource2Price[0] = titaniumCostPerPart;
+                        }
+                    };
+
+                    applyRocketPatch('rocket1', 12, 700, 15);
+                    applyRocketPatch('rocket2', 17, 700, 20);
+                    applyRocketPatch('rocket3', 22, 700, 25);
+                    applyRocketPatch('rocket4', 27, 700, 30);
+                }
+            }
+
+            saveData.version = 0.91;
+        }
+
         saveData.version += 0.001;
     }
 

@@ -8,7 +8,7 @@ import { showNotification } from "./ui.js";
 
 export let achievementImageUrls;
 export let resourceData = {
-    version: 0.90, //update this whenever changes are made to the structure
+    version: 0.91, //update this whenever changes are made to the structure
     resources: {
         solar: {
             autoSell: false,
@@ -571,18 +571,18 @@ export let resourceData = {
             },
             launchPad: { 
                 launchPadBoughtYet: false,
-                basePrices: [40000, 10000, 1000, 12000],
+                basePrices: [40000, 1000, 700, 12000],
                 price: 40000,
-                resource1Price: [10000, 'iron', 'resources'],
-                resource2Price: [1000, 'titanium', 'compounds'],
+                resource1Price: [1000, 'iron', 'resources'],
+                resource2Price: [700, 'titanium', 'compounds'],
                 resource3Price: [12000, 'concrete', 'compounds'],
             },
             rocket1: {
                 builtParts: 0,
-                parts: 15,
+                parts: 12,
                 price: 1000,
                 resource1Price: [1000, 'glass', 'compounds'],
-                resource2Price: [1000, 'titanium', 'compounds'],
+                resource2Price: [700, 'titanium', 'compounds'],
                 resource3Price: [3000, 'steel', 'compounds'],
                 setPrice: 'rocket1Price',
                 fuelQuantity: 0,
@@ -595,10 +595,10 @@ export let resourceData = {
             },
             rocket2: {
                 builtParts: 0,
-                parts: 20,
+                parts: 17,
                 price: 1000,
                 resource1Price: [1000, 'glass', 'compounds'],
-                resource2Price: [1000, 'titanium', 'compounds'],
+                resource2Price: [700, 'titanium', 'compounds'],
                 resource3Price: [3000, 'steel', 'compounds'],
                 setPrice: 'rocket2Price',
                 fuelQuantity: 0,
@@ -611,10 +611,10 @@ export let resourceData = {
             },
             rocket3: {
                 builtParts: 0,
-                parts: 25,
+                parts: 22,
                 price: 1000,
                 resource1Price: [1000, 'glass', 'compounds'],
-                resource2Price: [1000, 'titanium', 'compounds'],
+                resource2Price: [700, 'titanium', 'compounds'],
                 resource3Price: [3000, 'steel', 'compounds'],
                 setPrice: 'rocket3Price',
                 fuelQuantity: 0,
@@ -627,10 +627,10 @@ export let resourceData = {
             },
             rocket4: {
                 builtParts: 0,
-                parts: 30,
+                parts: 27,
                 price: 1000,
                 resource1Price: [1000, 'glass', 'compounds'],
-                resource2Price: [1000, 'titanium', 'compounds'],
+                resource2Price: [700, 'titanium', 'compounds'],
                 resource3Price: [3000, 'steel', 'compounds'],
                 setPrice: 'rocket4Price',
                 fuelQuantity: 0,
@@ -979,7 +979,7 @@ export const miaplacidus = {
 
 
 export let starSystems = {
-    version: 0.90,
+    version: 0.91,
     stars: {
         spica: {
             mapSize: 5.504440179536064, //might need to add this to star object when added dynamically for after rebirth
@@ -998,14 +998,14 @@ export let starSystems = {
 };
 
 export let oTypePowerPlantBuffs = {
-    version: 0.90,
+    version: 0.91,
     basicPowerPlantStar: { starName: null, settled: false },
     solarPowerPlantStar: { starName: null, settled: false },
     advancedPowerPlantStar: { starName: null, settled: false }
 };
 
 export let galacticCasino = {
-    version: 0.90,
+    version: 0.91,
     settings: {
         baseProbabilityCasino: 0.4,
     },
@@ -1036,7 +1036,7 @@ export let galacticCasino = {
 };
 
 export let galacticMarket = {
-    version: 0.90,
+    version: 0.91,
     resources: {
         hydrogen: { 
             name: "Hydrogen", 
@@ -1142,7 +1142,7 @@ export let galacticMarket = {
 };
 
 export let ascendencyBuffs = {
-    version: 0.90,
+    version: 0.91,
     "littleBagOfHydrogen": {
         name: "Little Bag Of Hydrogen",
         description: "buffLittleBagOfHydrogenRow",
