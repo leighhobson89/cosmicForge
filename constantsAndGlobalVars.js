@@ -324,7 +324,7 @@ function syncFactoryStarsArrayFromAncientManuscripts() {
 
     factoryStarsArray = next;
 }
-let oTypeMechanicActivatedForThisSave = false;
+let oTypeMechanicActivatedForThisSave = true;
 
 let battleUnits = { 
     player: [], 
