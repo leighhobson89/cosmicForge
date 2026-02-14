@@ -537,6 +537,9 @@ export function drawTab8Content(heading, optionContentElement) {
                 setAutoSaveToggle(isEnabled),
                 setWasAutoSaveToggled(getAutoSaveToggle());
                 initializeAutoSave();
+                if (!isEnabled) {
+                    showNotification('AUTOSAVE IS OFF, REMEMBER TO BACK UP SAVES MANUALLY', 'error', 5000, 'loadSave');
+                }
             }, ['toggle-switch-spacing']),
             null,
             null,

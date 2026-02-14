@@ -1485,24 +1485,60 @@ body {
     position: relative;
     width: 300px;
     max-width: 300px;
-    border: 2px solid var(--text-color);
-    border-radius: 10px 10px 10px 10px;
-    padding: 10px;
+    border: 2px solid var(--container-border-color);
+    border-radius: 6px;
+    padding: 0;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.select-container .dropdown {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+    min-height: 30px;
+    padding: 6px 10px;
+    background-color: var(--container-bg-color);
+    color: var(--text-color);
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.select-container .dropdown:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--tab-selected-bg-color);
+}
+
+.select-container .dropdown-text {
+    text-align: left;
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.select-container .dropdown::after {
+    content: '▾';
+    font-size: 24px;
+    opacity: 0.85;
 }
 
 .dropdown-options {
     background-color: var(--container-bg-color);
     position: absolute;
     color: var(--text-color);
-    width: 101%;
+    width: 100%;
     z-index: 10;
-    border: 2px solid var(--text-color);
+    border: 2px solid var(--container-border-color);
     border-top: none;
-    padding-left: 5px;
-    padding-right: 5px;
-    border-radius:  0 0 10px 10px;
-    transform: translate(-12px, 12px);
+    padding: 4px;
+    border-radius: 0 0 6px 6px;
+    top: calc(100% - 1px);
+    left: 0;
+    transform: none;
     max-height: 0;
     overflow: hidden;
     opacity: 0;
@@ -1516,14 +1552,13 @@ body {
 }
 
 .dropdown-option {
-    border-bottom: 2px dotted var(--text-color);
-    margin-bottom: 8px;
+    border-bottom: 1px dotted var(--container-border-color);
+    margin-bottom: 4px;
     color: var(--text-color);
     border-radius: 4px;
     width: 100%;
     z-index: 10;
-    padding-left: 5px;
-    padding-right: 5px;
+    padding: 6px 8px;
 }
 
 .dropdown-option:hover {
@@ -1669,8 +1704,11 @@ body {
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 3;
-    padding: 6px 12px;
-    font-size: 14px;
+    height: 20px;
+    max-height: 20px;
+    line-height: 20px;
+    padding: 0 10px;
+    font-size: 12px;
     border: none;
     border-radius: 4px;
     background-color: var(--button-bg-active);
@@ -1680,6 +1718,14 @@ body {
     opacity: 0;
     transition: opacity 0.4s ease;
     font-weight: bolder;
+}
+
+.notification-action-button {
+    top: auto;
+    bottom: 2px;
+    transform: translateX(-50%);
+    pointer-events: auto;
+    opacity: 1;
 }
 
 .notification:hover .notification-button {

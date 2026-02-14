@@ -411,6 +411,7 @@ import {
     updateContent,
     sortTechRows,
     showNotification,
+    showNotificationWithAction,
     showTabsUponUnlock,
     getTimeInStatCell,
     statToolBarCustomizations,
@@ -459,6 +460,107 @@ import {
     setElementOpacity,
     playWinCinematic
 } from "./ui.js";
+
+const storageFullNotificationState = {
+    resources: Object.create(null),
+    compounds: Object.create(null),
+    lastNotifiedAtMs: {
+        resources: Object.create(null),
+        compounds: Object.create(null)
+    }
+};
+
+const STORAGE_FULL_NOTIFICATION_COOLDOWN_MS = 60 * 1000;
+
+function performIncreaseStorageForKey(category, key) {
+    if (!category || !key) {
+        return;
+    }
+
+    const normalizedCategory = category === 'resources' ? 'resources' : 'compounds';
+    const normalizedKey = String(key || '').toLowerCase();
+
+    // Special-case reservoir since it uses concrete as a secondary cost.
+    if (normalizedCategory === 'compounds' && normalizedKey === 'water') {
+        increaseResourceStorage(['waterQuantity', 'concreteQuantity'], ['water', 'concrete'], ['compounds', 'compounds']);
+        return;
+    }
+
+    increaseResourceStorage([`${normalizedKey}Quantity`], [normalizedKey], [normalizedCategory]);
+}
+
+function maybeNotifyStorageFull(category, key, previousQuantity, newQuantity, storageCapacity) {
+    if (!category || !key) {
+        return;
+    }
+
+    if (!Number.isFinite(storageCapacity) || storageCapacity <= 0) {
+        return;
+    }
+
+    const hasPrev = previousQuantity !== null && previousQuantity !== undefined;
+    const hasNext = newQuantity !== null && newQuantity !== undefined;
+    const prev = hasPrev ? (Number(previousQuantity) || 0) : 0;
+    const next = hasNext ? (Number(newQuantity) || 0) : storageCapacity;
+    const reached = (!hasPrev || !hasNext) ? true : (prev < storageCapacity && next >= storageCapacity);
+    if (!reached) {
+        return;
+    }
+
+    const bucket = storageFullNotificationState[category];
+    if (!bucket) {
+        return;
+    }
+
+    if (bucket[key]) {
+        return;
+    }
+
+    const nowMs = Date.now();
+    const lastBucket = storageFullNotificationState.lastNotifiedAtMs?.[category];
+    const lastMs = lastBucket?.[key] || 0;
+    if (nowMs - lastMs < STORAGE_FULL_NOTIFICATION_COOLDOWN_MS) {
+        return;
+    }
+    bucket[key] = true;
+    if (lastBucket) {
+        lastBucket[key] = nowMs;
+    }
+
+    const pretty = capitaliseString(key);
+    const classification = 'storage';
+    const message = `${pretty} storage is full.`;
+
+    showNotificationWithAction(
+        message,
+        'info',
+        8000,
+        classification,
+        'Increase Storage',
+        () => {
+            performIncreaseStorageForKey(category, key);
+        }
+    );
+}
+
+function clearStorageFullFlagIfNotFull(category, key, quantity, storageCapacity) {
+    const bucket = storageFullNotificationState[category];
+    if (!bucket || !bucket[key]) {
+        return;
+    }
+
+    const current = Number(quantity) || 0;
+    if (!Number.isFinite(storageCapacity) || storageCapacity <= 0) {
+        bucket[key] = false;
+        return;
+    }
+
+    const hysteresisDrop = Math.max(1, storageCapacity * 0.02);
+    const clearThreshold = storageCapacity - hysteresisDrop;
+    if (current <= clearThreshold) {
+        bucket[key] = false;
+    }
+}
 
 import {
     capitaliseString,
@@ -1767,6 +1869,8 @@ function updateResourceAutoBuyerDelta(resource, tier, deltaMs) {
     let currentQuantity = getResourceDataObject('resources', [resource, 'quantity']) || 0;
     const supplyChainMultiplier = getSupplyChainDisruptionMultiplier('resources', resource);
 
+    clearStorageFullFlagIfNotFull('resources', resource, currentQuantity, storageCapacity);
+
     if (getPowerOnOff()) {
         const autoBuyerExtractionRate = getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', `tier${tier}`, 'rate']) || 0;
         const currentTierAutoBuyerQuantity = getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', `tier${tier}`, 'quantity']) || 0;
@@ -1779,6 +1883,7 @@ function updateResourceAutoBuyerDelta(resource, tier, deltaMs) {
 
         setResourceDataObject(updatedQuantity, 'resources', [resource, 'quantity']);
         addToResourceAllTimeStat(actualGain, resource);
+        maybeNotifyStorageFull('resources', resource, currentQuantity, updatedQuantity, storageCapacity);
         currentQuantity = updatedQuantity;
 
         const getResourceTierContribution = tierIndex => {
@@ -1904,6 +2009,8 @@ function updateCompoundAutoBuyerDelta(compound, tier, deltaMs) {
     let currentQuantity = getResourceDataObject('compounds', [compound, 'quantity']) || 0;
     const supplyChainMultiplier = getSupplyChainDisruptionMultiplier('compounds', compound);
 
+    clearStorageFullFlagIfNotFull('compounds', compound, currentQuantity, storageCapacity);
+
     if (getPowerOnOff()) {
         if (tier === 1) {
             const smoothingWindowMs = 1000;
@@ -1965,6 +2072,7 @@ function updateCompoundAutoBuyerDelta(compound, tier, deltaMs) {
 
         setResourceDataObject(updatedQuantity, 'compounds', [compound, 'quantity']);
         addToResourceAllTimeStat(actualGain, compound);
+        maybeNotifyStorageFull('compounds', compound, currentQuantity, updatedQuantity, storageCapacity);
         currentQuantity = updatedQuantity;
 
         if (
@@ -8088,6 +8196,18 @@ const updateQuantityDisplays = (element, data1, data2, resourceData1, resourceDa
 
         if (element && data2 && data1 === data2) {
             element.classList.add('green-ready-text');
+
+            if (element.id && element.id.endsWith('Quantity')) {
+                const baseId = element.id.replace('Quantity', '');
+                const resourceStorage = getResourceDataObject('resources', [baseId, 'storageCapacity'], true);
+                const compoundStorage = getResourceDataObject('compounds', [baseId, 'storageCapacity'], true);
+
+                if (Number.isFinite(resourceStorage)) {
+                    maybeNotifyStorageFull('resources', baseId, null, null, resourceStorage);
+                } else if (Number.isFinite(compoundStorage)) {
+                    maybeNotifyStorageFull('compounds', baseId, null, null, compoundStorage);
+                }
+            }
         }
 
         if (element && data2 && data1 !== data2) {
@@ -8131,6 +8251,18 @@ const updateQuantityDisplays = (element, data1, data2, resourceData1, resourceDa
 
         if (element && element.classList.contains('green-ready-text') && data1 !== data2) {
             element.classList.remove('green-ready-text');
+
+            if (element.id && element.id.endsWith('Quantity')) {
+                const baseId = element.id.replace('Quantity', '');
+                const resourceStorage = getResourceDataObject('resources', [baseId, 'storageCapacity'], true);
+                const compoundStorage = getResourceDataObject('compounds', [baseId, 'storageCapacity'], true);
+
+                if (Number.isFinite(resourceStorage)) {
+                    clearStorageFullFlagIfNotFull('resources', baseId, data1, resourceStorage);
+                } else if (Number.isFinite(compoundStorage)) {
+                    clearStorageFullFlagIfNotFull('compounds', baseId, data1, compoundStorage);
+                }
+            }
         }
     }
 };

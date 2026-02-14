@@ -4086,7 +4086,35 @@ export function showNotification(message, type = 'info', time = 3000, classifica
         createNotificationContainer(classification);
     }
 
-    queues[classification].push({ message, type, time });
+    queues[classification].push({ message, type, time, actionLabel: null, actionCallback: null });
+    setNotificationQueues(queues);
+
+    if (!status[classification]) {
+        processNotificationQueue(classification);
+    }
+}
+
+export function showNotificationWithAction(message, type = 'info', time = 3000, classification = 'default', actionLabel, actionCallback) {
+    if (!getNotificationsToggle()) return;
+
+    const queues = getNotificationQueues();
+    const status = getNotificationStatus();
+
+    if (!queues[classification]) {
+        queues[classification] = [];
+        status[classification] = false;
+        setNotificationQueues(queues);
+        setNotificationStatus(status);
+        createNotificationContainer(classification);
+    }
+
+    queues[classification].push({
+        message,
+        type,
+        time,
+        actionLabel: typeof actionLabel === 'string' && actionLabel.trim() ? actionLabel.trim() : null,
+        actionCallback: typeof actionCallback === 'function' ? actionCallback : null
+    });
     setNotificationQueues(queues);
 
     if (!status[classification]) {
@@ -4134,10 +4162,10 @@ function processNotificationQueue(classification) {
         status[classification] = true;
         setNotificationStatus(status);
 
-        const { message, type, time } = queue.shift();
+        const { message, type, time, actionLabel, actionCallback } = queue.shift();
         setNotificationQueues(queues);
 
-        sendNotification(message, type, classification, time);
+        sendNotification(message, type, classification, time, actionLabel, actionCallback);
     } else {
         status[classification] = false;
         setNotificationStatus(status);
@@ -4161,7 +4189,7 @@ function processNotificationQueue(classification) {
     }
 }
 
-function sendNotification(message, type, classification, duration) {
+function sendNotification(message, type, classification, duration, actionLabel, actionCallback) {
     const containers = getNotificationContainers();
     const container = containers[classification];
     if (!container) return;
@@ -4175,10 +4203,55 @@ function sendNotification(message, type, classification, duration) {
         existing.remove();
     }
 
+    let dismissed = false;
+    let autoDismissTimeoutId = null;
+
+    const dismissAndContinue = () => {
+        if (dismissed) {
+            return;
+        }
+        dismissed = true;
+
+        if (autoDismissTimeoutId !== null) {
+            clearTimeout(autoDismissTimeoutId);
+            autoDismissTimeoutId = null;
+        }
+
+        hideNotification(notification);
+        processNotificationQueue(classification);
+    };
+
+    if (actionLabel && typeof actionCallback === 'function') {
+        const actionButton = document.createElement('button');
+        actionButton.className = 'notification-button notification-action-button';
+        actionButton.innerText = 'Storage ⬆';
+        actionButton.style.position = 'absolute';
+        actionButton.style.top = 'auto';
+        actionButton.style.bottom = '2px';
+        actionButton.style.left = '50%';
+        actionButton.style.transform = 'translateX(-50%)';
+        actionButton.onclick = () => {
+            try {
+                actionCallback();
+            } catch (error) {
+                console.error('Notification action failed:', error);
+            } finally {
+                dismissAndContinue();
+            }
+        };
+        notification.appendChild(actionButton);
+    }
+
     const button = document.createElement('button');
     button.className = 'notification-button';
     button.innerText = 'Clear All';
     button.onclick = () => {
+        dismissed = true;
+        if (autoDismissTimeoutId !== null) {
+            clearTimeout(autoDismissTimeoutId);
+            autoDismissTimeoutId = null;
+        }
+
         const queues = getNotificationQueues();
         const containers = getNotificationContainers();
         const status = getNotificationStatus();
@@ -4203,7 +4276,7 @@ function sendNotification(message, type, classification, duration) {
         updateContainerPositions();
     };
 
-notification.appendChild(button);
+    notification.appendChild(button);
 
     container.appendChild(notification);
 
@@ -4211,9 +4284,8 @@ notification.appendChild(button);
         notification.classList.add('show');
     }, 10);
 
-    setTimeout(() => {
-        hideNotification(notification);
-        processNotificationQueue(classification);
+    autoDismissTimeoutId = setTimeout(() => {
+        dismissAndContinue();
     }, duration);
 }
 
