@@ -72,6 +72,7 @@ import {
     getUpcomingTechArray,
     setLastSavedTimeStamp,
     setCurrentTheme,
+    POWER_GRACE_PERIOD_MS,
     READY_TO_SORT,
     NOW,
     setTechRenderCounter,
@@ -208,6 +209,8 @@ import {
     setStellarScannerBuilt,
     getNotationType,
     getUnlockedCompoundsArray,
+    setPowerGracePeriodEnd,
+    setLastFocusOfflineGainsAppliedAt,
 } from './constantsAndGlobalVars.js';
 import {
     getResourceDataObject,
@@ -2537,7 +2540,11 @@ function buildFuelConsumptionLines(resourceKey, category, timerRatio) {
         const now = Date.now();
         if (now - lastOfflineGainsAppliedAt < 250) return;
         lastOfflineGainsAppliedAt = now;
+        setLastFocusOfflineGainsAppliedAt(now);
         offlineGains(true);
+        if (!getInfinitePower()) {
+            setPowerGracePeriodEnd(now + POWER_GRACE_PERIOD_MS);
+        }
         timerManagerDelta.resetTimestamp(null);
     };
 

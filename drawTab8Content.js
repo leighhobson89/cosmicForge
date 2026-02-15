@@ -578,7 +578,7 @@ export function drawTab8Content(heading, optionContentElement) {
             createButton(`Export`, ['option-button', 'save-load-button', ...demoExtraClasses], () => {
                 copySaveStringToClipBoard();
             }),
-            createButton(`Export File`, ['option-button', 'save-load-file-export', ...demoExtraClasses], () => {
+            createButton(`Manual Save`, ['option-button', 'save-load-file-export', ...demoExtraClasses], () => {
                 downloadSaveStringToComputer();
             }),
             null,
@@ -606,7 +606,7 @@ export function drawTab8Content(heading, optionContentElement) {
             createButton(`Import`, ['option-button', 'save-load-button', ...demoExtraClasses], () => {
                 loadGame();
             }),
-            createButton(`Import File`, ['option-button', 'save-load-file-export', ...demoExtraClasses], () => {
+            createButton(`Manual Load`, ['option-button', 'save-load-file-export', ...demoExtraClasses], () => {
                 importSaveStringFileFromComputer();
             }),
             null,
@@ -630,7 +630,7 @@ export function drawTab8Content(heading, optionContentElement) {
             'exportCloudSaveRow',
             null,
             'Export Cloud Save:',
-            createButton(`Export Cloud Save`, ['option-button', 'save-load-button', ...demoExtraClasses], () => {
+            createButton(`Save To Cloud`, ['option-button', 'save-load-button', ...demoExtraClasses], () => {
                 if (getOnboardingMode()) {
                     showNotification("You can't save while onboarding mode is active!", 'info', 4000, 'loadSave');
                     return;
@@ -667,7 +667,7 @@ export function drawTab8Content(heading, optionContentElement) {
             'importCloudSaveRow',
             null,
             'Import Cloud Save:',
-            createButton(`Import Cloud Save`, ['option-button', 'save-load-button', ...demoExtraClasses], () => {
+            createButton(`Load From Cloud`, ['option-button', 'save-load-button', ...demoExtraClasses], () => {
                 loadGameFromCloud();
             }),
             null,

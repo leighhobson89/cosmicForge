@@ -242,6 +242,7 @@ import {
     setRevealedTechArray,
     getTimerUpdateInterval,
     getTimerRateRatio,
+    getLastFocusOfflineGainsAppliedAt,
     getPowerGracePeriodEnd,
     isPowerGracePeriodActive,
     setPowerGracePeriodEnd,
@@ -1760,11 +1761,13 @@ function updateEnergyDelta(deltaMs) {
     const initialPowerState = getPowerOnOff();
     const graceActive = isPowerGracePeriodActive();
 
+    const shouldSkipAutoForceOffThisTick = (Date.now() - getLastFocusOfflineGainsAppliedAt()) <= (getTimerUpdateInterval() || 0);
+
     if (!batteryBought) {
         const totalRate = newEnergyRate - getTotalEnergyUse();
         if (!getInfinitePower()) {
             if (anyPlantActive) {
-                const shouldForceOff = totalRate < 0 && powerOnNow && !graceActive;
+                const shouldForceOff = totalRate < 0 && powerOnNow && !graceActive && !shouldSkipAutoForceOffThisTick;
                 const shouldForceOn = totalRate > 0 && !powerOnNow;
 
                 if (shouldForceOff) {
@@ -1779,7 +1782,7 @@ function updateEnergyDelta(deltaMs) {
         }
     } else {
         if (!getInfinitePower()) {
-            const shouldForceOff = currentEnergyQuantity <= 0.00001 && powerOnNow && !graceActive;
+            const shouldForceOff = currentEnergyQuantity <= 0.00001 && powerOnNow && !graceActive && !shouldSkipAutoForceOffThisTick;
             const shouldForceOn = currentEnergyQuantity > 0.00001 && !powerOnNow;
 
             if (shouldForceOff) {
@@ -13127,7 +13130,64 @@ export async function settleSystemAfterBattle(accessPoint) {
             break;
         case 'battle':
             if (getPlayerPhilosophy() === 'expansionist' && getPhilosophyAbilityActive()) {
-                setAdditionalSystemsToSettleThisRun(decideIfMoreSystemsAreAutomaticallySettled());
+                const rapidExpansionResult = decideIfMoreSystemsAreAutomaticallySettled();
+                setAdditionalSystemsToSettleThisRun(rapidExpansionResult);
+
+                if (Array.isArray(rapidExpansionResult) && rapidExpansionResult.length > 0) {
+                    showNotification(`Rapid Expansion captured ${rapidExpansionResult.length} extra system${rapidExpansionResult.length === 1 ? '' : 's'}!`, 'info', 3000, 'battle');
+                } else {
+                    const { stars, starDistanceData } = getStarDataAndDistancesToAllStarsFromSettledStar(getDestinationStar());
+                    const currentStar = getCurrentStarSystem().toLowerCase();
+                    const destinationStar = getDestinationStar().toLowerCase();
+                    const settledStars = getSettledStars();
+                    const factoryStars = new Set((getFactoryStarsArray?.() || []).map((name) => String(name || '').toLowerCase()).filter(Boolean));
+                    const manuscriptEntries = getStarsWithAncientManuscripts?.() || [];
+                    const manuscriptStars = new Set(
+                        manuscriptEntries
+                            .filter((entry) => Array.isArray(entry) && typeof entry[0] === 'string')
+                            .map((entry) => entry[0].toLowerCase())
+                    );
+
+                    const filteredStars = stars
+                        .filter(star => {
+                            const starNameLower = star.name.toLowerCase();
+                            if (starNameLower === destinationStar || starNameLower === currentStar) {
+                                return false;
+                            }
+
+                            if (settledStars.some(settled => capitaliseWordsWithRomanNumerals(settled) === star.name)) {
+                                return false;
+                            }
+
+                            if (manuscriptStars.has(starNameLower)) {
+                                return false;
+                            }
+
+                            const isFactoryStar = !!getStarSystemDataObject('stars', [starNameLower, 'factoryStar'], true) || factoryStars.has(starNameLower);
+                            if (isFactoryStar) {
+                                return false;
+                            }
+
+                            const starType = getStarSystemDataObject('stars', [starNameLower, 'starType'], true) ?? getStarTypeByName(starNameLower);
+                            if (starType === 'O') {
+                                return false;
+                            }
+
+                            return true;
+                        })
+                        .map(star => ({
+                            ...star,
+                            distanceFromSettledStar: starDistanceData[star.name]
+                        }));
+
+                    const starsWithinTenLightYears = filteredStars.filter(star => star.distanceFromSettledStar <= 10);
+
+                    if (starsWithinTenLightYears.length === 0) {
+                        showNotification('Rapid Expansion found no eligible nearby systems.', 'info', 3000, 'battle');
+                    } else {
+                        showNotification('Rapid Expansion failed to capture any extra systems.', 'info', 3000, 'battle');
+                    }
+                }
             }
 
             if (isFactoryStar) {

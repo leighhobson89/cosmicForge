@@ -420,6 +420,8 @@ let ranOutOfFuelWhenOn = {
 
 let powerGracePeriodEnd = 0;
 
+let lastFocusOfflineGainsAppliedAt = 0;
+
 let battleResolved = [false, null];
 
 let galacticMarketOutgoingStockType = 'select';
@@ -1781,7 +1783,8 @@ export function restoreGameStatus(gameState, type) {
 
             setCurrentTheme(gameState.currentTheme);
             themesTriedArray = Array.isArray(gameState.themesTriedArray) ? gameState.themesTriedArray : ['terminal'];
-            setAutoSaveFrequency(300000);
+            const savedAutoSaveFrequency = Number(gameState.autoSaveFrequency);
+            setAutoSaveFrequency(Number.isFinite(savedAutoSaveFrequency) && savedAutoSaveFrequency > 0 ? savedAutoSaveFrequency : 300000);
             setCurrentStarSystem(gameState.currentStarSystem);
             setCurrencySymbol(gameState.currencySymbol);
             setConstituentPartsObject(gameState.constituentPartsObject);
@@ -2998,6 +3001,14 @@ export function getPowerGracePeriodEnd() {
 
 export function setPowerGracePeriodEnd(value) {
     powerGracePeriodEnd = value;
+}
+
+export function getLastFocusOfflineGainsAppliedAt() {
+    return lastFocusOfflineGainsAppliedAt;
+}
+
+export function setLastFocusOfflineGainsAppliedAt(value) {
+    lastFocusOfflineGainsAppliedAt = value;
 }
 
 export function isPowerGracePeriodActive(referenceTime = Date.now()) {
