@@ -1665,6 +1665,16 @@ function updateEnergyDelta(deltaMs) {
     const batteryBought = getResourceDataObject('buildings', ['energy', 'batteryBoughtYet']);
     const energyStorageCapacity = getResourceDataObject('buildings', ['energy', 'storageCapacity']);
 
+    const numericEnergyQuantity = Number(currentEnergyQuantity);
+    const numericEnergyCapacity = Number(energyStorageCapacity);
+    if (!Number.isFinite(numericEnergyQuantity) || numericEnergyQuantity < 0) {
+        setResourceDataObject(0, 'buildings', ['energy', 'quantity']);
+        currentEnergyQuantity = 0;
+    }
+    if (!Number.isFinite(numericEnergyCapacity) || numericEnergyCapacity < 0) {
+        setResourceDataObject(0, 'buildings', ['energy', 'storageCapacity']);
+    }
+
     if (!getWeatherEfficiencyApplied()) {
         setResourceDataObject(
             getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'purchasedRate']) * getCurrentStarSystemWeatherEfficiency()[1],
@@ -1674,7 +1684,7 @@ function updateEnergyDelta(deltaMs) {
         setWeatherEfficiencyApplied(true);
     }
 
-    if (Math.floor(currentEnergyQuantity) <= energyStorageCapacity) {
+    if (Math.floor(currentEnergyQuantity) <= getResourceDataObject('buildings', ['energy', 'storageCapacity'])) {
         if (getPowerOnOff()) {
             if (getBuildingTypeOnOff('powerPlant1')) {
                 newEnergyRate += getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'purchasedRate']) *
@@ -1743,6 +1753,10 @@ function updateEnergyDelta(deltaMs) {
     }
 
     currentEnergyQuantity = getResourceDataObject('buildings', ['energy', 'quantity']);
+    if (!Number.isFinite(Number(currentEnergyQuantity))) {
+        setResourceDataObject(0, 'buildings', ['energy', 'quantity']);
+        currentEnergyQuantity = 0;
+    }
 
     if (currentEnergyQuantity < 0) {
         setResourceDataObject(0, 'buildings', ['energy', 'quantity']);

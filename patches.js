@@ -294,7 +294,7 @@ export function migrateResourceData(saveData, objectType, options = {}) {
 
                 if (saveData.casinoPoints.cpBaseCost === undefined) {
 
-                    saveData.casinoPoints.cpBaseCost = 10000;
+                    saveData.casinoPoints.cpBaseCost = 1000000;
 
                 }
 
@@ -462,89 +462,23 @@ export function migrateResourceData(saveData, objectType, options = {}) {
 
         }
 
+        if (saveData.version < 0.93) {
+
+            if (objectType === 'galacticCasinoData') {
+
+                saveData.casinoPoints.cpBaseCost = 100000;
+                
+            }
+
+            saveData.version = 0.93;
+
+        }
+
 
 
         saveData.version += 0.001;
 
     }
-
-
-
-    if (objectType === 'resourceData') {
-
-        if (!saveData.blackHole) {
-
-            saveData.blackHole = {
-
-                researchPrice: 1000000,
-
-                durationPrice: 600000,
-
-                powerPrice: 850000,
-
-                duration: 3000,
-
-                power: 5,
-
-                blackHoleResearchDone: false
-
-            };
-
-        }
-
-
-
-        if (saveData.blackHole.researchPrice === undefined) {
-
-            saveData.blackHole.researchPrice = 1000000;
-
-        }
-
-        if (saveData.blackHole.durationPrice === undefined) {
-
-            saveData.blackHole.durationPrice = 600000;
-
-        }
-
-        if (saveData.blackHole.powerPrice === undefined) {
-
-            saveData.blackHole.powerPrice = 850000;
-
-        }
-
-        if (saveData.blackHole.duration === undefined) {
-
-            saveData.blackHole.duration = 3000;
-
-        }
-
-        if (saveData.blackHole.power === undefined) {
-
-            saveData.blackHole.power = 5;
-
-        }
-
-        if (saveData.blackHole.blackHoleResearchDone === undefined) {
-
-            saveData.blackHole.blackHoleResearchDone = false;
-
-        }
-
-        if (saveData.blackHole.rechargePrice === undefined) {
-
-            saveData.blackHole.rechargePrice = 900000;
-
-        }
-
-        if (saveData.blackHole.rechargeMultiplier === undefined) {
-
-            saveData.blackHole.rechargeMultiplier = 1;
-
-        }
-
-    }
-
-
 
     return saveData;
 
