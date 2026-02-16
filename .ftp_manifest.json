@@ -1,7 +1,7 @@
 {
   "achievements.js": {
     "size": 18104,
-    "mtime": 1771226279
+    "mtime": 1771228633
   },
   "analytics.bat": {
     "size": 94,
@@ -9,7 +9,7 @@
   },
   "analytics.js": {
     "size": 5831,
-    "mtime": 1771226279
+    "mtime": 1771228636
   },
   "analytics.ps1": {
     "size": 195,
@@ -17,3142 +17,3142 @@
   },
   "audioManager.js": {
     "size": 4369,
-    "mtime": 1771226280
+    "mtime": 1771228638
   },
   "buildFlags.js": {
     "size": 25,
-    "mtime": 1771226281
+    "mtime": 1771228640
   },
   "bun.lock": {
-    "size": 146663,
-    "mtime": 1770475862
+    "size": 147987,
+    "mtime": 1770623933
   },
   "casino.js": {
     "size": 23169,
-    "mtime": 1771226282
+    "mtime": 1771228642
   },
   "constantsAndGlobalVars.js": {
     "size": 173021,
-    "mtime": 1771226283
+    "mtime": 1771228645
   },
   "descriptions.js": {
     "size": 195953,
-    "mtime": 1771226284
+    "mtime": 1771228647
   },
   "drawTab1Content.js": {
     "size": 58233,
-    "mtime": 1771226284
+    "mtime": 1771228649
   },
   "drawTab2Content.js": {
     "size": 10822,
-    "mtime": 1771226285
+    "mtime": 1771228651
   },
   "drawTab3Content.js": {
     "size": 91525,
-    "mtime": 1771226286
+    "mtime": 1771228654
   },
   "drawTab4Content.js": {
     "size": 49409,
-    "mtime": 1771226287
+    "mtime": 1771228656
   },
   "drawTab5Content.js": {
     "size": 27893,
-    "mtime": 1771226288
+    "mtime": 1771228658
   },
   "drawTab6Content.js": {
     "size": 20168,
-    "mtime": 1771226288
+    "mtime": 1771228661
   },
   "drawTab7Content.js": {
     "size": 42718,
-    "mtime": 1771226289
+    "mtime": 1771228663
   },
   "drawTab8Content.js": {
     "size": 16802,
-    "mtime": 1771226290
+    "mtime": 1771228666
   },
   "events.js": {
     "size": 37474,
-    "mtime": 1771226291
+    "mtime": 1771228668
   },
   "game.js": {
     "size": 315110,
-    "mtime": 1771226292
+    "mtime": 1771228671
   },
   "GDD.md": {
     "size": 20352,
-    "mtime": 1771006438
+    "mtime": 1770974314
   },
   "icon.png": {
     "size": 64010,
-    "mtime": 1769001968
+    "mtime": 1744274134
   },
   "incrementaldb_verification.txt": {
     "size": 43,
-    "mtime": 1743876220
+    "mtime": 1744274134
   },
   "index.html": {
     "size": 34260,
-    "mtime": 1771226293
+    "mtime": 1771228674
   },
   "jest.config.js": {
     "size": 299,
-    "mtime": 1771226294
+    "mtime": 1771228676
   },
   "jsconfig.json": {
-    "size": 770,
-    "mtime": 1769001968
+    "size": 744,
+    "mtime": 1769001306
   },
   "LICENSE": {
     "size": 35827,
-    "mtime": 1741121636
+    "mtime": 1744274134
   },
   "localization.js": {
     "size": 915,
-    "mtime": 1771226295
+    "mtime": 1771228678
   },
   "localization.json": {
     "size": 3415,
-    "mtime": 1741121636
+    "mtime": 1744274134
   },
   "main.js": {
     "size": 648,
-    "mtime": 1771226295
+    "mtime": 1771228680
   },
   "onboarding.js": {
     "size": 21727,
-    "mtime": 1771226296
+    "mtime": 1771228682
   },
   "patches.js": {
-    "size": 4598,
-    "mtime": 1771226297
+    "size": 4863,
+    "mtime": 1771228685
   },
   "playwright.config.js": {
     "size": 551,
-    "mtime": 1771226298
+    "mtime": 1771228687
   },
   "README.md": {
-    "size": 43586,
-    "mtime": 1771006438
+    "size": 43017,
+    "mtime": 1770974370
   },
   "resourceDataObject.js": {
-    "size": 106223,
-    "mtime": 1771226298
+    "size": 106222,
+    "mtime": 1771228690
   },
   "saveLoadGame.js": {
     "size": 10289,
-    "mtime": 1771226299
+    "mtime": 1771228692
   },
   "server.js": {
     "size": 30,
-    "mtime": 1771226300
+    "mtime": 1771228694
   },
   "styles.css": {
     "size": 78810,
-    "mtime": 1771049423
+    "mtime": 1771227876
   },
   "timerManager.js": {
     "size": 895,
-    "mtime": 1771226301
+    "mtime": 1771228696
   },
   "timerManagerDelta.js": {
     "size": 2117,
-    "mtime": 1771226301
+    "mtime": 1771228698
   },
   "ui.js": {
     "size": 253444,
-    "mtime": 1771226303
+    "mtime": 1771228702
   },
   "updates.json": {
     "size": 179,
-    "mtime": 1769799725
+    "mtime": 1769762054
   },
   "utilityFunctions.js": {
     "size": 524,
-    "mtime": 1771226303
+    "mtime": 1771228704
   },
   "images/favicon.ico": {
     "size": 1484,
-    "mtime": 1741121636
+    "mtime": 1744274134
   },
   "images/favicon.png": {
     "size": 64010,
-    "mtime": 1741121636
+    "mtime": 1744274134
   },
   "images/achievements/dark/images/achieve100FusionEfficiency.png": {
     "size": 5258,
-    "mtime": 1744823186
+    "mtime": 1744300401
   },
   "images/achievements/dark/images/activateAllWackyNewsTickers.png": {
     "size": 3704,
-    "mtime": 1744823186
+    "mtime": 1744300402
   },
   "images/achievements/dark/images/activateBlackHoleOver10x.png": {
     "size": 4423,
-    "mtime": 1769001968
+    "mtime": 1768985899
   },
   "images/achievements/dark/images/adoptPhilosophy.png": {
     "size": 1959,
-    "mtime": 1769001968
+    "mtime": 1768985899
   },
   "images/achievements/dark/images/bringDownMiaplacideanForceField.png": {
     "size": 1763,
-    "mtime": 1769001968
+    "mtime": 1768985899
   },
   "images/achievements/dark/images/buildPowerPlant.png": {
     "size": 1818,
-    "mtime": 1744823186
+    "mtime": 1744300401
   },
   "images/achievements/dark/images/buildSolarPowerPlant.png": {
     "size": 2002,
-    "mtime": 1744823186
+    "mtime": 1744300401
   },
   "images/achievements/dark/images/bullyEnemyIntoSubmission.png": {
     "size": 1559,
-    "mtime": 1744823186
+    "mtime": 1744300401
   },
   "images/achievements/dark/images/collect1000Hydrogen.png": {
     "size": 2542,
-    "mtime": 1744823186
+    "mtime": 1744300401
   },
   "images/achievements/dark/images/collect100Precipitation.png": {
     "size": 1911,
-    "mtime": 1744823186
+    "mtime": 1744300401
   },
   "images/achievements/dark/images/collect100TitaniumAsPrecipitation.png": {
     "size": 1852,
-    "mtime": 1744823186
+    "mtime": 1744300402
   },
   "images/achievements/dark/images/collect50000Iron.png": {
     "size": 2790,
-    "mtime": 1744823186
+    "mtime": 1744300401
   },
   "images/achievements/dark/images/collect5000Carbon.png": {
     "size": 2596,
-    "mtime": 1744823186
+    "mtime": 1744300401
   },
   "images/achievements/dark/images/collect50Hydrogen.png": {
     "size": 2630,
-    "mtime": 1744823186
+    "mtime": 1744300401
   },
   "images/achievements/dark/images/completeGame.png": {
     "size": 1997,
-    "mtime": 1769001968
+    "mtime": 1768985899
   },
   "images/achievements/dark/images/completeRunOnMiaplacidus.png": {
     "size": 2230,
-    "mtime": 1769001968
+    "mtime": 1768985899
   },
   "images/achievements/dark/images/conquer10StarSystems.png": {
     "size": 2525,
-    "mtime": 1744823186
+    "mtime": 1744300402
   },
   "images/achievements/dark/images/conquer50StarSystems.png": {
     "size": 2488,
-    "mtime": 1744823186
+    "mtime": 1744300402
   },
   "images/achievements/dark/images/conquerBelligerentEnemy.png": {
     "size": 2126,
-    "mtime": 1744823186
+    "mtime": 1744300401
   },
   "images/achievements/dark/images/conquerEnemy.png": {
     "size": 1299,
-    "mtime": 1744823186
+    "mtime": 1744300401
   },
   "images/achievements/dark/images/conquerEnemyWithoutScanning.png": {
     "size": 1859,
-    "mtime": 1744823186
+    "mtime": 1744300401
   },
   "images/achievements/dark/images/conquerHiveMindEnemy.png": {
     "size": 2199,
-    "mtime": 1744823186
+    "mtime": 1744300401
   },
   "images/achievements/dark/images/conquerMegastructureSystem.png": {
     "size": 3359,
-    "mtime": 1769001968
+    "mtime": 1768985899
   },
   "images/achievements/dark/images/createSteel.png": {
     "size": 2059,
-    "mtime": 1744823186
+    "mtime": 1744300401
   },
   "images/achievements/dark/images/createTitanium.png": {
     "size": 2033,
-    "mtime": 1744823186
+    "mtime": 1744300401
   },
   "images/achievements/dark/images/discoverAsteroid.png": {
     "size": 1852,
-    "mtime": 1744823186
+    "mtime": 1744300401
   },
   "images/achievements/dark/images/discoverBlackHole.png": {
     "size": 2331,
-    "mtime": 1769001968
+    "mtime": 1768985899
   },
   "images/achievements/dark/images/discoverLegendaryAsteroid.png": {
     "size": 2329,
-    "mtime": 1744823186
+    "mtime": 1744300402
   },
   "images/achievements/dark/images/discoverSystemWithNoLife.png": {
     "size": 2651,
-    "mtime": 1744823186
+    "mtime": 1744300401
   },
   "images/achievements/dark/images/findAncientManuscript.png": {
     "size": 2036,
-    "mtime": 1769001968
+    "mtime": 1768985899
   },
   "images/achievements/dark/images/fuseElement.png": {
     "size": 5142,
-    "mtime": 1744823186
+    "mtime": 1744300401
   },
   "images/achievements/dark/images/gain1000000Cash.png": {
     "size": 1797,
-    "mtime": 1744823186
+    "mtime": 1744300401
   },
   "images/achievements/dark/images/gain100000Cash.png": {
     "size": 1931,
-    "mtime": 1744823186
+    "mtime": 1744300401
   },
   "images/achievements/dark/images/gain10000Cash.png": {
     "size": 1874,
-    "mtime": 1744823186
+    "mtime": 1744300401
   },
   "images/achievements/dark/images/gain100Cash.png": {
     "size": 1875,
-    "mtime": 1744823186
+    "mtime": 1744300401
   },
   "images/achievements/dark/images/have4RocketsMiningAntimatter.png": {
     "size": 1903,
-    "mtime": 1744823186
+    "mtime": 1744300402
   },
   "images/achievements/dark/images/have50HoursWithOnePioneer.png": {
     "size": 2536,
-    "mtime": 1744823186
+    "mtime": 1744300402
   },
   "images/achievements/dark/images/haveFleetSizeOf50EachShipType.png": {
     "size": 2125,
-    "mtime": 1769001968
+    "mtime": 1768985899
   },
   "images/achievements/dark/images/initiateDiplomacyWithAlienRace.png": {
     "size": 1511,
-    "mtime": 1744823186
+    "mtime": 1744300401
   },
   "images/achievements/dark/images/launchRocket.png": {
     "size": 1293,
-    "mtime": 1744823186
+    "mtime": 1744300401
   },
   "images/achievements/dark/images/launchStarship.png": {
     "size": 1726,
-    "mtime": 1744823186
+    "mtime": 1744300401
   },
   "images/achievements/dark/images/liquidateAllAssets.png": {
     "size": 2141,
-    "mtime": 1744823186
+    "mtime": 1744300402
   },
   "images/achievements/dark/images/mineAllAntimatterAsteroid.png": {
     "size": 1748,
-    "mtime": 1744823186
+    "mtime": 1744300401
   },
   "images/achievements/dark/images/performGalacticMarketTransaction.png": {
     "size": 2131,
-    "mtime": 1744823186
+    "mtime": 1744300402
   },
   "images/achievements/dark/images/rebirth.png": {
     "size": 2417,
-    "mtime": 1744823186
+    "mtime": 1744300402
   },
   "images/achievements/dark/images/researchAllTechnologies.png": {
     "size": 1533,
-    "mtime": 1744823186
+    "mtime": 1744300401
   },
   "images/achievements/dark/images/researchTechnology.png": {
     "size": 1615,
-    "mtime": 1744823186
+    "mtime": 1744300401
   },
   "images/achievements/dark/images/seeAllNewsTickers.png": {
     "size": 1579,
-    "mtime": 1744823186
+    "mtime": 1744300402
   },
   "images/achievements/dark/images/settleSystem.png": {
     "size": 1389,
-    "mtime": 1744823186
+    "mtime": 1744300402
   },
   "images/achievements/dark/images/settleUnoccupiedSystem.png": {
     "size": 2638,
-    "mtime": 1744823186
+    "mtime": 1744300401
   },
   "images/achievements/dark/images/spendAP.png": {
     "size": 1565,
-    "mtime": 1744823186
+    "mtime": 1744300402
   },
   "images/achievements/dark/images/studyAllStarsInOneRun.png": {
     "size": 1613,
-    "mtime": 1744823186
+    "mtime": 1744300402
   },
   "images/achievements/dark/images/studyStar.png": {
     "size": 1683,
-    "mtime": 1744823186
+    "mtime": 1744300401
   },
   "images/achievements/dark/images/studyStarMoreThan20LYAway.png": {
     "size": 1689,
-    "mtime": 1744823186
+    "mtime": 1744300401
   },
   "images/achievements/dark/images/studyStarMoreThan5LYAway.png": {
     "size": 1636,
-    "mtime": 1744823186
+    "mtime": 1744300401
   },
   "images/achievements/dark/images/trade10APForCash.png": {
     "size": 2148,
-    "mtime": 1744823186
+    "mtime": 1744300402
   },
   "images/achievements/dark/images/tripPower.png": {
     "size": 2522,
-    "mtime": 1744823186
+    "mtime": 1744300401
   },
   "images/achievements/dark/images/tryAllThemes.png": {
     "size": 2119,
-    "mtime": 1769001968
+    "mtime": 1768985899
   },
   "images/achievements/dark/images/unlockCompounds.png": {
     "size": 2019,
-    "mtime": 1744823186
+    "mtime": 1744300401
   },
   "images/achievements/dark/images/vassalizeEnemy.png": {
     "size": 1445,
-    "mtime": 1744823186
+    "mtime": 1744300401
   },
   "images/achievements/frosty/images/achieve100FusionEfficiency.png": {
     "size": 5256,
-    "mtime": 1744823186
+    "mtime": 1744300191
   },
   "images/achievements/frosty/images/activateAllWackyNewsTickers.png": {
     "size": 3705,
-    "mtime": 1744823186
+    "mtime": 1744300192
   },
   "images/achievements/frosty/images/activateBlackHoleOver10x.png": {
     "size": 4417,
-    "mtime": 1769001968
+    "mtime": 1768985822
   },
   "images/achievements/frosty/images/adoptPhilosophy.png": {
     "size": 1965,
-    "mtime": 1769001968
+    "mtime": 1768985822
   },
   "images/achievements/frosty/images/bringDownMiaplacideanForceField.png": {
     "size": 1764,
-    "mtime": 1769001968
+    "mtime": 1768985822
   },
   "images/achievements/frosty/images/buildPowerPlant.png": {
     "size": 1821,
-    "mtime": 1744823186
+    "mtime": 1744300191
   },
   "images/achievements/frosty/images/buildSolarPowerPlant.png": {
     "size": 2003,
-    "mtime": 1744823186
+    "mtime": 1744300191
   },
   "images/achievements/frosty/images/bullyEnemyIntoSubmission.png": {
     "size": 1566,
-    "mtime": 1744823186
+    "mtime": 1744300192
   },
   "images/achievements/frosty/images/collect1000Hydrogen.png": {
     "size": 2541,
-    "mtime": 1744823186
+    "mtime": 1744300191
   },
   "images/achievements/frosty/images/collect100Precipitation.png": {
     "size": 1883,
-    "mtime": 1744823186
+    "mtime": 1744300191
   },
   "images/achievements/frosty/images/collect100TitaniumAsPrecipitation.png": {
     "size": 1839,
-    "mtime": 1744823186
+    "mtime": 1744300192
   },
   "images/achievements/frosty/images/collect50000Iron.png": {
     "size": 2787,
-    "mtime": 1744823186
+    "mtime": 1744300191
   },
   "images/achievements/frosty/images/collect5000Carbon.png": {
     "size": 2594,
-    "mtime": 1744823186
+    "mtime": 1744300191
   },
   "images/achievements/frosty/images/collect50Hydrogen.png": {
     "size": 2631,
-    "mtime": 1744823186
+    "mtime": 1744300191
   },
   "images/achievements/frosty/images/completeGame.png": {
     "size": 1994,
-    "mtime": 1769001968
+    "mtime": 1768985822
   },
   "images/achievements/frosty/images/completeRunOnMiaplacidus.png": {
     "size": 2234,
-    "mtime": 1769001968
+    "mtime": 1768985822
   },
   "images/achievements/frosty/images/conquer10StarSystems.png": {
     "size": 2508,
-    "mtime": 1744823186
+    "mtime": 1744300192
   },
   "images/achievements/frosty/images/conquer50StarSystems.png": {
     "size": 2485,
-    "mtime": 1744823186
+    "mtime": 1744300192
   },
   "images/achievements/frosty/images/conquerBelligerentEnemy.png": {
     "size": 2126,
-    "mtime": 1744823186
+    "mtime": 1744300192
   },
   "images/achievements/frosty/images/conquerEnemy.png": {
     "size": 1301,
-    "mtime": 1744823186
+    "mtime": 1744300192
   },
   "images/achievements/frosty/images/conquerEnemyWithoutScanning.png": {
     "size": 1859,
-    "mtime": 1744823186
+    "mtime": 1744300192
   },
   "images/achievements/frosty/images/conquerHiveMindEnemy.png": {
     "size": 2199,
-    "mtime": 1744823186
+    "mtime": 1744300192
   },
   "images/achievements/frosty/images/conquerMegastructureSystem.png": {
     "size": 3346,
-    "mtime": 1769001968
+    "mtime": 1768985822
   },
   "images/achievements/frosty/images/createSteel.png": {
     "size": 2060,
-    "mtime": 1744823186
+    "mtime": 1744300192
   },
   "images/achievements/frosty/images/createTitanium.png": {
     "size": 2033,
-    "mtime": 1744823186
+    "mtime": 1744300192
   },
   "images/achievements/frosty/images/discoverAsteroid.png": {
     "size": 1852,
-    "mtime": 1744823186
+    "mtime": 1744300192
   },
   "images/achievements/frosty/images/discoverBlackHole.png": {
     "size": 2288,
-    "mtime": 1769001968
+    "mtime": 1768985822
   },
   "images/achievements/frosty/images/discoverLegendaryAsteroid.png": {
     "size": 2337,
-    "mtime": 1744823186
+    "mtime": 1744300192
   },
   "images/achievements/frosty/images/discoverSystemWithNoLife.png": {
     "size": 2632,
-    "mtime": 1744823186
+    "mtime": 1744300192
   },
   "images/achievements/frosty/images/findAncientManuscript.png": {
     "size": 2036,
-    "mtime": 1769001968
+    "mtime": 1768985822
   },
   "images/achievements/frosty/images/fuseElement.png": {
     "size": 5141,
-    "mtime": 1744823186
+    "mtime": 1744300191
   },
   "images/achievements/frosty/images/gain1000000Cash.png": {
     "size": 1797,
-    "mtime": 1744823186
+    "mtime": 1744300191
   },
   "images/achievements/frosty/images/gain100000Cash.png": {
     "size": 1928,
-    "mtime": 1744823186
+    "mtime": 1744300191
   },
   "images/achievements/frosty/images/gain10000Cash.png": {
     "size": 1876,
-    "mtime": 1744823186
+    "mtime": 1744300191
   },
   "images/achievements/frosty/images/gain100Cash.png": {
     "size": 1877,
-    "mtime": 1744823186
+    "mtime": 1744300191
   },
   "images/achievements/frosty/images/have4RocketsMiningAntimatter.png": {
     "size": 1904,
-    "mtime": 1744823186
+    "mtime": 1744300192
   },
   "images/achievements/frosty/images/have50HoursWithOnePioneer.png": {
     "size": 2525,
-    "mtime": 1744823186
+    "mtime": 1744300192
   },
   "images/achievements/frosty/images/haveFleetSizeOf50EachShipType.png": {
     "size": 2128,
-    "mtime": 1769001968
+    "mtime": 1768985822
   },
   "images/achievements/frosty/images/initiateDiplomacyWithAlienRace.png": {
     "size": 1512,
-    "mtime": 1744823186
+    "mtime": 1744300192
   },
   "images/achievements/frosty/images/launchRocket.png": {
     "size": 1301,
-    "mtime": 1744823186
+    "mtime": 1744300192
   },
   "images/achievements/frosty/images/launchStarship.png": {
     "size": 1727,
-    "mtime": 1744823186
+    "mtime": 1744300192
   },
   "images/achievements/frosty/images/liquidateAllAssets.png": {
     "size": 2142,
-    "mtime": 1744823186
+    "mtime": 1744300192
   },
   "images/achievements/frosty/images/mineAllAntimatterAsteroid.png": {
     "size": 1749,
-    "mtime": 1744823186
+    "mtime": 1744300192
   },
   "images/achievements/frosty/images/performGalacticMarketTransaction.png": {
     "size": 2128,
-    "mtime": 1744823186
+    "mtime": 1744300192
   },
   "images/achievements/frosty/images/rebirth.png": {
     "size": 2424,
-    "mtime": 1744823186
+    "mtime": 1744300192
   },
   "images/achievements/frosty/images/researchAllTechnologies.png": {
     "size": 1534,
-    "mtime": 1744823186
+    "mtime": 1744300191
   },
   "images/achievements/frosty/images/researchTechnology.png": {
     "size": 1617,
-    "mtime": 1744823186
+    "mtime": 1744300191
   },
   "images/achievements/frosty/images/seeAllNewsTickers.png": {
     "size": 1583,
-    "mtime": 1744823186
+    "mtime": 1744300192
   },
   "images/achievements/frosty/images/settleSystem.png": {
     "size": 1397,
-    "mtime": 1744823186
+    "mtime": 1744300192
   },
   "images/achievements/frosty/images/settleUnoccupiedSystem.png": {
     "size": 2626,
-    "mtime": 1744823186
+    "mtime": 1744300192
   },
   "images/achievements/frosty/images/spendAP.png": {
     "size": 1567,
-    "mtime": 1744823186
+    "mtime": 1744300192
   },
   "images/achievements/frosty/images/studyAllStarsInOneRun.png": {
     "size": 1614,
-    "mtime": 1744823186
+    "mtime": 1744300192
   },
   "images/achievements/frosty/images/studyStar.png": {
     "size": 1693,
-    "mtime": 1744823186
+    "mtime": 1744300192
   },
   "images/achievements/frosty/images/studyStarMoreThan20LYAway.png": {
     "size": 1687,
-    "mtime": 1744823186
+    "mtime": 1744300192
   },
   "images/achievements/frosty/images/studyStarMoreThan5LYAway.png": {
     "size": 1635,
-    "mtime": 1744823186
+    "mtime": 1744300192
   },
   "images/achievements/frosty/images/trade10APForCash.png": {
     "size": 2153,
-    "mtime": 1744823186
+    "mtime": 1744300192
   },
   "images/achievements/frosty/images/tripPower.png": {
     "size": 2502,
-    "mtime": 1744823186
+    "mtime": 1744300191
   },
   "images/achievements/frosty/images/tryAllThemes.png": {
     "size": 2120,
-    "mtime": 1769001968
+    "mtime": 1768985822
   },
   "images/achievements/frosty/images/unlockCompounds.png": {
     "size": 2021,
-    "mtime": 1744823186
+    "mtime": 1744300192
   },
   "images/achievements/frosty/images/vassalizeEnemy.png": {
     "size": 1448,
-    "mtime": 1744823186
+    "mtime": 1744300192
   },
   "images/achievements/galaxy/images/achieve100FusionEfficiency.png": {
     "size": 5258,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/galaxy/images/activateAllWackyNewsTickers.png": {
     "size": 3704,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/galaxy/images/activateBlackHoleOver10x.png": {
     "size": 4423,
-    "mtime": 1771006438
+    "mtime": 1768985899
   },
   "images/achievements/galaxy/images/adoptPhilosophy.png": {
     "size": 1959,
-    "mtime": 1771006438
+    "mtime": 1768985899
   },
   "images/achievements/galaxy/images/bringDownMiaplacideanForceField.png": {
     "size": 1763,
-    "mtime": 1771006438
+    "mtime": 1768985899
   },
   "images/achievements/galaxy/images/buildPowerPlant.png": {
     "size": 1818,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/galaxy/images/buildSolarPowerPlant.png": {
     "size": 2002,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/galaxy/images/bullyEnemyIntoSubmission.png": {
     "size": 1559,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/galaxy/images/collect1000Hydrogen.png": {
     "size": 2542,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/galaxy/images/collect100Precipitation.png": {
     "size": 1911,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/galaxy/images/collect100TitaniumAsPrecipitation.png": {
     "size": 1852,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/galaxy/images/collect50000Iron.png": {
     "size": 2790,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/galaxy/images/collect5000Carbon.png": {
     "size": 2596,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/galaxy/images/collect50Hydrogen.png": {
     "size": 2630,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/galaxy/images/completeGame.png": {
     "size": 1997,
-    "mtime": 1771006438
+    "mtime": 1768985899
   },
   "images/achievements/galaxy/images/completeRunOnMiaplacidus.png": {
     "size": 2230,
-    "mtime": 1771006438
+    "mtime": 1768985899
   },
   "images/achievements/galaxy/images/conquer10StarSystems.png": {
     "size": 2525,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/galaxy/images/conquer50StarSystems.png": {
     "size": 2488,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/galaxy/images/conquerBelligerentEnemy.png": {
     "size": 2126,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/galaxy/images/conquerEnemy.png": {
     "size": 1299,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/galaxy/images/conquerEnemyWithoutScanning.png": {
     "size": 1859,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/galaxy/images/conquerHiveMindEnemy.png": {
     "size": 2199,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/galaxy/images/conquerMegastructureSystem.png": {
     "size": 3359,
-    "mtime": 1771006438
+    "mtime": 1768985899
   },
   "images/achievements/galaxy/images/createSteel.png": {
     "size": 2059,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/galaxy/images/createTitanium.png": {
     "size": 2033,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/galaxy/images/discoverAsteroid.png": {
     "size": 1852,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/galaxy/images/discoverBlackHole.png": {
     "size": 2331,
-    "mtime": 1771006438
+    "mtime": 1768985899
   },
   "images/achievements/galaxy/images/discoverLegendaryAsteroid.png": {
     "size": 2329,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/galaxy/images/discoverSystemWithNoLife.png": {
     "size": 2651,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/galaxy/images/findAncientManuscript.png": {
     "size": 2036,
-    "mtime": 1771006438
+    "mtime": 1768985899
   },
   "images/achievements/galaxy/images/fuseElement.png": {
     "size": 5142,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/galaxy/images/gain1000000Cash.png": {
     "size": 1797,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/galaxy/images/gain100000Cash.png": {
     "size": 1931,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/galaxy/images/gain10000Cash.png": {
     "size": 1874,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/galaxy/images/gain100Cash.png": {
     "size": 1875,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/galaxy/images/have4RocketsMiningAntimatter.png": {
     "size": 1903,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/galaxy/images/have50HoursWithOnePioneer.png": {
     "size": 2536,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/galaxy/images/haveFleetSizeOf50EachShipType.png": {
     "size": 2125,
-    "mtime": 1771006438
+    "mtime": 1768985899
   },
   "images/achievements/galaxy/images/initiateDiplomacyWithAlienRace.png": {
     "size": 1511,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/galaxy/images/launchRocket.png": {
     "size": 1293,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/galaxy/images/launchStarship.png": {
     "size": 1726,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/galaxy/images/liquidateAllAssets.png": {
     "size": 2141,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/galaxy/images/mineAllAntimatterAsteroid.png": {
     "size": 1748,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/galaxy/images/performGalacticMarketTransaction.png": {
     "size": 2131,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/galaxy/images/rebirth.png": {
     "size": 2417,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/galaxy/images/researchAllTechnologies.png": {
     "size": 1533,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/galaxy/images/researchTechnology.png": {
     "size": 1615,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/galaxy/images/seeAllNewsTickers.png": {
     "size": 1579,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/galaxy/images/settleSystem.png": {
     "size": 1389,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/galaxy/images/settleUnoccupiedSystem.png": {
     "size": 2638,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/galaxy/images/spendAP.png": {
     "size": 1565,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/galaxy/images/studyAllStarsInOneRun.png": {
     "size": 1613,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/galaxy/images/studyStar.png": {
     "size": 1683,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/galaxy/images/studyStarMoreThan20LYAway.png": {
     "size": 1689,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/galaxy/images/studyStarMoreThan5LYAway.png": {
     "size": 1636,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/galaxy/images/trade10APForCash.png": {
     "size": 2148,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/galaxy/images/tripPower.png": {
     "size": 2522,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/galaxy/images/tryAllThemes.png": {
     "size": 2119,
-    "mtime": 1771006438
+    "mtime": 1768985899
   },
   "images/achievements/galaxy/images/unlockCompounds.png": {
     "size": 2019,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/galaxy/images/vassalizeEnemy.png": {
     "size": 1445,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/light/images/achieve100FusionEfficiency.png": {
     "size": 5248,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/activateAllWackyNewsTickers.png": {
     "size": 3654,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/activateBlackHoleOver10x.png": {
     "size": 3838,
-    "mtime": 1769001968
+    "mtime": 1768985786
   },
   "images/achievements/light/images/adoptPhilosophy.png": {
     "size": 1869,
-    "mtime": 1769001968
+    "mtime": 1768985786
   },
   "images/achievements/light/images/bringDownMiaplacideanForceField.png": {
     "size": 1713,
-    "mtime": 1769001968
+    "mtime": 1768985786
   },
   "images/achievements/light/images/buildPowerPlant.png": {
     "size": 1799,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/buildSolarPowerPlant.png": {
     "size": 1846,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/bullyEnemyIntoSubmission.png": {
     "size": 1555,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/collect1000Hydrogen.png": {
     "size": 2310,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/collect100Precipitation.png": {
     "size": 1730,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/collect100TitaniumAsPrecipitation.png": {
     "size": 1717,
-    "mtime": 1744823186
+    "mtime": 1744300445
   },
   "images/achievements/light/images/collect50000Iron.png": {
     "size": 2446,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/collect5000Carbon.png": {
     "size": 2316,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/collect50Hydrogen.png": {
     "size": 2391,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/completeGame.png": {
     "size": 1812,
-    "mtime": 1769001968
+    "mtime": 1768985786
   },
   "images/achievements/light/images/completeRunOnMiaplacidus.png": {
     "size": 2066,
-    "mtime": 1769001968
+    "mtime": 1768985786
   },
   "images/achievements/light/images/conquer10StarSystems.png": {
     "size": 2273,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/conquer50StarSystems.png": {
     "size": 2149,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/conquerBelligerentEnemy.png": {
     "size": 1950,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/conquerEnemy.png": {
     "size": 1277,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/conquerEnemyWithoutScanning.png": {
     "size": 1682,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/conquerHiveMindEnemy.png": {
     "size": 2008,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/conquerMegastructureSystem.png": {
     "size": 2656,
-    "mtime": 1769001968
+    "mtime": 1768985786
   },
   "images/achievements/light/images/createSteel.png": {
     "size": 1952,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/createTitanium.png": {
     "size": 1913,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/discoverAsteroid.png": {
     "size": 1803,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/discoverBlackHole.png": {
     "size": 2106,
-    "mtime": 1769001968
+    "mtime": 1768985786
   },
   "images/achievements/light/images/discoverLegendaryAsteroid.png": {
     "size": 2071,
-    "mtime": 1744823186
+    "mtime": 1744300445
   },
   "images/achievements/light/images/discoverSystemWithNoLife.png": {
     "size": 2246,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/findAncientManuscript.png": {
     "size": 1995,
-    "mtime": 1769001968
+    "mtime": 1768985786
   },
   "images/achievements/light/images/fuseElement.png": {
     "size": 5144,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/gain1000000Cash.png": {
     "size": 1771,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/gain100000Cash.png": {
     "size": 1863,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/gain10000Cash.png": {
     "size": 1853,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/gain100Cash.png": {
     "size": 1819,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/have4RocketsMiningAntimatter.png": {
     "size": 1846,
-    "mtime": 1744823186
+    "mtime": 1744300445
   },
   "images/achievements/light/images/have50HoursWithOnePioneer.png": {
     "size": 2238,
-    "mtime": 1744823186
+    "mtime": 1744300445
   },
   "images/achievements/light/images/haveFleetSizeOf50EachShipType.png": {
     "size": 2022,
-    "mtime": 1769001968
+    "mtime": 1768985786
   },
   "images/achievements/light/images/initiateDiplomacyWithAlienRace.png": {
     "size": 1540,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/launchRocket.png": {
     "size": 1289,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/launchStarship.png": {
     "size": 1645,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/liquidateAllAssets.png": {
     "size": 1929,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/mineAllAntimatterAsteroid.png": {
     "size": 1708,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/performGalacticMarketTransaction.png": {
     "size": 1894,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/rebirth.png": {
     "size": 2007,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/researchAllTechnologies.png": {
     "size": 1530,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/researchTechnology.png": {
     "size": 1606,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/seeAllNewsTickers.png": {
     "size": 1561,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/settleSystem.png": {
     "size": 1384,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/settleUnoccupiedSystem.png": {
     "size": 2271,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/spendAP.png": {
     "size": 1570,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/studyAllStarsInOneRun.png": {
     "size": 1625,
-    "mtime": 1744823186
+    "mtime": 1744300445
   },
   "images/achievements/light/images/studyStar.png": {
     "size": 1645,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/studyStarMoreThan20LYAway.png": {
     "size": 1654,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/studyStarMoreThan5LYAway.png": {
     "size": 1605,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/trade10APForCash.png": {
     "size": 1980,
-    "mtime": 1744823186
+    "mtime": 1744300445
   },
   "images/achievements/light/images/tripPower.png": {
     "size": 2493,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/tryAllThemes.png": {
     "size": 1941,
-    "mtime": 1769001968
+    "mtime": 1768985786
   },
   "images/achievements/light/images/unlockCompounds.png": {
     "size": 1994,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/light/images/vassalizeEnemy.png": {
     "size": 1431,
-    "mtime": 1744823186
+    "mtime": 1744300444
   },
   "images/achievements/misty/images/achieve100FusionEfficiency.png": {
     "size": 5255,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/activateAllWackyNewsTickers.png": {
     "size": 3701,
-    "mtime": 1744823186
+    "mtime": 1744300650
   },
   "images/achievements/misty/images/activateBlackHoleOver10x.png": {
     "size": 3957,
-    "mtime": 1769001968
+    "mtime": 1768985350
   },
   "images/achievements/misty/images/adoptPhilosophy.png": {
     "size": 1859,
-    "mtime": 1769001968
+    "mtime": 1768985350
   },
   "images/achievements/misty/images/bringDownMiaplacideanForceField.png": {
     "size": 1754,
-    "mtime": 1769001968
+    "mtime": 1768985350
   },
   "images/achievements/misty/images/buildPowerPlant.png": {
     "size": 1783,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/buildSolarPowerPlant.png": {
     "size": 1980,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/bullyEnemyIntoSubmission.png": {
     "size": 1540,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/collect1000Hydrogen.png": {
     "size": 2297,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/collect100Precipitation.png": {
     "size": 1780,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/collect100TitaniumAsPrecipitation.png": {
     "size": 1746,
-    "mtime": 1744823186
+    "mtime": 1744300650
   },
   "images/achievements/misty/images/collect50000Iron.png": {
     "size": 2486,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/collect5000Carbon.png": {
     "size": 2300,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/collect50Hydrogen.png": {
     "size": 2341,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/completeGame.png": {
     "size": 1950,
-    "mtime": 1769001968
+    "mtime": 1768985350
   },
   "images/achievements/misty/images/completeRunOnMiaplacidus.png": {
     "size": 2158,
-    "mtime": 1769001968
+    "mtime": 1768985350
   },
   "images/achievements/misty/images/conquer10StarSystems.png": {
     "size": 2303,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/conquer50StarSystems.png": {
     "size": 2334,
-    "mtime": 1744823186
+    "mtime": 1744300650
   },
   "images/achievements/misty/images/conquerBelligerentEnemy.png": {
     "size": 2085,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/conquerEnemy.png": {
     "size": 1264,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/conquerEnemyWithoutScanning.png": {
     "size": 1815,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/conquerHiveMindEnemy.png": {
     "size": 2117,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/conquerMegastructureSystem.png": {
     "size": 2747,
-    "mtime": 1769001968
+    "mtime": 1768985350
   },
   "images/achievements/misty/images/createSteel.png": {
     "size": 2010,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/createTitanium.png": {
     "size": 1997,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/discoverAsteroid.png": {
     "size": 1769,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/discoverBlackHole.png": {
     "size": 2260,
-    "mtime": 1769001968
+    "mtime": 1768985350
   },
   "images/achievements/misty/images/discoverLegendaryAsteroid.png": {
     "size": 2222,
-    "mtime": 1744823186
+    "mtime": 1744300650
   },
   "images/achievements/misty/images/discoverSystemWithNoLife.png": {
     "size": 2352,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/findAncientManuscript.png": {
     "size": 1996,
-    "mtime": 1769001968
+    "mtime": 1768985350
   },
   "images/achievements/misty/images/fuseElement.png": {
     "size": 5129,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/gain1000000Cash.png": {
     "size": 1764,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/gain100000Cash.png": {
     "size": 1859,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/gain10000Cash.png": {
     "size": 1838,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/gain100Cash.png": {
     "size": 1836,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/have4RocketsMiningAntimatter.png": {
     "size": 1889,
-    "mtime": 1744823186
+    "mtime": 1744300650
   },
   "images/achievements/misty/images/have50HoursWithOnePioneer.png": {
     "size": 2382,
-    "mtime": 1744823186
+    "mtime": 1744300650
   },
   "images/achievements/misty/images/haveFleetSizeOf50EachShipType.png": {
     "size": 2060,
-    "mtime": 1769001968
+    "mtime": 1768985350
   },
   "images/achievements/misty/images/initiateDiplomacyWithAlienRace.png": {
     "size": 1496,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/launchRocket.png": {
     "size": 1273,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/launchStarship.png": {
     "size": 1736,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/liquidateAllAssets.png": {
     "size": 2040,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/mineAllAntimatterAsteroid.png": {
     "size": 1706,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/performGalacticMarketTransaction.png": {
     "size": 2059,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/rebirth.png": {
     "size": 2307,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/researchAllTechnologies.png": {
     "size": 1517,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/researchTechnology.png": {
     "size": 1596,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/seeAllNewsTickers.png": {
     "size": 1583,
-    "mtime": 1744823186
+    "mtime": 1744300650
   },
   "images/achievements/misty/images/settleSystem.png": {
     "size": 1376,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/settleUnoccupiedSystem.png": {
     "size": 2382,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/spendAP.png": {
     "size": 1545,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/studyAllStarsInOneRun.png": {
     "size": 1592,
-    "mtime": 1744823186
+    "mtime": 1744300650
   },
   "images/achievements/misty/images/studyStar.png": {
     "size": 1622,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/studyStarMoreThan20LYAway.png": {
     "size": 1625,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/studyStarMoreThan5LYAway.png": {
     "size": 1584,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/trade10APForCash.png": {
     "size": 2073,
-    "mtime": 1744823186
+    "mtime": 1744300650
   },
   "images/achievements/misty/images/tripPower.png": {
     "size": 2491,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/tryAllThemes.png": {
     "size": 2051,
-    "mtime": 1769001968
+    "mtime": 1768985350
   },
   "images/achievements/misty/images/unlockCompounds.png": {
     "size": 1974,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/misty/images/vassalizeEnemy.png": {
     "size": 1423,
-    "mtime": 1744823186
+    "mtime": 1744300649
   },
   "images/achievements/space/images/achieve100FusionEfficiency.png": {
     "size": 5258,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/space/images/activateAllWackyNewsTickers.png": {
     "size": 3704,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/space/images/activateBlackHoleOver10x.png": {
     "size": 4423,
-    "mtime": 1771006438
+    "mtime": 1768985899
   },
   "images/achievements/space/images/adoptPhilosophy.png": {
     "size": 1959,
-    "mtime": 1771006438
+    "mtime": 1768985899
   },
   "images/achievements/space/images/bringDownMiaplacideanForceField.png": {
     "size": 1763,
-    "mtime": 1771006438
+    "mtime": 1768985899
   },
   "images/achievements/space/images/buildPowerPlant.png": {
     "size": 1818,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/space/images/buildSolarPowerPlant.png": {
     "size": 2002,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/space/images/bullyEnemyIntoSubmission.png": {
     "size": 1559,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/space/images/collect1000Hydrogen.png": {
     "size": 2542,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/space/images/collect100Precipitation.png": {
     "size": 1911,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/space/images/collect100TitaniumAsPrecipitation.png": {
     "size": 1852,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/space/images/collect50000Iron.png": {
     "size": 2790,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/space/images/collect5000Carbon.png": {
     "size": 2596,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/space/images/collect50Hydrogen.png": {
     "size": 2630,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/space/images/completeGame.png": {
     "size": 1997,
-    "mtime": 1771006438
+    "mtime": 1768985899
   },
   "images/achievements/space/images/completeRunOnMiaplacidus.png": {
     "size": 2230,
-    "mtime": 1771006438
+    "mtime": 1768985899
   },
   "images/achievements/space/images/conquer10StarSystems.png": {
     "size": 2525,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/space/images/conquer50StarSystems.png": {
     "size": 2488,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/space/images/conquerBelligerentEnemy.png": {
     "size": 2126,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/space/images/conquerEnemy.png": {
     "size": 1299,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/space/images/conquerEnemyWithoutScanning.png": {
     "size": 1859,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/space/images/conquerHiveMindEnemy.png": {
     "size": 2199,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/space/images/conquerMegastructureSystem.png": {
     "size": 3359,
-    "mtime": 1771006438
+    "mtime": 1768985899
   },
   "images/achievements/space/images/createSteel.png": {
     "size": 2059,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/space/images/createTitanium.png": {
     "size": 2033,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/space/images/discoverAsteroid.png": {
     "size": 1852,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/space/images/discoverBlackHole.png": {
     "size": 2331,
-    "mtime": 1771006438
+    "mtime": 1768985899
   },
   "images/achievements/space/images/discoverLegendaryAsteroid.png": {
     "size": 2329,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/space/images/discoverSystemWithNoLife.png": {
     "size": 2651,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/space/images/findAncientManuscript.png": {
     "size": 2036,
-    "mtime": 1771006438
+    "mtime": 1768985899
   },
   "images/achievements/space/images/fuseElement.png": {
     "size": 5142,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/space/images/gain1000000Cash.png": {
     "size": 1797,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/space/images/gain100000Cash.png": {
     "size": 1931,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/space/images/gain10000Cash.png": {
     "size": 1874,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/space/images/gain100Cash.png": {
     "size": 1875,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/space/images/have4RocketsMiningAntimatter.png": {
     "size": 1903,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/space/images/have50HoursWithOnePioneer.png": {
     "size": 2536,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/space/images/haveFleetSizeOf50EachShipType.png": {
     "size": 2125,
-    "mtime": 1771006438
+    "mtime": 1768985899
   },
   "images/achievements/space/images/initiateDiplomacyWithAlienRace.png": {
     "size": 1511,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/space/images/launchRocket.png": {
     "size": 1293,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/space/images/launchStarship.png": {
     "size": 1726,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/space/images/liquidateAllAssets.png": {
     "size": 2141,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/space/images/mineAllAntimatterAsteroid.png": {
     "size": 1748,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/space/images/performGalacticMarketTransaction.png": {
     "size": 2131,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/space/images/rebirth.png": {
     "size": 2417,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/space/images/researchAllTechnologies.png": {
     "size": 1533,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/space/images/researchTechnology.png": {
     "size": 1615,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/space/images/seeAllNewsTickers.png": {
     "size": 1579,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/space/images/settleSystem.png": {
     "size": 1389,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/space/images/settleUnoccupiedSystem.png": {
     "size": 2638,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/space/images/spendAP.png": {
     "size": 1565,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/space/images/studyAllStarsInOneRun.png": {
     "size": 1613,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/space/images/studyStar.png": {
     "size": 1683,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/space/images/studyStarMoreThan20LYAway.png": {
     "size": 1689,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/space/images/studyStarMoreThan5LYAway.png": {
     "size": 1636,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/space/images/trade10APForCash.png": {
     "size": 2148,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/space/images/tripPower.png": {
     "size": 2522,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/space/images/tryAllThemes.png": {
     "size": 2119,
-    "mtime": 1771006438
+    "mtime": 1768985899
   },
   "images/achievements/space/images/unlockCompounds.png": {
     "size": 2019,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/space/images/vassalizeEnemy.png": {
     "size": 1445,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/summer/images/achieve100FusionEfficiency.png": {
     "size": 5258,
-    "mtime": 1744823186
+    "mtime": 1744300143
   },
   "images/achievements/summer/images/activateAllWackyNewsTickers.png": {
     "size": 3702,
-    "mtime": 1744823186
+    "mtime": 1744300144
   },
   "images/achievements/summer/images/activateBlackHoleOver10x.png": {
     "size": 4432,
-    "mtime": 1769001968
+    "mtime": 1768985735
   },
   "images/achievements/summer/images/adoptPhilosophy.png": {
     "size": 1946,
-    "mtime": 1769001968
+    "mtime": 1768985735
   },
   "images/achievements/summer/images/bringDownMiaplacideanForceField.png": {
     "size": 1764,
-    "mtime": 1769001968
+    "mtime": 1768985735
   },
   "images/achievements/summer/images/buildPowerPlant.png": {
     "size": 1818,
-    "mtime": 1744823186
+    "mtime": 1744300143
   },
   "images/achievements/summer/images/buildSolarPowerPlant.png": {
     "size": 2001,
-    "mtime": 1744823186
+    "mtime": 1744300143
   },
   "images/achievements/summer/images/bullyEnemyIntoSubmission.png": {
     "size": 1566,
-    "mtime": 1744823186
+    "mtime": 1744300144
   },
   "images/achievements/summer/images/collect1000Hydrogen.png": {
     "size": 2545,
-    "mtime": 1744823186
+    "mtime": 1744300143
   },
   "images/achievements/summer/images/collect100Precipitation.png": {
     "size": 1915,
-    "mtime": 1744823186
+    "mtime": 1744300143
   },
   "images/achievements/summer/images/collect100TitaniumAsPrecipitation.png": {
     "size": 1846,
-    "mtime": 1744823186
+    "mtime": 1744300144
   },
   "images/achievements/summer/images/collect50000Iron.png": {
     "size": 2796,
-    "mtime": 1744823186
+    "mtime": 1744300143
   },
   "images/achievements/summer/images/collect5000Carbon.png": {
     "size": 2601,
-    "mtime": 1744823186
+    "mtime": 1744300143
   },
   "images/achievements/summer/images/collect50Hydrogen.png": {
     "size": 2635,
-    "mtime": 1744823186
+    "mtime": 1744300143
   },
   "images/achievements/summer/images/completeGame.png": {
     "size": 2003,
-    "mtime": 1769001968
+    "mtime": 1768985735
   },
   "images/achievements/summer/images/completeRunOnMiaplacidus.png": {
     "size": 2227,
-    "mtime": 1769001968
+    "mtime": 1768985735
   },
   "images/achievements/summer/images/conquer10StarSystems.png": {
     "size": 2525,
-    "mtime": 1744823186
+    "mtime": 1744300144
   },
   "images/achievements/summer/images/conquer50StarSystems.png": {
     "size": 2488,
-    "mtime": 1744823186
+    "mtime": 1744300144
   },
   "images/achievements/summer/images/conquerBelligerentEnemy.png": {
     "size": 2132,
-    "mtime": 1744823186
+    "mtime": 1744300144
   },
   "images/achievements/summer/images/conquerEnemy.png": {
     "size": 1302,
-    "mtime": 1744823186
+    "mtime": 1744300144
   },
   "images/achievements/summer/images/conquerEnemyWithoutScanning.png": {
     "size": 1873,
-    "mtime": 1744823186
+    "mtime": 1744300144
   },
   "images/achievements/summer/images/conquerHiveMindEnemy.png": {
     "size": 2198,
-    "mtime": 1744823186
+    "mtime": 1744300144
   },
   "images/achievements/summer/images/conquerMegastructureSystem.png": {
     "size": 3386,
-    "mtime": 1769001968
+    "mtime": 1768985735
   },
   "images/achievements/summer/images/createSteel.png": {
     "size": 2060,
-    "mtime": 1744823186
+    "mtime": 1744300144
   },
   "images/achievements/summer/images/createTitanium.png": {
     "size": 2036,
-    "mtime": 1744823186
+    "mtime": 1744300144
   },
   "images/achievements/summer/images/discoverAsteroid.png": {
     "size": 1856,
-    "mtime": 1744823186
+    "mtime": 1744300144
   },
   "images/achievements/summer/images/discoverBlackHole.png": {
     "size": 2352,
-    "mtime": 1769001968
+    "mtime": 1768985735
   },
   "images/achievements/summer/images/discoverLegendaryAsteroid.png": {
     "size": 2328,
-    "mtime": 1744823186
+    "mtime": 1744300144
   },
   "images/achievements/summer/images/discoverSystemWithNoLife.png": {
     "size": 2677,
-    "mtime": 1744823186
+    "mtime": 1744300144
   },
   "images/achievements/summer/images/findAncientManuscript.png": {
     "size": 2039,
-    "mtime": 1769001968
+    "mtime": 1768985735
   },
   "images/achievements/summer/images/fuseElement.png": {
     "size": 5143,
-    "mtime": 1744823186
+    "mtime": 1744300143
   },
   "images/achievements/summer/images/gain1000000Cash.png": {
     "size": 1798,
-    "mtime": 1744823186
+    "mtime": 1744300143
   },
   "images/achievements/summer/images/gain100000Cash.png": {
     "size": 1928,
-    "mtime": 1744823186
+    "mtime": 1744300143
   },
   "images/achievements/summer/images/gain10000Cash.png": {
     "size": 1879,
-    "mtime": 1744823186
+    "mtime": 1744300143
   },
   "images/achievements/summer/images/gain100Cash.png": {
     "size": 1867,
-    "mtime": 1744823186
+    "mtime": 1744300143
   },
   "images/achievements/summer/images/have4RocketsMiningAntimatter.png": {
     "size": 1903,
-    "mtime": 1744823186
+    "mtime": 1744300144
   },
   "images/achievements/summer/images/have50HoursWithOnePioneer.png": {
     "size": 2534,
-    "mtime": 1744823186
+    "mtime": 1744300144
   },
   "images/achievements/summer/images/haveFleetSizeOf50EachShipType.png": {
     "size": 2124,
-    "mtime": 1769001968
+    "mtime": 1768985735
   },
   "images/achievements/summer/images/initiateDiplomacyWithAlienRace.png": {
     "size": 1511,
-    "mtime": 1744823186
+    "mtime": 1744300144
   },
   "images/achievements/summer/images/launchRocket.png": {
     "size": 1301,
-    "mtime": 1744823186
+    "mtime": 1744300144
   },
   "images/achievements/summer/images/launchStarship.png": {
     "size": 1728,
-    "mtime": 1744823186
+    "mtime": 1744300144
   },
   "images/achievements/summer/images/liquidateAllAssets.png": {
     "size": 2137,
-    "mtime": 1744823186
+    "mtime": 1744300144
   },
   "images/achievements/summer/images/mineAllAntimatterAsteroid.png": {
     "size": 1749,
-    "mtime": 1744823186
+    "mtime": 1744300144
   },
   "images/achievements/summer/images/performGalacticMarketTransaction.png": {
     "size": 2134,
-    "mtime": 1744823186
+    "mtime": 1744300144
   },
   "images/achievements/summer/images/rebirth.png": {
     "size": 2417,
-    "mtime": 1744823186
+    "mtime": 1744300144
   },
   "images/achievements/summer/images/researchAllTechnologies.png": {
     "size": 1535,
-    "mtime": 1744823186
+    "mtime": 1744300143
   },
   "images/achievements/summer/images/researchTechnology.png": {
     "size": 1618,
-    "mtime": 1744823186
+    "mtime": 1744300143
   },
   "images/achievements/summer/images/seeAllNewsTickers.png": {
     "size": 1581,
-    "mtime": 1744823186
+    "mtime": 1744300144
   },
   "images/achievements/summer/images/settleSystem.png": {
     "size": 1397,
-    "mtime": 1744823186
+    "mtime": 1744300144
   },
   "images/achievements/summer/images/settleUnoccupiedSystem.png": {
     "size": 2657,
-    "mtime": 1744823186
+    "mtime": 1744300144
   },
   "images/achievements/summer/images/spendAP.png": {
     "size": 1569,
-    "mtime": 1744823186
+    "mtime": 1744300144
   },
   "images/achievements/summer/images/studyAllStarsInOneRun.png": {
     "size": 1614,
-    "mtime": 1744823186
+    "mtime": 1744300144
   },
   "images/achievements/summer/images/studyStar.png": {
     "size": 1683,
-    "mtime": 1744823186
+    "mtime": 1744300144
   },
   "images/achievements/summer/images/studyStarMoreThan20LYAway.png": {
     "size": 1690,
-    "mtime": 1744823186
+    "mtime": 1744300144
   },
   "images/achievements/summer/images/studyStarMoreThan5LYAway.png": {
     "size": 1638,
-    "mtime": 1744823186
+    "mtime": 1744300144
   },
   "images/achievements/summer/images/trade10APForCash.png": {
     "size": 2151,
-    "mtime": 1744823186
+    "mtime": 1744300144
   },
   "images/achievements/summer/images/tripPower.png": {
     "size": 2541,
-    "mtime": 1744823186
+    "mtime": 1744300143
   },
   "images/achievements/summer/images/tryAllThemes.png": {
     "size": 2123,
-    "mtime": 1769001968
+    "mtime": 1768985735
   },
   "images/achievements/summer/images/unlockCompounds.png": {
     "size": 2015,
-    "mtime": 1744823186
+    "mtime": 1744300144
   },
   "images/achievements/summer/images/vassalizeEnemy.png": {
     "size": 1447,
-    "mtime": 1744823186
+    "mtime": 1744300144
   },
   "images/achievements/supernova/images/achieve100FusionEfficiency.png": {
     "size": 5258,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/supernova/images/activateAllWackyNewsTickers.png": {
     "size": 3704,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/supernova/images/activateBlackHoleOver10x.png": {
     "size": 4423,
-    "mtime": 1771006438
+    "mtime": 1768985899
   },
   "images/achievements/supernova/images/adoptPhilosophy.png": {
     "size": 1959,
-    "mtime": 1771006438
+    "mtime": 1768985899
   },
   "images/achievements/supernova/images/bringDownMiaplacideanForceField.png": {
     "size": 1763,
-    "mtime": 1771006438
+    "mtime": 1768985899
   },
   "images/achievements/supernova/images/buildPowerPlant.png": {
     "size": 1818,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/supernova/images/buildSolarPowerPlant.png": {
     "size": 2002,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/supernova/images/bullyEnemyIntoSubmission.png": {
     "size": 1559,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/supernova/images/collect1000Hydrogen.png": {
     "size": 2542,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/supernova/images/collect100Precipitation.png": {
     "size": 1911,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/supernova/images/collect100TitaniumAsPrecipitation.png": {
     "size": 1852,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/supernova/images/collect50000Iron.png": {
     "size": 2790,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/supernova/images/collect5000Carbon.png": {
     "size": 2596,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/supernova/images/collect50Hydrogen.png": {
     "size": 2630,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/supernova/images/completeGame.png": {
     "size": 1997,
-    "mtime": 1771006438
+    "mtime": 1768985899
   },
   "images/achievements/supernova/images/completeRunOnMiaplacidus.png": {
     "size": 2230,
-    "mtime": 1771006438
+    "mtime": 1768985899
   },
   "images/achievements/supernova/images/conquer10StarSystems.png": {
     "size": 2525,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/supernova/images/conquer50StarSystems.png": {
     "size": 2488,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/supernova/images/conquerBelligerentEnemy.png": {
     "size": 2126,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/supernova/images/conquerEnemy.png": {
     "size": 1299,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/supernova/images/conquerEnemyWithoutScanning.png": {
     "size": 1859,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/supernova/images/conquerHiveMindEnemy.png": {
     "size": 2199,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/supernova/images/conquerMegastructureSystem.png": {
     "size": 3359,
-    "mtime": 1771006438
+    "mtime": 1768985899
   },
   "images/achievements/supernova/images/createSteel.png": {
     "size": 2059,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/supernova/images/createTitanium.png": {
     "size": 2033,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/supernova/images/discoverAsteroid.png": {
     "size": 1852,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/supernova/images/discoverBlackHole.png": {
     "size": 2331,
-    "mtime": 1771006438
+    "mtime": 1768985899
   },
   "images/achievements/supernova/images/discoverLegendaryAsteroid.png": {
     "size": 2329,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/supernova/images/discoverSystemWithNoLife.png": {
     "size": 2651,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/supernova/images/findAncientManuscript.png": {
     "size": 2036,
-    "mtime": 1771006438
+    "mtime": 1768985899
   },
   "images/achievements/supernova/images/fuseElement.png": {
     "size": 5142,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/supernova/images/gain1000000Cash.png": {
     "size": 1797,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/supernova/images/gain100000Cash.png": {
     "size": 1931,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/supernova/images/gain10000Cash.png": {
     "size": 1874,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/supernova/images/gain100Cash.png": {
     "size": 1875,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/supernova/images/have4RocketsMiningAntimatter.png": {
     "size": 1903,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/supernova/images/have50HoursWithOnePioneer.png": {
     "size": 2536,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/supernova/images/haveFleetSizeOf50EachShipType.png": {
     "size": 2125,
-    "mtime": 1771006438
+    "mtime": 1768985899
   },
   "images/achievements/supernova/images/initiateDiplomacyWithAlienRace.png": {
     "size": 1511,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/supernova/images/launchRocket.png": {
     "size": 1293,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/supernova/images/launchStarship.png": {
     "size": 1726,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/supernova/images/liquidateAllAssets.png": {
     "size": 2141,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/supernova/images/mineAllAntimatterAsteroid.png": {
     "size": 1748,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/supernova/images/performGalacticMarketTransaction.png": {
     "size": 2131,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/supernova/images/rebirth.png": {
     "size": 2417,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/supernova/images/researchAllTechnologies.png": {
     "size": 1533,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/supernova/images/researchTechnology.png": {
     "size": 1615,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/supernova/images/seeAllNewsTickers.png": {
     "size": 1579,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/supernova/images/settleSystem.png": {
     "size": 1389,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/supernova/images/settleUnoccupiedSystem.png": {
     "size": 2638,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/supernova/images/spendAP.png": {
     "size": 1565,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/supernova/images/studyAllStarsInOneRun.png": {
     "size": 1613,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/supernova/images/studyStar.png": {
     "size": 1683,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/supernova/images/studyStarMoreThan20LYAway.png": {
     "size": 1689,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/supernova/images/studyStarMoreThan5LYAway.png": {
     "size": 1636,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/supernova/images/trade10APForCash.png": {
     "size": 2148,
-    "mtime": 1771006438
+    "mtime": 1744300402
   },
   "images/achievements/supernova/images/tripPower.png": {
     "size": 2522,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/supernova/images/tryAllThemes.png": {
     "size": 2119,
-    "mtime": 1771006438
+    "mtime": 1768985899
   },
   "images/achievements/supernova/images/unlockCompounds.png": {
     "size": 2019,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/supernova/images/vassalizeEnemy.png": {
     "size": 1445,
-    "mtime": 1771006438
+    "mtime": 1744300401
   },
   "images/achievements/terminal/images/achieve100FusionEfficiency.png": {
     "size": 5259,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/activateAllWackyNewsTickers.png": {
     "size": 3714,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/activateBlackHoleOver10x.png": {
     "size": 3922,
-    "mtime": 1769001968
+    "mtime": 1768985663
   },
   "images/achievements/terminal/images/adoptPhilosophy.png": {
     "size": 1959,
-    "mtime": 1769001968
+    "mtime": 1768985663
   },
   "images/achievements/terminal/images/bringDownMiaplacideanForceField.png": {
     "size": 1764,
-    "mtime": 1769001968
+    "mtime": 1768985663
   },
   "images/achievements/terminal/images/buildPowerPlant.png": {
     "size": 1840,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/buildSolarPowerPlant.png": {
     "size": 1963,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/bullyEnemyIntoSubmission.png": {
     "size": 1556,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/collect1000Hydrogen.png": {
     "size": 2293,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/collect100Precipitation.png": {
     "size": 1811,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/collect100TitaniumAsPrecipitation.png": {
     "size": 1759,
-    "mtime": 1744823186
+    "mtime": 1744300340
   },
   "images/achievements/terminal/images/collect50000Iron.png": {
     "size": 2461,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/collect5000Carbon.png": {
     "size": 2307,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/collect50Hydrogen.png": {
     "size": 2392,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/completeGame.png": {
     "size": 1951,
-    "mtime": 1769001968
+    "mtime": 1768985663
   },
   "images/achievements/terminal/images/completeRunOnMiaplacidus.png": {
     "size": 2205,
-    "mtime": 1769001968
+    "mtime": 1768985663
   },
   "images/achievements/terminal/images/conquer10StarSystems.png": {
     "size": 2348,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/conquer50StarSystems.png": {
     "size": 2249,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/conquerBelligerentEnemy.png": {
     "size": 2037,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/conquerEnemy.png": {
     "size": 1284,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/conquerEnemyWithoutScanning.png": {
     "size": 1808,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/conquerHiveMindEnemy.png": {
     "size": 2055,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/conquerMegastructureSystem.png": {
     "size": 2690,
-    "mtime": 1769001968
+    "mtime": 1768985663
   },
   "images/achievements/terminal/images/createSteel.png": {
     "size": 1991,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/createTitanium.png": {
     "size": 1980,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/discoverAsteroid.png": {
     "size": 1829,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/discoverBlackHole.png": {
     "size": 2223,
-    "mtime": 1769001968
+    "mtime": 1768985663
   },
   "images/achievements/terminal/images/discoverLegendaryAsteroid.png": {
     "size": 2184,
-    "mtime": 1744823186
+    "mtime": 1744300340
   },
   "images/achievements/terminal/images/discoverSystemWithNoLife.png": {
     "size": 2285,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/findAncientManuscript.png": {
     "size": 2046,
-    "mtime": 1769001968
+    "mtime": 1768985663
   },
   "images/achievements/terminal/images/fuseElement.png": {
     "size": 5150,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/gain1000000Cash.png": {
     "size": 1798,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/gain100000Cash.png": {
     "size": 1904,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/gain10000Cash.png": {
     "size": 1889,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/gain100Cash.png": {
     "size": 1863,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/have4RocketsMiningAntimatter.png": {
     "size": 1913,
-    "mtime": 1744823186
+    "mtime": 1744300340
   },
   "images/achievements/terminal/images/have50HoursWithOnePioneer.png": {
     "size": 2324,
-    "mtime": 1744823186
+    "mtime": 1744300340
   },
   "images/achievements/terminal/images/haveFleetSizeOf50EachShipType.png": {
     "size": 2058,
-    "mtime": 1769001968
+    "mtime": 1768985663
   },
   "images/achievements/terminal/images/initiateDiplomacyWithAlienRace.png": {
     "size": 1542,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/launchRocket.png": {
     "size": 1287,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/launchStarship.png": {
     "size": 1741,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/liquidateAllAssets.png": {
     "size": 2017,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/mineAllAntimatterAsteroid.png": {
     "size": 1736,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/performGalacticMarketTransaction.png": {
     "size": 1969,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/rebirth.png": {
     "size": 2170,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/researchAllTechnologies.png": {
     "size": 1535,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/researchTechnology.png": {
     "size": 1632,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/seeAllNewsTickers.png": {
     "size": 1603,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/settleSystem.png": {
     "size": 1385,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/settleUnoccupiedSystem.png": {
     "size": 2306,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/spendAP.png": {
     "size": 1578,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/studyAllStarsInOneRun.png": {
     "size": 1642,
-    "mtime": 1744823186
+    "mtime": 1744300340
   },
   "images/achievements/terminal/images/studyStar.png": {
     "size": 1675,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/studyStarMoreThan20LYAway.png": {
     "size": 1674,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/studyStarMoreThan5LYAway.png": {
     "size": 1634,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/trade10APForCash.png": {
     "size": 2077,
-    "mtime": 1744823186
+    "mtime": 1744300340
   },
   "images/achievements/terminal/images/tripPower.png": {
     "size": 2499,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/tryAllThemes.png": {
     "size": 2089,
-    "mtime": 1769001968
+    "mtime": 1768985663
   },
   "images/achievements/terminal/images/unlockCompounds.png": {
     "size": 2020,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/achievements/terminal/images/vassalizeEnemy.png": {
     "size": 1440,
-    "mtime": 1744823186
+    "mtime": 1744300339
   },
   "images/megaStructure/dark/CelestialProcessingCoreActive.png": {
     "size": 7298,
-    "mtime": 1747430142
+    "mtime": 1747638263
   },
   "images/megaStructure/dark/CelestialProcessingCoreNotActive.png": {
     "size": 7364,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/dark/DysonSphereActive.png": {
     "size": 6829,
-    "mtime": 1747430142
+    "mtime": 1747638263
   },
   "images/megaStructure/dark/DysonSphereNotActive.png": {
     "size": 6917,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/dark/ForceField0.png": {
     "size": 14619,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/dark/ForceField1.png": {
     "size": 14176,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/dark/ForceField2.png": {
     "size": 13904,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/dark/ForceField3.png": {
     "size": 13378,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/dark/ForceField4.png": {
     "size": 15709,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/dark/GalacticMemoryArchiveActive.png": {
     "size": 4809,
-    "mtime": 1747430142
+    "mtime": 1747638263
   },
   "images/megaStructure/dark/GalacticMemoryArchiveNotActive.png": {
     "size": 4812,
-    "mtime": 1747410166
+    "mtime": 1747638263
   },
   "images/megaStructure/dark/MiaplacidusActive.png": {
     "size": 21317,
-    "mtime": 1747430142
+    "mtime": 1747638263
   },
   "images/megaStructure/dark/MiaplacidusNotActive.png": {
     "size": 21461,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/dark/PlasmaForgeActive.png": {
     "size": 6368,
-    "mtime": 1747430142
+    "mtime": 1747638263
   },
   "images/megaStructure/dark/PlasmaForgeNotActive.png": {
     "size": 6443,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/frosty/CelestialProcessingCoreActive.png": {
     "size": 7523,
-    "mtime": 1747430046
+    "mtime": 1747638263
   },
   "images/megaStructure/frosty/CelestialProcessingCoreNotActive.png": {
     "size": 7364,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/frosty/DysonSphereActive.png": {
     "size": 8436,
-    "mtime": 1747430046
+    "mtime": 1747638263
   },
   "images/megaStructure/frosty/DysonSphereNotActive.png": {
     "size": 6917,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/frosty/ForceField0.png": {
     "size": 14619,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/frosty/ForceField1.png": {
     "size": 14176,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/frosty/ForceField2.png": {
     "size": 13904,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/frosty/ForceField3.png": {
     "size": 13378,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/frosty/ForceField4.png": {
     "size": 15709,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/frosty/GalacticMemoryArchiveActive.png": {
     "size": 4793,
-    "mtime": 1747430046
+    "mtime": 1747638263
   },
   "images/megaStructure/frosty/GalacticMemoryArchiveNotActive.png": {
     "size": 4812,
-    "mtime": 1747410166
+    "mtime": 1747638263
   },
   "images/megaStructure/frosty/MiaplacidusActive.png": {
     "size": 21885,
-    "mtime": 1747430046
+    "mtime": 1747638263
   },
   "images/megaStructure/frosty/MiaplacidusNotActive.png": {
     "size": 21461,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/frosty/PlasmaForgeActive.png": {
     "size": 7023,
-    "mtime": 1747430046
+    "mtime": 1747638263
   },
   "images/megaStructure/frosty/PlasmaForgeNotActive.png": {
     "size": 6443,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/galaxy/CelestialProcessingCoreActive.png": {
     "size": 7298,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/galaxy/CelestialProcessingCoreNotActive.png": {
     "size": 7364,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/galaxy/DysonSphereActive.png": {
     "size": 6829,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/galaxy/DysonSphereNotActive.png": {
     "size": 6917,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/galaxy/ForceField0.png": {
     "size": 14619,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/galaxy/ForceField1.png": {
     "size": 14176,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/galaxy/ForceField2.png": {
     "size": 13904,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/galaxy/ForceField3.png": {
     "size": 13378,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/galaxy/ForceField4.png": {
     "size": 15709,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/galaxy/GalacticMemoryArchiveActive.png": {
     "size": 4809,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/galaxy/GalacticMemoryArchiveNotActive.png": {
     "size": 4812,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/galaxy/MiaplacidusActive.png": {
     "size": 21317,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/galaxy/MiaplacidusNotActive.png": {
     "size": 21461,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/galaxy/PlasmaForgeActive.png": {
     "size": 6368,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/galaxy/PlasmaForgeNotActive.png": {
     "size": 6443,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/light/CelestialProcessingCoreActive.png": {
     "size": 7523,
-    "mtime": 1747430046
+    "mtime": 1747638263
   },
   "images/megaStructure/light/CelestialProcessingCoreNotActive.png": {
     "size": 7364,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/light/DysonSphereActive.png": {
     "size": 8436,
-    "mtime": 1747430046
+    "mtime": 1747638263
   },
   "images/megaStructure/light/DysonSphereNotActive.png": {
     "size": 6917,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/light/ForceField0.png": {
     "size": 14619,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/light/ForceField1.png": {
     "size": 14176,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/light/ForceField2.png": {
     "size": 13904,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/light/ForceField3.png": {
     "size": 13378,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/light/ForceField4.png": {
     "size": 15709,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/light/GalacticMemoryArchiveActive.png": {
     "size": 4793,
-    "mtime": 1747430046
+    "mtime": 1747638263
   },
   "images/megaStructure/light/GalacticMemoryArchiveNotActive.png": {
     "size": 4812,
-    "mtime": 1747410166
+    "mtime": 1747638263
   },
   "images/megaStructure/light/MiaplacidusActive.png": {
     "size": 21885,
-    "mtime": 1747430046
+    "mtime": 1747638263
   },
   "images/megaStructure/light/MiaplacidusNotActive.png": {
     "size": 21461,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/light/PlasmaForgeActive.png": {
     "size": 7023,
-    "mtime": 1747430046
+    "mtime": 1747638263
   },
   "images/megaStructure/light/PlasmaForgeNotActive.png": {
     "size": 6443,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/misty/CelestialProcessingCoreActive.png": {
     "size": 7523,
-    "mtime": 1747430046
+    "mtime": 1747638263
   },
   "images/megaStructure/misty/CelestialProcessingCoreNotActive.png": {
     "size": 7364,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/misty/DysonSphereActive.png": {
     "size": 8436,
-    "mtime": 1747430046
+    "mtime": 1747638263
   },
   "images/megaStructure/misty/DysonSphereNotActive.png": {
     "size": 6917,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/misty/ForceField0.png": {
     "size": 14619,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/misty/ForceField1.png": {
     "size": 14176,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/misty/ForceField2.png": {
     "size": 13904,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/misty/ForceField3.png": {
     "size": 13378,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/misty/ForceField4.png": {
     "size": 15709,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/misty/GalacticMemoryArchiveActive.png": {
     "size": 4793,
-    "mtime": 1747430046
+    "mtime": 1747638263
   },
   "images/megaStructure/misty/GalacticMemoryArchiveNotActive.png": {
     "size": 4812,
-    "mtime": 1747410166
+    "mtime": 1747638263
   },
   "images/megaStructure/misty/MiaplacidusActive.png": {
     "size": 21885,
-    "mtime": 1747430046
+    "mtime": 1747638263
   },
   "images/megaStructure/misty/MiaplacidusNotActive.png": {
     "size": 21461,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/misty/PlasmaForgeActive.png": {
     "size": 7023,
-    "mtime": 1747430046
+    "mtime": 1747638263
   },
   "images/megaStructure/misty/PlasmaForgeNotActive.png": {
     "size": 6443,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/space/CelestialProcessingCoreActive.png": {
     "size": 7298,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/space/CelestialProcessingCoreNotActive.png": {
     "size": 7364,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/space/DysonSphereActive.png": {
     "size": 6829,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/space/DysonSphereNotActive.png": {
     "size": 6917,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/space/ForceField0.png": {
     "size": 14619,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/space/ForceField1.png": {
     "size": 14176,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/space/ForceField2.png": {
     "size": 13904,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/space/ForceField3.png": {
     "size": 13378,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/space/ForceField4.png": {
     "size": 15709,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/space/GalacticMemoryArchiveActive.png": {
     "size": 4809,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/space/GalacticMemoryArchiveNotActive.png": {
     "size": 4812,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/space/MiaplacidusActive.png": {
     "size": 21317,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/space/MiaplacidusNotActive.png": {
     "size": 21461,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/space/PlasmaForgeActive.png": {
     "size": 6368,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/space/PlasmaForgeNotActive.png": {
     "size": 6443,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/summer/CelestialProcessingCoreActive.png": {
     "size": 7523,
-    "mtime": 1747430046
+    "mtime": 1747638263
   },
   "images/megaStructure/summer/CelestialProcessingCoreNotActive.png": {
     "size": 7364,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/summer/DysonSphereActive.png": {
     "size": 8436,
-    "mtime": 1747430046
+    "mtime": 1747638263
   },
   "images/megaStructure/summer/DysonSphereNotActive.png": {
     "size": 6917,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/summer/ForceField0.png": {
     "size": 14619,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/summer/ForceField1.png": {
     "size": 14176,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/summer/ForceField2.png": {
     "size": 13904,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/summer/ForceField3.png": {
     "size": 13378,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/summer/ForceField4.png": {
     "size": 15709,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/summer/GalacticMemoryArchiveActive.png": {
     "size": 4793,
-    "mtime": 1747430046
+    "mtime": 1747638263
   },
   "images/megaStructure/summer/GalacticMemoryArchiveNotActive.png": {
     "size": 4812,
-    "mtime": 1747410166
+    "mtime": 1747638263
   },
   "images/megaStructure/summer/MiaplacidusActive.png": {
     "size": 21885,
-    "mtime": 1747430046
+    "mtime": 1747638263
   },
   "images/megaStructure/summer/MiaplacidusNotActive.png": {
     "size": 21461,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/summer/PlasmaForgeActive.png": {
     "size": 7023,
-    "mtime": 1747430046
+    "mtime": 1747638263
   },
   "images/megaStructure/summer/PlasmaForgeNotActive.png": {
     "size": 6443,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/supernova/CelestialProcessingCoreActive.png": {
     "size": 7298,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/supernova/CelestialProcessingCoreNotActive.png": {
     "size": 7364,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/supernova/DysonSphereActive.png": {
     "size": 6829,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/supernova/DysonSphereNotActive.png": {
     "size": 6917,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/supernova/ForceField0.png": {
     "size": 14619,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/supernova/ForceField1.png": {
     "size": 14176,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/supernova/ForceField2.png": {
     "size": 13904,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/supernova/ForceField3.png": {
     "size": 13378,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/supernova/ForceField4.png": {
     "size": 15709,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/supernova/GalacticMemoryArchiveActive.png": {
     "size": 4809,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/supernova/GalacticMemoryArchiveNotActive.png": {
     "size": 4812,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/supernova/MiaplacidusActive.png": {
     "size": 21317,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/supernova/MiaplacidusNotActive.png": {
     "size": 21461,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/supernova/PlasmaForgeActive.png": {
     "size": 6368,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/supernova/PlasmaForgeNotActive.png": {
     "size": 6443,
-    "mtime": 1771006438
+    "mtime": 1747638263
   },
   "images/megaStructure/terminal/CelestialProcessingCoreActive.png": {
     "size": 7481,
-    "mtime": 1747429908
+    "mtime": 1747638263
   },
   "images/megaStructure/terminal/CelestialProcessingCoreNotActive.png": {
     "size": 7364,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/terminal/DysonSphereActive.png": {
     "size": 7479,
-    "mtime": 1747429908
+    "mtime": 1747638263
   },
   "images/megaStructure/terminal/DysonSphereNotActive.png": {
     "size": 6917,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/terminal/ForceField0.png": {
     "size": 14619,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/terminal/ForceField1.png": {
     "size": 14176,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/terminal/ForceField2.png": {
     "size": 13904,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/terminal/ForceField3.png": {
     "size": 13378,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/terminal/ForceField4.png": {
     "size": 15709,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/terminal/GalacticMemoryArchiveActive.png": {
     "size": 4782,
-    "mtime": 1747429908
+    "mtime": 1747638263
   },
   "images/megaStructure/terminal/GalacticMemoryArchiveNotActive.png": {
     "size": 4812,
-    "mtime": 1747410166
+    "mtime": 1747638263
   },
   "images/megaStructure/terminal/MiaplacidusActive.png": {
     "size": 21411,
-    "mtime": 1747429908
+    "mtime": 1747638263
   },
   "images/megaStructure/terminal/MiaplacidusNotActive.png": {
     "size": 21461,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/megaStructure/terminal/PlasmaForgeActive.png": {
     "size": 6716,
-    "mtime": 1747429908
+    "mtime": 1747638263
   },
   "images/megaStructure/terminal/PlasmaForgeNotActive.png": {
     "size": 6443,
-    "mtime": 1747410165
+    "mtime": 1747638263
   },
   "images/mouse/defaultDark.png": {
     "size": 44691,
-    "mtime": 1767692843
+    "mtime": 1767779052
   },
   "images/mouse/defaultFrosty.png": {
     "size": 41701,
-    "mtime": 1767708553
+    "mtime": 1767779052
   },
   "images/mouse/defaultGalaxy.png": {
     "size": 44691,
-    "mtime": 1771006438
+    "mtime": 1767779052
   },
   "images/mouse/defaultLight.png": {
     "size": 34640,
-    "mtime": 1767709006
+    "mtime": 1767779052
   },
   "images/mouse/defaultMisty.png": {
     "size": 44691,
-    "mtime": 1767692843
+    "mtime": 1767779052
   },
   "images/mouse/defaultSpace.png": {
     "size": 44691,
-    "mtime": 1771006438
+    "mtime": 1767779052
   },
   "images/mouse/defaultSummer.png": {
     "size": 43070,
-    "mtime": 1767708677
+    "mtime": 1767779052
   },
   "images/mouse/defaultSupernova.png": {
     "size": 44691,
-    "mtime": 1771006438
+    "mtime": 1767779052
   },
   "images/mouse/defaultTerminal.png": {
     "size": 40090,
-    "mtime": 1767708189
+    "mtime": 1767779052
   },
   "images/mouse/dragDark.png": {
     "size": 74312,
-    "mtime": 1767692732
+    "mtime": 1767779052
   },
   "images/mouse/dragFrosty.png": {
     "size": 61469,
-    "mtime": 1767708465
+    "mtime": 1767779052
   },
   "images/mouse/dragGalaxy.png": {
     "size": 74312,
-    "mtime": 1771006438
+    "mtime": 1767779052
   },
   "images/mouse/dragLight.png": {
     "size": 37562,
-    "mtime": 1767708978
+    "mtime": 1767779052
   },
   "images/mouse/dragMisty.png": {
     "size": 74312,
-    "mtime": 1767692732
+    "mtime": 1767779052
   },
   "images/mouse/dragSpace.png": {
     "size": 74312,
-    "mtime": 1771006438
+    "mtime": 1767779052
   },
   "images/mouse/dragSummer.png": {
     "size": 53524,
-    "mtime": 1767708704
+    "mtime": 1767779052
   },
   "images/mouse/dragSupernova.png": {
     "size": 74312,
-    "mtime": 1771006438
+    "mtime": 1767779052
   },
   "images/mouse/dragTerminal.png": {
     "size": 81246,
-    "mtime": 1767708266
+    "mtime": 1767779052
   },
   "images/mouse/handDark.png": {
     "size": 119327,
-    "mtime": 1767692761
+    "mtime": 1767779052
   },
   "images/mouse/handFrosty.png": {
     "size": 84200,
-    "mtime": 1767708497
+    "mtime": 1767779052
   },
   "images/mouse/handGalaxy.png": {
     "size": 119327,
-    "mtime": 1771006438
+    "mtime": 1767779052
   },
   "images/mouse/handLight.png": {
     "size": 50021,
-    "mtime": 1767709042
+    "mtime": 1767779052
   },
   "images/mouse/handMisty.png": {
     "size": 119327,
-    "mtime": 1767692761
+    "mtime": 1767779052
   },
   "images/mouse/handSpace.png": {
     "size": 119327,
-    "mtime": 1771006438
+    "mtime": 1767779052
   },
   "images/mouse/handSummer.png": {
     "size": 80016,
-    "mtime": 1767708731
+    "mtime": 1767779052
   },
   "images/mouse/handSupernova.png": {
     "size": 119327,
-    "mtime": 1771006438
+    "mtime": 1767779052
   },
   "images/mouse/handTerminal.png": {
     "size": 82429,
-    "mtime": 1767708250
+    "mtime": 1767779052
   },
   "resources/20250512_0100_Cosmic Forge Thumbnail_remix_01jv0s676jfwf81axbw0rvn78b.png": {
     "size": 1984790,
-    "mtime": 1769372833
+    "mtime": 1769167449
   },
   "resources/achievementsImageTray.psd": {
     "size": 1248379,
-    "mtime": 1769001968
+    "mtime": 1768985908
   },
   "resources/graph": {
     "size": 3432,
-    "mtime": 1741121636
+    "mtime": 1744274134
   },
   "resources/graph.png": {
     "size": 86827,
-    "mtime": 1741121636
+    "mtime": 1744274134
   },
   "resources/megastructures.psd": {
     "size": 679014,
-    "mtime": 1747406313
+    "mtime": 1747397916
   },
   "resources/thumbNailCosmicForge.png": {
     "size": 18969,
-    "mtime": 1743099213
+    "mtime": 1744274134
   },
   "resources/thumbNailCosmicForge.psd": {
     "size": 513521,
-    "mtime": 1743099213
+    "mtime": 1744274134
   },
   "resources/thumbNailCosmicForgeLarge.png": {
     "size": 175023,
-    "mtime": 1743715015
+    "mtime": 1744274134
   },
   "resources/thumbNailCosmicForgePortrait.png": {
     "size": 114536,
-    "mtime": 1743715015
+    "mtime": 1744274134
   },
   "resources/thumbNailCosmicSquare.png": {
     "size": 84328,
-    "mtime": 1743715015
+    "mtime": 1744274134
   },
   "resources/unlockData.json": {
     "size": 1377,
-    "mtime": 1741121636
+    "mtime": 1744274134
   },
   "sounds/asteroidScan.mp3": {
     "size": 61570,
-    "mtime": 1741121636
+    "mtime": 1744274134
   },
   "sounds/bgAmbience.mp3": {
     "size": 2400478,
-    "mtime": 1741121636
+    "mtime": 1744274134
   },
   "sounds/blackHoleActivated.mp3": {
     "size": 200142,
-    "mtime": 1769799725
+    "mtime": 1769775995
   },
   "sounds/boostAntimatter.mp3": {
     "size": 11853,
-    "mtime": 1769799725
+    "mtime": 1769778252
   },
   "sounds/buildLaunchPad.mp3": {
     "size": 62465,
-    "mtime": 1741121636
+    "mtime": 1744274134
   },
   "sounds/buildTelescope.mp3": {
     "size": 51335,
-    "mtime": 1741121636
+    "mtime": 1744274134
   },
   "sounds/clickButton.mp3": {
     "size": 2313,
-    "mtime": 1769799725
+    "mtime": 1769778135
   },
   "sounds/clickSwitch.mp3": {
     "size": 6366,
-    "mtime": 1741121636
+    "mtime": 1744274134
   },
   "sounds/eruptionLoop.mp3": {
     "size": 2040480,
-    "mtime": 1741121636
+    "mtime": 1744274134
   },
   "sounds/eventAlarm.mp3": {
     "size": 26713,
-    "mtime": 1769799725
+    "mtime": 1769778251
   },
   "sounds/forcefieldTakedown.mp3": {
     "size": 70798,
-    "mtime": 1769799725
+    "mtime": 1769778049
   },
   "sounds/forcefieldTakedownFinal.mp3": {
     "size": 117606,
-    "mtime": 1769799725
+    "mtime": 1769777787
   },
   "sounds/fuelRocket.mp3": {
     "size": 63656,
-    "mtime": 1769799725
+    "mtime": 1769778138
   },
   "sounds/goodPrize.mp3": {
     "size": 9340,
-    "mtime": 1741121636
+    "mtime": 1744274134
   },
   "sounds/increaseStorage.mp3": {
     "size": 4786,
-    "mtime": 1741121636
+    "mtime": 1744274134
   },
   "sounds/kaching.mp3": {
     "size": 26607,
-    "mtime": 1769799725
+    "mtime": 1769775626
   },
   "sounds/laserGun1.mp3": {
     "size": 5616,
-    "mtime": 1769799725
+    "mtime": 1769773753
   },
   "sounds/laserGun2.mp3": {
     "size": 6768,
-    "mtime": 1769799725
+    "mtime": 1769773802
   },
   "sounds/megastructureCaptured.mp3": {
     "size": 186185,
-    "mtime": 1769799725
+    "mtime": 1769776387
   },
   "sounds/powerOff.mp3": {
     "size": 38205,
-    "mtime": 1741121636
+    "mtime": 1744274134
   },
   "sounds/powerOn.mp3": {
     "size": 38337,
-    "mtime": 1741121636
+    "mtime": 1744274134
   },
   "sounds/powerTripped.mp3": {
     "size": 22560,
-    "mtime": 1741121636
+    "mtime": 1744274134
   },
   "sounds/rainLoop.mp3": {
     "size": 753024,
-    "mtime": 1741121636
+    "mtime": 1744274134
   },
   "sounds/rocketLand.mp3": {
     "size": 39285,
-    "mtime": 1769799725
+    "mtime": 1769778139
   },
   "sounds/rocketLaunch.mp3": {
     "size": 39021,
-    "mtime": 1769799725
+    "mtime": 1769778136
   },
   "sounds/shipBattleExplode1.mp3": {
     "size": 39936,
-    "mtime": 1769799725
+    "mtime": 1769774620
   },
   "sounds/shipBattleExplode2.mp3": {
     "size": 23167,
-    "mtime": 1769799725
+    "mtime": 1769774679
   },
   "sounds/starShipArrive.mp3": {
     "size": 70995,
-    "mtime": 1769799725
+    "mtime": 1769778707
   },
   "sounds/starShipLaunch.mp3": {
     "size": 82813,
-    "mtime": 1769799725
+    "mtime": 1769778637
   },
   "sounds/starStudy.mp3": {
     "size": 52858,
-    "mtime": 1741121636
+    "mtime": 1744274134
   },
   ".ftp_manifest.json": {
     "size": 86943,
-    "mtime": 1771226242
+    "mtime": 1771227876
   }
 }
