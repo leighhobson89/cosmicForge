@@ -136,6 +136,35 @@ export function drawTab7Content(heading, optionContentElement) {
         );
         
         optionContentElement.appendChild(rebirthRow);
+
+        const galacticMarketLiquidateForAPRow = createOptionRow(
+            'galacticMarketLiquidateForAPRow',
+            null,
+            'Liquidate:',
+            createDropdown('galacticMarketLiquidateDropDown', [
+                { value: 'no', text: 'I DO NOT WANT TO LIQUIDATE' },
+                { value: 'yes', text: 'I WANT TO LIQUIDATE' },
+            ], 'no', (value) => {
+                setGalacticMarketLiquidationAuthorization(value);
+            }),
+            createButton(`LIQUIDATE`, ['option-button', 'red-disabled-text', 'galactic-market-confirm-liquidate-button'], () => {
+                galacticMarketLiquidateForAp(getApLiquidationQuantity());
+            }, null, null, null, null, null, true, null, 'galacticMarketLiquidateForApConfirm'),
+            null,
+            null,
+            null,
+            `AP GAIN: <span id ="galacticMarketApLiquidationQuantity" class="green-ready-text">0</span>`, //updateDescriptionRow('galacticMarketLiquidateForAPRow', 'content2'); when user has used this up
+            '',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            'galacticMarketLiquidateForApConfirm'
+        );
+        optionContentElement.appendChild(galacticMarketLiquidateForAPRow);
     }
 
     if (heading === 'Galactic Market') {
@@ -302,35 +331,6 @@ export function drawTab7Content(heading, optionContentElement) {
             'galacticMarketSellApForCashConfirm'
         );
         optionContentElement.appendChild(galacticMarketSellApForCashRow);
-
-        const galacticMarketLiquidateForAPRow = createOptionRow(
-            'galacticMarketLiquidateForAPRow',
-            null,
-            'Liquidate:',
-            createDropdown('galacticMarketLiquidateDropDown', [
-                { value: 'no', text: 'I DO NOT WANT TO LIQUIDATE' },
-                { value: 'yes', text: 'I WANT TO LIQUIDATE' },
-            ], 'no', (value) => {
-                setGalacticMarketLiquidationAuthorization(value);
-            }),
-            createButton(`LIQUIDATE`, ['option-button', 'red-disabled-text', 'galactic-market-confirm-liquidate-button'], () => {
-                galacticMarketLiquidateForAp(getApLiquidationQuantity());
-            }, null, null, null, null, null, true, null, 'galacticMarketLiquidateForApConfirm'),
-            null,
-            null,
-            null,
-            `AP GAIN: <span id ="galacticMarketApLiquidationQuantity" class="green-ready-text">0</span>`, //updateDescriptionRow('galacticMarketLiquidateForAPRow', 'content2'); when user has used this up
-            '',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            'galacticMarketLiquidateForApConfirm'
-        );
-        optionContentElement.appendChild(galacticMarketLiquidateForAPRow);
     }
 
     if (heading === 'Galactic Casino') {

@@ -7283,6 +7283,8 @@ function galacticMarketChecks() {
         setGalacticCasinoUnlocked(true);
     }
 
+    updateLiquidationButtonState();
+
     if (getCurrentTab()[1].includes('Galactic') && getCurrentOptionPane() === 'galactic market') {
         const galacticMarketOutgoingStockTypeDropDown = document.getElementById('galacticMarketOutgoingStockTypeDropDown');
         const galacticMarketIncomingStockTypeDropDown = document.getElementById('galacticMarketIncomingStockTypeDropDown');
@@ -7292,7 +7294,6 @@ function galacticMarketChecks() {
         const galacticMarketTradeConfirmButton = document.querySelector('.galactic-market-confirm-trade-button');
 
         const galacticMarketConfirmSellApButton = document.querySelector('.galactic-market-confirm-sell-ap-button');
-        const galacticMarketLiquidateForApConfirmButton = document.querySelector('.galactic-market-confirm-liquidate-button');
 
         const setDropdownTextToSelect = (dropdown) => {
             if (!dropdown) return;
@@ -7461,13 +7462,19 @@ function galacticMarketChecks() {
             galacticMarketConfirmSellApButton.classList.add('red-disabled-text');
         }
         
-        if (getGalacticMarketLiquidationAuthorization() === 'yes' && !getLiquidatedThisRun() && getApLiquidationQuantity() > 0) {
-            galacticMarketLiquidateForApConfirmButton.classList.add('green-ready-text');
-            galacticMarketLiquidateForApConfirmButton.classList.remove('red-disabled-text');
-        } else {
-            galacticMarketLiquidateForApConfirmButton.classList.remove('green-ready-text');
-            galacticMarketLiquidateForApConfirmButton.classList.add('red-disabled-text');
-        }
+    }
+}
+
+function updateLiquidationButtonState() {
+    const btn = document.querySelector('.galactic-market-confirm-liquidate-button');
+    if (!btn) return;
+
+    if (getGalacticMarketLiquidationAuthorization() === 'yes' && !getLiquidatedThisRun() && getApLiquidationQuantity() > 0) {
+        btn.classList.add('green-ready-text');
+        btn.classList.remove('red-disabled-text');
+    } else {
+        btn.classList.remove('green-ready-text');
+        btn.classList.add('red-disabled-text');
     }
 }
 
@@ -7511,8 +7518,12 @@ export function calculateLiquidationValue() {
 
     setApLiquidationQuantity(apAmount + apFromPhilosophy);
 
-    if (getCurrentOptionPane() === 'galactic market') {
-        document.getElementById('galacticMarketApLiquidationQuantity').innerHTML = getApLiquidationQuantity();
+    const pane = getCurrentOptionPane();
+    if (pane === 'rebirth') {
+        const el = document.getElementById('galacticMarketApLiquidationQuantity');
+        if (el) {
+            el.innerHTML = getApLiquidationQuantity();
+        }
     }
 }
 
@@ -7711,6 +7722,10 @@ function rebirthChecks() {
         } else {
             document.getElementById('rebirthOption').parentElement.parentElement.classList.add('invisible');
         }
+    }
+
+    if (getCurrentOptionPane() === 'rebirth') {
+        updateLiquidationButtonState();
     }
 
     const [status, winner] = getBattleResolved();
