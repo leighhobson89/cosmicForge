@@ -473,7 +473,7 @@ export function initialiseDescriptions() {
     };
 
     rocketNames = {
-        version: 0.91,
+        version: 0.92,
         rocketDescription: "Build the launch pad to launch built rockets and mine asteroids for Antimatter.",
         [getRocketUserName('rocket1').toLowerCase()]: "Build the launch pad to launch built rockets and mine asteroids for Antimatter.",
         [getRocketUserName('rocket2').toLowerCase()]: "Build the launch pad to launch built rockets and mine asteroids for Antimatter.",

@@ -432,6 +432,38 @@ export function migrateResourceData(saveData, objectType, options = {}) {
 
 
 
+        if (saveData.version < 0.92) {
+
+            if (objectType === 'resourceData') {
+
+                const energyUpgrades = saveData?.buildings?.energy?.upgrades;
+
+                if (energyUpgrades && typeof energyUpgrades === 'object') {
+
+                    if (energyUpgrades.powerPlant2 && typeof energyUpgrades.powerPlant2 === 'object') {
+
+                        energyUpgrades.powerPlant2.price = 1000;
+
+                    }
+
+                    if (energyUpgrades.powerPlant3 && typeof energyUpgrades.powerPlant3 === 'object') {
+
+                        energyUpgrades.powerPlant3.price = 700;
+
+                    }
+
+                }
+
+            }
+
+
+
+            saveData.version = 0.92;
+
+        }
+
+
+
         saveData.version += 0.001;
 
     }
