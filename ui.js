@@ -2863,13 +2863,19 @@ export function createOptionRow(
 
     }
     const label = document.createElement('label');
+    label.classList.add('label-text');
+    labelContainer.appendChild(label);
 
-    if (objectSectionArgument1 === 'autoBuyer') { //to change color of label pass an array [value, class] as labeltext argument to function
+    if (renderNameABs !== null) {
         label.innerText = renderNameABs + ':';
     } else {
         if (Array.isArray(labelText)) {
             labelContainer.classList.add(labelText[1]);
-            label.innerText = labelText[0];
+            if (typeof labelText[0] === 'string' && labelText[0].includes('<')) {
+                label.innerHTML = labelText[0];
+            } else {
+                label.innerText = labelText[0];
+            }
         } else {
             label.innerText = labelText;
         }

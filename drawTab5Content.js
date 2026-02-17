@@ -1,7 +1,7 @@
 import { removeTabAttentionIfNoIndicators, createColoniseOpinionProgressBar, setColoniseOpinionProgressBar, spaceTravelButtonHideAndShowDescription, drawStarConnectionDrawings, createStarDestinationRow, sortStarTable, handleSortStarClick, createTextElement, createOptionRow, createButton, generateStarfield, showNotification, showEnterWarModeModal, setWarUI, removeStarConnectionTooltip } from './ui.js';
 import { sfxPlayer } from './audioManager.js';
 import { getStarNames, getStarTypeByName } from './descriptions.js';
-import { getFactoryStarsArray, getSettledStars, setInFormation, setRedrawBattleDescription, setFleetChangedSinceLastDiplomacy, setDestinationStarScanned, getDestinationStarScanned, getStellarScannerBuilt, getStarShipTravelling, getDestinationStar, getCurrencySymbol, getSortStarMethod, getCurrentStarSystem, STAR_FIELD_SEED, NUMBER_OF_STARS, getStarMapMode, setStarMapMode, getWarMode, replaceBattleUnits, setNeedNewBattleCanvas, setFormationGoal, setBattleResolved, getBelligerentEnemyFlag, setAchievementFlagArray, getStarsWithAncientManuscripts, getStarShipDestinationReminderVisible, getStarVisionDistance, getMiaplacidusMilestoneLevel } from './constantsAndGlobalVars.js';
+import { getFactoryStarsArray, getSettledStars, setInFormation, setRedrawBattleDescription, setFleetChangedSinceLastDiplomacy, setDestinationStarScanned, getDestinationStarScanned, getStellarScannerBuilt, getStarShipTravelling, getDestinationStar, getCurrencySymbol, getSortStarMethod, getCurrentStarSystem, STAR_FIELD_SEED, NUMBER_OF_STARS, getStarMapMode, setStarMapMode, getWarMode, replaceBattleUnits, setNeedNewBattleCanvas, setFormationGoal, setBattleResolved, getBelligerentEnemyFlag, setAchievementFlagArray, getStarsWithAncientManuscripts, getStarShipDestinationReminderVisible, getStarVisionDistance, getMiaplacidusMilestoneLevel, getCurrentTheme } from './constantsAndGlobalVars.js';
 import { getMaxFleetShip, getFleetShips, copyStarDataToDestinationStarField, getResourceDataObject, getStarShipParts, getStarShipPartsNeededInTotalPerModule, getStarSystemDataObject, setStarSystemDataObject } from './resourceDataObject.js';
 import { capitaliseString, capitaliseWordsWithRomanNumerals } from './utilityFunctions.js';
 import { updateDiplomacySituation, calculateModifiedAttitude, increaseAttackAndDefensePower, generateDestinationStarData, gain, getAscendencyPointsWithRepeatableBonus } from './game.js';
@@ -430,18 +430,52 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
         let starsData = getStarSystemDataObject('stars');
         const settledStars = getSettledStars();
         const factoryStarsList = getFactoryStarsArray();
+        const ancientManuscripts = getStarsWithAncientManuscripts?.() || [];
+
+        const normalizedCurrentLower = String(currentStarName || '').toLowerCase();
+        const destinationStarLower = 'destinationstar';
+        const settledLowerToOriginal = new Map(
+            (settledStars || [])
+                .filter(Boolean)
+                .map((name) => [String(name).toLowerCase(), String(name)])
+        );
+
+        Object.entries(Object.fromEntries(settledLowerToOriginal)).forEach(([settledLower, settledOriginal]) => {
+            if (!settledLower) return;
+            if (settledLower === normalizedCurrentLower) return;
+            if (settledLower === destinationStarLower) return;
+            if (!starsData?.[settledLower] && !starsData?.[settledOriginal]) {
+                setStarSystemDataObject(
+                    {
+                        name: settledOriginal,
+                        distance: Number.POSITIVE_INFINITY,
+                        fuel: Number.POSITIVE_INFINITY,
+                        ascendencyPoints: 0,
+                        starType: getStarTypeByName(settledOriginal),
+                        weatherTendency: null,
+                        weather: null,
+                        precipitationType: 'Unknown'
+                    },
+                    'stars',
+                    [settledLower]
+                );
+            }
+        });
+
+        starsData = getStarSystemDataObject('stars');
 
         let starsObject = Object.fromEntries(
             Object.entries(starsData).filter(([starName]) => {
                 if (starName === currentStarName || starName === 'destinationStar') return false;
 
+                const normalizedLower = String(starName || '').toLowerCase();
+                const hasRevealedManuscript = ancientManuscripts.some(
+                    (entry) => Array.isArray(entry) && entry[1] === normalizedLower && entry[3] === true
+                );
+                const isRevealedFactoryStar = factoryStarsList.includes(normalizedLower) && hasRevealedManuscript;
+
                 const isSettled = settledStars.includes(starName);
-                if (!isSettled) return true;
-
-                const factoryStarStatus = getStarSystemDataObject('stars', [starName, 'factoryStar']);
-                const isMegastructure = Boolean(factoryStarStatus && factoryStarStatus !== false) || factoryStarsList.includes(starName);
-
-                return !isMegastructure;
+                return !isSettled || isRevealedFactoryStar || isSettled;
             })
         );
 
@@ -513,13 +547,19 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
 
         let sortedStars = sortStarTable(starsObject, getSortStarMethod());
 
-        Object.entries(sortedStars).forEach(([nameStar, star]) => {
-            const factoryStarStatus = getStarSystemDataObject('stars', [nameStar, 'factoryStar']);
+        const settledStarNameSet = new Set((settledStars || []).map((n) => String(n || '').toLowerCase()));
+        const sortedEntries = Object.entries(sortedStars);
+        const nonSettledEntries = sortedEntries.filter(([nameStar]) => !settledStarNameSet.has(String(nameStar || '').toLowerCase()));
+        const settledEntries = sortedEntries
+            .filter(([nameStar]) => settledStarNameSet.has(String(nameStar || '').toLowerCase()))
+            .sort(([a], [b]) => String(a || '').localeCompare(String(b || '')));
 
-            const isFactoryStar = factoryStarsList.includes(nameStar) &&
-            (!Number.isInteger(Number(factoryStarStatus)) || isNaN(Number(factoryStarStatus)))
-            ? factoryStarStatus
-            : false;
+        [...nonSettledEntries, ...settledEntries].forEach(([nameStar, star]) => {
+            const normalizedLower = String(nameStar || '').toLowerCase();
+            const hasRevealedManuscript = ancientManuscripts.some(
+                (entry) => Array.isArray(entry) && entry[1] === normalizedLower && entry[3] === true
+            );
+            const isRevealedFactoryStar = factoryStarsList.includes(normalizedLower) && hasRevealedManuscript;
 
             const { distance, fuel, ascendencyPoints, name, weatherTendency, weather, precipitationType } = star;
             const displayAscendencyPoints = getAscendencyPointsWithRepeatableBonus(ascendencyPoints);
@@ -537,11 +577,19 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             const hasEnoughFuel = currentAntimatter >= fuel;
             const fuelClass = hasEnoughFuel ? 'green-ready-text' : 'red-disabled-text';
 
+            const isSettled = settledStarNameSet.has(normalizedLower);
+
+            const distanceText = isSettled ? 'Settled' : `${safeDistance.toFixed(2)} ly`;
+            const weatherTextDisplay = isSettled ? ' ' : weatherText;
+            const precipitationText = isSettled ? ' ' : `${safePrecipitationType}`;
+            const fuelText = isSettled ? 'Settled' : `${safeFuel}`;
+            const apText = isSettled ? ' ' : `${displayAscendencyPoints}`;
+
             const starDataCells = document.createElement('div');
             starDataCells.classList.add('star-table-cells');
             starDataCells.append(
                 createTextElement(
-                    `${safeDistance.toFixed(2)} ly`,
+                    distanceText,
                     'starInfoContainerDistance',
                     ['value-star', 'distance-star', fuelClass]
                 ),
@@ -551,37 +599,44 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                     ['value-star', 'type-star']
                 ),
                 createTextElement(
-                    weatherText,
+                    weatherTextDisplay,
                     'starInfoContainerWeatherTendency',
                     ['value-star']
                 ),
                 createTextElement(
-                    `${safePrecipitationType}`,
+                    precipitationText,
                     'starInfoContainerPrecipitationType',
                     ['value-star']
                 ),
                 createTextElement(
-                    `${safeFuel}`,
+                    fuelText,
                     'starInfoContainerFuel',
                     ['value-star', 'fuel-star', 'notation', fuelClass]
                 ),
                 createTextElement(
-                    `${displayAscendencyPoints}`,
+                    apText,
                     'starInfoContainerAscendencyPoints',
                     ['value-star', 'fuel-star', 'notation']
                 )
             );
 
+            const theme = getCurrentTheme?.() || 'terminal';
+            const megaStructureIconHtml = isRevealedFactoryStar
+                ? ` <img src="images/megaStructure/${theme}/DysonSphereActive.png" class="star-data-mega-icon" alt="" />`
+                : '';
+
             const starNameClass = !hasEnoughFuel
                 ? 'red-disabled-text'
-                : isFactoryStar
-                    ? 'factory-star-text'
-                    : safeStarType === 'O'
-                        ? 'o-star-text'
-                        : 'green-ready-text';
+                : isSettled
+                    ? 'settled-star-text'
+                    : isRevealedFactoryStar
+                        ? 'factory-star-text'
+                        : safeStarType === 'O'
+                            ? 'o-star-text'
+                            : 'green-ready-text';
 
             const starNameLabel = [
-                `${capitaliseWordsWithRomanNumerals(nameStar)}:`,
+                `${capitaliseWordsWithRomanNumerals(nameStar)}:${megaStructureIconHtml}`,
                 starNameClass
             ];
 
@@ -609,6 +664,10 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                 'star',
                 [true, '10%', '90%']
             );
+
+            if (isSettled) {
+                starDataRow.style.opacity = '0.5';
+            }
 
             optionContentElement.appendChild(starDataRow);
         });
