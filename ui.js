@@ -12103,6 +12103,19 @@ let preparingRunForStarshipLaunch = false;
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+function setDefaultPhilosophyForRun1IfUnset() {
+    if (getStatRun() !== 1) {
+        return;
+    }
+
+    const current = getPlayerPhilosophy();
+    if (current !== undefined && current !== null && String(current).trim() !== '') {
+        return;
+    }
+
+    setPlayerPhilosophy('voidborn');
+}
+
 async function clickDebugButton(buttonId, delayMs = 100, times = 1) {
     for (let i = 0; i < times; i++) {
         document.getElementById(buttonId)?.click();
@@ -12117,6 +12130,7 @@ prepareRunForStarshipLaunchButton?.addEventListener('click', async () => {
 
     preparingRunForStarshipLaunch = true;
     try {
+        setDefaultPhilosophyForRun1IfUnset();
         await clickDebugButton('give1BButton');
         await clickDebugButton('give1MAllResourcesAndCompounds');
         await clickDebugButton('grantAllTechsButton');
@@ -12305,14 +12319,13 @@ add10AsteroidsButton.addEventListener('click', () => {
 
 const addStarButton = document.getElementById('addStarButton');
 addStarButton.addEventListener('click', () => {
+    setDefaultPhilosophyForRun1IfUnset();
     // for (let i = 0; i < 10; i++) {
         extendStarDataRange(true);
     // }
     showNotification('CHEAT! Discovered Star Data!', 'info', 3000, 'debug');
 });
 
-const debugTimeWarpDurationSelect = document.getElementById('debugTimeWarpDurationSelect');
-const debugTimeWarpMultiplierSelect = document.getElementById('debugTimeWarpMultiplierSelect');
 const debugTimeWarpButton = document.getElementById('debugTimeWarpButton');
 
 if (debugTimeWarpDurationSelect) {
@@ -12374,6 +12387,7 @@ buildLaunchPadScannerAndAllRocketsButton.addEventListener('click', () => {
 
 const gain10000AntimatterButton = document.getElementById('gain10000AntimatterButton');
 gain10000AntimatterButton.addEventListener('click', () => {
+    setDefaultPhilosophyForRun1IfUnset();
     setAntimatterUnlocked(true);
     setResourceDataObject(getResourceDataObject('antimatter', ['quantity']) + 10000, 'antimatter', ['quantity']);
     showNotification('CHEAT! 10000 Antimatter added!', 'info', 3000, 'debug');
