@@ -189,6 +189,10 @@ body {
     color: var(--text-color);
 }
 
+[data-theme="light"] body {
+    background: linear-gradient(180deg, #ffffff 0%, #f6f6f6 100%);
+}
+
 .option-button,
 button.option-button {
     border-radius: var(--ui-radius-sm);
@@ -211,6 +215,16 @@ button.option-button {
     box-shadow: var(--ui-shadow);
 }
 
+[data-theme="light"] .container-item-menu,
+[data-theme="light"] .container-item-content,
+[data-theme="light"] .option-pane-description,
+[data-theme="light"] .text-area-style,
+[data-theme="light"] .casino-spinner,
+[data-theme="light"] .galactic-casino-roulette-wheel {
+    background-color: var(--ui-surface-bg);
+    border-color: var(--ui-surface-border);
+}
+
 .collapsible-header,
 .main-category-header {
     border-radius: var(--ui-radius-sm);
@@ -223,6 +237,15 @@ button.option-button {
 
 .tab.selected {
     box-shadow: var(--ui-shadow-strong);
+}
+
+[data-theme="light"] .tab {
+    background-color: var(--tab-bg-color);
+    border-color: var(--ui-surface-border);
+}
+
+[data-theme="light"] .tab.selected {
+    background-color: var(--tab-selected-bg-color);
 }
 
 .green-ready-text {
@@ -1119,6 +1142,21 @@ button {
     --current-star-border: #ff4500;
     --generation-colors: #66bb6a, #a5d6a7, #dcedc8;
     --consumption-colors: #ef5350, #f48fb1, #f8bbd0;
+
+    --ui-radius: 12px;
+    --ui-radius-sm: 10px;
+    --ui-shadow: 0 10px 30px rgba(0, 0, 0, 0.10);
+    --ui-shadow-strong: 0 14px 38px rgba(0, 0, 0, 0.14);
+    --ui-glow: 0 0 10px rgba(0, 0, 0, 0.10);
+    --ui-glow-strong: 0 0 16px rgba(0, 0, 0, 0.14);
+
+    --ui-surface-border: rgba(0, 0, 0, 0.14);
+    --ui-surface-bg: #ffffff;
+    --ui-surface-bg-2: #f7f7f7;
+
+    --accent-strong: #b8860b;
+    --accent-strong-rgb: 184, 134, 11;
+    --accent-soft: rgba(184, 134, 11, 0.18);
 }
 
 /* Frosty Theme Variables */
@@ -1789,11 +1827,6 @@ body {
     color: var(--stats-all-time-text);
     color: yellow;
     border: 6px solid yellow;
-}
-
-.notification.show {
-    opacity: 1;
-    transform: translateY(0);
 }
 
 .notification-info {
@@ -2481,7 +2514,8 @@ button.red-disabled-text {
 }
 
 .factory-star::after {
-    color: yellow;
+    color: var(--accent-strong, yellow);
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.55);
 }
 
 .o-star::after {
@@ -3409,7 +3443,8 @@ body.debug-window-open {
 }
 
 .factory-star-text {
-    color: yellow;
+    color: var(--accent-strong, yellow);
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.55);
 }
 
 .star-data-mega-icon {
