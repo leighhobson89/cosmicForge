@@ -474,8 +474,41 @@ export function migrateResourceData(saveData, objectType, options = {}) {
 
         }
 
+        if (saveData.version < 0.94) {
 
+                if (!saveData.flags || typeof saveData.flags !== 'object') {
 
+                    saveData.flags = {};
+
+                }
+
+                const alreadyPatched = saveData.flags.blackHoleNerfPatched === true;
+
+                if (!alreadyPatched) {
+
+                    const powerRaw = saveData?.blackHole?.power;
+                    const power = Number(powerRaw);
+
+                    if (Number.isFinite(power) && power > 50) {
+
+                        const delta = power - 50;
+                        const oldPurchasesAbove = Math.round(delta / 2);
+                        const newPower = 50 + (oldPurchasesAbove * 0.5);
+                        const roundedNewPower = Math.round(newPower * 2) / 2;
+
+                        if (saveData && saveData.blackHole && typeof saveData.blackHole === 'object') {
+                            saveData.blackHole.power = roundedNewPower;
+                        }
+
+                    }
+
+                    saveData.flags.blackHoleNerfPatched = true;
+
+                }
+
+            saveData.version = 0.94;
+
+        }
         saveData.version += 0.001;
 
     }

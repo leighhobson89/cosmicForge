@@ -12225,7 +12225,7 @@ give100Button.addEventListener('click', () => {
 
 const give1MResearchButton = document.getElementById('give1MResearch');
 give1MResearchButton.addEventListener('click', () => {
-    setResourceDataObject(1000000, 'research', ['quantity']);
+    setResourceDataObject(getResourceDataObject('research', ['quantity']) + 1000000, 'research', ['quantity']);
     
     showNotification('CHEAT! 1M research points added!', 'info', 3000, 'debug');
     console.log('1M storage capacity granted to all resources and compounds!');

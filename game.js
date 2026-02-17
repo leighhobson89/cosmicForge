@@ -2815,7 +2815,9 @@ function blackHoleUIChecks() {
     if (secondaryButton2) {
         const price = getBlackHolePowerPrice();
         const currentPower = getBlackHolePower();
-        const nextPower = currentPower + getBlackHolePowerUpgradeIncrement();
+        const baseIncrement = getBlackHolePowerUpgradeIncrement();
+        const increment = Number(currentPower) >= 50 ? 0.5 : baseIncrement;
+        const nextPower = Number(currentPower) + Number(increment);
         secondaryButton2.textContent = `Power\nx${currentPower} -> x${nextPower}\n${formatNumber(price)} Research Points`;
         const canAfford = currentResearch >= price;
         setButtonState(secondaryButton2, { enabled: canAfford, ready: canAfford });

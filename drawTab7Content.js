@@ -1671,7 +1671,11 @@ export function drawTab7Content(heading, optionContentElement) {
 
             setResourceDataObject(currentResearch - price, 'research', ['quantity']);
             setBlackHolePowerPrice(Math.ceil(price * getGameCostMultiplier()));
-            setBlackHolePower(getBlackHolePower() + getBlackHolePowerUpgradeIncrement());
+
+            const currentPower = Number(getBlackHolePower());
+            const baseIncrement = Number(getBlackHolePowerUpgradeIncrement());
+            const increment = currentPower >= 50 ? 0.5 : baseIncrement;
+            setBlackHolePower(currentPower + increment);
         });
         const blackHoleButton3 = createButton('Duration', ['id_blackHoleButton3', 'option-button', 'wide-option-button'], () => {
             if (!getBlackHoleResearchDone()) {

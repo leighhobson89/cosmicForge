@@ -28,7 +28,7 @@ let saveData = null;
 //CONSTANTS
 export const HOMESTAR = 'miaplacidus';
 export const MINIMUM_GAME_VERSION_FOR_SAVES = 0.80;
-export const GAME_VERSION_FOR_SAVES = 0.93;
+export const GAME_VERSION_FOR_SAVES = 0.94;
 export const deferredActions = [];
 
 //NOTIFICATIONS
@@ -217,6 +217,7 @@ let feedbackGiven = null;
 let gameStartTimeStamp = null;
 let runStartTimeStamp = null;
 let gameActiveCountTime = [0, 0];
+let blackHoleNerfPatched = false;
 let rocketUserName = {rocket1: 'Rocket 1', rocket2: 'Rocket 2', rocket3: 'Rocket 3', rocket4: 'Rocket 4'};
 let asteroidArray = [];
 let alreadySeenNewsTickerArray = [];
@@ -1662,6 +1663,7 @@ export function captureGameStatusForSaving(type) {
         notificationsToggle: notificationsToggle,
         customPointerEnabled: customPointerEnabled,
         mouseParticleTrailEnabled: mouseParticleTrailEnabled,
+        blackHoleNerfPatched: blackHoleNerfPatched,
         techRenderChange: techRenderChange,
         suppressUiClickSfx: suppressUiClickSfx,
         losingEnergy: losingEnergy,
@@ -1993,6 +1995,7 @@ export function restoreGameStatus(gameState, type) {
             nonExhaustiveResources = gameState.flags.nonExhaustiveResources ?? (ascendencyBuffs?.nonExhaustiveResources?.boughtYet > 0) ?? false;
             miaplacidusEndgameStoryShown = gameState.flags.miaplacidusEndgameStoryShown ?? false;
             galacticCasinoUnlocked = gameState.flags.galacticCasinoUnlocked ?? false;
+            blackHoleNerfPatched = gameState.flags.blackHoleNerfPatched ?? false;
 
             selectTheme(getCurrentTheme());
             applyCustomPointerSetting();
@@ -3339,6 +3342,14 @@ export function getCurrentGameVersion() {
 
 export function getMinimumVersion() {
     return MINIMUM_GAME_VERSION_FOR_SAVES;
+}
+
+export function getBlackHoleNerfPatched() {
+    return blackHoleNerfPatched;
+}
+
+export function setBlackHoleNerfPatched(value) {
+    blackHoleNerfPatched = !!value;
 }
 
 export function getBaseSearchAsteroidTimerDuration() {
