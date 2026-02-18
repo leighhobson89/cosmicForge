@@ -689,8 +689,12 @@ function easeInQuad(t) {
     return t * t;
 }
 
+function easeOutQuad(t) {
+    return 1 - (1 - t) * (1 - t);
+}
+
 function spinEase(t) {
-    const a = 0.2;
+    const a = 0.6;
     if (t <= 0) return 0;
     if (t >= 1) return 1;
     if (t < a) {
@@ -699,6 +703,18 @@ function spinEase(t) {
     }
     const p = (t - a) / (1 - a);
     return a + (1 - a) * easeOutCubic(p);
+}
+
+function spinEaseNumeric(t) {
+    const a = 0.85;
+    if (t <= 0) return 0;
+    if (t >= 1) return 1;
+    if (t < a) {
+        const p = t / a;
+        return a * easeInQuad(p);
+    }
+    const p = (t - a) / (1 - a);
+    return a + (1 - a) * easeOutQuad(p);
 }
 
 export function spinDoubleOrNothing(spinnerId, durationMs = 5000) {
@@ -769,20 +785,144 @@ export function spinDoubleOrNothing(spinnerId, durationMs = 5000) {
                 requestAnimationFrame(tick);
             } else {
                 track.style.willChange = '';
-
                 track.style.transform = `translateY(${Math.round(endOffset)}px)`;
+                resolve(outcome);
+            }
+        };
+
+        requestAnimationFrame(tick);
+    });
+}
+
+export function spinNumericSpinner(spinnerId, targetValue, { durationMs = 5000, minLoops = 4 } = {}) {
+    const spinnerEl = document.getElementById(spinnerId);
+    if (!spinnerEl) return Promise.resolve(String(targetValue ?? '0'));
+
+    const track = spinnerEl.querySelector('.casino-spinner-track');
+    if (!track) return Promise.resolve(String(targetValue ?? '0'));
+
+    const items = Array.from(track.querySelectorAll('.casino-spinner-item'));
+    if (items.length === 0) return Promise.resolve(String(targetValue ?? '0'));
+
+    const viewport = spinnerEl.querySelector('.casino-spinner-viewport');
+    const desired = String(targetValue ?? '0');
+
+    const matches = items
+        .map((el, idx) => ({ el, idx }))
+        .filter(({ el }) => String(el?.dataset?.value ?? '') === desired);
+
+    if (matches.length === 0) {
+        return Promise.resolve(desired);
+    }
+
+    let itemHeight = items[0].offsetHeight;
+    if (!itemHeight && matches[0]?.el) itemHeight = matches[0].el.offsetHeight;
+    if (!itemHeight) itemHeight = viewport?.offsetHeight || 0;
+    if (!itemHeight) return Promise.resolve(desired);
+
+    const viewportHeight = viewport?.offsetHeight || itemHeight;
+    const centerOffset = (viewportHeight - itemHeight) / 2;
+
+    const uniqueValues = Array.from(new Set(items.map((el) => String(el?.dataset?.value ?? '')))).filter((v) => v !== '');
+    const uniqueCount = Math.max(1, uniqueValues.length);
+    const loopDistance = uniqueCount * itemHeight;
+    const loops = Number.isFinite(Number(minLoops)) ? Math.max(0, Math.floor(Number(minLoops))) : 4;
+
+    const normaliseOffset = (raw) => {
+        if (!Number.isFinite(raw)) return 0;
+        if (!loopDistance) return raw;
+        const m = ((raw % loopDistance) + loopDistance) % loopDistance;
+        return -m;
+    };
+
+    const storedRaw = Number(spinnerEl.getAttribute('data-spin-offset') ?? NaN);
+    const initialOffset = Number.isFinite(storedRaw) ? storedRaw : (() => {
+        const currentTransform = track.style.transform || '';
+        const currentMatch = currentTransform.match(/translateY\(([-0-9.]+)px\)/);
+        return currentMatch ? Number(currentMatch[1]) : 0;
+    })();
+
+    const startOffset = normaliseOffset(initialOffset);
+    track.style.transform = `translateY(${startOffset}px)`;
+
+    const midIndex = Math.floor(items.length / 2);
+    const targetIndexFromMiddle = matches.reduce((best, cur) => {
+        if (!best) return cur;
+        const dBest = Math.abs(best.idx - midIndex);
+        const dCur = Math.abs(cur.idx - midIndex);
+        return dCur < dBest ? cur : best;
+    }, null)?.idx;
+
+    const baseIndex = Number.isFinite(targetIndexFromMiddle) ? targetIndexFromMiddle : matches[0].idx;
+    const baseEl = items[Number.isFinite(baseIndex) ? baseIndex : 0];
+
+    const baseTop = baseEl ? baseEl.offsetTop : ((Number.isFinite(baseIndex) ? baseIndex : 0) * itemHeight);
+    const baseEndOffset = centerOffset - baseTop;
+
+    const desiredEndOffset = baseEndOffset - (Math.max(4, loops) * loopDistance);
+
+    const startTime = performance.now();
+    track.style.willChange = 'transform';
+
+    return new Promise((resolve) => {
+        const tick = (now) => {
+            const t = Math.min(1, (now - startTime) / durationMs);
+            const eased = spinEaseNumeric(t);
+            const current = startOffset + (desiredEndOffset - startOffset) * eased;
+            track.style.transform = `translateY(${current}px)`;
+
+            if (t < 1) {
+                requestAnimationFrame(tick);
+            } else {
+                track.style.willChange = '';
+                track.style.transform = `translateY(${Math.round(desiredEndOffset)}px)`;
+
+                const desiredItem = track.querySelector(`.casino-spinner-item[data-value="${CSS.escape(desired)}"]`);
+                if (viewport && desiredItem) {
+                    const spinnerRect = spinnerEl.getBoundingClientRect();
+                    const viewportRect = viewport.getBoundingClientRect();
+                    const itemRect = desiredItem.getBoundingClientRect();
+                    const relativeTop = itemRect.top - spinnerRect.top;
+                    const currentTransform = track.style.transform || '';
+                    const m = currentTransform.match(/translateY\(([-0-9.]+)px\)/);
+                    const currentOffset = m ? Number(m[1]) : desiredEndOffset;
+                    const targetOffset = currentOffset + ((centerOffset + viewportRect.top - spinnerRect.top) - relativeTop);
+
+                    const settleFrom = currentOffset;
+                    const settleTo = targetOffset;
+                    const settleStart = performance.now();
+                    const settleMs = 180;
+                    track.style.willChange = 'transform';
+
+                    const settleTick = (now2) => {
+                        const tt = Math.min(1, (now2 - settleStart) / settleMs);
+                        const eased2 = easeOutQuad(tt);
+                        const cur2 = settleFrom + (settleTo - settleFrom) * eased2;
+                        track.style.transform = `translateY(${cur2}px)`;
+                        if (tt < 1) {
+                            requestAnimationFrame(settleTick);
+                        } else {
+                            track.style.willChange = '';
+                            track.style.transform = `translateY(${Math.round(settleTo)}px)`;
+                            spinnerEl.setAttribute('data-spin-offset', String(settleTo));
+                        }
+                    };
+                    requestAnimationFrame(settleTick);
+                } else {
+                    spinnerEl.setAttribute('data-spin-offset', String(desiredEndOffset));
+                }
 
                 if (viewport && typeof viewport.animate === 'function') {
                     viewport.animate(
                         [
                             { transform: 'scale(1)' },
-                            { transform: 'scale(1.18)' },
+                            { transform: 'scale(1.12)' },
                             { transform: 'scale(1)' }
                         ],
-                        { duration: 300, easing: 'ease-out' }
+                        { duration: 220, easing: 'ease-out' }
                     );
                 }
-                resolve(outcome);
+                resolve(desired);
             }
         };
 

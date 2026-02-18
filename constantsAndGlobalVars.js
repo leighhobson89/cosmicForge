@@ -62,6 +62,11 @@ export const ENEMY_FLEET_SPEED_LAND = 2;
 export const ENEMY_FLEET_SPEED_SEA = 1;
 export const PRICE_CASINO_GAME_2 = 1;
 export const PRICE_CASINO_GAME_3 = 5;
+export const VOID_SEER_PRIZE_CATALOG = {
+    prize1: { costCp: 7, maxReel: 6, label: 'O Type Star Clue - 7CP - Odds: 6/1' },
+    prize2: { costCp: 10, maxReel: 8, label: 'Ancient Manuscript Clue - 10CP - Odds: 8/1' },
+    prize3: { costCp: 15, maxReel: 12, label: 'Pillage Antimatter - 15CP - Odds: 12/1' }
+};
 export const AP_BASE_SELL_PRICE = 100000;
 export const AP_BASE_BUY_PRICE = 1000000;
 export const CASH_LIQUIDATION_MODIFIER = 10;
@@ -4119,6 +4124,10 @@ export function getPriceCasinoGame2() {
 
 export function getPriceCasinoGame3() {
     return PRICE_CASINO_GAME_3;
+}
+
+export function getVoidSeerPrizeCatalog() {
+    return VOID_SEER_PRIZE_CATALOG;
 }
 
 export function setGalacticMarketIncomingQuantity(value) {

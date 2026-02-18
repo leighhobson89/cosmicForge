@@ -1,4 +1,5 @@
 import {
+    getVoidSeerPrizeCatalog,
     getGalacticCasinoUnlocked,
     getGalacticCasinoPurchaseItem,
     setGalacticCasinoPurchaseItem,
@@ -407,6 +408,7 @@ import {
 } from "./resourceDataObject.js";
 
 import { autoGrantAchievementsOnRebirth, checkForAchievements, resetAchievementsOnRebirth } from "./achievements.js";
+import { getStarNames } from "./descriptions.js";
 
 import { 
     updateContent,
@@ -761,6 +763,114 @@ function galacticCasinoChecks() {
             const canSpinWheel = cpQuantity >= 1 && !spinning && !dropdownActive;
             setButtonState(spinWheelButton, { enabled: canSpinWheel, ready: canSpinWheel });
         }
+    }
+
+    const voidSeerContainer = document.getElementById('galacticCasinoGame4Container');
+    const voidSeerSpinButton = document.getElementById('galacticCasinoGame4SpinButton')
+        || document.getElementById('id_galacticCasinoGame4SpinButton')
+        || document.getElementsByClassName('galacticCasinoGame4SpinButton')?.[0];
+    const voidSeerPrizeDropdown = document.getElementById('galacticCasinoGame4PrizeDropdown');
+    if (voidSeerContainer && voidSeerSpinButton) {
+        const spinning = String(voidSeerContainer.getAttribute('data-spinning') || 'false') === 'true';
+        const selection = String(voidSeerContainer.getAttribute('data-prize-selection') || 'select').toLowerCase();
+        const catalog = getVoidSeerPrizeCatalog?.() || {};
+
+        if (voidSeerPrizeDropdown) {
+            const settledStarSet = new Set((getSettledStars?.() || []).map((name) => String(name || '').toLowerCase()));
+            const starshipDestination = String(getDestinationStar?.() || '').toLowerCase();
+            const starshipStatus = getStarShipStatus?.() || [];
+            const starshipState = String(starshipStatus?.[0] || '').toLowerCase();
+
+            const isStarshipOccupyingStar = (targetLower) => {
+                if (!targetLower) return false;
+                if (!starshipDestination) return false;
+                if (targetLower !== starshipDestination) return false;
+                return starshipState === 'travelling' || starshipState === 'orbiting';
+            };
+
+            const manuscriptEntries = getStarsWithAncientManuscripts?.() || [];
+            const hasAvailableManuscriptTarget = (manuscriptEntries || []).some((entry) => {
+                if (!Array.isArray(entry)) return false;
+                const rawTargetStar = entry?.[0] ?? entry?.[1] ?? '';
+                const targetStar = String(rawTargetStar || '').toLowerCase();
+                if (!targetStar) return false;
+                if (settledStarSet.has(targetStar)) return false;
+                if (isStarshipOccupyingStar(targetStar)) return false;
+                return true;
+            });
+
+            const starNames = getStarNames?.() || [];
+            const hasUnsettledOTypeStar = (starNames || []).some((name) => {
+                if (!name) return false;
+                const lower = String(name).toLowerCase();
+                if (settledStarSet.has(lower)) return false;
+                if (isStarshipOccupyingStar(lower)) return false;
+                return getStarTypeByName?.(name) === 'O';
+            });
+
+            const hasStudiedAllOTypeStars = (() => {
+                const oTypeStars = (starNames || []).filter((name) => name && getStarTypeByName?.(name) === 'O');
+                if (oTypeStars.length === 0) return false;
+
+                const studiedDistance = getStarVisionDistance?.() ?? 0;
+
+                const dummyContainer = document.createElement('div');
+                const { starDistanceData } = generateStarfield(
+                    dummyContainer,
+                    NUMBER_OF_STARS,
+                    STAR_FIELD_SEED,
+                    null,
+                    true,
+                    getCurrentStarSystem(),
+                    false
+                ) || { starDistanceData: {} };
+
+                return oTypeStars.every((starName) => {
+                    const key = capitaliseWordsWithRomanNumerals?.(starName);
+                    const distance = starDistanceData?.[key];
+                    return typeof distance === 'number' && distance <= studiedDistance;
+                });
+            })();
+
+            const options = voidSeerPrizeDropdown.querySelectorAll('.dropdown-option');
+            options.forEach((opt) => {
+                const value = String(opt.getAttribute('data-value') || '').toLowerCase();
+                const cost = catalog?.[value]?.costCp ?? null;
+                let enabled = value === 'select' || (cost !== null && cpQuantity >= cost);
+
+                if (enabled) {
+                    if (value === 'prize1') {
+                        enabled = hasUnsettledOTypeStar && !hasStudiedAllOTypeStars;
+                    } else if (value === 'prize2') {
+                        enabled = hasAvailableManuscriptTarget;
+                    } else if (value === 'prize3') {
+                        enabled = true;
+                    }
+                }
+
+                opt.classList.toggle('red-disabled-text', !enabled);
+                opt.style.pointerEvents = enabled ? 'auto' : 'none';
+            });
+
+            const selectedOption = voidSeerPrizeDropdown.querySelector(`.dropdown-option[data-value="${selection}"]`);
+            const selectedDisabled = !!selectedOption?.classList?.contains('red-disabled-text');
+            if (selection !== 'select' && selectedDisabled) {
+                voidSeerContainer.setAttribute('data-prize-selection', 'select');
+                const dropdownTextEl = voidSeerPrizeDropdown.querySelector('.dropdown-text');
+                if (dropdownTextEl) {
+                    dropdownTextEl.textContent = 'Select Prize';
+                }
+            }
+        }
+
+        const cost = catalog?.[selection]?.costCp ?? null;
+        const canSpin = !spinning && selection !== 'select' && cost !== null && cpQuantity >= cost;
+
+        setButtonState(voidSeerSpinButton, {
+            enabled: canSpin,
+            ready: canSpin,
+            applyPointerEvents: true
+        });
     }
 
     const purchaseDropdown = document.getElementById('galacticCasinoPurchaseItemDropDown');

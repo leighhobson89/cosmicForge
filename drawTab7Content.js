@@ -1,5 +1,9 @@
 import { removeTabAttentionIfNoIndicators, createOptionRow, createButton, createDropdown, createTextElement, createTextFieldArea, createSpinningDropdown, callPopupModal, showHideModal, createMegaStructureDiagram, createMegaStructureTable, createBlackHole, setButtonState, showNotification } from './ui.js';
 import {
+    getStarsWithAncientManuscripts,
+    getDestinationStar,
+    getSettledStars,
+    getStarShipStatus,
     setApLiquidationQuantity,
     setGalacticMarketIncomingQuantity,
     setHasClickedOutgoingOptionGalacticMarket,
@@ -36,10 +40,11 @@ import {
     getCurrentTheme,
     getPlayerPhilosophy,
     getUnlockedResourcesArray,
-    getUnlockedCompoundsArray
+    getUnlockedCompoundsArray,
+    getVoidSeerPrizeCatalog,
 } from './constantsAndGlobalVars.js';
 import { purchaseBuff, buyCasinoPoints, galacticMarketLiquidateForAp, galacticMarketSellApForCash, galacticMarketTrade, rebirth, startBlackHoleChargeTimer, timeWarp } from './game.js';
-import { claimCasinoSpecialPrizeByKey } from './casino.js';
+import { claimCasinoSpecialPrizeByKey, spinNumericSpinner } from './casino.js';
 import { trackAnalyticsEvent } from './analytics.js';
 import {
     getAscendencyBuffDataObject,
@@ -61,13 +66,13 @@ import {
     getBlackHoleRechargePrice,
     setBlackHoleRechargePrice,
     getBlackHoleRechargeMultiplier,
-    setBlackHoleRechargeMultiplier
+    setBlackHoleRechargeMultiplier,
 } from './resourceDataObject.js';
 
 import { playDoubleOrNothing, playWheelOfFortune, claimWheelSpecialPrize } from './casino.js';
 import { sfxPlayer } from './audioManager.js';
-import { capitaliseString } from './utilityFunctions.js';
-import { modalRebirthText, modalRebirthHeader } from './descriptions.js';
+import { capitaliseString, capitaliseWordsWithRomanNumerals } from './utilityFunctions.js';
+import { modalRebirthText, modalRebirthHeader, getStarNames, getStarTypeByName, getNewsTickerContent } from './descriptions.js';
 import { timerManagerDelta } from './timerManagerDelta.js';
 
 export function drawTab7Content(heading, optionContentElement) {
@@ -567,6 +572,283 @@ export function drawTab7Content(heading, optionContentElement) {
             null,
             null,
             'galacticCasinoGame2',
+            [true, '20%', '80%'],
+            ['no-left-margin', 'galactic-casino-input-container'],
+            false
+        );
+
+        const voidSeerPrizeCatalog = getVoidSeerPrizeCatalog?.() || {};
+
+        const game4Container = document.createElement('div');
+        game4Container.id = 'galacticCasinoGame4Container';
+        game4Container.classList.add('galactic-casino-wheel-stack');
+        game4Container.setAttribute('data-spinning', 'false');
+
+        const game4SpinnerContainer = document.createElement('div');
+        game4SpinnerContainer.id = 'galacticCasinoGame4SpinnerContainer';
+        game4SpinnerContainer.style.display = 'flex';
+        game4SpinnerContainer.style.flexDirection = 'column';
+        game4SpinnerContainer.style.gap = '6px';
+
+        const game4SpinnerRow1 = document.createElement('div');
+        game4SpinnerRow1.id = 'galacticCasinoGame4SpinnerRow1';
+        game4SpinnerRow1.style.display = 'flex';
+        game4SpinnerRow1.style.gap = '8px';
+
+        const game4SpinnerRow2 = document.createElement('div');
+        game4SpinnerRow2.id = 'galacticCasinoGame4SpinnerRow2';
+        game4SpinnerRow2.style.display = 'flex';
+        game4SpinnerRow2.style.gap = '8px';
+
+        const applyVoidSeerSpinnerTextStyling = (spinnerEl) => {
+            if (!spinnerEl) return;
+            spinnerEl.style.fontSize = '3em';
+            const items = spinnerEl.querySelectorAll?.('.casino-spinner-item');
+            if (items && typeof items.forEach === 'function') {
+                items.forEach((el) => el.classList.add('green-ready-text'));
+            }
+        };
+
+        const game4Spinner1 = createSpinningDropdown(
+            'galacticCasinoGame4Spinner1',
+            [{ value: '0', text: '0', className: '' }],
+            '0',
+            ['galactic-casino-spinner']
+        );
+        const game4Spinner2 = createSpinningDropdown(
+            'galacticCasinoGame4Spinner2',
+            [{ value: '0', text: '0', className: '' }],
+            '0',
+            ['galactic-casino-spinner']
+        );
+
+        applyVoidSeerSpinnerTextStyling(game4Spinner1);
+        applyVoidSeerSpinnerTextStyling(game4Spinner2);
+
+        game4SpinnerRow1.appendChild(game4Spinner1);
+        game4SpinnerRow2.appendChild(game4Spinner2);
+        game4SpinnerContainer.appendChild(game4SpinnerRow1);
+        game4SpinnerContainer.appendChild(game4SpinnerRow2);
+
+        const updateVoidSeerSpinButtonState = () => {
+            const spinBtn = document.getElementById('galacticCasinoGame4SpinButton');
+            if (!spinBtn) return;
+
+            const spinning = String(game4Container.getAttribute('data-spinning') || 'false') === 'true';
+            const selectedPrize = String(game4Container.getAttribute('data-prize-selection') || '').toLowerCase();
+            const prize = voidSeerPrizeCatalog[selectedPrize];
+            const cost = prize?.costCp ?? null;
+            const cpBalance = getGalacticCasinoDataObject('casinoPoints', ['quantity']) ?? 0;
+            const canSpin = !spinning && cost !== null && cpBalance >= cost;
+
+            setButtonState(spinBtn, { enabled: canSpin, ready: canSpin });
+        };
+
+        const buildVoidSeerSpinnerItems = (maxReel) => {
+            const max = Number.isFinite(Number(maxReel)) ? Math.max(0, Math.floor(Number(maxReel))) : 0;
+            return Array.from({ length: max + 1 }, (_, i) => ({ value: String(i), text: String(i), className: '' }));
+        };
+
+        const replaceVoidSeerSpinner = (spinnerId, items, value) => {
+            const old = document.getElementById(spinnerId);
+            if (!old) return;
+
+            const next = createSpinningDropdown(spinnerId, items, String(value ?? '0'), ['galactic-casino-spinner']);
+            old.replaceWith(next);
+
+            applyVoidSeerSpinnerTextStyling(next);
+        };
+
+        const setVoidSeerSpinnerValue = (spinnerId, value, maxReel) => {
+            const v = Number.isFinite(Number(value)) ? Math.max(0, Math.floor(Number(value))) : 0;
+            const max = Number.isFinite(Number(maxReel)) ? Math.max(0, Math.floor(Number(maxReel))) : 0;
+            const clamped = Math.min(v, max);
+            const items = buildVoidSeerSpinnerItems(max);
+            replaceVoidSeerSpinner(spinnerId, items, String(clamped));
+        };
+
+        const updateVoidSeerSpinnerOptions = (maxReel) => {
+            const items = buildVoidSeerSpinnerItems(maxReel);
+            replaceVoidSeerSpinner('galacticCasinoGame4Spinner1', items, '0');
+            replaceVoidSeerSpinner('galacticCasinoGame4Spinner2', items, '0');
+        };
+
+        const game4PrizeDropdown = createDropdown(
+            'galacticCasinoGame4PrizeDropdown',
+            [
+                { value: 'select', text: 'Select Prize', type: 'select' },
+                { value: 'prize1', text: String(voidSeerPrizeCatalog?.prize1?.label || 'Prize 1'), type: 'prize' },
+                { value: 'prize2', text: String(voidSeerPrizeCatalog?.prize2?.label || 'Prize 2'), type: 'prize' },
+                { value: 'prize3', text: String(voidSeerPrizeCatalog?.prize3?.label || 'Prize 3'), type: 'prize' }
+            ],
+            'select',
+            (value) => {
+                const key = String(value || 'select').toLowerCase();
+                game4Container.setAttribute('data-prize-selection', key);
+
+                const prize = voidSeerPrizeCatalog[key];
+                if (prize) {
+                    updateVoidSeerSpinnerOptions(prize.maxReel);
+                }
+
+                updateVoidSeerSpinButtonState();
+            },
+            ['galactic-casino-wheel-prize-dropdown']
+        );
+
+        const game4SpinButton = createButton(
+            'SPIN',
+            ['galacticCasinoGame4SpinButton', 'id_galacticCasinoGame4SpinButton', 'option-button', 'red-disabled-text', 'galactic-casino-spin-button'],
+            () => {
+                const spinning = String(game4Container.getAttribute('data-spinning') || 'false') === 'true';
+                if (spinning) return;
+
+                const selectedPrize = String(game4Container.getAttribute('data-prize-selection') || '').toLowerCase();
+                const prize = voidSeerPrizeCatalog[selectedPrize];
+                if (!prize) {
+                    return;
+                }
+                const cost = prize.costCp;
+                const cpBalance = getGalacticCasinoDataObject('casinoPoints', ['quantity']) ?? 0;
+                if (cpBalance < cost) {
+                    return;
+                }
+
+                game4Container.setAttribute('data-spinning', 'true');
+                updateVoidSeerSpinButtonState();
+
+                setGalacticCasinoDataObject(Math.max(0, cpBalance - cost), 'casinoPoints', ['quantity']);
+
+                const max = Math.max(0, Math.floor(Number(prize.maxReel)));
+                const rollMid = () => {
+                    const upper = Math.max(0, max);
+                    const minMid = Math.max(0, Math.floor(upper * 0.25));
+                    const maxMid = Math.max(minMid, Math.ceil(upper * 0.75));
+                    return minMid + Math.floor(Math.random() * (maxMid - minMid + 1));
+                };
+
+                const final1 = rollMid();
+                const final2 = rollMid();
+
+                Promise.all([
+                    spinNumericSpinner('galacticCasinoGame4Spinner1', String(final1), { durationMs: 4200, minLoops: 4 }),
+                    spinNumericSpinner('galacticCasinoGame4Spinner2', String(final2), { durationMs: 5100, minLoops: 4 })
+                ]).then(() => {
+                    game4Container.setAttribute('data-spinning', 'false');
+
+                    if (final1 === final2) {
+                        const settledStarSet = new Set((getSettledStars?.() || []).map((name) => String(name || '').toLowerCase()));
+                        const starshipDestination = String(getDestinationStar?.() || '').toLowerCase();
+                        const starshipStatus = getStarShipStatus?.() || [];
+                        const starshipState = String(starshipStatus?.[0] || '').toLowerCase();
+
+                        const isStarshipOccupyingStar = (targetLower) => {
+                            if (!targetLower) return false;
+                            if (!starshipDestination) return false;
+                            if (targetLower !== starshipDestination) return false;
+                            return starshipState === 'travelling' || starshipState === 'orbiting';
+                        };
+
+                        const pickRandom = (arr) => {
+                            if (!Array.isArray(arr) || arr.length === 0) return null;
+                            return arr[Math.floor(Math.random() * arr.length)];
+                        };
+
+                        const makeManuscriptClueMessage = (targetLower) => {
+                            const templates = getNewsTickerContent?.()?.manuscriptClues ?? [];
+                            const template = pickRandom(templates);
+                            const body = String(template?.template || '').replaceAll('{STAR}', capitaliseWordsWithRomanNumerals(targetLower));
+                            return body;
+                        };
+
+                        const makeOTypeClueMessage = (targetLower) => {
+                            const starName = capitaliseWordsWithRomanNumerals(targetLower);
+                            const templates = [
+                                '{STAR} is giving off very high energy signals, it could be a type O star!',
+                                'Your instruments spike whenever they point toward {STAR}. All signs suggest an O-type star.',
+                                'Long-range scans detect extreme radiation from {STAR}. This could be an O-type system.'
+                            ];
+                            const template = pickRandom(templates);
+                            return String(template || '').replaceAll('{STAR}', starName);
+                        };
+
+                        if (selectedPrize === 'prize3') {
+                            const currentAm = Number(getResourceDataObject?.('antimatter', ['quantity'], true) ?? 0);
+                            const base = Number.isFinite(currentAm) && currentAm > 0 ? currentAm : 0;
+                            const gain = Math.max(1, Math.floor(base * (0.10 + Math.random() * 0.20)));
+                            const next = Math.max(0, base + gain);
+                            setResourceDataObject?.(next, 'antimatter', ['quantity']);
+                            showNotification(`WIN! +${gain} Antimatter`, 'info', 3000, 'galacticCasino');
+                        } else if (selectedPrize === 'prize2') {
+                            const manuscriptEntries = getStarsWithAncientManuscripts?.() || [];
+                            const eligible = (manuscriptEntries || [])
+                                .filter((entry) => Array.isArray(entry))
+                                .map((entry) => String(entry?.[0] ?? entry?.[1] ?? '').toLowerCase())
+                                .filter((name) => !!name && !settledStarSet.has(name) && !isStarshipOccupyingStar(name));
+                            const target = pickRandom(eligible);
+                            if (target) {
+                                const clue = makeManuscriptClueMessage(target);
+                                showNotification(`WIN! ${clue}<span style="display:none">${Date.now()}</span>`, 'warning', 15000, 'galacticCasino');
+                            } else {
+                                showNotification('WIN!', 'info', 2500, 'galacticCasino');
+                            }
+                        } else if (selectedPrize === 'prize1') {
+                            const starNames = getStarNames?.() || [];
+                            const eligible = (starNames || [])
+                                .map((name) => String(name || '').toLowerCase())
+                                .filter((name) => !!name && getStarTypeByName?.(name) === 'O')
+                                .filter((name) => !settledStarSet.has(name) && !isStarshipOccupyingStar(name));
+                            const target = pickRandom(eligible);
+                            if (target) {
+                                const clue = makeOTypeClueMessage(target);
+                                showNotification(`WIN! ${clue}<span style="display:none">${Date.now()}</span>`, 'warning', 15000, 'galacticCasino');
+                            } else {
+                                showNotification('WIN!', 'info', 2500, 'galacticCasino');
+                            }
+                        } else {
+                            showNotification('WIN!', 'info', 2500, 'galacticCasino');
+                        }
+                    } else {
+                        showNotification('LOSE! Better luck next time', 'error', 2000, 'galacticCasino');
+                    }
+
+                    updateVoidSeerSpinButtonState();
+                });
+            },
+            null,
+            null,
+            null,
+            null,
+            null,
+            true,
+            null,
+            'galacticCasinoGame4'
+        );
+
+        game4Container.appendChild(game4SpinnerContainer);
+        game4Container.appendChild(game4PrizeDropdown);
+        game4Container.appendChild(game4SpinButton);
+
+        const game4Row = createOptionRow(
+            'galacticCasinoGame4Row',
+            null,
+            'Visiting VoidSeer:',
+            game4Container,
+            null,
+            null,
+            game4PrizeDropdown,
+            game4SpinButton,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            'galacticCasinoGame4',
             [true, '20%', '80%'],
             ['no-left-margin', 'galactic-casino-input-container'],
             false
@@ -1352,6 +1634,7 @@ export function drawTab7Content(heading, optionContentElement) {
         optionContentElement.appendChild(game1Row);
         optionContentElement.appendChild(game2Row);
         optionContentElement.appendChild(game3Row);
+        optionContentElement.appendChild(game4Row);
 
         setHiloIdleUi();
 

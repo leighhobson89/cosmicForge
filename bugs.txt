@@ -1,2 +1,2 @@
-maybe broken compound recipe reduction doesnt seem to be falling
 offline gains not triggering on lose focus, only on load
+add feature in casino - Visiting VoidSeer to offer a game to win clues to ancient scripts...

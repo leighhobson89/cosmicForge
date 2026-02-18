@@ -1664,6 +1664,11 @@ export function initialiseDescriptions() {
             content2: "",
             updateAt: ""
         },
+        galacticCasinoGame4Row: {
+            content1: `Master VoidSeer has numbers in each hand.  If they match, you win the prize you select!  Each prize has a CP prize and a number denoting how many possibilities are per hand, higher is harder!`,
+            content2: "",
+            updateAt: ""
+        },
         settingsCurrencySymbolRow: {
             content1: "Change the currency symbol displayed in the game.",
             content2: "",
@@ -3634,6 +3639,10 @@ export function getStarTypeByName(name) {
 
     const match = starNames.find((entry) => String(entry?.[0] ?? '').toLowerCase() === normalized);
     return match?.[1] ?? 'A';
+}
+
+export function getNewsTickerContent() {
+    return newsTickerContent;
 }
 
 export function getHelpContent(section, type) {
