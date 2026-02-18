@@ -3076,7 +3076,31 @@ export function restoreAscendencyBuffsDataObject(value) {
         getCurrentGameVersion,
         getMinimumVersion,
     })
-    ascendencyBuffs = value;
+
+    const template = ascendencyBuffs;
+    const merged = JSON.parse(JSON.stringify(template));
+
+    if (value && typeof value === 'object') {
+        for (const [key, savedBuff] of Object.entries(value)) {
+            if (key === 'version') {
+                continue;
+            }
+
+            if (!template[key]) {
+                continue;
+            }
+
+            if (savedBuff && typeof savedBuff === 'object') {
+                merged[key] = {
+                    ...template[key],
+                    ...savedBuff,
+                };
+            }
+        }
+    }
+
+    merged.version = template.version;
+    ascendencyBuffs = merged;
 }
 
 export function restoreAchievementsDataObject(value) {

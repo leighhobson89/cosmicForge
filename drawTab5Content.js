@@ -575,14 +575,14 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
 
             const currentAntimatter = getResourceDataObject('antimatter', ['quantity']);
             const hasEnoughFuel = currentAntimatter >= fuel;
-            const fuelClass = hasEnoughFuel ? 'green-ready-text' : 'red-disabled-text';
-
             const isSettled = settledStarNameSet.has(normalizedLower);
+            const fuelClass = isSettled ? 'red-disabled-text' : (hasEnoughFuel ? 'green-ready-text' : 'red-disabled-text');
 
             const distanceText = isSettled ? 'Settled' : `${safeDistance.toFixed(2)} ly`;
             const weatherTextDisplay = isSettled ? ' ' : weatherText;
             const precipitationText = isSettled ? ' ' : `${safePrecipitationType}`;
             const fuelText = isSettled ? 'Settled' : `${safeFuel}`;
+
             const apText = isSettled ? ' ' : `${displayAscendencyPoints}`;
 
             const starDataCells = document.createElement('div');

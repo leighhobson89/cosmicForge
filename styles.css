@@ -1804,6 +1804,11 @@ body {
     font-weight: bold;
 }
 
+.notification.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
 .notification::before {
     content: '';
     position: absolute;

@@ -1400,7 +1400,13 @@ export function drawTab7Content(heading, optionContentElement) {
     }
 
     if (heading === 'Ascendency Perks') {
-        const ascendencyBuffsArray = Object.fromEntries(Object.entries(getAscendencyBuffDataObject()).filter(([key]) => key !== "version"));
+        const ascendencyBuffsArray = Object.fromEntries(
+            Object.entries(getAscendencyBuffDataObject())
+                .filter(([key]) => key !== "version")
+                .filter(([, buff]) => buff && typeof buff === 'object')
+                .filter(([, buff]) => typeof buff.baseCostAp === 'number' && Number.isFinite(buff.baseCostAp))
+                .filter(([, buff]) => typeof buff.boughtYet === 'number' && Number.isFinite(buff.boughtYet))
+        );
     
         if (Object.keys(ascendencyBuffsArray).length === 0) {
             return;
