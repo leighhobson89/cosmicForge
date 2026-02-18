@@ -7988,6 +7988,12 @@ async function colonisePrepareWarUI(reason) {
 
 function checkDiplomacyButtons(element) {
     const starData = getStarSystemDataObject('stars', ['destinationStar']);
+    if (!starData) {
+        element.classList.add('red-disabled-text');
+        element.classList.remove('green-ready-text');
+        return;
+    }
+
     const civilizationLevel = starData.civilizationLevel;
 
     const enemyTraitMain = starData.lifeformTraits[0];

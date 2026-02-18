@@ -4416,16 +4416,22 @@ export function generateStarfield(starfieldContainer, numberOfStars = 70, seed =
         currentStar = stars.find(star => star.name === capitaliseWordsWithRomanNumerals(getCurrentStarSystem()));
     }
 
-    stars.forEach(star => {
-        starDistanceData[star.name] = calculate3DDistance(
-            currentStar.left + currentStar.width / 2,
-            currentStar.top + currentStar.height / 2,
-            currentStar.z,
-            star.left + star.width / 2,
-            star.top + star.height / 2,
-            star.z
-        );
-    });
+    if (!currentStar && stars.length > 0) {
+        currentStar = stars[0];
+    }
+
+    if (currentStar) {
+        stars.forEach(star => {
+            starDistanceData[star.name] = calculate3DDistance(
+                currentStar.left + currentStar.width / 2,
+                currentStar.top + currentStar.height / 2,
+                currentStar.z,
+                star.left + star.width / 2,
+                star.top + star.height / 2,
+                star.z
+            );
+        });
+    }
 
     if (calculationMode) {
         return { stars, starDistanceData };

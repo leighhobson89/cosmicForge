@@ -127,7 +127,7 @@ export function drawTab2Content(heading, optionContentElement) {
                 sellBuilding(1, 'powerPlant1');
                 addBuildingPotentialRate('powerPlant1');
             }, 'upgradeCheck', '', 'energy', 'powerPlant1', 'cash', true, null, 'building'),
-            createButton(`Add ${getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'rate']) * getOTypePowerPlantBoostMultiplierForCurrentSystem('powerPlant1') * getTimerRateRatio()} KW /s`, ['option-button', 'building-purchase-button', 'red-disabled-text', 'resource-cost-sell-check'], () => {
+            createButton(`Add ${Math.round(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'rate']) * getOTypePowerPlantBoostMultiplierForCurrentSystem('powerPlant1') * getTimerRateRatio())} KW /s`, ['option-button', 'building-purchase-button', 'red-disabled-text', 'resource-cost-sell-check'], () => {
                 gain(1, 'powerPlant1Quantity', 'powerPlant1', false, null, 'energy', 'resources');
                 addToResourceAllTimeStat(1, 'allTimeBasicPowerPlantsBuilt');
                 addBuildingPotentialRate('powerPlant1');
@@ -231,7 +231,7 @@ export function drawTab2Content(heading, optionContentElement) {
                 sellBuilding(1, 'powerPlant3');
                 addBuildingPotentialRate('powerPlant3');
             }, 'upgradeCheck', '', 'energy', 'powerPlant3', 'cash', true, null, 'building'),
-            createButton(`Add ${getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant3', 'rate']) * getOTypePowerPlantBoostMultiplierForCurrentSystem('powerPlant3') * getTimerRateRatio()} KW /s`, ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check', ...demoExtraClasses], () => {
+            createButton(`Add ${Math.round(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant3', 'rate']) * getOTypePowerPlantBoostMultiplierForCurrentSystem('powerPlant3') * getTimerRateRatio())} KW /s`, ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check', ...demoExtraClasses], () => {
                 gain(1, 'powerPlant3Quantity', 'powerPlant3', false, null, 'energy', 'resources');
                 addToResourceAllTimeStat(1, 'allTimeAdvancedPowerPlantsBuilt');
                 addBuildingPotentialRate('powerPlant3');

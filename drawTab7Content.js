@@ -1408,6 +1408,9 @@ export function drawTab7Content(heading, optionContentElement) {
     
         Object.keys(ascendencyBuffsArray).forEach(buffKey => {
             const buff = ascendencyBuffsArray[buffKey];
+            const buffName = typeof buff?.name === 'string' ? buff.name : capitaliseString(buffKey);
+            const buffNameSlug = buffName.replace(/\s+/g, '-').toLowerCase();
+            const buffNameId = buffName.replace(/\s+/g, '').replace(/^./, str => str.toLowerCase());
     
             const buffRowDescription = `buff${capitaliseString(buffKey)}Row`;
             const cost = buff.rebuyable ? buff.baseCostAp * Math.pow(buff.rebuyableIncreaseMultiple, buff.boughtYet) : buff.baseCostAp;
@@ -1416,7 +1419,7 @@ export function drawTab7Content(heading, optionContentElement) {
             const buffRow = createOptionRow(
                 buffRowDescription,
                 null,
-                `${buff.name}:`,
+                `${buffName}:`,
                 createTextElement(
                     `Rebuyable: <span class="green-ready-text">
                     ${buff.rebuyable ? (buff.timesRebuyable === 100000 ? "Yes" : buff.timesRebuyable) : "No"}
@@ -1425,11 +1428,11 @@ export function drawTab7Content(heading, optionContentElement) {
                     ['buff-value']
                 ),                
                 createTextElement(buyStatus, `buff${capitaliseString(buffKey)}BuyStatusText`, ['buff-value']),
-                createButton(`BUY`, ['option-button', 'red-disabled-text', 'ascendency-buff-button', `buff-class-${buff.name.replace(/\s+/g, '-').toLowerCase()}`], () => {
+                createButton(`BUY`, ['option-button', 'red-disabled-text', 'ascendency-buff-button', `buff-class-${buffNameSlug}`], () => {
                     purchaseBuff(buffKey, cost);
                 }, null, null, null, null, null, true, null, 'ascendency'),
                 createTextElement(
-                    `<span id="${buff.name.replace(/\s+/g, '').replace(/^./, str => str.toLowerCase())}CostText" class="green-ready-text">${Math.floor(cost)} AP</span>`,
+                    `<span id="${buffNameId}CostText" class="green-ready-text">${Math.floor(cost)} AP</span>`,
                     'buffCost',
                     ['buff-value']
                 ),
