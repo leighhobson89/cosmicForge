@@ -25,6 +25,8 @@ let flushTimer = null;
 let enabled = false;
 let initialised = false;
 
+export let analyticsTrackingEnabled = false; //MASTER CONTROL TRACKING  
+
 let clientId = null;
 let sessionId = null;
 
@@ -214,6 +216,11 @@ export function initAnalytics(options = {}) {
 
     enabled = loadEnabledFromStorage(options.defaultEnabled ?? false);
 
+    if (!analyticsTrackingEnabled) {
+        enabled = false;
+        persistEnabledToStorage(false);
+    }
+
     clientId = getOrCreateId(STORAGE_KEYS.clientId);
 
     setSessionId(createId());
@@ -235,7 +242,20 @@ export function initAnalytics(options = {}) {
     });
 }
 
+export function setAnalyticsTrackingEnabled(value) {
+    analyticsTrackingEnabled = !!value;
+    if (!analyticsTrackingEnabled) {
+        setAnalyticsEnabled(false);
+    }
+}
+
 export function setAnalyticsEnabled(value) {
+    if (!analyticsTrackingEnabled && value) {
+        enabled = false;
+        persistEnabledToStorage(false);
+        schedulePeriodicFlush();
+        return;
+    }
     enabled = !!value;
     persistEnabledToStorage(enabled);
     schedulePeriodicFlush();
@@ -250,6 +270,7 @@ export function getAnalyticsEnabled() {
 }
 
 export function startNewAnalyticsSession() {
+    if (!analyticsTrackingEnabled) return;
     setSessionId(createId());
     trackAnalyticsEvent('session_start', {
         ts: nowIso(),
@@ -258,6 +279,7 @@ export function startNewAnalyticsSession() {
 }
 
 export function trackAnalyticsEvent(eventName, payload = {}, options = {}) {
+    if (!analyticsTrackingEnabled) return;
     if (!enabled) return;
 
     const sampleRate = options.sampleRate;
