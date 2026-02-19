@@ -2882,6 +2882,11 @@ export function restoreResourceDataObject(value) {
             getMinimumVersion,
         });
         resourceData = value;
+
+        const restoredResearchQuantity = getResourceDataObject('research', ['quantity'], true);
+        if (typeof restoredResearchQuantity === 'number' && !Number.isFinite(restoredResearchQuantity)) {
+            setResourceDataObject(0, 'research', ['quantity']);
+        }
     }
 }
 
@@ -3241,6 +3246,23 @@ export function setResourceDataObject(value, key, subKeys = []) {
     if (!key) {
         console.warn("Main key is required.");
         return;
+    }
+
+    if (typeof value === 'number' && !Number.isFinite(value)) {
+        let previousValue;
+        try {
+            previousValue = getResourceDataObject(key, subKeys, true);
+        } catch {
+            previousValue = undefined;
+        }
+
+        if (typeof previousValue === 'number' && Number.isFinite(previousValue)) {
+            console.warn(`setResourceDataObject prevented non-finite numeric write to ${String(key)}.${subKeys.join('.')}; preserving previous value.`);
+            return;
+        }
+
+        console.warn(`setResourceDataObject prevented non-finite numeric write to ${String(key)}.${subKeys.join('.')}; defaulting to 0.`);
+        value = 0;
     }
 
     let current = resourceData;

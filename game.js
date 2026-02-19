@@ -6877,6 +6877,9 @@ function handleSpaceUpgradeResourceType(element) {
 }
 
 function checkStatusAndSetTextClasses(element) {
+    if (!element) {
+        return;
+    }
     if (element.id === 'spaceStorageTankResearchDescription' || element.id === 'fleetHologramsDescription' || element.id === 'voidSeersDescription' || element.id === 'rapidExpansionDescription') {
         if (element.innerHTML === 'UNLOCKED' || (element.querySelector('span') && element.querySelector('span').innerHTML === 'UNLOCKED')) {
             element.innerHTML = '<span class="green-ready-text">UNLOCKED</span>';
@@ -6887,7 +6890,8 @@ function checkStatusAndSetTextClasses(element) {
     }
 
     if ([...element.classList].some(clas => clas.includes('travel-starship'))) {
-        return checkTravelToStarElements(element);
+        checkTravelToStarElements(element);
+        return;
     }
 
     if (getCurrentOptionPane() === 'colonise' && element.classList.contains('diplomacy-button')) {
