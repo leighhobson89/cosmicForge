@@ -1,4 +1,4 @@
-import { removeTabAttentionIfNoIndicators, createOptionRow, createButton, createDropdown, createTextElement, createTextFieldArea, createSpinningDropdown, callPopupModal, showHideModal, createMegaStructureDiagram, createMegaStructureTable, createBlackHole, setButtonState, showNotification } from './ui.js';
+import { removeTabAttentionIfNoIndicators, createOptionRow, createButton, createDropdown, createTextElement, createTextFieldArea, createSpinningDropdown, callPopupModal, showHideModal, createMegaStructureDiagram, createMegaStructureTable, createBlackHole, setButtonState, showNotification, updateDescriptionRow } from './ui.js';
 import {
     getStarsWithAncientManuscripts,
     getDestinationStar,
@@ -42,6 +42,7 @@ import {
     getUnlockedResourcesArray,
     getUnlockedCompoundsArray,
     getVoidSeerPrizeCatalog,
+    getLiquidatedThisRun,
 } from './constantsAndGlobalVars.js';
 import { purchaseBuff, buyCasinoPoints, galacticMarketLiquidateForAp, galacticMarketSellApForCash, galacticMarketTrade, rebirth, startBlackHoleChargeTimer, timeWarp } from './game.js';
 import { claimCasinoSpecialPrizeByKey, spinNumericSpinner } from './casino.js';
@@ -68,6 +69,8 @@ import {
     getBlackHoleRechargeMultiplier,
     setBlackHoleRechargeMultiplier,
 } from './resourceDataObject.js';
+
+import { getOptionDescription } from './descriptions.js';
 
 import { playDoubleOrNothing, playWheelOfFortune, claimWheelSpecialPrize } from './casino.js';
 import { sfxPlayer } from './audioManager.js';
@@ -169,6 +172,14 @@ export function drawTab7Content(heading, optionContentElement) {
             null,
             'galacticMarketLiquidateForApConfirm'
         );
+
+        if (getLiquidatedThisRun()) {
+            updateDescriptionRow('galacticMarketLiquidateForAPRow', 'content2');
+            const descriptionEl = document.getElementById('galacticMarketLiquidateForAPRowDescription');
+            if (descriptionEl) {
+                descriptionEl.innerHTML = getOptionDescription('galacticMarketLiquidateForAPRow').content1;
+            }
+        }
         optionContentElement.appendChild(galacticMarketLiquidateForAPRow);
     }
 

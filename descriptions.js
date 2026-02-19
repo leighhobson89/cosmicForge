@@ -1640,8 +1640,8 @@ export function initialiseDescriptions() {
             updateAt: ""
         },
         galacticMarketLiquidateForAPRow: {
-            content1: "Liquidate ALL Cash, Resources and Compounds, to AP.  You can only do this once per run so choose your moment wisely!",
-            content2: `Liquidate ALL Cash, Resources and Compounds, to AP. <span class="red-disabled-text">Already done this run!</span>`,
+            content1: "Liquidate ALL Cash, Resources and Compounds, to AP.  You can only do this once per run so choose your moment wisely!  The Galactic Market Base rate affects this calculation.",
+            content2: `<span>Liquidate ALL Cash, Resources and Compounds, to AP.  The Galactic Market Base rate affects this calculation. <span class="red-disabled-text">Already done this run!</span></span>`,
             updateAt: ""
         },
         galacticCasinoPurchaseCpRow: {
