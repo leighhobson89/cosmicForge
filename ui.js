@@ -4107,7 +4107,7 @@ export function showNotification(message, type = 'info', time = 3000, classifica
     }
 }
 
-export function showNotificationWithAction(message, type = 'info', time = 3000, classification = 'default', actionLabel, actionCallback) {
+export function showNotificationWithAction(message, type = 'info', time = 3000, classification = 'default', actionLabel, actionCallback, options = null) {
     if (!getNotificationsToggle()) return;
 
     const queues = getNotificationQueues();
@@ -4121,12 +4121,18 @@ export function showNotificationWithAction(message, type = 'info', time = 3000, 
         createNotificationContainer(classification);
     }
 
+    const opts = (options && typeof options === 'object') ? options : null;
+
     queues[classification].push({
         message,
         type,
         time,
         actionLabel: typeof actionLabel === 'string' && actionLabel.trim() ? actionLabel.trim() : null,
-        actionCallback: typeof actionCallback === 'function' ? actionCallback : null
+        actionCallback: typeof actionCallback === 'function' ? actionCallback : null,
+        actionDisabled: !!opts?.actionDisabled,
+        actionDisabledTooltip: (typeof opts?.actionDisabledTooltip === 'string' && opts.actionDisabledTooltip.trim())
+            ? opts.actionDisabledTooltip.trim()
+            : null
     });
     setNotificationQueues(queues);
 
@@ -4175,10 +4181,10 @@ function processNotificationQueue(classification) {
         status[classification] = true;
         setNotificationStatus(status);
 
-        const { message, type, time, actionLabel, actionCallback } = queue.shift();
+        const { message, type, time, actionLabel, actionCallback, actionDisabled, actionDisabledTooltip } = queue.shift();
         setNotificationQueues(queues);
 
-        sendNotification(message, type, classification, time, actionLabel, actionCallback);
+        sendNotification(message, type, classification, time, actionLabel, actionCallback, actionDisabled, actionDisabledTooltip);
     } else {
         status[classification] = false;
         setNotificationStatus(status);
@@ -4202,7 +4208,7 @@ function processNotificationQueue(classification) {
     }
 }
 
-function sendNotification(message, type, classification, duration, actionLabel, actionCallback) {
+function sendNotification(message, type, classification, duration, actionLabel, actionCallback, actionDisabled, actionDisabledTooltip) {
     const containers = getNotificationContainers();
     const container = containers[classification];
     if (!container) return;
@@ -4237,21 +4243,61 @@ function sendNotification(message, type, classification, duration, actionLabel, 
     if (actionLabel && typeof actionCallback === 'function') {
         const actionButton = document.createElement('button');
         actionButton.className = 'notification-button notification-action-button';
-        actionButton.innerText = 'Storage ⬆';
+        actionButton.innerText = actionLabel;
         actionButton.style.position = 'absolute';
         actionButton.style.top = 'auto';
         actionButton.style.bottom = '2px';
         actionButton.style.left = '50%';
         actionButton.style.transform = 'translateX(-50%)';
-        actionButton.onclick = () => {
-            try {
-                actionCallback();
-            } catch (error) {
-                console.error('Notification action failed:', error);
-            } finally {
-                dismissAndContinue();
+
+        if (actionDisabled) {
+            actionButton.disabled = true;
+            actionButton.classList.add('red-disabled-text');
+            if (actionDisabledTooltip) {
+                actionButton.title = actionDisabledTooltip;
+
+                actionButton.addEventListener('mouseenter', (event) => {
+                    const tooltip = document.getElementById('stat-tooltip');
+                    if (!tooltip) {
+                        return;
+                    }
+                    tooltip.innerHTML = `<div>${actionDisabledTooltip}</div>`;
+                    tooltip.style.display = 'block';
+                    tooltip.style.left = `${event.pageX + 12}px`;
+                    tooltip.style.top = `${event.pageY - 40}px`;
+                });
+
+                actionButton.addEventListener('mousemove', (event) => {
+                    const tooltip = document.getElementById('stat-tooltip');
+                    if (!tooltip) {
+                        return;
+                    }
+                    if (tooltip.style.display !== 'block') {
+                        tooltip.style.display = 'block';
+                    }
+                    tooltip.style.left = `${event.pageX + 12}px`;
+                    tooltip.style.top = `${event.pageY - 40}px`;
+                });
+
+                actionButton.addEventListener('mouseleave', () => {
+                    const tooltip = document.getElementById('stat-tooltip');
+                    if (!tooltip) {
+                        return;
+                    }
+                    tooltip.style.display = 'none';
+                });
             }
-        };
+        } else {
+            actionButton.onclick = () => {
+                try {
+                    actionCallback();
+                } catch (error) {
+                    console.error('Notification action failed:', error);
+                } finally {
+                    dismissAndContinue();
+                }
+            };
+        }
         notification.appendChild(actionButton);
     }
 

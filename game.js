@@ -483,7 +483,6 @@ function performIncreaseStorageForKey(category, key) {
     const normalizedCategory = category === 'resources' ? 'resources' : 'compounds';
     const normalizedKey = String(key || '').toLowerCase();
 
-    // Special-case reservoir since it uses concrete as a secondary cost.
     if (normalizedCategory === 'compounds' && normalizedKey === 'water') {
         increaseResourceStorage(['waterQuantity', 'concreteQuantity'], ['water', 'concrete'], ['compounds', 'compounds']);
         return;
@@ -534,6 +533,23 @@ function maybeNotifyStorageFull(category, key, previousQuantity, newQuantity, st
     const classification = 'storage';
     const message = `${pretty} storage is full.`;
 
+    let actionDisabled = false;
+    let actionDisabledTooltip = null;
+
+    if (category === 'compounds' && String(key || '').toLowerCase() === 'water') {
+        const waterStorage = Number(getResourceDataObject('compounds', ['water', 'storageCapacity']) ?? 0);
+        const requiredConcrete = waterStorage * 0.3;
+        const currentConcrete = Number(getResourceDataObject('compounds', ['concrete', 'quantity']) ?? 0);
+
+        if (!(Number.isFinite(requiredConcrete) && requiredConcrete > 0)) {
+            actionDisabled = true;
+            actionDisabledTooltip = 'Cannot calculate concrete requirement for reservoir upgrade.';
+        } else if (!(Number.isFinite(currentConcrete) && currentConcrete >= requiredConcrete)) {
+            actionDisabled = true;
+            actionDisabledTooltip = `Need ${Math.ceil(requiredConcrete)} Concrete to enlarge reservoir.`;
+        }
+    }
+
     showNotificationWithAction(
         message,
         'info',
@@ -542,7 +558,10 @@ function maybeNotifyStorageFull(category, key, previousQuantity, newQuantity, st
         'Increase Storage',
         () => {
             performIncreaseStorageForKey(category, key);
-        }
+        },
+        actionDisabled || actionDisabledTooltip
+            ? { actionDisabled, actionDisabledTooltip }
+            : null
     );
 }
 
