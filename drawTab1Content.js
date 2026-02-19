@@ -1,7 +1,7 @@
 import { getLastSellResourceCompoundDropdownOption, setLastSellResourceCompoundDropdownOption, getResourceSalePreview, getTimerRateRatio } from './constantsAndGlobalVars.js';
 import { sellResource, fuseResource, gain, increaseResourceStorage } from './game.js';
 import { getResourceDataObject, setResourceDataObject } from './resourceDataObject.js';
-import { createToggleSwitch, createTextElement, createOptionRow, createDropdown, createButton, removeTabAttentionIfNoIndicators } from './ui.js';
+import { createToggleSwitch, createTextElement, createOptionRow, createDropdown, createButton, removeTabAttentionIfNoIndicators, disableStorageNotificationActionIfShowing } from './ui.js';
 
 export function drawTab1Content(heading, optionContentElement) {
     const optionElement = document.getElementById(heading.toLowerCase().replace(/\s(.)/g, (match, group1) => group1.toUpperCase()).replace(/\s+/g, '') + 'Option');
@@ -108,6 +108,7 @@ export function drawTab1Content(heading, optionContentElement) {
             'Increase Storage:',
             createButton('Increase Storage', ['option-button', 'red-disabled-text', 'resource-cost-sell-check'], () => {
                 increaseResourceStorage(['hydrogenQuantity'], ['hydrogen'], ['resources']);
+                disableStorageNotificationActionIfShowing('hydrogen', 'Already Increased!');
                 storagePrice = getResourceDataObject('resources', ['hydrogen', 'storageCapacity']) - 1;
             }, 'upgradeCheck', '', 'storage', null, 'hydrogen', true, null, 'resource'),
             null,
@@ -331,6 +332,7 @@ export function drawTab1Content(heading, optionContentElement) {
             'Increase Storage:',
             createButton('Increase Storage', ['option-button', 'red-disabled-text', 'resource-cost-sell-check'], () => {
                 increaseResourceStorage(['heliumQuantity'], ['helium'], ['resources']);
+                disableStorageNotificationActionIfShowing('helium', 'Already Increased!');
                 storagePrice = getResourceDataObject('resources', ['helium', 'storageCapacity']) - 1;
             }, 'upgradeCheck', '', 'storage', null, 'helium', true, null, 'resource'),
             null,
@@ -562,6 +564,7 @@ export function drawTab1Content(heading, optionContentElement) {
             'Increase Storage:',
             createButton('Increase Storage', ['option-button', 'red-disabled-text', 'resource-cost-sell-check'], () => {
                 increaseResourceStorage(['carbonQuantity'], ['carbon'], ['resources']);
+                disableStorageNotificationActionIfShowing('carbon', 'Already Increased!');
                 storagePrice = getResourceDataObject('resources', ['carbon', 'storageCapacity']) - 1;
             }, 'upgradeCheck', '', 'storage', null, 'carbon', true, null, 'resource'),
             null,
@@ -786,6 +789,7 @@ export function drawTab1Content(heading, optionContentElement) {
             'Increase Storage:',
             createButton('Increase Storage', ['option-button', 'red-disabled-text', 'resource-cost-sell-check'], () => {
                 increaseResourceStorage(['neonQuantity'], ['neon'], ['resources']);
+                disableStorageNotificationActionIfShowing('neon', 'Already Increased!');
                 storagePrice = getResourceDataObject('resources', ['neon', 'storageCapacity']) - 1;
             }, 'upgradeCheck', '', 'storage', null, 'neon', true, null, 'resource'),
             null,
@@ -1010,6 +1014,7 @@ export function drawTab1Content(heading, optionContentElement) {
             'Increase Storage:',
             createButton('Increase Storage', ['option-button', 'red-disabled-text', 'resource-cost-sell-check'], () => {
                 increaseResourceStorage(['oxygenQuantity'], ['oxygen'], ['resources']);
+                disableStorageNotificationActionIfShowing('oxygen', 'Already Increased!');
                 storagePrice = getResourceDataObject('resources', ['oxygen', 'storageCapacity']) - 1;
             }, 'upgradeCheck', '', 'storage', null, 'oxygen', true, null, 'resource'),
             null,
@@ -1222,6 +1227,7 @@ export function drawTab1Content(heading, optionContentElement) {
             'Increase Storage:',
             createButton('Increase Storage', ['option-button', 'red-disabled-text', 'resource-cost-sell-check'], () => {
                 increaseResourceStorage(['sodiumQuantity'], ['sodium'], ['resources']);
+                disableStorageNotificationActionIfShowing('sodium', 'Already Increased!');
                 storagePrice = getResourceDataObject('resources', ['sodium', 'storageCapacity']) - 1;
             }, 'upgradeCheck', '', 'storage', null, 'sodium', true, null, 'resource'),
             null,
@@ -1446,6 +1452,7 @@ export function drawTab1Content(heading, optionContentElement) {
             'Increase Storage:',
             createButton('Increase Storage', ['option-button', 'red-disabled-text', 'resource-cost-sell-check'], () => {
                 increaseResourceStorage(['siliconQuantity'], ['silicon'], ['resources']);
+                disableStorageNotificationActionIfShowing('silicon', 'Already Increased!');
                 storagePrice = getResourceDataObject('resources', ['silicon', 'storageCapacity']) - 1;
             }, 'upgradeCheck', '', 'storage', null, 'silicon', true, null, 'resource'),
             null,
@@ -1658,6 +1665,7 @@ export function drawTab1Content(heading, optionContentElement) {
             'Increase Storage:',
             createButton('Increase Storage', ['option-button', 'red-disabled-text', 'resource-cost-sell-check'], () => {
                 increaseResourceStorage(['ironQuantity'], ['iron'], ['resources']);
+                disableStorageNotificationActionIfShowing('iron', 'Already Increased!');
                 storagePrice = getResourceDataObject('resources', ['iron', 'storageCapacity']) - 1;
             }, 'upgradeCheck', '', 'storage', null, 'iron', true, null, 'resource'),
             null,

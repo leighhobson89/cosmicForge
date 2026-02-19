@@ -3,7 +3,7 @@ import { getCompoundCreateDropdownRecipeText, getLastSellResourceCompoundDropdow
 import { increaseResourceStorage, createCompound, sellCompound, gain, addToResourceAllTimeStat } from './game.js';
 
 import { setResourceDataObject, getResourceDataObject } from './resourceDataObject.js';
-import { removeTabAttentionIfNoIndicators, createTextElement, createToggleSwitch, createOptionRow, createDropdown, createButton } from './ui.js';
+import { removeTabAttentionIfNoIndicators, createTextElement, createToggleSwitch, createOptionRow, createDropdown, createButton, disableStorageNotificationActionIfShowing } from './ui.js';
 
 export function drawTab4Content(heading, optionContentElement) {
     const handleCompoundCreate = (compound) => {
@@ -129,6 +129,7 @@ export function drawTab4Content(heading, optionContentElement) {
                 'Increase Storage:',
                 createButton('Increase Storage', ['option-button', 'red-disabled-text', 'compound-cost-sell-check'], () => {
                     increaseResourceStorage(['dieselQuantity'], ['diesel'], ['compounds']);
+                    disableStorageNotificationActionIfShowing('diesel', 'Already Increased!');
                     storagePrice = getResourceDataObject('compounds', ['diesel', 'storageCapacity']) - 1;
                 }, 'upgradeCheck', '', 'storage', null, 'diesel', true, null, 'compound'),
                 null,
@@ -367,6 +368,7 @@ export function drawTab4Content(heading, optionContentElement) {
                 'Increase Storage:',
                 createButton('Increase Storage', ['option-button', 'red-disabled-text', 'compound-cost-sell-check'], () => {
                     increaseResourceStorage(['glassQuantity'], ['glass'], ['compounds']);
+                    disableStorageNotificationActionIfShowing('glass', 'Already Increased!');
                     storagePrice = getResourceDataObject('compounds', ['glass', 'storageCapacity']) - 1;
                 }, 'upgradeCheck', '', 'storage', null, 'glass', true, null, 'compound'),
                 null,
@@ -597,6 +599,7 @@ export function drawTab4Content(heading, optionContentElement) {
                 'Increase Storage:',
                 createButton('Increase Storage', ['option-button', 'red-disabled-text', 'compound-cost-sell-check'], () => {
                     increaseResourceStorage(['steelQuantity'], ['steel'], ['compounds']);
+                    disableStorageNotificationActionIfShowing('steel', 'Already Increased!');
                     storagePrice = getResourceDataObject('compounds', ['steel', 'storageCapacity']) - 1;
                 }, 'upgradeCheck', '', 'storage', null, 'steel', true, null, 'compound'),
                 null,
@@ -826,6 +829,7 @@ export function drawTab4Content(heading, optionContentElement) {
                 'Increase Storage:',
                 createButton('Increase Storage', ['option-button', 'red-disabled-text', 'compound-cost-sell-check'], () => {
                     increaseResourceStorage(['concreteQuantity'], ['concrete'], ['compounds']);
+                    disableStorageNotificationActionIfShowing('concrete', 'Already Increased!');
                     storagePrice = getResourceDataObject('compounds', ['concrete', 'storageCapacity']) - 1;
                 }, 'upgradeCheck', '', 'storage', null, 'concrete', true, null, 'compound'),
                 null,
@@ -1057,6 +1061,7 @@ export function drawTab4Content(heading, optionContentElement) {
                 'Enlarge Reservoir:',
                 createButton('Enlarge Reservoir', ['option-button', 'red-disabled-text', 'compound-cost-sell-check'], () => {
                     increaseResourceStorage(['waterQuantity', 'concreteQuantity'], ['water', 'concrete'], ['compounds', 'compounds']);
+                    disableStorageNotificationActionIfShowing('water', 'Already Increased!');
                     storagePrice = getResourceDataObject('compounds', ['water', 'storageCapacity']) - 1;
                     extraResourceName = 'Concrete';
                 }, 'upgradeCheck', '', 'storage', null, 'water', true, null, 'compound'),
@@ -1287,6 +1292,7 @@ export function drawTab4Content(heading, optionContentElement) {
                 'Increase Storage:',
                 createButton('Increase Storage', ['option-button', 'red-disabled-text', 'compound-cost-sell-check'], () => {
                     increaseResourceStorage(['titaniumQuantity'], ['titanium'], ['compounds']);
+                    disableStorageNotificationActionIfShowing('titanium', 'Already Increased!');
                     storagePrice = getResourceDataObject('compounds', ['titanium', 'storageCapacity']) - 1;
                 }, 'upgradeCheck', '', 'storage', null, 'titanium', true, null, 'compound'),
                 null,

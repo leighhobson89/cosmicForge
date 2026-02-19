@@ -415,6 +415,7 @@ import {
     sortTechRows,
     showNotification,
     showNotificationWithAction,
+    disableStorageNotificationActionIfShowing,
     showTabsUponUnlock,
     getTimeInStatCell,
     statToolBarCustomizations,
@@ -485,10 +486,22 @@ function performIncreaseStorageForKey(category, key) {
 
     if (normalizedCategory === 'compounds' && normalizedKey === 'water') {
         increaseResourceStorage(['waterQuantity', 'concreteQuantity'], ['water', 'concrete'], ['compounds', 'compounds']);
+        disableStorageNotificationActionIfShowing(normalizedKey, 'Already Increased!');
+        // Clear notification flag so it can fire again if storage fills up
+        const bucket = storageFullNotificationState[normalizedCategory];
+        if (bucket) {
+            bucket[normalizedKey] = false;
+        }
         return;
     }
 
     increaseResourceStorage([`${normalizedKey}Quantity`], [normalizedKey], [normalizedCategory]);
+    disableStorageNotificationActionIfShowing(normalizedKey, 'Already Increased!');
+    // Clear notification flag so it can fire again if storage fills up
+    const bucket = storageFullNotificationState[normalizedCategory];
+    if (bucket) {
+        bucket[normalizedKey] = false;
+    }
 }
 
 function maybeNotifyStorageFull(category, key, previousQuantity, newQuantity, storageCapacity) {

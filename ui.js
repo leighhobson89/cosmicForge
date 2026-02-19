@@ -4214,7 +4214,13 @@ function sendNotification(message, type, classification, duration, actionLabel, 
     if (!container) return;
 
     const notification = document.createElement('div');
-    notification.className = `notification notification-${type}`;
+    notification.className = 'notification show';
+    if (classification) {
+        notification.dataset.notificationClassification = String(classification);
+    }
+
+    notification.style.position = 'relative';
+    notification.style.paddingBottom = '40px';
     notification.innerHTML = `<div class="notification-content">${message}</div>`;
 
     const existing = container.querySelector('.notification');
@@ -4354,6 +4360,70 @@ function hideNotification(notification) {
         notification.remove();
     }, 500);
 }
+
+export function disableStorageNotificationActionIfShowing(key, tooltipText = 'Already Increased!') {
+    const normalizedKey = String(key || '').trim();
+    if (!normalizedKey) {
+        return;
+    }
+
+    const container = document.querySelector('.notification-container.classification-storage');
+    if (!container) {
+        return;
+    }
+
+    const notification = container.querySelector('.notification');
+    if (!notification) {
+        return;
+    }
+
+    const contentEl = notification.querySelector('.notification-content');
+    const messageText = String(contentEl?.textContent || '');
+    const keyLower = normalizedKey.toLowerCase();
+    if (!messageText.toLowerCase().includes(`${keyLower} storage is full`)) {
+        return;
+    }
+
+    const actionButton = notification.querySelector('button.notification-action-button');
+    if (!actionButton) {
+        return;
+    }
+
+    actionButton.disabled = true;
+    actionButton.classList.add('red-disabled-text');
+    actionButton.title = tooltipText;
+
+    actionButton.onmouseenter = (event) => {
+        const tooltip = document.getElementById('stat-tooltip');
+        if (!tooltip) {
+            return;
+        }
+        tooltip.innerHTML = `<div>${tooltipText}</div>`;
+        tooltip.style.display = 'block';
+        tooltip.style.left = `${event.pageX + 12}px`;
+        tooltip.style.top = `${event.pageY - 40}px`;
+    };
+
+    actionButton.onmousemove = (event) => {
+        const tooltip = document.getElementById('stat-tooltip');
+        if (!tooltip) {
+            return;
+        }
+        if (tooltip.style.display !== 'block') {
+            tooltip.style.display = 'block';
+        }
+        tooltip.style.left = `${event.pageX + 12}px`;
+        tooltip.style.top = `${event.pageY - 40}px`;
+    };
+
+    actionButton.onmouseleave = () => {
+        const tooltip = document.getElementById('stat-tooltip');
+        if (!tooltip) {
+            return;
+        }
+        tooltip.style.display = 'none';
+    };
+ }
 
 function highlightActiveTab(activeTabText) {
     if (activeTabText.trim() === "???") return;
