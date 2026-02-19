@@ -3214,7 +3214,7 @@ function generateAchievementTooltipDescriptions() {
         `,
         "collect100TitaniumAsPrecipitation": `
         ${getAchievementTooltipDescriptionTexts('collect100TitaniumAsPrecipitation')}<br>
-        <span class="green-ready-text">Reward: Permanent x1.3 all Resource Rates</span><br>
+        <span class="green-ready-text">Reward: 50AP</span><br>
         <span class="${getAchievementDataObject('collect100TitaniumAsPrecipitation', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
             Reset on Rebirth: ${getAchievementDataObject('collect100TitaniumAsPrecipitation', ['resetOnRebirth']) ? 'YES' : 'NO'}
         </span><br><br>
