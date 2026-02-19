@@ -60,7 +60,7 @@ export function checkForAchievements() {
 
         if (getCurrentOptionPane() === 'achievements') {
             const achievementElement = document.getElementById(achievement.id);
-            if (achievementElement) {
+            if (achievementElement && achievementElement.style) {
                 if (achievement && achievement.active) {
                     achievementElement.style.opacity = 1;
                 } else if (achievement && !achievement.active) {
