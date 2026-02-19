@@ -2,6 +2,7 @@ import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs/promises';
+import { exec } from 'node:child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -36,6 +37,10 @@ const TABLE = process.env.SUPABASE_ANALYTICS_TABLE || 'CosmicForge_analytics_eve
 
 const ROLLUP_TABLE = process.env.SUPABASE_ROLLUP_TABLE || 'analytics_rollups';
 const ROLLUP_ID = process.env.SUPABASE_ROLLUP_ID || 'latest';
+
+const args = new Set(process.argv.slice(2));
+const OPEN_SMALL = args.has('--open-small');
+const OPEN_LARGE = args.has('--open-large');
 
 async function supabaseFetch(pathname, searchParams) {
   const url = new URL(`${SUPABASE_URL}/rest/v1/${pathname}`);
@@ -543,6 +548,62 @@ function writeJson(res, status, value) {
   res.end(JSON.stringify(value));
 }
 
+async function fetchSmallRollupFromDB() {
+  const params = new URLSearchParams();
+  params.set('select', 'id,rollup,last_event_id,updated_at');
+  params.set('id', `eq.${ROLLUP_ID}`);
+  const rows = await supabaseFetch(ROLLUP_TABLE, params);
+  const row = Array.isArray(rows) && rows.length ? rows[0] : null;
+  if (!row || !row.rollup) {
+    throw new Error('No rollup data found in database. Ensure the edge function has run via cron.');
+  }
+  // Return the rollup JSON in the same shape the edge function would return
+  return {
+    ok: true,
+    processed: row.last_event_id || 0,
+    lastEventId: row.last_event_id || 0,
+    totalEvents: row.rollup?.totalEvents || 0,
+    feedbackThumbUp: row.rollup?.feedbackThumbUp || 0,
+    feedbackThumbDown: row.rollup?.feedbackThumbDown || 0,
+    recentFeedbackComments: row.rollup?.feedbackComments?.slice(-10) || [],
+    jsErrorSignatures: row.rollup?.jsErrorSignatures || {},
+    ...row.rollup,
+  };
+}
+
+async function saveSmallRollupToDB(rollup) {
+  if (!rollup || typeof rollup !== 'object') {
+    throw new Error('Invalid rollup payload');
+  }
+
+  const url = new URL(`${SUPABASE_URL}/rest/v1/${ROLLUP_TABLE}`);
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`,
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      Prefer: 'resolution=merge-duplicates,return=representation',
+    },
+    body: JSON.stringify([
+      {
+        id: ROLLUP_ID,
+        rollup,
+        updated_at: new Date().toISOString(),
+      },
+    ]),
+  });
+
+  const text = await res.text();
+  if (!res.ok) {
+    throw new Error(`Failed to save rollup ${res.status}: ${text}`);
+  }
+
+  return text ? JSON.parse(text) : null;
+}
+
 async function readJsonFileIfExists(filePath) {
   try {
     const raw = await fs.readFile(filePath, 'utf-8');
@@ -633,9 +694,59 @@ const server = http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url || '/', 'http://localhost');
 
+    if (url.pathname === '/favicon.ico') {
+      res.writeHead(204, { 'Cache-Control': 'no-store' });
+      res.end();
+      return;
+    }
+
     if (url.pathname.startsWith('/api/')) {
       if (url.pathname === '/api/health') {
         writeJson(res, 200, { ok: true });
+        return;
+      }
+
+      if (url.pathname === '/api/small-rollup' || url.pathname === '/api/analytics-rollup-mini') {
+        if (req.method === 'GET') {
+          try {
+            const summary = await fetchSmallRollupFromDB();
+            writeJson(res, 200, summary ?? { ok: false, error: 'Empty response' });
+          } catch (err) {
+            writeJson(res, 500, {
+              ok: false,
+              error: String(err?.message || err),
+            });
+          }
+          return;
+        }
+
+        if (req.method === 'PUT') {
+          try {
+            const text = await readRequestBody(req);
+            let parsed;
+            try {
+              parsed = JSON.parse(text);
+            } catch {
+              writeJson(res, 400, { ok: false, error: 'Invalid JSON' });
+              return;
+            }
+
+            const nextRollup = parsed?.rollup && typeof parsed.rollup === 'object' ? parsed.rollup : null;
+            if (!nextRollup) {
+              writeJson(res, 400, { ok: false, error: 'Missing rollup' });
+              return;
+            }
+
+            await saveSmallRollupToDB(nextRollup);
+            const summary = await fetchSmallRollupFromDB();
+            writeJson(res, 200, summary);
+          } catch (err) {
+            writeJson(res, 500, { ok: false, error: String(err?.message || err) });
+          }
+          return;
+        }
+
+        writeJson(res, 405, { ok: false, error: 'Method not allowed' });
         return;
       }
 
@@ -717,7 +828,7 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
-    const pathname = url.pathname === '/' ? '/tools/analytics-dashboard/index.html' : url.pathname;
+    const pathname = url.pathname === '/' ? '/tools/analytics-dashboard/indexSmall.html' : url.pathname;
     const filePath = safeJoin(repoRoot, pathname);
 
     if (!filePath) {
@@ -727,7 +838,10 @@ const server = http.createServer(async (req, res) => {
     }
 
     const data = await fs.readFile(filePath);
-    res.writeHead(200, { 'Content-Type': contentTypeFor(filePath) });
+    res.writeHead(200, {
+      'Content-Type': contentTypeFor(filePath),
+      'Cache-Control': 'no-store',
+    });
     res.end(data);
   } catch (err) {
     res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
@@ -746,5 +860,16 @@ server.on('error', (err) => {
 
 server.listen(PORT, '127.0.0.1', () => {
   console.log(`📊 Cosmic Forge Analytics Dashboard`);
-  console.log(`🔁 All‑time dashboard: http://127.0.0.1:${PORT}`);
+  console.log(`🔎 Dashboard: http://127.0.0.1:${PORT}`);
+
+  const openUrl = `http://127.0.0.1:${PORT}/tools/analytics-dashboard/indexSmall.html`;
+
+  if (OPEN_SMALL || OPEN_LARGE) {
+    const cmd = process.platform === 'win32'
+      ? `start "" "${openUrl}"`
+      : process.platform === 'darwin'
+        ? `open "${openUrl}"`
+        : `xdg-open "${openUrl}"`;
+    exec(cmd);
+  }
 });

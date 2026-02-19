@@ -49,7 +49,7 @@
   "scripts": {
     "start": "electron .",
     "save-inspector": "node tools/save-inspector/server.mjs",
-    "analytics-dashboard": "node tools/analytics-dashboard/server.mjs",
+    "analytics-dashboard": "node tools/analytics-dashboard/server.mjs --open-small",
     "build-icons": "mkdir -p icons && icon-gen -i icon.png -o icons",
     "build:mac": "bun run build-icons && electron-builder --mac --universal -c.mac.identity=null --publish never",
     "build:win": "bun run build-icons && electron-builder --win",

@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Cosmic Forge Analytics (Small)</title>
+    <link rel="stylesheet" href="/tools/analytics-dashboard/styles.css" />
+  </head>
+  <body data-theme="terminal">
+    <header>
+      <h1>Cosmic Forge - Analytics Dashboard (Small)</h1>
+      <div class="controls">
+        <label for="theme">Theme</label>
+        <select id="theme">
+          <option value="terminal" selected>Terminal</option>
+          <option value="dark">Dark</option>
+          <option value="supernova">Supernova</option>
+          <option value="galaxy">Galaxy</option>
+          <option value="space">Space</option>
+          <option value="light">Light</option>
+          <option value="frosty">Frosty</option>
+          <option value="summer">Summer</option>
+        </select>
+        <button id="btnRefresh">Refresh</button>
+        <span id="status" class="muted"></span>
+      </div>
+    </header>
+
+    <main>
+      <div class="card" data-panel-id="summary">
+        <h2>Summary</h2>
+        <div class="kpis">
+          <div class="kpi"><div class="label">Processed</div><div class="value" id="kpiProcessed">-</div></div>
+          <div class="kpi"><div class="label">Last Event ID</div><div class="value" id="kpiLastEventId">-</div></div>
+          <div class="kpi"><div class="label">Total Events</div><div class="value" id="kpiTotalEvents">-</div></div>
+          <div class="kpi"><div class="label">Feedback (Up / Down)</div><div class="value" id="kpiFeedback">-</div></div>
+        </div>
+        <div style="margin-top:10px" class="muted">
+          <span class="mono" id="meta"></span>
+        </div>
+      </div>
+
+      <div class="card" data-panel-id="recentFeedback">
+        <h2>Recent Feedback Comments</h2>
+        <div id="recentFeedbackComments" class="mono" style="white-space: pre-wrap; max-height: 260px; overflow: auto;"></div>
+      </div>
+
+      <div class="card" data-panel-id="jsErrors">
+        <h2>JS Errors</h2>
+        <div class="controls" style="margin-bottom: 10px; gap: 14px;">
+          <label><input type="checkbox" id="filterRuntime" checked /> Runtime</label>
+          <label><input type="checkbox" id="filterRejections" checked /> Rejections</label>
+          <label><input type="checkbox" id="filterWithStack" checked /> Only with stack</label>
+          <label><input type="checkbox" id="filterOnlyLocal" /> Only local scripts</label>
+          <span id="jsErrorSelectedCount" class="muted mono"></span>
+          <button id="btnDeleteSelectedJsErrors">Delete selected</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th id="jsErrSortCount" style="cursor: pointer; user-select: none;">Count</th>
+              <th id="jsErrSortLastSeen" style="cursor: pointer; user-select: none;">Last Seen</th>
+              <th id="jsErrSortType" style="cursor: pointer; user-select: none;">Type</th>
+              <th id="jsErrSortMessage" style="cursor: pointer; user-select: none;">Message</th>
+              <th id="jsErrSortLocation" style="cursor: pointer; user-select: none;">Location</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="jsErrors"></tbody>
+        </table>
+        <div id="jsErrorDetails" class="mono" style="white-space: pre-wrap; margin-top: 10px; max-height: 320px; overflow: auto;"></div>
+      </div>
+    </main>
+
+    <script type="module">
+      const $ = (id) => document.getElementById(id);
+
+      const THEME_STORAGE_KEY = 'analytics_dashboard_theme';
+
+      function fmtInt(n) {
+        return typeof n === 'number' && Number.isFinite(n) ? n.toLocaleString() : '-';
+      }
+
+      function nowIso() {
+        return new Date().toISOString();
+      }
+
+      function applyTheme(theme) {
+        if (!theme) return;
+        document.body.setAttribute('data-theme', theme);
+        try {
+          localStorage.setItem(THEME_STORAGE_KEY, theme);
+        } catch {
+          // ignore
+        }
+      }
+
+      function loadSavedTheme() {
+        let saved = null;
+        try {
+          saved = localStorage.getItem(THEME_STORAGE_KEY);
+        } catch {
+          saved = null;
+        }
+        const theme = saved || 'terminal';
+        const sel = $('theme');
+        if (sel) sel.value = theme;
+        applyTheme(theme);
+      }
+
+      function setStatus(text) {
+        const el = $('status');
+        if (!el) return;
+        el.textContent = text || '';
+      }
+
+      function isLocalScript(value) {
+        const s = String(value || '').trim();
+        if (!s) return false;
+        if (s.startsWith('/')) return true;
+        if (!s.includes('://')) return true;
+        if (window.location && typeof window.location.origin === 'string') {
+          return s.startsWith(window.location.origin);
+        }
+        return false;
+      }
+
+      const selectedJsErrorSignatures = new Set();
+
+      const jsErrorSortState = {
+        key: null,
+        dir: 'desc',
+      };
+
+      function updateJsErrorSelectedCount() {
+        const el = $('jsErrorSelectedCount');
+        if (!el) return;
+        const n = selectedJsErrorSignatures.size;
+        el.textContent = n > 0 ? `selected=${n}` : '';
+      }
+
+      function getSortArrow(key) {
+        if (jsErrorSortState.key !== key) return '';
+        return jsErrorSortState.dir === 'asc' ? ' ▲' : ' ▼';
+      }
+
+      function updateJsErrorSortHeaderLabels() {
+        const set = (id, base, key) => {
+          const el = $(id);
+          if (!el) return;
+          el.textContent = `${base}${getSortArrow(key)}`;
+        };
+        set('jsErrSortCount', 'Count', 'count');
+        set('jsErrSortLastSeen', 'Last Seen', 'lastSeen');
+        set('jsErrSortType', 'Type', 'type');
+        set('jsErrSortMessage', 'Message', 'message');
+        set('jsErrSortLocation', 'Location', 'location');
+      }
+
+      function compareValues(a, b) {
+        if (a === b) return 0;
+        if (a === null || a === undefined) return -1;
+        if (b === null || b === undefined) return 1;
+        if (typeof a === 'number' && typeof b === 'number') return a - b;
+        return String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' });
+      }
+
+      function renderSummary(summary) {
+        $('kpiProcessed').textContent = fmtInt(summary?.processed);
+        $('kpiLastEventId').textContent = fmtInt(summary?.lastEventId);
+        $('kpiTotalEvents').textContent = fmtInt(summary?.totalEvents);
+        const up = fmtInt(summary?.feedbackThumbUp);
+        const down = fmtInt(summary?.feedbackThumbDown);
+        $('kpiFeedback').textContent = `${up} / ${down}`;
+
+        const ok = summary?.ok ? 'ok' : 'error';
+        $('meta').textContent = `${ok} • updated=${nowIso()}`;
+
+        const comments = Array.isArray(summary?.recentFeedbackComments)
+          ? summary.recentFeedbackComments
+          : [];
+
+        $('recentFeedbackComments').textContent = comments.length
+          ? comments.map((c, i) => `${comments.length - i}. ${String(c)}`).join('\n\n')
+          : '(none)';
+
+        renderJsErrors(summary);
+      }
+
+      function renderJsErrors(rollup) {
+        const tbody = $('jsErrors');
+        if (!tbody) return;
+
+        const showRuntime = $('filterRuntime') ? $('filterRuntime').checked : true;
+        const showRejections = $('filterRejections') ? $('filterRejections').checked : true;
+        const onlyWithStack = $('filterWithStack') ? $('filterWithStack').checked : false;
+        const onlyLocal = $('filterOnlyLocal') ? $('filterOnlyLocal').checked : false;
+
+        const entries = Object.entries(rollup?.jsErrorSignatures || {})
+          .map(([signature, rec]) => ({ signature, ...rec }));
+
+        const filtered = entries.filter((rec) => {
+          const sample = rec.sample || {};
+          const eventName = sample.event_name || '';
+          if (!showRuntime && eventName === 'js_error') return false;
+          if (!showRejections && eventName === 'unhandled_promise_rejection') return false;
+          if (onlyWithStack && !(typeof sample.stack === 'string' && sample.stack.trim().length > 0)) return false;
+          if (onlyLocal && !isLocalScript(sample.filename)) return false;
+          return true;
+        });
+
+        const sortKey = jsErrorSortState.key;
+        const sortDir = jsErrorSortState.dir;
+
+        if (!sortKey) {
+          filtered.sort((a, b) => (b.count || 0) - (a.count || 0));
+        } else {
+          const dirMul = sortDir === 'asc' ? 1 : -1;
+          filtered.sort((a, b) => {
+            const sa = a.sample || {};
+            const sb = b.sample || {};
+
+            let va;
+            let vb;
+            if (sortKey === 'count') {
+              va = a.count || 0;
+              vb = b.count || 0;
+            } else if (sortKey === 'lastSeen') {
+              va = a.lastSeen || '';
+              vb = b.lastSeen || '';
+            } else if (sortKey === 'type') {
+              va = sa.event_name || '';
+              vb = sb.event_name || '';
+            } else if (sortKey === 'message') {
+              va = sa.message || '';
+              vb = sb.message || '';
+            } else if (sortKey === 'location') {
+              va = `${sa.filename || ''}:${sa.lineno ?? ''}:${sa.colno ?? ''}`;
+              vb = `${sb.filename || ''}:${sb.lineno ?? ''}:${sb.colno ?? ''}`;
+            }
+
+            const cmp = compareValues(va, vb);
+            if (cmp !== 0) return cmp * dirMul;
+            return compareValues(a.signature, b.signature);
+          });
+        }
+
+        tbody.innerHTML = '';
+        for (const rec of filtered.slice(0, 500)) {
+          const sample = rec.sample || {};
+          const tr = document.createElement('tr');
+
+          const tdSel = document.createElement('td');
+          const cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.checked = selectedJsErrorSignatures.has(rec.signature);
+          cb.addEventListener('change', () => {
+            if (cb.checked) {
+              selectedJsErrorSignatures.add(rec.signature);
+            } else {
+              selectedJsErrorSignatures.delete(rec.signature);
+            }
+            updateJsErrorSelectedCount();
+          });
+          tdSel.appendChild(cb);
+
+          const tdCount = document.createElement('td');
+          tdCount.textContent = fmtInt(rec.count || 0);
+          tdCount.className = 'mono';
+
+          const tdLast = document.createElement('td');
+          tdLast.textContent = rec.lastSeen || '-';
+          tdLast.className = 'mono';
+
+          const tdType = document.createElement('td');
+          tdType.textContent = sample.event_name || '-';
+          tdType.className = 'mono';
+
+          const tdMsg = document.createElement('td');
+          tdMsg.textContent = sample.message || '(no message)';
+          tdMsg.className = 'mono';
+
+          const tdLoc = document.createElement('td');
+          const loc = `${sample.filename || '-'}:${sample.lineno ?? '-'}:${sample.colno ?? '-'}`;
+          tdLoc.textContent = loc;
+          tdLoc.className = 'mono';
+
+          const tdBtn = document.createElement('td');
+          const btn = document.createElement('button');
+          btn.textContent = 'View';
+          btn.addEventListener('click', () => {
+            const details = [
+              `event=${sample.event_name || ''}`,
+              `count=${rec.count || 0}`,
+              `lastSeen=${rec.lastSeen || ''}`,
+              `name=${sample.name || ''}`,
+              `message=${sample.message || ''}`,
+              `file=${sample.filename || ''}`,
+              `line=${sample.lineno ?? ''}`,
+              `col=${sample.colno ?? ''}`,
+              `path=${sample.path || ''}`,
+              '',
+              'stack:',
+              sample.stack || '(no stack)'
+            ].join('\n');
+            $('jsErrorDetails').textContent = details;
+          });
+          tdBtn.appendChild(btn);
+
+          tr.appendChild(tdSel);
+          tr.appendChild(tdCount);
+          tr.appendChild(tdLast);
+          tr.appendChild(tdType);
+          tr.appendChild(tdMsg);
+          tr.appendChild(tdLoc);
+          tr.appendChild(tdBtn);
+          tbody.appendChild(tr);
+        }
+
+        if (filtered.length === 0) {
+          $('jsErrorDetails').textContent = '(no errors match filters)';
+        }
+
+        updateJsErrorSelectedCount();
+        updateJsErrorSortHeaderLabels();
+      }
+
+      async function fetchSummary() {
+        setStatus('Loading…');
+        try {
+          const res = await fetch('/api/small-rollup', { cache: 'no-store' });
+          const json = await res.json();
+          if (!res.ok) throw new Error(json?.error || 'Failed to load');
+          renderSummary(json);
+          setStatus('');
+        } catch (err) {
+          setStatus(String(err?.message || err));
+        }
+      }
+
+      $('theme')?.addEventListener('change', (ev) => {
+        applyTheme(ev.target.value);
+      });
+
+      $('btnRefresh')?.addEventListener('click', () => {
+        fetchSummary();
+      });
+
+      const wireSort = (id, key) => {
+        $(id)?.addEventListener('click', () => {
+          if (jsErrorSortState.key === key) {
+            jsErrorSortState.dir = jsErrorSortState.dir === 'asc' ? 'desc' : 'asc';
+          } else {
+            jsErrorSortState.key = key;
+            jsErrorSortState.dir = key === 'count' ? 'desc' : 'asc';
+          }
+          fetchSummary();
+        });
+      };
+
+      wireSort('jsErrSortCount', 'count');
+      wireSort('jsErrSortLastSeen', 'lastSeen');
+      wireSort('jsErrSortType', 'type');
+      wireSort('jsErrSortMessage', 'message');
+      wireSort('jsErrSortLocation', 'location');
+
+      $('filterRuntime')?.addEventListener('change', () => fetchSummary());
+      $('filterRejections')?.addEventListener('change', () => fetchSummary());
+      $('filterWithStack')?.addEventListener('change', () => fetchSummary());
+      $('filterOnlyLocal')?.addEventListener('change', () => fetchSummary());
+
+      $('btnDeleteSelectedJsErrors')?.addEventListener('click', async () => {
+        const signatures = Array.from(selectedJsErrorSignatures);
+        if (signatures.length === 0) {
+          alert('No error signatures selected.');
+          return;
+        }
+        if (!confirm(`Delete ${signatures.length} selected error signature(s) from this rollup?`)) return;
+
+        try {
+          const res = await fetch('/api/small-rollup', { cache: 'no-store' });
+          const json = await res.json();
+          if (!res.ok) throw new Error(json?.error || 'Failed to load rollup');
+
+          const next = { ...(json || {}) };
+          if (!next.jsErrorSignatures || typeof next.jsErrorSignatures !== 'object') {
+            next.jsErrorSignatures = {};
+          }
+
+          for (const sig of signatures) {
+            delete next.jsErrorSignatures[sig];
+          }
+
+          await fetch('/api/small-rollup', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ rollup: next }),
+          });
+
+          selectedJsErrorSignatures.clear();
+          await fetchSummary();
+        } catch (err) {
+          alert(String(err?.message || err));
+        }
+      });
+
+      loadSavedTheme();
+      fetchSummary();
+    </script>
+  </body>
+</html>
