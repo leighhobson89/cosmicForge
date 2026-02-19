@@ -5769,8 +5769,8 @@ function buildBatteryTooltipContent() {
 
     const batteryLines = [
         { label: 'Sodium Ion Battery', path: ['energy', 'upgrades', 'battery1', 'quantity'] },
-        { label: 'Battery 2', path: ['energy', 'upgrades', 'battery2', 'quantity'] },
-        { label: 'Battery 3', path: ['energy', 'upgrades', 'battery3', 'quantity'] }
+        { label: 'Lithium Ion Battery', path: ['energy', 'upgrades', 'battery2', 'quantity'] },
+        { label: 'Stellar Capacitor Array', path: ['energy', 'upgrades', 'battery3', 'quantity'] }
     ].map(({ label, path }) => {
         const quantity = getResourceDataObject('buildings', path) ?? 0;
         const quantityClass = quantity > 0 ? 'green-ready-text' : 'red-disabled-text';

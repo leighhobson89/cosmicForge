@@ -55,7 +55,7 @@ export function drawTab2Content(heading, optionContentElement) {
         const battery2Row = createOptionRow(
             'energyBattery2Row',
             null,
-            'Battery 2:',
+            'Lithium Ion Battery:',
             createButton(`Add ${Math.floor(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery2', 'capacity']) / 1000)} MWh`, ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check', ...demoExtraClasses], () => {
                 gain(1, 'battery2Quantity', 'battery2', false, null, 'energy', 'resources');
                 addToResourceAllTimeStat(1, 'allTimeBattery2Built');
@@ -67,14 +67,17 @@ export function drawTab2Content(heading, optionContentElement) {
             null,
             null,
             null,
-            `${getCurrencySymbol() + getResourceDataObject('buildings', ['energy', 'upgrades', 'battery2', 'price'])}`,
+            `${getCurrencySymbol() + getResourceDataObject('buildings', ['energy', 'upgrades', 'battery2', 'price'])}, 
+            ${getResourceDataObject('buildings', ['energy', 'upgrades', 'battery2', 'resource1Price'])[0]} ${capitaliseString(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery2', 'resource1Price'])[1])}, 
+            ${getResourceDataObject('buildings', ['energy', 'upgrades', 'battery2', 'resource2Price'])[0]} ${capitaliseString(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery2', 'resource2Price'])[1])}, 
+            ${getResourceDataObject('buildings', ['energy', 'upgrades', 'battery2', 'resource3Price'])[0]} ${capitaliseString(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery2', 'resource3Price'])[1])}`,
             '',
             'upgradeCheck',
             'energy',
             'battery2',
             'cash',
             null,
-            ['tech', 'sodiumIonPowerStorage'],
+            ['tech', 'advancedPowerGeneration'],
             null,
             null,
             'building'
@@ -84,7 +87,7 @@ export function drawTab2Content(heading, optionContentElement) {
         const battery3Row = createOptionRow(
             'energyBattery3Row',
             null,
-            'Battery 3:',
+            'Stellar Capacitor Array:',
             createButton(`Add ${Math.floor(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery3', 'capacity']) / 1000)} MWh`, ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check', ...demoExtraClasses], () => {
                 gain(1, 'battery3Quantity', 'battery3', false, null, 'energy', 'resources');
                 addToResourceAllTimeStat(1, 'allTimeBattery3Built');
@@ -96,14 +99,17 @@ export function drawTab2Content(heading, optionContentElement) {
             null,
             null,
             null,
-            `${getCurrencySymbol() + getResourceDataObject('buildings', ['energy', 'upgrades', 'battery3', 'price'])}`,
+            `${getCurrencySymbol() + getResourceDataObject('buildings', ['energy', 'upgrades', 'battery3', 'price'])}, 
+            ${getResourceDataObject('buildings', ['energy', 'upgrades', 'battery3', 'resource1Price'])[0]} ${capitaliseString(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery3', 'resource1Price'])[1])}, 
+            ${getResourceDataObject('buildings', ['energy', 'upgrades', 'battery3', 'resource2Price'])[0]} ${capitaliseString(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery3', 'resource2Price'])[1])}, 
+            ${getResourceDataObject('buildings', ['energy', 'upgrades', 'battery3', 'resource3Price'])[0]} ${capitaliseString(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery3', 'resource3Price'])[1])}`,
             '',
             'upgradeCheck',
             'energy',
             'battery3',
             'cash',
             null,
-            ['tech', 'sodiumIonPowerStorage'],
+            ['tech', 'orbitalConstruction'],
             null,
             null,
             'building'

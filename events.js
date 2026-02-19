@@ -1481,8 +1481,8 @@ function getBuildingDisplayName(buildingKey) {
         powerPlant2: 'Solar Power Plant',
         powerPlant3: 'Advanced Power Plant',
         battery1: 'Sodium Ion Battery',
-        battery2: 'Battery 2',
-        battery3: 'Battery 3'
+        battery2: 'Lithium Ion Battery',
+        battery3: 'Stellar Capacitor Array'
     };
     return map[buildingKey] || buildingKey;
 }

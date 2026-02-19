@@ -8,7 +8,7 @@ import { showNotification } from "./ui.js";
 
 export let achievementImageUrls;
 export let resourceData = {
-    version: 0.94, //update this whenever changes are made to the structure
+    version: 0.95, //update this whenever changes are made to the structure
     resources: {
         solar: {
             autoSell: false,
@@ -512,8 +512,8 @@ export let resourceData = {
                 powerPlant3: {
                     revealedBy: 'advancedPowerGeneration',
                     price: 700,
-                    resource1Price: [0, '', ''],
-                    resource2Price: [0, '', ''],
+                    resource1Price: [800, 'hydrogen', 'resources'],
+                    resource2Price: [500, 'helium', 'resources'],
                     resource3Price: [0, '', ''],
                     rate: 0.35,
                     quantity: 0, 
@@ -534,18 +534,18 @@ export let resourceData = {
                 },
                 battery2: {
                     price: 50000,
-                    resource1Price: [0, '', ''],
-                    resource2Price: [0, '', ''],
-                    resource3Price: [0, '', ''],
+                    resource1Price: [3000, 'steel', 'compounds'],
+                    resource2Price: [1500, 'glass', 'compounds'],
+                    resource3Price: [2000, 'sodium', 'resources'],
                     capacity: 150000,
                     quantity: 0, 
                     setPrice: 'battery2Price'
                 },
                 battery3: {
                     price: 500000,
-                    resource1Price: [0, '', ''],
-                    resource2Price: [0, '', ''],
-                    resource3Price: [0, '', ''],
+                    resource1Price: [25000, 'titanium', 'compounds'],
+                    resource2Price: [12000, 'neon', 'resources'],
+                    resource3Price: [18000, 'silicon', 'resources'],
                     capacity: 1500000,
                     quantity: 0, 
                     setPrice: 'battery3Price'
@@ -979,7 +979,7 @@ export const miaplacidus = {
 
 
 export let starSystems = {
-    version: 0.94,
+    version: 0.95,
     stars: {
         spica: {
             mapSize: 5.504440179536064, //might need to add this to star object when added dynamically for after rebirth
@@ -998,14 +998,14 @@ export let starSystems = {
 };
 
 export let oTypePowerPlantBuffs = {
-    version: 0.94,
+    version: 0.95,
     basicPowerPlantStar: { starName: null, settled: false },
     solarPowerPlantStar: { starName: null, settled: false },
     advancedPowerPlantStar: { starName: null, settled: false }
 };
 
 export let galacticCasino = {
-    version: 0.94,
+    version: 0.95,
     settings: {
         baseProbabilityCasino: 0.4,
     },
@@ -1036,7 +1036,7 @@ export let galacticCasino = {
 };
 
 export let galacticMarket = {
-    version: 0.94,
+    version: 0.95,
     resources: {
         hydrogen: { 
             name: "Hydrogen", 
@@ -1142,7 +1142,7 @@ export let galacticMarket = {
 };
 
 export let ascendencyBuffs = {
-    version: 0.94,
+    version: 0.95,
     "littleBagOfHydrogen": {
         name: "Little Bag Of Hydrogen",
         description: "buffLittleBagOfHydrogenRow",

@@ -185,6 +185,60 @@ export function migrateResourceData(saveData, objectType, options = {}) {
             saveData.version = 0.94;
 
         }
+
+        if (saveData.version < 0.95) {
+
+            if (objectType === 'resourceData') {
+
+                const energyUpgrades = saveData?.buildings?.energy?.upgrades;
+
+                if (energyUpgrades && typeof energyUpgrades === 'object') {
+
+                    const GAME_COST_MULTIPLIER = 1.13;
+
+                    if (energyUpgrades.powerPlant3 && typeof energyUpgrades.powerPlant3 === 'object') {
+
+                        const quantity = energyUpgrades.powerPlant3.quantity || 0;
+                        const scaleFactor = Math.pow(GAME_COST_MULTIPLIER, quantity);
+
+                        energyUpgrades.powerPlant3.price = Math.ceil(700 * scaleFactor);
+                        energyUpgrades.powerPlant3.resource1Price = [Math.ceil(800 * scaleFactor), 'hydrogen', 'resources'];
+                        energyUpgrades.powerPlant3.resource2Price = [Math.ceil(500 * scaleFactor), 'helium', 'resources'];
+                        energyUpgrades.powerPlant3.resource3Price = [0, '', ''];
+
+                    }
+
+                    if (energyUpgrades.battery2 && typeof energyUpgrades.battery2 === 'object') {
+
+                        const quantity = energyUpgrades.battery2.quantity || 0;
+                        const scaleFactor = Math.pow(GAME_COST_MULTIPLIER, quantity);
+
+                        energyUpgrades.battery2.price = Math.ceil(50000 * scaleFactor);
+                        energyUpgrades.battery2.resource1Price = [Math.ceil(3000 * scaleFactor), 'steel', 'compounds'];
+                        energyUpgrades.battery2.resource2Price = [Math.ceil(1500 * scaleFactor), 'glass', 'compounds'];
+                        energyUpgrades.battery2.resource3Price = [Math.ceil(2000 * scaleFactor), 'sodium', 'resources'];
+
+                    }
+
+                    if (energyUpgrades.battery3 && typeof energyUpgrades.battery3 === 'object') {
+
+                        const quantity = energyUpgrades.battery3.quantity || 0;
+                        const scaleFactor = Math.pow(GAME_COST_MULTIPLIER, quantity);
+
+                        energyUpgrades.battery3.price = Math.ceil(500000 * scaleFactor);
+                        energyUpgrades.battery3.resource1Price = [Math.ceil(25000 * scaleFactor), 'titanium', 'compounds'];
+                        energyUpgrades.battery3.resource2Price = [Math.ceil(12000 * scaleFactor), 'neon', 'resources'];
+                        energyUpgrades.battery3.resource3Price = [Math.ceil(18000 * scaleFactor), 'silicon', 'resources'];
+
+                    }
+
+                }
+
+            }
+
+            saveData.version = 0.95;
+
+        }
         saveData.version += 0.001;
 
     }

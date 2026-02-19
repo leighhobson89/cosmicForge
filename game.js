@@ -4960,13 +4960,13 @@ function getBuildingResourceDescriptionElements() {
     const battery1BuyResource2Price = getResourceDataObject('buildings', ['energy', 'upgrades', 'battery1', 'resource2Price'])[0];
     const battery1BuyResource3Price = getResourceDataObject('buildings', ['energy', 'upgrades', 'battery1', 'resource3Price'])[0];
 
-    const battery2BuyDescElement = document.getElementById('battery2Description');
+    const battery2BuyDescElement = document.getElementById('lithiumIonBatteryDescription');
     const battery2BuyPrice = getResourceDataObject('buildings', ['energy', 'upgrades', 'battery2', 'price']);
     const battery2BuyResource1Price = getResourceDataObject('buildings', ['energy', 'upgrades', 'battery2', 'resource1Price'])[0];
     const battery2BuyResource2Price = getResourceDataObject('buildings', ['energy', 'upgrades', 'battery2', 'resource2Price'])[0];
     const battery2BuyResource3Price = getResourceDataObject('buildings', ['energy', 'upgrades', 'battery2', 'resource3Price'])[0];
 
-    const battery3BuyDescElement = document.getElementById('battery3Description');
+    const battery3BuyDescElement = document.getElementById('stellarCapacitorArrayDescription');
     const battery3BuyPrice = getResourceDataObject('buildings', ['energy', 'upgrades', 'battery3', 'price']);
     const battery3BuyResource1Price = getResourceDataObject('buildings', ['energy', 'upgrades', 'battery3', 'resource1Price'])[0];
     const battery3BuyResource2Price = getResourceDataObject('buildings', ['energy', 'upgrades', 'battery3', 'resource2Price'])[0];
@@ -10141,7 +10141,7 @@ function complexPurchaseBuildingFormatter(element, notationType) {
             if (index !== 0) {
                 numberPart = parts[1]?.replace(/[^0-9.]/g, '');
             } else {
-                numberPart = parts[0].replace(/[^0-9.]/g, '');
+            numberPart = parts[0].replace(/[^0-9.]/g, '');
             }
             
             const formattedNumber = formatNumber(numberPart);

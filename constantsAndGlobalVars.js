@@ -28,7 +28,7 @@ let saveData = null;
 //CONSTANTS
 export const HOMESTAR = 'miaplacidus';
 export const MINIMUM_GAME_VERSION_FOR_SAVES = 0.90;
-export const GAME_VERSION_FOR_SAVES = 0.94;
+export const GAME_VERSION_FOR_SAVES = 0.95;
 export const deferredActions = [];
 
 //NOTIFICATIONS
