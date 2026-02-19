@@ -9624,10 +9624,12 @@ export function sortStarTable(starsObject, sortMethod) {
                     "☂": 3,
                     "⛰": 4
                 };
-                const weatherIconA = starA.weatherTendency[0]; 
-                const weatherIconB = starB.weatherTendency[0];
-                const weatherProbabilityA = starA.weatherTendency[1];
-                const weatherProbabilityB = starB.weatherTendency[1];
+                const weatherArrA = Array.isArray(starA.weatherTendency) ? starA.weatherTendency : [];
+                const weatherArrB = Array.isArray(starB.weatherTendency) ? starB.weatherTendency : [];
+                const weatherIconA = weatherArrA[0] ?? '☀';
+                const weatherIconB = weatherArrB[0] ?? '☀';
+                const weatherProbabilityA = typeof weatherArrA[1] === 'number' && Number.isFinite(weatherArrA[1]) ? weatherArrA[1] : 0;
+                const weatherProbabilityB = typeof weatherArrB[1] === 'number' && Number.isFinite(weatherArrB[1]) ? weatherArrB[1] : 0;
 
                 if (weatherPriority[weatherIconA] !== weatherPriority[weatherIconB]) {
                     return weatherPriority[weatherIconA] - weatherPriority[weatherIconB];
