@@ -1873,6 +1873,7 @@ body {
     border: none;
     white-space: nowrap;
     padding: 6px 12px;
+    border: 1px solid rgba(var(--text-color-rgb), 0.12);
     border-radius: 8px;
     cursor: pointer;
     display: inline-flex;
@@ -1970,8 +1971,12 @@ body {
     }
 }
 
-.option-button:not(.red-disabled-text):active {
+.option-button:not(.red-disabled-text).option-button-animating {
     animation: option-button-pop 260ms ease-out;
+}
+
+.option-button:not(.red-disabled-text):active {
+    background-color: var(--button-bg-active) !important;
 }
 
 .option-button:not(.red-disabled-text)::after {
@@ -2005,14 +2010,22 @@ body {
     filter: drop-shadow(0 0 6px rgba(255,255,255,0.55));
 }
 
-.option-button:not(.red-disabled-text):active::after {
+.option-button:not(.red-disabled-text).option-button-animating::after {
     opacity: 1;
     animation: option-button-ripple 360ms ease-out;
 }
 
-.option-button:not(.red-disabled-text):active::before {
+.option-button:not(.red-disabled-text):active::after {
+    opacity: 0;
+}
+
+.option-button:not(.red-disabled-text).option-button-animating::before {
     opacity: 1;
     animation: option-button-particles 420ms ease-out;
+}
+
+.option-button:not(.red-disabled-text):active::before {
+    opacity: 0;
 }
 
 @keyframes modal-button-pop {
@@ -2052,10 +2065,11 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .option-button:not(.red-disabled-text):active {
+    .option-button:not(.red-disabled-text).option-button-animating {
         animation: none;
     }
-    .option-button:not(.red-disabled-text):active::after {
+    .option-button:not(.red-disabled-text).option-button-animating::after,
+    .option-button:not(.red-disabled-text).option-button-animating::before {
         animation: none;
         opacity: 0;
     }
@@ -2078,11 +2092,43 @@ body {
     width: 100%;
     justify-content: space-between;
     flex-direction: row;
+    gap: 10px;
+    padding: 8px 10px;
+    margin: 6px 0;
+    border-radius: 12px;
+    border: 1px solid rgba(var(--text-color-rgb), 0.12);
+    background: color-mix(in srgb, var(--container-bg-color) 88%, transparent);
+    transition: transform 120ms ease, background-color 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
 }
 
 .row-side-menu-item {
     width: 33%;
     box-sizing: border-box;
+}
+
+.row-side-menu-item p[class*="tab"] {
+    margin: 0;
+    width: 100%;
+    padding: 6px 0;
+    border-radius: 0;
+    user-select: none;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    background: transparent;
+    border: none;
+    min-height: 18px;
+    line-height: 18px;
+    transition: none;
+}
+
+.row-side-menu:hover {
+    background: rgba(var(--text-color-rgb), 0.09);
+    border-color: rgba(var(--text-color-rgb), 0.20);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+}
+
+.row-side-menu:active {
+    transform: translateY(1px);
 }
 
 [class*="option1"],
@@ -2578,7 +2624,13 @@ button.red-disabled-text {
 }
 
 .row-side-menu-selected {
-    background-color: rgba(var(--text-color-rgb), 0.2);
+    background: rgba(var(--text-color-rgb), 0.14);
+    border-color: rgba(var(--text-color-rgb), 0.32);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.25);
+}
+
+.row-side-menu:focus-within {
+    box-shadow: 0 0 0 2px rgba(var(--text-color-rgb), 0.55), 0 10px 24px rgba(0,0,0,0.22);
 }
 
 .collapsible-arrow {

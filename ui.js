@@ -2838,6 +2838,50 @@ function setupGlobalErrorAnalytics() {
 
 
 
+    document.addEventListener('click', (event) => {
+
+        const target = event.target;
+
+        if (!target || typeof target.closest !== 'function') {
+
+            return;
+
+        }
+
+
+
+        const row = target.closest('.row-side-menu');
+
+        if (!row) {
+
+            return;
+
+        }
+
+
+
+        if (target.closest('p[class*="tab"][class*="option"]')) {
+
+            return;
+
+        }
+
+
+
+        const primary = row.querySelector('.row-side-menu-item p[class*="tab"][class*="option"]');
+
+        if (!primary || primary.classList?.contains('red-disabled-text')) {
+
+            return;
+
+        }
+
+        primary.click();
+
+    }, true);
+
+
+
     window.addEventListener('unhandledrejection', (ev) => {
 
         if (!ev) return;
@@ -6482,6 +6526,22 @@ export function createButton(text, classNames, onClick, dataConditionCheck, reso
 
             playClickSfx();
 
+        }
+
+        // Set click position for ripple/particle effects
+        const rect = button.getBoundingClientRect();
+        const x = ((event.clientX - rect.left) / rect.width) * 100;
+        const y = ((event.clientY - rect.top) / rect.height) * 100;
+        button.style.setProperty('--click-x', `${x}%`);
+        button.style.setProperty('--click-y', `${y}%`);
+
+        // Only animate if not already animating
+        if (!button.classList.contains('option-button-animating')) {
+            button.classList.add('option-button-animating');
+            // Remove class after longest animation completes (particles = 420ms)
+            setTimeout(() => {
+                button.classList.remove('option-button-animating');
+            }, 420);
         }
 
         onClick(event);
