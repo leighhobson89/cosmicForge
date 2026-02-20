@@ -6538,10 +6538,10 @@ export function createButton(text, classNames, onClick, dataConditionCheck, reso
         // Only animate if not already animating
         if (!button.classList.contains('option-button-animating')) {
             button.classList.add('option-button-animating');
-            // Remove class after longest animation completes (particles = 420ms)
+            // Remove class after longest animation completes (particles = 210ms)
             setTimeout(() => {
                 button.classList.remove('option-button-animating');
-            }, 420);
+            }, 210);
         }
 
         onClick(event);

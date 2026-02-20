@@ -166,11 +166,6 @@
     letter-spacing: 1px;
 }
 
-/* ------------------------------------------------------------
-   Modern theme styling enhancements
-   ------------------------------------------------------------ */
-
-/* Default fallbacks for new theme tokens (keep existing themes stable) */
 [data-theme] {
     --ui-radius: 10px;
     --ui-radius-sm: 8px;
@@ -183,7 +178,6 @@
     --ui-surface-bg-2: var(--bg-color);
 }
 
-/* Global “modernization” hooks via existing shared classes */
 body {
     background: var(--bg-color);
     color: var(--text-color);
@@ -261,11 +255,11 @@ button.option-button {
     text-shadow: var(--ui-glow);
 }
 
-/* Supernova Theme Variables (warm, high-contrast light) */
 [data-theme="supernova"] {
     --battleBgImg: url('./resources/images/battleImage1_light.png');
     --disabled-text: #ff4d4d;
     --ready-text: #ffd54f;
+    --ready-text-transparent: rgba(255, 213, 79, 0.3);
     --warning-text: #ffb300;
     --stats-this-run-text: #8be9ff;
     --stats-all-time-text: #ffd54f;
@@ -299,11 +293,11 @@ button.option-button {
     --ui-glow-strong: 0 0 20px rgba(139, 233, 255, 0.35);
 }
 
-/* Galaxy Theme Variables */
 [data-theme="galaxy"] {
     --battleBgImg: url('./resources/images/battleImage1_dark.png');
     --disabled-text: #ff4d4d;
     --ready-text: #2ce6a6;
+    --ready-text-transparent: rgba(44, 230, 166, 0.4);
     --warning-text: #ffb020;
     --stats-this-run-text: #58a6ff;
     --stats-all-time-text: #c678ff;
@@ -337,11 +331,11 @@ button.option-button {
     --ui-glow-strong: 0 0 18px rgba(88, 166, 255, 0.25);
 }
 
-/* Space Theme Variables (wacky) */
 [data-theme="space"] {
     --battleBgImg: url('./resources/images/battleImage1_dark.png');
     --disabled-text: #ff2bd6;
     --ready-text: #00f5ff;
+    --ready-text-transparent: rgba(0, 245, 255, 0.3);
     --warning-text: #ffe600;
     --stats-this-run-text: #00f5ff;
     --stats-all-time-text: #ff2bd6;
@@ -1099,6 +1093,7 @@ button {
     --twinkle-scale: 1.2;
     --disabled-text: red;
     --ready-text: rgba(0, 255, 0, 1);
+    --ready-text-transparent: rgba(0, 255, 0, 0.3);
     --warning-text: orange;
     --stats-this-run-text: #87cefa;
     --stats-all-time-text: #ff80ff;
@@ -1126,14 +1121,14 @@ button {
     --consumption-colors: #F44336, #E91E63, #9C27B0;
 }
 
-/* Light Theme Variables */
 [data-theme="light"] {
     --battleBgImg: url('./resources/images/battleImage1_light.png');
     --disabled-text: red;
     --ready-text: rgb(0, 187, 0);
+    --ready-text-transparent: rgba(0, 187, 0, 0.5);
     --warning-text: orange;
-    --stats-this-run-text: #2e7d32; /* Dark green for contrast on light background */
-    --stats-all-time-text: #00695c; /* Deep cyan for contrast */
+    --stats-this-run-text: #2e7d32;
+    --stats-all-time-text: #00695c;
     --bg-color: white;
     --text-color: rgba(0, 0, 0, 1);
     --text-color-rgb: 0, 0, 0;
@@ -1172,14 +1167,14 @@ button {
     --accent-soft: rgba(184, 134, 11, 0.18);
 }
 
-/* Frosty Theme Variables */
 [data-theme="frosty"] {
     --battleBgImg: url('./resources/images/battleImage1_frosty.png');
     --disabled-text: red;
-    --ready-text: rgb(0, 187, 0);
+    --ready-text: #009688;
+    --ready-text-transparent: rgba(0, 150, 136, 0.3);
     --warning-text: orange;
-    --stats-this-run-text: #1565c0; /* A vibrant blue for contrast on frosty light background */
-    --stats-all-time-text: #009688; /* Rich cyan for contrast */
+    --stats-this-run-text: #1565c0;
+    --stats-all-time-text: #009688;
     --bg-color: #e1f7ff;
     --text-color: rgba(18, 159, 219, 1);
     --text-color-rgb: 18, 159, 219;
@@ -1203,45 +1198,45 @@ button {
     --consumption-colors: #e57373, #ef9a9a, #ffcdd2;
 }
 
-/* Summer Theme Variables */
 [data-theme="summer"] {
     --battleBgImg: url('./resources/images/battleImage1_summer.png');
-    --disabled-text: red;
-    --ready-text: rgb(0, 187, 0);
-    --warning-text: orange;
-    --stats-this-run-text: #e65100; /* Bright orange for contrast */
-    --stats-all-time-text: #6d4c41; /* Dark brown for contrast instead of yellow */
+    --disabled-text: #c62828;
+    --ready-text: #8d4513;
+    --ready-text-transparent: rgba(141, 69, 19, 0.6);
+    --warning-text: rgb(219, 153, 30);
+    --stats-this-run-text: #8d4513;
+    --stats-all-time-text: #6d4c41;
     --bg-color: #c5c1a0;
     --text-color: rgba(142, 81, 34, 1);
     --text-color-rgb: 142, 81, 34;
     --text-color-hex: #8e5122;
     --text-hover-color: #ffee57;
     --text-focus-color: #ffee57;
-    --tab-bg-color: #e4c066;
-    --tab-bg-hover: #ffcc00;
-    --tab-selected-bg-color: #ff774e;
-    --tab-border-color: #ff9800;
-    --tab-invisible-bg-color: #fdd835;
-    --tab-invisible-text-color: #ff774e;
+    --tab-bg-color: rgba(141, 69, 19, 0.10);
+    --tab-bg-hover: rgba(141, 69, 19, 0.14);
+    --tab-selected-bg-color: rgba(141, 69, 19, 0.18);
+    --tab-border-color: rgba(141, 69, 19, 0.24);
+    --tab-invisible-bg-color: rgba(141, 69, 19, 0.06);
+    --tab-invisible-text-color: rgba(142, 81, 34, 0.35);
     --container-border-color: #ffa37f;
     --container-bg-color: #d8cf8e;
     --button-bg-color: #e4c066;
     --button-bg-active: #ffdab0;
     --star-color-prominent: #471414;
     --star-color-settled: #2a5faa;
-    --current-star-border: #ff4500;
+    --current-star-border: #b55735;
     --generation-colors: #ffcc80, #ffb74d, #ffa726;
     --consumption-colors: #ff8a65, #ff7043, #d84315;
 }
 
-/* Terminal Theme Variables */
 [data-theme="terminal"] {
     --battleBgImg: url('./resources/images/battleImage1_terminal.png');
     --disabled-text: red;
     --ready-text: #fff;
+    --ready-text-transparent: rgba(255, 255, 255, 0.3);
     --warning-text: orange;
-    --stats-this-run-text: magenta; /* Much darker green for better contrast */
-    --stats-all-time-text: cyan; /* Cyan for contrast */
+    --stats-this-run-text: magenta;
+    --stats-all-time-text: cyan;
     --bg-color: black;
     --text-color: rgba(0, 255, 0, 1);
     --text-color-rgb: 0, 255, 0;
@@ -1265,11 +1260,11 @@ button {
     --consumption-colors: red, #f00, #800;
 }
 
-/* Dark Theme Variables */
 [data-theme="dark"] {
     --battleBgImg: url('./resources/images/battleImage1_dark.png');
     --disabled-text: #ff0000;
     --ready-text: #00ff00;
+    --ready-text-transparent: rgba(0, 255, 0, 0.3);
     --warning-text: orange;
     --stats-this-run-text: #90caf9;
     --stats-all-time-text: #8e24aa;
@@ -1296,7 +1291,6 @@ button {
     --consumption-colors: #c62828, #e53935, #ef5350;
 }
 
-/* Global Styles */
 body {
     margin: 0;
     padding: 0;
@@ -1886,6 +1880,11 @@ body {
     overflow: hidden;
 }
 
+.option-button:not(.red-disabled-text) {
+    border: 1px solid var(--ready-text);
+    box-shadow: 0 0 20px var(--ready-text-transparent);
+}
+
 .option-button.option-button--wrap {
     white-space: pre-wrap;
     overflow-wrap: anywhere;
@@ -1972,7 +1971,7 @@ body {
 }
 
 .option-button:not(.red-disabled-text).option-button-animating {
-    animation: option-button-pop 260ms ease-out;
+    animation: option-button-pop 130ms ease-out;
 }
 
 .option-button:not(.red-disabled-text):active {
@@ -2012,7 +2011,7 @@ body {
 
 .option-button:not(.red-disabled-text).option-button-animating::after {
     opacity: 1;
-    animation: option-button-ripple 360ms ease-out;
+    animation: option-button-ripple 180ms ease-out;
 }
 
 .option-button:not(.red-disabled-text):active::after {
@@ -2021,7 +2020,7 @@ body {
 
 .option-button:not(.red-disabled-text).option-button-animating::before {
     opacity: 1;
-    animation: option-button-particles 420ms ease-out;
+    animation: option-button-particles 210ms ease-out;
 }
 
 .option-button:not(.red-disabled-text):active::before {
