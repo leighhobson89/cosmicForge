@@ -4,7 +4,7 @@ import { getRocketPartsNeededInTotalPerRocket, getRocketParts, getResourceDataOb
 import { startTravelToAndFromAsteroidTimer, startInvestigateStarTimer, startSearchAsteroidTimer, launchRocket, gain, startUpdateTimersAndRates, addBuildingPotentialRate, buildSpaceMiningBuilding, addToResourceAllTimeStat, startPillageVoidTimer } from './game.js';
 import { timerManagerDelta } from './timerManagerDelta.js';
 
-import { removeTabAttentionIfNoIndicators, createSvgElement, createDropdown, createToggleSwitch, handleSortAsteroidClick, sortAsteroidTable, switchFuelGaugeWhenFuellerBought, createTextElement, createOptionRow, createButton, showNotification, renameRocket } from './ui.js';
+import { removeTabAttentionIfNoIndicators, createSvgElement, createDropdown, createToggleSwitch, handleSortAsteroidClick, sortAsteroidTable, switchFuelGaugeWhenFuellerBought, createTextElement, createOptionRow, createButton, setupInfoTooltips,showNotification, renameRocket } from './ui.js';
 import { capitaliseString } from './utilityFunctions.js';
 import { sfxPlayer } from './audioManager.js'
 
@@ -19,6 +19,26 @@ export function drawTab6Content(heading, optionContentElement) {
         }
     }
     removeTabAttentionIfNoIndicators('tab6');
+
+    const headerRow = document.getElementById('headerContentTab6');
+    if (headerRow) {
+        const isRocketHeading = [getRocketUserName('rocket1'), getRocketUserName('rocket2'), getRocketUserName('rocket3'), getRocketUserName('rocket4')].includes(heading);
+        if (isRocketHeading) {
+            const existingInfoEmoji = headerRow.querySelectorAll?.('.info-emoji') || [];
+            existingInfoEmoji.forEach(el => el.remove());
+        }
+        if (heading === 'Mining') {
+            headerRow.innerHTML = `Mining <p id="info_miningHeader" class="info-emoji">ℹ️</p>`;
+        }
+        if (heading === 'Launch Pad') {
+            headerRow.innerHTML = `Launch Pad <p id="info_launchPadHeader" class="info-emoji">ℹ️</p>`;
+        }
+        if (heading === 'Asteroids') {
+            headerRow.innerHTML = `Asteroids <p id="info_asteroidsHeader" class="info-emoji">ℹ️</p>`;
+        }
+    }
+
+    setupInfoTooltips();
 
     const asteroids = getAsteroidArray();
     const asteroidsBeingMinedOrExhausted = getMiningObject();

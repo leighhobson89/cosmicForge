@@ -3257,11 +3257,11 @@ export function setResourceDataObject(value, key, subKeys = []) {
         }
 
         if (typeof previousValue === 'number' && Number.isFinite(previousValue)) {
-            console.warn(`setResourceDataObject prevented non-finite numeric write to ${String(key)}.${subKeys.join('.')}; preserving previous value.`);
+            //console.warn(`setResourceDataObject prevented non-finite numeric write to ${String(key)}.${subKeys.join('.')}; preserving previous value.`);
             return;
         }
 
-        console.warn(`setResourceDataObject prevented non-finite numeric write to ${String(key)}.${subKeys.join('.')}; defaulting to 0.`);
+        //console.warn(`setResourceDataObject prevented non-finite numeric write to ${String(key)}.${subKeys.join('.')}; defaulting to 0.`);
         value = 0;
     }
 

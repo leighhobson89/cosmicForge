@@ -1346,8 +1346,8 @@ body {
     display: none !important;
 }
 
- .inline-icon-header {
-     display: inline-flex;
+ .tab-description-row {
+     display: flex;
      align-items: center;
      gap: 6px;
  }
@@ -1356,8 +1356,10 @@ body {
      display: inline-block;
      margin: 0;
      padding: 0;
-     line-height: 1;
+     position: relative;
+     z-index: 2;
      cursor: help;
+     line-height: 1;
      pointer-events: auto;
  }
 

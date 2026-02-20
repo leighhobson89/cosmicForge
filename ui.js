@@ -19310,13 +19310,15 @@ export function sortStarTable(starsObject, sortMethod) {
 
 
 
-    let sortedEntries = Object.entries(starsObject).sort(([keyA, starA], [keyB, starB]) => {
+    let sortedEntries = Object.entries(starsObject)
+        .filter(([, star]) => star && typeof star === 'object')
+        .sort(([keyA, starA], [keyB, starB]) => {
 
         switch (sortMethod) {
 
             case "distance":
 
-                return starA.distance - starB.distance;
+                return Number(starA?.distance ?? 0) - Number(starB?.distance ?? 0);
 
             case "type": {
 

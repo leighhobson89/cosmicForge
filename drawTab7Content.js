@@ -1,4 +1,4 @@
-import { removeTabAttentionIfNoIndicators, createOptionRow, createButton, createDropdown, createTextElement, createTextFieldArea, createSpinningDropdown, callPopupModal, showHideModal, createMegaStructureDiagram, createMegaStructureTable, createBlackHole, setButtonState, showNotification, updateDescriptionRow } from './ui.js';
+import { removeTabAttentionIfNoIndicators, createOptionRow, createButton, createDropdown, createTextElement, createTextFieldArea, createSpinningDropdown, callPopupModal, showHideModal, createMegaStructureDiagram, createMegaStructureTable, createBlackHole, setButtonState, showNotification, updateDescriptionRow, setupInfoTooltips } from './ui.js';
 import {
     getStarsWithAncientManuscripts,
     getDestinationStar,
@@ -351,6 +351,11 @@ export function drawTab7Content(heading, optionContentElement) {
     }
 
     if (heading === 'Galactic Casino') {
+        const headerRow = document.getElementById('headerContentTab7');
+        if (headerRow) {
+            headerRow.innerHTML = `Galactic Casino <p id="info_galacticCasinoHeader" class="info-emoji">ℹ️</p>`;
+        }
+
         const purchaseCpRow = createOptionRow(
             'galacticCasinoPurchaseCpRow',
             null,
@@ -396,6 +401,8 @@ export function drawTab7Content(heading, optionContentElement) {
             ['no-left-margin', 'galactic-casino-input-container']
         );
         optionContentElement.appendChild(purchaseCpRow);
+
+        setupInfoTooltips();
 
         document.getElementById('galacticCasinoPurchaseQuantityTextArea').addEventListener('input', (event) => {
             if (event.target.value.startsWith('0') && event.target.value.length > 1) {
@@ -1709,9 +1716,10 @@ export function drawTab7Content(heading, optionContentElement) {
     
         Object.keys(ascendencyBuffsArray).forEach(buffKey => {
             const buff = ascendencyBuffsArray[buffKey];
-            const buffName = typeof buff?.name === 'string' ? buff.name : capitaliseString(buffKey);
-            const buffNameSlug = buffName.replace(/\s+/g, '-').toLowerCase();
-            const buffNameId = buffName.replace(/\s+/g, '').replace(/^./, str => str.toLowerCase());
+            const buffNameRaw = typeof buff?.name === 'string' ? buff.name : capitaliseString(buffKey);
+            const buffName = typeof buffNameRaw === 'string' ? buffNameRaw : capitaliseString(buffKey);
+            const buffNameSlug = String(buffName).replace(/\s+/g, '-').toLowerCase();
+            const buffNameId = String(buffName).replace(/\s+/g, '').replace(/^./, str => str.toLowerCase());
     
             const buffRowDescription = `buff${capitaliseString(buffKey)}Row`;
             const cost = buff.rebuyable ? buff.baseCostAp * Math.pow(buff.rebuyableIncreaseMultiple, buff.boughtYet) : buff.baseCostAp;
