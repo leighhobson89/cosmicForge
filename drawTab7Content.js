@@ -1962,7 +1962,7 @@ export function drawTab7Content(heading, optionContentElement) {
             setTimeLeftUntilBlackHoleChargeTimerFinishes(0);
             startBlackHoleChargeTimer([0, 'researchComplete']);
         });
-        const blackHoleButton2 = createButton('Power', ['id_blackHoleButton2', 'option-button', 'wide-option-button'], () => {
+        const blackHoleButton2 = createButton('Power', ['id_blackHoleButton2', 'option-button', 'wide-option-button', 'option-button--wrap'], () => {
             if (!getBlackHoleResearchDone()) {
                 return;
             }
@@ -1981,7 +1981,7 @@ export function drawTab7Content(heading, optionContentElement) {
             const increment = currentPower >= 50 ? 0.5 : baseIncrement;
             setBlackHolePower(currentPower + increment);
         });
-        const blackHoleButton3 = createButton('Duration', ['id_blackHoleButton3', 'option-button', 'wide-option-button'], () => {
+        const blackHoleButton3 = createButton('Duration', ['id_blackHoleButton3', 'option-button', 'wide-option-button', 'option-button--wrap'], () => {
             if (!getBlackHoleResearchDone()) {
                 return;
             }
@@ -2004,7 +2004,7 @@ export function drawTab7Content(heading, optionContentElement) {
             setBlackHoleDurationPrice(Math.ceil(price * getGameCostMultiplier()));
             setBlackHoleDuration(getBlackHoleDuration() + getBlackHoleDurationUpgradeIncrementMs());
         });
-        const blackHoleButton4 = createButton('Recharge', ['id_blackHoleButton4', 'option-button', 'wide-option-button'], () => {
+        const blackHoleButton4 = createButton('Recharge', ['id_blackHoleButton4', 'option-button', 'wide-option-button', 'option-button--wrap'], () => {
             if (!getBlackHoleResearchDone()) {
                 return;
             }
