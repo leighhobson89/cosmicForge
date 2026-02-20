@@ -616,6 +616,8 @@ import {
 
     modalEventBlackHoleInstabilityEndedText,
 
+    infoTooltipDescriptions,
+
     
 
 } from "./descriptions.js";
@@ -2160,6 +2162,34 @@ function attachSharedTooltip(element, getContent) {
 
 
 
+export function setupInfoTooltips() {
+
+    const elements = document.querySelectorAll('.info-emoji');
+
+    elements.forEach((element) => {
+
+        attachSharedTooltip(element, () => {
+
+            const id = element?.id;
+
+            const map = infoTooltipDescriptions;
+
+            if (!id || !map) {
+
+                return '';
+
+            }
+
+            return map[id] || '';
+
+        });
+
+    });
+
+}
+
+
+
 function hasMegaStructureTech(techList, structureId, techIndex) {
 
     return Array.isArray(techList) && techList.some(entry => Array.isArray(entry) && entry[0] === structureId && entry[1] === techIndex);
@@ -2952,6 +2982,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     setupStatTooltips();
 
+    setupInfoTooltips();
+
     attachEnergyTooltipMirrors();
 
 
@@ -3402,7 +3434,7 @@ function setupStatTooltips() {
 
     tooltip.style.fontSize = '12px';
 
-    tooltip.style.zIndex = '100000';
+    tooltip.style.zIndex = '2147483647';
 
     tooltip.style.display = 'none';
 
@@ -19310,19 +19342,27 @@ export function sortStarTable(starsObject, sortMethod) {
 
                 };
 
-                const weatherIconA = starA.weatherTendency[0]; 
+                const tendencyA = Array.isArray(starA?.weatherTendency) ? starA.weatherTendency : null;
 
-                const weatherIconB = starB.weatherTendency[0];
+                const tendencyB = Array.isArray(starB?.weatherTendency) ? starB.weatherTendency : null;
 
-                const weatherProbabilityA = starA.weatherTendency[1];
+                const weatherIconA = tendencyA?.[0] ?? '';
 
-                const weatherProbabilityB = starB.weatherTendency[1];
+                const weatherIconB = tendencyB?.[0] ?? '';
+
+                const weatherProbabilityA = Number(tendencyA?.[1] ?? -1);
+
+                const weatherProbabilityB = Number(tendencyB?.[1] ?? -1);
 
 
 
-                if (weatherPriority[weatherIconA] !== weatherPriority[weatherIconB]) {
+                const priorityA = weatherPriority[weatherIconA] ?? 999;
 
-                    return weatherPriority[weatherIconA] - weatherPriority[weatherIconB];
+                const priorityB = weatherPriority[weatherIconB] ?? 999;
+
+                if (priorityA !== priorityB) {
+
+                    return priorityA - priorityB;
 
                 }
 

@@ -12300,10 +12300,9 @@ function generateCivilizationLevel(starData) {
     if (randomValue < 0.1) {
         return 'Unsentient';
     } else if (randomValue < 0.55) {
-        addToResourceAllTimeStat(starData.ascendencyPoints, 'apAnticipated'); //double anticipated if a civilization is there
-        return 'Industrial';
+        addToResourceAllTimeStat(starData.ascendencyPoints, 'apAnticipated');
     } else {
-        addToResourceAllTimeStat(starData.ascendencyPoints, 'apAnticipated'); //double anticipated if a civilization is there
+        addToResourceAllTimeStat(starData.ascendencyPoints, 'apAnticipated');
         return 'Spacefaring';
     }
 }

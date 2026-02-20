@@ -1346,6 +1346,21 @@ body {
     display: none !important;
 }
 
+ .inline-icon-header {
+     display: inline-flex;
+     align-items: center;
+     gap: 6px;
+ }
+
+ .info-emoji {
+     display: inline-block;
+     margin: 0;
+     padding: 0;
+     line-height: 1;
+     cursor: help;
+     pointer-events: auto;
+ }
+
 .visibility-hidden {
     visibility: hidden !important;
 }
@@ -1624,19 +1639,23 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.select-container select {
-    width: 100%;
-    padding: 10px;
-    background-color: var(--container-bg-color);
+.select-container #stat-tooltip {
+    position: absolute;
+    padding: 6px 10px;
+    pointer-events: none;
+    background: var(--container-bg-color);
     color: var(--text-color);
-    border: 1px solid var(--container-border-color);
-    border-radius: 8px;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    cursor: pointer;
+    border: 1px solid var(--border-color, #555);
+    border-radius: var(--border-radius, 4px);
+    font-size: 12px;
+    z-index: 2147483647;
+    display: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    max-width: 380px;
+    max-height: 80vh;
+    overflow-y: auto;
+    word-wrap: break-word;
+    white-space: normal;
 }
 
 .select-container select:hover {

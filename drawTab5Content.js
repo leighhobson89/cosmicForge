@@ -1,4 +1,4 @@
-import { removeTabAttentionIfNoIndicators, createColoniseOpinionProgressBar, setColoniseOpinionProgressBar, spaceTravelButtonHideAndShowDescription, drawStarConnectionDrawings, createStarDestinationRow, sortStarTable, handleSortStarClick, createTextElement, createOptionRow, createButton, generateStarfield, showNotification, showEnterWarModeModal, setWarUI, removeStarConnectionTooltip } from './ui.js';
+import { removeTabAttentionIfNoIndicators, createColoniseOpinionProgressBar, setColoniseOpinionProgressBar, spaceTravelButtonHideAndShowDescription, setupInfoTooltips, drawStarConnectionDrawings, createStarDestinationRow, sortStarTable, handleSortStarClick, createTextElement, createOptionRow, createButton, generateStarfield, showNotification, showEnterWarModeModal, setWarUI, removeStarConnectionTooltip } from './ui.js';
 import { sfxPlayer } from './audioManager.js';
 import { getStarNames, getStarTypeByName } from './descriptions.js';
 import { getFactoryStarsArray, getSettledStars, setInFormation, setRedrawBattleDescription, setFleetChangedSinceLastDiplomacy, setDestinationStarScanned, getDestinationStarScanned, getStellarScannerBuilt, getStarShipTravelling, getDestinationStar, getCurrencySymbol, getSortStarMethod, getCurrentStarSystem, STAR_FIELD_SEED, NUMBER_OF_STARS, getStarMapMode, setStarMapMode, getWarMode, replaceBattleUnits, setNeedNewBattleCanvas, setFormationGoal, setBattleResolved, getBelligerentEnemyFlag, setAchievementFlagArray, getStarsWithAncientManuscripts, getStarShipDestinationReminderVisible, getStarVisionDistance, getMiaplacidusMilestoneLevel, getCurrentTheme } from './constantsAndGlobalVars.js';
@@ -148,6 +148,12 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                 buttonElement.classList.add('green-ready-text');
             }
         });
+        
+        const infoEmoji = document.createElement('p');
+        infoEmoji.id = 'info_starMapModes';
+        infoEmoji.className = 'info-emoji';
+        infoEmoji.innerHTML = '\u00A0\u00A0ℹ️';
+        starButtonContainer.appendChild(infoEmoji);
         
         const starContainer = document.querySelector('#optionContentTab5');   
         starContainer.innerHTML = '';     
@@ -423,6 +429,8 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                 });
             }
         }
+        
+        setupInfoTooltips();
     }
 
     if (heading === 'Star Data') {
@@ -495,7 +503,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                 (event) => handleSortStarClick('type')
             ),
             createTextElement(
-                `Weather`,
+                `<span class="inline-icon-header">Weather <p id="info_starLegendWeather" class="info-emoji">ℹ️</p></span>`,
                 'starLegendWeatherProb',
                 ['sort-by', 'label-star'],
                 (event) => handleSortStarClick('weather')
@@ -671,7 +679,10 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
 
             optionContentElement.appendChild(starDataRow);
         });
+
+        setupInfoTooltips();
     }
+
     if (heading === 'Star Ship') {
         if (!starDestinationInfoRedraw) {
             const destinationStar = getDestinationStar();
@@ -808,6 +819,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
 
         if (getDestinationStarScanned()) {
             drawLifeformData(optionContentElement);
+            setupInfoTooltips();
         }
 
         function drawLifeformData(optionContentElement) {
@@ -824,7 +836,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                     ['value-text']
                 ),
                 createTextElement(
-                    `<span class="ap-destination-star-element-right">AP: <span class="green-ready-text">${displayAscendencyPoints}</span></span>
+                    `<span class="ap-destination-star-element-right">AP: <span class="green-ready-text">${displayAscendencyPoints}</span> <p id="info_starShipScanAP" class="info-emoji">ℹ️</p></span>
                     Life: <span class="${getStellarScannerBuilt() ? (starData.lifeDetected ? 'green-ready-text' : 'red-disabled-text') : 'red-disabled-text'}">
                         ${getStellarScannerBuilt() ? (starData.lifeDetected ? 'Yes' : 'No') : '???'}
                     </span>`,
@@ -836,7 +848,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                         Weather: <span class="${starData.weatherTendency[2]}">${starData.weatherTendency[0]}</span> 
                         (<span class="probability-text">${starData.weatherTendency[1]}</span>%) - 
                         <span class="${starData.precipitation !== 'water' ? 'green-ready-text' : ''}">
-                            ${capitaliseString(starData.precipitationType)}
+                            ${capitaliseString(starData.precipitationType)} <p id="info_starShipScanPrecipitation" class="info-emoji">ℹ️</p>
                         </span>
                     </span>`,
                     'weatherContainer',
@@ -883,7 +895,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                                         : 'red-disabled-text') 
                             : 'red-disabled-text'}">
                             ${getStellarScannerBuilt() ? starData.civilizationLevel : '???'}
-                        </span>
+                        </span> <p id="info_starShipScanType" class="info-emoji">ℹ️</p>
                     </span>`,
                     'apContainer',
                     ['value-text', 'ap-destination-star-element']
@@ -981,12 +993,12 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                 null,
                 'Threat Level:',
                 createTextElement(
-                    `<span class="${threatLevelClass}">${threatLevel}</span>`,
+                    `<span class="${threatLevelClass}">${threatLevel}</span> <p id="info_starShipScanThreatLevel" class="info-emoji">ℹ️</p>`,
                     'threatLevelText',
                     [threatLevelClass]
                 ),
                 createTextElement(
-                    `<span class="ap-destination-star-element-right">Defense: <span class="value-text ${defenseClass}">${defenseText}</span></span>`,
+                    `<span class="ap-destination-star-element-right">Defense: <span class="value-text ${defenseClass}">${defenseText}</span> <p id="info_starShipScanDefense" class="info-emoji">ℹ️</p></span>`,
                     'defenseRatingText',
                     ['value-text', 'ap-destination-star-element']
                 ),
@@ -1052,7 +1064,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                             : (getStellarScannerBuilt() 
                                 ? starData.enemyFleets.sea 
                                 : '???')}
-                    </span>`,
+                    </span> <p id="info_starShipScanEnemyFleets" class="info-emoji">ℹ️</p>`,
                     'fleetSeaText',
                     ['value-text', 'ap-destination-star-element']
                 ),                                                 
@@ -1133,6 +1145,11 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
     }
 
     if (heading === 'Fleet Hangar') {
+        const headerRow = document.getElementById('headerContentTab5');
+        if (headerRow) {
+            headerRow.innerHTML = `Fleet Hangar <p id="info_fleetHangarHeader" class="info-emoji">ℹ️</p>`;
+        }
+        
         const fleetShips = [
             { id: 'fleetEnvoy', label: 'Envoy' },
             { id: 'fleetScout', label: 'Scout' },
@@ -1182,6 +1199,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             );
             optionContentElement.appendChild(fleetShipBuildRow);
         });
+        setupInfoTooltips();
     }
 
     if (heading === 'Colonise') {
@@ -1393,7 +1411,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                             : (getStellarScannerBuilt() 
                                 ? starData.enemyFleets.sea 
                                 : '???')}
-                    </span>`,
+                    </span> <p id="info_starShipScanEnemyFleets" class="info-emoji">ℹ️</p>`,
                     'fleetSeaText',
                     ['value-text', 'ap-destination-star-element']
                 ),                                                 

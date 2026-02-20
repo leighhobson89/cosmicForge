@@ -3,6 +3,7 @@ import { calculateAndAddExtraAPFromPhilosophyRepeatable, formatNumber } from "./
 import { getAchievementDataObject, getResourceDataObject } from "./resourceDataObject.js";
 import { capitaliseWordsWithRomanNumerals } from "./utilityFunctions.js";
 
+export let infoTooltipDescriptions;
 export let gameIntroHeader;
 export let gameIntroText;
 export let gameSaveNameCollect;
@@ -470,6 +471,18 @@ export function initialiseDescriptions() {
         'saving / loading': "Save and Load your progress in the game.",
         'statistics': `Here you can see your progress in the game.`,
         'achievements': `Here you can see your earned achievements, and their effects.`
+    };
+
+    infoTooltipDescriptions = {
+        info_starLegendWeather: 'Weather Data can be read as Prevailing Weather Type - Not exact Science - If 57% Sunny for example then it is largely a sunny System, as all the other weather types are sharing at 43% probability, but if it is 26% Sunny then it is really saying it is a mixed climate as the other 3 types are sharing the other 74%',
+        info_starMapModes: 'Normal - Shows all Unstudied, Studied, Settled, O-Type, and Megastructure Stars.<br><br>Distance - Colours all Studied Stars by their distance, red being the furthest away.<br><br>Studied removes all Unstudied Stars, leaving Studied, Settled, O-Type, and MegaStructure Stars.<br><br>In Range - Same as Studied but stars too far to travel to with current Antimatter levels will be colored in red.',
+        info_starShipScanAP: 'This is the base AP amount that the System is worth, when travelled to from your current System.  There are modifiers to this such as the type of battle undertaken there, which may give more AP, and there are yet other modifiers to this available in some Philosophies and Ascendency Perks.',
+        info_starShipScanPrecipitation: 'Weather Data can be read as Prevailing Weather Type - Not exact Science - If 57% Sunny for example then it is largely a sunny System, as all the other weather types are sharing at 43% probability, but if it is 26% Sunny then it is really saying it is a mixed climate as the other 3 types are sharing the other 74% Also shown is the type of compound received by collecting this System\'s Precipitation.',
+        info_starShipScanType: 'How advanced the Civilization is.  This directly impacts the Civilizations Defense if they are SpaceFaring their unit defenses are twice as strong as if they are Industrial.',
+        info_starShipScanDefense: 'The defense rating modifies the enemy ship\'s hitpoints.  Whatever they would normally start with, they are reduced to this percentage when fighting.  This number may be colored, meaning its value has been modified by an Anomaly in the System, which are described below in the Anomalies row.  For comparison, the player always has 100% defense to start with.',
+        info_starShipScanEnemyFleets: 'The number of each unit the enemy starts a battle with, this is not the same as the Fleet Power.  A number may be colored, meaning its quantity has been modified by an Anomaly in the System, which are described below in the Anomalies row.',
+        info_starShipScanThreatLevel: 'Threat Level modifies the defense level of the enemy units defending the System.  Extreme threat get the full bonus (no reduction) High means it is 70% as strong as it would be if Extreme, Moderate is 40%, Low is 20% and None is 0% (only Unsentient or Lifeless Systems)  The final calculated value is still shown to the right of this value, it is not modifying that value after the fact, but showing what has gone in to reaching that final value.',
+        info_fleetHangarHeader: 'Here you can build the Fleets that will conquer the System you are at or travelling to.<br><br>Envoys are non battle units that you build once to open up diplomacy with the enemy, not in all cases but in most.<br><br>Scouts are fast Air Units and can target enemy Air Units and Sea units with a Speed of 5.<br><br>Marauders are special Air Units that only the player has, and can target both enemy Land and Sea Units with a Speed of 4.<br><br>Land Stalkers are Land Units and can target enemy Air and Land Units with a Speed of 2.<br><br>Naval Strafers are Sea Units and can target Enemy Sea and Land Units with a Speed of 1.'
     };
 
     rocketNames = {
