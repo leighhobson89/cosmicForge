@@ -1881,6 +1881,8 @@ body {
     font-size: 1rem;
     text-align: center;
     transition: background-color 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+    position: relative;
+    overflow: hidden;
 }
 
 .option-button.option-button--wrap {
@@ -1899,6 +1901,10 @@ body {
 .option-button:hover {
     background-color: var(--tab-selected-bg-hover-color); /* Theme hover state */
     color: var(--text-color);
+    box-shadow:
+        0 0 0 1px rgba(var(--text-color-rgb), 0.35),
+        0 0 14px rgba(var(--text-color-rgb), 0.35),
+        0 0 26px rgba(var(--text-color-rgb), 0.22);
 }
 
 .option-button.selected  {
@@ -1920,15 +1926,36 @@ body {
         box-shadow: var(--ui-shadow);
         filter: brightness(1);
     }
-    40% {
-        transform: translateY(-1px) scale(1.12);
+    28% {
+        transform: translateY(-3px) scale(1.18);
         box-shadow: var(--ui-shadow-strong);
-        filter: brightness(1.25);
+        filter: brightness(1.28);
+    }
+    55% {
+        transform: translateY(1px) scale(0.96);
+        box-shadow: var(--ui-shadow);
+        filter: brightness(1.08);
+    }
+    78% {
+        transform: translateY(-2px) scale(1.08);
+        box-shadow: var(--ui-shadow-strong);
+        filter: brightness(1.18);
     }
     100% {
         transform: translateY(0) scale(1);
         box-shadow: var(--ui-shadow);
         filter: brightness(1);
+    }
+}
+
+@keyframes option-button-particles {
+    0% {
+        transform: translate(-50%, -50%) scale(0.35);
+        opacity: 0.9;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.35);
+        opacity: 0;
     }
 }
 
@@ -1960,9 +1987,32 @@ body {
     opacity: 0;
 }
 
+.option-button:not(.red-disabled-text)::before {
+    content: '';
+    position: absolute;
+    left: var(--click-x, 50%);
+    top: var(--click-y, 50%);
+    width: 10px;
+    height: 10px;
+    pointer-events: none;
+    opacity: 0;
+    background:
+        radial-gradient(circle at 10% 30%, rgba(255,255,255,0.95) 0 2px, rgba(255,255,255,0) 3px),
+        radial-gradient(circle at 85% 20%, rgba(255,255,255,0.8) 0 2px, rgba(255,255,255,0) 3px),
+        radial-gradient(circle at 65% 85%, rgba(255,255,255,0.85) 0 2px, rgba(255,255,255,0) 3px),
+        radial-gradient(circle at 25% 80%, rgba(255,255,255,0.75) 0 2px, rgba(255,255,255,0) 3px),
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,0.55) 0 3px, rgba(255,255,255,0) 6px);
+    filter: drop-shadow(0 0 6px rgba(255,255,255,0.55));
+}
+
 .option-button:not(.red-disabled-text):active::after {
     opacity: 1;
     animation: option-button-ripple 360ms ease-out;
+}
+
+.option-button:not(.red-disabled-text):active::before {
+    opacity: 1;
+    animation: option-button-particles 420ms ease-out;
 }
 
 @keyframes modal-button-pop {
@@ -1991,6 +2041,13 @@ body {
 #modalConfirm.option-button::after,
 #modalExtraChoice1.option-button::after,
 #modalExtraChoice2.option-button::after {
+    content: none;
+}
+
+#modalCancel.option-button::before,
+#modalConfirm.option-button::before,
+#modalExtraChoice1.option-button::before,
+#modalExtraChoice2.option-button::before {
     content: none;
 }
 
