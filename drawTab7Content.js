@@ -182,6 +182,8 @@ export function drawTab7Content(heading, optionContentElement) {
             }
         }
         optionContentElement.appendChild(galacticMarketLiquidateForAPRow);
+
+        setupInfoTooltips();
     }
 
     if (heading === 'Galactic Market') {
@@ -519,7 +521,7 @@ export function drawTab7Content(heading, optionContentElement) {
             ['galactic-casino-wheel-prize-dropdown']
         );
 
-        prizeDropdown.classList.add('red-disabled-text');
+        prizeDropdown.classList.add('dropdown-disabled-red');
         prizeDropdown.style.pointerEvents = 'none';
 
         const claimButton = createButton(
@@ -542,7 +544,7 @@ export function drawTab7Content(heading, optionContentElement) {
                 }
 
                 if (dd) {
-                    dd.classList.add('red-disabled-text');
+                    dd.classList.add('dropdown-disabled-red');
                     dd.style.pointerEvents = 'none';
 
                     const dropdownTextEl = dd.querySelector('.dropdown-text');
@@ -595,6 +597,8 @@ export function drawTab7Content(heading, optionContentElement) {
             ['no-left-margin', 'galactic-casino-input-container'],
             false
         );
+        optionContentElement.appendChild(game2Row);
+        setupInfoTooltips();
 
         const voidSeerPrizeCatalog = getVoidSeerPrizeCatalog?.() || {};
 

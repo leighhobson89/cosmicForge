@@ -2353,6 +2353,12 @@ button.red-disabled-text {
     pointer-events: auto !important;
 }
 
+.select-container.dropdown-disabled-red {
+  border: 2px solid red;
+  background-color: rgba(255, 0, 0, 0.1);
+  color: red;
+}
+
 .green-ready-text {
     color: var(--ready-text) !important;
     font-weight: bold;

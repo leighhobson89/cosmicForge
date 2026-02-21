@@ -487,7 +487,9 @@ export function initialiseDescriptions() {
         info_launchPadHeader: 'The Launch Pad is where rockets are built.  You must build all modules of each rocket for it to be considered built.<br><br>Once you click on Launch Pad you can then click on the rocket you want more info about, and there you can launch it, and select a destination for it to go.',
         info_asteroidsHeader: 'The Asteroids table gives you information about discovered asteroids, ones being Mined currently, Exhausted ones, and Destroyed ones too. <br><br> Distance - The time it takes to travel there (and also back!), without any modifications to reduce it ie the base time, is 1 second per 100 of distance, e.g. Distance to Asteroid 360000 base time to get there 3600 seconds (1hr) <br><br>Complexity - The higher this number is the slower Antimatter will be extracted from the Asteroid. <br><br>Antimatter - This is the quantity at the Asteroid available to be Mined.',
         info_philosophyHeader: 'Philosophy is an important mechanic.  You are asked to select it during the first run, so by now you have already chosen yours.  It cannot be changed throughout the game unless you start again.<br><br>The perks available for your chosen Philosophy are shown here below, and they are repeatable, meaning you can stack up a large bonus if you can pay the escalating cost to repeat purchase.<br><br>There is also a very strong one off special Abiliity that is expensive but comes with huge benefits and each Philosophy has its own flavor.',
-        info_galacticCasinoHeader: 'Welcome to the Galactic Casino!  Here the premise is, buy CP that you can use on the current run, and use it to gamble for prizes that benefit you in the current run.  Nothing here is for the long game, and CP is reset at the end of the run.  Enjoy playing the games and good luck!'
+        info_galacticCasinoHeader: 'Welcome to the Galactic Casino!  Here the premise is, buy CP that you can use on the current run, and use it to gamble for prizes that benefit you in the current run.  Nothing here is for the long game, and CP is reset at the end of the run.  Enjoy playing the games and good luck! 🤔',
+        info_galacticCasinoWheelOfFortune: 'The drop down will be enabled only if you win the Special Prize, i.e. the Special Colored segment of the wheel where you will be able to choose a prize from it.',
+        info_rebirthLiquidation: 'Rebirth Liquidation is calculated by taking the base market rate AP price which is a random number between 1M and 1.6M and fluctuates every 2-4 mins.<br><br>This is the cost of 1AP.   Resources and Compounds are calculated at their sell price per unit and then cash is calculated at a tenth of face value.<br><br>This is added together and then the AP base rate is divided by it and the amout rounded down, to see a final total of AP.'
     };
 
     rocketNames = {
@@ -1658,8 +1660,8 @@ export function initialiseDescriptions() {
             updateAt: ""
         },
         galacticMarketLiquidateForAPRow: {
-            content1: "Liquidate ALL Cash, Resources and Compounds, to AP.  You can only do this once per run so choose your moment wisely!  The Galactic Market Base rate affects this calculation so the value can fluctuate.",
-            content2: `<span>Liquidate ALL Cash, Resources and Compounds, to AP.  The Galactic Market Base rate affects this calculation so the value can fluctuate. <span class="red-disabled-text">Already done this run!</span></span>`,
+            content1: "<span>Liquidate ALL Cash, Resources and Compounds, to AP.  You can only do this once per run so choose your moment wisely!  The Galactic Market Base rate affects this calculation so the value can fluctuate.  <p id=\"info_rebirthLiquidation\" class=\"info-emoji\">ℹ️</p></span>",
+            content2: `<span>Liquidate ALL Cash, Resources and Compounds, to AP.  The Galactic Market Base rate affects this calculation so the value can fluctuate.  <span class="red-disabled-text">Already done this run!</span>  <p id="info_rebirthLiquidation" class="info-emoji">ℹ️</p></span>`,
             updateAt: ""
         },
         galacticCasinoPurchaseCpRow: {
@@ -1673,7 +1675,7 @@ export function initialiseDescriptions() {
             updateAt: ""
         },
         galacticCasinoGame2Row: {
-            content1: `Wheel Of Fortune. Spend CP to spin the wheel and test your luck -&nbsp;<strong>${getPriceCasinoGame2()}CP</strong>`,
+            content1: `<span>Wheel Of Fortune. Spend CP to spin the wheel and test your luck -&nbsp;<strong>${getPriceCasinoGame2()}CP</strong>  <p id="info_galacticCasinoWheelOfFortune" class="info-emoji">ℹ️</p></span>`,
             content2: "",
             updateAt: ""
         },
@@ -2753,7 +2755,7 @@ helpContent = {
     subBody6: "Born of the void, expect bonuses relating to Initial Impressions with Civilizations on foreign Systems, better Asteroid searches and Star studies, opportunities to increase AP gain, and even the ability to Pillage the Void for massive Resource and Compound gains!",
 
     subHeading7: "Expansionist",
-    subBody7: "Expansionists thrive on colonizing and spreading across the stars. Reduce travel time for Rocket Miners and StarShips and make them cheaper, and also gain the ability to force extra nearby Systems to cede when you conquer one!"
+    subBody7: "Expansionists thrive on colonizing and spreading across the stars. Reduce travel time for Rocket Miners and StarShips and make them cheaper, and also gain the ability to have a chance to convince nearby Systems to cede when you conquer one!"
     }
 }
 

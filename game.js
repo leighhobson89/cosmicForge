@@ -713,7 +713,7 @@ function galacticCasinoChecks() {
 
         if (wheelPrizeDropdown) {
             const enableDropdown = specialReady && !spinning;
-            wheelPrizeDropdown.classList.toggle('red-disabled-text', !enableDropdown);
+            wheelPrizeDropdown.classList.toggle('dropdown-disabled-red', !enableDropdown);
             wheelPrizeDropdown.style.pointerEvents = enableDropdown ? 'auto' : 'none';
 
             if (!enableDropdown) {
@@ -12144,8 +12144,8 @@ export function calculateAscendencyPoints(distance) {
 export function calculateAntimatterRequired(distance) {
     const MIN_DISTANCE = 1;
     const MAX_DISTANCE = 100;
-    const MIN_COST = Math.floor(Math.random() * (6000 - 4000 + 1)) + 4000;
-    const MAX_COST = Math.floor(Math.random() * (160000 - 150000 + 1)) + 150000;
+    const MIN_COST = 5000;
+    const MAX_COST = 155000;
 
     let normalizedDistance = (distance - MIN_DISTANCE) / (MAX_DISTANCE - MIN_DISTANCE);
 
@@ -12300,9 +12300,14 @@ function generateCivilizationLevel(starData) {
     if (randomValue < 0.1) {
         return 'Unsentient';
     } else if (randomValue < 0.55) {
-        addToResourceAllTimeStat(starData.ascendencyPoints, 'apAnticipated');
+        if (starData && typeof starData.ascendencyPoints === 'number') {
+            addToResourceAllTimeStat(starData.ascendencyPoints, 'apAnticipated');
+        }
+        return 'Industrial';
     } else {
-        addToResourceAllTimeStat(starData.ascendencyPoints, 'apAnticipated');
+        if (starData && typeof starData.ascendencyPoints === 'number') {
+            addToResourceAllTimeStat(starData.ascendencyPoints, 'apAnticipated');
+        }
         return 'Spacefaring';
     }
 }
@@ -13308,7 +13313,16 @@ export async function settleSystemAfterBattle(accessPoint) {
 
     switch(accessPoint) {
         case 'noSentientLife':
+            if (getPlayerPhilosophy() === 'expansionist' && getPhilosophyAbilityActive()) {
+                showNotification('Rapid Expansion cannot capture extra systems when settling lifeless or unsentient worlds.', 'info', 3000, 'battle');
+            }
             await showBattlePopup('noSentientLife', apGain);
+            break;
+        case 'surrender':
+            if (getPlayerPhilosophy() === 'expansionist' && getPhilosophyAbilityActive()) {
+                showNotification('Rapid Expansion only triggers after conquest victories. No extra systems were captured.', 'info', 3000, 'battle');
+            }
+            await showBattlePopup(true, apGain);
             break;
         case 'battle':
             if (getPlayerPhilosophy() === 'expansionist' && getPhilosophyAbilityActive()) {
@@ -13316,8 +13330,16 @@ export async function settleSystemAfterBattle(accessPoint) {
                 setAdditionalSystemsToSettleThisRun(rapidExpansionResult);
 
                 if (Array.isArray(rapidExpansionResult) && rapidExpansionResult.length > 0) {
-                    showNotification(`Rapid Expansion captured ${rapidExpansionResult.length} extra system${rapidExpansionResult.length === 1 ? '' : 's'}!`, 'info', 3000, 'battle');
+                    const starNames = rapidExpansionResult.map(([name]) => name).join(', ');
+                    showNotification(`Rapid Expansion captured ${rapidExpansionResult.length} extra system${rapidExpansionResult.length === 1 ? '' : 's'}! - ${starNames}`, 'info', 3000, 'battle');
                 } else {
+                    const battleContainer = document.querySelector('.notification-container.classification-battle');
+                    if (battleContainer) {
+                        const existingBattleNotification = battleContainer.querySelector('.notification');
+                        if (existingBattleNotification) {
+                            existingBattleNotification.remove();
+                        }
+                    }
                     const { stars, starDistanceData } = getStarDataAndDistancesToAllStarsFromSettledStar(getDestinationStar());
                     const currentStar = getCurrentStarSystem().toLowerCase();
                     const destinationStar = getDestinationStar().toLowerCase();
