@@ -504,6 +504,22 @@ function performIncreaseStorageForKey(category, key) {
     }
 }
 
+function optionButtonGlowChecks() {
+    const optionButtons = document.querySelectorAll('.option-button');
+    if (!optionButtons || optionButtons.length === 0) {
+        return;
+    }
+
+    optionButtons.forEach((button) => {
+        if (!button || !document.body.contains(button)) {
+            return;
+        }
+
+        const disabledViaPointerEvents = getComputedStyle(button).pointerEvents === 'none';
+        button.classList.toggle('option-button-no-glow', disabledViaPointerEvents);
+    });
+}
+
 function maybeNotifyStorageFull(category, key, previousQuantity, newQuantity, storageCapacity) {
     if (!category || !key) {
         return;
@@ -1449,6 +1465,7 @@ export async function gameLoop() {
         handleAutoCreateResourceSellRows();
 
         starChecks();
+        optionButtonGlowChecks();
         starShipUiChecks();
         fleetHangarChecks();
         coloniseChecks();
