@@ -3283,14 +3283,14 @@ export function setEnergyAndResearchBuildingPricesAfterRepeatables() {
     const reducePrice = (value) => value > 0 ? value * 0.95 : value;
 
     const updateBuildingPrices = (key, subKeys) => {
-        const price = getResourceDataObject(key, [...subKeys, 'price']);
+        const price = getResourceDataObject(key, [...subKeys, 'price'], true);
         if (price > 0) {
             setResourceDataObject(reducePrice(price), key, [...subKeys, 'price']);
         }
 
         for (let i = 1; i <= 3; i++) {
             const resourceKey = `resource${i}Price`;
-            const priceArray = getResourceDataObject(key, [...subKeys, resourceKey]);
+            const priceArray = getResourceDataObject(key, [...subKeys, resourceKey], true);
 
             if (Array.isArray(priceArray) && priceArray[0] > 0) {
                 const newPriceArray = [...priceArray];

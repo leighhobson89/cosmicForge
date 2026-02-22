@@ -12794,6 +12794,7 @@ function renderBattleExplosions(ctx, now) {
 
 
     export function resetTabsOnRebirth() {
+        const spaceRipEnabled = typeof window !== 'undefined' && window.__SPACE_RIP_ENABLED__ === true;
         const tabData = [
             { id: "tab1", classes: ["tab", "selected"], dataTab: "", dataName: "Resources", text: "Resources" },
             { id: "tab2", classes: ["tab", "tab-not-yet"], dataTab: "basicPowerGeneration", dataName: "Energy", text: "???" },
@@ -12802,7 +12803,13 @@ function renderBattleExplosions(ctx, now) {
             { id: "tab5", classes: ["tab", "tab-not-yet"], dataTab: "stellarCartography", dataName: "Interstellar", text: "???" },
             { id: "tab6", classes: ["tab", "tab-not-yet"], dataTab: "atmosphericTelescopes", dataName: "Space Mining", text: "???" },
             { id: "tab7", classes: ["tab", "tab-not-yet"], dataTab: "apAwardedThisRun", dataName: "Galactic", text: "???" },
-            { id: "tab8", classes: ["tab"], dataTab: "", dataName: "☰", text: "☰" },
+            {
+                id: "tab8",
+                classes: spaceRipEnabled ? ["tab", "tab-not-yet"] : ["tab"],
+                dataTab: spaceRipEnabled ? "spaceRip" : "",
+                dataName: spaceRipEnabled ? "Space Rip" : "☰",
+                text: spaceRipEnabled ? "???" : "☰"
+            },
             { id: "tab9", classes: ["tab"], dataTab: "", dataName: "☰", text: "☰" }
         ];
 

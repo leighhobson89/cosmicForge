@@ -1107,6 +1107,9 @@ export function mapFactoryStarValue(value) {
 }
 
 export function resetAllVariablesOnRebirth() {
+    const spaceRipEnabled = typeof window !== 'undefined' && window.__SPACE_RIP_ENABLED__ === true;
+    const hadSpaceRipUnlocked = getTechUnlockedArray().includes('spaceRip');
+
     if (!getMegaStructureTechsResearched().some(arr => Array.isArray(arr) && arr[0] === 1 && arr[1] === 5)) {
         infinitePower = false;
     }
@@ -1133,6 +1136,9 @@ export function resetAllVariablesOnRebirth() {
     itemsToDeduct = {};
     itemsToIncreasePrice = {};
     techUnlockedArray = ['apAwardedThisRun'];
+    if (spaceRipEnabled && hadSpaceRipUnlocked) {
+        techUnlockedArray.unshift('spaceRip');
+    }
     revealedTechArray = [];
     upcomingTechArray = [];
     unlockedResourcesArray = ['hydrogen'];
