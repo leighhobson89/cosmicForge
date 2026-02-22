@@ -8,7 +8,7 @@ import { showNotification } from "./ui.js";
 
 export let achievementImageUrls;
 export let resourceData = {
-    version: 0.96, //update this whenever changes are made to the structure
+    version: 0.965, //update this whenever changes are made to the structure
     resources: {
         solar: {
             autoSell: false,
@@ -929,7 +929,11 @@ export let resourceData = {
         quantity: 0,
     },
     spaceRip: {
-        galacticPoints: 0
+        galacticPoints: 0,
+        galacticTelescopeRestored: false,
+        ripLocationSectorIndex: -1,
+        ripFound: false,
+        scanResultsBySectorIndex: Array(9).fill(false)
     },
     fleets: {
         attackPower: 0,
@@ -982,7 +986,7 @@ export const miaplacidus = {
 
 
 export let starSystems = {
-    version: 0.96,
+    version: 0.965,
     stars: {
         spica: {
             mapSize: 5.504440179536064, //might need to add this to star object when added dynamically for after rebirth
@@ -1001,14 +1005,14 @@ export let starSystems = {
 };
 
 export let oTypePowerPlantBuffs = {
-    version: 0.96,
+    version: 0.965,
     basicPowerPlantStar: { starName: null, settled: false },
     solarPowerPlantStar: { starName: null, settled: false },
     advancedPowerPlantStar: { starName: null, settled: false }
 };
 
 export let galacticCasino = {
-    version: 0.96,
+    version: 0.965,
     settings: {
         baseProbabilityCasino: 0.4,
     },
@@ -1039,7 +1043,7 @@ export let galacticCasino = {
 };
 
 export let galacticMarket = {
-    version: 0.96,
+    version: 0.965,
     resources: {
         hydrogen: { 
             name: "Hydrogen", 
@@ -1145,7 +1149,7 @@ export let galacticMarket = {
 };
 
 export let ascendencyBuffs = {
-    version: 0.96,
+    version: 0.965,
     "littleBagOfHydrogen": {
         name: "Little Bag Of Hydrogen",
         description: "buffLittleBagOfHydrogenRow",
@@ -3754,4 +3758,40 @@ export const getSpaceRipGalacticPoints = () => {
 
 export const setSpaceRipGalacticPoints = (points) => {
     resourceData.spaceRip.galacticPoints = points;
+};
+
+export const getSpaceRipGalacticTelescopeRestored = () => {
+    return resourceData.spaceRip.galacticTelescopeRestored;
+};
+
+export const setSpaceRipGalacticTelescopeRestored = (value) => {
+    resourceData.spaceRip.galacticTelescopeRestored = value === true;
+};
+
+export const getSpaceRipRipLocationSectorIndex = () => {
+    return resourceData.spaceRip.ripLocationSectorIndex;
+};
+
+export const setSpaceRipRipLocationSectorIndex = (value) => {
+    resourceData.spaceRip.ripLocationSectorIndex = Number.isFinite(Number(value)) ? Math.floor(Number(value)) : -1;
+};
+
+export const getSpaceRipRipFound = () => {
+    return resourceData.spaceRip.ripFound;
+};
+
+export const setSpaceRipRipFound = (value) => {
+    resourceData.spaceRip.ripFound = value === true;
+};
+
+export const getSpaceRipScanResultsBySectorIndex = () => {
+    return resourceData.spaceRip.scanResultsBySectorIndex;
+};
+
+export const setSpaceRipScanResultsBySectorIndex = (value) => {
+    if (Array.isArray(value) && value.length === 9) {
+        resourceData.spaceRip.scanResultsBySectorIndex = value.map(v => v === true);
+    } else {
+        resourceData.spaceRip.scanResultsBySectorIndex = Array(9).fill(false);
+    }
 };

@@ -9791,159 +9791,51 @@ function initializeTabEventListeners() {
     document.querySelectorAll('[class*="tab8"][class*="option1"]').forEach(function(element) {
         element.addEventListener('click', function() {
             selectRowCss(this);
-            setLastScreenOpenRegister('tab8', 'visual');
-            setCurrentOptionPane('visual');
-            updateContent('Visual', 'tab8', 'content');
-            setFirstAccessArray('visual');
+            setLastScreenOpenRegister('tab8', 'overview');
+            setCurrentOptionPane('space rip overview');
+            updateContent('Overview', 'tab8', 'content');
+            setFirstAccessArray('overview');
         });
     });
 
-    
     document.querySelectorAll('[class*="tab8"][class*="option2"]').forEach(function(element) {
         element.addEventListener('click', function() {
             selectRowCss(this);
-            setLastScreenOpenRegister('tab8', 'saving / loading');
-            setCurrentOptionPane('saving / loading');
-            updateContent('Saving / Loading', 'tab8', 'content');
-            setFirstAccessArray('saving / loading');
+            setLastScreenOpenRegister('tab8', 'galactic telescope');
+            setCurrentOptionPane('space rip galactic telescope');
+            updateContent('Galactic Telescope', 'tab8', 'content');
+            setFirstAccessArray('galactic telescope');
         });
     });
-
 
     document.querySelectorAll('[class*="tab8"][class*="option3"]').forEach(function(element) {
         element.addEventListener('click', function() {
             selectRowCss(this);
-            setLastScreenOpenRegister('tab8', 'game options');
-            setCurrentOptionPane('game options');
-            updateContent('Game Options', 'tab8', 'content');
-            setFirstAccessArray('game options');
+            setLastScreenOpenRegister('tab8', 'cosmic rip');
+            setCurrentOptionPane('space rip cosmic rip');
+            updateContent('Cosmic Rip', 'tab8', 'content');
+            setFirstAccessArray('cosmic rip');
         });
     });
-
 
     document.querySelectorAll('[class*="tab8"][class*="option4"]').forEach(function(element) {
         element.addEventListener('click', function() {
             selectRowCss(this);
-            setLastScreenOpenRegister('tab8', 'get started');
-            setCurrentOptionPane('get started');
-            updateContent('Get Started', 'tab8', 'content');
-            setFirstAccessArray('get started');
+            setLastScreenOpenRegister('tab8', 'ripcraft');
+            setCurrentOptionPane('space rip ripcraft');
+            updateContent('Ripcraft', 'tab8', 'content');
+            setFirstAccessArray('ripcraft');
         });
     });
 
-    
     document.querySelectorAll('[class*="tab8"][class*="option5"]').forEach(function(element) {
         element.addEventListener('click', function() {
             selectRowCss(this);
-            setLastScreenOpenRegister('tab8', 'concepts - early');
-            setCurrentOptionPane('concepts - early');
-            updateContent('Concepts - Early', 'tab8', 'content');
-            setFirstAccessArray('concepts - early');
+            setLastScreenOpenRegister('tab8', 'expeditions');
+            setCurrentOptionPane('space rip expeditions');
+            updateContent('Expeditions', 'tab8', 'content');
+            setFirstAccessArray('expeditions');
         });
-    });
-
-    
-    document.querySelectorAll('[class*="tab8"][class*="option6"]').forEach(function(element) {
-        element.addEventListener('click', function() {
-            selectRowCss(this);
-            setLastScreenOpenRegister('tab8', 'concepts - mid');
-            setCurrentOptionPane('concepts - mid');
-            updateContent('Concepts - Mid', 'tab8', 'content');
-            setFirstAccessArray('concepts - mid');
-        });
-    });
-
-    
-    document.querySelectorAll('[class*="tab8"][class*="option7"]').forEach(function(element) {
-        element.addEventListener('click', function() {
-            selectRowCss(this);
-            setLastScreenOpenRegister('tab8', 'concepts - late');
-            setCurrentOptionPane('concepts - late');
-            updateContent('Concepts - Late', 'tab8', 'content');
-            setFirstAccessArray('concepts - late');
-        });    
-    });
-
-
-    document.querySelectorAll('[class*="tab8"][class*="option13"]').forEach(function(element) {
-        element.addEventListener('click', function() {
-            selectRowCss(this);
-            setLastScreenOpenRegister('tab8', 'concepts - end goal');
-            setCurrentOptionPane('concepts - end goal');
-            updateContent('Concepts - End Goal', 'tab8', 'content');
-            setFirstAccessArray('concepts - end goal');
-        });
-    });
-
-
-    document.querySelectorAll('[class*="tab8"][class*="option8"]').forEach(function(element) {
-        element.addEventListener('click', function() {
-            selectRowCss(this);
-            setLastScreenOpenRegister('tab8', 'statistics');
-            setCurrentOptionPane('statistics');
-            updateContent('Statistics', 'tab8', 'content');
-            setFirstAccessArray('statistics');
-        });    
-    });
-
-
-    document.querySelectorAll('[class*="tab8"][class*="option9"]').forEach(function(element) {
-        element.addEventListener('click', function() {
-            selectRowCss(this);
-            setLastScreenOpenRegister('tab8', 'contact');
-            setCurrentOptionPane('contact');
-            updateContent('Contact', 'tab8', 'content');
-            setFirstAccessArray('contact');
-        });    
-    });
-
-
-    document.querySelectorAll('[class*="tab8"][class*="option10"]').forEach(function(element) {
-        element.addEventListener('click', function() {
-            selectRowCss(this);
-            setLastScreenOpenRegister('tab8', 'achievements');
-            setCurrentOptionPane('achievements');
-            refreshAchievementTooltipDescriptions();
-            updateContent('Achievements', 'tab8', 'content');
-            setFirstAccessArray('achievements');
-        });    
-    });
-
-
-    document.querySelectorAll('[class*="tab8"][class*="option14"]').forEach(function(element) {
-        element.addEventListener('click', function() {
-            selectRowCss(this);
-            setLastScreenOpenRegister('tab8', 'events');
-            setCurrentOptionPane('events');
-            updateContent('Events', 'tab8', 'content');
-            setFirstAccessArray('events');
-            removeAttentionIndicator(this);
-            removeTabAttentionIfNoIndicators('tab8');
-        });
-    });
-
-
-    document.querySelectorAll('[class*="tab8"][class*="option11"]').forEach(function(element) {
-        element.addEventListener('click', function() {
-            selectRowCss(this);
-            setLastScreenOpenRegister('tab8', 'philosophies');
-            setLastScreenOpenRegister('tab8', 'philosophies');
-            setCurrentOptionPane('philosophies');
-            updateContent('Philosophies', 'tab8', 'content');
-            setFirstAccessArray('philosophies');
-        });    
-    });
-
-
-    document.querySelectorAll('[class*="tab8"][class*="option12"]').forEach(function(element) {
-        element.addEventListener('click', function() {
-            selectRowCss(this);
-            setLastScreenOpenRegister('tab8', 'story');
-            setLastScreenOpenRegister('tab8', 'story');
-            setCurrentOptionPane('story');
-            updateContent('Story', 'tab8', 'content');
-            setFirstAccessArray('story');
-        });    
     });
 
 

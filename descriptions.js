@@ -1,6 +1,6 @@
 import { getGameActiveCountTime, getTimerRateRatio, getSaveName, getRocketUserName, getDestinationStar, getCurrencySymbol, getPlayerPhilosophy, getRepeatableTechMultipliers, getStatRun, getCurrentRunIsMegaStructureRun, getPriceCasinoGame2, getPriceCasinoGame3 } from "./constantsAndGlobalVars.js";
 import { calculateAndAddExtraAPFromPhilosophyRepeatable, formatNumber } from "./game.js";
-import { getAchievementDataObject, getResourceDataObject } from "./resourceDataObject.js";
+import { getAchievementDataObject, getResourceDataObject, getSpaceRipGalacticPoints } from "./resourceDataObject.js";
 import { capitaliseWordsWithRomanNumerals } from "./utilityFunctions.js";
 
 export let infoTooltipDescriptions;
@@ -457,6 +457,12 @@ export function initialiseDescriptions() {
         'ascendency perks': `Here you can spend AP for permanent buffs to speed up your runs! - AP: <span class="green-ready-text">${getResourceDataObject('ascendencyPoints', ['quantity'])}</span>`,
         'megastructures': "This shows your progress in harnessing the power of MegaStructures, and the slow dismantling of the Miaplacidus Force Field!",
         'black hole': "This shows the Black Hole time warp feature, once unlocked.",
+
+        'overview': `Space Rip operations and progression - GP: <span id="spaceRipGpBalance" class="green-ready-text">${getSpaceRipGalacticPoints()}</span>`,
+        'galactic telescope': 'Commission the Galactic Telescope, scan sectors to locate distortions, and pinpoint the Cosmic Rip.',
+        'cosmic rip': 'Interact with the Cosmic Rip once it has been located.',
+        'ripcraft': 'Ripcraft construction and upgrades (coming soon).',
+        'expeditions': 'Dispatch expeditions into unstable space (coming soon).',
 
         'contact': "Contact Channels for Feedback and Suggestions",
         'get started': "Learn how to get started in Cosmic Forge.",

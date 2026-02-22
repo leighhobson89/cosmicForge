@@ -124,7 +124,7 @@ export function migrateResourceData(saveData, objectType, options = {}) {
             }
             saveData.version = 0.95;
         }
-        if (saveData.version < 0.96) {
+        if (saveData.version < 0.965) {
             if (objectType === 'resourceData') {
                 if (!saveData.spaceRip || typeof saveData.spaceRip !== 'object') {
                     saveData.spaceRip = {};
@@ -132,13 +132,25 @@ export function migrateResourceData(saveData, objectType, options = {}) {
                 if (typeof saveData.spaceRip.galacticPoints !== 'number') {
                     saveData.spaceRip.galacticPoints = 0;
                 }
+                if (typeof saveData.spaceRip.galacticTelescopeRestored !== 'boolean') {
+                    saveData.spaceRip.galacticTelescopeRestored = false;
+                }
+                if (typeof saveData.spaceRip.ripLocationSectorIndex !== 'number') {
+                    saveData.spaceRip.ripLocationSectorIndex = -1;
+                }
+                if (typeof saveData.spaceRip.ripFound !== 'boolean') {
+                    saveData.spaceRip.ripFound = false;
+                }
+                if (!Array.isArray(saveData.spaceRip.scanResultsBySectorIndex) || saveData.spaceRip.scanResultsBySectorIndex.length !== 9) {
+                    saveData.spaceRip.scanResultsBySectorIndex = Array(9).fill(false);
+                }
             }
             if (objectType === 'gameState') {
                 if (typeof saveData.galacticPointsSpent !== 'number') {
                     saveData.galacticPointsSpent = 0;
                 }
             }
-            saveData.version = 0.96;
+            saveData.version = 0.965;
         }
         saveData.version += 0.001;
     }

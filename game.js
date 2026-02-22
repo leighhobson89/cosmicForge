@@ -1,4 +1,5 @@
 import {
+    setGalacticPointsSpent,
     getVoidSeerPrizeCatalog,
     getGalacticCasinoUnlocked,
     getGalacticCasinoPurchaseItem,
@@ -362,7 +363,13 @@ import {
     setGalacticCasinoUnlocked,
 } from "./constantsAndGlobalVars.js";
 
-import { getSpaceRipGalacticPoints, setSpaceRipGalacticPoints } from "./resourceDataObject.js";
+import {
+    getSpaceRipGalacticPoints,
+    setSpaceRipGalacticPoints,
+    getSpaceRipGalacticTelescopeRestored,
+    getSpaceRipRipFound,
+    getSpaceRipScanResultsBySectorIndex,
+} from './resourceDataObject.js';
 
 import { onboardingChecks } from './onboarding.js';
 
@@ -1127,6 +1134,69 @@ function updateProductionRateText(elementId, rateValue) {
     }
 }
 
+function spaceRipChecks() {
+    if (!getCurrentTab?.()?.[1]?.includes?.('Space Rip')) {
+        return;
+    }
+
+    const overviewOption = document.getElementById('spaceRipOverviewOption');
+    if (!overviewOption) {
+        return;
+    }
+
+    if (getCurrentOptionPane?.() === 'space rip overview') {
+        const gpBalanceEl = document.getElementById('spaceRipGpBalance');
+        if (gpBalanceEl) {
+            const gp = Number(getSpaceRipGalacticPoints?.()) || 0;
+            gpBalanceEl.textContent = String(gp);
+            gpBalanceEl.classList.toggle('green-ready-text', gp > 0);
+        }
+    }
+
+    const telescopeRow = document.getElementById('spaceRipGalacticTelescopeRow');
+    const cosmicRipRow = document.getElementById('spaceRipCosmicRipRow');
+
+    const telescopeRestored = getSpaceRipGalacticTelescopeRestored?.() === true;
+    const ripFound = getSpaceRipRipFound?.() === true;
+
+    if (telescopeRow) {
+        if (telescopeRestored) {
+            telescopeRow.classList.remove('invisible');
+        } else {
+            telescopeRow.classList.add('invisible');
+        }
+    }
+
+    if (cosmicRipRow) {
+        if (ripFound) {
+            cosmicRipRow.classList.remove('invisible');
+        } else {
+            cosmicRipRow.classList.add('invisible');
+        }
+    }
+
+    const restoreBtn = document.querySelector('.space-rip-restore-telescope-button');
+    if (restoreBtn) {
+        const gp = Number(getSpaceRipGalacticPoints?.()) || 0;
+        const canRestore = !telescopeRestored && gp >= 10;
+        setButtonState(restoreBtn, { enabled: canRestore, ready: canRestore });
+    }
+
+    const scanButtons = document.querySelectorAll('.space-rip-scan-sector-button');
+    if (scanButtons && scanButtons.length > 0) {
+        const gp = Number(getSpaceRipGalacticPoints?.()) || 0;
+        const scanResults = Array.isArray(getSpaceRipScanResultsBySectorIndex?.())
+            ? getSpaceRipScanResultsBySectorIndex()
+            : Array(9).fill(false);
+
+        scanButtons.forEach((btn, i) => {
+            const scanned = scanResults?.[i] === true;
+            const canScan = telescopeRestored && !scanned && gp >= 1;
+            setButtonState(btn, { enabled: canScan, ready: canScan });
+        });
+    }
+}
+
 function getSupplyChainDisruptionMultiplier(category, key) {
     const state = isTimedEffectActive?.('supplyChainDisruption')
         ? (getTimedEffectStateSnapshot?.('supplyChainDisruption') || null)
@@ -1486,6 +1556,7 @@ export async function gameLoop() {
         ascendencyBuffChecks();
         megastructureUIChecks();
         blackHoleUIChecks();
+        spaceRipChecks();
         rebirthChecks();
         onboardingChecks({
             callPopupModal,
