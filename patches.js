@@ -124,6 +124,22 @@ export function migrateResourceData(saveData, objectType, options = {}) {
             }
             saveData.version = 0.95;
         }
+        if (saveData.version < 0.96) {
+            if (objectType === 'resourceData') {
+                if (!saveData.spaceRip || typeof saveData.spaceRip !== 'object') {
+                    saveData.spaceRip = {};
+                }
+                if (typeof saveData.spaceRip.galacticPoints !== 'number') {
+                    saveData.spaceRip.galacticPoints = 0;
+                }
+            }
+            if (objectType === 'gameState') {
+                if (typeof saveData.galacticPointsSpent !== 'number') {
+                    saveData.galacticPointsSpent = 0;
+                }
+            }
+            saveData.version = 0.96;
+        }
         saveData.version += 0.001;
     }
     return saveData;

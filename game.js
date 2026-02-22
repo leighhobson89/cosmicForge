@@ -319,6 +319,7 @@ import {
     setRocketTravelSpeed,
     setStarShipTravelSpeed,
     getSettledStars,
+    getGalacticPointsSpent,
     getOTypePowerPlantStrengthBoost,
     getBasePillageVoidTimerDuration,
     getInfinitePowerRate,
@@ -357,8 +358,11 @@ import {
     getMinimumBlackHoleChargeTime,
     getBlackHoleAlwaysOn,
     setBlackHoleAlwaysOn,
+    getPriceCasinoGame3,
     setGalacticCasinoUnlocked,
-} from './constantsAndGlobalVars.js';
+} from "./constantsAndGlobalVars.js";
+
+import { getSpaceRipGalacticPoints, setSpaceRipGalacticPoints } from "./resourceDataObject.js";
 
 import { onboardingChecks } from './onboarding.js';
 
@@ -1401,6 +1405,14 @@ export async function gameLoop() {
         backgroundAudio.update();
         weatherAmbienceManager.update();
         const elements = document.querySelectorAll('.notation');
+
+        const settledCount = ((getSettledStars?.() || []).length) - 1;
+        const spent = Number(getGalacticPointsSpent?.()) || 0;
+        const desiredGalacticPoints = Math.max(0, settledCount - spent);
+        const currentGalacticPoints = Number(getSpaceRipGalacticPoints?.()) || 0;
+        if (currentGalacticPoints !== desiredGalacticPoints) {
+            setSpaceRipGalacticPoints(desiredGalacticPoints);
+        }
 
         showHideDynamicUiContent();
         updateDynamicUiContent();
@@ -13661,6 +13673,8 @@ export function rebirth() {
     setCurrentStarSystem(getStarSystemDataObject('stars', ['destinationStar', 'name']));
     setSettledStars(getCurrentStarSystem());
 
+    let conqueredThisRebirth = 1;
+
     const rebirthStarName = getCurrentStarSystem();
     const rebirthStarKey = String(rebirthStarName || '').toLowerCase();
     const rebirthStarType = rebirthStarKey
@@ -13720,8 +13734,12 @@ export function rebirth() {
             extraSystems.forEach(([name]) => {
                 setSettledStars(name.toLowerCase());
             });
+            conqueredThisRebirth += extraSystems.length;
         }
     }
+
+    const current = Number(getSpaceRipGalacticPoints?.()) || 0;
+    setSpaceRipGalacticPoints(current + conqueredThisRebirth);
 
     setupNewRunStarSystem();
     setRebirthPossible(false);

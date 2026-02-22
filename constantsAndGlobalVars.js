@@ -28,7 +28,7 @@ let saveData = null;
 //CONSTANTS
 export const HOMESTAR = 'miaplacidus';
 export const MINIMUM_GAME_VERSION_FOR_SAVES = 0.90;
-export const GAME_VERSION_FOR_SAVES = 0.95;
+export const GAME_VERSION_FOR_SAVES = 0.96;
 export const deferredActions = [];
 
 //NOTIFICATIONS
@@ -216,6 +216,7 @@ let miaplacidusMilestoneLevel = 0;
 let increaseStorageFactor = 2;
 let rocketTravelSpeed = 0.2;
 let starShipTravelSpeed = 360000; //3600000 one real hour per light year
+let galacticPointsSpent = 0;
 let philosophy = null;
 let feedbackContent = 'Not done yet';
 let feedbackGiven = null;
@@ -1633,6 +1634,7 @@ export function captureGameStatusForSaving(type) {
     gameState.miaplacidusMilestoneLevel = miaplacidusMilestoneLevel;
     gameState.megaStructureTechsResearched = megaStructureTechsResearched;
     gameState.megaStructureAntimatterAmount = megastructureAntimatterAmount;
+    gameState.galacticPointsSpent = galacticPointsSpent;
 
     gameState.runNumber = runNumber;
     gameState.starShipTravelDistance = starShipTravelDistance;
@@ -1950,6 +1952,7 @@ export function restoreGameStatus(gameState, type) {
             miaplacidusMilestoneLevel = gameState.miaplacidusMilestoneLevel ?? 0;
             megaStructureTechsResearched = gameState.megaStructureTechsResearched ?? [];
             megastructureAntimatterAmount = gameState.megaStructureAntimatterAmount ?? 0;
+            galacticPointsSpent = gameState.galacticPointsSpent ?? 0;
             
             if (gameState.compoundCreateDropdownRecipeText) {
                 compoundCreateDropdownRecipeText = gameState.compoundCreateDropdownRecipeText;
@@ -5379,6 +5382,14 @@ export function setPlayerPhilosophy(value) {
 
 export function getMiaplacidusEndgameStoryShown() {
     return miaplacidusEndgameStoryShown;
+}
+
+export function getGalacticPointsSpent() {
+    return galacticPointsSpent;
+}
+
+export function setGalacticPointsSpent(value) {
+    galacticPointsSpent = typeof value === 'number' && Number.isFinite(value) ? value : 0;
 }
 
 export function setMiaplacidusEndgameStoryShown(value) {
