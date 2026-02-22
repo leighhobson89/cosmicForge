@@ -406,6 +406,7 @@ let lastScreenOpenRegister = {
     tab6: null,
     tab7: null,
     tab8: null,
+    tab9: null,
 };
 
 let activatedFuelBurnObject = {

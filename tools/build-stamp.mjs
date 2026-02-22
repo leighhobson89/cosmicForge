@@ -28,12 +28,29 @@ try {
   throw err;
 }
 
+function readSpaceRipEnabledFlag() {
+  try {
+    const existing = fs.readFileSync(buildFlagsPath, 'utf8');
+    const match = existing.match(/window\.__SPACE_RIP_ENABLED__\s*=\s*(true|false)\s*;/);
+    if (match && match[1]) {
+      return match[1] === 'true';
+    }
+  } catch {
+  }
+  return false;
+}
+
 function writePackageJson(obj) {
   fs.writeFileSync(repoRootPackageJsonPath, JSON.stringify(obj, null, 2) + '\n', 'utf8');
 }
 
 try {
-  fs.writeFileSync(buildFlagsPath, `window.__DEMO_BUILD__ = ${isDemo ? 'true' : 'false'};\n`, 'utf8');
+  const spaceRipEnabled = readSpaceRipEnabledFlag();
+  fs.writeFileSync(
+    buildFlagsPath,
+    `window.__DEMO_BUILD__ = ${isDemo ? 'true' : 'false'};\n\nwindow.__SPACE_RIP_ENABLED__ = ${spaceRipEnabled ? 'true' : 'false'};\n`,
+    'utf8'
+  );
 
   packageJson.build = packageJson.build || {};
 

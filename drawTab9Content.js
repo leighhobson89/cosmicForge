@@ -1,11 +1,125 @@
-import { getCurrentTheme, setAutoSaveToggle, getAutoSaveToggle, getAutoSaveFrequency, setAutoSaveFrequency, getSaveData, setSaveData, getCurrencySymbol, setCurrencySymbol, getNotationType, setNotationType, setNotificationsToggle, getNotificationsToggle, getSaveName, getWeatherEffectSetting, setWeatherEffectSetting, setNewsTickerSetting, getNewsTickerSetting, setSaveExportCloudFlag, getBackgroundAudio, setBackgroundAudio, getSfx, setSfx, setWasAutoSaveToggled, setMouseParticleTrailEnabled, getMouseParticleTrailEnabled, setCustomPointerEnabled, getCustomPointerEnabled, getOnboardingMode, getDemoBuild } from './constantsAndGlobalVars.js';
-import { toggleGameFullScreen, createButton, createTextFieldArea, createOptionRow, createDropdown, createToggleSwitch, selectTheme, callPopupModal, showHideModal, showNotification, applyCustomPointerSetting, fadeInStartupOverlay } from './ui.js';
+import { getCurrentOptionPane, getCurrentTheme, setAutoSaveToggle, getAutoSaveToggle, getAutoSaveFrequency, setAutoSaveFrequency, getSaveData, setSaveData, getCurrencySymbol, setCurrencySymbol, getNotationType, setNotationType, setNotificationsToggle, getNotificationsToggle, getSaveName, getWeatherEffectSetting, setWeatherEffectSetting, setNewsTickerSetting, getNewsTickerSetting, setSaveExportCloudFlag, getBackgroundAudio, setBackgroundAudio, getSfx, setSfx, setWasAutoSaveToggled, setMouseParticleTrailEnabled, getMouseParticleTrailEnabled, setCustomPointerEnabled, getCustomPointerEnabled, getOnboardingMode, getDemoBuild } from './constantsAndGlobalVars.js';
+import { setupAchievementTooltip, createHtmlTableAchievementsGrid, createHtmlTableStatistics, createHtmlTextAreaProse, toggleGameFullScreen, createButton, createTextFieldArea, createOptionRow, createDropdown, createToggleSwitch, selectTheme, callPopupModal, showHideModal, showNotification, applyCustomPointerSetting, setElementPointerEvents, fadeInStartupOverlay } from './ui.js';
 import { importSaveStringFileFromComputer, downloadSaveStringToComputer, initializeAutoSave, saveGame, saveGameToCloud, loadGameFromCloud, copySaveStringToClipBoard, loadGame, destroySaveGameOnCloud } from './saveLoadGame.js';
-import { hardResetWarningHeader, hardResetWarningText } from './descriptions.js';
-import { setAchievementIconImageUrls } from './resourceDataObject.js';
+import { hardResetWarningHeader, hardResetWarningText, getStatisticsContent, getHelpContent } from './descriptions.js';
+import { setAchievementIconImageUrls, getAchievementPositionData } from './resourceDataObject.js';
 import { trackAnalyticsEvent } from './analytics.js';
 
-export function drawTab8Content(heading, optionContentElement) {
+export function drawTab9Content(heading, optionContentElement) {
+    if (heading === 'Contact') createHelpSectionRow('contactRow', ['discord-link', 'email-link']);
+    if (heading === 'Get Started') createHelpSectionRow('getStartedRow', []);
+    if (heading === 'Story') createHelpSectionRow('storyRow', []);
+    if (heading === 'Concepts - Early') createHelpSectionRow('conceptsEarlyRow', []);
+    if (heading === 'Concepts - Mid') createHelpSectionRow('conceptsMidRow', []);
+    if (heading === 'Concepts - Late') createHelpSectionRow('conceptsLateRow', []);
+    if (heading === 'Concepts - End Goal') createHelpSectionRow('conceptsEndGoalRow', []);
+    if (heading === 'Philosophies') createHelpSectionRow('philosophies', []);
+    if (heading === 'Statistics') createStatisticsSectionRow('statisticsRow');
+    if (heading === 'Achievements') createAchievementsSectionRow('achievementsRow');
+    if (heading === 'Events') createEventsSectionRow('eventsRow');
+
+    if (heading === 'Exit Game') {
+        const exitGameRow = createOptionRow(
+            'exitGameRow',
+            null,
+            'Exit Game:',
+            createButton('EXIT GAME', ['option-button', 'green-ready-text'], () => {
+                const ua = (typeof window !== 'undefined' && window.navigator?.userAgent) ? window.navigator.userAgent.toLowerCase() : '';
+                const isElectron = ua.includes('electron') || (typeof window !== 'undefined' && window.process?.versions?.electron);
+                if (!isElectron) {
+                    return;
+                }
+
+                callPopupModal(
+                    'EXIT GAME',
+                    'Would you like to save to the cloud before exiting?',
+                    true,
+                    true,
+                    true,
+                    false,
+                    function() {
+                        showHideModal();
+                        (async () => {
+                            await fadeInStartupOverlay(2000);
+                            window.close();
+                        })().catch((error) => {
+                            console.error('Exit & Don\'t Save failed:', error);
+                            window.close();
+                        });
+                    },
+                    function() {
+                        showHideModal();
+                    },
+                    function() {
+                        (async () => {
+                            if (getOnboardingMode()) {
+                                showNotification("You can't save while onboarding mode is active!", 'info', 4000, 'loadSave');
+                                return;
+                            }
+
+                            if (getDemoBuild()) {
+                                showNotification('Saving is disabled in the demo build!', 'info', 4000, 'loadSave');
+                                return;
+                            }
+
+                            saveGame('manualExportCloud');
+                            const saveData = getSaveData();
+                            if (!saveData) {
+                                showNotification('No save data available to export.', 'error', 3000, 'loadSave');
+                                return;
+                            }
+
+                            let savedOk = false;
+                            try {
+                                savedOk = await saveGameToCloud(saveData, 'manualExportCloud');
+                                if (savedOk) {
+                                    setSaveExportCloudFlag(saveData);
+                                }
+                            } finally {
+                                setSaveData(null);
+                            }
+
+                            if (!savedOk) {
+                                return;
+                            }
+
+                            showHideModal();
+                            await fadeInStartupOverlay(2000);
+                            window.close();
+                        })().catch((error) => {
+                            console.error('Exit & Save failed:', error);
+                            showNotification('Error saving game to cloud!', 'error', 3000, 'loadSave');
+                        });
+                    },
+                    null,
+                    "EXIT AND DON'T SAVE",
+                    'CANCEL',
+                    'EXIT AND SAVE',
+                    null,
+                    false
+                );
+            }),
+            null,
+            null,
+            null,
+            null,
+            'Here you can Exit The Game',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            false,
+            null,
+            null,
+            null,
+            [true, '25%', '80%']
+        );
+
+        optionContentElement.appendChild(exitGameRow);
+    }
+
     if (heading === 'Visual') {
         const settingsCurrencySymbolRow = createOptionRow(
             'settingsCurrencySymbolRow',
@@ -641,4 +755,219 @@ export function drawTab8Content(heading, optionContentElement) {
         }
     }
 
+    function createHelpSectionRow(rowId, classes) {
+        const defaultClasses = ['help-container', 'help-container-margin'];
+        const combinedClasses = defaultClasses.concat(classes || []);
+        
+        const helpRow = createOptionRow(
+            rowId,
+            null,
+            '',
+            createHtmlTextAreaProse(
+                `${rowId}TextArea`,
+                combinedClasses,
+                getHelpContent(getCurrentOptionPane(), 'subHeadings'),
+                getHelpContent(getCurrentOptionPane(), 'subBodys'),
+                ['help-sub-header-text'],
+                ['help-sub-body-text']
+            ),
+            null,
+            null,
+            null,
+            null,
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+            null,
+            false,
+            null,
+            null,
+            '',
+            [true, 'invisible', '100%'],
+            ['no-left-margin']
+        );
+        
+        optionContentElement.appendChild(helpRow);
+
+        const contactRowTextArea = document.getElementById('contactRowTextArea');
+
+        if (helpRow && contactRowTextArea && contactRowTextArea.classList.contains('discord-link')) {
+            const spans = helpRow.querySelectorAll('span');
+            
+            spans.forEach(span => {
+                if (span.innerHTML.includes('discord.gg')) {
+                    span.classList.add('green-ready-text');
+                    span.style.cursor = 'pointer';
+                    setElementPointerEvents(span, 'auto');
+                    span.addEventListener('click', () => {
+                        window.open(span.innerHTML, '_blank');
+                    });
+                }
+            });
+        }
+        
+        if (helpRow && contactRowTextArea && contactRowTextArea.classList.contains('email-link')) {
+            const spans = helpRow.querySelectorAll('span');
+            
+            spans.forEach(span => {
+                if (span.innerHTML.includes('@gmail.com')) {
+                    span.classList.add('green-ready-text');
+                    span.style.cursor = 'pointer';
+                    setElementPointerEvents(span, 'auto');
+                    span.addEventListener('click', () => {
+                        window.open(`mailto:${span.innerHTML}`, '_blank');
+                    });
+                }
+            });
+        }        
+    }   
+    
+    function createAchievementsSectionRow(rowId) {
+        const achievementsData = Object.values(getAchievementPositionData());
+    
+        const achievementsRow = createOptionRow(
+            rowId,
+            null,
+            '',
+            createHtmlTableAchievementsGrid(
+                `${rowId}AchievementsGrid`,
+                ['achievement-container', 'achievement-container-margin'],
+                achievementsData
+            ),
+            null,
+            null,
+            null,
+            null,
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+            null,
+            false,
+            null,
+            null,
+            '',
+            [true, '0%', '100%']
+        );
+    
+        optionContentElement.appendChild(achievementsRow);
+        setupAchievementTooltip();
+    }      
+    
+    function createStatisticsSectionRow(rowId) {
+        const statisticsRow = createOptionRow(
+            rowId,
+            null,
+            '',
+            createHtmlTableStatistics(
+                `${rowId}TextArea`,
+                ['help-container', 'help-container-margin', 'center-statistics'],
+                getStatisticsContent('mainHeadings'),
+                getStatisticsContent('subHeadings'),
+                getStatisticsContent('subBodys')
+            ),
+            null,
+            null,
+            null,
+            null,
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+            null,
+            false,
+            null,
+            null,
+            '',
+            [true, '0%', '100%']
+        );
+        
+        optionContentElement.appendChild(statisticsRow);
+    }
+
+    function createEventsSectionRow(rowId) {
+        const container = document.createElement('div');
+        container.id = `${rowId}Container`;
+        container.classList.add('events-container');
+
+        const activeTitle = document.createElement('div');
+        activeTitle.id = `${rowId}ActiveTitle`;
+        activeTitle.classList.add('help-sub-header-text');
+        activeTitle.innerHTML = 'Active Events';
+        container.appendChild(activeTitle);
+
+        const activeTable = document.createElement('table');
+        activeTable.id = `${rowId}ActiveTable`;
+        activeTable.classList.add('events-table');
+        activeTable.innerHTML = `
+            <thead>
+                <tr>
+                    <th>Event</th>
+                    <th>Active Until</th>
+                    <th>Effect</th>
+                </tr>
+            </thead>
+            <tbody id="timedEventsActiveBody">
+                <tr><td colspan="3">No active timed events.</td></tr>
+            </tbody>
+        `;
+        container.appendChild(activeTable);
+
+        const historyTitle = document.createElement('div');
+        historyTitle.id = `${rowId}HistoryTitle`;
+        historyTitle.classList.add('help-sub-header-text');
+        historyTitle.style.marginTop = '14px';
+        historyTitle.innerHTML = 'Event History';
+        container.appendChild(historyTitle);
+
+        const historyTable = document.createElement('table');
+        historyTable.id = `${rowId}HistoryTable`;
+        historyTable.classList.add('events-table');
+        historyTable.innerHTML = `
+            <thead>
+                <tr>
+                    <th>Event</th>
+                    <th>Total Duration</th>
+                    <th>Effect</th>
+                </tr>
+            </thead>
+            <tbody id="timedEventsHistoryBody">
+                <tr><td colspan="3">No completed timed events yet.</td></tr>
+            </tbody>
+        `;
+        container.appendChild(historyTable);
+
+        const eventsRow = createOptionRow(
+            rowId,
+            null,
+            '',
+            container,
+            null,
+            null,
+            null,
+            null,
+            '',
+            '',
+            '',
+            '',
+            '',
+            '',
+            null,
+            false,
+            null,
+            null,
+            '',
+            [true, 'invisible', '100%'],
+            ['no-left-margin']
+        );
+
+        optionContentElement.appendChild(eventsRow);
+    }
 }
