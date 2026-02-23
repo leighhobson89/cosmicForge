@@ -644,8 +644,8 @@ function applyBlackHoleInstabilityShift(showNotification) {
 
     const alwaysOn = typeof getBlackHoleAlwaysOn === 'function' ? !!getBlackHoleAlwaysOn() : false;
 
-    const powerMultiplier = roundToTwo(Math.random() + 0.5); // 0.5 .. 1.5
-    const durationMultiplier = roundToTwo(Math.random() + 0.5); // 0.5 .. 1.5
+    const powerMultiplier = roundToTwo(Math.random() + 0.5);
+    const durationMultiplier = roundToTwo(Math.random() + 0.5);
 
     const nextPower = Math.max(0.01, roundToTwo(originalPower * powerMultiplier));
     setBlackHolePower(nextPower);
@@ -656,7 +656,6 @@ function applyBlackHoleInstabilityShift(showNotification) {
         const nextDuration = Math.max(0, Math.round(originalDuration * durationMultiplier));
         setBlackHoleDuration(nextDuration);
     } else if (alwaysOn && Number.isFinite(originalDuration) && originalDuration >= 0) {
-        // If the black hole becomes always-on during instability, revert duration to its original.
         setBlackHoleDuration(originalDuration);
     }
 

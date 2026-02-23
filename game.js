@@ -369,6 +369,8 @@ import {
     getCosmicRipNearSpaceScannerArrayRestored,
     getCosmicRipRipFound,
     getCosmicRipScanResultsBySectorIndex,
+    setCosmicRipScanResultsBySectorIndex,
+    getCosmicRipRipLocationSectorIndex
 } from './resourceDataObject.js';
 
 import { onboardingChecks } from './onboarding.js';
@@ -498,7 +500,6 @@ function performIncreaseStorageForKey(category, key) {
     if (normalizedCategory === 'compounds' && normalizedKey === 'water') {
         increaseResourceStorage(['waterQuantity', 'concreteQuantity'], ['water', 'concrete'], ['compounds', 'compounds']);
         disableStorageNotificationActionIfShowing(normalizedKey, 'Already Increased!');
-        // Clear notification flag so it can fire again if storage fills up
         const bucket = storageFullNotificationState[normalizedCategory];
         if (bucket) {
             bucket[normalizedKey] = false;
@@ -508,7 +509,6 @@ function performIncreaseStorageForKey(category, key) {
 
     increaseResourceStorage([`${normalizedKey}Quantity`], [normalizedKey], [normalizedCategory]);
     disableStorageNotificationActionIfShowing(normalizedKey, 'Already Increased!');
-    // Clear notification flag so it can fire again if storage fills up
     const bucket = storageFullNotificationState[normalizedCategory];
     if (bucket) {
         bucket[normalizedKey] = false;
@@ -1167,6 +1167,40 @@ function cosmicRipChecks() {
 
     const scannerRestored = getCosmicRipNearSpaceScannerArrayRestored?.() === true;
     const ripFound = getCosmicRipRipFound?.() === true;
+    const prevRipFound = globalThis.__cosmicRipPrevRipFound;
+    globalThis.__cosmicRipPrevRipFound = ripFound;
+
+    if (ripFound && prevRipFound === undefined) {
+        const foundIdx = Number(getCosmicRipRipLocationSectorIndex?.());
+        globalThis.__cosmicRipFoundSectorIndexForZoom = Number.isFinite(foundIdx) ? foundIdx : 0;
+        globalThis.__cosmicRipNearSpaceScannerArrayOneSectorState = true;
+
+        const fogOverlayEl = globalThis.__cosmicRipNearSpaceScannerArrayFogOverlayEl;
+        const interactiveOverlayEl = globalThis.__cosmicRipNearSpaceScannerArrayInteractiveOverlayEl;
+        const scanLabelOverlayEl = globalThis.__cosmicRipNearSpaceScannerArrayScanLabelOverlayEl;
+        const labelFadeOverlayEl = globalThis.__cosmicRipNearSpaceScannerArrayLabelFadeOverlayEl;
+        const zoomCanvasEl = globalThis.__cosmicRipNearSpaceScannerArrayZoomCanvasEl;
+        const baseCanvasEl = globalThis.__cosmicRipNearSpaceScannerArrayCanvasEl;
+
+        if (fogOverlayEl) { fogOverlayEl.style.display = 'none'; fogOverlayEl.style.transition = ''; }
+        if (interactiveOverlayEl) { interactiveOverlayEl.style.display = 'none'; interactiveOverlayEl.style.transition = ''; }
+        if (scanLabelOverlayEl) { scanLabelOverlayEl.style.display = 'none'; scanLabelOverlayEl.style.transition = ''; scanLabelOverlayEl.style.opacity = '0'; }
+        if (labelFadeOverlayEl) { labelFadeOverlayEl.style.display = 'none'; labelFadeOverlayEl.style.transition = ''; }
+        if (zoomCanvasEl) { zoomCanvasEl.style.display = 'none'; zoomCanvasEl.style.transition = ''; zoomCanvasEl.style.opacity = '0'; zoomCanvasEl.style.transform = 'scale(1)'; }
+        if (baseCanvasEl) { baseCanvasEl.style.transition = ''; baseCanvasEl.style.opacity = '1'; }
+
+        const tryDraw = () => {
+            const drawCanvas = globalThis.__cosmicRipNearSpaceScannerArrayDrawCanvas;
+            if (typeof drawCanvas === 'function') {
+                drawCanvas();
+                return true;
+            }
+            return false;
+        };
+        if (!tryDraw()) {
+            requestAnimationFrame(tryDraw);
+        }
+    }
 
     if (scannerArrayRow) {
         if (scannerRestored) {
@@ -1203,6 +1237,244 @@ function cosmicRipChecks() {
             const canScan = telescopeRestored && !scanned && gp >= 1;
             setButtonState(btn, { enabled: canScan, ready: canScan });
         });
+    }
+
+    const scanLabelEls = globalThis.__cosmicRipNearSpaceScannerArrayScanLabelEls;
+    if (Array.isArray(scanLabelEls) && scanLabelEls.length === 9) {
+        const gp = Number(getCosmicRipGalacticPoints?.()) || 0;
+        const scanResults = Array.isArray(getCosmicRipScanResultsBySectorIndex?.())
+            ? getCosmicRipScanResultsBySectorIndex()
+            : Array(9).fill(false);
+
+        if (!globalThis.__cosmicRipPrevScanResultsBySectorIndex) {
+            globalThis.__cosmicRipPrevScanResultsBySectorIndex = scanResults.map(v => v === true);
+        }
+
+        globalThis.__cosmicRipGpForUi = gp;
+        globalThis.__cosmicRipScannerRestoredForUi = scannerRestored;
+        globalThis.__cosmicRipScanResultsBySectorIndex = scanResults;
+
+        scanLabelEls.forEach((el, i) => {
+            if (globalThis.__cosmicRipNearSpaceScannerArrayOneSectorState === true) {
+                el.style.opacity = '0';
+                el.textContent = '';
+                return;
+            }
+            const scanned = scanResults?.[i] === true;
+            const ready = scannerRestored && !scanned && gp > 0;
+            const shouldBeGreen = scanned || ready;
+            el.classList.toggle('green-ready-text', shouldBeGreen);
+            el.classList.toggle('red-disabled-text', !shouldBeGreen);
+            if (scanned) {
+                if (el.textContent !== 'SCANNED!') {
+                    el.textContent = 'SCANNED!';
+                }
+            } else {
+                const desiredText = `Scan 1 GP`;
+                if (el.textContent !== desiredText) {
+                    el.textContent = desiredText;
+                }
+            }
+        });
+
+        const fogEls = globalThis.__cosmicRipNearSpaceScannerArrayFogEls;
+        const prev = Array.isArray(globalThis.__cosmicRipPrevScanResultsBySectorIndex)
+            ? globalThis.__cosmicRipPrevScanResultsBySectorIndex
+            : scanResults.map(v => v === true);
+
+        if (Array.isArray(fogEls) && fogEls.length === 9) {
+            fogEls.forEach((el, i) => {
+                const scanned = scanResults?.[i] === true;
+                const wasScanned = prev?.[i] === true;
+
+                if (el.dataset?.animatingOpacity === '1') {
+                    return;
+                }
+
+                if (!scanned) {
+                    el.style.transition = '';
+                    el.style.opacity = '1';
+                    return;
+                }
+
+                if (!wasScanned) {
+                    if (ripFound && prevRipFound === undefined) {
+                        el.style.transition = '';
+                        el.style.opacity = '0';
+                    } else {
+                        console.log(`[CosmicRip] Animating sector ${i} fog fade`);
+                        el.style.transition = '';
+                        el.style.opacity = '1';
+                        void el.offsetWidth;
+                        el.style.transition = 'opacity 2s ease';
+                        void el.offsetWidth;
+                        el.dataset.animatingOpacity = '1';
+                        window.setTimeout(() => {
+                            if (el && el.dataset) {
+                                delete el.dataset.animatingOpacity;
+                            }
+                        }, 2050);
+                        requestAnimationFrame(() => {
+                            el.style.opacity = '0';
+                        });
+                    }
+                } else {
+                    el.style.transition = '';
+                    el.style.opacity = '0';
+                }
+            });
+        }
+
+        globalThis.__cosmicRipPrevScanResultsBySectorIndex = scanResults.map(v => v === true);
+
+        const labelFadeOverlayEl = globalThis.__cosmicRipNearSpaceScannerArrayLabelFadeOverlayEl;
+        const zoomCanvasEl = globalThis.__cosmicRipNearSpaceScannerArrayZoomCanvasEl;
+        const drawCanvas = globalThis.__cosmicRipNearSpaceScannerArrayDrawCanvas;
+
+        if (ripFound && !globalThis.__cosmicRipRipFoundUiSequenceStarted) {
+            globalThis.__cosmicRipRipFoundUiSequenceStarted = true;
+
+            const previouslyScanned = scanResults.map(v => v === true);
+            const fullScanned = scanResults.map(() => true);
+            setCosmicRipScanResultsBySectorIndex?.(fullScanned);
+            globalThis.__cosmicRipPrevScanResultsBySectorIndex = fullScanned.map(v => v === true);
+
+            const scanLabelOverlayEl = globalThis.__cosmicRipNearSpaceScannerArrayScanLabelOverlayEl;
+            if (labelFadeOverlayEl) {
+                labelFadeOverlayEl.style.transition = '';
+                labelFadeOverlayEl.style.opacity = '0';
+                void labelFadeOverlayEl.offsetWidth;
+                labelFadeOverlayEl.style.transition = 'opacity 2s ease';
+                void labelFadeOverlayEl.offsetWidth;
+                requestAnimationFrame(() => {
+                    labelFadeOverlayEl.style.opacity = '1';
+                });
+            }
+            if (scanLabelOverlayEl) {
+                scanLabelOverlayEl.style.transition = '';
+                scanLabelOverlayEl.style.opacity = '1';
+                void scanLabelOverlayEl.offsetWidth;
+                scanLabelOverlayEl.style.transition = 'opacity 2s ease';
+                void scanLabelOverlayEl.offsetWidth;
+                requestAnimationFrame(() => {
+                    scanLabelOverlayEl.style.opacity = '0';
+                });
+            }
+
+            const foundIdx = Number(getCosmicRipRipLocationSectorIndex?.());
+            globalThis.__cosmicRipFoundSectorIndexForZoom = Number.isFinite(foundIdx) ? foundIdx : 0;
+
+            window.setTimeout(() => {
+                if (!zoomCanvasEl || typeof drawCanvas !== 'function') {
+                    return;
+                }
+
+                drawCanvas();
+                const baseCanvas = document.getElementById('cosmicRipNearSpaceScannerArrayCanvas');
+                const scanLabelOverlayEl = document.getElementById('cosmicRipNearSpaceScannerArrayScanLabelOverlay');
+                if (!baseCanvas) {
+                    return;
+                }
+
+                zoomCanvasEl.width = baseCanvas.width;
+                zoomCanvasEl.height = baseCanvas.height;
+                const zctx = zoomCanvasEl.getContext('2d');
+                if (!zctx) {
+                    return;
+                }
+
+                const w = baseCanvas.width;
+                const h = baseCanvas.height;
+                const cellW = w / 3;
+                const cellH = h / 3;
+                const idx = globalThis.__cosmicRipFoundSectorIndexForZoom || 0;
+                const col = idx % 3;
+                const row = Math.floor(idx / 3);
+
+                zctx.clearRect(0, 0, w, h);
+                zctx.drawImage(baseCanvas,
+                    Math.floor(col * cellW),
+                    Math.floor(row * cellH),
+                    Math.ceil(cellW),
+                    Math.ceil(cellH),
+                    Math.floor(col * cellW),
+                    Math.floor(row * cellH),
+                    Math.ceil(cellW),
+                    Math.ceil(cellH)
+                );
+
+                const centerX = (col + 0.5) / 3;
+                const centerY = (row + 0.5) / 3;
+
+                zoomCanvasEl.style.transition = '';
+                zoomCanvasEl.style.opacity = '1';
+                zoomCanvasEl.style.transformOrigin = `${(centerX * 100).toFixed(2)}% ${(centerY * 100).toFixed(2)}%`;
+                zoomCanvasEl.style.transform = 'scale(1)';
+
+                requestAnimationFrame(() => {
+                    zoomCanvasEl.style.transition = 'transform 2s ease';
+                    zoomCanvasEl.style.transform = 'scale(3)';
+
+                    if (baseCanvas) {
+                        baseCanvas.style.transition = 'opacity 2s ease';
+                        baseCanvas.style.opacity = '0';
+                    }
+                    if (scanLabelOverlayEl) {
+                        scanLabelOverlayEl.style.transition = 'opacity 2s ease';
+                        scanLabelOverlayEl.style.opacity = '0';
+                    }
+                    if (labelFadeOverlayEl) {
+                        labelFadeOverlayEl.style.transition = 'opacity 2s ease';
+                        labelFadeOverlayEl.style.opacity = '0';
+                    }
+                });
+
+                window.setTimeout(() => {
+                    globalThis.__cosmicRipOneSectorStateReady = true;
+                    globalThis.__cosmicRipNearSpaceScannerArrayOneSectorState = true;
+
+                    const baseCanvasEl = globalThis.__cosmicRipNearSpaceScannerArrayCanvasEl;
+                    if (baseCanvasEl) {
+                        baseCanvasEl.style.transition = 'opacity 0.3s ease';
+                        baseCanvasEl.style.opacity = '0';
+                    }
+
+                    const scanLabelOverlayEl3 = globalThis.__cosmicRipNearSpaceScannerArrayScanLabelOverlayEl;
+                    if (scanLabelOverlayEl3) {
+                        scanLabelOverlayEl3.style.transition = 'opacity 0.3s ease';
+                        scanLabelOverlayEl3.style.opacity = '0';
+                    }
+
+                    if (zoomCanvasEl) {
+                        zoomCanvasEl.style.transition = '';
+                        zoomCanvasEl.style.opacity = '0';
+                        zoomCanvasEl.style.transform = 'scale(1)';
+                    }
+
+                    const fogOverlayEl = globalThis.__cosmicRipNearSpaceScannerArrayFogOverlayEl;
+                    const interactiveOverlayEl = globalThis.__cosmicRipNearSpaceScannerArrayInteractiveOverlayEl;
+                    const scanLabelOverlayEl2 = globalThis.__cosmicRipNearSpaceScannerArrayScanLabelOverlayEl;
+                    if (fogOverlayEl) fogOverlayEl.style.display = 'none';
+                    if (interactiveOverlayEl) interactiveOverlayEl.style.display = 'none';
+                    if (scanLabelOverlayEl2) { scanLabelOverlayEl2.style.display = 'none'; scanLabelOverlayEl2.style.opacity = '0'; }
+                    if (labelFadeOverlayEl) labelFadeOverlayEl.style.display = 'none';
+
+                    window.setTimeout(() => {
+                        if (baseCanvasEl) {
+                            baseCanvasEl.style.transition = '';
+                            baseCanvasEl.style.opacity = '1';
+                        }
+                        if (typeof drawCanvas === 'function') {
+                            drawCanvas();
+                        }
+                    }, 10);
+                }, 2050);
+            }, 500);
+        }
+
+        if (typeof drawCanvas === 'function') {
+            drawCanvas();
+        }
     }
 }
 
@@ -3197,60 +3469,15 @@ function checkRepeatables() {
 
     const handlers = {
         constructor: {
-            "1": () => { // cheaper one off buildings
-                setOneOffBuildingPricesAfterRepeatables(getRepeatableTechMultipliers('1')); // DONE
+            "1": () => {
+                setOneOffBuildingPricesAfterRepeatables(getRepeatableTechMultipliers('1'));
             },
-            "2": () => { // cheaper resource autobuyers
-                //setResourceAutobuyerPricesAfterRepeatables(getRepeatableTechMultipliers('2')); //already DONE in upgrade button logic
-            },
-            "3": () => { // cheaper compound recipes
-                //setCompoundRecipePricesAfterRepeatables(getRepeatableTechMultipliers('3')); //already DONE in upgrade button logic
-            },
-            "4": () => { // cheaper energy and research buildings
-                //setEnergyAndResearchBuildingPricesAfterRepeatables(getRepeatableTechMultipliers('4')); //already DONE in upgrade button logic
-            }
         },
         supremacist: {
-            "1": () => { // cheaper fleets
-                //setFleetPricesAfterRepeatables(getRepeatableTechMultipliers('1')); //already DONE in upgrade button logic
-            },
-            "2": () => { // fleets higher health armor
-                //setFleetArmorBuffsAfterRepeatables(getRepeatableTechMultipliers('2')); //already DONE in upgrade button logic
-            },
-            "3": () => { // fleets faster
-                //setFleetSpeedsAfterRepeatables(getRepeatableTechMultipliers('3')); //already DONE in upgrade button logic
-            },
-            "4": () => { // fleets more damage dealt
-                //setFleetAttackDamageAfterRepeatables(getRepeatableTechMultipliers('4')); //already DONE in upgrade button logic
-            }
         },
         voidborn: {
-            "1": () => { // improve starting impression of enemies
-                //setInitialImpressionBaseAfterRepeatables(getRepeatableTechMultipliers('1')); //already DONE in upgrade button logic
-            },
-            "2": () => { // star study quicker
-                //setStarStudyEfficiencyAfterRepeatables(getRepeatableTechMultipliers('2')); //already DONE in upgrade button logic
-            },
-            "3": () => { // asteroid search quicker
-                //setAsteroidSearchEfficiencyAfterRepeatables(getRepeatableTechMultipliers('3')); //already DONE in upgrade button logic
-            },
-            "4": () => { // improve base awarded AP by 1pt each time
-                //calculateAndAddExtraAPFromPhilosophyRepeatable(getRepeatableTechMultipliers('4')); //already DONE in upgrade button logic
-            }
         },
         expansionist: {
-            "1": () => { // reduce starship parts costs
-                //setStarshipPartPricesAfterRepeatables(getRepeatableTechMultipliers('1')); //already DONE in upgrade button logic
-            },
-            "2": () => { // reduce rocket parts costs
-                //setRocketPartPricesAfterRepeatables(getRepeatableTechMultipliers('2')); //already DONE in upgrade button logic
-            },
-            "3": () => { // reduce rocket travel time
-                //setRocketTravelTimeReductionAfterRepeatables(getRepeatableTechMultipliers('3')); //already DONE in upgrade button logic
-            },
-            "4": () => { // reduce starship travel time
-                //setStarshipTravelTimeReductionAfterRepeatables(getRepeatableTechMultipliers('4')); //already DONE in upgrade button logic
-            }
         }
     };
 
@@ -4062,7 +4289,7 @@ export function sellResource(resource) {
     if (getCurrencySymbol() === "€") {
         cashRaised = parseFloat(extractedValue.replace('€', '').replace(',', ''));
     } else {
-        cashRaised = parseFloat(extractedValue.slice(1).replace(',', '')); // Remove the currency symbol and convert
+        cashRaised = parseFloat(extractedValue.slice(1).replace(',', ''));
     }
     const quantityToDeduct = parseInt(saleData.match(/\((\d+)/)[1], 10);
 
@@ -5847,7 +6074,6 @@ export function checkPowerForSpaceTelescopeTimer(timers) {
         const isDeltaTimer = Object.prototype.hasOwnProperty.call(deltaTimerContinuations, timerName);
 
         if (isDeltaTimer) {
-            // Check if the timer exists before trying to manage it
             if (timerManagerDelta.hasTimer(timerName)) {
                 const canContinue = deltaTimerContinuations[timerName];
                 if (canContinue) {
@@ -5856,7 +6082,6 @@ export function checkPowerForSpaceTelescopeTimer(timers) {
                     timerManagerDelta.pauseTimer(timerName);
                 }
             }
-            // Continue to the next timer instead of returning
         } else {
             const timer = timerManager.getTimer(timerName);
             if (timer) {
@@ -5983,7 +6208,7 @@ function spaceTelescopeChecks(element, type) {
     
     const accompanyingLabel = document.getElementById(labelId);
 
-    if (accompanyingLabel) { // Scan description
+    if (accompanyingLabel) {
         if (getPowerOnOff()) {
             accompanyingLabel.classList.remove('red-disabled-text');
             if (getTelescopeReadyToSearch()) {
@@ -6044,7 +6269,7 @@ function spaceTelescopeChecks(element, type) {
         } 
     }
 
-    if (element.dataset.resourceToFuseTo === type) { // Scan button doesnt need specifics for which timer as it is not shown unless getTelescopeReadyToSearch is true
+    if (element.dataset.resourceToFuseTo === type) {
         if (getPowerOnOff() && getTelescopeReadyToSearch()) {
             element.classList.remove('red-disabled-text');
         } else {
@@ -6164,7 +6389,6 @@ function energyChecks(element) {
 
 function powerOnOrOffChecks(element) {
     if (!getResourceDataObject('buildings', ['energy', 'batteryBoughtYet'])) {
-        // No battery purchased yet
         if (getInfinitePower() || getResourceDataObject('buildings', ['energy', 'rate']) > 0) {
             element.textContent = '• ON';
             element.classList.remove('red-disabled-text');
@@ -6182,7 +6406,6 @@ function powerOnOrOffChecks(element) {
             element.classList.remove('warning-orange-text');
         }
     } else {
-        // Battery is purchased
         if (getInfinitePower() || getResourceDataObject('buildings', ['energy', 'quantity']) > 0.00001) {
             element.textContent = '• ON';
             element.classList.remove('red-disabled-text');
@@ -6813,7 +7036,7 @@ function setStateOfButtonsBasedOnDescriptionStateForBuildingPurchases(element) {
             buyButton.classList.contains('sell-building-button') ||
             buyButton.dataset?.conditionCheck === 'toggle' ||
             buyButton.classList.contains('toggle-timer')
-        ) return; // Skip sell buttons and building toggles
+        ) return;
     
         if (hasRedDisabledText) {
             buyButton.classList.add('red-disabled-text');
@@ -7176,7 +7399,7 @@ function starShipUiChecks() {
         }
 
         if (destinationStarDetailsRow) {
-            if (getDestinationStarScanned() && getStarShipStatus()[0] === 'orbiting') { // && getStarShipStatus()[0] add invading, landing etc however it is
+            if (getDestinationStarScanned() && getStarShipStatus()[0] === 'orbiting') {
                 destinationStarDetailsRow.classList.remove('invisible');
             } else {
                 destinationStarDetailsRow.classList.add('invisible');
@@ -7376,7 +7599,6 @@ let settleSystemAfterBattleCalled = false;
 async function initiateBattleFadeOut(battleResolved) {
     const battleCanvas = document.getElementById('battleCanvas');
     if (battleCanvas) {
-        // Freeze battle rendering/AI during the end animation so the victory/defeat text remains visible.
         setBattleOngoing(false);
         await waitForAnimationEnd(battleCanvas, 'fade-in-stretch');
         setBattleResolved(true, battleResolved[1]);
@@ -8529,7 +8751,7 @@ const updateQuantityDisplays = (element, data1, data2, resourceData1, resourceDa
             }
 
             if (compoundsAutoCreate !== undefined) {
-                if (compoundsAutoCreate) { // if on
+                if (compoundsAutoCreate) {
                     const storageCapacity = getResourceDataObject('compounds', [baseId, 'storageCapacity']);
                     const quantity = getResourceDataObject('compounds', [baseId, 'quantity']);
 
@@ -10075,21 +10297,21 @@ export function startSearchAsteroidTimer(adjustment) {
 
 function getAsteroidSearchDuration() {
     const baseTimeDuration = getBaseSearchAsteroidTimerDuration();
-    const variance = baseTimeDuration * 0.2; // 20% variance
+    const variance = baseTimeDuration * 0.2;
     const randomOffset = (Math.random() * 2 - 1) * variance;
     return baseTimeDuration + randomOffset;
 }
 
 function getStarInvestigationDuration() {
     const baseTimeDuration = getBaseInvestigateStarTimerDuration();
-    const variance = baseTimeDuration * 0.2; // 20% variance
+    const variance = baseTimeDuration * 0.2;
     const randomOffset = (Math.random() * 2 - 1) * variance;
     return baseTimeDuration + randomOffset;
 }
 
 function getPillageVoidDuration() {
     const baseTimeDuration = getBasePillageVoidTimerDuration();
-    const variance = baseTimeDuration * 0.2; // 20% variance
+    const variance = baseTimeDuration * 0.2;
     const randomOffset = (Math.random() * 2 - 1) * variance;
     return baseTimeDuration + randomOffset;
 }
@@ -10262,9 +10484,9 @@ function formatAllNotationElements(element, notationType) {
                     return `${(Math.floor(number / 1e3 * 10) / 10).toFixed(1)}K`;
                 } else {
                     if (element.dataset.conditionCheck === 'techUnlock' || element.dataset.type === 'building') {
-                        return number; // Return the raw number for these conditions
+                        return number;
                     } else {
-                        return number.toFixed(0); // Default formatting for other cases
+                        return number.toFixed(0);
                     }
                 }                               
             }                       
@@ -10624,42 +10846,33 @@ function getConstituentComponents(createCompoundDescriptionString) {
     let constituentPartQuantity4 = 0;
     let constituentPartName4 = '';
 
-    // Main compound quantity
     const regexCompoundToCreate = /(\d[\d,]*(?:\.\d+)?(?:[KMBGTPE]?)?)\s*/;
     const matchCompound = createCompoundDescriptionString.match(regexCompoundToCreate);
     if (matchCompound) {
         compoundToCreateQuantity = matchCompound[1];
-    } else {
-        //console.log('No match found for compound quantity.');
     }
-    
-    // Constituent Part 1
-    const regexConstituentPart1 = /\((\d[\d,]*(?:\.\d+)?(?:[KMBGTPE]?)?)\s*([a-zA-Z]+)/;
 
+    const regexConstituentPart1 = /\((\d[\d,]*(?:\.\d+)?(?:[KMBGTPE]?)?)\s*([a-zA-Z]+)/;
     const matchConstituentPart1 = createCompoundDescriptionString.match(regexConstituentPart1);
     if (matchConstituentPart1) {
         constituentPartQuantity1 = matchConstituentPart1[1];
         constituentPartName1 = matchConstituentPart1[2];
     }
-    
-    // Constituent Part 2
+
     const regexConstituentPart2 = /, (\d[\d,]*(?:\.\d+)?(?:[KMBGTPE]?)?)\s*([a-zA-Z]+)/
     const matchConstituentPart2 = createCompoundDescriptionString.match(regexConstituentPart2);
     if (matchConstituentPart2) {
         constituentPartQuantity2 = matchConstituentPart2[1];
         constituentPartName2 = matchConstituentPart2[2];
     }
-    
-    // Constituent Part 3
-    const regexConstituentPart3 = /(?:, \d[\d,]*(?:\.\d+)?(?:[KMBGTPE]?)?\s*[a-zA-Z]+){1}\s*,\s*(\d[\d,]*(?:\.\d+)?(?:[KMBGTPE]?)?)\s*([a-zA-Z]+)/;
-                                    
+
+    const regexConstituentPart3 = /(?:, \d[\d,]*(?:\.\d+)?(?:[KMBGTPE]?)?\s*[a-zA-Z]+){1}\s*,\s*(\d[\d,]*(?:\.\d+)?(?:[KMBGTPE]?)?)\s*([a-zA-Z]+)/;                               
     const matchConstituentPart3 = createCompoundDescriptionString.match(regexConstituentPart3);
     if (matchConstituentPart3) {
         constituentPartQuantity3 = matchConstituentPart3[1];
         constituentPartName3 = matchConstituentPart3[2];
     }
-    
-    // Constituent Part 4
+
     const regexConstituentPart4 = /(?:, \d[\d,]*(?:\.\d+)?(?:[KMBGTPE]?)?\s*[a-zA-Z]+){2}\s*,\s*(\d[\d,]*(?:\.\d+)?(?:[KMBGTPE]?)?)\s*([a-zA-Z]+)/;
     const matchConstituentPart4 = createCompoundDescriptionString.match(regexConstituentPart4);
     if (matchConstituentPart4) {
@@ -10690,7 +10903,6 @@ function unpackConstituentPartsObject(constituentComponents) {
         let quantityValue = constituentComponents[quantityKey];
 
         if (quantityValue && quantityValue !== 0) {
-            // Convert the numeric string to a number
             constituentComponents[quantityKey] = Math.round(parseNumber(quantityValue));
         }
 
@@ -11074,12 +11286,7 @@ export function offlineGains(switchedFocus) {
         if (!switchedFocus) {
             showNotification('Offline Gains Added!', 'info', 3000, 'loadSave');
         }
-    
-        //console.log('Offline Gains:', offlineGains);
-        //console.log('Time Offline (seconds):', timeDifferenceInSeconds);
     }
-    // startSearchAsteroidTimer([10000, 'offlineGains']); //DEBUG
-    // startTravelToAndFromAsteroidTimer([10000, 'offlineGains'], 'rocket1', getRocketDirection('rocket1')); //DEBUG
 }
 
 function nerfOfflineGains(obj) {
@@ -11905,16 +12112,16 @@ function generateAsteroidData(name) {
         setAchievementFlagArray('discoverLegendaryAsteroid', 'add');
     }
 
-    const easeOfExtraction = Math.floor(Math.random() * 6) + 1; // Now only 1-6
+    const easeOfExtraction = Math.floor(Math.random() * 6) + 1;
     let easeClass;
     if (easeOfExtraction === 1) {
-        easeClass = 'green-ready-text';      // Easiest (1)
+        easeClass = 'green-ready-text';
     } else if (easeOfExtraction <= 3) {
-        easeClass = 'none';                 // Moderate (2-3)
+        easeClass = 'none';
     } else if (easeOfExtraction <= 5) {
-        easeClass = 'warning-orange-text';  // Hard (4-5)
+        easeClass = 'warning-orange-text';
     } else {
-        easeClass = 'red-disabled-text';    // Hardest (6)
+        easeClass = 'red-disabled-text';
     }
 
     let quantity;
@@ -12729,19 +12936,13 @@ function calculateInitialImpression(lifeformTraits, civilizationLevel, threatLev
     };
     let threatImpact = threatModifiers[threatLevel] || 0;
     impression += threatImpact;
-    // console.log(`Threat level '${threatLevel}' applied (${threatImpact}), new impression: ${impression}`);
-
     const totalFleetSize = enemyFleets.air + enemyFleets.land + enemyFleets.sea;
     let fleetPenalty = Math.floor(totalFleetSize / 20);
     impression -= fleetPenalty;
-    // console.log(`Total fleet size: ${totalFleetSize}, fleet penalty: ${fleetPenalty}, new impression: ${impression}`);
-
     if (population < 5000000) {
         impression += 5;
-        // console.log(`Small population detected, new impression: ${impression}`);
     } else if (population > 50000000) {
         impression -= 5;
-        // console.log(`Large population detected, new impression: ${impression}`);
     }
 
     impression = Math.max(0, Math.min(80, impression));
@@ -12750,7 +12951,6 @@ function calculateInitialImpression(lifeformTraits, civilizationLevel, threatLev
     } else {
         setBelligerentEnemyFlag(false);
     }
-    // console.log(`Final impression (clamped to 0-80 range): ${impression}`);
 
     setDiplomacyPossible(impression >= 10);
     return impression;

@@ -1391,7 +1391,6 @@ body {
     background-color: var(--container-bg-color);
 }
 
-/* TAB 8 (Settings)*/
 .tab-1-container-group {
     justify-content: space-between;
     align-items: stretch;
@@ -1824,7 +1823,7 @@ body {
 
 .notification {
     position: relative;
-    overflow: hidden; /* Ensure ::before doesn't spill out */
+    overflow: hidden;
     width: 100%;
     padding: 15px;
     background-color: var(--tab-bg-color);
@@ -1865,8 +1864,8 @@ body {
 .notification-achievement {
     background-color: var(--tab-bg-color);
     color: var(--stats-all-time-text);
-    color: yellow;
-    border: 6px solid yellow;
+    color: #ffcc00;
+    border: 6px solid #ffcc00;
 }
 
 .notification-info {
@@ -1923,7 +1922,7 @@ body {
 }
 
 .option-button:hover {
-    background-color: var(--tab-selected-bg-hover-color); /* Theme hover state */
+    background-color: var(--tab-selected-bg-hover-color);
     color: var(--text-color);
     box-shadow:
         0 0 0 1px rgba(var(--text-color-rgb), 0.35),
@@ -2958,12 +2957,12 @@ canvas {
     overflow: auto;
     padding: 16px;
     cursor: grab;
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE 10+ */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
 .tech-tree-native-container::-webkit-scrollbar {
-    display: none; /* WebKit */
+    display: none;
 }
 
 .tech-tree-native-container.native-tech-dragging {
@@ -3245,7 +3244,6 @@ canvas {
     height: auto;
 }
 
-/* SCROLL BAR */
 ::-webkit-scrollbar {
     width: 12px;
     height: 12px;
@@ -3273,10 +3271,6 @@ canvas {
 ::-webkit-scrollbar-corner {
     background-color: #f1f1f1;
 }
-
-/* wacky-effects-section */
-
-/* Wave Effect */
 .wave {
     animation: waveAnimation;
 }
@@ -3289,7 +3283,6 @@ canvas {
     }
 }
 
-/* Disco Effect */
 .disco {
     animation: discoAnimation 1s infinite alternate;
 }
@@ -3311,7 +3304,6 @@ canvas {
     }
 }
 
-/* Bounce Effect */
 .bounce {
     animation: bounceAnimation;
 }
@@ -3324,7 +3316,6 @@ canvas {
     }
 }
 
-/* Fade Effect */
 .fade {
     animation: fadeAnimation;
 }
@@ -3337,7 +3328,6 @@ canvas {
     }
 }
 
-/* Glitch Effect */
 .glitch {
     animation: glitchAnimation;
 }
@@ -3503,8 +3493,8 @@ canvas {
     top: 50px;
     left: 50px;
     width: 90vw;
-    max-height: 80vh;  /* Limits the height to 80% of the viewport height */
-    overflow-y: auto;  /* Enables vertical scrolling */
+    max-height: 80vh;
+    overflow-y: auto;
     border: 2px solid var(--text-color);
     background-color: var(--bg-color);
     color: var(--text-color);

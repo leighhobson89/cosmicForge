@@ -1,9 +1,4 @@
-import {
-    // getLanguage,
-    // getLocalization,
-    // setLanguage,
-    // setLocalization,
-} from './constantsAndGlobalVars.js';
+
 
 let localizationData = {};
 

@@ -862,7 +862,6 @@ export let resourceData = {
         starshipFleets: { appearsAt: [80000, "FTLTravelTheory", "antimatterEngines", "orbitalConstruction"], prereqs: ['FTL Travel Theory', 'Antimatter Engines', 'Orbital Construction'], price: 100000, idForRenderPosition: 9104, path: 5 },
         stellarScanners: { appearsAt: [70000, "FTLTravelTheory", "orbitalConstruction"], prereqs: ['FTL Travel Theory', 'Orbital Construction'], price: 72000, idForRenderPosition: 9105, path: 5 },
 
-        // Megastructure Investigation Techs
         dysonSphereUnderstanding: { appearsAt: [40000, "advancedPowerGeneration", ""], prereqs: ['Advanced Power Generation'], price: 50000, idForRenderPosition: 10001, special: 'megastructure', path: 6 },
         dysonSphereCapabilities: { appearsAt: [80000, "dysonSphereUnderstanding", ""], prereqs: ['Dyson Sphere Understanding'], price: 100000, idForRenderPosition: 10002, special: 'megastructure', path: 6 },
         dysonSphereDisconnect: { appearsAt: [120000, "dysonSphereCapabilities", ""], prereqs: ['Dyson Sphere Capabilities'], price: 150000, idForRenderPosition: 10003, special: 'megastructure', path: 6 },
@@ -889,32 +888,32 @@ export let resourceData = {
     },
     philosophyRepeatableTechs: {
         constructor: {
-            spaceStorageTankResearch: { idWithinCategory: 0, multiplier: 0, price: 500000, affects: 'specialAbility', philosophy: 'constructor', repeatable: false, setPrice: 'spaceStorageTankResearchTechPhilosophyPrice' }, // ABILITY : storage increases not x2 but x5 every time
-            efficientAssembly: { idWithinCategory: 1, multiplier: 1, price: 10000, affects: 'space', philosophy: 'constructor', repeatable: true, setPrice: 'efficientAssemblyTechPhilosophyPrice' }, // cheaper one off buildings
-            laserMining: { idWithinCategory: 2, multiplier: 1, price: 10000, affects: 'resources', philosophy: 'constructor', repeatable: true, setPrice: 'laserMiningTechPhilosophyPrice' }, // cheaper resource autobuyers
-            massCompoundAssembly: { idWithinCategory: 3, multiplier: 1, price: 10000, affects: 'compounds', philosophy: 'constructor', repeatable: true, setPrice: 'massCompoundAssemblyTechPhilosophyPrice' }, // cheaper compound recipes
-            energyDrones: { idWithinCategory: 4, multiplier: 1, price: 10000, affects: 'buildings', philosophy: 'constructor', repeatable: true, setPrice: 'energyDronesTechPhilosophyPrice' } // cheaper energy and research buildings
+            spaceStorageTankResearch: { idWithinCategory: 0, multiplier: 0, price: 500000, affects: 'specialAbility', philosophy: 'constructor', repeatable: false, setPrice: 'spaceStorageTankResearchTechPhilosophyPrice' },
+            efficientAssembly: { idWithinCategory: 1, multiplier: 1, price: 10000, affects: 'space', philosophy: 'constructor', repeatable: true, setPrice: 'efficientAssemblyTechPhilosophyPrice' },
+            laserMining: { idWithinCategory: 2, multiplier: 1, price: 10000, affects: 'resources', philosophy: 'constructor', repeatable: true, setPrice: 'laserMiningTechPhilosophyPrice' },
+            massCompoundAssembly: { idWithinCategory: 3, multiplier: 1, price: 10000, affects: 'compounds', philosophy: 'constructor', repeatable: true, setPrice: 'massCompoundAssemblyTechPhilosophyPrice' },
+            energyDrones: { idWithinCategory: 4, multiplier: 1, price: 10000, affects: 'buildings', philosophy: 'constructor', repeatable: true, setPrice: 'energyDronesTechPhilosophyPrice' }
         },
         supremacist: {
-            fleetHolograms: { idWithinCategory: 0, multiplier: 0, price: 500000, affects: 'specialAbility', philosophy: 'supremacist', repeatable: false, setPrice: 'fleetHologramsTechPhilosophyPrice' }, // ABILITY : guaranteed vassalization if fleet 3x larger, regardless of leader traits
-            hangarAutomation: { idWithinCategory: 1, multiplier: 1, price: 10000, affects: 'fleetCosts', philosophy: 'supremacist', repeatable: true, setPrice: 'hangarAutomationTechPhilosophyPrice' }, // cheaper fleets
-            syntheticPlating: { idWithinCategory: 2, multiplier: 1, price: 10000, affects: 'fleetHealth', philosophy: 'supremacist', repeatable: true, setPrice: 'syntheticPlatingTechPhilosophyPrice' }, // fleets higher health armor
-            antimatterEngineMinaturization: { idWithinCategory: 3, multiplier: 1, price: 10000, affects: 'fleetSpeed', philosophy: 'supremacist', repeatable: true, setPrice: 'antimatterEngineMinaturizationTechPhilosophyPrice' }, // fleets faster
-            laserIntensityResearch: { idWithinCategory: 4, multiplier: 1, price: 10000, affects: 'fleetAttackPower', philosophy: 'supremacist', repeatable: true, setPrice: 'laserIntensityResearchTechPhilosophyPrice' } // fleets more damage dealt
+            fleetHolograms: { idWithinCategory: 0, multiplier: 0, price: 500000, affects: 'specialAbility', philosophy: 'supremacist', repeatable: false, setPrice: 'fleetHologramsTechPhilosophyPrice' },
+            hangarAutomation: { idWithinCategory: 1, multiplier: 1, price: 10000, affects: 'fleetCosts', philosophy: 'supremacist', repeatable: true, setPrice: 'hangarAutomationTechPhilosophyPrice' },
+            syntheticPlating: { idWithinCategory: 2, multiplier: 1, price: 10000, affects: 'fleetHealth', philosophy: 'supremacist', repeatable: true, setPrice: 'syntheticPlatingTechPhilosophyPrice' },
+            antimatterEngineMinaturization: { idWithinCategory: 3, multiplier: 1, price: 10000, affects: 'fleetSpeed', philosophy: 'supremacist', repeatable: true, setPrice: 'antimatterEngineMinaturizationTechPhilosophyPrice' },
+            laserIntensityResearch: { idWithinCategory: 4, multiplier: 1, price: 10000, affects: 'fleetAttackPower', philosophy: 'supremacist', repeatable: true, setPrice: 'laserIntensityResearchTechPhilosophyPrice' }
         },
         voidborn: {
-            voidSeers: { idWithinCategory: 0, multiplier: 0, price: 500000, affects: 'specialAbility', philosophy: 'voidborn', repeatable: false, setPrice: 'voidSeersTechPhilosophyPrice' }, // ABILITY: unlock space telescope ability search void instant credits of resources / compounds
-            stellarWhispers: { idWithinCategory: 1, multiplier: 1, price: 10000, affects: 'initialImpression', philosophy: 'voidborn', repeatable: true, setPrice: 'stellarWhispersTechPhilosophyPrice' }, // improve starting impression of enemies
-            stellarInsightManifold: { idWithinCategory: 2, multiplier: 1, price: 10000, affects: 'starStudy', philosophy: 'voidborn', repeatable: true, setPrice: 'stellarInsightManifoldTechPhilosophyPrice' }, // star study quicker
-            asteroidDwellers: { idWithinCategory: 3, multiplier: 1, price: 10000, affects: 'asteroidSearch', philosophy: 'voidborn', repeatable: true, setPrice: 'asteroidDwellersTechPhilosophyPrice' }, // asteroid search quicker
-            ascendencyPhilosophy: { idWithinCategory: 4, multiplier: 0, price: 10000, affects: 'ascendencyPoints', philosophy: 'voidborn', repeatable: true, setPrice: 'ascendencyPhilosophyTechPhilosophyPrice' } // improve base awarded AP by 1pt each time
+            voidSeers: { idWithinCategory: 0, multiplier: 0, price: 500000, affects: 'specialAbility', philosophy: 'voidborn', repeatable: false, setPrice: 'voidSeersTechPhilosophyPrice' },
+            stellarWhispers: { idWithinCategory: 1, multiplier: 1, price: 10000, affects: 'initialImpression', philosophy: 'voidborn', repeatable: true, setPrice: 'stellarWhispersTechPhilosophyPrice' },
+            stellarInsightManifold: { idWithinCategory: 2, multiplier: 1, price: 10000, affects: 'starStudy', philosophy: 'voidborn', repeatable: true, setPrice: 'stellarInsightManifoldTechPhilosophyPrice' },
+            asteroidDwellers: { idWithinCategory: 3, multiplier: 1, price: 10000, affects: 'asteroidSearch', philosophy: 'voidborn', repeatable: true, setPrice: 'asteroidDwellersTechPhilosophyPrice' },
+            ascendencyPhilosophy: { idWithinCategory: 4, multiplier: 0, price: 10000, affects: 'ascendencyPoints', philosophy: 'voidborn', repeatable: true, setPrice: 'ascendencyPhilosophyTechPhilosophyPrice' }
         },
         expansionist: {
-            rapidExpansion: { idWithinCategory: 0, multiplier: 0, price: 500000, affects: 'specialAbility', philosophy: 'expansionist', repeatable: false, setPrice: 'rapidExpansionTechPhilosophyPrice' }, // ABILITY: chance to capture up to 3 neighbouring systems when capturing one
-            spaceElevator: { idWithinCategory: 1, multiplier: 1, price: 10000, affects: 'starshipPartsCost', philosophy: 'expansionist', repeatable: true, setPrice: 'spaceElevatorTechPhilosophyPrice' }, // reduce starship parts costs
-            launchPadMassProduction: { idWithinCategory: 2, multiplier: 1, price: 10000, affects: 'rocketPartsCost', philosophy: 'expansionist', repeatable: true, setPrice: 'launchPadMassProductionTechPhilosophyPrice' }, // reduce rocket parts costs
-            asteroidAttractors: { idWithinCategory: 3, multiplier: 1, price: 10000, affects: 'rocketTravelTime', philosophy: 'expansionist', repeatable: true, setPrice: 'asteroidAttractorsTechPhilosophyPrice' }, // reduce rocket travel time
-            warpDrive: { idWithinCategory: 4, multiplier: 1, price: 10000, affects: 'starshipTravelTime', philosophy: 'expansionist', repeatable: true, setPrice: 'warpDriveTechPhilosophyPrice' } // reduce starship travel time
+            rapidExpansion: { idWithinCategory: 0, multiplier: 0, price: 500000, affects: 'specialAbility', philosophy: 'expansionist', repeatable: false, setPrice: 'rapidExpansionTechPhilosophyPrice' },
+            spaceElevator: { idWithinCategory: 1, multiplier: 1, price: 10000, affects: 'starshipPartsCost', philosophy: 'expansionist', repeatable: true, setPrice: 'spaceElevatorTechPhilosophyPrice' },
+            launchPadMassProduction: { idWithinCategory: 2, multiplier: 1, price: 10000, affects: 'rocketPartsCost', philosophy: 'expansionist', repeatable: true, setPrice: 'launchPadMassProductionTechPhilosophyPrice' },
+            asteroidAttractors: { idWithinCategory: 3, multiplier: 1, price: 10000, affects: 'rocketTravelTime', philosophy: 'expansionist', repeatable: true, setPrice: 'asteroidAttractorsTechPhilosophyPrice' },
+            warpDrive: { idWithinCategory: 4, multiplier: 1, price: 10000, affects: 'starshipTravelTime', philosophy: 'expansionist', repeatable: true, setPrice: 'warpDriveTechPhilosophyPrice' }
         }
     },
     currency: {
@@ -3379,6 +3378,9 @@ export function resetResourceDataObjectOnRebirthAndAddApAndPermanentBuffsBack() 
     const blackHolePowerPrice = getResourceDataObject('blackHole', ['powerPrice']);
     const blackHoleDurationPrice = getResourceDataObject('blackHole', ['durationPrice']);
     const blackHoleRechargePrice = getResourceDataObject('blackHole', ['rechargePrice']);
+    const cosmicRipSnapshot = (resourceData && typeof resourceData === 'object' && resourceData.cosmicRip && typeof resourceData.cosmicRip === 'object')
+        ? structuredClone(resourceData.cosmicRip)
+        : null;
     const currentPricesForRepeatables = {};
     const playerPhilosophy = getPlayerPhilosophy();
     const allPhilosophyTechs = getResourceDataObject('philosophyRepeatableTechs');
@@ -3399,6 +3401,13 @@ export function resetResourceDataObjectOnRebirthAndAddApAndPermanentBuffsBack() 
         delete resourceData[key];
     });
     Object.assign(resourceData, freshRebirthState);
+
+    if (cosmicRipSnapshot && typeof cosmicRipSnapshot === 'object') {
+        if (!resourceData.cosmicRip || typeof resourceData.cosmicRip !== 'object') {
+            resourceData.cosmicRip = {};
+        }
+        Object.assign(resourceData.cosmicRip, cosmicRipSnapshot);
+    }
     setResourceDataObject(blackHoleResearchDone, 'blackHole', ['blackHoleResearchDone']);
     setResourceDataObject(blackHolePower, 'blackHole', ['power']);
     setResourceDataObject(blackHoleDuration, 'blackHole', ['duration']);

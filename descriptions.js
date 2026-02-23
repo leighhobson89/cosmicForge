@@ -1623,25 +1623,21 @@ export function initialiseDescriptions() {
         },
         spaceFleetScoutBuildRow: {
             content1: `A cheap, light craft good in large numbers.`,
-            // content1: `A cheap, light craft good in large numbers. Gains a <span class="green-ready-text">&nbsp;${getResourceDataObject('space', ['upgrades', 'fleetScout', 'bonusPercentage'])}%&nbsp;</span> bonus against <span class="green-ready-text">&nbsp;${capitaliseString(getResourceDataObject('space', ['upgrades', 'fleetScout', 'bonusGivenAgainstType']))}&nbsp;</span> fleets.`,
             content2: "",
             updateAt: ""
         },
         spaceFleetMarauderBuildRow: {
             content1: `A strong craft, designed for decimating enemy fleets.`,
-            //content1: `A strong craft, designed for decimating enemy fleets. <span class="green-ready-text">&nbsp;${getResourceDataObject('space', ['upgrades', 'fleetMarauder', 'bonusPercentage'])}%&nbsp;</span> bonus against <span class="green-ready-text">&nbsp;${capitaliseString(getResourceDataObject('space', ['upgrades', 'fleetMarauder', 'bonusGivenAgainstType']))}&nbsp;</span> fleets.`,
             content2: "",
             updateAt: ""
         },
         spaceFleetLandStalkerBuildRow: {
             content1: `If they don't fly, they fear this awesome machine!`,
-            //content1: `If they don't fly, they fear this awesome machine! <span class="green-ready-text">&nbsp;${getResourceDataObject('space', ['upgrades', 'fleetMarauder', 'bonusPercentage'])}%&nbsp;</span> bonus against <span class="green-ready-text">&nbsp;${capitaliseString(getResourceDataObject('space', ['upgrades', 'fleetLandStalker', 'bonusGivenAgainstType']))}&nbsp;</span> fleets.`,
             content2: "",
             updateAt: ""
         },
         spaceFleetNavalStraferBuildRow: {
             content1: `Naval fleets can be devastated in a heartbeat!`,
-            // content1: `Naval fleets can be devastated in a heartbeat! Gains a <span class="green-ready-text">&nbsp;${getResourceDataObject('space', ['upgrades', 'fleetScout', 'bonusPercentage'])}%&nbsp;</span> bonus against <span class="green-ready-text">&nbsp;${capitaliseString(getResourceDataObject('space', ['upgrades', 'fleetNavalStrafer', 'bonusGivenAgainstType']))}&nbsp;</span> fleets.`,
             content2: "",
             updateAt: ""
         },

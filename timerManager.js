@@ -59,7 +59,7 @@ class Timer {
     pause() {
         if (this.timerId) {
             clearInterval(this.timerId);
-            this.isPaused = true; // Mark as paused
+            this.isPaused = true;
         }
     }
 

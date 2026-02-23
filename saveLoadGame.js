@@ -231,7 +231,6 @@ export function saveGame(type) {
             showNotification("You can't save while onboarding mode is active!", 'info', 4000, 'loadSave');
         }
 
-        // Prevent callers from using stale save data (e.g. cloud export button / autosave follow-ups)
         setSaveData(null);
         return;
     }
@@ -408,7 +407,6 @@ export async function loadGameFromCloud() {
         }
 
         if (!data) {
-            // No row found at all
             showNotification('No saved game data found.', 'warning', 3000, 'loadSave');
             return false;
         }
@@ -457,7 +455,6 @@ export function loadGame() {
         try {
             const compressed = textArea.value.trim();
 
-            // Validate the compressed string before processing
             if (!validateSaveString(compressed)) {
                 showNotification('Invalid game data string. Please check and try again.', 'warning', 3000, 'loadSave');
                 return reject('Invalid game data string');

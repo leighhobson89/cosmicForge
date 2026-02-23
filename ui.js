@@ -3238,13 +3238,10 @@ export function createOptionRow(
     specialInputContainerClasses = false,
     hideMainDescriptionRow = false
 ) {
-    // Main wrapper container
     const wrapper = document.createElement('div');
     wrapper.classList.add('option-row', 'd-flex')
     wrapper.id = labelId;
 
-
-    // Create the description row
     const descriptionRowContainer = document.createElement('div');
     descriptionRowContainer.id = labelId + 'Description';
     descriptionRowContainer.classList.add('option-row-description', 'd-flex');
@@ -3252,8 +3249,6 @@ export function createOptionRow(
         descriptionRowContainer.innerHTML = getOptionDescription(labelId).content1;
     }
 
-
-    // Main row container
     const mainRow = document.createElement('div');
     mainRow.classList.add('option-row-main', 'd-flex');
     wrapper.dataset.conditionCheck = dataConditionCheck;
@@ -3261,8 +3256,6 @@ export function createOptionRow(
     wrapper.dataset.autoBuyerTier = autoBuyerTier;
     wrapper.dataset.rowCategory = rowCategory;
 
-
-    // Visibility logic for mainRow
     if (dataConditionCheck === "techUnlock") {
         const researchPointsToAppear = getResourceDataObject('techs', [objectSectionArgument1, 'appearsAt'])[0];
         const prerequisiteForTech = getResourceDataObject('techs', [objectSectionArgument1, 'appearsAt'])[1];
@@ -3323,8 +3316,6 @@ export function createOptionRow(
         }
     }
 
-
-    // Create the label container
     const labelContainer = document.createElement('div');
     labelContainer.classList.add('label-container');
     if (noDescriptionContainer) {
@@ -3360,8 +3351,6 @@ export function createOptionRow(
     labelContainer.appendChild(label);
     mainRow.appendChild(labelContainer);
 
-
-    // Create the input container
     const inputContainer = document.createElement('div');
     inputContainer.classList.add('input-container');
     if (specialInputContainerClasses) {
@@ -3389,8 +3378,6 @@ export function createOptionRow(
 
     mainRow.appendChild(inputContainer);
 
-
-    // Create the description container that contains prices of upgrades etc
     if (!noDescriptionContainer || getCurrentOptionPane() === 'energy' || getCurrentOptionPane() === 'power plant' || getCurrentOptionPane() === 'advanced power plant' || getCurrentOptionPane() === 'solar power plant') {
         const descriptionContainer = document.createElement('div');
         descriptionContainer.classList.add('description-container');
@@ -3784,16 +3771,15 @@ export function createButton(text, classNames, onClick, dataConditionCheck, reso
         } else {
             playClickSfx();
         }
-        // Set click position for ripple/particle effects
+
         const rect = button.getBoundingClientRect();
         const x = ((event.clientX - rect.left) / rect.width) * 100;
         const y = ((event.clientY - rect.top) / rect.height) * 100;
         button.style.setProperty('--click-x', `${x}%`);
         button.style.setProperty('--click-y', `${y}%`);
-        // Only animate if not already animating
+
         if (!button.classList.contains('option-button-animating')) {
             button.classList.add('option-button-animating');
-            // Remove class after longest animation completes (particles = 210ms)
             setTimeout(() => {
                 button.classList.remove('option-button-animating');
             }, 210);
@@ -3985,10 +3971,10 @@ export function setupModalButtonTooltips() {
 
 
     const tooltipTextMap = {
-        modalConfirm: modalPlayerLeaderIntroContentText1,      // Constructor
-        modalCancel: modalPlayerLeaderIntroContentText2,       // Supremacist
-        modalExtraChoice1: modalPlayerLeaderIntroContentText3, // Voidborn
-        modalExtraChoice2: modalPlayerLeaderIntroContentText4  // Expansionist
+        modalConfirm: modalPlayerLeaderIntroContentText1,
+        modalCancel: modalPlayerLeaderIntroContentText2,
+        modalExtraChoice1: modalPlayerLeaderIntroContentText3,
+        modalExtraChoice2: modalPlayerLeaderIntroContentText4
     };
 
 
@@ -4269,8 +4255,6 @@ export function createHtmlTableStatistics(id, classList = [], mainHeadings, subH
                 header += ':';
             }
 
-
-            // Apply special rule for the first and second tables (i === 0 or i === 1)
             if (i === 0 || i === 1) {
                 innerTextString += `
                     <tr>
@@ -4520,7 +4504,7 @@ export function createSvgElement(id, width = "100%", height = "100%", additional
 
          ctx.save();
          ctx.translate(c, c);
-         ctx.translate(0, 16); // Adjusted vertical centering
+         ctx.translate(0, 16);
          ctx.scale(pulseScale, pulseScale);
          ctx.scale(1, 0.82);
 
@@ -5462,7 +5446,7 @@ export function generateStarfield(starfieldContainer, numberOfStars = 70, seed =
             starElement.style.width = `${star.width * 2}px`;
             starElement.style.height = `${star.height * 2}px`;
             starElement.classList.add('star');
-            // Always register factory stars so their data appears in the Star Data table
+
             generateStarDataAndAddToDataObject(starElement, distance);
             if (mapMode === 'distance') {
                 starElement.style.backgroundColor = getStarColorForDistanceFilterButton(distance);
@@ -6517,7 +6501,7 @@ async function getUserSaveName() {
 
 
                 saveGame('initialise');
-                saveNameButton.removeEventListener('click', handleSaveNameClick); // Remove handler after successful input
+                saveNameButton.removeEventListener('click', handleSaveNameClick);
                 resolve();
             } else {
                 alert("Please enter a valid code name!");
@@ -7593,8 +7577,6 @@ const galacticMarketSidebarStatusEntries = [
     }
 ];
 
-
-// Add the megastructure sidebar status entry
 const megastructureSidebarStatusEntry = {
     elementId: 'megastructuresOption2',
     builder: buildMegastructuresSidebarStatus
@@ -7610,7 +7592,7 @@ const sidebarStatusUpdaters = [
     ...launchPadSidebarStatusEntries,
     ...starShipSidebarStatusEntries,
     ...galacticMarketSidebarStatusEntries,
-    megastructureSidebarStatusEntry  // Add the megastructure status
+    megastructureSidebarStatusEntry
 ];
 
 
@@ -7793,9 +7775,6 @@ function buildRocketSidebarStatus(rocketKey) {
         return { text: 'Ready For Refuel', className: rocketStatusClassMap['Ready For Refuel'] };
     }
 
-
-    // If THIS rocket is not currently fuelling and isn't launched/travelling/mining,
-    // it should still show Ready For Refuel even if other rockets are fuelling.
     if (!fuelingEntries.includes(rocketKey) && !fuelingEntries.includes(`${rocketKey}FuelledUp`)) {
         return { text: 'Ready For Refuel', className: rocketStatusClassMap['Ready For Refuel'] };
     }
@@ -8255,16 +8234,9 @@ function buildMegastructuresSidebarStatus() {
             tooltipContent += '</div>';
         });
     }
-
-
     tooltipContent += '</div>';
-
-
-    // Store tooltip content in data attribute
     statusElement.dataset.megastructureTooltipContent = tooltipContent;
 
-
-    // Set up tooltip if not already done
     if (!statusElement.dataset.tooltipInitialized) {
         attachSharedTooltip(statusElement, () => statusElement.dataset.megastructureTooltipContent || '');
         statusElement.dataset.tooltipInitialized = 'true';
@@ -10180,9 +10152,6 @@ export async function showNewsTickerMessage(newsTickerContainer) {
         randomIndex = Math.floor(Math.random() * newsTickerContainer[category].length);
         message = newsTickerContainer[category][randomIndex];
     }
-    // let message = newsTickerContainer['wackyEffects'][newsTickerContainer['wackyEffects'].length - 1]; //DEBUG MESSAGES
-    // category = 'wackyEffects'; //DEBUG
-
 
     if (category === 'prize' || category === 'oneOff' || category === 'wackyEffects') {
         if (category === 'oneOff') {
@@ -10660,7 +10629,7 @@ function addOneOffEventListeners() {
 
 
         if (type === 'storageMultiplier') {
-            categoryArray.forEach(category => { // resource or compounds storage capacity
+            categoryArray.forEach(category => {
                 if (category === 'resources' || category === 'compounds') {
                     const categoryTypeToUse = category === 'resources' ? resourcesToInclude : compoundsToInclude;
                     Object.keys(categoryTypeToUse).forEach(element => {
@@ -10672,7 +10641,7 @@ function addOneOffEventListeners() {
                             [element, 'storageCapacity']
                         );
                     });
-                } else if (category === 'buildings') { //battery storage capacity
+                } else if (category === 'buildings') {
                     const buyBuildingButtonElement = document.querySelector(`#${item[0]}${capitaliseString(item[1])}Row .option-row-main .input-container .building-purchase-button`);
 
 
@@ -10692,10 +10661,10 @@ function addOneOffEventListeners() {
                 }
             });
         } else if (type === 'rateMultiplier') {
-            categoryArray.forEach(category => { // resource, compounds, or building rate multiplier
+            categoryArray.forEach(category => {
                 if (category === 'resources' || category === 'compounds') {
                     const categoryTypeToUse = category === 'resources' ? resourcesToInclude : compoundsToInclude;
-                    Object.keys(categoryTypeToUse).forEach(element => { //set future purchase rate * multiplier
+                    Object.keys(categoryTypeToUse).forEach(element => {
                         const currentRate = getResourceDataObject(category, [element, 'upgrades', 'autoBuyer', item[1], 'rate']);
                         const newRate = multiplyAndRound(currentRate, multiplier);
 
@@ -10703,14 +10672,14 @@ function addOneOffEventListeners() {
                         setResourceDataObject(newRate, category, [element, 'upgrades', 'autoBuyer', item[1], 'rate']);
 
 
-                        if (getCurrentOptionPane() === element) { //set autobuyer button text if on that screen at the moment prize is clicked
+                        if (getCurrentOptionPane() === element) {
                             const buyBuildingButtonElement = document.querySelector(`#${element}AutoBuyer${item[1].replace(/^\D+/g, '')}Row .option-row-main .input-container button[data-auto-buyer-tier="${item[1]}`);
                             if (buyBuildingButtonElement) {
                                 buyBuildingButtonElement.innerHTML = `Add ${newRate * getTimerRateRatio()} ${capitaliseString(element)} /s`;
                             }
                         }
                     });
-                } else if (category === 'buildings') { // building rate multiplier e.g. Power Plants
+                } else if (category === 'buildings') {
                     const buyBuildingButtonElement = document.querySelector(`#${item[0]}${capitaliseString(item[1])}Row .option-row-main .input-container .building-purchase-button`);
                     const rateElement = document.getElementById(`${item[1]}Rate`);
 
@@ -11491,25 +11460,26 @@ function wrapAngle(angle) {
 
 
 function getBattleBackdropStarFillStops(starType) {
+    const themeElement = document.querySelector('[data-theme]');
+    const textColor = themeElement
+        ? getComputedStyle(themeElement).getPropertyValue('--text-color').trim()
+        : 'rgb(200,200,200)';
+
+    const rgbMatch = textColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+    const r = rgbMatch ? parseInt(rgbMatch[1], 10) : 200;
+    const g = rgbMatch ? parseInt(rgbMatch[2], 10) : 200;
+    const b = rgbMatch ? parseInt(rgbMatch[3], 10) : 200;
+
     const t = String(starType || '').trim().toUpperCase();
-    switch (t) {
-        case 'O':
-            return { inner: 'rgba(255,0,255,0.52)', mid: 'rgba(255,0,255,0.16)', outer: 'rgba(255,0,255,0)' };
-        case 'B':
-            return { inner: 'rgba(110,170,255,0.45)', mid: 'rgba(110,170,255,0.14)', outer: 'rgba(110,170,255,0)' };
-        case 'A':
-            return { inner: 'rgba(220,245,255,0.40)', mid: 'rgba(220,245,255,0.12)', outer: 'rgba(220,245,255,0)' };
-        case 'F':
-            return { inner: 'rgba(255,250,220,0.40)', mid: 'rgba(255,250,220,0.12)', outer: 'rgba(255,250,220,0)' };
-        case 'G':
-            return { inner: 'rgba(255,230,140,0.42)', mid: 'rgba(255,230,140,0.13)', outer: 'rgba(255,230,140,0)' };
-        case 'K':
-            return { inner: 'rgba(255,170,90,0.45)', mid: 'rgba(255,170,90,0.14)', outer: 'rgba(255,170,90,0)' };
-        case 'M':
-            return { inner: 'rgba(255,90,70,0.46)', mid: 'rgba(255,90,70,0.14)', outer: 'rgba(255,90,70,0)' };
-        default:
-            return { inner: 'rgba(200,200,200,0.22)', mid: 'rgba(200,200,200,0.08)', outer: 'rgba(200,200,200,0)' };
+    if (t === 'O') {
+        return { inner: 'rgba(255,0,255,0.52)', mid: 'rgba(255,0,255,0.16)', outer: 'rgba(255,0,255,0)' };
     }
+
+    return {
+        inner: `rgba(${r}, ${g}, ${b}, 0.52)`,
+        mid: `rgba(${r}, ${g}, ${b}, 0.16)`,
+        outer: `rgba(${r}, ${g}, ${b}, 0)`
+    };
 }
 
 
@@ -11602,18 +11572,29 @@ function createStarFieldBattleCanvas(canvas, starCount = 200) {
                 x: Math.random() * canvas.width,
                 y: Math.random() * canvas.height,
                 radius: depth > 0.85 ? 1 : 0.5,
-                grey: Math.floor(140 + depth * 100),
-                alpha: 0.3 + depth * 0.7
+                depth: depth
             });
         }
     }
 
+    const themeElement = document.querySelector('[data-theme]');
+    const containerBg = themeElement
+        ? getComputedStyle(themeElement).getPropertyValue('--container-bg').trim()
+        : 'rgba(0, 0, 0, 1)';
+    const textColor = themeElement
+        ? getComputedStyle(themeElement).getPropertyValue('--text-color').trim()
+        : 'rgb(200,200,200)';
+    const rgbMatch = textColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+    const baseR = rgbMatch ? parseInt(rgbMatch[1], 10) : 200;
+    const baseG = rgbMatch ? parseInt(rgbMatch[2], 10) : 200;
+    const baseB = rgbMatch ? parseInt(rgbMatch[3], 10) : 200;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
 
     for (const star of battleStarField) {
-        ctx.fillStyle = `rgba(${star.grey}, ${star.grey}, ${star.grey}, ${star.alpha})`;
+        const alpha = 0.3 + star.depth * 0.7;
+        ctx.fillStyle = `rgba(${baseR}, ${baseG}, ${baseB}, ${alpha})`;
         ctx.beginPath();
         ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
         ctx.fill();
@@ -11834,13 +11815,8 @@ function renderBattleExplosions(ctx, now) {
 
 
     export function drawFleets(canvasId, enemyFleets = [], playerFleets = [], createNew = true) {
-        //DEBUG
-         //enemyFleets = [10,18,26]; //DEBUG
-        // playerFleets = [1,0,0,0]; //DEBUG
-        //
+
         const canvas = document.getElementById(canvasId);
-
-
         const optionContentElement = document.getElementById(`optionContentTab5`);
         const starData = getStarSystemDataObject('stars', ['destinationStar']);
         if (!canvas)  {
@@ -12243,8 +12219,6 @@ function renderBattleExplosions(ctx, now) {
         const x2 = typeof enemy.renderX === 'number' ? enemy.renderX : enemy.x;
         const y2 = typeof enemy.renderY === 'number' ? enemy.renderY : enemy.y;
 
-
-        // Keep lasers essentially "instant" (1-2 frames) and anchored to current unit positions.
         battleVisualLasers.push({
             unitId: unit.id,
             enemyId: enemy.id,
@@ -12455,40 +12429,23 @@ function renderBattleExplosions(ctx, now) {
 
     
         battleUnits.player.forEach(unit => {
-            if (!unit.disabled) {
-                // ctx.fillStyle = 
-                //     unit.currentGoal?.id === 'hunt' ? 'magenta' : 
-                //     (unit.currentGoal?.id ? 'blue' : 
-                //     getComputedStyle(document.querySelector('[data-theme]')).getPropertyValue('--ready-text').trim());
-
-                
+            if (!unit.disabled) {                
                 const themeElement = document.querySelector('[data-theme]');
                 ctx.fillStyle = themeElement ? getComputedStyle(themeElement).getPropertyValue('--ready-text').trim() : 'white';
                 drawUnit(ctx, unit);
             }
-
-
         });
-
-        
+    
         battleUnits.enemy.forEach(unit => {
             if (!unit.disabled) {
-                            // ctx.fillStyle = 
-            //     unit.currentGoal?.id === 'hunt' ? 'magenta' : 
-            //     (unit.currentGoal?.id ? 'blue' : 
-            //     getComputedStyle(document.querySelector('[data-theme]')).getPropertyValue('--disabled-text').trim());
-
-            
             ctx.fillStyle = getEnemyBattleUnitFillStyle(starData);
             drawUnit(ctx, unit);
             }
         });
 
-
         renderBattleExplosions(ctx, now);
         renderBattleLasers(ctx, now);
     }        
-
 
     function moveIntoFormation(canvas) {
         const battleUnits = getBattleUnits();
@@ -12625,33 +12582,27 @@ function renderBattleExplosions(ctx, now) {
         }
     }
 
-
     function calculateMovement(unit, canvas, key, type) {
         checkCanvasBounds(unit, canvas);
         const newMovementVector = calculateMovementVector(unit, type, canvas);
 
-
         let baseSpeed;
 
-    
         if (type === "formation") {
             baseSpeed = 3 + (Math.random() * 3 - 1);
         } else {
-            let acceleration = unit.acceleration; // /3 is DEBUG
+            let acceleration = unit.acceleration;
             unit.currentSpeed = Math.min(unit.speed, unit.currentSpeed + acceleration);
 
             
             baseSpeed = unit.currentSpeed;
         }
 
-    
         const xFactor = newMovementVector[0] / 100;
         const yFactor = newMovementVector[1] / 100;
-
-            
+   
         unit.horizontalSpeed = Math.max(-unit.speed, Math.min(unit.speed, baseSpeed * xFactor));
         unit.verticalSpeed = Math.max(-unit.speed, Math.min(unit.speed, baseSpeed * yFactor));        
-
 
         if (type !== 'formation') {
             if (newMovementVector[0] < 0) {
@@ -14551,9 +14502,7 @@ add10AsteroidsButton.addEventListener('click', () => {
 const addStarButton = document.getElementById('addStarButton');
 addStarButton.addEventListener('click', () => {
     setDefaultPhilosophyForRun1IfUnset();
-    // for (let i = 0; i < 10; i++) {
-        extendStarDataRange(true);
-    // }
+    extendStarDataRange(true);
     showNotification('CHEAT! Discovered Star Data!', 'info', 3000, 'debug');
 });
 

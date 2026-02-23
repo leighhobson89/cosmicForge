@@ -298,9 +298,9 @@ let apSellForCashPrice = AP_BASE_SELL_PRICE;
 let apBuyForCashPrice = AP_BASE_BUY_PRICE;
 let apLiquidationQuantity = 0;
 let userPlatform = [
-    null, // [0] - Platform: 'github', 'itch', 'electron', or 'unknown'
-    null, // [1] - User agent string
-    null  // [2] - Additional platform-specific data
+    null,
+    null,
+    null
 ];
 let hostSource = null;
 let multiplierPermanentResources = 1;
@@ -755,7 +755,6 @@ export function setElements() {
 }
 
 export const statFunctionsGets = {
-    // Overview
     "stat_timePlayed": getStatTotalTimePlayed,
     "stat_pioneer": getStatPioneer,
     "stat_currentAp": getStatCurrentAp,
@@ -771,14 +770,12 @@ export const statFunctionsGets = {
     "stat_rocketsLaunched": getStatTotalRocketsLaunched,
     "stat_starShipsLaunched": getStatTotalStarShipsLaunched,
 
-    // Run
     "stat_starSystem": getStatStarSystem,
     "stat_currentWeather": getStatCurrentWeather,
     "stat_cash": getStatCash,
     "stat_apAnticipated": getStatApAnticipated,
     "stat_antimatter": getStatAntimatter,
 
-    // Resources
     "stat_hydrogen": getStatHydrogen,
     "stat_helium": getStatHelium,
     "stat_carbon": getStatCarbon,
@@ -797,7 +794,6 @@ export const statFunctionsGets = {
     "stat_siliconThisRun": getStatSiliconThisRun,
     "stat_ironThisRun": getStatIronThisRun,
 
-    // Compounds
     "stat_diesel": getStatDiesel,
     "stat_glass": getStatGlass,
     "stat_steel": getStatSteel,
@@ -812,7 +808,6 @@ export const statFunctionsGets = {
     "stat_waterThisRun": getStatWaterThisRun,
     "stat_titaniumThisRun": getStatTitaniumThisRun,
 
-    // Research
     "stat_researchPoints": getStatResearchPoints,
     "stat_scienceKits": getStatScienceKits,
     "stat_scienceClubs": getStatScienceClubs,
@@ -825,7 +820,6 @@ export const statFunctionsGets = {
     "stat_scienceClubsThisRun": getStatScienceClubsThisRun,
     "stat_scienceLabsThisRun": getStatScienceLabsThisRun,
 
-    // Energy
     "stat_powerThisRun": getStatPower,
     "stat_totalEnergyThisRun": getStatTotalEnergy,
     "stat_totalProductionThisRun": getStatTotalProduction,
@@ -851,7 +845,6 @@ export const statFunctionsGets = {
     "stat_battery3": getStatBattery3,
     "stat_battery3ThisRun": getStatBattery3ThisRun,
 
-    // Space Mining
     "stat_spaceTelescopeBuiltThisRun": getStatSpaceTelescopeBuilt,
     "stat_launchPadBuiltThisRun": getStatLaunchPadBuilt,
     "stat_spaceTelescopeBuilt": getStatSpaceTelescopeBuiltAllTime,
@@ -863,7 +856,6 @@ export const statFunctionsGets = {
     "stat_asteroidsMinedThisRun": getStatAsteroidsMinedThisRun,
     "stat_asteroidsMined": getStatAsteroidsMined,
 
-    // Interstellar
     "stat_starStudyRangeThisRun": getStatStarStudyRange,
     "stat_starShipBuiltThisRun": getStatStarShipBuilt,
     "stat_systemScannedThisRun": getStatSystemScanned,
@@ -1499,7 +1491,6 @@ export function captureGameStatusForSaving(type) {
         localStorage.setItem('saveName', getSaveName());
     }
 
-    // Large objects directly
     gameState.resourceData = JSON.parse(JSON.stringify(resourceData));
     gameState.starSystems = JSON.parse(JSON.stringify(starSystems));
     gameState.galacticMarket = JSON.parse(JSON.stringify(galacticMarket));
@@ -1507,7 +1498,6 @@ export function captureGameStatusForSaving(type) {
     gameState.ascendencyBuffs = JSON.parse(JSON.stringify(ascendencyBuffs));
     gameState.achievementsData = JSON.parse(JSON.stringify(achievementsData));
 
-    // Global variables
     gameState.saveName = getSaveName();
     gameState.currentTheme = getCurrentTheme();
     gameState.themesTriedArray = themesTriedArray;
@@ -1669,7 +1659,6 @@ export function captureGameStatusForSaving(type) {
     gameState.blackHoleDiscovered = blackHoleDiscovered;
     gameState.blackHoleDiscoveryProbability = blackHoleDiscoveryProbability;
 
-    // Flags
     gameState.flags = {
         autoSaveToggle: autoSaveToggle,
         weatherEffectSettingToggle: weatherEffectSettingToggle,
@@ -1738,7 +1727,6 @@ export function restoreGameStatus(gameState, type) {
                 }
             }
 
-            // Game variables
             if (gameState.resourceData) {
                 restoreResourceDataObject(JSON.parse(JSON.stringify(gameState.resourceData)));
             } else {
@@ -1790,7 +1778,6 @@ export function restoreGameStatus(gameState, type) {
             }
             
 
-            // Global variables
             if (type === 'cloud') {
                 if (gameState.saveName) {
                     setSaveName(gameState.saveName);
@@ -1958,7 +1945,6 @@ export function restoreGameStatus(gameState, type) {
                 compoundCreateDropdownRecipeText = gameState.compoundCreateDropdownRecipeText;
             }
 
-            // Flags
             autoSaveToggle = gameState.flags.autoSaveToggle ?? false;
             notificationsToggle = gameState.flags.notificationsToggle ?? true;
             customPointerEnabled = gameState.flags.customPointerEnabled ?? false;

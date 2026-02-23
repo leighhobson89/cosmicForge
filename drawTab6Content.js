@@ -123,8 +123,7 @@ export function drawTab6Content(heading, optionContentElement) {
             null,
             null
         );
-        
-        // Only show the auto telescope row if the space telescope is built and autoSpaceTelescopeRowEnabled is true
+
         if (getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'spaceTelescopeBoughtYet']) && getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'autoSpaceTelescopeRowEnabled'])) {
             optionContentElement.appendChild(spaceTelescopeAutoRow);
         }
@@ -613,9 +612,9 @@ function createRocketUI(rocketId, optionContentElement, asteroids, asteroidsBein
     const launchedState = getLaunchedRockets().includes(rocketId);
 
     const destinationAsteroids = ['rocket1', 'rocket2', 'rocket3', 'rocket4']
-    .filter(id => id !== rocketId) // exclude the current rocket
+    .filter(id => id !== rocketId)
     .map(id => getDestinationAsteroid(id))
-    .filter(Boolean); // remove null/undefined
+    .filter(Boolean);
 
     let filteredAsteroids = asteroids.filter(obj => {
         const asteroidName = Object.keys(obj)[0];

@@ -22,10 +22,6 @@ class DeltaTimer {
         this.markedForRemoval = false;
     }
 
-    /**
-     * Advance the timer by delta milliseconds.
-     * Returns true if the timer completed this update.
-     */
     update(deltaMs) {
         if (this.paused || this.markedForRemoval) {
             return false;
@@ -33,7 +29,6 @@ class DeltaTimer {
 
         this.triggerUpdate(deltaMs);
 
-        // Timers with duration 0 behave as immediate callbacks.
         if (this.durationMs === 0) {
             this.triggerTick();
             if (!this.repeat) {
@@ -134,9 +129,6 @@ class TimerManagerDelta {
         this.timers.clear();
     }
 
-    /**
-     * Update all timers with the provided delta (in milliseconds).
-     */
     update(deltaMs, multiplier = 1) {
         const effectiveMultiplier = (typeof multiplier === 'number' && Number.isFinite(multiplier) && multiplier > 0)
             ? multiplier
@@ -158,9 +150,6 @@ class TimerManagerDelta {
         timersToRemove.forEach(id => this.timers.delete(id));
     }
 
-    /**
-     * Helper for driving the manager using performance.now() timestamps.
-     */
     updateWithTimestamp(currentTime, multiplier = 1) {
         if (this.lastUpdateTime === null) {
             this.lastUpdateTime = currentTime;

@@ -596,7 +596,6 @@ function awardTimePrize(cost) {
                 });
             }
         } catch (e) {
-            // ignore
         }
     });
 

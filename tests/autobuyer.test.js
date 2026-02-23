@@ -70,8 +70,6 @@ describe("cloudSave_autobuyer", () => {
             energy.consumption = 0;
 
             const upgrades = energy.upgrades || {};
-            // IMPORTANT: keep fossil-fuel plants OFF so the test doesn't consume carbon/diesel and make
-            // resource quantity deltas negative.
             if (upgrades.powerPlant1) {
               upgrades.powerPlant1.quantity = Math.max(upgrades.powerPlant1.quantity ?? 0, 0);
               upgrades.powerPlant1.purchasedRate = 0;
