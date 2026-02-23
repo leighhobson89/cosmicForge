@@ -124,33 +124,65 @@ export function migrateResourceData(saveData, objectType, options = {}) {
             }
             saveData.version = 0.95;
         }
-        if (saveData.version < 0.965) {
+
+        if (saveData.version < 0.967) {
             if (objectType === 'resourceData') {
-                if (!saveData.spaceRip || typeof saveData.spaceRip !== 'object') {
-                    saveData.spaceRip = {};
+                const legacy = (saveData && typeof saveData === 'object') ? saveData.spaceRip : null;
+                if (legacy && typeof legacy === 'object') {
+                    if (!saveData.cosmicRip || typeof saveData.cosmicRip !== 'object') {
+                        saveData.cosmicRip = {};
+                    }
+                    if (typeof saveData.cosmicRip.galacticPoints !== 'number') {
+                        saveData.cosmicRip.galacticPoints = typeof legacy.galacticPoints === 'number' ? legacy.galacticPoints : 0;
+                    }
+                    if (typeof saveData.cosmicRip.nearSpaceScannerArrayRestored !== 'boolean') {
+                        saveData.cosmicRip.nearSpaceScannerArrayRestored = typeof legacy.galacticTelescopeRestored === 'boolean'
+                            ? legacy.galacticTelescopeRestored
+                            : false;
+                    }
+                    if (typeof saveData.cosmicRip.ripLocationSectorIndex !== 'number') {
+                        saveData.cosmicRip.ripLocationSectorIndex = typeof legacy.ripLocationSectorIndex === 'number' ? legacy.ripLocationSectorIndex : -1;
+                    }
+                    if (typeof saveData.cosmicRip.ripFound !== 'boolean') {
+                        saveData.cosmicRip.ripFound = typeof legacy.ripFound === 'boolean' ? legacy.ripFound : false;
+                    }
+                    if (!Array.isArray(saveData.cosmicRip.scanResultsBySectorIndex) || saveData.cosmicRip.scanResultsBySectorIndex.length !== 9) {
+                        if (Array.isArray(legacy.scanResultsBySectorIndex) && legacy.scanResultsBySectorIndex.length === 9) {
+                            saveData.cosmicRip.scanResultsBySectorIndex = legacy.scanResultsBySectorIndex.map(v => v === true);
+                        } else {
+                            saveData.cosmicRip.scanResultsBySectorIndex = Array(9).fill(false);
+                        }
+                    }
+                    delete saveData.spaceRip;
                 }
-                if (typeof saveData.spaceRip.galacticPoints !== 'number') {
-                    saveData.spaceRip.galacticPoints = 0;
+
+                if (!saveData.cosmicRip || typeof saveData.cosmicRip !== 'object') {
+                    saveData.cosmicRip = {};
                 }
-                if (typeof saveData.spaceRip.galacticTelescopeRestored !== 'boolean') {
-                    saveData.spaceRip.galacticTelescopeRestored = false;
+                if (typeof saveData.cosmicRip.galacticPoints !== 'number') {
+                    saveData.cosmicRip.galacticPoints = 0;
                 }
-                if (typeof saveData.spaceRip.ripLocationSectorIndex !== 'number') {
-                    saveData.spaceRip.ripLocationSectorIndex = -1;
+                if (typeof saveData.cosmicRip.nearSpaceScannerArrayRestored !== 'boolean') {
+                    saveData.cosmicRip.nearSpaceScannerArrayRestored = false;
                 }
-                if (typeof saveData.spaceRip.ripFound !== 'boolean') {
-                    saveData.spaceRip.ripFound = false;
+                if (typeof saveData.cosmicRip.ripLocationSectorIndex !== 'number') {
+                    saveData.cosmicRip.ripLocationSectorIndex = -1;
                 }
-                if (!Array.isArray(saveData.spaceRip.scanResultsBySectorIndex) || saveData.spaceRip.scanResultsBySectorIndex.length !== 9) {
-                    saveData.spaceRip.scanResultsBySectorIndex = Array(9).fill(false);
+                if (typeof saveData.cosmicRip.ripFound !== 'boolean') {
+                    saveData.cosmicRip.ripFound = false;
+                }
+                if (!Array.isArray(saveData.cosmicRip.scanResultsBySectorIndex) || saveData.cosmicRip.scanResultsBySectorIndex.length !== 9) {
+                    saveData.cosmicRip.scanResultsBySectorIndex = Array(9).fill(false);
                 }
             }
+
             if (objectType === 'gameState') {
                 if (typeof saveData.galacticPointsSpent !== 'number') {
                     saveData.galacticPointsSpent = 0;
                 }
             }
-            saveData.version = 0.965;
+
+            saveData.version = 0.967;
         }
         saveData.version += 0.001;
     }

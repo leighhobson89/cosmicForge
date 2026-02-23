@@ -1,6 +1,6 @@
 import { getGameActiveCountTime, getTimerRateRatio, getSaveName, getRocketUserName, getDestinationStar, getCurrencySymbol, getPlayerPhilosophy, getRepeatableTechMultipliers, getStatRun, getCurrentRunIsMegaStructureRun, getPriceCasinoGame2, getPriceCasinoGame3 } from "./constantsAndGlobalVars.js";
 import { calculateAndAddExtraAPFromPhilosophyRepeatable, formatNumber } from "./game.js";
-import { getAchievementDataObject, getResourceDataObject, getSpaceRipGalacticPoints } from "./resourceDataObject.js";
+import { getAchievementDataObject, getResourceDataObject, getCosmicRipGalacticPoints } from "./resourceDataObject.js";
 import { capitaliseWordsWithRomanNumerals } from "./utilityFunctions.js";
 
 export let infoTooltipDescriptions;
@@ -458,8 +458,8 @@ export function initialiseDescriptions() {
         'megastructures': "This shows your progress in harnessing the power of MegaStructures, and the slow dismantling of the Miaplacidus Force Field!",
         'black hole': "This shows the Black Hole time warp feature, once unlocked.",
 
-        'overview': `Space Rip operations and progression - GP: <span id="spaceRipGpBalance" class="green-ready-text">${getSpaceRipGalacticPoints()}</span>`,
-        'galactic telescope': 'Commission the Galactic Telescope, scan sectors to locate distortions, and pinpoint the Cosmic Rip.',
+        'overview': `Cosmic Rip operations and progression - GP: <span id="cosmicRipGpBalance" class="green-ready-text">${getCosmicRipGalacticPoints()}</span>`,
+        'near space scanner array': 'Commission the Near Space Scanner Array, scan sectors to locate distortions, and pinpoint the Cosmic Rip.',
         'cosmic rip': 'Interact with the Cosmic Rip once it has been located.',
         'ripcraft': 'Ripcraft construction and upgrades (coming soon).',
         'expeditions': 'Dispatch expeditions into unstable space (coming soon).',

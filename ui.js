@@ -9085,8 +9085,8 @@ function setupNativeTechTreeZoom(container, stage) {
 
 
 export function showTabsUponUnlock() {
-    const spaceRipEnabled = typeof window !== 'undefined' && window.__SPACE_RIP_ENABLED__ === true;
-    if (!spaceRipEnabled) {
+    const cosmicRipEnabled = typeof window !== 'undefined' && window.__COSMIC_RIP_ENABLED__ === true;
+    if (!cosmicRipEnabled) {
         const tab8 = document.getElementById('tab8');
         const tab8Container = document.getElementById('tab8ContainerGroup');
         if (tab8) tab8.remove();
@@ -9160,7 +9160,7 @@ function normalizeTabName(tabName) {
 export function checkOrderOfTabs() {
     const techArray = getTechUnlockedArray();
 
-    const spaceRipEnabled = typeof window !== 'undefined' && window.__SPACE_RIP_ENABLED__ === true;
+    const cosmicRipEnabled = typeof window !== 'undefined' && window.__COSMIC_RIP_ENABLED__ === true;
 
 
     const tabPriorities = {
@@ -9184,7 +9184,7 @@ export function checkOrderOfTabs() {
     if (techArray.includes('compounds')) unlockedTabs.push(4);
     if (techArray.includes('atmosphericTelescopes')) unlockedTabs.push(6);
     if (techArray.includes('apAwardedThisRun')) unlockedTabs.push(7);
-    if (spaceRipEnabled && techArray.includes('spaceRip')) unlockedTabs.push(8);
+    if (cosmicRipEnabled && techArray.includes('cosmicRip')) unlockedTabs.push(8);
 
 
     unlockedTabs = unlockedTabs.sort((a, b) => tabPriorities[a] - tabPriorities[b]);
@@ -9210,7 +9210,7 @@ export function checkOrderOfTabs() {
     });
 
 
-    if (spaceRipEnabled) {
+    if (cosmicRipEnabled) {
         if (!unlockedTabs.includes(8)) {
             unlockedTabs.push(8);
         }
@@ -9794,7 +9794,7 @@ function initializeTabEventListeners() {
         element.addEventListener('click', function() {
             selectRowCss(this);
             setLastScreenOpenRegister('tab8', 'overview');
-            setCurrentOptionPane('space rip overview');
+            setCurrentOptionPane('cosmic rip overview');
             updateContent('Overview', 'tab8', 'content');
             setFirstAccessArray('overview');
         });
@@ -9803,10 +9803,10 @@ function initializeTabEventListeners() {
     document.querySelectorAll('[class*="tab8"][class*="option2"]').forEach(function(element) {
         element.addEventListener('click', function() {
             selectRowCss(this);
-            setLastScreenOpenRegister('tab8', 'galactic telescope');
-            setCurrentOptionPane('space rip galactic telescope');
-            updateContent('Galactic Telescope', 'tab8', 'content');
-            setFirstAccessArray('galactic telescope');
+            setLastScreenOpenRegister('tab8', 'near space scanner array');
+            setCurrentOptionPane('cosmic rip near space scanner array');
+            updateContent('Near Space Scanner Array', 'tab8', 'content');
+            setFirstAccessArray('near space scanner array');
         });
     });
 
@@ -9814,7 +9814,7 @@ function initializeTabEventListeners() {
         element.addEventListener('click', function() {
             selectRowCss(this);
             setLastScreenOpenRegister('tab8', 'cosmic rip');
-            setCurrentOptionPane('space rip cosmic rip');
+            setCurrentOptionPane('cosmic rip cosmic rip');
             updateContent('Cosmic Rip', 'tab8', 'content');
             setFirstAccessArray('cosmic rip');
         });
@@ -9824,7 +9824,7 @@ function initializeTabEventListeners() {
         element.addEventListener('click', function() {
             selectRowCss(this);
             setLastScreenOpenRegister('tab8', 'ripcraft');
-            setCurrentOptionPane('space rip ripcraft');
+            setCurrentOptionPane('cosmic rip ripcraft');
             updateContent('Ripcraft', 'tab8', 'content');
             setFirstAccessArray('ripcraft');
         });
@@ -9834,7 +9834,7 @@ function initializeTabEventListeners() {
         element.addEventListener('click', function() {
             selectRowCss(this);
             setLastScreenOpenRegister('tab8', 'expeditions');
-            setCurrentOptionPane('space rip expeditions');
+            setCurrentOptionPane('cosmic rip expeditions');
             updateContent('Expeditions', 'tab8', 'content');
             setFirstAccessArray('expeditions');
         });
@@ -11475,6 +11475,14 @@ let lastLaserGunSfxAt = 0;
 let lastShipBattleExplodeSfxAt = 0;
 
 
+export function drawSharedSpaceBackdrop(ctx, canvas, starData, starCount = 200) {
+    if (!ctx || !canvas) return;
+
+    createStarFieldBattleCanvas(canvas, starCount);
+    drawBattleBackdropStar(ctx, canvas, starData);
+}
+
+
 
 
 function wrapAngle(angle) {
@@ -12688,7 +12696,7 @@ function renderBattleExplosions(ctx, now) {
 
 
     export function resetTabsOnRebirth() {
-        const spaceRipEnabled = typeof window !== 'undefined' && window.__SPACE_RIP_ENABLED__ === true;
+        const cosmicRipEnabled = typeof window !== 'undefined' && window.__COSMIC_RIP_ENABLED__ === true;
         const tabData = [
             { id: "tab1", classes: ["tab", "selected"], dataTab: "", dataName: "Resources", text: "Resources" },
             { id: "tab2", classes: ["tab", "tab-not-yet"], dataTab: "basicPowerGeneration", dataName: "Energy", text: "???" },
@@ -12699,10 +12707,10 @@ function renderBattleExplosions(ctx, now) {
             { id: "tab7", classes: ["tab", "tab-not-yet"], dataTab: "apAwardedThisRun", dataName: "Galactic", text: "???" },
             {
                 id: "tab8",
-                classes: spaceRipEnabled ? ["tab", "tab-not-yet"] : ["tab"],
-                dataTab: spaceRipEnabled ? "spaceRip" : "",
-                dataName: spaceRipEnabled ? "Space Rip" : "☰",
-                text: spaceRipEnabled ? "???" : "☰"
+                classes: cosmicRipEnabled ? ["tab", "tab-not-yet"] : ["tab"],
+                dataTab: cosmicRipEnabled ? "cosmicRip" : "",
+                dataName: cosmicRipEnabled ? "Cosmic Rip" : "☰",
+                text: cosmicRipEnabled ? "???" : "☰"
             },
             { id: "tab9", classes: ["tab"], dataTab: "", dataName: "☰", text: "☰" }
         ];
@@ -13134,8 +13142,8 @@ export function playWinCinematic(durationMs = 14000) {
     setAchievementFlagArray('completeGame', 'add');
 
 
-    if (!getTechUnlockedArray().includes('spaceRip')) {
-        setTechUnlockedArray('spaceRip');
+    if (!getTechUnlockedArray().includes('cosmicRip')) {
+        setTechUnlockedArray('cosmicRip');
     }
 
 

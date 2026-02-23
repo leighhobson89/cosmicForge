@@ -1,39 +1,37 @@
-import { createButton, createOptionRow, setButtonState, showNotification } from './ui.js';
+import { createButton, createOptionRow, setButtonState, showNotification, drawSharedSpaceBackdrop } from './ui.js';
 import {
-    getSpaceRipGalacticPoints,
-    getSpaceRipGalacticTelescopeRestored,
-    getSpaceRipRipFound,
-    getSpaceRipScanResultsBySectorIndex,
+    getCosmicRipGalacticPoints,
+    getCosmicRipNearSpaceScannerArrayRestored,
+    getCosmicRipRipFound,
 } from './resourceDataObject.js';
 
 import {
-    getSectorScanCostGp,
-    getSpaceRipSectorCount,
-    getTelescopeRestoreCostGp,
-    restoreGalacticTelescope,
-    scanRipSector,
-} from './spaceRip.js';
+    getCosmicRipSectorScanCostGp,
+    getCosmicRipSectorCount,
+    getNearSpaceScannerArrayRestoreCostGp,
+    restoreNearSpaceScannerArray,
+} from './cosmicRip.js';
 
 export function drawTab8Content(heading, optionContentElement) {
     if (heading === 'Overview') {
-        const restored = getSpaceRipGalacticTelescopeRestored?.() === true;
-        const gp = Number(getSpaceRipGalacticPoints?.()) || 0;
-        const restoreCost = Number(getTelescopeRestoreCostGp?.()) || 10;
+        const restored = getCosmicRipNearSpaceScannerArrayRestored?.() === true;
+        const gp = Number(getCosmicRipGalacticPoints?.()) || 0;
+        const restoreCost = Number(getNearSpaceScannerArrayRestoreCostGp?.()) || 10;
 
         const restoreRow = createOptionRow(
-            'spaceRipRestoreGalacticTelescopeRow',
+            'cosmicRipRestoreNearSpaceScannerArrayRow',
             null,
-            'Galactic Telescope:',
+            'Near Space Scanner Array:',
             createButton(
                 'RESTORE',
-                ['option-button', 'red-disabled-text', 'space-rip-restore-telescope-button'],
+                ['option-button', 'red-disabled-text', 'cosmic-rip-restore-scanner-array-button'],
                 () => {
-                    const result = restoreGalacticTelescope?.();
+                    const result = restoreNearSpaceScannerArray?.();
                     if (!result?.ok) {
-                        showNotification('Unable to restore Galactic Telescope.', 'warning', 3000, 'spaceRip');
+                        showNotification('Unable to restore Near Space Scanner Array.', 'warning', 3000, 'cosmicRip');
                         return;
                     }
-                    showNotification('Galactic Telescope restored.', 'info', 3000, 'spaceRip');
+                    showNotification('Near Space Scanner Array restored.', 'info', 3000, 'cosmicRip');
                 },
                 null,
                 null,
@@ -42,7 +40,7 @@ export function drawTab8Content(heading, optionContentElement) {
                 null,
                 true,
                 null,
-                'spaceRipRestoreGalacticTelescope'
+                'cosmicRipRestoreNearSpaceScannerArray'
             ),
             null,
             null,
@@ -65,13 +63,13 @@ export function drawTab8Content(heading, optionContentElement) {
             null,
             null,
             null,
-            'spaceRipRestoreGalacticTelescope'
+            'cosmicRipRestoreNearSpaceScannerArray'
         );
 
         const restoredRow = createOptionRow(
-            'spaceRipGalacticTelescopeRestoredStatusRow',
+            'cosmicRipNearSpaceScannerArrayRestoredStatusRow',
             null,
-            'Galactic Telescope:',
+            'Near Space Scanner Array:',
             null,
             null,
             null,
@@ -102,7 +100,7 @@ export function drawTab8Content(heading, optionContentElement) {
 
         if (!restored) {
             optionContentElement.appendChild(restoreRow);
-            const btn = optionContentElement.querySelector?.('.space-rip-restore-telescope-button');
+            const btn = optionContentElement.querySelector?.('.cosmic-rip-restore-scanner-array-button');
             if (btn) {
                 const canRestore = gp >= restoreCost;
                 setButtonState(btn, { enabled: canRestore, ready: canRestore });
@@ -113,15 +111,15 @@ export function drawTab8Content(heading, optionContentElement) {
         return;
     }
 
-    if (heading === 'Galactic Telescope') {
-        const restored = getSpaceRipGalacticTelescopeRestored?.() === true;
-        const found = getSpaceRipRipFound?.() === true;
-        const gp = Number(getSpaceRipGalacticPoints?.()) || 0;
-        const scanCost = Number(getSectorScanCostGp?.()) || 1;
-        const sectorCount = Number(getSpaceRipSectorCount?.()) || 9;
+    if (heading === 'Near Space Scanner Array') {
+        const restored = getCosmicRipNearSpaceScannerArrayRestored?.() === true;
+        const found = getCosmicRipRipFound?.() === true;
+        const gp = Number(getCosmicRipGalacticPoints?.()) || 0;
+        const scanCost = Number(getCosmicRipSectorScanCostGp?.()) || 1;
+        const sectorCount = Number(getCosmicRipSectorCount?.()) || 9;
 
         const statusRow = createOptionRow(
-            'spaceRipGalacticTelescopeStatusRow',
+            'cosmicRipNearSpaceScannerArrayStatusRow',
             null,
             'Status:',
             null,
@@ -155,66 +153,134 @@ export function drawTab8Content(heading, optionContentElement) {
         );
         optionContentElement.appendChild(statusRow);
 
-        const gridContainer = document.createElement('div');
-        gridContainer.id = 'spaceRipGalacticTelescopeGridContainer';
-        gridContainer.style.display = 'grid';
-        gridContainer.style.gridTemplateColumns = 'repeat(3, 1fr)';
-        gridContainer.style.gap = '8px';
-        gridContainer.style.width = '100%';
-        gridContainer.style.maxWidth = '520px';
-        gridContainer.style.marginTop = '10px';
+        const telescopeContainer = document.createElement('div');
+        telescopeContainer.id = 'cosmicRipNearSpaceScannerArrayCanvasContainer';
+        telescopeContainer.style.position = 'relative';
+        telescopeContainer.style.width = '90%';
+        telescopeContainer.style.maxWidth = '520px';
+        telescopeContainer.style.marginTop = '10px';
+        telescopeContainer.style.marginLeft = 'auto';
+        telescopeContainer.style.marginRight = 'auto';
+        telescopeContainer.style.aspectRatio = '1 / 1';
 
-        const scanResults = Array.isArray(getSpaceRipScanResultsBySectorIndex?.())
-            ? getSpaceRipScanResultsBySectorIndex()
-            : Array(sectorCount).fill(false);
+        const canvas = document.createElement('canvas');
+        canvas.id = 'cosmicRipNearSpaceScannerArrayCanvas';
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+        canvas.style.display = 'block';
 
-        for (let i = 0; i < sectorCount; i += 1) {
-            const scanned = scanResults?.[i] === true;
-            const label = scanned ? `SECTOR ${i + 1} - SCANNED` : `SCAN SECTOR ${i + 1}`;
-            const btn = createButton(
-                label,
-                ['option-button', scanned ? 'green-ready-text' : 'red-disabled-text', 'space-rip-scan-sector-button'],
-                () => {
-                    const result = scanRipSector?.(i);
-                    if (!result?.ok) {
-                        if (result?.reason === 'not_enough_gp') {
-                            showNotification('Not enough Galactic Points to scan.', 'warning', 3000, 'spaceRip');
-                        } else if (result?.reason === 'already_scanned') {
-                            showNotification('Sector already scanned.', 'info', 2500, 'spaceRip');
-                        } else {
-                            showNotification('Unable to scan sector.', 'warning', 3000, 'spaceRip');
-                        }
-                        return;
-                    }
+        const overlay = document.createElement('div');
+        overlay.id = 'cosmicRipNearSpaceScannerArrayOverlay';
+        overlay.style.position = 'absolute';
+        overlay.style.left = '0';
+        overlay.style.top = '0';
+        overlay.style.width = '100%';
+        overlay.style.height = '100%';
+        overlay.style.display = 'grid';
+        overlay.style.gridTemplateColumns = 'repeat(3, 1fr)';
+        overlay.style.gridTemplateRows = 'repeat(3, 1fr)';
+        overlay.style.pointerEvents = 'none';
 
-                    if (result?.found) {
-                        showNotification('Rip signature found!', 'info', 4000, 'spaceRip');
-                    } else {
-                        showNotification('Scan complete. No signature detected.', 'info', 2500, 'spaceRip');
-                    }
-                },
-                null,
-                null,
-                null,
-                null,
-                null,
-                true,
-                null,
-                'spaceRipSectorScan'
-            );
+        const sectorNames = [
+            'MI-7411', 'MI-7412', 'MI-7413',
+            'MI-7411', 'MI-7412', 'MI-7413',
+            'MI-7411', 'MI-7412', 'MI-7413'
+        ];
 
-            const canScan = restored && !scanned && gp >= scanCost;
-            setButtonState(btn, { enabled: canScan, ready: canScan });
-            gridContainer.appendChild(btn);
+        for (let i = 0; i < 9; i += 1) {
+            const sector = document.createElement('div');
+            sector.id = `cosmicRipNearSpaceScannerArraySector${i}`;
+            sector.dataset.sectorId = sectorNames[i];
+            sector.addEventListener('click', () => {
+                // handler placeholder
+            });
+            overlay.appendChild(sector);
         }
 
-        optionContentElement.appendChild(gridContainer);
+        telescopeContainer.appendChild(canvas);
+        telescopeContainer.appendChild(overlay);
+        optionContentElement.appendChild(telescopeContainer);
+
+        const drawCanvas = () => {
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return;
+
+            const w = canvas.offsetWidth;
+            const h = canvas.offsetHeight;
+            if (!w || !h) return;
+
+            canvas.width = w;
+            canvas.height = h;
+
+            drawSharedSpaceBackdrop(ctx, canvas, null, 200);
+
+            const themeElement = document.querySelector('[data-theme]');
+            const disabledColor = themeElement
+                ? getComputedStyle(themeElement).getPropertyValue('--disabled-text').trim()
+                : 'rgba(255, 0, 0, 0.6)';
+
+            ctx.save();
+            ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+            ctx.lineWidth = 1;
+
+            const cellW = w / 3;
+            const cellH = h / 3;
+
+            for (let col = 1; col <= 2; col += 1) {
+                const x = Math.round(col * cellW) + 0.5;
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, h);
+                ctx.stroke();
+            }
+
+            for (let row = 1; row <= 2; row += 1) {
+                const y = Math.round(row * cellH) + 0.5;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(w, y);
+                ctx.stroke();
+            }
+
+            ctx.fillStyle = disabledColor;
+            ctx.font = 'bold 11px sans-serif';
+            ctx.textBaseline = 'top';
+
+            for (let i = 0; i < 9; i += 1) {
+                const col = i % 3;
+                const row = Math.floor(i / 3);
+                const label = sectorNames[i];
+                const x = col * cellW + 6;
+                const y = row * cellH + 6;
+                ctx.fillText(String(label).toUpperCase(), x, y);
+            }
+
+            ctx.restore();
+        };
+
+        drawCanvas();
+        if (!globalThis.__cosmicRipNearSpaceScannerArrayResizeAttached) {
+            globalThis.__cosmicRipNearSpaceScannerArrayResizeAttached = true;
+            window.addEventListener('resize', () => {
+                const el = document.getElementById('cosmicRipNearSpaceScannerArrayCanvas');
+                if (el) {
+                    const ctx = el.getContext('2d');
+                    if (ctx) {
+                        const w = el.offsetWidth;
+                        const h = el.offsetHeight;
+                        el.width = w;
+                        el.height = h;
+                        drawSharedSpaceBackdrop(ctx, el, null, 200);
+                    }
+                }
+            });
+        }
         return;
     }
 
     if (heading === 'Cosmic Rip') {
         const row = createOptionRow(
-            'spaceRipCosmicRipStubRow',
+            'cosmicRipCosmicRipStubRow',
             null,
             'Cosmic Rip:',
             null,
@@ -250,7 +316,7 @@ export function drawTab8Content(heading, optionContentElement) {
 
     if (heading === 'Ripcraft') {
         const row = createOptionRow(
-            'spaceRipRipcraftStubRow',
+            'cosmicRipRipcraftStubRow',
             null,
             'Ripcraft:',
             null,
@@ -286,7 +352,7 @@ export function drawTab8Content(heading, optionContentElement) {
 
     if (heading === 'Expeditions') {
         const row = createOptionRow(
-            'spaceRipExpeditionsStubRow',
+            'cosmicRipExpeditionsStubRow',
             null,
             'Expeditions:',
             null,

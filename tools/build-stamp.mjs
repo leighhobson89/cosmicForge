@@ -28,10 +28,10 @@ try {
   throw err;
 }
 
-function readSpaceRipEnabledFlag() {
+function readCosmicRipEnabledFlag() {
   try {
     const existing = fs.readFileSync(buildFlagsPath, 'utf8');
-    const match = existing.match(/window\.__SPACE_RIP_ENABLED__\s*=\s*(true|false)\s*;/);
+    const match = existing.match(/window\.__COSMIC_RIP_ENABLED__\s*=\s*(true|false)\s*;/);
     if (match && match[1]) {
       return match[1] === 'true';
     }
@@ -45,10 +45,10 @@ function writePackageJson(obj) {
 }
 
 try {
-  const spaceRipEnabled = readSpaceRipEnabledFlag();
+  const cosmicRipEnabled = readCosmicRipEnabledFlag();
   fs.writeFileSync(
     buildFlagsPath,
-    `window.__DEMO_BUILD__ = ${isDemo ? 'true' : 'false'};\n\nwindow.__SPACE_RIP_ENABLED__ = ${spaceRipEnabled ? 'true' : 'false'};\n`,
+    `window.__DEMO_BUILD__ = ${isDemo ? 'true' : 'false'};\n\nwindow.__COSMIC_RIP_ENABLED__ = ${cosmicRipEnabled ? 'true' : 'false'};\n`,
     'utf8'
   );
 

@@ -8,7 +8,7 @@ import { showNotification } from "./ui.js";
 
 export let achievementImageUrls;
 export let resourceData = {
-    version: 0.965, //update this whenever changes are made to the structure
+    version: 0.967, //update this whenever changes are made to the structure
     resources: {
         solar: {
             autoSell: false,
@@ -928,9 +928,9 @@ export let resourceData = {
     ascendencyPoints: {
         quantity: 0,
     },
-    spaceRip: {
+    cosmicRip: {
         galacticPoints: 0,
-        galacticTelescopeRestored: false,
+        nearSpaceScannerArrayRestored: false,
         ripLocationSectorIndex: -1,
         ripFound: false,
         scanResultsBySectorIndex: Array(9).fill(false)
@@ -986,7 +986,7 @@ export const miaplacidus = {
 
 
 export let starSystems = {
-    version: 0.965,
+    version: 0.967,
     stars: {
         spica: {
             mapSize: 5.504440179536064, //might need to add this to star object when added dynamically for after rebirth
@@ -1005,14 +1005,14 @@ export let starSystems = {
 };
 
 export let oTypePowerPlantBuffs = {
-    version: 0.965,
+    version: 0.967,
     basicPowerPlantStar: { starName: null, settled: false },
     solarPowerPlantStar: { starName: null, settled: false },
     advancedPowerPlantStar: { starName: null, settled: false }
 };
 
 export let galacticCasino = {
-    version: 0.965,
+    version: 0.967,
     settings: {
         baseProbabilityCasino: 0.4,
     },
@@ -1043,7 +1043,7 @@ export let galacticCasino = {
 };
 
 export let galacticMarket = {
-    version: 0.965,
+    version: 0.967,
     resources: {
         hydrogen: { 
             name: "Hydrogen", 
@@ -1149,7 +1149,7 @@ export let galacticMarket = {
 };
 
 export let ascendencyBuffs = {
-    version: 0.965,
+    version: 0.967,
     "littleBagOfHydrogen": {
         name: "Little Bag Of Hydrogen",
         description: "buffLittleBagOfHydrogenRow",
@@ -3752,46 +3752,46 @@ export function getMaxFleetShip(fleetShip) {
     return resourceData.space.upgrades[fleetShip].maxCanBuild;
 }
 
-export const getSpaceRipGalacticPoints = () => {
-    return resourceData.spaceRip.galacticPoints;
+export const getCosmicRipGalacticPoints = () => {
+    return resourceData.cosmicRip.galacticPoints;
 };
 
-export const setSpaceRipGalacticPoints = (points) => {
-    resourceData.spaceRip.galacticPoints = points;
+export const setCosmicRipGalacticPoints = (points) => {
+    resourceData.cosmicRip.galacticPoints = points;
 };
 
-export const getSpaceRipGalacticTelescopeRestored = () => {
-    return resourceData.spaceRip.galacticTelescopeRestored;
+export const getCosmicRipNearSpaceScannerArrayRestored = () => {
+    return resourceData.cosmicRip.nearSpaceScannerArrayRestored;
 };
 
-export const setSpaceRipGalacticTelescopeRestored = (value) => {
-    resourceData.spaceRip.galacticTelescopeRestored = value === true;
+export const setCosmicRipNearSpaceScannerArrayRestored = (value) => {
+    resourceData.cosmicRip.nearSpaceScannerArrayRestored = value === true;
 };
 
-export const getSpaceRipRipLocationSectorIndex = () => {
-    return resourceData.spaceRip.ripLocationSectorIndex;
+export const getCosmicRipRipLocationSectorIndex = () => {
+    return resourceData.cosmicRip.ripLocationSectorIndex;
 };
 
-export const setSpaceRipRipLocationSectorIndex = (value) => {
-    resourceData.spaceRip.ripLocationSectorIndex = Number.isFinite(Number(value)) ? Math.floor(Number(value)) : -1;
+export const setCosmicRipRipLocationSectorIndex = (value) => {
+    resourceData.cosmicRip.ripLocationSectorIndex = Number.isFinite(Number(value)) ? Math.floor(Number(value)) : -1;
 };
 
-export const getSpaceRipRipFound = () => {
-    return resourceData.spaceRip.ripFound;
+export const getCosmicRipRipFound = () => {
+    return resourceData.cosmicRip.ripFound;
 };
 
-export const setSpaceRipRipFound = (value) => {
-    resourceData.spaceRip.ripFound = value === true;
+export const setCosmicRipRipFound = (value) => {
+    resourceData.cosmicRip.ripFound = value === true;
 };
 
-export const getSpaceRipScanResultsBySectorIndex = () => {
-    return resourceData.spaceRip.scanResultsBySectorIndex;
+export const getCosmicRipScanResultsBySectorIndex = () => {
+    return resourceData.cosmicRip.scanResultsBySectorIndex;
 };
 
-export const setSpaceRipScanResultsBySectorIndex = (value) => {
+export const setCosmicRipScanResultsBySectorIndex = (value) => {
     if (Array.isArray(value) && value.length === 9) {
-        resourceData.spaceRip.scanResultsBySectorIndex = value.map(v => v === true);
+        resourceData.cosmicRip.scanResultsBySectorIndex = value.map(v => v === true);
     } else {
-        resourceData.spaceRip.scanResultsBySectorIndex = Array(9).fill(false);
+        resourceData.cosmicRip.scanResultsBySectorIndex = Array(9).fill(false);
     }
 };

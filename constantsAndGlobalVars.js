@@ -28,7 +28,7 @@ let saveData = null;
 //CONSTANTS
 export const HOMESTAR = 'miaplacidus';
 export const MINIMUM_GAME_VERSION_FOR_SAVES = 0.90;
-export const GAME_VERSION_FOR_SAVES = 0.965;
+export const GAME_VERSION_FOR_SAVES = 0.967;
 export const deferredActions = [];
 
 //NOTIFICATIONS
@@ -1108,8 +1108,8 @@ export function mapFactoryStarValue(value) {
 }
 
 export function resetAllVariablesOnRebirth() {
-    const spaceRipEnabled = typeof window !== 'undefined' && window.__SPACE_RIP_ENABLED__ === true;
-    const hadSpaceRipUnlocked = getTechUnlockedArray().includes('spaceRip');
+    const cosmicRipEnabled = typeof window !== 'undefined' && window.__COSMIC_RIP_ENABLED__ === true;
+    const hadCosmicRipUnlocked = getTechUnlockedArray().includes('cosmicRip');
 
     if (!getMegaStructureTechsResearched().some(arr => Array.isArray(arr) && arr[0] === 1 && arr[1] === 5)) {
         infinitePower = false;
@@ -1137,8 +1137,8 @@ export function resetAllVariablesOnRebirth() {
     itemsToDeduct = {};
     itemsToIncreasePrice = {};
     techUnlockedArray = ['apAwardedThisRun'];
-    if (spaceRipEnabled && hadSpaceRipUnlocked) {
-        techUnlockedArray.unshift('spaceRip');
+    if (cosmicRipEnabled && hadCosmicRipUnlocked) {
+        techUnlockedArray.unshift('cosmicRip');
     }
     revealedTechArray = [];
     upcomingTechArray = [];
@@ -2744,13 +2744,17 @@ export function setTechUnlockedArrayDirect(value) {
     techUnlockedArray = Array.isArray(value) ? value : techUnlockedArray;
 }
 
-export function setTechUnlockedArray(value) {
+export function setTechUnlockedArray(value, direct = false) {
     if (value === 'run1' && techUnlockedArray.length === 1 && techUnlockedArray[0] === 'apAwardedThisRun' && value !== 'compoundMachining') {
         techUnlockedArray = [];
         return;
     }
 
-    techUnlockedArray.unshift(value);
+    if (direct) {
+        techUnlockedArray = Array.isArray(value) ? value : techUnlockedArray;
+    } else {
+        techUnlockedArray.unshift(value);
+    }
 }
 
 

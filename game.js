@@ -364,11 +364,11 @@ import {
 } from "./constantsAndGlobalVars.js";
 
 import {
-    getSpaceRipGalacticPoints,
-    setSpaceRipGalacticPoints,
-    getSpaceRipGalacticTelescopeRestored,
-    getSpaceRipRipFound,
-    getSpaceRipScanResultsBySectorIndex,
+    getCosmicRipGalacticPoints,
+    setCosmicRipGalacticPoints,
+    getCosmicRipNearSpaceScannerArrayRestored,
+    getCosmicRipRipFound,
+    getCosmicRipScanResultsBySectorIndex,
 } from './resourceDataObject.js';
 
 import { onboardingChecks } from './onboarding.js';
@@ -1134,36 +1134,45 @@ function updateProductionRateText(elementId, rateValue) {
     }
 }
 
-function spaceRipChecks() {
-    if (!getCurrentTab?.()?.[1]?.includes?.('Space Rip')) {
+function cosmicRipChecks() {
+    const techUnlockedArray = getTechUnlockedArray?.();
+    if (Array.isArray(techUnlockedArray) && techUnlockedArray.includes('spaceRip')) { //patch cosmicRip rename
+        const filtered = techUnlockedArray.filter(t => t !== 'spaceRip');
+        if (!filtered.includes('cosmicRip')) {
+            filtered.unshift('cosmicRip');
+        }
+        setTechUnlockedArray(filtered, true);
+    }
+
+    if (!getCurrentTab?.()?.[1]?.includes?.('Cosmic Rip')) {
         return;
     }
 
-    const overviewOption = document.getElementById('spaceRipOverviewOption');
+    const overviewOption = document.getElementById('cosmicRipOverviewOption');
     if (!overviewOption) {
         return;
     }
 
-    if (getCurrentOptionPane?.() === 'space rip overview') {
-        const gpBalanceEl = document.getElementById('spaceRipGpBalance');
+    if (getCurrentOptionPane?.() === 'cosmic rip overview') {
+        const gpBalanceEl = document.getElementById('cosmicRipGpBalance');
         if (gpBalanceEl) {
-            const gp = Number(getSpaceRipGalacticPoints?.()) || 0;
+            const gp = Number(getCosmicRipGalacticPoints?.()) || 0;
             gpBalanceEl.textContent = String(gp);
             gpBalanceEl.classList.toggle('green-ready-text', gp > 0);
         }
     }
 
-    const telescopeRow = document.getElementById('spaceRipGalacticTelescopeRow');
-    const cosmicRipRow = document.getElementById('spaceRipCosmicRipRow');
+    const scannerArrayRow = document.getElementById('cosmicRipNearSpaceScannerArrayRow');
+    const cosmicRipRow = document.getElementById('cosmicRipCosmicRipRow');
 
-    const telescopeRestored = getSpaceRipGalacticTelescopeRestored?.() === true;
-    const ripFound = getSpaceRipRipFound?.() === true;
+    const scannerRestored = getCosmicRipNearSpaceScannerArrayRestored?.() === true;
+    const ripFound = getCosmicRipRipFound?.() === true;
 
-    if (telescopeRow) {
-        if (telescopeRestored) {
-            telescopeRow.classList.remove('invisible');
+    if (scannerArrayRow) {
+        if (scannerRestored) {
+            scannerArrayRow.classList.remove('invisible');
         } else {
-            telescopeRow.classList.add('invisible');
+            scannerArrayRow.classList.add('invisible');
         }
     }
 
@@ -1175,18 +1184,18 @@ function spaceRipChecks() {
         }
     }
 
-    const restoreBtn = document.querySelector('.space-rip-restore-telescope-button');
+    const restoreBtn = document.querySelector('.cosmic-rip-restore-scanner-array-button');
     if (restoreBtn) {
-        const gp = Number(getSpaceRipGalacticPoints?.()) || 0;
-        const canRestore = !telescopeRestored && gp >= 10;
+        const gp = Number(getCosmicRipGalacticPoints?.()) || 0;
+        const canRestore = !scannerRestored && gp >= 10;
         setButtonState(restoreBtn, { enabled: canRestore, ready: canRestore });
     }
 
-    const scanButtons = document.querySelectorAll('.space-rip-scan-sector-button');
+    const scanButtons = document.querySelectorAll('.cosmic-rip-scan-sector-button');
     if (scanButtons && scanButtons.length > 0) {
-        const gp = Number(getSpaceRipGalacticPoints?.()) || 0;
-        const scanResults = Array.isArray(getSpaceRipScanResultsBySectorIndex?.())
-            ? getSpaceRipScanResultsBySectorIndex()
+        const gp = Number(getCosmicRipGalacticPoints?.()) || 0;
+        const scanResults = Array.isArray(getCosmicRipScanResultsBySectorIndex?.())
+            ? getCosmicRipScanResultsBySectorIndex()
             : Array(9).fill(false);
 
         scanButtons.forEach((btn, i) => {
@@ -1479,9 +1488,9 @@ export async function gameLoop() {
         const settledCount = ((getSettledStars?.() || []).length) - 1;
         const spent = Number(getGalacticPointsSpent?.()) || 0;
         const desiredGalacticPoints = Math.max(0, settledCount - spent);
-        const currentGalacticPoints = Number(getSpaceRipGalacticPoints?.()) || 0;
+        const currentGalacticPoints = Number(getCosmicRipGalacticPoints?.()) || 0;
         if (currentGalacticPoints !== desiredGalacticPoints) {
-            setSpaceRipGalacticPoints(desiredGalacticPoints);
+            setCosmicRipGalacticPoints(desiredGalacticPoints);
         }
 
         showHideDynamicUiContent();
@@ -1556,7 +1565,7 @@ export async function gameLoop() {
         ascendencyBuffChecks();
         megastructureUIChecks();
         blackHoleUIChecks();
-        spaceRipChecks();
+        cosmicRipChecks();
         rebirthChecks();
         onboardingChecks({
             callPopupModal,
@@ -13809,8 +13818,8 @@ export function rebirth() {
         }
     }
 
-    const current = Number(getSpaceRipGalacticPoints?.()) || 0;
-    setSpaceRipGalacticPoints(current + conqueredThisRebirth);
+    const current = Number(getCosmicRipGalacticPoints?.()) || 0;
+    setCosmicRipGalacticPoints(current + conqueredThisRebirth);
 
     setupNewRunStarSystem();
     setRebirthPossible(false);
