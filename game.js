@@ -1314,7 +1314,6 @@ function cosmicRipChecks() {
                         el.style.transition = '';
                         el.style.opacity = '0';
                     } else {
-                        console.log(`[CosmicRip] Animating sector ${i} fog fade`);
                         el.style.transition = '';
                         el.style.opacity = '1';
                         void el.offsetWidth;

@@ -163,6 +163,10 @@ export let modalEventBlackHoleInstabilityHeader;
 export let modalEventBlackHoleInstabilityText;
 export let modalEventBlackHoleInstabilityEndedHeader;
 export let modalEventBlackHoleInstabilityEndedText;
+export let modalCosmicRipLocatedHeader;
+export let modalCosmicRipLocatedText;
+export let modalNearSpaceScannerArrayRestoredHeader;
+export let modalNearSpaceScannerArrayRestoredText;
 
 export let randomEventTriggerDescriptions;
 
@@ -281,6 +285,12 @@ export function initialiseDescriptions() {
     modalMegaStructureTechGalacticMemoryArchive5Text = `You have connected this Galactic Memory Archive into the fabric of the galaxy<br>meaning its benefits are now permanently available in whichever<br>system you might one day settle. This has enormous potential.<br><br><span class="green-ready-text">All Resource And Compound Storage Capacity + 10B!<br>All Resource And Compound Storage Capacity starts at 10B in every new System!</span>`;
     modalBlackHoleDiscoveredHeader = 'Black Hole Discovered!';
     modalBlackHoleDiscoveredText = `While studying the stars with the Space Telescope, you stumbled upon a Black Hole!<br>Time Dilation is a feature of these objects, and maybe we can harness its power for our own uses!<br><br><span class="green-ready-text">Take a look in the Galactic tab to interact with it.</span>`;
+
+    modalNearSpaceScannerArrayRestoredHeader = 'Near Space Scanner Array Restored!';
+    modalNearSpaceScannerArrayRestoredText = `We have restored the strange <span class="green-ready-text">Near Space Scanner Array</span> orbiting Miaplacidus inside the ruined force field.<br><br>With Galactic Points (GP), we can bring it fully online and scan Miaplacidus' local space to locate the source of the AI invasion!`;
+
+    modalCosmicRipLocatedHeader = 'Cosmic Rip Located!';
+    modalCosmicRipLocatedText = `The <span class="green-ready-text">Cosmic Rip</span> opened by the scientist, through which the evil AI race travelled has been located.<br><br>We will dispatch science teams to investigate at once!<br><br>This is going to be huge!`;
 
     modalEventPowerPlantExplosionHeader = 'POWER PLANT EXPLOSION!';
     modalEventPowerPlantExplosionText = `A catastrophic failure rocked your energy grid.<br><br><span class="red-disabled-text">{destroyedBuilding} destroyed!</span>`;

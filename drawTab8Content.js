@@ -1,4 +1,10 @@
-import { createButton, createOptionRow, setButtonState, showNotification, drawSharedSpaceBackdrop } from './ui.js';
+import { createButton, createOptionRow, setButtonState, showNotification, drawSharedSpaceBackdrop, callPopupModal, showHideModal } from './ui.js';
+import {
+    modalCosmicRipLocatedHeader,
+    modalCosmicRipLocatedText,
+    modalNearSpaceScannerArrayRestoredHeader,
+    modalNearSpaceScannerArrayRestoredText,
+} from './descriptions.js';
 import {
     getCosmicRipGalacticPoints,
     getCosmicRipNearSpaceScannerArrayRestored,
@@ -33,6 +39,24 @@ export function drawTab8Content(heading, optionContentElement) {
                         return;
                     }
                     showNotification('Near Space Scanner Array restored.', 'info', 3000, 'cosmicRip');
+                    callPopupModal(
+                        modalNearSpaceScannerArrayRestoredHeader,
+                        modalNearSpaceScannerArrayRestoredText,
+                        true,
+                        false,
+                        false,
+                        false,
+                        () => {
+                            showHideModal();
+                        },
+                        null,
+                        null,
+                        null,
+                        'CONFIRM',
+                        '',
+                        '',
+                        ''
+                    );
                 },
                 null,
                 null,
@@ -122,7 +146,7 @@ export function drawTab8Content(heading, optionContentElement) {
         const statusRow = createOptionRow(
             'cosmicRipNearSpaceScannerArrayStatusRow',
             null,
-            'Status:',
+            'Miaplacidus Map:',
             null,
             null,
             null,
@@ -273,7 +297,33 @@ export function drawTab8Content(heading, optionContentElement) {
 
                 const result = scanCosmicRipSector?.(i);
                 if (result?.ok) {
-                    console.log(`[CosmicRip] Sector clicked: ${name} (index ${i})`);
+                    if (result.found) {
+                        showNotification(`Scan complete! Cosmic Rip located in sector ${name}`, 'info', 4000, 'cosmicRip');
+
+                        if (globalThis.__cosmicRipLocatedModalShown !== true) {
+                            globalThis.__cosmicRipLocatedModalShown = true;
+                            callPopupModal(
+                                modalCosmicRipLocatedHeader,
+                                modalCosmicRipLocatedText,
+                                true,
+                                false,
+                                false,
+                                false,
+                                () => {
+                                    showHideModal();
+                                },
+                                null,
+                                null,
+                                null,
+                                'CONFIRM',
+                                '',
+                                '',
+                                ''
+                            );
+                        }
+                    } else {
+                        showNotification(`Scan complete! Nothing significant found in sector ${name}`, 'info', 3500, 'cosmicRip');
+                    }
                 }
             });
             overlay.appendChild(sector);
