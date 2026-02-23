@@ -26,7 +26,7 @@ import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 import { getNavigatorLanguage } from './game.js';
 
 const supabaseUrl = 'https://riogcxvtomyjlzkcnujf.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJpb2djeHZ0b215amx6a2NudWpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQwMjY1NDgsImV4cCI6MjA1OTYwMjU0OH0.HH7KXPrcORvl6Wiefupl422gRYxAa_kFCRM2-puUcsQ';
+const supabaseKey = 'sb_publishable_aocxf5kurMeS6QmQ_RMsAQ_Fio1271m';
 const supabase = createClient(supabaseUrl, supabaseKey, {
     auth: {
         persistSession: false,
@@ -437,6 +437,7 @@ export async function loadGameFromCloud() {
         setAchievementIconImageUrls();
         getNavigatorLanguage();
         showNotification('Game loaded successfully!', 'info', 3000, 'loadSave');
+        showNotification('APOLOGIES IF YOU COULD NOT SAVE GAME TODAY.  It was necessary to update the Database Save Cloud Configuration', 'error', 7000, 'loadSave');
         return true;
 
     } catch (error) {
@@ -480,6 +481,7 @@ export function loadGame() {
                     setOnboardingMode(false);
                     setAchievementIconImageUrls();
                     showNotification('Game loaded successfully!', 'info', 3000, 'loadSave');
+                    showNotification('APOLOGIES IF YOU COULD NOT SAVE GAME TODAY.  It was necessary to update the Database Save Cloud Configuration', 'error', 7000, 'loadSave');
                     resolve();
                 })
                 .catch(error => {

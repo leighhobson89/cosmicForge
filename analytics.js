@@ -1,7 +1,7 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
 const DEFAULT_SUPABASE_URL = 'https://riogcxvtomyjlzkcnujf.supabase.co';
-const DEFAULT_SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJpb2djeHZ0b215amx6a2NudWpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQwMjY1NDgsImV4cCI6MjA1OTYwMjU0OH0.HH7KXPrcORvl6Wiefupl422gRYxAa_kFCRM2-puUcsQ';
+const DEFAULT_SUPABASE_KEY = 'sb_publishable_aocxf5kurMeS6QmQ_RMsAQ_Fio1271m';
 
 const DEFAULT_TABLE_NAME = 'CosmicForge_analytics_events';
 const DEFAULT_BATCH_SIZE = 25;

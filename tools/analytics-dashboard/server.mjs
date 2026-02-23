@@ -32,7 +32,7 @@ function safeJoin(baseDir, reqPath) {
 }
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://riogcxvtomyjlzkcnujf.supabase.co';
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJpb2djeHZ0b215amx6a2NudWpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQwMjY1NDgsImV4cCI6MjA1OTYwMjU0OH0.HH7KXPrcORvl6Wiefupl422gRYxAa_kFCRM2-puUcsQ';
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || 'sb_publishable_aocxf5kurMeS6QmQ_RMsAQ_Fio1271m';
 const TABLE = process.env.SUPABASE_ANALYTICS_TABLE || 'CosmicForge_analytics_events';
 
 const ROLLUP_TABLE = process.env.SUPABASE_ROLLUP_TABLE || 'analytics_rollups';

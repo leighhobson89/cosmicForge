@@ -4933,6 +4933,8 @@ function sendNotification(message, type, classification, duration, actionLabel, 
 
     const notification = document.createElement('div');
     notification.className = 'notification show';
+    const normalizedType = String(type || 'info').toLowerCase();
+    notification.classList.add(`notification-${normalizedType}`);
     if (classification) {
         notification.dataset.notificationClassification = String(classification);
     }
