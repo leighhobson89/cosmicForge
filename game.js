@@ -1153,13 +1153,25 @@ function cosmicRipChecks() {
         return;
     }
 
-    if (getCurrentOptionPane?.() === 'cosmic rip overview') {
-        const gpBalanceEl = document.getElementById('cosmicRipGpBalance');
-        if (gpBalanceEl) {
-            const gp = Number(getCosmicRipGalacticPoints?.()) || 0;
-            gpBalanceEl.textContent = String(gp);
-            gpBalanceEl.classList.toggle('green-ready-text', gp > 0);
-        }
+    const optionPane = String(getCurrentOptionPane?.() || '');
+    if (optionPane.startsWith('cosmic rip')) {
+        // GP is maintained each tick as: max(0, (settled systems - 1) - galacticPointsSpent)
+        const gp = Number(getCosmicRipGalacticPoints?.()) || 0;
+        const gpIds = [
+            'cosmicRipGpBalance',
+            'cosmicRipGpBalanceNearSpace',
+            'cosmicRipGpBalanceCosmicRip',
+            'cosmicRipGpBalanceRipcraft',
+            'cosmicRipGpBalanceExpeditions',
+        ];
+        gpIds.forEach((id) => {
+            const el = document.getElementById(id);
+            if (!el) {
+                return;
+            }
+            el.textContent = String(gp);
+            el.classList.toggle('green-ready-text', gp > 0);
+        });
     }
 
     const scannerArrayRow = document.getElementById('cosmicRipNearSpaceScannerArrayRow');

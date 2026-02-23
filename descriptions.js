@@ -408,9 +408,8 @@ export function initialiseDescriptions() {
         'Energy': 'Here you can buy upgrades for generating power which is needed for more advanced buildings.',
         'Space Mining': 'Here you can build vessels to mine asteroids for valuable Antimatter, enabling you to visit locations in the Star Map, and really start to conquer the galaxy!',
         'Galactic': 'Here you can exchange your AP for permanent buffs, and reset runs.',
+        'Cosmic Rip': 'I don\'t know how you got here Cosmic Forger, but we are going to settle this...',
         'Settings': 'Change the game settings to your liking.',
-        'events': 'Here you can see any ongoing or historical events and the effects they have.',
-        'exit game': 'Here you can Exit The Game',
         
         'hydrogen': 'The most basic element known to man, very cheap to produce and has a pretty low value, but anything can be created from it.',
         'helium': 'Lighter than air this one will make you float away!',
@@ -459,10 +458,10 @@ export function initialiseDescriptions() {
         'black hole': "This shows the Black Hole time warp feature, once unlocked.",
 
         'overview': `Cosmic Rip operations and progression - GP: <span id="cosmicRipGpBalance" class="green-ready-text">${getCosmicRipGalacticPoints()}</span>`,
-        'near space scanner array': 'Commission the Near Space Scanner Array, scan sectors to locate distortions, and pinpoint the Cosmic Rip.',
-        'cosmic rip': 'Interact with the Cosmic Rip once it has been located.',
-        'ripcraft': 'Ripcraft construction and upgrades (coming soon).',
-        'expeditions': 'Dispatch expeditions into unstable space (coming soon).',
+        'near space scanner array': `Commission the Near Space Scanner Array, scan sectors to locate distortions, and pinpoint the Cosmic Rip. - GP: <span id="cosmicRipGpBalanceNearSpace" class="green-ready-text">${getCosmicRipGalacticPoints()}</span>`,
+        'cosmic rip': `Interact with the Cosmic Rip once it has been located. - GP: <span id="cosmicRipGpBalanceCosmicRip" class="green-ready-text">${getCosmicRipGalacticPoints()}</span>`,
+        'ripcraft': `Ripcraft construction and upgrades (coming soon). - GP: <span id="cosmicRipGpBalanceRipcraft" class="green-ready-text">${getCosmicRipGalacticPoints()}</span>`,
+        'expeditions': `Dispatch expeditions into unstable space (coming soon). - GP: <span id="cosmicRipGpBalanceExpeditions" class="green-ready-text">${getCosmicRipGalacticPoints()}</span>`,
 
         'contact': "Contact Channels for Feedback and Suggestions",
         'get started': "Learn how to get started in Cosmic Forge.",
@@ -476,7 +475,9 @@ export function initialiseDescriptions() {
         'game options': "Change the game options to your liking.",
         'saving / loading': "Save and Load your progress in the game.",
         'statistics': `Here you can see your progress in the game.`,
-        'achievements': `Here you can see your earned achievements, and their effects.`
+        'achievements': `Here you can see your earned achievements, and their effects.`,
+        'events': 'Here you can see any ongoing or historical events and the effects they have.',
+        'exit game': 'Here you can Exit The Game'
     };
 
     infoTooltipDescriptions = {
