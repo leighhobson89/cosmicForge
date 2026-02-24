@@ -3593,7 +3593,7 @@ export const megaStructureTableText = {
     effectGalacticMemoryArchive2: `All Res. & Cmp. Storage Cap. +1M`,
     effectGalacticMemoryArchive3: `+0.15 Antimatter/s + Force Field Reduced`,
     effectGalacticMemoryArchive4: `All Res. & Cmp. Storage Cap. +1B`,
-    effectGalacticMemoryArchive5: `All Res. & Cmp. Storage Cap. +10B<br>All Res. & Cmp. Storage Cap. starts at 10B /System`
+    effectGalacticMemoryArchive5: `All Res. & Cmp. Storage Cap. +10B & start at 10B /System`
 };
 
 export function getAchievementTooltipDescriptionTexts(achievementKey) {
