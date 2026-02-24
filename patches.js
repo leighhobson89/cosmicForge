@@ -184,7 +184,85 @@ export function migrateResourceData(saveData, objectType, options = {}) {
 
             saveData.version = 0.967;
         }
-        saveData.version += 0.001;
+
+        if (saveData.version < 0.969) {
+            if (objectType === 'resourceData') {
+                if (!saveData.cosmicRip || typeof saveData.cosmicRip !== 'object') {
+                    saveData.cosmicRip = {};
+                }
+
+                if (typeof saveData.cosmicRip.stage !== 'string') {
+                    saveData.cosmicRip.stage = 'discovery';
+                }
+                if (typeof saveData.cosmicRip.instability !== 'number') {
+                    saveData.cosmicRip.instability = 100;
+                }
+                if (typeof saveData.cosmicRip.containmentIntegrity !== 'number') {
+                    saveData.cosmicRip.containmentIntegrity = 0;
+                }
+                if (typeof saveData.cosmicRip.sealProgress !== 'number') {
+                    saveData.cosmicRip.sealProgress = 0;
+                }
+
+                if (!saveData.cosmicRip.ripResearch || typeof saveData.cosmicRip.ripResearch !== 'object') {
+                    saveData.cosmicRip.ripResearch = {};
+                }
+                if (typeof saveData.cosmicRip.ripResearch.points !== 'number') {
+                    saveData.cosmicRip.ripResearch.points = 0;
+                }
+                if (typeof saveData.cosmicRip.ripResearch.level !== 'number') {
+                    saveData.cosmicRip.ripResearch.level = 0;
+                }
+                if (!saveData.cosmicRip.ripResearch.unlocked || typeof saveData.cosmicRip.ripResearch.unlocked !== 'object') {
+                    saveData.cosmicRip.ripResearch.unlocked = {};
+                }
+                if (typeof saveData.cosmicRip.ripResearch.unlocked.stabilization !== 'boolean') {
+                    saveData.cosmicRip.ripResearch.unlocked.stabilization = false;
+                }
+                if (typeof saveData.cosmicRip.ripResearch.unlocked.containment !== 'boolean') {
+                    saveData.cosmicRip.ripResearch.unlocked.containment = false;
+                }
+                if (typeof saveData.cosmicRip.ripResearch.unlocked.sealing !== 'boolean') {
+                    saveData.cosmicRip.ripResearch.unlocked.sealing = false;
+                }
+
+                if (!saveData.cosmicRip.projects || typeof saveData.cosmicRip.projects !== 'object') {
+                    saveData.cosmicRip.projects = {};
+                }
+                if (typeof saveData.cosmicRip.projects.stabilizerArrayLevel !== 'number') {
+                    saveData.cosmicRip.projects.stabilizerArrayLevel = 0;
+                }
+                if (typeof saveData.cosmicRip.projects.containmentRingSegmentsBuilt !== 'number') {
+                    saveData.cosmicRip.projects.containmentRingSegmentsBuilt = 0;
+                }
+                if (typeof saveData.cosmicRip.projects.containmentRingSegmentsRequired !== 'number') {
+                    saveData.cosmicRip.projects.containmentRingSegmentsRequired = 8;
+                }
+                if (typeof saveData.cosmicRip.projects.anchorPylonsBuilt !== 'number') {
+                    saveData.cosmicRip.projects.anchorPylonsBuilt = 0;
+                }
+                if (typeof saveData.cosmicRip.projects.anchorPylonsRequired !== 'number') {
+                    saveData.cosmicRip.projects.anchorPylonsRequired = 4;
+                }
+                if (typeof saveData.cosmicRip.projects.sealDriverBuilt !== 'boolean') {
+                    saveData.cosmicRip.projects.sealDriverBuilt = false;
+                }
+                if (typeof saveData.cosmicRip.projects.failsafeCapacitorsBuilt !== 'number') {
+                    saveData.cosmicRip.projects.failsafeCapacitorsBuilt = 0;
+                }
+                if (typeof saveData.cosmicRip.projects.failsafeCapacitorsRequired !== 'number') {
+                    saveData.cosmicRip.projects.failsafeCapacitorsRequired = 3;
+                }
+                if (typeof saveData.cosmicRip.projects.sensorBuoyDeployed !== 'boolean') {
+                    saveData.cosmicRip.projects.sensorBuoyDeployed = false;
+                }
+                if (typeof saveData.cosmicRip.projects.stabilizerNodeDeployedCount !== 'number') {
+                    saveData.cosmicRip.projects.stabilizerNodeDeployedCount = 0;
+                }
+            }
+
+            saveData.version = 0.969;
+        }
     }
     return saveData;
 }

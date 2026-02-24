@@ -1154,9 +1154,14 @@ function cosmicRipChecks() {
     }
 
     const optionPane = String(getCurrentOptionPane?.() || '');
-    if (optionPane.startsWith('cosmic rip')) {
-        // GP is maintained each tick as: max(0, (settled systems - 1) - galacticPointsSpent)
-        const gp = Number(getCosmicRipGalacticPoints?.()) || 0;
+    if (
+        optionPane === 'overview'
+        || optionPane === 'near space scanner array'
+        || optionPane === 'cosmic rip'
+        || optionPane === 'ripcraft'
+        || optionPane === 'expeditions'
+    ) {
+        const gp = Math.max(0, (((getSettledStars?.() || []).length) - 1) - (Number(getGalacticPointsSpent?.()) || 0));
         const gpIds = [
             'cosmicRipGpBalance',
             'cosmicRipGpBalanceNearSpace',
@@ -1181,6 +1186,62 @@ function cosmicRipChecks() {
     const ripFound = getCosmicRipRipFound?.() === true;
     const prevRipFound = globalThis.__cosmicRipPrevRipFound;
     globalThis.__cosmicRipPrevRipFound = ripFound;
+
+    const cosmicRipData = (typeof getResourceDataObject === 'function')
+        ? getResourceDataObject('cosmicRip')
+        : null;
+    const stage = (cosmicRipData && typeof cosmicRipData.stage === 'string') ? cosmicRipData.stage : 'discovery';
+    const instability = (cosmicRipData && typeof cosmicRipData.instability === 'number') ? cosmicRipData.instability : 0;
+    const containmentIntegrity = (cosmicRipData && typeof cosmicRipData.containmentIntegrity === 'number') ? cosmicRipData.containmentIntegrity : 0;
+    const sealProgress = (cosmicRipData && typeof cosmicRipData.sealProgress === 'number') ? cosmicRipData.sealProgress : 0;
+    const ripResearchPoints = (cosmicRipData?.ripResearch && typeof cosmicRipData.ripResearch.points === 'number') ? cosmicRipData.ripResearch.points : 0;
+    const ripResearchLevel = (cosmicRipData?.ripResearch && typeof cosmicRipData.ripResearch.level === 'number') ? cosmicRipData.ripResearch.level : 0;
+
+    const overviewStatusText = document.getElementById('cosmicRipOverviewStatusText');
+    if (overviewStatusText) {
+        const desired = scannerRestored
+            ? (ripFound ? `Located (${stage})` : 'Searching')
+            : 'Offline';
+        if (overviewStatusText.textContent !== desired) {
+            overviewStatusText.textContent = desired;
+        }
+    }
+
+    const overviewObjectiveText = document.getElementById('cosmicRipOverviewObjectiveText');
+    if (overviewObjectiveText) {
+        const desired = !scannerRestored
+            ? 'Restore Near Space Scanner Array'
+            : (ripFound ? 'Stabilize the rip' : 'Locate the rip sector');
+        if (overviewObjectiveText.textContent !== desired) {
+            overviewObjectiveText.textContent = desired;
+        }
+    }
+
+    const overviewResearchText = document.getElementById('cosmicRipOverviewResearchText');
+    if (overviewResearchText) {
+        const desired = `${ripResearchPoints} pts (L${ripResearchLevel})`;
+        if (overviewResearchText.textContent !== desired) {
+            overviewResearchText.textContent = desired;
+        }
+    }
+
+    const cosmicRipStageText = document.getElementById('cosmicRipCosmicRipStageText');
+    if (cosmicRipStageText) {
+        const desired = scannerRestored
+            ? (ripFound ? stage : 'Searching')
+            : 'Offline';
+        if (cosmicRipStageText.textContent !== desired) {
+            cosmicRipStageText.textContent = desired;
+        }
+    }
+
+    const cosmicRipMetersText = document.getElementById('cosmicRipCosmicRipMetersText');
+    if (cosmicRipMetersText) {
+        const desired = `Instability: ${instability} | Integrity: ${containmentIntegrity} | Seal: ${sealProgress}`;
+        if (cosmicRipMetersText.textContent !== desired) {
+            cosmicRipMetersText.textContent = desired;
+        }
+    }
 
     const statusRowLabel = document.querySelector('.option-row-main div label');
     if (getCurrentOptionPane() === 'near space scanner array') {
@@ -1242,7 +1303,11 @@ function cosmicRipChecks() {
     const restoreBtn = document.querySelector('.cosmic-rip-restore-scanner-array-button');
     if (restoreBtn) {
         const gp = Number(getCosmicRipGalacticPoints?.()) || 0;
-        const canRestore = !scannerRestored && gp >= 10;
+        const settled = (typeof getSettledStars === 'function') ? (getSettledStars() || []) : [];
+        const miaplacidusSettled = Array.isArray(settled)
+            ? settled.some(s => String(s).toLowerCase().includes('miaplacidus'))
+            : false;
+        const canRestore = !scannerRestored && gp >= 10 && miaplacidusSettled;
         setButtonState(restoreBtn, { enabled: canRestore, ready: canRestore });
     }
 
@@ -1354,10 +1419,11 @@ function cosmicRipChecks() {
         if (ripFound && !globalThis.__cosmicRipRipFoundUiSequenceStarted) {
             globalThis.__cosmicRipRipFoundUiSequenceStarted = true;
 
-            const previouslyScanned = scanResults.map(v => v === true);
             const fullScanned = scanResults.map(() => true);
-            setCosmicRipScanResultsBySectorIndex?.(fullScanned);
-            globalThis.__cosmicRipPrevScanResultsBySectorIndex = fullScanned.map(v => v === true);
+            window.setTimeout(() => {
+                setCosmicRipScanResultsBySectorIndex?.(fullScanned);
+                globalThis.__cosmicRipPrevScanResultsBySectorIndex = fullScanned.map(v => v === true);
+            }, 2000);
 
             const scanLabelOverlayEl = globalThis.__cosmicRipNearSpaceScannerArrayScanLabelOverlayEl;
             if (labelFadeOverlayEl) {
@@ -1411,84 +1477,103 @@ function cosmicRipChecks() {
                 const col = idx % 3;
                 const row = Math.floor(idx / 3);
 
-                zctx.clearRect(0, 0, w, h);
-                zctx.drawImage(baseCanvas,
-                    Math.floor(col * cellW),
-                    Math.floor(row * cellH),
-                    Math.ceil(cellW),
-                    Math.ceil(cellH),
-                    Math.floor(col * cellW),
-                    Math.floor(row * cellH),
-                    Math.ceil(cellW),
-                    Math.ceil(cellH)
-                );
+                const centerPxX = Math.floor((col + 0.5) * cellW);
+                const centerPxY = Math.floor((row + 0.5) * cellH);
+                const maxRadius = Math.ceil(Math.hypot(w, h));
+                const minRadius = Math.max(8, Math.floor(Math.min(cellW, cellH) * 0.15));
+                const durationMs = 520;
 
-                const centerX = (col + 0.5) / 3;
-                const centerY = (row + 0.5) / 3;
+                const easeInOutCubic = (t) => (t < 0.5
+                    ? 4 * t * t * t
+                    : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
+                const drawIris = (radius) => {
+                    zctx.clearRect(0, 0, w, h);
+                    zctx.fillStyle = 'rgba(0,0,0,0.92)';
+                    zctx.fillRect(0, 0, w, h);
+                    zctx.globalCompositeOperation = 'destination-out';
+                    zctx.beginPath();
+                    zctx.arc(centerPxX, centerPxY, radius, 0, Math.PI * 2);
+                    zctx.fill();
+                    zctx.globalCompositeOperation = 'source-over';
+                };
+
+                zoomCanvasEl.style.display = '';
                 zoomCanvasEl.style.transition = '';
                 zoomCanvasEl.style.opacity = '1';
-                zoomCanvasEl.style.transformOrigin = `${(centerX * 100).toFixed(2)}% ${(centerY * 100).toFixed(2)}%`;
                 zoomCanvasEl.style.transform = 'scale(1)';
 
-                requestAnimationFrame(() => {
-                    zoomCanvasEl.style.transition = 'transform 2s ease';
-                    zoomCanvasEl.style.transform = 'scale(3)';
+                if (baseCanvas) {
+                    baseCanvas.style.transition = '';
+                    baseCanvas.style.opacity = '1';
+                }
+                if (scanLabelOverlayEl) {
+                    scanLabelOverlayEl.style.transition = 'opacity 0.3s ease';
+                    scanLabelOverlayEl.style.opacity = '0';
+                }
+                if (labelFadeOverlayEl) {
+                    labelFadeOverlayEl.style.transition = 'opacity 0.3s ease';
+                    labelFadeOverlayEl.style.opacity = '0';
+                }
 
-                    if (baseCanvas) {
-                        baseCanvas.style.transition = 'opacity 2s ease';
-                        baseCanvas.style.opacity = '0';
+                let phase = 'closing';
+                let phaseStart = performance.now();
+
+                const step = (now) => {
+                    const tRaw = Math.min(1, Math.max(0, (now - phaseStart) / durationMs));
+                    const t = easeInOutCubic(tRaw);
+
+                    if (phase === 'closing') {
+                        const radius = maxRadius + (minRadius - maxRadius) * t;
+                        drawIris(radius);
+                        if (tRaw < 1) {
+                            requestAnimationFrame(step);
+                            return;
+                        }
+
+                        globalThis.__cosmicRipOneSectorStateReady = true;
+                        globalThis.__cosmicRipNearSpaceScannerArrayOneSectorState = true;
+
+                        const deploySensorBuoyRowEl = document.getElementById('cosmicRipNearSpaceScannerArrayDeploySensorBuoyRow');
+                        if (deploySensorBuoyRowEl) deploySensorBuoyRowEl.classList.remove('invisible');
+                        const deployStabilizerNodeRowEl = document.getElementById('cosmicRipNearSpaceScannerArrayDeployStabilizerNodeRow');
+                        if (deployStabilizerNodeRowEl) deployStabilizerNodeRowEl.classList.remove('invisible');
+                        const sampleRipRowEl = document.getElementById('cosmicRipNearSpaceScannerArraySampleRipRow');
+                        if (sampleRipRowEl) sampleRipRowEl.classList.remove('invisible');
+
+                        const fogOverlayEl = globalThis.__cosmicRipNearSpaceScannerArrayFogOverlayEl;
+                        const interactiveOverlayEl = globalThis.__cosmicRipNearSpaceScannerArrayInteractiveOverlayEl;
+                        const scanLabelOverlayEl2 = globalThis.__cosmicRipNearSpaceScannerArrayScanLabelOverlayEl;
+                        if (fogOverlayEl) fogOverlayEl.style.display = 'none';
+                        if (interactiveOverlayEl) interactiveOverlayEl.style.display = 'none';
+                        if (scanLabelOverlayEl2) { scanLabelOverlayEl2.style.display = 'none'; scanLabelOverlayEl2.style.opacity = '0'; }
+                        if (labelFadeOverlayEl) labelFadeOverlayEl.style.display = 'none';
+
+                        drawCanvas();
+
+                        phase = 'opening';
+                        phaseStart = performance.now();
+                        requestAnimationFrame(step);
+                        return;
                     }
-                    if (scanLabelOverlayEl) {
-                        scanLabelOverlayEl.style.transition = 'opacity 2s ease';
-                        scanLabelOverlayEl.style.opacity = '0';
-                    }
-                    if (labelFadeOverlayEl) {
-                        labelFadeOverlayEl.style.transition = 'opacity 2s ease';
-                        labelFadeOverlayEl.style.opacity = '0';
-                    }
-                });
 
-                window.setTimeout(() => {
-                    globalThis.__cosmicRipOneSectorStateReady = true;
-                    globalThis.__cosmicRipNearSpaceScannerArrayOneSectorState = true;
-
-                    const baseCanvasEl = globalThis.__cosmicRipNearSpaceScannerArrayCanvasEl;
-                    if (baseCanvasEl) {
-                        baseCanvasEl.style.transition = 'opacity 0.3s ease';
-                        baseCanvasEl.style.opacity = '0';
+                    const radius = minRadius + (maxRadius - minRadius) * t;
+                    drawIris(radius);
+                    if (tRaw < 1) {
+                        requestAnimationFrame(step);
+                        return;
                     }
 
-                    const scanLabelOverlayEl3 = globalThis.__cosmicRipNearSpaceScannerArrayScanLabelOverlayEl;
-                    if (scanLabelOverlayEl3) {
-                        scanLabelOverlayEl3.style.transition = 'opacity 0.3s ease';
-                        scanLabelOverlayEl3.style.opacity = '0';
-                    }
-
-                    if (zoomCanvasEl) {
-                        zoomCanvasEl.style.transition = '';
-                        zoomCanvasEl.style.opacity = '0';
-                        zoomCanvasEl.style.transform = 'scale(1)';
-                    }
-
-                    const fogOverlayEl = globalThis.__cosmicRipNearSpaceScannerArrayFogOverlayEl;
-                    const interactiveOverlayEl = globalThis.__cosmicRipNearSpaceScannerArrayInteractiveOverlayEl;
-                    const scanLabelOverlayEl2 = globalThis.__cosmicRipNearSpaceScannerArrayScanLabelOverlayEl;
-                    if (fogOverlayEl) fogOverlayEl.style.display = 'none';
-                    if (interactiveOverlayEl) interactiveOverlayEl.style.display = 'none';
-                    if (scanLabelOverlayEl2) { scanLabelOverlayEl2.style.display = 'none'; scanLabelOverlayEl2.style.opacity = '0'; }
-                    if (labelFadeOverlayEl) labelFadeOverlayEl.style.display = 'none';
-
+                    zoomCanvasEl.style.opacity = '0';
                     window.setTimeout(() => {
-                        if (baseCanvasEl) {
-                            baseCanvasEl.style.transition = '';
-                            baseCanvasEl.style.opacity = '1';
+                        if (zoomCanvasEl) {
+                            zoomCanvasEl.style.transition = '';
+                            zoomCanvasEl.style.opacity = '0';
                         }
-                        if (typeof drawCanvas === 'function') {
-                            drawCanvas();
-                        }
-                    }, 10);
-                }, 2050);
+                    }, 0);
+                };
+
+                requestAnimationFrame(step);
             }, 500);
         }
 

@@ -932,7 +932,32 @@ export let resourceData = {
         nearSpaceScannerArrayRestored: false,
         ripLocationSectorIndex: -1,
         ripFound: false,
-        scanResultsBySectorIndex: Array(9).fill(false)
+        scanResultsBySectorIndex: Array(9).fill(false),
+        stage: 'discovery',
+        instability: 100,
+        containmentIntegrity: 0,
+        sealProgress: 0,
+        ripResearch: {
+            points: 0,
+            level: 0,
+            unlocked: {
+                stabilization: false,
+                containment: false,
+                sealing: false
+            }
+        },
+        projects: {
+            stabilizerArrayLevel: 0,
+            containmentRingSegmentsBuilt: 0,
+            containmentRingSegmentsRequired: 8,
+            anchorPylonsBuilt: 0,
+            anchorPylonsRequired: 4,
+            sealDriverBuilt: false,
+            failsafeCapacitorsBuilt: 0,
+            failsafeCapacitorsRequired: 3,
+            sensorBuoyDeployed: false,
+            stabilizerNodeDeployedCount: 0
+        }
     },
     fleets: {
         attackPower: 0,
@@ -985,7 +1010,7 @@ export const miaplacidus = {
 
 
 export let starSystems = {
-    version: 0.967,
+    version: 0.969,
     stars: {
         spica: {
             mapSize: 5.504440179536064, //might need to add this to star object when added dynamically for after rebirth
@@ -1004,14 +1029,14 @@ export let starSystems = {
 };
 
 export let oTypePowerPlantBuffs = {
-    version: 0.967,
+    version: 0.969,
     basicPowerPlantStar: { starName: null, settled: false },
     solarPowerPlantStar: { starName: null, settled: false },
     advancedPowerPlantStar: { starName: null, settled: false }
 };
 
 export let galacticCasino = {
-    version: 0.967,
+    version: 0.969,
     settings: {
         baseProbabilityCasino: 0.4,
     },
@@ -1042,7 +1067,7 @@ export let galacticCasino = {
 };
 
 export let galacticMarket = {
-    version: 0.967,
+    version: 0.969,
     resources: {
         hydrogen: { 
             name: "Hydrogen", 
@@ -1148,7 +1173,7 @@ export let galacticMarket = {
 };
 
 export let ascendencyBuffs = {
-    version: 0.967,
+    version: 0.969,
     "littleBagOfHydrogen": {
         name: "Little Bag Of Hydrogen",
         description: "buffLittleBagOfHydrogenRow",

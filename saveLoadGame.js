@@ -435,7 +435,6 @@ export async function loadGameFromCloud() {
         setAchievementIconImageUrls();
         getNavigatorLanguage();
         showNotification('Game loaded successfully!', 'info', 3000, 'loadSave');
-        showNotification('APOLOGIES IF YOU COULD NOT SAVE GAME TODAY.  It was necessary to update the Database Save Cloud Configuration', 'error', 7000, 'loadSave');
         return true;
 
     } catch (error) {
@@ -478,7 +477,6 @@ export function loadGame() {
                     setOnboardingMode(false);
                     setAchievementIconImageUrls();
                     showNotification('Game loaded successfully!', 'info', 3000, 'loadSave');
-                    showNotification('APOLOGIES IF YOU COULD NOT SAVE GAME TODAY.  It was necessary to update the Database Save Cloud Configuration', 'error', 7000, 'loadSave');
                     resolve();
                 })
                 .catch(error => {

@@ -123,6 +123,105 @@ export function drawTab8Content(heading, optionContentElement) {
             null
         );
 
+        const cosmicRipStatusRow = createOptionRow(
+            'cosmicRipOverviewStatusRow',
+            null,
+            'Cosmic Rip Status:',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            '<span id="cosmicRipOverviewStatusText" class="warning-orange-text">Unknown</span>',
+            '',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        );
+        cosmicRipStatusRow.classList.add('invisible');
+
+        const cosmicRipObjectiveRow = createOptionRow(
+            'cosmicRipOverviewObjectiveRow',
+            null,
+            'Next Objective:',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            '<span id="cosmicRipOverviewObjectiveText">-</span>',
+            '',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        );
+        cosmicRipObjectiveRow.classList.add('invisible');
+
+        const cosmicRipResearchRow = createOptionRow(
+            'cosmicRipOverviewResearchRow',
+            null,
+            'Cosmic Rip Research:',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            '<span id="cosmicRipOverviewResearchText">0 pts (L0)</span>',
+            '',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        );
+        cosmicRipResearchRow.classList.add('invisible');
+
         if (!restored) {
             optionContentElement.appendChild(restoreRow);
             const btn = optionContentElement.querySelector?.('.cosmic-rip-restore-scanner-array-button');
@@ -132,6 +231,12 @@ export function drawTab8Content(heading, optionContentElement) {
             }
         } else {
             optionContentElement.appendChild(restoredRow);
+            optionContentElement.appendChild(cosmicRipStatusRow);
+            optionContentElement.appendChild(cosmicRipObjectiveRow);
+            optionContentElement.appendChild(cosmicRipResearchRow);
+            cosmicRipStatusRow.classList.remove('invisible');
+            cosmicRipObjectiveRow.classList.remove('invisible');
+            cosmicRipResearchRow.classList.remove('invisible');
         }
         return;
     }
@@ -182,16 +287,14 @@ export function drawTab8Content(heading, optionContentElement) {
         telescopeContainer.id = 'cosmicRipNearSpaceScannerArrayCanvasContainer';
         telescopeContainer.style.position = 'relative';
         telescopeContainer.style.width = '90%';
-        telescopeContainer.style.marginTop = '10px';
-        telescopeContainer.style.marginLeft = 'auto';
-        telescopeContainer.style.marginRight = 'auto';
-        telescopeContainer.style.aspectRatio = '1 / 1';
+        telescopeContainer.style.margin = '20px auto';
+        telescopeContainer.style.height = '100%';
         telescopeContainer.classList.add('container-bg');
 
         const canvas = document.createElement('canvas');
         canvas.id = 'cosmicRipNearSpaceScannerArrayCanvas';
         canvas.style.width = '100%';
-        canvas.style.height = '50%';
+        canvas.style.height = '100%';
         canvas.style.display = 'block';
         canvas.style.opacity = '1';
 
@@ -201,7 +304,7 @@ export function drawTab8Content(heading, optionContentElement) {
         labelFadeOverlay.style.left = '0';
         labelFadeOverlay.style.top = '0';
         labelFadeOverlay.style.width = '100%';
-        labelFadeOverlay.style.height = canvas.style.height;
+        labelFadeOverlay.style.height = '100%';
         labelFadeOverlay.style.pointerEvents = 'none';
         labelFadeOverlay.style.background = 'var(--container-bg-color)';
         labelFadeOverlay.style.opacity = '0';
@@ -213,7 +316,7 @@ export function drawTab8Content(heading, optionContentElement) {
         fogOverlay.style.left = '0';
         fogOverlay.style.top = '0';
         fogOverlay.style.width = '100%';
-        fogOverlay.style.height = canvas.style.height;
+        fogOverlay.style.height = '100%';
         fogOverlay.style.display = 'grid';
         fogOverlay.style.gridTemplateColumns = 'repeat(3, 1fr)';
         fogOverlay.style.gridTemplateRows = 'repeat(3, 1fr)';
@@ -225,7 +328,7 @@ export function drawTab8Content(heading, optionContentElement) {
         overlay.style.left = '0';
         overlay.style.top = '0';
         overlay.style.width = '100%';
-        overlay.style.height = canvas.style.height;
+        overlay.style.height = '100%';
         overlay.style.display = 'grid';
         overlay.style.gridTemplateColumns = 'repeat(3, 1fr)';
         overlay.style.gridTemplateRows = 'repeat(3, 1fr)';
@@ -237,7 +340,7 @@ export function drawTab8Content(heading, optionContentElement) {
         scanLabelOverlay.style.left = '0';
         scanLabelOverlay.style.top = '0';
         scanLabelOverlay.style.width = '100%';
-        scanLabelOverlay.style.height = canvas.style.height;
+        scanLabelOverlay.style.height = '100%';
         scanLabelOverlay.style.display = 'grid';
         scanLabelOverlay.style.gridTemplateColumns = 'repeat(3, 1fr)';
         scanLabelOverlay.style.gridTemplateRows = 'repeat(3, 1fr)';
@@ -298,28 +401,30 @@ export function drawTab8Content(heading, optionContentElement) {
                 const result = scanCosmicRipSector?.(i);
                 if (result?.ok) {
                     if (result.found) {
-                        showNotification(`Scan complete! Cosmic Rip located in sector ${name}`, 'info', 4000, 'cosmicRip');
-
+                        
+                            showNotification(`Scan complete! Cosmic Rip located in sector ${name}`, 'info', 4000, 'cosmicRip');
                         if (globalThis.__cosmicRipLocatedModalShown !== true) {
                             globalThis.__cosmicRipLocatedModalShown = true;
-                            callPopupModal(
-                                modalCosmicRipLocatedHeader,
-                                modalCosmicRipLocatedText,
-                                true,
-                                false,
-                                false,
-                                false,
-                                () => {
-                                    showHideModal();
-                                },
-                                null,
-                                null,
-                                null,
-                                'CONFIRM',
-                                '',
-                                '',
-                                ''
-                            );
+                            window.setTimeout(() => {
+                                callPopupModal(
+                                    modalCosmicRipLocatedHeader,
+                                    modalCosmicRipLocatedText,
+                                    true,
+                                    false,
+                                    false,
+                                    false,
+                                    () => {
+                                        showHideModal();
+                                    },
+                                    null,
+                                    null,
+                                    null,
+                                    'CONFIRM',
+                                    '',
+                                    '',
+                                    ''
+                                );
+                            }, 2000);
                         }
                     } else {
                         showNotification(`Scan complete! Nothing significant found in sector ${name}`, 'info', 3500, 'cosmicRip');
@@ -365,7 +470,7 @@ export function drawTab8Content(heading, optionContentElement) {
         zoomCanvas.style.left = '0';
         zoomCanvas.style.top = '0';
         zoomCanvas.style.width = '100%';
-        zoomCanvas.style.height = canvas.style.height;
+        zoomCanvas.style.height = '100%';
         zoomCanvas.style.pointerEvents = 'none';
         zoomCanvas.style.opacity = '0';
         zoomCanvas.style.transformOrigin = '0 0';
@@ -373,6 +478,187 @@ export function drawTab8Content(heading, optionContentElement) {
         zoomCanvas.style.transition = '';
         telescopeContainer.appendChild(zoomCanvas);
         optionContentElement.appendChild(telescopeContainer);
+
+        const opsHeaderRow = createOptionRow(
+            'cosmicRipNearSpaceScannerArrayOpsHeaderRow',
+            null,
+            'Rip Sector Operations:',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            found ? '<span class="warning-orange-text">Available</span>' : '<span class="red-disabled-text">Locked</span>',
+            '',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        );
+        opsHeaderRow.classList.add('invisible');
+        optionContentElement.appendChild(opsHeaderRow);
+
+        const deploySensorBuoyRow = createOptionRow(
+            'cosmicRipNearSpaceScannerArrayDeploySensorBuoyRow',
+            null,
+            'Sensor Buoy:',
+            createButton(
+                'DEPLOY',
+                ['option-button', 'red-disabled-text', 'cosmic-rip-deploy-sensor-buoy-button'],
+                () => {
+                    showNotification('Coming soon', 'info', 2500, 'cosmicRip');
+                },
+                null,
+                null,
+                null,
+                null,
+                null,
+                true,
+                null,
+                'cosmicRipDeploySensorBuoy'
+            ),
+            null,
+            null,
+            null,
+            null,
+            'Deploy a buoy to begin passively collecting rip telemetry.',
+            '',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            'cosmicRipDeploySensorBuoy'
+        );
+        deploySensorBuoyRow.classList.add('invisible');
+        optionContentElement.appendChild(deploySensorBuoyRow);
+
+        const deployStabilizerNodeRow = createOptionRow(
+            'cosmicRipNearSpaceScannerArrayDeployStabilizerNodeRow',
+            null,
+            'Stabilizer Node:',
+            createButton(
+                'DEPLOY',
+                ['option-button', 'red-disabled-text', 'cosmic-rip-deploy-stabilizer-node-button'],
+                () => {
+                    showNotification('Coming soon', 'info', 2500, 'cosmicRip');
+                },
+                null,
+                null,
+                null,
+                null,
+                null,
+                true,
+                null,
+                'cosmicRipDeployStabilizerNode'
+            ),
+            null,
+            null,
+            null,
+            null,
+            'Deploy a stabilizer node to reduce local instability.',
+            '',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            'cosmicRipDeployStabilizerNode'
+        );
+        deployStabilizerNodeRow.classList.add('invisible');
+        optionContentElement.appendChild(deployStabilizerNodeRow);
+
+        const sampleRipRow = createOptionRow(
+            'cosmicRipNearSpaceScannerArraySampleRipRow',
+            null,
+            'Rip Sampling:',
+            createButton(
+                'SAMPLE',
+                ['option-button', 'red-disabled-text', 'cosmic-rip-sample-rip-button'],
+                () => {
+                    showNotification('Coming soon', 'info', 2500, 'cosmicRip');
+                },
+                null,
+                null,
+                null,
+                null,
+                null,
+                true,
+                null,
+                'cosmicRipSampleRip'
+            ),
+            null,
+            null,
+            null,
+            null,
+            'Perform a controlled sample to gain Cosmic Rip Research.',
+            '',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            'cosmicRipSampleRip'
+        );
+        sampleRipRow.classList.add('invisible');
+        optionContentElement.appendChild(sampleRipRow);
+
+        if (restored) {
+            if (opsHeaderRow) {
+                opsHeaderRow.classList.remove('invisible');
+            }
+        }
+
+        if (restored && found) {
+            deploySensorBuoyRow.classList.remove('invisible');
+            deployStabilizerNodeRow.classList.remove('invisible');
+            sampleRipRow.classList.remove('invisible');
+        }
 
         globalThis.__cosmicRipNearSpaceScannerArrayCanvasEl = canvas;
         globalThis.__cosmicRipNearSpaceScannerArrayFogOverlayEl = fogOverlay;
@@ -544,8 +830,11 @@ export function drawTab8Content(heading, optionContentElement) {
     }
 
     if (heading === 'Cosmic Rip') {
-        const row = createOptionRow(
-            'cosmicRipCosmicRipStubRow',
+        const restored = getCosmicRipNearSpaceScannerArrayRestored?.() === true;
+        const found = getCosmicRipRipFound?.() === true;
+
+        const statusRow = createOptionRow(
+            'cosmicRipCosmicRipStatusRow',
             null,
             'Cosmic Rip:',
             null,
@@ -560,7 +849,7 @@ export function drawTab8Content(heading, optionContentElement) {
             null,
             null,
             null,
-            'Coming soon',
+            `<span id="cosmicRipCosmicRipStageText" class="warning-orange-text">Unknown</span>`,
             '',
             null,
             null,
@@ -575,7 +864,338 @@ export function drawTab8Content(heading, optionContentElement) {
             null,
             null
         );
-        optionContentElement.appendChild(row);
+        statusRow.classList.add('invisible');
+        optionContentElement.appendChild(statusRow);
+
+        const metersRow = createOptionRow(
+            'cosmicRipCosmicRipMetersRow',
+            null,
+            'Field Readings:',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            `<span id="cosmicRipCosmicRipMetersText">Instability: - | Integrity: - | Seal: -</span>`,
+            '',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        );
+        metersRow.classList.add('invisible');
+        optionContentElement.appendChild(metersRow);
+
+        const projectsHeaderRow = createOptionRow(
+            'cosmicRipCosmicRipProjectsHeaderRow',
+            null,
+            'Projects:',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            found ? '<span class="warning-orange-text">Available</span>' : '<span class="red-disabled-text">Locked</span>',
+            '',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        );
+        projectsHeaderRow.classList.add('invisible');
+        optionContentElement.appendChild(projectsHeaderRow);
+
+        const stabilizerProjectRow = createOptionRow(
+            'cosmicRipCosmicRipStabilizerProjectRow',
+            null,
+            'Stabilizer Array:',
+            createButton(
+                'BUILD',
+                ['option-button', 'red-disabled-text', 'cosmic-rip-build-stabilizer-array-button'],
+                () => {
+                    showNotification('Coming soon', 'info', 2500, 'cosmicRip');
+                },
+                null,
+                null,
+                null,
+                null,
+                null,
+                true,
+                null,
+                'cosmicRipBuildStabilizerArray'
+            ),
+            null,
+            null,
+            null,
+            null,
+            'Construct stabilizers to reduce instability and unlock safe operations.',
+            '',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            'cosmicRipBuildStabilizerArray'
+        );
+        stabilizerProjectRow.classList.add('invisible');
+        optionContentElement.appendChild(stabilizerProjectRow);
+
+        const containmentProjectRow = createOptionRow(
+            'cosmicRipCosmicRipContainmentProjectRow',
+            null,
+            'Containment Ring:',
+            createButton(
+                'BUILD',
+                ['option-button', 'red-disabled-text', 'cosmic-rip-build-containment-ring-button'],
+                () => {
+                    showNotification('Coming soon', 'info', 2500, 'cosmicRip');
+                },
+                null,
+                null,
+                null,
+                null,
+                null,
+                true,
+                null,
+                'cosmicRipBuildContainmentRing'
+            ),
+            null,
+            null,
+            null,
+            null,
+            'Construct containment segments to build integrity and prepare sealing.',
+            '',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            'cosmicRipBuildContainmentRing'
+        );
+        containmentProjectRow.classList.add('invisible');
+        optionContentElement.appendChild(containmentProjectRow);
+
+        const operationsHeaderRow = createOptionRow(
+            'cosmicRipCosmicRipOperationsHeaderRow',
+            null,
+            'Operations:',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            found ? '<span class="warning-orange-text">Available</span>' : '<span class="red-disabled-text">Locked</span>',
+            '',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        );
+        operationsHeaderRow.classList.add('invisible');
+        optionContentElement.appendChild(operationsHeaderRow);
+
+        const sampleOperationRow = createOptionRow(
+            'cosmicRipCosmicRipSampleOperationRow',
+            null,
+            'Controlled Sample:',
+            createButton(
+                'SAMPLE',
+                ['option-button', 'red-disabled-text', 'cosmic-rip-controlled-sample-button'],
+                () => {
+                    showNotification('Coming soon', 'info', 2500, 'cosmicRip');
+                },
+                null,
+                null,
+                null,
+                null,
+                null,
+                true,
+                null,
+                'cosmicRipControlledSample'
+            ),
+            null,
+            null,
+            null,
+            null,
+            'Perform a controlled sample to gain Cosmic Rip Research.',
+            '',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            'cosmicRipControlledSample'
+        );
+        sampleOperationRow.classList.add('invisible');
+        optionContentElement.appendChild(sampleOperationRow);
+
+        const sealHeaderRow = createOptionRow(
+            'cosmicRipCosmicRipSealHeaderRow',
+            null,
+            'Seal Sequence:',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            '<span class="red-disabled-text">Locked</span>',
+            '',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        );
+        sealHeaderRow.classList.add('invisible');
+        optionContentElement.appendChild(sealHeaderRow);
+
+        const sealStepRow = createOptionRow(
+            'cosmicRipCosmicRipSealStepRow',
+            null,
+            'Seal Progress:',
+            createButton(
+                'EXECUTE',
+                ['option-button', 'red-disabled-text', 'cosmic-rip-execute-seal-step-button'],
+                () => {
+                    showNotification('Coming soon', 'info', 2500, 'cosmicRip');
+                },
+                null,
+                null,
+                null,
+                null,
+                null,
+                true,
+                null,
+                'cosmicRipExecuteSealStep'
+            ),
+            null,
+            null,
+            null,
+            null,
+            'Execute the next sealing step once all prerequisites are met.',
+            '',
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            'cosmicRipExecuteSealStep'
+        );
+        sealStepRow.classList.add('invisible');
+        optionContentElement.appendChild(sealStepRow);
+
+        if (restored) {
+            statusRow.classList.remove('invisible');
+            metersRow.classList.remove('invisible');
+        }
+        if (restored && found) {
+            projectsHeaderRow.classList.remove('invisible');
+            stabilizerProjectRow.classList.remove('invisible');
+            containmentProjectRow.classList.remove('invisible');
+            operationsHeaderRow.classList.remove('invisible');
+            sampleOperationRow.classList.remove('invisible');
+            sealHeaderRow.classList.remove('invisible');
+            sealStepRow.classList.remove('invisible');
+        }
         return;
     }
 

@@ -9774,7 +9774,7 @@ function initializeTabEventListeners() {
         element.addEventListener('click', function() {
             selectRowCss(this);
             setLastScreenOpenRegister('tab8', 'overview');
-            setCurrentOptionPane('cosmic rip overview');
+            setCurrentOptionPane('overview');
             updateContent('Overview', 'tab8', 'content');
             setFirstAccessArray('overview');
         });
@@ -9794,7 +9794,7 @@ function initializeTabEventListeners() {
         element.addEventListener('click', function() {
             selectRowCss(this);
             setLastScreenOpenRegister('tab8', 'cosmic rip');
-            setCurrentOptionPane('cosmic rip cosmic rip');
+            setCurrentOptionPane('cosmic rip');
             updateContent('Cosmic Rip', 'tab8', 'content');
             setFirstAccessArray('cosmic rip');
         });
@@ -9804,7 +9804,7 @@ function initializeTabEventListeners() {
         element.addEventListener('click', function() {
             selectRowCss(this);
             setLastScreenOpenRegister('tab8', 'ripcraft');
-            setCurrentOptionPane('cosmic rip ripcraft');
+            setCurrentOptionPane('ripcraft');
             updateContent('Ripcraft', 'tab8', 'content');
             setFirstAccessArray('ripcraft');
         });
@@ -9814,7 +9814,7 @@ function initializeTabEventListeners() {
         element.addEventListener('click', function() {
             selectRowCss(this);
             setLastScreenOpenRegister('tab8', 'expeditions');
-            setCurrentOptionPane('cosmic rip expeditions');
+            setCurrentOptionPane('expeditions');
             updateContent('Expeditions', 'tab8', 'content');
             setFirstAccessArray('expeditions');
         });
