@@ -1,4 +1,5 @@
 import {
+    getInFormation,
     getGalacticCasinoUnlocked,
     setGalacticCasinoUnlocked,
     getDemoBuild,
@@ -2960,11 +2961,18 @@ function buildFuelConsumptionLines(resourceKey, category, timerRatio) {
 
      
     window.addEventListener('resize', () => {
-        if (getCurrentOptionPane()) {
-            const starContainer = document.querySelector('#optionContentTab5');
-            starContainer.innerHTML = '';
-            generateStarfield(starContainer, NUMBER_OF_STARS, STAR_FIELD_SEED, getStarMapMode(), false, null, false);
+        if (!getCurrentTab?.()?.[1]?.includes?.('Interstellar')) {
+            return;
         }
+        if (String(getCurrentOptionPane?.() || '').toLowerCase() !== 'star map') {
+            return;
+        }
+        const starContainer = document.querySelector('#optionContentTab5');
+        if (!starContainer) {
+            return;
+        }
+        starContainer.innerHTML = '';
+        generateStarfield(starContainer, NUMBER_OF_STARS, STAR_FIELD_SEED, getStarMapMode(), false, null, false);
     });
 
 
@@ -9776,7 +9784,7 @@ function initializeTabEventListeners() {
         element.addEventListener('click', function() {
             selectRowCss(this);
             setLastScreenOpenRegister('tab8', 'near space scanner array');
-            setCurrentOptionPane('cosmic rip near space scanner array');
+            setCurrentOptionPane('near space scanner array');
             updateContent('Near Space Scanner Array', 'tab8', 'content');
             setFirstAccessArray('near space scanner array');
         });
@@ -11489,6 +11497,7 @@ function ensureBattleBackdropStar(canvas, starData) {
     const dest = String(getDestinationStar?.() || starData?.name || '').trim();
     const destKey = dest.toLowerCase();
     const starType = getStarTypeByName?.(dest) ?? starData?.starType;
+    const forcedBottomRight = starData?.forceBackdropStarBottomRight === true;
     const signature = `${destKey}|${starType}|${w}|${h}`;
 
 
@@ -11499,26 +11508,32 @@ function ensureBattleBackdropStar(canvas, starData) {
 
     const diameter = (1 + Math.random() * 1) * h;
     const radius = diameter / 2;
-    const outsideFactor = 0.02 + Math.random() * 0.06;
-    const side = Math.floor(Math.random() * 4);
 
 
     let x;
     let y;
 
 
-    if (side === 0) {
-        x = -radius * outsideFactor;
-        y = Math.random() * (h * 0.9) + (h * 0.05);
-    } else if (side === 1) {
-        x = w + radius * outsideFactor;
-        y = Math.random() * (h * 0.9) + (h * 0.05);
-    } else if (side === 2) {
-        x = Math.random() * (w * 0.9) + (w * 0.05);
-        y = -radius * outsideFactor;
+    if (forcedBottomRight) {
+        // Always glow in from off-screen bottom-right.
+        x = w + radius * 0.04;
+        y = h + radius * 0.04;
     } else {
-        x = Math.random() * (w * 0.9) + (w * 0.05);
-        y = h + radius * outsideFactor;
+        const outsideFactor = 0.02 + Math.random() * 0.06;
+        const side = Math.floor(Math.random() * 4);
+        if (side === 0) {
+            x = -radius * outsideFactor;
+            y = Math.random() * (h * 0.9) + (h * 0.05);
+        } else if (side === 1) {
+            x = w + radius * outsideFactor;
+            y = Math.random() * (h * 0.9) + (h * 0.05);
+        } else if (side === 2) {
+            x = Math.random() * (w * 0.9) + (w * 0.05);
+            y = -radius * outsideFactor;
+        } else {
+            x = Math.random() * (w * 0.9) + (w * 0.05);
+            y = h + radius * outsideFactor;
+        }
     }
 
 
@@ -11529,6 +11544,8 @@ function ensureBattleBackdropStar(canvas, starData) {
         radius,
         starType
     };
+
+    globalThis.__battleBackdropStar = battleBackdropStar;
 
 
     return battleBackdropStar;
@@ -12347,7 +12364,10 @@ function renderBattleExplosions(ctx, now) {
         const lastEnemyOnScreen = lastEnemyUnits.some(unit => unit.x <= (canvas.offsetWidth - 10));
 
 
-        const allUnitsOnScreen = lastPlayerOnScreen && lastEnemyOnScreen;
+        const alreadyInFormation = getInFormation?.() === true;
+        const allUnitsOnScreen = (alreadyInFormation && !getBattleTriggeredByPlayer())
+            ? true
+            : (lastPlayerOnScreen && lastEnemyOnScreen);
 
 
         if (!getBattleTriggeredByPlayer() && !getFormationGoal()) {

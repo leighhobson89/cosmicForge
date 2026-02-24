@@ -1182,6 +1182,15 @@ function cosmicRipChecks() {
     const prevRipFound = globalThis.__cosmicRipPrevRipFound;
     globalThis.__cosmicRipPrevRipFound = ripFound;
 
+    const statusRowLabel = document.querySelector('.option-row-main div label');
+    if (getCurrentOptionPane() === 'near space scanner array') {
+        const isOneSectorState = globalThis.__cosmicRipNearSpaceScannerArrayOneSectorState === true;
+        const desired = (isOneSectorState && ripFound) ? 'Cosmic Rip Sector:' : 'Miaplacidus Sectors Map:';
+        if (statusRowLabel.innerText !== desired) {
+            statusRowLabel.innerText = desired;
+        }
+    }
+
     if (ripFound && prevRipFound === undefined) {
         const foundIdx = Number(getCosmicRipRipLocationSectorIndex?.());
         globalThis.__cosmicRipFoundSectorIndexForZoom = Number.isFinite(foundIdx) ? foundIdx : 0;

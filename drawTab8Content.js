@@ -146,7 +146,7 @@ export function drawTab8Content(heading, optionContentElement) {
         const statusRow = createOptionRow(
             'cosmicRipNearSpaceScannerArrayStatusRow',
             null,
-            'Miaplacidus Map:',
+            'Miaplacidus Sectors Map:',
             null,
             null,
             null,
@@ -261,9 +261,9 @@ export function drawTab8Content(heading, optionContentElement) {
         tooltip.style.fontSize = '0.75rem';
 
         const sectorNames = [
-            'MI-7411', 'MI-7412', 'MI-7413',
-            'MI-7422', 'MI-7423', 'MI-7424',
-            'MI-7432', 'MI-7433', 'MI-7434'
+            'MIAPLAC-7411', 'MIAPLAC-7412', 'MIAPLAC-7413',
+            'MIAPLAC-7422', 'MIAPLAC-7423', 'MIAPLAC-7424',
+            'MIAPLAC-7432', 'MIAPLAC-7433', 'MIAPLAC-7434'
         ];
 
         globalThis.__cosmicRipNearSpaceScannerArraySectorNames = sectorNames;
@@ -401,7 +401,7 @@ export function drawTab8Content(heading, optionContentElement) {
             canvas.width = w;
             canvas.height = h;
 
-            drawSharedSpaceBackdrop(ctx, canvas, null, 200);
+            drawSharedSpaceBackdrop(ctx, canvas, { forceBackdropStarBottomRight: true }, 200);
 
             const themeElement = document.querySelector('[data-theme]');
             const disabledColor = themeElement
@@ -438,8 +438,42 @@ export function drawTab8Content(heading, optionContentElement) {
                 ctx.stroke();
             };
 
+            const drawRipSprite = () => {
+                const spriteW = 191;
+                const spriteH = 271;
+                const themeName = String(document.querySelector('[data-theme]')?.getAttribute?.('data-theme') || '').trim();
+                const spriteKey = themeName || 'default';
+                if (!globalThis.__cosmicRipRipSpriteImgCache) {
+                    globalThis.__cosmicRipRipSpriteImgCache = {};
+                }
+                let spriteImg = globalThis.__cosmicRipRipSpriteImgCache[spriteKey];
+                if (!spriteImg) {
+                    spriteImg = new Image();
+                    spriteImg.src = `images/ripSprite/rip_${spriteKey}.png`;
+                    globalThis.__cosmicRipRipSpriteImgCache[spriteKey] = spriteImg;
+                }
+
+                const candidateSpriteY = 7;
+
+                const spriteX = 100; // position along x row
+                const spriteY = candidateSpriteY;
+                if (spriteImg && spriteImg.complete && spriteImg.naturalWidth > 0) {
+                    ctx.drawImage(spriteImg, spriteX, spriteY, spriteW, spriteH);
+                } else if (spriteImg) {
+                    spriteImg.onload = () => {
+                        try {
+                            globalThis.__cosmicRipNearSpaceScannerArrayDrawCanvas?.();
+                        } catch {
+                            // ignore
+                        }
+                    };
+                }
+            };
+
             if (isOneSectorState) {
-                drawSharedSpaceBackdrop(ctx, canvas, null, 260);
+                drawSharedSpaceBackdrop(ctx, canvas, { forceBackdropStarBottomRight: true }, 260);
+
+                drawRipSprite();
 
                 const idx = Number(globalThis.__cosmicRipFoundSectorIndexForZoom);
                 const safeIdx = Number.isFinite(idx) ? Math.max(0, Math.min(8, Math.floor(idx))) : 0;
