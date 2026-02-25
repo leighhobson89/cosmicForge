@@ -1,4 +1,4 @@
-import { createButton, createOptionRow, setButtonState, showNotification, drawSharedSpaceBackdrop, callPopupModal, showHideModal } from './ui.js';
+import { createButton, createOptionRow, createTextElement, setButtonState, showNotification, drawSharedSpaceBackdrop, callPopupModal, showHideModal } from './ui.js';
 import {
     modalCosmicRipLocatedHeader,
     modalCosmicRipLocatedText,
@@ -20,7 +20,7 @@ import {
 } from './cosmicRip.js';
 
 export function drawTab8Content(heading, optionContentElement) {
-    if (heading === 'Overview') {
+    if (heading === 'Situation') {
         const restored = getCosmicRipNearSpaceScannerArrayRestored?.() === true;
         const gp = Number(getCosmicRipGalacticPoints?.()) || 0;
         const restoreCost = Number(getNearSpaceScannerArrayRestoreCostGp?.()) || 10;
@@ -91,10 +91,15 @@ export function drawTab8Content(heading, optionContentElement) {
             'cosmicRipRestoreNearSpaceScannerArray'
         );
 
+        if (restored) {
+            restoreRow.classList.add('invisible');
+        }
+
         const restoredRow = createOptionRow(
             'cosmicRipNearSpaceScannerArrayRestoredStatusRow',
             null,
             'Near Space Scanner Array:',
+            createTextElement('Requires Restoration', 'cosmicRipNearSpaceScannerArraySituationStatusText', ['red-disabled-text']),
             null,
             null,
             null,
@@ -107,7 +112,7 @@ export function drawTab8Content(heading, optionContentElement) {
             null,
             null,
             null,
-            `<span class="green-ready-text">Restored</span>`,
+            '',
             '',
             null,
             null,
@@ -124,9 +129,10 @@ export function drawTab8Content(heading, optionContentElement) {
         );
 
         const cosmicRipStatusRow = createOptionRow(
-            'cosmicRipOverviewStatusRow',
+            'cosmicRipSituationStatusRow',
             null,
             'Cosmic Rip Status:',
+            createTextElement('Not Located', 'cosmicRipSituationStatusText', ['red-disabled-text']),
             null,
             null,
             null,
@@ -139,7 +145,7 @@ export function drawTab8Content(heading, optionContentElement) {
             null,
             null,
             null,
-            '<span id="cosmicRipOverviewStatusText" class="warning-orange-text">Unknown</span>',
+            '',
             '',
             null,
             null,
@@ -157,9 +163,10 @@ export function drawTab8Content(heading, optionContentElement) {
         cosmicRipStatusRow.classList.add('invisible');
 
         const cosmicRipObjectiveRow = createOptionRow(
-            'cosmicRipOverviewObjectiveRow',
+            'cosmicRipSituationObjectiveRow',
             null,
             'Next Objective:',
+            createTextElement('Scan Local Sectors for the Cosmic Rip', 'cosmicRipSituationObjectiveText', ['green-ready-text']),
             null,
             null,
             null,
@@ -172,7 +179,7 @@ export function drawTab8Content(heading, optionContentElement) {
             null,
             null,
             null,
-            '<span id="cosmicRipOverviewObjectiveText">-</span>',
+            '',
             '',
             null,
             null,
@@ -190,9 +197,10 @@ export function drawTab8Content(heading, optionContentElement) {
         cosmicRipObjectiveRow.classList.add('invisible');
 
         const cosmicRipResearchRow = createOptionRow(
-            'cosmicRipOverviewResearchRow',
+            'cosmicRipSituationResearchRow',
             null,
             'Cosmic Rip Research:',
+            createTextElement('0 pts (L0)', 'cosmicRipSituationResearchText', []),
             null,
             null,
             null,
@@ -205,7 +213,7 @@ export function drawTab8Content(heading, optionContentElement) {
             null,
             null,
             null,
-            '<span id="cosmicRipOverviewResearchText">0 pts (L0)</span>',
+            '',
             '',
             null,
             null,
@@ -222,21 +230,16 @@ export function drawTab8Content(heading, optionContentElement) {
         );
         cosmicRipResearchRow.classList.add('invisible');
 
-        if (!restored) {
-            optionContentElement.appendChild(restoreRow);
-            const btn = optionContentElement.querySelector?.('.cosmic-rip-restore-scanner-array-button');
-            if (btn) {
-                const canRestore = gp >= restoreCost;
-                setButtonState(btn, { enabled: canRestore, ready: canRestore });
-            }
-        } else {
-            optionContentElement.appendChild(restoredRow);
-            optionContentElement.appendChild(cosmicRipStatusRow);
-            optionContentElement.appendChild(cosmicRipObjectiveRow);
-            optionContentElement.appendChild(cosmicRipResearchRow);
-            cosmicRipStatusRow.classList.remove('invisible');
-            cosmicRipObjectiveRow.classList.remove('invisible');
-            cosmicRipResearchRow.classList.remove('invisible');
+        optionContentElement.appendChild(restoreRow);
+        optionContentElement.appendChild(restoredRow);
+        optionContentElement.appendChild(cosmicRipStatusRow);
+        optionContentElement.appendChild(cosmicRipObjectiveRow);
+        optionContentElement.appendChild(cosmicRipResearchRow);
+
+        const btn = optionContentElement.querySelector?.('.cosmic-rip-restore-scanner-array-button');
+        if (btn) {
+            const canRestore = gp >= restoreCost;
+            setButtonState(btn, { enabled: canRestore, ready: canRestore });
         }
         return;
     }

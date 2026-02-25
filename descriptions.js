@@ -467,7 +467,7 @@ export function initialiseDescriptions() {
         'megastructures': "This shows your progress in harnessing the power of MegaStructures, and the slow dismantling of the Miaplacidus Force Field!",
         'black hole': "This shows the Black Hole time warp feature, once unlocked.",
 
-        'overview': `Cosmic Rip operations and progression - GP: <span id="cosmicRipGpBalance" class="green-ready-text">${getCosmicRipGalacticPoints()}</span>`,
+        'situation': `Cosmic Rip operations and progression - GP: <span id="cosmicRipGpBalance" class="green-ready-text">${getCosmicRipGalacticPoints()}</span>`,
         'near space scanner array': `Commission the Near Space Scanner Array, scan sectors to locate distortions, and pinpoint the Cosmic Rip. - GP: <span id="cosmicRipGpBalanceNearSpace" class="green-ready-text">${getCosmicRipGalacticPoints()}</span>`,
         'cosmic rip': `Interact with the Cosmic Rip once it has been located. - GP: <span id="cosmicRipGpBalanceCosmicRip" class="green-ready-text">${getCosmicRipGalacticPoints()}</span>`,
         'ripcraft': `Ripcraft construction and upgrades (coming soon). - GP: <span id="cosmicRipGpBalanceRipcraft" class="green-ready-text">${getCosmicRipGalacticPoints()}</span>`,

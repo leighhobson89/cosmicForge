@@ -1148,14 +1148,14 @@ function cosmicRipChecks() {
         return;
     }
 
-    const overviewOption = document.getElementById('cosmicRipOverviewOption');
-    if (!overviewOption) {
+    const situationOption = document.getElementById('cosmicRipSituationOption');
+    if (!situationOption) {
         return;
     }
 
     const optionPane = String(getCurrentOptionPane?.() || '');
     if (
-        optionPane === 'overview'
+        optionPane === 'situation'
         || optionPane === 'near space scanner array'
         || optionPane === 'cosmic rip'
         || optionPane === 'ripcraft'
@@ -1197,32 +1197,76 @@ function cosmicRipChecks() {
     const ripResearchPoints = (cosmicRipData?.ripResearch && typeof cosmicRipData.ripResearch.points === 'number') ? cosmicRipData.ripResearch.points : 0;
     const ripResearchLevel = (cosmicRipData?.ripResearch && typeof cosmicRipData.ripResearch.level === 'number') ? cosmicRipData.ripResearch.level : 0;
 
-    const overviewStatusText = document.getElementById('cosmicRipOverviewStatusText');
-    if (overviewStatusText) {
-        const desired = scannerRestored
-            ? (ripFound ? `Located (${stage})` : 'Searching')
-            : 'Offline';
-        if (overviewStatusText.textContent !== desired) {
-            overviewStatusText.textContent = desired;
+    const situationScannerStatusText = document.getElementById('cosmicRipNearSpaceScannerArraySituationStatusText');
+    if (situationScannerStatusText) {
+        if (scannerRestored) {
+            situationScannerStatusText.textContent = 'Restored';
+            situationScannerStatusText.classList.remove('red-disabled-text');
+            situationScannerStatusText.classList.add('green-ready-text');
+        } else {
+            situationScannerStatusText.textContent = 'Requires Restoration';
+            situationScannerStatusText.classList.remove('green-ready-text');
+            situationScannerStatusText.classList.add('red-disabled-text');
         }
     }
 
-    const overviewObjectiveText = document.getElementById('cosmicRipOverviewObjectiveText');
-    if (overviewObjectiveText) {
-        const desired = !scannerRestored
-            ? 'Restore Near Space Scanner Array'
-            : (ripFound ? 'Stabilize the rip' : 'Locate the rip sector');
-        if (overviewObjectiveText.textContent !== desired) {
-            overviewObjectiveText.textContent = desired;
+    const situationStatusText = document.getElementById('cosmicRipSituationStatusText');
+    if (situationStatusText) {
+        const isOneSectorState = globalThis.__cosmicRipNearSpaceScannerArrayOneSectorState === true;
+        if (!scannerRestored) {
+            situationStatusText.textContent = 'Not Located';
+            situationStatusText.classList.remove('green-ready-text');
+            situationStatusText.classList.add('red-disabled-text');
+        } else if (ripFound && isOneSectorState) {
+            const idx = Number(globalThis.__cosmicRipFoundSectorIndexForZoom);
+            const safeIdx = Number.isFinite(idx) ? Math.max(0, Math.min(8, Math.floor(idx))) : 0;
+            const sectorNamesArr = globalThis.__cosmicRipNearSpaceScannerArraySectorNames;
+            let sectorLabel = Array.isArray(sectorNamesArr) ? String(sectorNamesArr[safeIdx] || '') : '';
+            if (!sectorLabel) {
+                const sectorEl = document.getElementById(`cosmicRipNearSpaceScannerArraySector${safeIdx}`);
+                sectorLabel = sectorEl?.dataset?.sectorId ? String(sectorEl.dataset.sectorId) : '';
+            }
+            situationStatusText.textContent = `Located in Sector ${sectorLabel}`;
+            situationStatusText.classList.remove('red-disabled-text');
+            situationStatusText.classList.add('green-ready-text');
+        } else {
+            situationStatusText.textContent = 'Not Located';
+            situationStatusText.classList.remove('green-ready-text');
+            situationStatusText.classList.add('red-disabled-text');
         }
     }
 
-    const overviewResearchText = document.getElementById('cosmicRipOverviewResearchText');
-    if (overviewResearchText) {
+    const situationObjectiveText = document.getElementById('cosmicRipSituationObjectiveText');
+    if (situationObjectiveText) {
+        const isOneSectorState = globalThis.__cosmicRipNearSpaceScannerArrayOneSectorState === true;
+        if (scannerRestored && ripFound && isOneSectorState) {
+            situationObjectiveText.textContent = 'Learn how to Investigate the Cosmic Rip';
+            situationObjectiveText.classList.add('green-ready-text');
+        } else {
+            situationObjectiveText.textContent = 'Scan Local Sectors for the Cosmic Rip';
+            situationObjectiveText.classList.add('green-ready-text');
+        }
+    }
+
+    const situationResearchText = document.getElementById('cosmicRipSituationResearchText');
+    if (situationResearchText) {
         const desired = `${ripResearchPoints} pts (L${ripResearchLevel})`;
-        if (overviewResearchText.textContent !== desired) {
-            overviewResearchText.textContent = desired;
+        if (situationResearchText.textContent !== desired) {
+            situationResearchText.textContent = desired;
         }
+    }
+
+    const situationStatusRow = document.getElementById('cosmicRipSituationStatusRow');
+    if (situationStatusRow) {
+        situationStatusRow.classList.toggle('invisible', !scannerRestored);
+    }
+    const situationObjectiveRow = document.getElementById('cosmicRipSituationObjectiveRow');
+    if (situationObjectiveRow) {
+        situationObjectiveRow.classList.toggle('invisible', !scannerRestored);
+    }
+    const situationResearchRow = document.getElementById('cosmicRipSituationResearchRow');
+    if (situationResearchRow) {
+        situationResearchRow.classList.toggle('invisible', !scannerRestored);
     }
 
     const cosmicRipStageText = document.getElementById('cosmicRipCosmicRipStageText');

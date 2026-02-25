@@ -9773,10 +9773,10 @@ function initializeTabEventListeners() {
     document.querySelectorAll('[class*="tab8"][class*="option1"]').forEach(function(element) {
         element.addEventListener('click', function() {
             selectRowCss(this);
-            setLastScreenOpenRegister('tab8', 'overview');
-            setCurrentOptionPane('overview');
-            updateContent('Overview', 'tab8', 'content');
-            setFirstAccessArray('overview');
+            setLastScreenOpenRegister('tab8', 'situation');
+            setCurrentOptionPane('situation');
+            updateContent('Situation', 'tab8', 'content');
+            setFirstAccessArray('situation');
         });
     });
 
