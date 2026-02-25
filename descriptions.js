@@ -2360,7 +2360,7 @@ export function initialiseDescriptions() {
             "You can’t breathe and swallow at the same time.",
             "The first known contraceptive was used in ancient Egypt and involved crocodile dung.",
             "An astronaut's helmet costs over $3 million.",
-            "Pressing '-' on the numpad doesn't do anything.",
+            "Pressing '-' on the numpad doesn't do anything. No,now it really doesn't :)",
             "Apparently there are Ancient Manuscripts dotted around the Galaxy that point to Ancient Megastructures...",
             "If you are playing in the United States, there is an 87% chance you are American, but only a 66% chance that at least one of your parents is.",
             "If you think this game is worth paying for, then tough, you can't pay for it, MUHAHAHAH!  Wait, actually there is a way on itch if you get the Downloadable version, Phew!",
