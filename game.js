@@ -1336,6 +1336,15 @@ function cosmicRipChecks() {
         }
     }
 
+    const restoreScannerRow = document.getElementById('cosmicRipRestoreNearSpaceScannerArrayRow');
+    if (restoreScannerRow) {
+        if (scannerRestored) {
+            restoreScannerRow.classList.add('invisible');
+        } else {
+            restoreScannerRow.classList.remove('invisible');
+        }
+    }
+
     if (cosmicRipRow) {
         if (ripFound) {
             cosmicRipRow.classList.remove('invisible');

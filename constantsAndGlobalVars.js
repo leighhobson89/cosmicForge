@@ -5558,6 +5558,9 @@ const IMAGE_URLS = {
 
 export function populateVariableDebugger() {
     const debugTextAreaContainer = document.getElementById('debugTextAreaContainer');
+    const variableDebuggerSearchInput = document.getElementById('variableDebuggerSearch');
+    const debugContent = debugTextAreaContainer?.closest?.('.debug-content') ?? null;
+    const variableDebuggerSearchBar = variableDebuggerSearchInput?.closest?.('.variable-debugger-search-bar') ?? null;
     const researchAutoBuyerConfig = getResourceDataObject('research', ['upgrades', 'autoBuyer']);
     const philosophyTechData = getResourceDataObject('philosophyRepeatableTechs');
     const cosmicRipData = getResourceDataObject('cosmicRip');
@@ -5855,6 +5858,10 @@ export function populateVariableDebugger() {
         { label: "cosmicRip.instability", value: cosmicRipData?.instability ?? null },
         { label: "cosmicRip.containmentIntegrity", value: cosmicRipData?.containmentIntegrity ?? null },
         { label: "cosmicRip.sealProgress", value: cosmicRipData?.sealProgress ?? null },
+        { label: "", value: "" },
+        { label: "__cosmicRipPrevRipFound", value: globalThis?.__cosmicRipPrevRipFound ?? null },
+        { label: "__cosmicRipNearSpaceScannerArrayOneSectorState", value: globalThis?.__cosmicRipNearSpaceScannerArrayOneSectorState ?? null },
+        { label: "__cosmicRipFoundSectorIndexForZoom", value: globalThis?.__cosmicRipFoundSectorIndexForZoom ?? null },
         { label: "cosmicRip.ripResearch.points", value: cosmicRipData?.ripResearch?.points ?? null },
         { label: "cosmicRip.ripResearch.level", value: cosmicRipData?.ripResearch?.level ?? null },
         { label: "cosmicRip.ripResearch.unlocked", value: cosmicRipData?.ripResearch?.unlocked ?? null },
@@ -5885,6 +5892,7 @@ export function populateVariableDebugger() {
 
     variables.forEach((variable) => {
         const div = document.createElement("div");
+        div.dataset.variableDebuggerLabel = String(variable.label ?? '');
         const label = document.createElement("span");
 
         if (variable.label === "") {
@@ -5955,6 +5963,17 @@ export function populateVariableDebugger() {
             const className = variable.value === null ? "red-disabled-text" : "green-ready-text";
             valueDiv.classList.add(className);
             valueDiv.textContent = formatVariableDebuggerValue(variable.value);
+
+            valueDiv.style.cursor = "pointer";
+            valueDiv.style.pointerEvents = "auto";
+            valueDiv.style.touchAction = "manipulation";
+            valueDiv.title = "Click to edit";
+            valueDiv.addEventListener("pointerdown", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                valueDiv.setPointerCapture?.(e.pointerId);
+                openVariableDebuggerInlineEditor(String(variable.label));
+            });
     
             div.appendChild(iconContainer);
             div.appendChild(label);
@@ -5994,6 +6013,50 @@ export function populateVariableDebugger() {
             }
         }
     });
+
+    if (variableDebuggerSearchInput && !variableDebuggerSearchInput.__variableDebuggerSearchListenerAttached) {
+        variableDebuggerSearchInput.__variableDebuggerSearchListenerAttached = true;
+        variableDebuggerSearchInput.addEventListener('input', () => {
+            const raw = String(variableDebuggerSearchInput.value ?? '');
+            const q = raw.trim().toLowerCase();
+            if (q.length < 3) {
+                variableDebuggerSearchInput.style.color = 'red';
+                return;
+            }
+
+            const rows = Array.from(debugTextAreaContainer.querySelectorAll('[data-variable-debugger-label]'));
+            const matchIndex = rows.findIndex((el) => {
+                const label = String(el.dataset.variableDebuggerLabel ?? '').toLowerCase();
+                if (!label) return false;
+                if (label.endsWith(':')) return false;
+                return label.includes(q);
+            });
+
+            if (matchIndex === -1) {
+                variableDebuggerSearchInput.style.color = 'red';
+                return;
+            }
+
+            variableDebuggerSearchInput.style.color = 'var(--text-color)';
+
+            const matchEl = rows[matchIndex];
+            const isNearBottom = matchIndex >= Math.max(0, rows.length - 15);
+
+            const searchBarHeight = variableDebuggerSearchBar ? variableDebuggerSearchBar.offsetHeight : 0;
+            const extraPadding = 30;
+
+            if (debugContent) {
+                if (isNearBottom) {
+                    debugContent.scrollTop = debugContent.scrollHeight;
+                } else {
+                    const targetTop = matchEl.offsetTop;
+                    debugContent.scrollTop = Math.max(0, targetTop - searchBarHeight - extraPadding);
+                }
+            } else {
+                matchEl.scrollIntoView({ block: isNearBottom ? 'end' : 'start' });
+            }
+        });
+    }
 }
 
 function openVariableDebuggerInlineEditor(label) {
@@ -6033,8 +6096,10 @@ function createVariableDebuggerInlineEditorRow(label) {
     row.style.marginLeft = '22px';
     row.style.marginTop = '2px';
     row.style.marginBottom = '2px';
+    row.classList.add('variable-debugger-inline-editor-row');
 
     const input = document.createElement('textarea');
+    input.classList.add('variable-debugger-inline-editor-input');
     input.value = String(globalThis.__variableDebuggerEditState?.value ?? '');
     input.placeholder = `Set ${label}...`;
     input.style.flex = '1';
@@ -6068,6 +6133,7 @@ function createVariableDebuggerInlineEditorRow(label) {
     });
 
     const submit = document.createElement('button');
+    submit.classList.add('variable-debugger-inline-editor-button');
     submit.textContent = 'SUBMIT';
     submit.style.height = '22px';
     submit.style.fontSize = '12px';
@@ -6077,6 +6143,7 @@ function createVariableDebuggerInlineEditorRow(label) {
     submit.disabled = String(input.value ?? '').trim() === '';
 
     const cancel = document.createElement('button');
+    cancel.classList.add('variable-debugger-inline-editor-button');
     cancel.textContent = 'X';
     cancel.style.height = '22px';
     cancel.style.fontSize = '12px';
@@ -6435,6 +6502,9 @@ function getVariableDebuggerSetterForLabel(label) {
         'cosmicRip.instability': (v) => setResourceDataObject(Number(v), 'cosmicRip', ['instability']),
         'cosmicRip.containmentIntegrity': (v) => setResourceDataObject(Number(v), 'cosmicRip', ['containmentIntegrity']),
         'cosmicRip.sealProgress': (v) => setResourceDataObject(Number(v), 'cosmicRip', ['sealProgress']),
+        '__cosmicRipPrevRipFound': (v) => { globalThis.__cosmicRipPrevRipFound = v === 'true' || v === true; },
+        '__cosmicRipNearSpaceScannerArrayOneSectorState': (v) => { globalThis.__cosmicRipNearSpaceScannerArrayOneSectorState = v === 'true' || v === true; },
+        '__cosmicRipFoundSectorIndexForZoom': (v) => { globalThis.__cosmicRipFoundSectorIndexForZoom = Number(v); },
         'cosmicRip.ripResearch.points': (v) => setResourceDataObject(Number(v), 'cosmicRip', ['ripResearch', 'points']),
         'cosmicRip.ripResearch.level': (v) => setResourceDataObject(Number(v), 'cosmicRip', ['ripResearch', 'level']),
         'cosmicRip.ripResearch.unlocked': (v) => setResourceDataObject(v === 'true' || v === true, 'cosmicRip', ['ripResearch', 'unlocked']),
@@ -6804,6 +6874,9 @@ function getCurrentVariableDebuggerValueForLabel(label) {
     if (label === 'cosmicRip.instability') return String(rip?.instability ?? '');
     if (label === 'cosmicRip.containmentIntegrity') return String(rip?.containmentIntegrity ?? '');
     if (label === 'cosmicRip.sealProgress') return String(rip?.sealProgress ?? '');
+    if (label === '__cosmicRipPrevRipFound') return String(globalThis?.__cosmicRipPrevRipFound ?? '');
+    if (label === '__cosmicRipNearSpaceScannerArrayOneSectorState') return String(globalThis?.__cosmicRipNearSpaceScannerArrayOneSectorState ?? '');
+    if (label === '__cosmicRipFoundSectorIndexForZoom') return String(globalThis?.__cosmicRipFoundSectorIndexForZoom ?? '');
     if (label === 'cosmicRip.ripResearch.points') return String(rip?.ripResearch?.points ?? '');
     if (label === 'cosmicRip.ripResearch.level') return String(rip?.ripResearch?.level ?? '');
     if (label === 'cosmicRip.ripResearch.unlocked') return String(rip?.ripResearch?.unlocked ?? '');
