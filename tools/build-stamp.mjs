@@ -40,15 +40,28 @@ function readCosmicRipEnabledFlag() {
   return false;
 }
 
+function readVariableDebuggerAndCheatsFlag() {
+  try {
+    const existing = fs.readFileSync(buildFlagsPath, 'utf8');
+    const match = existing.match(/window\.__VARIABLE_DEBUGGER_AND_CHEATS__\s*=\s*(true|false)\s*;/);
+    if (match && match[1]) {
+      return match[1] === 'true';
+    }
+  } catch {
+  }
+  return false;
+}
+
 function writePackageJson(obj) {
   fs.writeFileSync(repoRootPackageJsonPath, JSON.stringify(obj, null, 2) + '\n', 'utf8');
 }
 
 try {
   const cosmicRipEnabled = readCosmicRipEnabledFlag();
+  // Always force variable debugger and cheats to false for builds
   fs.writeFileSync(
     buildFlagsPath,
-    `window.__DEMO_BUILD__ = ${isDemo ? 'true' : 'false'};\n\nwindow.__COSMIC_RIP_ENABLED__ = ${cosmicRipEnabled ? 'true' : 'false'};\n`,
+    `window.__DEMO_BUILD__ = ${isDemo ? 'true' : 'false'};\n\nwindow.__COSMIC_RIP_ENABLED__ = ${cosmicRipEnabled ? 'true' : 'false'};\n\nwindow.__VARIABLE_DEBUGGER_AND_CHEATS__ = false;\n`,
     'utf8'
   );
 

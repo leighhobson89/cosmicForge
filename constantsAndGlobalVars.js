@@ -1,4 +1,4 @@
-import { restoreAchievementsDataObject, restoreAscendencyBuffsDataObject, restoreGalacticMarketDataObject, restoreGalacticCasinoDataObject, restoreRocketNamesObject, restoreResourceDataObject, restoreStarSystemsDataObject, resourceData, starSystems, getResourceDataObject, setResourceDataObject, galacticMarket, galacticCasino, ascendencyBuffs, achievementsData, getStarSystemDataObject, getBlackHoleResearchDone, getBlackHolePower, getBlackHoleDuration, getBlackHoleRechargeMultiplier, getBlackHoleResearchPrice, getBlackHolePowerPrice, getBlackHoleDurationPrice, getBlackHoleRechargePrice, oTypePowerPlantBuffs, restoreOTypePowerPlantBuffsObject } from "./resourceDataObject.js";
+import { restoreAchievementsDataObject, restoreAscendencyBuffsDataObject, restoreGalacticMarketDataObject, restoreGalacticCasinoDataObject, restoreRocketNamesObject, restoreResourceDataObject, restoreStarSystemsDataObject, resourceData, starSystems, getResourceDataObject, setResourceDataObject, galacticMarket, galacticCasino, ascendencyBuffs, achievementsData, getStarSystemDataObject, getBlackHoleResearchDone, getBlackHolePower, getBlackHoleDuration, getBlackHoleRechargeMultiplier, getBlackHoleResearchPrice, getBlackHolePowerPrice, getBlackHoleDurationPrice, getBlackHoleRechargePrice, setBlackHoleResearchDone, setBlackHolePower, setBlackHoleDuration, setBlackHoleRechargeMultiplier, setBlackHoleResearchPrice, setBlackHolePowerPrice, setBlackHoleDurationPrice, setBlackHoleRechargePrice, oTypePowerPlantBuffs, restoreOTypePowerPlantBuffsObject } from "./resourceDataObject.js";
 import { achievementFunctionsMap } from "./achievements.js";
 import { drawNativeTechTree, selectTheme, startWeatherEffect, stopWeatherEffect, applyCustomPointerSetting, showNotification, generateStarfield } from "./ui.js";
 import { capitaliseWordsWithRomanNumerals, capitaliseString } from './utilityFunctions.js';
@@ -67,6 +67,7 @@ export const VOID_SEER_PRIZE_CATALOG = {
     prize2: { costCp: 10, maxReel: 8, label: 'Ancient Manuscript Clue - 10CP - Odds: 8/1' },
     prize3: { costCp: 15, maxReel: 12, label: 'Pillage Antimatter - 15CP - Odds: 12/1' }
 };
+
 export const AP_BASE_SELL_PRICE = 100000;
 export const AP_BASE_BUY_PRICE = 1000000;
 export const CASH_LIQUIDATION_MODIFIER = 10;
@@ -5386,6 +5387,24 @@ export function setMiaplacidusEndgameStoryShown(value) {
     miaplacidusEndgameStoryShown = value;
 }
 
+export function getVariableDebuggerAndCheats() {
+    if (typeof window === 'undefined') {
+        return false;
+    }
+
+    if (window.__VARIABLE_DEBUGGER_AND_CHEATS__) {
+        return true;
+    }
+
+    return window.__VARIABLE_DEBUGGER_AND_CHEATS;
+}
+
+export function setVariableDebuggerAndCheats(value) {
+    if (typeof window !== 'undefined') {
+        window.__VARIABLE_DEBUGGER_AND_CHEATS__ = !!value;
+    }
+}
+
 export function getMinimumBlackHoleChargeTime() {
     return MINIMUM_BLACK_HOLE_CHARGE_TIME;
 }
@@ -5541,13 +5560,14 @@ export function populateVariableDebugger() {
     const debugTextAreaContainer = document.getElementById('debugTextAreaContainer');
     const researchAutoBuyerConfig = getResourceDataObject('research', ['upgrades', 'autoBuyer']);
     const philosophyTechData = getResourceDataObject('philosophyRepeatableTechs');
+    const cosmicRipData = getResourceDataObject('cosmicRip');
     
     const variables = [
         { label: "", value: "" },
         { label: "Game Settings:", value: "" },
         { label: "", value: "" },
 
-        { label: "gamestate", value: getGameStateVariable() },
+        { label: "gamestate", value: gameState },
         { label: "gameStartTimeStamp", value: gameStartTimeStamp },
         { label: "runStartTimeStamp", value: runStartTimeStamp },        
         { label: "alreadySeenNewsTickerArray", value: alreadySeenNewsTickerArray },
@@ -5794,23 +5814,23 @@ export function populateVariableDebugger() {
         { label: "Black Hole:", value: "" },
         { label: "", value: "" },
 
-        { label: "blackHoleDiscovered", value: getBlackHoleDiscovered() },
-        { label: "blackHoleDiscoveryProbability", value: getBlackHoleDiscoveryProbability() },
+        { label: "blackHoleDiscovered", value: blackHoleDiscovered },
+        { label: "blackHoleDiscoveryProbability", value: blackHoleDiscoveryProbability },
+        { label: "blackHoleAlwaysOn", value: blackHoleAlwaysOn },
+        { label: "blackHoleChargeReady", value: blackHoleChargeReady },
+        { label: "currentlyChargingBlackHole", value: currentlyChargingBlackHole },
+        { label: "currentlyTimeWarpingBlackHole", value: currentlyTimeWarpingBlackHole },
+
+        { label: "timeWarpMultiplier", value: timeWarpMultiplier },
+        { label: "timeWarpEndTimestampMs", value: timeWarpEndTimestampMs },
+
+        { label: "baseBlackHoleChargeTimerDuration", value: baseBlackHoleChargeTimerDuration },
+        { label: "blackHoleDurationUpgradeIncrementMs", value: blackHoleDurationUpgradeIncrementMs },
+        { label: "blackHolePowerUpgradeIncrement", value: blackHolePowerUpgradeIncrement },
+        { label: "currentBlackHoleChargeTimerDurationTotal", value: currentBlackHoleChargeTimerDurationTotal },
+        { label: "timeLeftUntilBlackHoleChargeTimerFinishes", value: timeLeftUntilBlackHoleChargeTimerFinishes },
+
         { label: "blackHoleResearchDone", value: getBlackHoleResearchDone() },
-        { label: "blackHoleAlwaysOn", value: getBlackHoleAlwaysOn() },
-        { label: "blackHoleChargeReady", value: getBlackHoleChargeReady() },
-        { label: "currentlyChargingBlackHole", value: getCurrentlyChargingBlackHole() },
-        { label: "currentlyTimeWarpingBlackHole", value: getCurrentlyTimeWarpingBlackHole() },
-
-        { label: "timeWarpMultiplier", value: getTimeWarpMultiplier() },
-        { label: "timeWarpEndTimestampMs", value: getTimeWarpEndTimestampMs() },
-
-        { label: "baseBlackHoleChargeTimerDuration", value: getBaseBlackHoleChargeTimerDuration() },
-        { label: "blackHoleDurationUpgradeIncrementMs", value: getBlackHoleDurationUpgradeIncrementMs() },
-        { label: "blackHolePowerUpgradeIncrement", value: getBlackHolePowerUpgradeIncrement() },
-        { label: "currentBlackHoleChargeTimerDurationTotal", value: getCurrentBlackHoleChargeTimerDurationTotal() },
-        { label: "timeLeftUntilBlackHoleChargeTimerFinishes", value: getTimeLeftUntilBlackHoleChargeTimerFinishes() },
-
         { label: "blackHolePower", value: getBlackHolePower() },
         { label: "blackHoleDuration", value: getBlackHoleDuration() },
         { label: "blackHoleRechargeMultiplier", value: getBlackHoleRechargeMultiplier() },
@@ -5818,36 +5838,606 @@ export function populateVariableDebugger() {
         { label: "blackHolePowerPrice", value: getBlackHolePowerPrice() },
         { label: "blackHoleDurationPrice", value: getBlackHoleDurationPrice() },
         { label: "blackHoleRechargePrice", value: getBlackHoleRechargePrice() },
+
+        { label: "", value: "" },
+        { label: "Cosmic Rip:", value: "" },
+        { label: "", value: "" },
+
+        { label: "cosmicRip", value: cosmicRipData },
+        { label: "cosmicRip.galacticPoints", value: cosmicRipData?.galacticPoints ?? null },
+        { label: "cosmicRip.nearSpaceScannerArrayRestored", value: cosmicRipData?.nearSpaceScannerArrayRestored ?? null },
+        { label: "cosmicRip.ripLocationSectorIndex", value: cosmicRipData?.ripLocationSectorIndex ?? null },
+        { label: "cosmicRip.ripFound", value: cosmicRipData?.ripFound ?? null },
+        { label: "cosmicRip.scanResultsBySectorIndex", value: cosmicRipData?.scanResultsBySectorIndex ?? null },
+        { label: "cosmicRip.stage", value: cosmicRipData?.stage ?? null },
+        { label: "cosmicRip.instability", value: cosmicRipData?.instability ?? null },
+        { label: "cosmicRip.containmentIntegrity", value: cosmicRipData?.containmentIntegrity ?? null },
+        { label: "cosmicRip.sealProgress", value: cosmicRipData?.sealProgress ?? null },
+        { label: "cosmicRip.ripResearch.points", value: cosmicRipData?.ripResearch?.points ?? null },
+        { label: "cosmicRip.ripResearch.level", value: cosmicRipData?.ripResearch?.level ?? null },
+        { label: "cosmicRip.ripResearch.unlocked", value: cosmicRipData?.ripResearch?.unlocked ?? null },
+        { label: "cosmicRip.projects", value: cosmicRipData?.projects ?? null },
+
+        { label: "__cosmicRipNearSpaceScannerArraySectorNames", value: globalThis.__cosmicRipNearSpaceScannerArraySectorNames ?? null },
+        { label: "__cosmicRipNearSpaceScannerArrayOneSectorState", value: globalThis.__cosmicRipNearSpaceScannerArrayOneSectorState ?? null },
+        { label: "__cosmicRipFoundSectorIndexForZoom", value: globalThis.__cosmicRipFoundSectorIndexForZoom ?? null },
     ];    
 
+    // If the inline editor is open, preserve the DOM node and (if focused) its selection.
+    // This window is refreshed every tick, and clearing/rebuilding the container would otherwise
+    // continuously steal focus from the textarea, making it impossible to type.
+    const existingEditorRow = globalThis.__variableDebuggerEditorRow;
+    const existingEditorTextarea = existingEditorRow?.querySelector?.('textarea') ?? null;
+    const editorHadFocus = !!(existingEditorTextarea && document.activeElement === existingEditorTextarea);
+    const editorSelectionStart = editorHadFocus ? existingEditorTextarea.selectionStart : null;
+    const editorSelectionEnd = editorHadFocus ? existingEditorTextarea.selectionEnd : null;
+
+    if (existingEditorRow && existingEditorRow.parentNode) {
+        existingEditorRow.parentNode.removeChild(existingEditorRow);
+    }
+
     debugTextAreaContainer.innerHTML = "";
+
+    const editState = globalThis.__variableDebuggerEditState;
+    const editTargetLabel = editState?.label ? String(editState.label) : '';
 
     variables.forEach((variable) => {
         const div = document.createElement("div");
         const label = document.createElement("span");
 
-        if (variable.value === "" && variable.label !== "") {
-            label.style.fontSize = "2rem";
-        }
-
         if (variable.label === "") {
             const blankLineDiv = document.createElement("div");
             blankLineDiv.style.height = "10px";
             debugTextAreaContainer.appendChild(blankLineDiv);
+        } else if (variable.value === "" && variable.label.endsWith(':')) {
+            label.innerHTML = `${variable.label}`;
+            label.style.fontSize = "2rem";
+            div.appendChild(label);
+            debugTextAreaContainer.appendChild(div);
         } else {
-            label.innerHTML = variable.value === "" ? `${variable.label}` : `${variable.label}:&nbsp;&nbsp;`;
+            const iconContainer = document.createElement("span");
+            iconContainer.style.display = "inline-flex";
+            iconContainer.style.alignItems = "center";
+            iconContainer.style.marginRight = "8px";
+            iconContainer.style.userSelect = "none";
+            iconContainer.style.pointerEvents = "auto";
+            iconContainer.style.touchAction = "manipulation";
+
+            const clipboardIcon = document.createElement("span");
+            clipboardIcon.textContent = "📋";
+            clipboardIcon.style.cursor = "pointer";
+            clipboardIcon.style.marginRight = "4px";
+            clipboardIcon.style.padding = "2px 4px";
+            clipboardIcon.style.pointerEvents = "auto";
+            clipboardIcon.style.touchAction = "manipulation";
+            clipboardIcon.title = "Copy to clipboard";
+            clipboardIcon.addEventListener("pointerdown", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                clipboardIcon.setPointerCapture?.(e.pointerId);
+                const textToCopy = `${variable.label}: ${formatVariableDebuggerValue(variable.value)}`;
+
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(textToCopy).then(() => {
+                        console.log("Copied to clipboard:", textToCopy);
+                        showNotification(`Copied: ${variable.label}`, 'warning', 2000, 'general');
+                    }).catch((err) => {
+                        console.error("Clipboard API failed:", err);
+                        fallbackCopy(textToCopy, variable.label);
+                    });
+                } else {
+                    fallbackCopy(textToCopy, variable.label);
+                }
+            });
+
+            const pencilIcon = document.createElement("span");
+            pencilIcon.textContent = "✏️";
+            pencilIcon.style.cursor = "pointer";
+            pencilIcon.style.padding = "2px 4px";
+            pencilIcon.style.pointerEvents = "auto";
+            pencilIcon.style.touchAction = "manipulation";
+            pencilIcon.title = "Edit variable";
+            pencilIcon.addEventListener("pointerdown", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                pencilIcon.setPointerCapture?.(e.pointerId);
+                openVariableDebuggerInlineEditor(String(variable.label));
+            });
+
+            iconContainer.appendChild(clipboardIcon);
+            iconContainer.appendChild(pencilIcon);
+
+            label.innerHTML = `${variable.label}:&nbsp;&nbsp;`;
     
             const valueDiv = document.createElement("span");
             const className = variable.value === null ? "red-disabled-text" : "green-ready-text";
             valueDiv.classList.add(className);
             valueDiv.textContent = formatVariableDebuggerValue(variable.value);
     
+            div.appendChild(iconContainer);
             div.appendChild(label);
             div.appendChild(valueDiv);
     
             debugTextAreaContainer.appendChild(div);
+
+            if (editTargetLabel && String(variable.label) === editTargetLabel) {
+                // Always insert the editor row directly after the target variable row.
+                // If it already exists, we re-append the same DOM node to preserve event handlers.
+                let editorRow = globalThis.__variableDebuggerEditorRow;
+                if (!editorRow || editorRow.dataset.editLabel !== editTargetLabel) {
+                    editorRow = createVariableDebuggerInlineEditorRow(editTargetLabel);
+                    editorRow.dataset.editLabel = editTargetLabel;
+                    globalThis.__variableDebuggerEditorRow = editorRow;
+                }
+
+                // If the textarea isn't focused, keep it in sync with state on repaint.
+                const textarea = editorRow.querySelector?.('textarea') ?? null;
+                if (textarea && document.activeElement !== textarea) {
+                    textarea.value = String(globalThis.__variableDebuggerEditState?.value ?? '');
+                }
+
+                debugTextAreaContainer.appendChild(editorRow);
+
+                if (editorHadFocus && textarea) {
+                    queueMicrotask(() => {
+                        try {
+                            textarea.focus();
+                            if (typeof editorSelectionStart === 'number' && typeof editorSelectionEnd === 'number') {
+                                textarea.setSelectionRange(editorSelectionStart, editorSelectionEnd);
+                            }
+                        } catch {
+                        }
+                    });
+                }
+            }
         }
     });
+}
+
+function openVariableDebuggerInlineEditor(label) {
+    const safeLabel = String(label || '');
+    if (!safeLabel) {
+        return;
+    }
+
+    if (!getVariableDebuggerSetterForLabel(safeLabel)) {
+        showNotification(`Cannot edit: ${safeLabel}`, 'warning', 2000, 'general');
+        return;
+    }
+
+    let currentValue = '';
+    try {
+        currentValue = getCurrentVariableDebuggerValueForLabel(safeLabel);
+    } catch {
+        currentValue = '';
+    }
+
+    globalThis.__variableDebuggerEditState = {
+        label: safeLabel,
+        value: currentValue
+    };
+}
+
+function closeVariableDebuggerInlineEditor() {
+    globalThis.__variableDebuggerEditState = null;
+    globalThis.__variableDebuggerEditorRow = null;
+}
+
+function createVariableDebuggerInlineEditorRow(label) {
+    const row = document.createElement('div');
+    row.style.display = 'flex';
+    row.style.alignItems = 'center';
+    row.style.gap = '8px';
+    row.style.marginLeft = '22px';
+    row.style.marginTop = '2px';
+    row.style.marginBottom = '2px';
+
+    const input = document.createElement('textarea');
+    input.value = String(globalThis.__variableDebuggerEditState?.value ?? '');
+    input.placeholder = `Set ${label}...`;
+    input.style.flex = '1';
+    input.style.height = '44px';
+    input.style.fontSize = '14px';
+    input.style.resize = 'vertical';
+    input.style.whiteSpace = 'pre-wrap';
+    input.style.overflowWrap = 'anywhere';
+    // Ensure normal mouse interactions (click-to-place caret, drag-to-select) aren't blocked
+    // by pointer handlers on parent containers during tick rerenders.
+    input.style.pointerEvents = 'auto';
+    input.style.touchAction = 'auto';
+    input.addEventListener('pointerdown', (e) => {
+        // Do NOT preventDefault here (that would stop selection/caret placement).
+        e.stopPropagation();
+    });
+    input.addEventListener('pointermove', (e) => {
+        e.stopPropagation();
+    });
+    input.addEventListener('pointerup', (e) => {
+        e.stopPropagation();
+    });
+    input.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+    });
+    input.addEventListener('mousemove', (e) => {
+        e.stopPropagation();
+    });
+    input.addEventListener('mouseup', (e) => {
+        e.stopPropagation();
+    });
+
+    const submit = document.createElement('button');
+    submit.textContent = 'SUBMIT';
+    submit.style.height = '22px';
+    submit.style.fontSize = '12px';
+    submit.style.cursor = 'pointer';
+    submit.style.pointerEvents = 'auto';
+    submit.style.touchAction = 'manipulation';
+    submit.disabled = String(input.value ?? '').trim() === '';
+
+    const cancel = document.createElement('button');
+    cancel.textContent = 'X';
+    cancel.style.height = '22px';
+    cancel.style.fontSize = '12px';
+    cancel.style.cursor = 'pointer';
+    cancel.style.pointerEvents = 'auto';
+    cancel.style.touchAction = 'manipulation';
+
+    function syncEditState() {
+        const state = globalThis.__variableDebuggerEditState;
+        if (state && state.label === label) {
+            state.value = String(input.value ?? '');
+        }
+        submit.disabled = String(input.value ?? '').trim() === '';
+    }
+
+    input.addEventListener('input', () => {
+        syncEditState();
+    });
+
+    submit.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        submit.setPointerCapture?.(e.pointerId);
+        if (String(input.value ?? '').trim() === '') {
+            return;
+        }
+        applyVariableDebuggerEdit(label, input.value);
+    });
+
+    cancel.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        cancel.setPointerCapture?.(e.pointerId);
+        closeVariableDebuggerInlineEditor();
+    });
+
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            if (e.shiftKey) {
+                return;
+            }
+            e.preventDefault();
+            if (String(input.value ?? '').trim() === '') {
+                return;
+            }
+            applyVariableDebuggerEdit(label, input.value);
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            closeVariableDebuggerInlineEditor();
+        }
+    });
+
+    row.appendChild(input);
+    row.appendChild(submit);
+    row.appendChild(cancel);
+
+    queueMicrotask(() => {
+        try {
+            input.focus();
+            input.select();
+        } catch {
+        }
+    });
+
+    return row;
+}
+
+function applyVariableDebuggerEdit(label, raw) {
+    const setter = getVariableDebuggerSetterForLabel(label);
+    if (!setter) {
+        showNotification(`Cannot edit: ${label}`, 'warning', 2000, 'general');
+        return;
+    }
+
+    let parsed;
+    try {
+        parsed = parseVariableDebuggerInput(raw);
+    } catch (err) {
+        showNotification(`Invalid value: ${err.message}`, 'warning', 3000, 'general');
+        return;
+    }
+
+    try {
+        setter(parsed);
+        showNotification(`Updated: ${label}`, 'warning', 2000, 'general');
+        closeVariableDebuggerInlineEditor();
+    } catch (err) {
+        showNotification(`Failed to update: ${label} - ${err.message}`, 'warning', 3000, 'general');
+    }
+}
+
+function parseVariableDebuggerInput(raw) {
+    const str = String(raw ?? '').trim();
+    if (str === '') {
+        return '';
+    }
+
+    // Try to parse as JSON first (for arrays and objects)
+    if ((str.startsWith('[') && str.endsWith(']')) || (str.startsWith('{') && str.endsWith('}'))) {
+        try {
+            const parsed = JSON.parse(str);
+            // Validate that arrays contain only the expected types
+            if (Array.isArray(parsed)) {
+                return parsed;
+            }
+            // Return objects as-is
+            if (typeof parsed === 'object' && parsed !== null) {
+                return parsed;
+            }
+        } catch (err) {
+            // JSON parse failed, throw a descriptive error
+            throw new Error(`Invalid JSON: ${err.message}`);
+        }
+    }
+
+    // Try to parse as number
+    if (!isNaN(str) && !isNaN(parseFloat(str))) {
+        const num = parseFloat(str);
+        // Check if it should be an integer
+        if (Number.isInteger(num)) {
+            return parseInt(str, 10);
+        }
+        return num;
+    }
+
+    // Try to parse as boolean
+    if (str === 'true') return true;
+    if (str === 'false') return false;
+
+    // Try to parse as null
+    if (str === 'null') return null;
+
+    // Return as string
+    return str;
+}
+
+function getVariableDebuggerSetterForLabel(label) {
+    const map = {
+        // Game Settings
+        gamestate: (v) => setGameStateVariable(v),
+        gameStartTimeStamp: (v) => { gameStartTimeStamp = Number(v); },
+        runStartTimeStamp: (v) => { runStartTimeStamp = Number(v); },
+        alreadySeenNewsTickerArray: (v) => { alreadySeenNewsTickerArray = JSON.parse(v); },
+        currencySymbol: (v) => { currencySymbol = v; },
+        currentTheme: (v) => { currentTheme = v; document.body.setAttribute('data-theme', v); },
+        sfx: (v) => { sfx = v === 'true' || v === true; },
+        backgroundAudio: (v) => setBackgroundAudio(v),
+        saveExportCloudFlag: (v) => { saveExportCloudFlag = v === 'true' || v === true; },
+        autoSaveToggle: (v) => { autoSaveToggle = v === 'true' || v === true; },
+        newsTickerSetting: (v) => { newsTickerSetting = v === 'true' || v === true; },
+        weatherEffectSettingToggle: (v) => { weatherEffectSettingToggle = v === 'true' || v === true; },
+        notificationsToggle: (v) => { notificationsToggle = v === 'true' || v === true; },
+        saveName: (v) => { saveName = v; },
+        lastSavedTimeStamp: (v) => { lastSavedTimeStamp = v; },
+        autoSaveFrequency: (v) => { autoSaveFrequency = Number(v); },
+        savedYetSinceOpeningSaveDialogue: (v) => { savedYetSinceOpeningSaveDialogue = v === 'true' || v === true; },
+
+        // Run
+        rebirthPossible: (v) => { rebirthPossible = v === 'true' || v === true; },
+        runNumber: (v) => { runNumber = Number(v); },
+        apAwardedThisRun: (v) => { apAwardedThisRun = Number(v); },
+        currentStarSystem: (v) => { currentStarSystem = v; },
+
+        // Resources / Compounds / AutoBuyers
+        saleResourcePreviews: (v) => { saleResourcePreviews = v; },
+        saleCompoundPreviews: (v) => { saleCompoundPreviews = v; },
+        createCompoundPreviews: (v) => { createCompoundPreviews = v; },
+        constituentPartsObject: (v) => { constituentPartsObject = v; },
+        itemsToDeduct: (v) => { itemsToDeduct = v; },
+        itemsToIncreasePrice: (v) => { itemsToIncreasePrice = v; },
+        unlockedResourcesArray: (v) => { unlockedResourcesArray = v; },
+        unlockedCompoundsArray: (v) => { unlockedCompoundsArray = v; },
+        temporaryCoreTechsRowsRepo: (v) => { temporaryCoreTechRowsRepo = v; },
+        canAffordDeferred: (v) => { canAffordDeferred = v === 'true' || v === true; },
+        originalFrameNumbers: (v) => { originalFrameNumbers = v; },
+
+        // Tech
+        techRenderCounter: (v) => { techRenderCounter = Number(v); },
+        techUnlockedArray: (v) => { techUnlockedArray = v; },
+        revealedTechArray: (v) => { revealedTechArray = v; },
+        upcomingTechArray: (v) => { upcomingTechArray = v; },
+        tempRowValue: (v) => { tempRowValue = v; },
+
+        // Energy
+        losingEnergy: (v) => { losingEnergy = v === 'true' || v === true; },
+        powerOnOff: (v) => { powerOnOff = v === 'true' || v === true; },
+        trippedStatus: (v) => { trippedStatus = v === 'true' || v === true; },
+
+        // Statistics - all Time totals
+        allTimeTotalHydrogen: (v) => { allTimeTotalHydrogen = Number(v); },
+        allTimeTotalHelium: (v) => { allTimeTotalHelium = Number(v); },
+        allTimeTotalCarbon: (v) => { allTimeTotalCarbon = Number(v); },
+        allTimeTotalNeon: (v) => { allTimeTotalNeon = Number(v); },
+        allTimeTotalOxygen: (v) => { allTimeTotalOxygen = Number(v); },
+        allTimeTotalSodium: (v) => { allTimeTotalSodium = Number(v); },
+        allTimeTotalSilicon: (v) => { allTimeTotalSilicon = Number(v); },
+        allTimeTotalIron: (v) => { allTimeTotalIron = Number(v); },
+        allTimeTotalDiesel: (v) => { allTimeTotalDiesel = Number(v); },
+        allTimeTotalGlass: (v) => { allTimeTotalGlass = Number(v); },
+        allTimeTotalSteel: (v) => { allTimeTotalSteel = Number(v); },
+        allTimeTotalConcrete: (v) => { allTimeTotalConcrete = Number(v); },
+        allTimeTotalWater: (v) => { allTimeTotalWater = Number(v); },
+        allTimeTotalTitanium: (v) => { allTimeTotalTitanium = Number(v); },
+        allTimeTotalResearchPoints: (v) => { allTimeTotalResearchPoints = Number(v); },
+        allTimeTotalScienceKits: (v) => { allTimeTotalScienceKits = Number(v); },
+        allTimeTotalScienceClubs: (v) => { allTimeTotalScienceClubs = Number(v); },
+        allTimeTotalScienceLabs: (v) => { allTimeTotalScienceLabs = Number(v); },
+        allTimeTotalRocketsLaunched: (v) => { allTimeTotalRocketsLaunched = Number(v); },
+        allTimeTotalStarShipsLaunched: (v) => { allTimeTotalStarShipsLaunched = Number(v); },
+        allTimeTotalAsteroidsDiscovered: (v) => { allTimeTotalAsteroidsDiscovered = Number(v); },
+        allTimeTotalLegendaryAsteroidsDiscovered: (v) => { allTimeTotalLegendaryAsteroidsDiscovered = Number(v); },
+        starStudyRange: (v) => { starStudyRange = Number(v); },
+        allTimeTotalAntimatterMined: (v) => { allTimeTotalAntimatterMined = Number(v); },
+        antimatterMinedThisRun: (v) => { antimatterMinedThisRun = Number(v); },
+        allTimeTotalApGain: (v) => { allTimeTotalApGain = Number(v); },
+        currentRunNumber: (v) => { currentRunNumber = Number(v); },
+        currentRunTimer: (v) => { currentRunTimer = Number(v); },
+        totalNewsTickerPrizesCollected: (v) => { totalNewsTickerPrizesCollected = Number(v); },
+        apAnticipatedThisRun: (v) => { apAnticipatedThisRun = Number(v); },
+        allTimeStarShipsBuilt: (v) => { allTimeStarShipsBuilt = Number(v); },
+        starShipTravelDistance: (v) => { starShipTravelDistance = Number(v); },
+        allTimesTripped: (v) => { allTimesTripped = Number(v); },
+        allTimeBasicPowerPlantsBuilt: (v) => { allTimeBasicPowerPlantsBuilt = Number(v); },
+        allTimeAdvancedPowerPlantsBuilt: (v) => { allTimeAdvancedPowerPlantsBuilt = Number(v); },
+        allTimeSolarPowerPlantsBuilt: (v) => { allTimeSolarPowerPlantsBuilt = Number(v); },
+        allTimeSodiumIonBatteriesBuilt: (v) => { allTimeSodiumIonBatteriesBuilt = Number(v); },
+        allTimeBattery2Built: (v) => { allTimeBattery2Built = Number(v); },
+        allTimeBattery3Built: (v) => { allTimeBattery3Built = Number(v); },
+        asteroidsMinedThisRun: (v) => { asteroidsMinedThisRun = Number(v); },
+
+        // Weather
+        weatherEffectOn: (v) => { weatherEffectOn = v === 'true' || v === true; },
+        weatherEfficiencyApplied: (v) => { weatherEfficiencyApplied = v === 'true' || v === true; },
+        currentStarSystemWeatherEfficiency: (v) => { currentStarSystemWeatherEfficiency = Number(v); },
+        currentPrecipitationRate: (v) => { currentPrecipitationRate = Number(v); },
+
+        // Space Telescope
+        currentlySearchingAsteroid: (v) => { currentlySearchingAsteroid = v === 'true' || v === true; },
+        currentlyInvestigatingStar: (v) => { currentlyInvestigatingStar = v === 'true' || v === true; },
+        currentlyPillagingVoid: (v) => { currentlyPillagingVoid = v === 'true' || v === true; },
+        telescopeReadyToSearch: (v) => { telescopeReadyToSearch = v === 'true' || v === true; },
+        asteroidTimerCanContinue: (v) => { asteroidTimerCanContinue = v === 'true' || v === true; },
+        starInvestigationTimerCanContinue: (v) => { starInvestigationTimerCanContinue = v === 'true' || v === true; },
+        pillageVoidTimerCanContinue: (v) => { pillageVoidTimerCanContinue = v === 'true' || v === true; },
+        sortAsteroidMethod: (v) => { sortAsteroidMethod = v; },
+        sortStarMethod: (v) => { sortStarMethod = v; },
+        baseSearchAsteroidTimerDuration: (v) => { baseSearchAsteroidTimerDuration = Number(v); },
+        baseInvestigateStarTimerDuration: (v) => { baseInvestigateStarTimerDuration = Number(v); },
+        basePillageVoidTimerDuration: (v) => { basePillageVoidTimerDuration = Number(v); },
+        currentAsteroidSearchTimerDurationTotal: (v) => { currentAsteroidSearchTimerDurationTotal = Number(v); },
+        currentInvestigateStarTimerDurationTotal: (v) => { currentInvestigateStarTimerDurationTotal = Number(v); },
+        currentPillageVoidTimerDurationTotal: (v) => { currentPillageVoidTimerDurationTotal = Number(v); },
+        timeLeftUntilAsteroidScannerTimerFinishes: (v) => { timeLeftUntilAsteroidScannerTimerFinishes = Number(v); },
+        timeLeftUntilTravelToDestinationStarTimerFinishes: (v) => { timeLeftUntilTravelToDestinationStarTimerFinishes = Number(v); },
+        timeLeftUntilStarInvestigationTimerFinishes: (v) => { timeLeftUntilStarInvestigationTimerFinishes = Number(v); },
+        timeLeftUntilPillageVoidTimerFinishes: (v) => { timeLeftUntilPillageVoidTimerFinishes = Number(v); },
+        oldAntimatterRightBoxSvgData: (v) => { oldAntimatterRightBoxSvgData = v; },
+
+        // Rockets And Asteroid Mining
+        antimatterUnlocked: (v) => { antimatterUnlocked = v === 'true' || v === true; },
+        isAntimatterBoostActive: (v) => { isAntimatterBoostActive = v === 'true' || v === true; },
+        antimatterSvgEventListeners: (v) => { antimatterSvgEventListeners = v; },
+        canTravelToAsteroids: (v) => { canTravelToAsteroids = v === 'true' || v === true; },
+        canFuelRockets: (v) => { canFuelRockets = v === 'true' || v === true; },
+        rocketUserName: (v) => { rocketUserName = v; },
+        rocketsBuilt: (v) => { rocketsBuilt = Number(v); },
+        miningObject: (v) => { miningObject = v; },
+        asteroidArray: (v) => { asteroidArray = v; },
+        rocketsFuellerStartedArray: (v) => { rocketsFuellerStartedArray = v; },
+        launchedRockets: (v) => { launchedRockets = v; },
+
+        // Star Ship
+        starShipBuilt: (v) => { starShipBuilt = v === 'true' || v === true; },
+        starShipTravelling: (v) => { starShipTravelling = v === 'true' || v === true; },
+        starShipArrowPosition: (v) => { starShipArrowPosition = Number(v); },
+        stellarScannerBuilt: (v) => { stellarScannerBuilt = v === 'true' || v === true; },
+        destinationStarScanned: (v) => { destinationStarScanned = v === 'true' || v === true; },
+        currentDestinationDropdownText: (v) => { currentDestinationDropdownText = v; },
+        starVisionDistance: (v) => { starVisionDistance = Number(v); },
+        starMapMode: (v) => { starMapMode = v; },
+        starVisionIncrement: (v) => { starVisionIncrement = Number(v); },
+        destinationStar: (v) => { destinationStar = v; },
+        fromStarObject: (v) => { fromStarObject = v; },
+        toStarObject: (v) => { toStarObject = v; },
+        currentStarObject: (v) => { currentStarObject = v; },
+        starShipStatus: (v) => { starShipStatus = v; },
+        starShipModulesBuilt: (v) => { starShipModulesBuilt = v; },
+
+        // Diplomacy
+        diplomacyPossible: (v) => { diplomacyPossible = v === 'true' || v === true; },
+
+        // Battle
+        needNewBattleCanvas: (v) => { needNewBattleCanvas = v === 'true' || v === true; },
+        redrawBattleDescription: (v) => { redrawBattleDescription = v === 'true' || v === true; },
+        warMode: (v) => { warMode = v === 'true' || v === true; },
+        fleetChangedSinceLastDiplomacy: (v) => { fleetChangedSinceLastDiplomacy = v === 'true' || v === true; },
+        battleOngoing: (v) => { battleOngoing = v === 'true' || v === true; },
+        formationGoal: (v) => { formationGoal = v; },
+        battleTriggeredByPlayer: (v) => { battleTriggeredByPlayer = v === 'true' || v === true; },
+        inFormation: (v) => { inFormation = v === 'true' || v === true; },
+        wasAutoSaveToggled: (v) => { wasAutoSaveToggled = v === 'true' || v === true; },
+        enemyFleetAdjustedForDiplomacy: (v) => { enemyFleetAdjustedForDiplomacy = v; },
+
+        // Philosophy
+        philosophy: (v) => { philosophy = v; },
+        philosophyAbilityActive: (v) => { philosophyAbilityActive = v === 'true' || v === true; },
+        repeatableTechMultipliers: (v) => { repeatableTechMultipliers = v; },
+
+        // Megastructures
+        starsWithAncientManuscripts: (v) => { starsWithAncientManuscripts = v; },
+        factoryStarsArray: (v) => { factoryStarsArray = v; },
+        manuscriptCluesShown: (v) => { manuscriptCluesShown = v; },
+        megaStructuresInPossessionArray: (v) => { megaStructuresInPossessionArray = v; },
+        megaStructureTechsResearched: (v) => { megaStructureTechsResearched = v; },
+        megaStructureAntimatterAmount: (v) => { megastructureAntimatterAmount = Number(v); },
+        miaplacidusMilestoneLevel: (v) => { miaplacidusMilestoneLevel = Number(v); },
+        factoryStarMap: (v) => { factoryStarMap = v; },
+        currentRunIsMegaStructureRun: (v) => { currentRunIsMegaStructureRun = v === 'true' || v === true; },
+        megaStructureResourceBonus: (v) => { megaStructureResourceBonus = v === 'true' || v === true; },
+        infinitePower: (v) => { infinitePower = v === 'true' || v === true; },
+
+        // Black Hole
+        blackHoleDiscovered: (v) => setBlackHoleDiscovered(v),
+        blackHoleDiscoveryProbability: (v) => setBlackHoleDiscoveryProbability(Number(v)),
+        blackHoleAlwaysOn: (v) => setBlackHoleAlwaysOn(v === 'true' || v === true),
+        blackHoleChargeReady: (v) => setBlackHoleChargeReady(v === 'true' || v === true),
+        currentlyChargingBlackHole: (v) => setCurrentlyChargingBlackHole(v === 'true' || v === true),
+        currentlyTimeWarpingBlackHole: (v) => setCurrentlyTimeWarpingBlackHole(v === 'true' || v === true),
+        timeWarpMultiplier: (v) => setTimeWarpMultiplier(Number(v)),
+        timeWarpEndTimestampMs: (v) => setTimeWarpEndTimestampMs(Number(v)),
+        baseBlackHoleChargeTimerDuration: (v) => setBaseBlackHoleChargeTimerDuration(Number(v)),
+        blackHoleDurationUpgradeIncrementMs: (v) => setBlackHoleDurationUpgradeIncrementMs(Number(v)),
+        blackHolePowerUpgradeIncrement: (v) => setBlackHolePowerUpgradeIncrement(Number(v)),
+        currentBlackHoleChargeTimerDurationTotal: (v) => setCurrentBlackHoleChargeTimerDurationTotal(Number(v)),
+        timeLeftUntilBlackHoleChargeTimerFinishes: (v) => setTimeLeftUntilBlackHoleChargeTimerFinishes(Number(v)),
+
+        blackHoleResearchDone: (v) => setBlackHoleResearchDone(v === 'true' || v === true),
+        blackHolePower: (v) => setBlackHolePower(Number(v)),
+        blackHoleDuration: (v) => setBlackHoleDuration(Number(v)),
+        blackHoleRechargeMultiplier: (v) => setBlackHoleRechargeMultiplier(Number(v)),
+        blackHoleResearchPrice: (v) => setBlackHoleResearchPrice(v),
+        blackHolePowerPrice: (v) => setBlackHolePowerPrice(v),
+        blackHoleDurationPrice: (v) => setBlackHoleDurationPrice(v),
+        blackHoleRechargePrice: (v) => setBlackHoleRechargePrice(v),
+
+        // Cosmic Rip
+        cosmicRip: (v) => setResourceDataObject(v, 'cosmicRip', []),
+        'cosmicRip.galacticPoints': (v) => setResourceDataObject(Number(v), 'cosmicRip', ['galacticPoints']),
+        'cosmicRip.nearSpaceScannerArrayRestored': (v) => setResourceDataObject(v === 'true' || v === true, 'cosmicRip', ['nearSpaceScannerArrayRestored']),
+        'cosmicRip.ripLocationSectorIndex': (v) => setResourceDataObject(Number(v), 'cosmicRip', ['ripLocationSectorIndex']),
+        'cosmicRip.ripFound': (v) => setResourceDataObject(v === 'true' || v === true, 'cosmicRip', ['ripFound']),
+        'cosmicRip.scanResultsBySectorIndex': (v) => setResourceDataObject(v, 'cosmicRip', ['scanResultsBySectorIndex']),
+        'cosmicRip.stage': (v) => setResourceDataObject(Number(v), 'cosmicRip', ['stage']),
+        'cosmicRip.instability': (v) => setResourceDataObject(Number(v), 'cosmicRip', ['instability']),
+        'cosmicRip.containmentIntegrity': (v) => setResourceDataObject(Number(v), 'cosmicRip', ['containmentIntegrity']),
+        'cosmicRip.sealProgress': (v) => setResourceDataObject(Number(v), 'cosmicRip', ['sealProgress']),
+        'cosmicRip.ripResearch.points': (v) => setResourceDataObject(Number(v), 'cosmicRip', ['ripResearch', 'points']),
+        'cosmicRip.ripResearch.level': (v) => setResourceDataObject(Number(v), 'cosmicRip', ['ripResearch', 'level']),
+        'cosmicRip.ripResearch.unlocked': (v) => setResourceDataObject(v === 'true' || v === true, 'cosmicRip', ['ripResearch', 'unlocked']),
+        'cosmicRip.projects': (v) => setResourceDataObject(v, 'cosmicRip', ['projects']),
+    };
+
+    return map[label] || null;
 }
 
 function formatVariableDebuggerValue(value) {
@@ -5857,6 +6447,25 @@ function formatVariableDebuggerValue(value) {
     } else {
         return value;
     }
+}
+
+function fallbackCopy(text, label) {
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.style.position = "fixed";
+    textarea.style.left = "-9999px";
+    textarea.style.top = "0";
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+    try {
+        document.execCommand('copy');
+        console.log("Copied via fallback:", text);
+        showNotification(`Copied: ${label}`, 'warning', 2000, 'general');
+    } catch (err) {
+        console.error("Fallback copy failed:", err);
+    }
+    document.body.removeChild(textarea);
 }
 
 export function getUserPlatform() {
@@ -5973,3 +6582,235 @@ export function getRepeatableTechMultipliers(key) {
 export function setRepeatableTechMultipliers(key, value) {
     repeatableTechMultipliers[key] = value;
 }  
+
+function getCurrentVariableDebuggerValueForLabel(label) {
+    // For labels not covered, return null to indicate "not directly readable"
+    if (label === 'gamestate') return JSON.stringify(gameState);
+    if (label === 'gameStartTimeStamp') return String(gameStartTimeStamp);
+    if (label === 'runStartTimeStamp') return String(runStartTimeStamp);
+    if (label === 'alreadySeenNewsTickerArray') return JSON.stringify(alreadySeenNewsTickerArray);
+    if (label === 'currencySymbol') return String(currencySymbol);
+    if (label === 'currentTheme') return String(currentTheme);
+    if (label === 'sfx') return String(sfx);
+    if (label === 'backgroundAudio') return String(backgroundAudio);
+    if (label === 'saveExportCloudFlag') return String(saveExportCloudFlag);
+    if (label === 'autoSaveToggle') return String(autoSaveToggle);
+    if (label === 'newsTickerSetting') return String(newsTickerSetting);
+    if (label === 'weatherEffectSettingToggle') return String(weatherEffectSettingToggle);
+    if (label === 'notificationsToggle') return String(notificationsToggle);
+    if (label === 'saveName') return String(saveName);
+    if (label === 'lastSavedTimeStamp') return String(lastSavedTimeStamp);
+    if (label === 'autoSaveFrequency') return String(autoSaveFrequency);
+    if (label === 'savedYetSinceOpeningSaveDialogue') return String(savedYetSinceOpeningSaveDialogue);
+
+    if (label === 'rebirthPossible') return String(rebirthPossible);
+    if (label === 'runNumber') return String(runNumber);
+    if (label === 'apAwardedThisRun') return String(apAwardedThisRun);
+    if (label === 'currentStarSystem') return String(currentStarSystem);
+
+    if (label === 'saleResourcePreviews') return JSON.stringify(saleResourcePreviews);
+    if (label === 'saleCompoundPreviews') return JSON.stringify(saleCompoundPreviews);
+    if (label === 'createCompoundPreviews') return JSON.stringify(createCompoundPreviews);
+    if (label === 'constituentPartsObject') return JSON.stringify(constituentPartsObject);
+    if (label === 'itemsToDeduct') return JSON.stringify(itemsToDeduct);
+    if (label === 'itemsToIncreasePrice') return JSON.stringify(itemsToIncreasePrice);
+    if (label === 'unlockedResourcesArray') return JSON.stringify(unlockedResourcesArray);
+    if (label === 'unlockedCompoundsArray') return JSON.stringify(unlockedCompoundsArray);
+    if (label === 'temporaryCoreTechsRowsRepo') return JSON.stringify(temporaryCoreTechRowsRepo);
+    if (label === 'canAffordDeferred') return String(canAffordDeferred);
+    if (label === 'originalFrameNumbers') return JSON.stringify(originalFrameNumbers);
+
+    if (label === 'techRenderCounter') return String(techRenderCounter);
+    if (label === 'techUnlockedArray') return JSON.stringify(techUnlockedArray);
+    if (label === 'revealedTechArray') return JSON.stringify(revealedTechArray);
+    if (label === 'upcomingTechArray') return JSON.stringify(upcomingTechArray);
+    if (label === 'tempRowValue') return String(tempRowValue);
+
+    if (label === 'losingEnergy') return String(losingEnergy);
+    if (label === 'powerOnOff') return String(powerOnOff);
+    if (label === 'trippedStatus') return String(trippedStatus);
+
+    if (label === 'allTimeTotalHydrogen') return String(allTimeTotalHydrogen);
+    if (label === 'allTimeTotalHelium') return String(allTimeTotalHelium);
+    if (label === 'allTimeTotalCarbon') return String(allTimeTotalCarbon);
+    if (label === 'allTimeTotalNeon') return String(allTimeTotalNeon);
+    if (label === 'allTimeTotalOxygen') return String(allTimeTotalOxygen);
+    if (label === 'allTimeTotalSodium') return String(allTimeTotalSodium);
+    if (label === 'allTimeTotalSilicon') return String(allTimeTotalSilicon);
+    if (label === 'allTimeTotalIron') return String(allTimeTotalIron);
+    if (label === 'allTimeTotalDiesel') return String(allTimeTotalDiesel);
+    if (label === 'allTimeTotalGlass') return String(allTimeTotalGlass);
+    if (label === 'allTimeTotalSteel') return String(allTimeTotalSteel);
+    if (label === 'allTimeTotalConcrete') return String(allTimeTotalConcrete);
+    if (label === 'allTimeTotalWater') return String(allTimeTotalWater);
+    if (label === 'allTimeTotalTitanium') return String(allTimeTotalTitanium);
+    if (label === 'allTimeTotalResearchPoints') return String(allTimeTotalResearchPoints);
+    if (label === 'allTimeTotalScienceKits') return String(allTimeTotalScienceKits);
+    if (label === 'allTimeTotalScienceClubs') return String(allTimeTotalScienceClubs);
+    if (label === 'allTimeTotalScienceLabs') return String(allTimeTotalScienceLabs);
+    if (label === 'allTimeTotalRocketsLaunched') return String(allTimeTotalRocketsLaunched);
+    if (label === 'allTimeTotalStarShipsLaunched') return String(allTimeTotalStarShipsLaunched);
+    if (label === 'allTimeTotalAsteroidsDiscovered') return String(allTimeTotalAsteroidsDiscovered);
+    if (label === 'allTimeTotalLegendaryAsteroidsDiscovered') return String(allTimeTotalLegendaryAsteroidsDiscovered);
+    if (label === 'starStudyRange') return String(starStudyRange);
+    if (label === 'allTimeTotalAntimatterMined') return String(allTimeTotalAntimatterMined);
+    if (label === 'antimatterMinedThisRun') return String(antimatterMinedThisRun);
+    if (label === 'allTimeTotalApGain') return String(allTimeTotalApGain);
+    if (label === 'currentRunNumber') return String(currentRunNumber);
+    if (label === 'currentRunTimer') return String(currentRunTimer);
+    if (label === 'totalNewsTickerPrizesCollected') return String(totalNewsTickerPrizesCollected);
+    if (label === 'apAnticipatedThisRun') return String(apAnticipatedThisRun);
+    if (label === 'allTimeStarShipsBuilt') return String(allTimeStarShipsBuilt);
+    if (label === 'starShipTravelDistance') return String(starShipTravelDistance);
+    if (label === 'allTimesTripped') return String(allTimesTripped);
+    if (label === 'allTimeBasicPowerPlantsBuilt') return String(allTimeBasicPowerPlantsBuilt);
+    if (label === 'allTimeAdvancedPowerPlantsBuilt') return String(allTimeAdvancedPowerPlantsBuilt);
+    if (label === 'allTimeSolarPowerPlantsBuilt') return String(allTimeSolarPowerPlantsBuilt);
+    if (label === 'allTimeSodiumIonBatteriesBuilt') return String(allTimeSodiumIonBatteriesBuilt);
+    if (label === 'allTimeBattery2Built') return String(allTimeBattery2Built);
+    if (label === 'allTimeBattery3Built') return String(allTimeBattery3Built);
+    if (label === 'asteroidsMinedThisRun') return String(asteroidsMinedThisRun);
+
+    if (label === 'weatherEffectOn') return String(weatherEffectOn);
+    if (label === 'weatherEfficiencyApplied') return String(weatherEfficiencyApplied);
+    if (label === 'currentStarSystemWeatherEfficiency') return String(currentStarSystemWeatherEfficiency);
+    if (label === 'currentPrecipitationRate') return String(currentPrecipitationRate);
+
+    if (label === 'currentlySearchingAsteroid') return String(currentlySearchingAsteroid);
+    if (label === 'currentlyInvestigatingStar') return String(currentlyInvestigatingStar);
+    if (label === 'currentlyPillagingVoid') return String(currentlyPillagingVoid);
+    if (label === 'telescopeReadyToSearch') return String(telescopeReadyToSearch);
+    if (label === 'asteroidTimerCanContinue') return String(asteroidTimerCanContinue);
+    if (label === 'starInvestigationTimerCanContinue') return String(starInvestigationTimerCanContinue);
+    if (label === 'pillageVoidTimerCanContinue') return String(pillageVoidTimerCanContinue);
+    if (label === 'sortAsteroidMethod') return String(sortAsteroidMethod);
+    if (label === 'sortStarMethod') return String(sortStarMethod);
+    if (label === 'baseSearchAsteroidTimerDuration') return String(baseSearchAsteroidTimerDuration);
+    if (label === 'baseInvestigateStarTimerDuration') return String(baseInvestigateStarTimerDuration);
+    if (label === 'basePillageVoidTimerDuration') return String(basePillageVoidTimerDuration);
+    if (label === 'currentAsteroidSearchTimerDurationTotal') return String(currentAsteroidSearchTimerDurationTotal);
+    if (label === 'currentInvestigateStarTimerDurationTotal') return String(currentInvestigateStarTimerDurationTotal);
+    if (label === 'currentPillageVoidTimerDurationTotal') return String(currentPillageVoidTimerDurationTotal);
+    if (label === 'timeLeftUntilAsteroidScannerTimerFinishes') return String(timeLeftUntilAsteroidScannerTimerFinishes);
+    if (label === 'timeLeftUntilTravelToDestinationStarTimerFinishes') return String(timeLeftUntilTravelToDestinationStarTimerFinishes);
+    if (label === 'timeLeftUntilStarInvestigationTimerFinishes') return String(timeLeftUntilStarInvestigationTimerFinishes);
+    if (label === 'timeLeftUntilPillageVoidTimerFinishes') return String(timeLeftUntilPillageVoidTimerFinishes);
+    if (label === 'oldAntimatterRightBoxSvgData') return JSON.stringify(oldAntimatterRightBoxSvgData);
+
+    if (label === 'antimatterUnlocked') return String(antimatterUnlocked);
+    if (label === 'isAntimatterBoostActive') return String(isAntimatterBoostActive);
+    if (label === 'antimatterSvgEventListeners') return JSON.stringify(antimatterSvgEventListeners);
+    if (label === 'canTravelToAsteroids') return String(canTravelToAsteroids);
+    if (label === 'canFuelRockets') return String(canFuelRockets);
+    if (label === 'checkRocketFuellingStatus - rocket1') return String(checkRocketFuellingStatus?.rocket1);
+    if (label === 'checkRocketFuellingStatus - rocket2') return String(checkRocketFuellingStatus?.rocket2);
+    if (label === 'checkRocketFuellingStatus - rocket3') return String(checkRocketFuellingStatus?.rocket3);
+    if (label === 'checkRocketFuellingStatus - rocket4') return String(checkRocketFuellingStatus?.rocket4);
+    if (label === 'currentlyTravellingToAsteroid - rocket1') return String(currentlyTravellingToAsteroid?.rocket1);
+    if (label === 'currentlyTravellingToAsteroid - rocket2') return String(currentlyTravellingToAsteroid?.rocket2);
+    if (label === 'currentlyTravellingToAsteroid - rocket3') return String(currentlyTravellingToAsteroid?.rocket3);
+    if (label === 'currentlyTravellingToAsteroid - rocket4') return String(currentlyTravellingToAsteroid?.rocket4);
+    if (label === 'rocketReadyToTravel - rocket1') return String(rocketReadyToTravel?.rocket1);
+    if (label === 'rocketReadyToTravel - rocket2') return String(rocketReadyToTravel?.rocket2);
+    if (label === 'rocketReadyToTravel - rocket3') return String(rocketReadyToTravel?.rocket3);
+    if (label === 'rocketReadyToTravel - rocket4') return String(rocketReadyToTravel?.rocket4);
+    if (label === 'rocketUserName') return JSON.stringify(rocketUserName);
+    if (label === 'rocketsBuilt') return String(rocketsBuilt);
+    if (label === 'miningObject') return JSON.stringify(miningObject);
+    if (label === 'asteroidArray') return JSON.stringify(asteroidArray);
+    if (label === 'rocketsFuellerStartedArray') return JSON.stringify(rocketsFuellerStartedArray);
+    if (label === 'launchedRockets') return JSON.stringify(launchedRockets);
+
+    if (label === 'starShipBuilt') return String(starShipBuilt);
+    if (label === 'starShipTravelling') return String(starShipTravelling);
+    if (label === 'starShipArrowPosition') return String(starShipArrowPosition);
+    if (label === 'stellarScannerBuilt') return String(stellarScannerBuilt);
+    if (label === 'destinationStarScanned') return String(destinationStarScanned);
+    if (label === 'currentDestinationDropdownText') return String(currentDestinationDropdownText);
+    if (label === 'starVisionDistance') return String(starVisionDistance);
+    if (label === 'starMapMode') return String(starMapMode);
+    if (label === 'starVisionIncrement') return String(starVisionIncrement);
+    if (label === 'destinationStar') return JSON.stringify(destinationStar);
+    if (label === 'fromStarObject') return JSON.stringify(fromStarObject);
+    if (label === 'toStarObject') return JSON.stringify(toStarObject);
+    if (label === 'currentStarObject') return JSON.stringify(currentStarObject);
+    if (label === 'starShipStatus') return String(starShipStatus);
+    if (label === 'starShipModulesBuilt') return JSON.stringify(starShipModulesBuilt);
+
+    if (label === 'diplomacyPossible') return String(diplomacyPossible);
+
+    if (label === 'needNewBattleCanvas') return String(needNewBattleCanvas);
+    if (label === 'redrawBattleDescription') return String(redrawBattleDescription);
+    if (label === 'warMode') return String(warMode);
+    if (label === 'fleetChangedSinceLastDiplomacy') return String(fleetChangedSinceLastDiplomacy);
+    if (label === 'battleOngoing') return String(battleOngoing);
+    if (label === 'formationGoal') return String(formationGoal);
+    if (label === 'battleTriggeredByPlayer') return String(battleTriggeredByPlayer);
+    if (label === 'inFormation') return String(inFormation);
+    if (label === 'wasAutoSaveToggled') return String(wasAutoSaveToggled);
+    if (label === 'enemyFleetAdjustedForDiplomacy') return JSON.stringify(enemyFleetAdjustedForDiplomacy);
+
+    if (label === 'philosophy') return String(philosophy);
+    if (label === 'philosophyAbilityActive') return String(philosophyAbilityActive);
+    if (label === 'repeatableTechMultipliers') return JSON.stringify(repeatableTechMultipliers);
+
+    if (label === 'starsWithAncientManuscripts') return JSON.stringify(starsWithAncientManuscripts);
+    if (label === 'factoryStarsArray') return JSON.stringify(factoryStarsArray);
+    if (label === 'manuscriptCluesShown') return JSON.stringify(manuscriptCluesShown);
+    if (label === 'megaStructuresInPossessionArray') return JSON.stringify(megaStructuresInPossessionArray);
+    if (label === 'megaStructureTechsResearched') return JSON.stringify(megaStructureTechsResearched);
+    if (label === 'megaStructureAntimatterAmount') return String(megastructureAntimatterAmount);
+    if (label === 'miaplacidusMilestoneLevel') return String(miaplacidusMilestoneLevel);
+    if (label === 'factoryStarMap') return JSON.stringify(factoryStarMap);
+    if (label === 'currentRunIsMegaStructureRun') return String(currentRunIsMegaStructureRun);
+    if (label === 'megaStructureResourceBonus') return String(megaStructureResourceBonus);
+    if (label === 'infinitePower') return String(infinitePower);
+
+    if (label === 'blackHoleDiscovered') return String(blackHoleDiscovered);
+    if (label === 'blackHoleDiscoveryProbability') return String(blackHoleDiscoveryProbability);
+    if (label === 'blackHoleAlwaysOn') return String(blackHoleAlwaysOn);
+    if (label === 'blackHoleChargeReady') return String(blackHoleChargeReady);
+    if (label === 'currentlyChargingBlackHole') return String(currentlyChargingBlackHole);
+    if (label === 'currentlyTimeWarpingBlackHole') return String(currentlyTimeWarpingBlackHole);
+    if (label === 'timeWarpMultiplier') return String(timeWarpMultiplier);
+    if (label === 'timeWarpEndTimestampMs') return String(timeWarpEndTimestampMs);
+    if (label === 'baseBlackHoleChargeTimerDuration') return String(baseBlackHoleChargeTimerDuration);
+    if (label === 'blackHoleDurationUpgradeIncrementMs') return String(blackHoleDurationUpgradeIncrementMs);
+    if (label === 'blackHolePowerUpgradeIncrement') return String(blackHolePowerUpgradeIncrement);
+    if (label === 'currentBlackHoleChargeTimerDurationTotal') return String(currentBlackHoleChargeTimerDurationTotal);
+    if (label === 'timeLeftUntilBlackHoleChargeTimerFinishes') return String(timeLeftUntilBlackHoleChargeTimerFinishes);
+    if (label === 'blackHoleResearchDone') return String(getBlackHoleResearchDone());
+    if (label === 'blackHolePower') return String(getBlackHolePower());
+    if (label === 'blackHoleDuration') return String(getBlackHoleDuration());
+    if (label === 'blackHoleRechargeMultiplier') return String(getBlackHoleRechargeMultiplier());
+    if (label === 'blackHoleResearchPrice') return String(getBlackHoleResearchPrice());
+    if (label === 'blackHolePowerPrice') return String(getBlackHolePowerPrice());
+    if (label === 'blackHoleDurationPrice') return String(getBlackHoleDurationPrice());
+    if (label === 'blackHoleRechargePrice') return String(getBlackHoleRechargePrice());
+
+    if (label === 'cosmicRip') return JSON.stringify(getResourceDataObject('cosmicRip'));
+    const rip = getResourceDataObject('cosmicRip');
+    if (label === 'cosmicRip.galacticPoints') return String(rip?.galacticPoints ?? '');
+    if (label === 'cosmicRip.nearSpaceScannerArrayRestored') return String(rip?.nearSpaceScannerArrayRestored ?? '');
+    if (label === 'cosmicRip.ripLocationSectorIndex') return String(rip?.ripLocationSectorIndex ?? '');
+    if (label === 'cosmicRip.ripFound') return String(rip?.ripFound ?? '');
+    if (label === 'cosmicRip.scanResultsBySectorIndex') return JSON.stringify(rip?.scanResultsBySectorIndex ?? null);
+    if (label === 'cosmicRip.stage') return String(rip?.stage ?? '');
+    if (label === 'cosmicRip.instability') return String(rip?.instability ?? '');
+    if (label === 'cosmicRip.containmentIntegrity') return String(rip?.containmentIntegrity ?? '');
+    if (label === 'cosmicRip.sealProgress') return String(rip?.sealProgress ?? '');
+    if (label === 'cosmicRip.ripResearch.points') return String(rip?.ripResearch?.points ?? '');
+    if (label === 'cosmicRip.ripResearch.level') return String(rip?.ripResearch?.level ?? '');
+    if (label === 'cosmicRip.ripResearch.unlocked') return String(rip?.ripResearch?.unlocked ?? '');
+    if (label === 'cosmicRip.projects') return JSON.stringify(rip?.projects ?? null);
+    if (label === '__cosmicRipNearSpaceScannerArraySectorNames') return JSON.stringify(globalThis.__cosmicRipNearSpaceScannerArraySectorNames ?? null);
+    if (label === '__cosmicRipNearSpaceScannerArrayOneSectorState') return JSON.stringify(globalThis.__cosmicRipNearSpaceScannerArrayOneSectorState ?? null);
+    if (label === '__cosmicRipFoundSectorIndexForZoom') return String(globalThis.__cosmicRipFoundSectorIndexForZoom ?? '');
+
+    const state = globalThis.__variableDebuggerEditState;
+    if (state && state.label === label) {
+        return String(state.value ?? '');
+    }
+
+    return null;
+}

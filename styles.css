@@ -3511,6 +3511,12 @@ canvas {
     max-height: calc(80vh - 50px);
 }
 
+.debug-textarea-container {
+    user-select: text;
+    -webkit-user-select: text;
+    -ms-user-select: text;
+}
+
 .debug-header,
 .debug-variables-header {
     padding: 10px;
