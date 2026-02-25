@@ -5592,6 +5592,7 @@ export function populateVariableDebugger() {
         { label: "rebirthPossible", value: rebirthPossible },
         { label: "runNumber", value: runNumber },
         { label: "apAwardedThisRun", value: apAwardedThisRun },
+        { label: "settledStars", value: settledStars },
         { label: "currentStarSystem", value: currentStarSystem },
 
         { label: "", value: "" },
@@ -5844,6 +5845,7 @@ export function populateVariableDebugger() {
         { label: "", value: "" },
 
         { label: "cosmicRip", value: cosmicRipData },
+        { label: "galacticPointsSpent", value: galacticPointsSpent ?? null },
         { label: "cosmicRip.galacticPoints", value: cosmicRipData?.galacticPoints ?? null },
         { label: "cosmicRip.nearSpaceScannerArrayRestored", value: cosmicRipData?.nearSpaceScannerArrayRestored ?? null },
         { label: "cosmicRip.ripLocationSectorIndex", value: cosmicRipData?.ripLocationSectorIndex ?? null },
@@ -6421,7 +6423,9 @@ function getVariableDebuggerSetterForLabel(label) {
         blackHoleRechargePrice: (v) => setBlackHoleRechargePrice(v),
 
         // Cosmic Rip
+        settledStars: (v) => { settledStars = v; },
         cosmicRip: (v) => setResourceDataObject(v, 'cosmicRip', []),
+        'galacticPointsSpent': (v) => setGalacticPointsSpent(Number(v)),
         'cosmicRip.galacticPoints': (v) => setResourceDataObject(Number(v), 'cosmicRip', ['galacticPoints']),
         'cosmicRip.nearSpaceScannerArrayRestored': (v) => setResourceDataObject(v === 'true' || v === true, 'cosmicRip', ['nearSpaceScannerArrayRestored']),
         'cosmicRip.ripLocationSectorIndex': (v) => setResourceDataObject(Number(v), 'cosmicRip', ['ripLocationSectorIndex']),
@@ -6584,7 +6588,6 @@ export function setRepeatableTechMultipliers(key, value) {
 }  
 
 function getCurrentVariableDebuggerValueForLabel(label) {
-    // For labels not covered, return null to indicate "not directly readable"
     if (label === 'gamestate') return JSON.stringify(gameState);
     if (label === 'gameStartTimeStamp') return String(gameStartTimeStamp);
     if (label === 'runStartTimeStamp') return String(runStartTimeStamp);
@@ -6788,7 +6791,9 @@ function getCurrentVariableDebuggerValueForLabel(label) {
     if (label === 'blackHoleDurationPrice') return String(getBlackHoleDurationPrice());
     if (label === 'blackHoleRechargePrice') return String(getBlackHoleRechargePrice());
 
+    if (label === 'settledStars') return JSON.stringify(settledStars);
     if (label === 'cosmicRip') return JSON.stringify(getResourceDataObject('cosmicRip'));
+    if (label === 'galacticPointsSpent') return String(galacticPointsSpent);
     const rip = getResourceDataObject('cosmicRip');
     if (label === 'cosmicRip.galacticPoints') return String(rip?.galacticPoints ?? '');
     if (label === 'cosmicRip.nearSpaceScannerArrayRestored') return String(rip?.nearSpaceScannerArrayRestored ?? '');
