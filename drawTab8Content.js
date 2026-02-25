@@ -19,6 +19,39 @@ import {
     scanCosmicRipSector,
 } from './cosmicRip.js';
 
+import {
+    getCosmicRipNearSpaceScannerArrayFogEls,
+    setCosmicRipNearSpaceScannerArraySectorNames,
+    getCosmicRipNearSpaceScannerArraySectorNames,
+    setCosmicRipNearSpaceScannerArrayOneSectorState,
+    getCosmicRipNearSpaceScannerArrayOneSectorState,
+    setCosmicRipFoundSectorIndexForZoom,
+    getCosmicRipFoundSectorIndexForZoom,
+    setCosmicRipNearSpaceScannerArrayCanvasEl,
+    setCosmicRipNearSpaceScannerArrayFogOverlayEl,
+    setCosmicRipNearSpaceScannerArrayInteractiveOverlayEl,
+    setCosmicRipNearSpaceScannerArrayScanLabelOverlayEl,
+    setCosmicRipNearSpaceScannerArrayScanLabelEls,
+    getCosmicRipNearSpaceScannerArrayScanLabelEls,
+    setCosmicRipNearSpaceScannerArrayFogEls,
+    setCosmicRipNearSpaceScannerArrayLabelFadeOverlayEl,
+    setCosmicRipNearSpaceScannerArrayZoomCanvasEl,
+    setCosmicRipLocatedModalShown,
+    getCosmicRipLocatedModalShown,
+    setCosmicRipScanResultsBySectorIndex,
+    getCosmicRipScanResultsBySectorIndex,
+    setCosmicRipGpForUi,
+    getCosmicRipGpForUi,
+    setCosmicRipScannerRestoredForUi,
+    getCosmicRipScannerRestoredForUi,
+    setCosmicRipRipSpriteImgCache,
+    getCosmicRipRipSpriteImgCache,
+    setCosmicRipNearSpaceScannerArrayDrawCanvas,
+    getCosmicRipNearSpaceScannerArrayDrawCanvas,
+    setCosmicRipNearSpaceScannerArrayResizeAttached,
+    getCosmicRipNearSpaceScannerArrayResizeAttached,
+} from './constantsAndGlobalVars.js';
+
 export function drawTab8Content(heading, optionContentElement) {
     if (heading === 'Situation') {
         const restored = getCosmicRipNearSpaceScannerArrayRestored?.() === true;
@@ -372,7 +405,7 @@ export function drawTab8Content(heading, optionContentElement) {
             'MIAPLAC-7432', 'MIAPLAC-7433', 'MIAPLAC-7434'
         ];
 
-        globalThis.__cosmicRipNearSpaceScannerArraySectorNames = sectorNames;
+        setCosmicRipNearSpaceScannerArraySectorNames(sectorNames);
 
         for (let i = 0; i < 9; i += 1) {
             const sector = document.createElement('div');
@@ -381,9 +414,15 @@ export function drawTab8Content(heading, optionContentElement) {
             sector.style.cursor = 'pointer';
             sector.style.pointerEvents = 'auto';
             sector.addEventListener('mouseenter', () => {
+                if (getCosmicRipNearSpaceScannerArrayOneSectorState() === true) {
+                    return;
+                }
                 tooltip.textContent = sector.dataset.sectorId || '';
             });
             sector.addEventListener('mousemove', (event) => {
+                if (getCosmicRipNearSpaceScannerArrayOneSectorState() === true) {
+                    return;
+                }
                 const rect = telescopeContainer.getBoundingClientRect();
                 const x = event.clientX - rect.left;
                 const y = event.clientY - rect.top;
@@ -394,7 +433,7 @@ export function drawTab8Content(heading, optionContentElement) {
             });
             sector.addEventListener('click', () => {
                 const name = sector.dataset.sectorId;
-                const scanLabels = globalThis.__cosmicRipNearSpaceScannerArrayScanLabelEls;
+                const scanLabels = getCosmicRipNearSpaceScannerArrayScanLabelEls();
                 const labelEl = Array.isArray(scanLabels) ? scanLabels[i] : null;
                 const isActive = !!labelEl && labelEl.classList.contains('green-ready-text') && labelEl.textContent !== 'SCANNED!';
                 if (!isActive) {
@@ -406,8 +445,8 @@ export function drawTab8Content(heading, optionContentElement) {
                     if (result.found) {
                         
                             showNotification(`Scan complete! Cosmic Rip located in sector ${name}`, 'info', 4000, 'cosmicRip');
-                        if (globalThis.__cosmicRipLocatedModalShown !== true) {
-                            globalThis.__cosmicRipLocatedModalShown = true;
+                        if (getCosmicRipLocatedModalShown() !== true) {
+                            setCosmicRipLocatedModalShown(true);
                             window.setTimeout(() => {
                                 callPopupModal(
                                     modalCosmicRipLocatedHeader,
@@ -663,21 +702,21 @@ export function drawTab8Content(heading, optionContentElement) {
             sampleRipRow.classList.remove('invisible');
         }
 
-        globalThis.__cosmicRipNearSpaceScannerArrayCanvasEl = canvas;
-        globalThis.__cosmicRipNearSpaceScannerArrayFogOverlayEl = fogOverlay;
-        globalThis.__cosmicRipNearSpaceScannerArrayInteractiveOverlayEl = overlay;
-        globalThis.__cosmicRipNearSpaceScannerArrayScanLabelOverlayEl = scanLabelOverlay;
+        setCosmicRipNearSpaceScannerArrayCanvasEl(canvas);
+        setCosmicRipNearSpaceScannerArrayFogOverlayEl(fogOverlay);
+        setCosmicRipNearSpaceScannerArrayInteractiveOverlayEl(overlay);
+        setCosmicRipNearSpaceScannerArrayScanLabelOverlayEl(scanLabelOverlay);
 
-        globalThis.__cosmicRipNearSpaceScannerArrayScanLabelEls = Array.from(
+        setCosmicRipNearSpaceScannerArrayScanLabelEls(Array.from(
             scanLabelOverlay.querySelectorAll('[id^="cosmicRipNearSpaceScannerArrayScanLabel"]')
-        );
+        ));
 
-        globalThis.__cosmicRipNearSpaceScannerArrayFogEls = Array.from(
+        setCosmicRipNearSpaceScannerArrayFogEls(Array.from(
             fogOverlay.querySelectorAll('[id^="cosmicRipNearSpaceScannerArrayFogCell"]')
-        );
+        ));
 
-        globalThis.__cosmicRipNearSpaceScannerArrayLabelFadeOverlayEl = labelFadeOverlay;
-        globalThis.__cosmicRipNearSpaceScannerArrayZoomCanvasEl = zoomCanvas;
+        setCosmicRipNearSpaceScannerArrayLabelFadeOverlayEl(labelFadeOverlay);
+        setCosmicRipNearSpaceScannerArrayZoomCanvasEl(zoomCanvas);
 
         const drawCanvas = () => {
             const ctx = canvas.getContext('2d');
@@ -703,13 +742,13 @@ export function drawTab8Content(heading, optionContentElement) {
 
             const borderColor = readyColor;
 
-            const scanResults = Array.isArray(globalThis.__cosmicRipScanResultsBySectorIndex)
-                ? globalThis.__cosmicRipScanResultsBySectorIndex
+            const scanResults = Array.isArray(getCosmicRipScanResultsBySectorIndex())
+                ? getCosmicRipScanResultsBySectorIndex()
                 : Array(9).fill(false);
-            const gpForUi = Number(globalThis.__cosmicRipGpForUi) || 0;
-            const scannerRestoredForUi = globalThis.__cosmicRipScannerRestoredForUi === true;
+            const gpForUi = Number(getCosmicRipGpForUi()) || 0;
+            const scannerRestoredForUi = getCosmicRipScannerRestoredForUi() === true;
 
-            const isOneSectorState = globalThis.__cosmicRipNearSpaceScannerArrayOneSectorState === true;
+            const isOneSectorState = getCosmicRipNearSpaceScannerArrayOneSectorState() === true;
 
             const drawRoundedRectStroke = (x, y, width, height, radius) => {
                 const r = Math.max(0, Math.min(radius, Math.min(width, height) / 2));
@@ -732,14 +771,17 @@ export function drawTab8Content(heading, optionContentElement) {
                 const spriteH = 271;
                 const themeName = String(document.querySelector('[data-theme]')?.getAttribute?.('data-theme') || '').trim();
                 const spriteKey = themeName || 'default';
-                if (!globalThis.__cosmicRipRipSpriteImgCache) {
-                    globalThis.__cosmicRipRipSpriteImgCache = {};
+                if (!getCosmicRipRipSpriteImgCache()) {
+                    setCosmicRipRipSpriteImgCache({});
                 }
-                let spriteImg = globalThis.__cosmicRipRipSpriteImgCache[spriteKey];
+                let spriteImg = getCosmicRipRipSpriteImgCache()?.[spriteKey];
                 if (!spriteImg) {
                     spriteImg = new Image();
                     spriteImg.src = `images/ripSprite/rip_${spriteKey}.png`;
-                    globalThis.__cosmicRipRipSpriteImgCache[spriteKey] = spriteImg;
+                    const cache = getCosmicRipRipSpriteImgCache();
+                    if (cache && typeof cache === 'object') {
+                        cache[spriteKey] = spriteImg;
+                    }
                 }
 
                 const candidateSpriteY = 7;
@@ -751,7 +793,7 @@ export function drawTab8Content(heading, optionContentElement) {
                 } else if (spriteImg) {
                     spriteImg.onload = () => {
                         try {
-                            globalThis.__cosmicRipNearSpaceScannerArrayDrawCanvas?.();
+                            getCosmicRipNearSpaceScannerArrayDrawCanvas()?.();
                         } catch {
                             // ignore
                         }
@@ -764,7 +806,7 @@ export function drawTab8Content(heading, optionContentElement) {
 
                 drawRipSprite();
 
-                const idx = Number(globalThis.__cosmicRipFoundSectorIndexForZoom);
+                const idx = Number(getCosmicRipFoundSectorIndexForZoom());
                 const safeIdx = Number.isFinite(idx) ? Math.max(0, Math.min(8, Math.floor(idx))) : 0;
                 const sectorLabel = sectorNames?.[safeIdx] || '';
 
@@ -822,11 +864,11 @@ export function drawTab8Content(heading, optionContentElement) {
             ctx.restore();
         };
 
-        globalThis.__cosmicRipNearSpaceScannerArrayDrawCanvas = drawCanvas;
+        setCosmicRipNearSpaceScannerArrayDrawCanvas(drawCanvas);
 
         drawCanvas();
-        if (!globalThis.__cosmicRipNearSpaceScannerArrayResizeAttached) {
-            globalThis.__cosmicRipNearSpaceScannerArrayResizeAttached = true;
+        if (!getCosmicRipNearSpaceScannerArrayResizeAttached()) {
+            setCosmicRipNearSpaceScannerArrayResizeAttached(true);
             window.addEventListener('resize', drawCanvas);
         }
         return;

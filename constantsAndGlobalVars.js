@@ -295,6 +295,28 @@ let starShipStatus = ['preconstruction', null];
 let starShipDestinationReminderVisible = false;
 let runNumber = 1;
 let settledStars = [STARTING_STAR_SYSTEM];
+let cosmicRipNearSpaceScannerArraySectorNames = null;
+let cosmicRipNearSpaceScannerArrayOneSectorState = false;
+let cosmicRipFoundSectorIndexForZoom = 0;
+let cosmicRipNearSpaceScannerArrayCanvasEl = null;
+let cosmicRipNearSpaceScannerArrayFogOverlayEl = null;
+let cosmicRipNearSpaceScannerArrayInteractiveOverlayEl = null;
+let cosmicRipNearSpaceScannerArrayScanLabelOverlayEl = null;
+let cosmicRipNearSpaceScannerArrayScanLabelEls = null;
+let cosmicRipNearSpaceScannerArrayFogEls = null;
+let cosmicRipNearSpaceScannerArrayLabelFadeOverlayEl = null;
+let cosmicRipNearSpaceScannerArrayZoomCanvasEl = null;
+let cosmicRipLocatedModalShown = false;
+let cosmicRipOneSectorStateReady = false;
+let cosmicRipPrevRipFound = undefined;
+let cosmicRipScanResultsBySectorIndex = null;
+let cosmicRipGpForUi = 0;
+let cosmicRipScannerRestoredForUi = false;
+let cosmicRipRipSpriteImgCache = null;
+let cosmicRipNearSpaceScannerArrayDrawCanvas = null;
+let cosmicRipNearSpaceScannerArrayResizeAttached = false;
+let cosmicRipPrevScanResultsBySectorIndex = null;
+let cosmicRipRipFoundUiSequenceStarted = false;
 let apSellForCashPrice = AP_BASE_SELL_PRICE;
 let apBuyForCashPrice = AP_BASE_BUY_PRICE;
 let apLiquidationQuantity = 0;
@@ -5383,6 +5405,182 @@ export function setGalacticPointsSpent(value) {
     galacticPointsSpent = typeof value === 'number' && Number.isFinite(value) ? value : 0;
 }
 
+export function getCosmicRipNearSpaceScannerArraySectorNames() {
+    return cosmicRipNearSpaceScannerArraySectorNames;
+}
+
+export function setCosmicRipNearSpaceScannerArraySectorNames(value) {
+    cosmicRipNearSpaceScannerArraySectorNames = value;
+}
+
+export function getCosmicRipNearSpaceScannerArrayOneSectorState() {
+    return cosmicRipNearSpaceScannerArrayOneSectorState;
+}
+
+export function setCosmicRipNearSpaceScannerArrayOneSectorState(value) {
+    cosmicRipNearSpaceScannerArrayOneSectorState = value === true;
+}
+
+export function getCosmicRipFoundSectorIndexForZoom() {
+    return cosmicRipFoundSectorIndexForZoom;
+}
+
+export function setCosmicRipFoundSectorIndexForZoom(value) {
+    cosmicRipFoundSectorIndexForZoom = typeof value === 'number' && Number.isFinite(value) ? value : 0;
+}
+
+export function getCosmicRipNearSpaceScannerArrayCanvasEl() {
+    return cosmicRipNearSpaceScannerArrayCanvasEl;
+}
+
+export function setCosmicRipNearSpaceScannerArrayCanvasEl(value) {
+    cosmicRipNearSpaceScannerArrayCanvasEl = value;
+}
+
+export function getCosmicRipNearSpaceScannerArrayFogOverlayEl() {
+    return cosmicRipNearSpaceScannerArrayFogOverlayEl;
+}
+
+export function setCosmicRipNearSpaceScannerArrayFogOverlayEl(value) {
+    cosmicRipNearSpaceScannerArrayFogOverlayEl = value;
+}
+
+export function getCosmicRipNearSpaceScannerArrayInteractiveOverlayEl() {
+    return cosmicRipNearSpaceScannerArrayInteractiveOverlayEl;
+}
+
+export function setCosmicRipNearSpaceScannerArrayInteractiveOverlayEl(value) {
+    cosmicRipNearSpaceScannerArrayInteractiveOverlayEl = value;
+}
+
+export function getCosmicRipNearSpaceScannerArrayScanLabelOverlayEl() {
+    return cosmicRipNearSpaceScannerArrayScanLabelOverlayEl;
+}
+
+export function setCosmicRipNearSpaceScannerArrayScanLabelOverlayEl(value) {
+    cosmicRipNearSpaceScannerArrayScanLabelOverlayEl = value;
+}
+
+export function getCosmicRipNearSpaceScannerArrayScanLabelEls() {
+    return cosmicRipNearSpaceScannerArrayScanLabelEls;
+}
+
+export function setCosmicRipNearSpaceScannerArrayScanLabelEls(value) {
+    cosmicRipNearSpaceScannerArrayScanLabelEls = value;
+}
+
+export function getCosmicRipNearSpaceScannerArrayFogEls() {
+    return cosmicRipNearSpaceScannerArrayFogEls;
+}
+
+export function setCosmicRipNearSpaceScannerArrayFogEls(value) {
+    cosmicRipNearSpaceScannerArrayFogEls = value;
+}
+
+export function getCosmicRipNearSpaceScannerArrayLabelFadeOverlayEl() {
+    return cosmicRipNearSpaceScannerArrayLabelFadeOverlayEl;
+}
+
+export function setCosmicRipNearSpaceScannerArrayLabelFadeOverlayEl(value) {
+    cosmicRipNearSpaceScannerArrayLabelFadeOverlayEl = value;
+}
+
+export function getCosmicRipNearSpaceScannerArrayZoomCanvasEl() {
+    return cosmicRipNearSpaceScannerArrayZoomCanvasEl;
+}
+
+export function setCosmicRipNearSpaceScannerArrayZoomCanvasEl(value) {
+    cosmicRipNearSpaceScannerArrayZoomCanvasEl = value;
+}
+
+export function getCosmicRipLocatedModalShown() {
+    return cosmicRipLocatedModalShown;
+}
+
+export function setCosmicRipLocatedModalShown(value) {
+    cosmicRipLocatedModalShown = value === true;
+}
+
+export function getCosmicRipOneSectorStateReady() {
+    return cosmicRipOneSectorStateReady;
+}
+
+export function setCosmicRipOneSectorStateReady(value) {
+    cosmicRipOneSectorStateReady = value === true;
+}
+
+export function getCosmicRipPrevRipFound() {
+    return cosmicRipPrevRipFound;
+}
+
+export function setCosmicRipPrevRipFound(value) {
+    cosmicRipPrevRipFound = value;
+}
+
+export function getCosmicRipScanResultsBySectorIndex() {
+    return cosmicRipScanResultsBySectorIndex;
+}
+
+export function setCosmicRipScanResultsBySectorIndex(value) {
+    cosmicRipScanResultsBySectorIndex = value;
+}
+
+export function getCosmicRipGpForUi() {
+    return cosmicRipGpForUi;
+}
+
+export function setCosmicRipGpForUi(value) {
+    cosmicRipGpForUi = typeof value === 'number' && Number.isFinite(value) ? value : 0;
+}
+
+export function getCosmicRipScannerRestoredForUi() {
+    return cosmicRipScannerRestoredForUi;
+}
+
+export function setCosmicRipScannerRestoredForUi(value) {
+    cosmicRipScannerRestoredForUi = value === true;
+}
+
+export function getCosmicRipRipSpriteImgCache() {
+    return cosmicRipRipSpriteImgCache;
+}
+
+export function setCosmicRipRipSpriteImgCache(value) {
+    cosmicRipRipSpriteImgCache = value;
+}
+
+export function getCosmicRipNearSpaceScannerArrayDrawCanvas() {
+    return cosmicRipNearSpaceScannerArrayDrawCanvas;
+}
+
+export function setCosmicRipNearSpaceScannerArrayDrawCanvas(value) {
+    cosmicRipNearSpaceScannerArrayDrawCanvas = value;
+}
+
+export function getCosmicRipNearSpaceScannerArrayResizeAttached() {
+    return cosmicRipNearSpaceScannerArrayResizeAttached;
+}
+
+export function setCosmicRipNearSpaceScannerArrayResizeAttached(value) {
+    cosmicRipNearSpaceScannerArrayResizeAttached = value === true;
+}
+
+export function getCosmicRipPrevScanResultsBySectorIndex() {
+    return cosmicRipPrevScanResultsBySectorIndex;
+}
+
+export function setCosmicRipPrevScanResultsBySectorIndex(value) {
+    cosmicRipPrevScanResultsBySectorIndex = value;
+}
+
+export function getCosmicRipRipFoundUiSequenceStarted() {
+    return cosmicRipRipFoundUiSequenceStarted;
+}
+
+export function setCosmicRipRipFoundUiSequenceStarted(value) {
+    cosmicRipRipFoundUiSequenceStarted = value === true;
+}
+
 export function setMiaplacidusEndgameStoryShown(value) {
     miaplacidusEndgameStoryShown = value;
 }
@@ -5858,18 +6056,15 @@ export function populateVariableDebugger() {
         { label: "cosmicRip.instability", value: cosmicRipData?.instability ?? null },
         { label: "cosmicRip.containmentIntegrity", value: cosmicRipData?.containmentIntegrity ?? null },
         { label: "cosmicRip.sealProgress", value: cosmicRipData?.sealProgress ?? null },
-        { label: "", value: "" },
-        { label: "__cosmicRipPrevRipFound", value: globalThis?.__cosmicRipPrevRipFound ?? null },
-        { label: "__cosmicRipNearSpaceScannerArrayOneSectorState", value: globalThis?.__cosmicRipNearSpaceScannerArrayOneSectorState ?? null },
-        { label: "__cosmicRipFoundSectorIndexForZoom", value: globalThis?.__cosmicRipFoundSectorIndexForZoom ?? null },
+        { label: "cosmicRipPrevRipFound", value: getCosmicRipPrevRipFound() ?? null },
+        { label: "cosmicRipNearSpaceScannerArrayOneSectorState", value: getCosmicRipNearSpaceScannerArrayOneSectorState() ?? null },
+        { label: "cosmicRipFoundSectorIndexForZoom", value: getCosmicRipFoundSectorIndexForZoom() ?? null },
         { label: "cosmicRip.ripResearch.points", value: cosmicRipData?.ripResearch?.points ?? null },
         { label: "cosmicRip.ripResearch.level", value: cosmicRipData?.ripResearch?.level ?? null },
         { label: "cosmicRip.ripResearch.unlocked", value: cosmicRipData?.ripResearch?.unlocked ?? null },
         { label: "cosmicRip.projects", value: cosmicRipData?.projects ?? null },
-
-        { label: "__cosmicRipNearSpaceScannerArraySectorNames", value: globalThis.__cosmicRipNearSpaceScannerArraySectorNames ?? null },
-        { label: "__cosmicRipNearSpaceScannerArrayOneSectorState", value: globalThis.__cosmicRipNearSpaceScannerArrayOneSectorState ?? null },
-        { label: "__cosmicRipFoundSectorIndexForZoom", value: globalThis.__cosmicRipFoundSectorIndexForZoom ?? null },
+        { label: "cosmicRipNearSpaceScannerArraySectorNames", value: getCosmicRipNearSpaceScannerArraySectorNames() ?? null },
+        { label: "cosmicRipFoundSectorIndexForZoom", value: getCosmicRipFoundSectorIndexForZoom() ?? null },
     ];    
 
     // If the inline editor is open, preserve the DOM node and (if focused) its selection.
@@ -5958,6 +6153,22 @@ export function populateVariableDebugger() {
             iconContainer.appendChild(pencilIcon);
 
             label.innerHTML = `${variable.label}:&nbsp;&nbsp;`;
+            label.style.cursor = 'pointer';
+            label.title = "Click to copy variable";
+            label.addEventListener("pointerdown", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const textToCopy = `${variable.label}: ${formatVariableDebuggerValue(variable.value)}`;
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(textToCopy).then(() => {
+                        showNotification(`Copied: ${variable.label}`, 'warning', 2000, 'general');
+                    }).catch((err) => {
+                        fallbackCopy(textToCopy, variable.label);
+                    });
+                } else {
+                    fallbackCopy(textToCopy, variable.label);
+                }
+            });
     
             const valueDiv = document.createElement("span");
             const className = variable.value === null ? "red-disabled-text" : "green-ready-text";
@@ -6502,9 +6713,10 @@ function getVariableDebuggerSetterForLabel(label) {
         'cosmicRip.instability': (v) => setResourceDataObject(Number(v), 'cosmicRip', ['instability']),
         'cosmicRip.containmentIntegrity': (v) => setResourceDataObject(Number(v), 'cosmicRip', ['containmentIntegrity']),
         'cosmicRip.sealProgress': (v) => setResourceDataObject(Number(v), 'cosmicRip', ['sealProgress']),
-        '__cosmicRipPrevRipFound': (v) => { globalThis.__cosmicRipPrevRipFound = v === 'true' || v === true; },
-        '__cosmicRipNearSpaceScannerArrayOneSectorState': (v) => { globalThis.__cosmicRipNearSpaceScannerArrayOneSectorState = v === 'true' || v === true; },
-        '__cosmicRipFoundSectorIndexForZoom': (v) => { globalThis.__cosmicRipFoundSectorIndexForZoom = Number(v); },
+        'cosmicRipPrevRipFound': (v) => setCosmicRipPrevRipFound(v === 'true' || v === true),
+        'cosmicRipNearSpaceScannerArraySectorNames': (v) => setCosmicRipNearSpaceScannerArraySectorNames(v),
+        'cosmicRipNearSpaceScannerArrayOneSectorState': (v) => setCosmicRipNearSpaceScannerArrayOneSectorState(v === 'true' || v === true),
+        'cosmicRipFoundSectorIndexForZoom': (v) => setCosmicRipFoundSectorIndexForZoom(Number(v)),
         'cosmicRip.ripResearch.points': (v) => setResourceDataObject(Number(v), 'cosmicRip', ['ripResearch', 'points']),
         'cosmicRip.ripResearch.level': (v) => setResourceDataObject(Number(v), 'cosmicRip', ['ripResearch', 'level']),
         'cosmicRip.ripResearch.unlocked': (v) => setResourceDataObject(v === 'true' || v === true, 'cosmicRip', ['ripResearch', 'unlocked']),
@@ -6874,16 +7086,15 @@ function getCurrentVariableDebuggerValueForLabel(label) {
     if (label === 'cosmicRip.instability') return String(rip?.instability ?? '');
     if (label === 'cosmicRip.containmentIntegrity') return String(rip?.containmentIntegrity ?? '');
     if (label === 'cosmicRip.sealProgress') return String(rip?.sealProgress ?? '');
-    if (label === '__cosmicRipPrevRipFound') return String(globalThis?.__cosmicRipPrevRipFound ?? '');
-    if (label === '__cosmicRipNearSpaceScannerArrayOneSectorState') return String(globalThis?.__cosmicRipNearSpaceScannerArrayOneSectorState ?? '');
-    if (label === '__cosmicRipFoundSectorIndexForZoom') return String(globalThis?.__cosmicRipFoundSectorIndexForZoom ?? '');
+    if (label === 'cosmicRipPrevRipFound') return String(getCosmicRipPrevRipFound() ?? '');
+    if (label === 'cosmicRipNearSpaceScannerArrayOneSectorState') return String(getCosmicRipNearSpaceScannerArrayOneSectorState() ?? '');
+    if (label === 'cosmicRipFoundSectorIndexForZoom') return String(getCosmicRipFoundSectorIndexForZoom() ?? '');
     if (label === 'cosmicRip.ripResearch.points') return String(rip?.ripResearch?.points ?? '');
     if (label === 'cosmicRip.ripResearch.level') return String(rip?.ripResearch?.level ?? '');
     if (label === 'cosmicRip.ripResearch.unlocked') return String(rip?.ripResearch?.unlocked ?? '');
     if (label === 'cosmicRip.projects') return JSON.stringify(rip?.projects ?? null);
-    if (label === '__cosmicRipNearSpaceScannerArraySectorNames') return JSON.stringify(globalThis.__cosmicRipNearSpaceScannerArraySectorNames ?? null);
-    if (label === '__cosmicRipNearSpaceScannerArrayOneSectorState') return JSON.stringify(globalThis.__cosmicRipNearSpaceScannerArrayOneSectorState ?? null);
-    if (label === '__cosmicRipFoundSectorIndexForZoom') return String(globalThis.__cosmicRipFoundSectorIndexForZoom ?? '');
+    if (label === 'cosmicRipNearSpaceScannerArraySectorNames') return JSON.stringify(getCosmicRipNearSpaceScannerArraySectorNames() ?? null);
+    if (label === 'cosmicRipFoundSectorIndexForZoom') return String(getCosmicRipFoundSectorIndexForZoom() ?? '');
 
     const state = globalThis.__variableDebuggerEditState;
     if (state && state.label === label) {

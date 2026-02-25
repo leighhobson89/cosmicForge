@@ -1,5 +1,45 @@
 import {
     setGalacticPointsSpent,
+    setCosmicRipNearSpaceScannerArraySectorNames,
+    getCosmicRipNearSpaceScannerArraySectorNames,
+    setCosmicRipNearSpaceScannerArrayOneSectorState,
+    getCosmicRipNearSpaceScannerArrayOneSectorState,
+    setCosmicRipFoundSectorIndexForZoom,
+    getCosmicRipFoundSectorIndexForZoom,
+    setCosmicRipNearSpaceScannerArrayCanvasEl,
+    getCosmicRipNearSpaceScannerArrayCanvasEl,
+    setCosmicRipNearSpaceScannerArrayFogOverlayEl,
+    getCosmicRipNearSpaceScannerArrayFogOverlayEl,
+    setCosmicRipNearSpaceScannerArrayInteractiveOverlayEl,
+    getCosmicRipNearSpaceScannerArrayInteractiveOverlayEl,
+    setCosmicRipNearSpaceScannerArrayScanLabelOverlayEl,
+    getCosmicRipNearSpaceScannerArrayScanLabelOverlayEl,
+    setCosmicRipNearSpaceScannerArrayScanLabelEls,
+    getCosmicRipNearSpaceScannerArrayScanLabelEls,
+    setCosmicRipNearSpaceScannerArrayFogEls,
+    getCosmicRipNearSpaceScannerArrayFogEls,
+    setCosmicRipNearSpaceScannerArrayLabelFadeOverlayEl,
+    getCosmicRipNearSpaceScannerArrayLabelFadeOverlayEl,
+    setCosmicRipNearSpaceScannerArrayZoomCanvasEl,
+    getCosmicRipNearSpaceScannerArrayZoomCanvasEl,
+    setCosmicRipLocatedModalShown,
+    getCosmicRipLocatedModalShown,
+    setCosmicRipOneSectorStateReady,
+    getCosmicRipOneSectorStateReady,
+    setCosmicRipPrevRipFound,
+    getCosmicRipPrevRipFound,
+    setCosmicRipGpForUi,
+    getCosmicRipGpForUi,
+    setCosmicRipScannerRestoredForUi,
+    getCosmicRipScannerRestoredForUi,
+    setCosmicRipNearSpaceScannerArrayDrawCanvas,
+    getCosmicRipNearSpaceScannerArrayDrawCanvas,
+    setCosmicRipNearSpaceScannerArrayResizeAttached,
+    getCosmicRipNearSpaceScannerArrayResizeAttached,
+    setCosmicRipPrevScanResultsBySectorIndex,
+    getCosmicRipPrevScanResultsBySectorIndex,
+    setCosmicRipRipFoundUiSequenceStarted,
+    getCosmicRipRipFoundUiSequenceStarted,
     getVoidSeerPrizeCatalog,
     getGalacticCasinoUnlocked,
     getGalacticCasinoPurchaseItem,
@@ -368,9 +408,9 @@ import {
     setCosmicRipGalacticPoints,
     getCosmicRipNearSpaceScannerArrayRestored,
     getCosmicRipRipFound,
-    getCosmicRipScanResultsBySectorIndex,
+    getCosmicRipRipLocationSectorIndex,
     setCosmicRipScanResultsBySectorIndex,
-    getCosmicRipRipLocationSectorIndex
+    getCosmicRipScanResultsBySectorIndex,
 } from './resourceDataObject.js';
 
 import { onboardingChecks } from './onboarding.js';
@@ -1184,8 +1224,8 @@ function cosmicRipChecks() {
 
     const scannerRestored = getCosmicRipNearSpaceScannerArrayRestored?.() === true;
     const ripFound = getCosmicRipRipFound?.() === true;
-    const prevRipFound = globalThis.__cosmicRipPrevRipFound;
-    globalThis.__cosmicRipPrevRipFound = ripFound;
+    const prevRipFound = getCosmicRipPrevRipFound();
+    setCosmicRipPrevRipFound(ripFound);
 
     const cosmicRipData = (typeof getResourceDataObject === 'function')
         ? getResourceDataObject('cosmicRip')
@@ -1212,15 +1252,15 @@ function cosmicRipChecks() {
 
     const situationStatusText = document.getElementById('cosmicRipSituationStatusText');
     if (situationStatusText) {
-        const isOneSectorState = globalThis.__cosmicRipNearSpaceScannerArrayOneSectorState === true;
+        const isOneSectorState = getCosmicRipNearSpaceScannerArrayOneSectorState() === true;
         if (!scannerRestored) {
             situationStatusText.textContent = 'Not Located';
             situationStatusText.classList.remove('green-ready-text');
             situationStatusText.classList.add('red-disabled-text');
         } else if (ripFound && isOneSectorState) {
-            const idx = Number(globalThis.__cosmicRipFoundSectorIndexForZoom);
+            const idx = Number(getCosmicRipFoundSectorIndexForZoom());
             const safeIdx = Number.isFinite(idx) ? Math.max(0, Math.min(8, Math.floor(idx))) : 0;
-            const sectorNamesArr = globalThis.__cosmicRipNearSpaceScannerArraySectorNames;
+            const sectorNamesArr = getCosmicRipNearSpaceScannerArraySectorNames();
             let sectorLabel = Array.isArray(sectorNamesArr) ? String(sectorNamesArr[safeIdx] || '') : '';
             if (!sectorLabel) {
                 const sectorEl = document.getElementById(`cosmicRipNearSpaceScannerArraySector${safeIdx}`);
@@ -1238,7 +1278,7 @@ function cosmicRipChecks() {
 
     const situationObjectiveText = document.getElementById('cosmicRipSituationObjectiveText');
     if (situationObjectiveText) {
-        const isOneSectorState = globalThis.__cosmicRipNearSpaceScannerArrayOneSectorState === true;
+        const isOneSectorState = getCosmicRipNearSpaceScannerArrayOneSectorState() === true;
         if (scannerRestored && ripFound && isOneSectorState) {
             situationObjectiveText.textContent = 'Learn how to Investigate the Cosmic Rip';
             situationObjectiveText.classList.add('green-ready-text');
@@ -1289,7 +1329,7 @@ function cosmicRipChecks() {
 
     const statusRowLabel = document.querySelector('.option-row-main div label');
     if (getCurrentOptionPane() === 'near space scanner array') {
-        const isOneSectorState = globalThis.__cosmicRipNearSpaceScannerArrayOneSectorState === true;
+        const isOneSectorState = getCosmicRipNearSpaceScannerArrayOneSectorState() === true;
         const desired = (isOneSectorState && ripFound) ? 'Cosmic Rip Sector:' : 'Miaplacidus Sectors Map:';
         if (statusRowLabel.innerText !== desired) {
             statusRowLabel.innerText = desired;
@@ -1298,15 +1338,15 @@ function cosmicRipChecks() {
 
     if (ripFound && prevRipFound === undefined) {
         const foundIdx = Number(getCosmicRipRipLocationSectorIndex?.());
-        globalThis.__cosmicRipFoundSectorIndexForZoom = Number.isFinite(foundIdx) ? foundIdx : 0;
-        globalThis.__cosmicRipNearSpaceScannerArrayOneSectorState = true;
+        setCosmicRipFoundSectorIndexForZoom(Number.isFinite(foundIdx) ? foundIdx : 0);
+        setCosmicRipNearSpaceScannerArrayOneSectorState(true);
 
-        const fogOverlayEl = globalThis.__cosmicRipNearSpaceScannerArrayFogOverlayEl;
-        const interactiveOverlayEl = globalThis.__cosmicRipNearSpaceScannerArrayInteractiveOverlayEl;
-        const scanLabelOverlayEl = globalThis.__cosmicRipNearSpaceScannerArrayScanLabelOverlayEl;
-        const labelFadeOverlayEl = globalThis.__cosmicRipNearSpaceScannerArrayLabelFadeOverlayEl;
-        const zoomCanvasEl = globalThis.__cosmicRipNearSpaceScannerArrayZoomCanvasEl;
-        const baseCanvasEl = globalThis.__cosmicRipNearSpaceScannerArrayCanvasEl;
+        const fogOverlayEl = getCosmicRipNearSpaceScannerArrayFogOverlayEl();
+        const interactiveOverlayEl = getCosmicRipNearSpaceScannerArrayInteractiveOverlayEl();
+        const scanLabelOverlayEl = getCosmicRipNearSpaceScannerArrayScanLabelOverlayEl();
+        const labelFadeOverlayEl = getCosmicRipNearSpaceScannerArrayLabelFadeOverlayEl();
+        const zoomCanvasEl = getCosmicRipNearSpaceScannerArrayZoomCanvasEl();
+        const baseCanvasEl = getCosmicRipNearSpaceScannerArrayCanvasEl();
 
         if (fogOverlayEl) { fogOverlayEl.style.display = 'none'; fogOverlayEl.style.transition = ''; }
         if (interactiveOverlayEl) { interactiveOverlayEl.style.display = 'none'; interactiveOverlayEl.style.transition = ''; }
@@ -1316,7 +1356,7 @@ function cosmicRipChecks() {
         if (baseCanvasEl) { baseCanvasEl.style.transition = ''; baseCanvasEl.style.opacity = '1'; }
 
         const tryDraw = () => {
-            const drawCanvas = globalThis.__cosmicRipNearSpaceScannerArrayDrawCanvas;
+            const drawCanvas = getCosmicRipNearSpaceScannerArrayDrawCanvas();
             if (typeof drawCanvas === 'function') {
                 drawCanvas();
                 return true;
@@ -1367,7 +1407,7 @@ function cosmicRipChecks() {
     const scanButtons = document.querySelectorAll('.cosmic-rip-scan-sector-button');
     if (scanButtons && scanButtons.length > 0) {
         const gp = Number(getCosmicRipGalacticPoints?.()) || 0;
-        const scanResults = Array.isArray(getCosmicRipScanResultsBySectorIndex?.())
+        const scanResults = Array.isArray(getCosmicRipScanResultsBySectorIndex())
             ? getCosmicRipScanResultsBySectorIndex()
             : Array(9).fill(false);
 
@@ -1378,23 +1418,22 @@ function cosmicRipChecks() {
         });
     }
 
-    const scanLabelEls = globalThis.__cosmicRipNearSpaceScannerArrayScanLabelEls;
+    const scanLabelEls = getCosmicRipNearSpaceScannerArrayScanLabelEls();
     if (Array.isArray(scanLabelEls) && scanLabelEls.length === 9) {
         const gp = Number(getCosmicRipGalacticPoints?.()) || 0;
-        const scanResults = Array.isArray(getCosmicRipScanResultsBySectorIndex?.())
+    const scanResults = Array.isArray(getCosmicRipScanResultsBySectorIndex())
             ? getCosmicRipScanResultsBySectorIndex()
             : Array(9).fill(false);
 
-        if (!globalThis.__cosmicRipPrevScanResultsBySectorIndex) {
-            globalThis.__cosmicRipPrevScanResultsBySectorIndex = scanResults.map(v => v === true);
+        if (!getCosmicRipPrevScanResultsBySectorIndex()) {
+            setCosmicRipPrevScanResultsBySectorIndex(scanResults.map(v => v === true));
         }
 
-        globalThis.__cosmicRipGpForUi = gp;
-        globalThis.__cosmicRipScannerRestoredForUi = scannerRestored;
-        globalThis.__cosmicRipScanResultsBySectorIndex = scanResults;
+        setCosmicRipGpForUi(gp);
+        setCosmicRipScannerRestoredForUi(scannerRestored);
 
         scanLabelEls.forEach((el, i) => {
-            if (globalThis.__cosmicRipNearSpaceScannerArrayOneSectorState === true) {
+            if (getCosmicRipNearSpaceScannerArrayOneSectorState() === true) {
                 el.style.opacity = '0';
                 el.textContent = '';
                 return;
@@ -1416,9 +1455,9 @@ function cosmicRipChecks() {
             }
         });
 
-        const fogEls = globalThis.__cosmicRipNearSpaceScannerArrayFogEls;
-        const prev = Array.isArray(globalThis.__cosmicRipPrevScanResultsBySectorIndex)
-            ? globalThis.__cosmicRipPrevScanResultsBySectorIndex
+        const fogEls = getCosmicRipNearSpaceScannerArrayFogEls();
+        const prev = Array.isArray(getCosmicRipPrevScanResultsBySectorIndex())
+            ? getCosmicRipPrevScanResultsBySectorIndex()
             : scanResults.map(v => v === true);
 
         if (Array.isArray(fogEls) && fogEls.length === 9) {
@@ -1463,22 +1502,22 @@ function cosmicRipChecks() {
             });
         }
 
-        globalThis.__cosmicRipPrevScanResultsBySectorIndex = scanResults.map(v => v === true);
+        setCosmicRipPrevScanResultsBySectorIndex(scanResults.map(v => v === true));
 
-        const labelFadeOverlayEl = globalThis.__cosmicRipNearSpaceScannerArrayLabelFadeOverlayEl;
-        const zoomCanvasEl = globalThis.__cosmicRipNearSpaceScannerArrayZoomCanvasEl;
-        const drawCanvas = globalThis.__cosmicRipNearSpaceScannerArrayDrawCanvas;
+        const labelFadeOverlayEl = getCosmicRipNearSpaceScannerArrayLabelFadeOverlayEl();
+        const zoomCanvasEl = getCosmicRipNearSpaceScannerArrayZoomCanvasEl();
+        const drawCanvas = getCosmicRipNearSpaceScannerArrayDrawCanvas();
 
-        if (ripFound && !globalThis.__cosmicRipRipFoundUiSequenceStarted) {
-            globalThis.__cosmicRipRipFoundUiSequenceStarted = true;
+        if (ripFound && !getCosmicRipRipFoundUiSequenceStarted()) {
+            setCosmicRipRipFoundUiSequenceStarted(true);
 
             const fullScanned = scanResults.map(() => true);
             window.setTimeout(() => {
                 setCosmicRipScanResultsBySectorIndex?.(fullScanned);
-                globalThis.__cosmicRipPrevScanResultsBySectorIndex = fullScanned.map(v => v === true);
+                setCosmicRipPrevScanResultsBySectorIndex(fullScanned.map(v => v === true));
             }, 2000);
 
-            const scanLabelOverlayEl = globalThis.__cosmicRipNearSpaceScannerArrayScanLabelOverlayEl;
+            const scanLabelOverlayEl = getCosmicRipNearSpaceScannerArrayScanLabelOverlayEl();
             if (labelFadeOverlayEl) {
                 labelFadeOverlayEl.style.transition = '';
                 labelFadeOverlayEl.style.opacity = '0';
@@ -1501,7 +1540,7 @@ function cosmicRipChecks() {
             }
 
             const foundIdx = Number(getCosmicRipRipLocationSectorIndex?.());
-            globalThis.__cosmicRipFoundSectorIndexForZoom = Number.isFinite(foundIdx) ? foundIdx : 0;
+            setCosmicRipFoundSectorIndexForZoom(Number.isFinite(foundIdx) ? foundIdx : 0);
 
             window.setTimeout(() => {
                 if (!zoomCanvasEl || typeof drawCanvas !== 'function') {
@@ -1526,7 +1565,7 @@ function cosmicRipChecks() {
                 const h = baseCanvas.height;
                 const cellW = w / 3;
                 const cellH = h / 3;
-                const idx = globalThis.__cosmicRipFoundSectorIndexForZoom || 0;
+                const idx = getCosmicRipFoundSectorIndexForZoom() || 0;
                 const col = idx % 3;
                 const row = Math.floor(idx / 3);
 
@@ -1584,8 +1623,8 @@ function cosmicRipChecks() {
                             return;
                         }
 
-                        globalThis.__cosmicRipOneSectorStateReady = true;
-                        globalThis.__cosmicRipNearSpaceScannerArrayOneSectorState = true;
+                        setCosmicRipOneSectorStateReady(true);
+                        setCosmicRipNearSpaceScannerArrayOneSectorState(true);
 
                         const deploySensorBuoyRowEl = document.getElementById('cosmicRipNearSpaceScannerArrayDeploySensorBuoyRow');
                         if (deploySensorBuoyRowEl) deploySensorBuoyRowEl.classList.remove('invisible');
@@ -1594,9 +1633,9 @@ function cosmicRipChecks() {
                         const sampleRipRowEl = document.getElementById('cosmicRipNearSpaceScannerArraySampleRipRow');
                         if (sampleRipRowEl) sampleRipRowEl.classList.remove('invisible');
 
-                        const fogOverlayEl = globalThis.__cosmicRipNearSpaceScannerArrayFogOverlayEl;
-                        const interactiveOverlayEl = globalThis.__cosmicRipNearSpaceScannerArrayInteractiveOverlayEl;
-                        const scanLabelOverlayEl2 = globalThis.__cosmicRipNearSpaceScannerArrayScanLabelOverlayEl;
+                        const fogOverlayEl = getCosmicRipNearSpaceScannerArrayFogOverlayEl();
+                        const interactiveOverlayEl = getCosmicRipNearSpaceScannerArrayInteractiveOverlayEl();
+                        const scanLabelOverlayEl2 = getCosmicRipNearSpaceScannerArrayScanLabelOverlayEl();
                         if (fogOverlayEl) fogOverlayEl.style.display = 'none';
                         if (interactiveOverlayEl) interactiveOverlayEl.style.display = 'none';
                         if (scanLabelOverlayEl2) { scanLabelOverlayEl2.style.display = 'none'; scanLabelOverlayEl2.style.opacity = '0'; }
