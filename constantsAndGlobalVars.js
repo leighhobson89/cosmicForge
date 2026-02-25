@@ -2759,6 +2759,10 @@ export function setTechUnlockedArray(value, direct = false) {
         return;
     }
 
+    if (value === 'run1') {
+        return;
+    }
+
     if (direct) {
         techUnlockedArray = Array.isArray(value) ? value : techUnlockedArray;
     } else {
