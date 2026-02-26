@@ -57,9 +57,17 @@ export function drawTab4Content(heading, optionContentElement) {
                     ], 'fillToCapacity', (value) => {
                         setCreateCompoundPreview('diesel', value);
                     }),
-                    createButton('Create', ['option-button', 'red-disabled-text', 'compound-cost-sell-check', 'create'], () => {
-                        handleCompoundCreate('diesel');
-                    }, 'createCompound', null, null, null, 'diesel', true, null, 'compound'),
+                    createButton({
+                        text: 'Create',
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check', 'create'],
+                        onClick: () => {
+                            handleCompoundCreate('diesel');
+                        },
+                        dataConditionCheck: 'createCompound',
+                        quantityArgument: 'diesel',
+                        disableKeyboardForButton: true,
+                        rowCategory: 'compound'
+                    }),
                     createTextElement(`Auto:`, '', ['autoBuyer-building-quantity']),
                     createToggleSwitch('autoCreateToggle', false, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'compounds', ['diesel', 'autoCreate']);
@@ -99,9 +107,17 @@ export function drawTab4Content(heading, optionContentElement) {
                     ], getLastSellResourceCompoundDropdownOption('compounds', 'diesel'), (value) => {
                         setLastSellResourceCompoundDropdownOption('compounds', 'diesel', value);
                     }),
-                    createButton('Sell', ['option-button', 'red-disabled-text', 'compound-cost-sell-check', 'sell'], () => {
-                        sellCompound('diesel');
-                    }, 'sellCompound', null, null, null, 'diesel', true, null, 'compound'),
+                    createButton({
+                        text: 'Sell',
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check', 'sell'],
+                        onClick: () => {
+                            sellCompound('diesel');
+                        },
+                        dataConditionCheck: 'sellCompound',
+                        quantityArgument: 'diesel',
+                        disableKeyboardForButton: true,
+                        rowCategory: 'compound'
+                    }),
                     createTextElement(`Auto:`, '', ['autoBuyer-building-quantity']),
                     createToggleSwitch('autoSellToggle', false, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'compounds', ['diesel', 'autoSell']);
@@ -130,11 +146,21 @@ export function drawTab4Content(heading, optionContentElement) {
                 renderNameABs: null,
                 labelText: 'Increase Storage:',
                 inputElements: [
-                    createButton('Increase Storage', ['option-button', 'red-disabled-text', 'compound-cost-sell-check'], () => {
-                        increaseResourceStorage(['dieselQuantity'], ['diesel'], ['compounds']);
-                        disableStorageNotificationActionIfShowing('diesel', 'Already Increased!');
-                        storagePrice = getResourceDataObject('compounds', ['diesel', 'storageCapacity']) - 1;
-                    }, 'upgradeCheck', '', 'storage', null, 'diesel', true, null, 'compound')
+                    createButton({
+                        text: 'Increase Storage',
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check'],
+                        onClick: () => {
+                            increaseResourceStorage(['dieselQuantity'], ['diesel'], ['compounds']);
+                            disableStorageNotificationActionIfShowing('diesel', 'Already Increased!');
+                            storagePrice = getResourceDataObject('compounds', ['diesel', 'storageCapacity']) - 1;
+                        },
+                        dataConditionCheck: 'upgradeCheck',
+                        resourcePriceObject: '',
+                        objectSectionArgument1: 'storage',
+                        quantityArgument: 'diesel',
+                        disableKeyboardForButton: true,
+                        rowCategory: 'compound'
+                    })
                 ],
                 descriptionText: `${storagePrice + " " + getResourceDataObject('compounds', ['diesel', 'nameResource'])}`,
                 resourcePriceObject: '',
@@ -155,9 +181,20 @@ export function drawTab4Content(heading, optionContentElement) {
                 renderNameABs: getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']),
                 labelText: 'Diesel Auto Buyer Tier 1:',
                 inputElements: [
-                    createButton(`Add ${Math.floor(getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier1', 'rate']) * getTimerRateRatio())} Diesel /s`, ['option-button', 'red-disabled-text', 'compound-cost-sell-check'], () => {
-                        gain(1, 'dieselAB1Quantity', 'autoBuyer', true, 'tier1', 'diesel', 'compounds')
-                    }, 'upgradeCheck', '', 'autoBuyer', null, 'diesel', true, 'tier1', 'compound'),
+                    createButton({
+                        text: `Add ${Math.floor(getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier1', 'rate']) * getTimerRateRatio())} Diesel /s`,
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check'],
+                        onClick: () => {
+                            gain(1, 'dieselAB1Quantity', 'autoBuyer', true, 'tier1', 'diesel', 'compounds')
+                        },
+                        dataConditionCheck: 'upgradeCheck',
+                        resourcePriceObject: '',
+                        objectSectionArgument1: 'autoBuyer',
+                        quantityArgument: 'diesel',
+                        disableKeyboardForButton: true,
+                        autoBuyerTier: 'tier1',
+                        rowCategory: 'compound'
+                    }),
                     createTextElement(`Quantity: ${getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier1', 'quantity'])}`, 'dieselAB1Quantity', ['autoBuyer-building-quantity']),
                     createToggleSwitch('diesel1Toggle', true, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier1', 'active']);
@@ -191,9 +228,20 @@ export function drawTab4Content(heading, optionContentElement) {
                 renderNameABs: getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']),
                 labelText: 'Diesel Auto Buyer Tier 2:',
                 inputElements: [
-                    createButton(`Add ${Math.floor(getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier2', 'rate']) * getTimerRateRatio())} Diesel /s`, ['option-button', 'red-disabled-text', 'compound-cost-sell-check'], () => {
-                        gain(1, 'dieselAB2Quantity', 'autoBuyer', true, 'tier2', 'diesel', 'compounds')
-                    }, 'upgradeCheck', '', 'autoBuyer', null, 'diesel', true, 'tier2', 'compound'),
+                    createButton({
+                        text: `Add ${Math.floor(getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier2', 'rate']) * getTimerRateRatio())} Diesel /s`,
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check'],
+                        onClick: () => {
+                            gain(1, 'dieselAB2Quantity', 'autoBuyer', true, 'tier2', 'diesel', 'compounds')
+                        },
+                        dataConditionCheck: 'upgradeCheck',
+                        resourcePriceObject: '',
+                        objectSectionArgument1: 'autoBuyer',
+                        quantityArgument: 'diesel',
+                        disableKeyboardForButton: true,
+                        autoBuyerTier: 'tier2',
+                        rowCategory: 'compound'
+                    }),
                     createTextElement(`Quantity: ${getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier2', 'quantity'])}`, 'dieselAB2Quantity', ['autoBuyer-building-quantity']),
                     createToggleSwitch('diesel2Toggle', true, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier2', 'active']);
@@ -218,9 +266,20 @@ export function drawTab4Content(heading, optionContentElement) {
                 renderNameABs: getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']),
                 labelText: 'Diesel Auto Buyer Tier 3:',
                 inputElements: [
-                    createButton(`Add ${Math.floor(getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier3', 'rate']) * getTimerRateRatio())} Diesel /s`, ['option-button', 'red-disabled-text', 'compound-cost-sell-check'], () => {
-                        gain(1, 'dieselAB3Quantity', 'autoBuyer', true, 'tier3', 'diesel', 'compounds')
-                    }, 'upgradeCheck', '', 'autoBuyer', null, 'diesel', true, 'tier3', 'compound'),
+                    createButton({
+                        text: `Add ${Math.floor(getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier3', 'rate']) * getTimerRateRatio())} Diesel /s`,
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check'],
+                        onClick: () => {
+                            gain(1, 'dieselAB3Quantity', 'autoBuyer', true, 'tier3', 'diesel', 'compounds')
+                        },
+                        dataConditionCheck: 'upgradeCheck',
+                        resourcePriceObject: '',
+                        objectSectionArgument1: 'autoBuyer',
+                        quantityArgument: 'diesel',
+                        disableKeyboardForButton: true,
+                        autoBuyerTier: 'tier3',
+                        rowCategory: 'compound'
+                    }),
                     createTextElement(`Quantity: ${getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier3', 'quantity'])}`, 'dieselAB3Quantity', ['autoBuyer-building-quantity']),
                     createToggleSwitch('diesel3Toggle', true, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier3', 'active']);
@@ -245,9 +304,20 @@ export function drawTab4Content(heading, optionContentElement) {
                 renderNameABs: getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']),
                 labelText: 'Diesel Auto Buyer Tier 4:',
                 inputElements: [
-                    createButton(`Add ${Math.floor(getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier4', 'rate']) * getTimerRateRatio())} Diesel /s`, ['option-button', 'red-disabled-text', 'compound-cost-sell-check'], () => {
-                        gain(1, 'dieselAB4Quantity', 'autoBuyer', true, 'tier4', 'diesel', 'compounds')
-                    }, 'upgradeCheck', '', 'autoBuyer', null, 'diesel', true, 'tier4', 'compound'),
+                    createButton({
+                        text: `Add ${Math.floor(getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier4', 'rate']) * getTimerRateRatio())} Diesel /s`,
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check'],
+                        onClick: () => {
+                            gain(1, 'dieselAB4Quantity', 'autoBuyer', true, 'tier4', 'diesel', 'compounds')
+                        },
+                        dataConditionCheck: 'upgradeCheck',
+                        resourcePriceObject: '',
+                        objectSectionArgument1: 'autoBuyer',
+                        quantityArgument: 'diesel',
+                        disableKeyboardForButton: true,
+                        autoBuyerTier: 'tier4',
+                        rowCategory: 'compound'
+                    }),
                     createTextElement(`Quantity: ${getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier4', 'quantity'])}`, 'dieselAB4Quantity', ['autoBuyer-building-quantity']),
                     createToggleSwitch('diesel4Toggle', true, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier4', 'active']);
@@ -296,9 +366,17 @@ export function drawTab4Content(heading, optionContentElement) {
                     ], 'fillToCapacity', (value) => {
                         setCreateCompoundPreview('glass', value);
                     }),
-                    createButton('Create', ['option-button', 'red-disabled-text', 'compound-cost-sell-check', 'create'], () => {
-                        handleCompoundCreate('glass');
-                    }, 'createCompound', null, null, null, 'glass', true, null, 'compound'),
+                    createButton({
+                        text: 'Create',
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check', 'create'],
+                        onClick: () => {
+                            handleCompoundCreate('glass');
+                        },
+                        dataConditionCheck: 'createCompound',
+                        quantityArgument: 'glass',
+                        disableKeyboardForButton: true,
+                        rowCategory: 'compound'
+                    }),
                     createTextElement(`Auto:`, '', ['autoBuyer-building-quantity']),
                     createToggleSwitch('autoCreateToggle', false, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'compounds', ['glass', 'autoCreate']);
@@ -338,9 +416,17 @@ export function drawTab4Content(heading, optionContentElement) {
                     ], getLastSellResourceCompoundDropdownOption('compounds', 'glass'), (value) => {
                         setLastSellResourceCompoundDropdownOption('compounds', 'glass', value);
                     }),
-                    createButton('Sell', ['option-button', 'red-disabled-text', 'compound-cost-sell-check', 'sell'], () => {
-                        sellCompound('glass');
-                    }, 'sellCompound', null, null, null, 'glass', true, null, 'compound'),
+                    createButton({
+                        text: 'Sell',
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check', 'sell'],
+                        onClick: () => {
+                            sellCompound('glass');
+                        },
+                        dataConditionCheck: 'sellCompound',
+                        quantityArgument: 'glass',
+                        disableKeyboardForButton: true,
+                        rowCategory: 'compound'
+                    }),
                     createTextElement(`Auto:`, '', ['autoBuyer-building-quantity']),
                     createToggleSwitch('autoSellToggle', false, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'compounds', ['glass', 'autoSell']);
@@ -369,11 +455,21 @@ export function drawTab4Content(heading, optionContentElement) {
                 renderNameABs: null,
                 labelText: 'Increase Storage:',
                 inputElements: [
-                    createButton('Increase Storage', ['option-button', 'red-disabled-text', 'compound-cost-sell-check'], () => {
-                        increaseResourceStorage(['glassQuantity'], ['glass'], ['compounds']);
-                        disableStorageNotificationActionIfShowing('glass', 'Already Increased!');
-                        storagePrice = getResourceDataObject('compounds', ['glass', 'storageCapacity']) - 1;
-                    }, 'upgradeCheck', '', 'storage', null, 'glass', true, null, 'compound')
+                    createButton({
+                        text: 'Increase Storage',
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check'],
+                        onClick: () => {
+                            increaseResourceStorage(['glassQuantity'], ['glass'], ['compounds']);
+                            disableStorageNotificationActionIfShowing('glass', 'Already Increased!');
+                            storagePrice = getResourceDataObject('compounds', ['glass', 'storageCapacity']) - 1;
+                        },
+                        dataConditionCheck: 'upgradeCheck',
+                        resourcePriceObject: '',
+                        objectSectionArgument1: 'storage',
+                        quantityArgument: 'glass',
+                        disableKeyboardForButton: true,
+                        rowCategory: 'compound'
+                    })
                 ],
                 descriptionText: `${storagePrice + " " + getResourceDataObject('compounds', ['glass', 'nameResource'])}`,
                 resourcePriceObject: '',
@@ -394,9 +490,20 @@ export function drawTab4Content(heading, optionContentElement) {
                 renderNameABs: getResourceDataObject('compounds', ['glass', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']),
                 labelText: 'Glass Auto Buyer Tier 1:',
                 inputElements: [
-                    createButton(`Add ${Math.floor(getResourceDataObject('compounds', ['glass', 'upgrades', 'autoBuyer', 'tier1', 'rate']) * getTimerRateRatio())} Glass /s`, ['option-button', 'red-disabled-text', 'compound-cost-sell-check'], () => {
-                        gain(1, 'glassAB1Quantity', 'autoBuyer', true, 'tier1', 'glass', 'compounds')
-                    }, 'upgradeCheck', '', 'autoBuyer', null, 'glass', true, 'tier1', 'compound'),
+                    createButton({
+                        text: `Add ${Math.floor(getResourceDataObject('compounds', ['glass', 'upgrades', 'autoBuyer', 'tier1', 'rate']) * getTimerRateRatio())} Glass /s`,
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check'],
+                        onClick: () => {
+                            gain(1, 'glassAB1Quantity', 'autoBuyer', true, 'tier1', 'glass', 'compounds')
+                        },
+                        dataConditionCheck: 'upgradeCheck',
+                        resourcePriceObject: '',
+                        objectSectionArgument1: 'autoBuyer',
+                        quantityArgument: 'glass',
+                        disableKeyboardForButton: true,
+                        autoBuyerTier: 'tier1',
+                        rowCategory: 'compound'
+                    }),
                     createTextElement(`Quantity: ${getResourceDataObject('compounds', ['glass', 'upgrades', 'autoBuyer', 'tier1', 'quantity'])}`, 'glassAB1Quantity', ['autoBuyer-building-quantity']),
                     createToggleSwitch('glass1Toggle', true, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'compounds', ['glass', 'upgrades', 'autoBuyer', 'tier1', 'active']);
@@ -421,9 +528,20 @@ export function drawTab4Content(heading, optionContentElement) {
                 renderNameABs: getResourceDataObject('compounds', ['glass', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']),
                 labelText: 'Glass Auto Buyer Tier 2:',
                 inputElements: [
-                    createButton(`Add ${Math.floor(getResourceDataObject('compounds', ['glass', 'upgrades', 'autoBuyer', 'tier2', 'rate']) * getTimerRateRatio())} Glass /s`, ['option-button', 'red-disabled-text', 'compound-cost-sell-check'], () => {
-                        gain(1, 'glassAB2Quantity', 'autoBuyer', true, 'tier2', 'glass', 'compounds')
-                    }, 'upgradeCheck', '', 'autoBuyer', null, 'glass', true, 'tier2', 'compound'),
+                    createButton({
+                        text: `Add ${Math.floor(getResourceDataObject('compounds', ['glass', 'upgrades', 'autoBuyer', 'tier2', 'rate']) * getTimerRateRatio())} Glass /s`,
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check'],
+                        onClick: () => {
+                            gain(1, 'glassAB2Quantity', 'autoBuyer', true, 'tier2', 'glass', 'compounds')
+                        },
+                        dataConditionCheck: 'upgradeCheck',
+                        resourcePriceObject: '',
+                        objectSectionArgument1: 'autoBuyer',
+                        quantityArgument: 'glass',
+                        disableKeyboardForButton: true,
+                        autoBuyerTier: 'tier2',
+                        rowCategory: 'compound'
+                    }),
                     createTextElement(`Quantity: ${getResourceDataObject('compounds', ['glass', 'upgrades', 'autoBuyer', 'tier2', 'quantity'])}`, 'glassAB2Quantity', ['autoBuyer-building-quantity']),
                     createToggleSwitch('glass2Toggle', true, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'compounds', ['glass', 'upgrades', 'autoBuyer', 'tier2', 'active']);
@@ -448,9 +566,20 @@ export function drawTab4Content(heading, optionContentElement) {
                 renderNameABs: getResourceDataObject('compounds', ['glass', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']),
                 labelText: 'Glass Auto Buyer Tier 3:',
                 inputElements: [
-                    createButton(`Add ${Math.floor(getResourceDataObject('compounds', ['glass', 'upgrades', 'autoBuyer', 'tier3', 'rate']) * getTimerRateRatio())} Glass /s`, ['option-button', 'red-disabled-text', 'compound-cost-sell-check'], () => {
-                        gain(1, 'glassAB3Quantity', 'autoBuyer', true, 'tier3', 'glass', 'compounds')
-                    }, 'upgradeCheck', '', 'autoBuyer', null, 'glass', true, 'tier3', 'compound'),
+                    createButton({
+                        text: `Add ${Math.floor(getResourceDataObject('compounds', ['glass', 'upgrades', 'autoBuyer', 'tier3', 'rate']) * getTimerRateRatio())} Glass /s`,
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check'],
+                        onClick: () => {
+                            gain(1, 'glassAB3Quantity', 'autoBuyer', true, 'tier3', 'glass', 'compounds')
+                        },
+                        dataConditionCheck: 'upgradeCheck',
+                        resourcePriceObject: '',
+                        objectSectionArgument1: 'autoBuyer',
+                        quantityArgument: 'glass',
+                        disableKeyboardForButton: true,
+                        autoBuyerTier: 'tier3',
+                        rowCategory: 'compound'
+                    }),
                     createTextElement(`Quantity: ${getResourceDataObject('compounds', ['glass', 'upgrades', 'autoBuyer', 'tier3', 'quantity'])}`, 'glassAB3Quantity', ['autoBuyer-building-quantity']),
                     createToggleSwitch('glass3Toggle', true, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'compounds', ['glass', 'upgrades', 'autoBuyer', 'tier3', 'active']);
@@ -475,9 +604,20 @@ export function drawTab4Content(heading, optionContentElement) {
                 renderNameABs: getResourceDataObject('compounds', ['glass', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']),
                 labelText: 'Glass Auto Buyer Tier 4:',
                 inputElements: [
-                    createButton(`Add ${Math.floor(getResourceDataObject('compounds', ['glass', 'upgrades', 'autoBuyer', 'tier4', 'rate']) * getTimerRateRatio())} Glass /s`, ['option-button', 'red-disabled-text', 'compound-cost-sell-check'], () => {
-                        gain(1, 'glassAB4Quantity', 'autoBuyer', true, 'tier4', 'glass', 'compounds')
-                    }, 'upgradeCheck', '', 'autoBuyer', null, 'glass', true, 'tier4', 'compound'),
+                    createButton({
+                        text: `Add ${Math.floor(getResourceDataObject('compounds', ['glass', 'upgrades', 'autoBuyer', 'tier4', 'rate']) * getTimerRateRatio())} Glass /s`,
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check'],
+                        onClick: () => {
+                            gain(1, 'glassAB4Quantity', 'autoBuyer', true, 'tier4', 'glass', 'compounds')
+                        },
+                        dataConditionCheck: 'upgradeCheck',
+                        resourcePriceObject: '',
+                        objectSectionArgument1: 'autoBuyer',
+                        quantityArgument: 'glass',
+                        disableKeyboardForButton: true,
+                        autoBuyerTier: 'tier4',
+                        rowCategory: 'compound'
+                    }),
                     createTextElement(`Quantity: ${getResourceDataObject('compounds', ['glass', 'upgrades', 'autoBuyer', 'tier4', 'quantity'])}`, 'glassAB4Quantity', ['autoBuyer-building-quantity']),
                     createToggleSwitch('glass4Toggle', true, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'compounds', ['glass', 'upgrades', 'autoBuyer', 'tier4', 'active']);
@@ -526,10 +666,18 @@ export function drawTab4Content(heading, optionContentElement) {
                     ], 'fillToCapacity', (value) => {
                         setCreateCompoundPreview('steel', value);
                     }),
-                    createButton('Create', ['option-button', 'red-disabled-text', 'compound-cost-sell-check', 'create'], () => {
-                        handleCompoundCreate('steel');
-                        setAchievementFlagArray('createSteel', 'add');
-                    }, 'createCompound', null, null, null, 'steel', true, null, 'compound'),
+                    createButton({
+                        text: 'Create',
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check', 'create'],
+                        onClick: () => {
+                            handleCompoundCreate('steel');
+                            setAchievementFlagArray('createSteel', 'add');
+                        },
+                        dataConditionCheck: 'createCompound',
+                        quantityArgument: 'steel',
+                        disableKeyboardForButton: true,
+                        rowCategory: 'compound'
+                    }),
                     createTextElement(`Auto:`, '', ['autoBuyer-building-quantity']),
                     createToggleSwitch('autoCreateToggle', false, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'compounds', ['steel', 'autoCreate']);
@@ -569,9 +717,17 @@ export function drawTab4Content(heading, optionContentElement) {
                     ], getLastSellResourceCompoundDropdownOption('compounds', 'steel'), (value) => {
                         setLastSellResourceCompoundDropdownOption('compounds', 'steel', value);
                     }),
-                    createButton('Sell', ['option-button', 'red-disabled-text', 'compound-cost-sell-check', 'sell'], () => {
-                        sellCompound('steel');
-                    }, 'sellCompound', null, null, null, 'steel', true, null, 'compound'),
+                    createButton({
+                        text: 'Sell',
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check', 'sell'],
+                        onClick: () => {
+                            sellCompound('steel');
+                        },
+                        dataConditionCheck: 'sellCompound',
+                        quantityArgument: 'steel',
+                        disableKeyboardForButton: true,
+                        rowCategory: 'compound'
+                    }),
                     createTextElement(`Auto:`, '', ['autoBuyer-building-quantity']),
                     createToggleSwitch('autoSellToggle', false, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'compounds', ['steel', 'autoSell']);
@@ -600,11 +756,21 @@ export function drawTab4Content(heading, optionContentElement) {
                 renderNameABs: null,
                 labelText: 'Increase Storage:',
                 inputElements: [
-                    createButton('Increase Storage', ['option-button', 'red-disabled-text', 'compound-cost-sell-check'], () => {
-                        increaseResourceStorage(['steelQuantity'], ['steel'], ['compounds']);
-                        disableStorageNotificationActionIfShowing('steel', 'Already Increased!');
-                        storagePrice = getResourceDataObject('compounds', ['steel', 'storageCapacity']) - 1;
-                    }, 'upgradeCheck', '', 'storage', null, 'steel', true, null, 'compound')
+                    createButton({
+                        text: 'Increase Storage',
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check'],
+                        onClick: () => {
+                            increaseResourceStorage(['steelQuantity'], ['steel'], ['compounds']);
+                            disableStorageNotificationActionIfShowing('steel', 'Already Increased!');
+                            storagePrice = getResourceDataObject('compounds', ['steel', 'storageCapacity']) - 1;
+                        },
+                        dataConditionCheck: 'upgradeCheck',
+                        resourcePriceObject: '',
+                        objectSectionArgument1: 'storage',
+                        quantityArgument: 'steel',
+                        disableKeyboardForButton: true,
+                        rowCategory: 'compound'
+                    })
                 ],
                 descriptionText: `${storagePrice + " " + getResourceDataObject('compounds', ['steel', 'nameResource'])}`,
                 resourcePriceObject: '',
@@ -625,9 +791,20 @@ export function drawTab4Content(heading, optionContentElement) {
                 renderNameABs: getResourceDataObject('compounds', ['steel', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']),
                 labelText: 'Steel Auto Buyer Tier 1:',
                 inputElements: [
-                    createButton(`Add ${Math.floor(getResourceDataObject('compounds', ['steel', 'upgrades', 'autoBuyer', 'tier1', 'rate']) * getTimerRateRatio())} Steel /s`, ['option-button', 'red-disabled-text', 'compound-cost-sell-check'], () => {
-                        gain(1, 'steelAB1Quantity', 'autoBuyer', true, 'tier1', 'steel', 'compounds')
-                    }, 'upgradeCheck', '', 'autoBuyer', null, 'steel', true, 'tier1', 'compound'),
+                    createButton({
+                        text: `Add ${Math.floor(getResourceDataObject('compounds', ['steel', 'upgrades', 'autoBuyer', 'tier1', 'rate']) * getTimerRateRatio())} Steel /s`,
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check'],
+                        onClick: () => {
+                            gain(1, 'steelAB1Quantity', 'autoBuyer', true, 'tier1', 'steel', 'compounds')
+                        },
+                        dataConditionCheck: 'upgradeCheck',
+                        resourcePriceObject: '',
+                        objectSectionArgument1: 'autoBuyer',
+                        quantityArgument: 'steel',
+                        disableKeyboardForButton: true,
+                        autoBuyerTier: 'tier1',
+                        rowCategory: 'compound'
+                    }),
                     createTextElement(`Quantity: ${getResourceDataObject('compounds', ['steel', 'upgrades', 'autoBuyer', 'tier1', 'quantity'])}`, 'steelAB1Quantity', ['autoBuyer-building-quantity']),
                     createToggleSwitch('steel1Toggle', true, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'compounds', ['steel', 'upgrades', 'autoBuyer', 'tier1', 'active']);
@@ -652,9 +829,20 @@ export function drawTab4Content(heading, optionContentElement) {
                 renderNameABs: getResourceDataObject('compounds', ['steel', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']),
                 labelText: 'Steel Auto Buyer Tier 2:',
                 inputElements: [
-                    createButton(`Add ${Math.floor(getResourceDataObject('compounds', ['steel', 'upgrades', 'autoBuyer', 'tier2', 'rate']) * getTimerRateRatio())} Steel /s`, ['option-button', 'red-disabled-text', 'compound-cost-sell-check'], () => {
-                        gain(1, 'steelAB2Quantity', 'autoBuyer', true, 'tier2', 'steel', 'compounds')
-                    }, 'upgradeCheck', '', 'autoBuyer', null, 'steel', true, 'tier2', 'compound'),
+                    createButton({
+                        text: `Add ${Math.floor(getResourceDataObject('compounds', ['steel', 'upgrades', 'autoBuyer', 'tier2', 'rate']) * getTimerRateRatio())} Steel /s`,
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check'],
+                        onClick: () => {
+                            gain(1, 'steelAB2Quantity', 'autoBuyer', true, 'tier2', 'steel', 'compounds')
+                        },
+                        dataConditionCheck: 'upgradeCheck',
+                        resourcePriceObject: '',
+                        objectSectionArgument1: 'autoBuyer',
+                        quantityArgument: 'steel',
+                        disableKeyboardForButton: true,
+                        autoBuyerTier: 'tier2',
+                        rowCategory: 'compound'
+                    }),
                     createTextElement(`Quantity: ${getResourceDataObject('compounds', ['steel', 'upgrades', 'autoBuyer', 'tier2', 'quantity'])}`, 'steelAB2Quantity', ['autoBuyer-building-quantity']),
                     createToggleSwitch('steel2Toggle', true, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'compounds', ['steel', 'upgrades', 'autoBuyer', 'tier2', 'active']);
@@ -679,9 +867,20 @@ export function drawTab4Content(heading, optionContentElement) {
                 renderNameABs: getResourceDataObject('compounds', ['steel', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']),
                 labelText: 'Steel Auto Buyer Tier 3:',
                 inputElements: [
-                    createButton(`Add ${Math.floor(getResourceDataObject('compounds', ['steel', 'upgrades', 'autoBuyer', 'tier3', 'rate']) * getTimerRateRatio())} Steel /s`, ['option-button', 'red-disabled-text', 'compound-cost-sell-check'], () => {
-                        gain(1, 'steelAB3Quantity', 'autoBuyer', true, 'tier3', 'steel', 'compounds')
-                    }, 'upgradeCheck', '', 'autoBuyer', null, 'steel', true, 'tier3', 'compound'),
+                    createButton({
+                        text: `Add ${Math.floor(getResourceDataObject('compounds', ['steel', 'upgrades', 'autoBuyer', 'tier3', 'rate']) * getTimerRateRatio())} Steel /s`,
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check'],
+                        onClick: () => {
+                            gain(1, 'steelAB3Quantity', 'autoBuyer', true, 'tier3', 'steel', 'compounds')
+                        },
+                        dataConditionCheck: 'upgradeCheck',
+                        resourcePriceObject: '',
+                        objectSectionArgument1: 'autoBuyer',
+                        quantityArgument: 'steel',
+                        disableKeyboardForButton: true,
+                        autoBuyerTier: 'tier3',
+                        rowCategory: 'compound'
+                    }),
                     createTextElement(`Quantity: ${getResourceDataObject('compounds', ['steel', 'upgrades', 'autoBuyer', 'tier3', 'quantity'])}`, 'steelAB3Quantity', ['autoBuyer-building-quantity']),
                     createToggleSwitch('steel3Toggle', true, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'compounds', ['steel', 'upgrades', 'autoBuyer', 'tier3', 'active']);
@@ -706,9 +905,20 @@ export function drawTab4Content(heading, optionContentElement) {
                 renderNameABs: getResourceDataObject('compounds', ['steel', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']),
                 labelText: 'Steel Auto Buyer Tier 4:',
                 inputElements: [
-                    createButton(`Add ${Math.floor(getResourceDataObject('compounds', ['steel', 'upgrades', 'autoBuyer', 'tier4', 'rate']) * getTimerRateRatio())} Steel /s`, ['option-button', 'red-disabled-text', 'compound-cost-sell-check'], () => {
-                        gain(1, 'steelAB4Quantity', 'autoBuyer', true, 'tier4', 'steel', 'compounds')
-                    }, 'upgradeCheck', '', 'autoBuyer', null, 'steel', true, 'tier4', 'compound'),
+                    createButton({
+                        text: `Add ${Math.floor(getResourceDataObject('compounds', ['steel', 'upgrades', 'autoBuyer', 'tier4', 'rate']) * getTimerRateRatio())} Steel /s`,
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check'],
+                        onClick: () => {
+                            gain(1, 'steelAB4Quantity', 'autoBuyer', true, 'tier4', 'steel', 'compounds')
+                        },
+                        dataConditionCheck: 'upgradeCheck',
+                        resourcePriceObject: '',
+                        objectSectionArgument1: 'autoBuyer',
+                        quantityArgument: 'steel',
+                        disableKeyboardForButton: true,
+                        autoBuyerTier: 'tier4',
+                        rowCategory: 'compound'
+                    }),
                     createTextElement(`Quantity: ${getResourceDataObject('compounds', ['steel', 'upgrades', 'autoBuyer', 'tier4', 'quantity'])}`, 'steelAB4Quantity', ['autoBuyer-building-quantity']),
                     createToggleSwitch('steel4Toggle', true, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'compounds', ['steel', 'upgrades', 'autoBuyer', 'tier4', 'active']);
@@ -757,9 +967,17 @@ export function drawTab4Content(heading, optionContentElement) {
                     ], 'fillToCapacity', (value) => {
                         setCreateCompoundPreview('concrete', value);
                     }),
-                    createButton('Create', ['option-button', 'red-disabled-text', 'compound-cost-sell-check', 'create'], () => {
-                        handleCompoundCreate('concrete');
-                    }, 'createCompound', null, null, null, 'concrete', true, null, 'compound'),
+                    createButton({
+                        text: 'Create',
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check', 'create'],
+                        onClick: () => {
+                            handleCompoundCreate('concrete');
+                        },
+                        dataConditionCheck: 'createCompound',
+                        quantityArgument: 'concrete',
+                        disableKeyboardForButton: true,
+                        rowCategory: 'compound'
+                    }),
                     createTextElement(`Auto:`, '', ['autoBuyer-building-quantity']),
                     createToggleSwitch('autoCreateToggle', false, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'compounds', ['concrete', 'autoCreate']);
@@ -799,9 +1017,17 @@ export function drawTab4Content(heading, optionContentElement) {
                     ], getLastSellResourceCompoundDropdownOption('compounds', 'concrete'), (value) => {
                         setLastSellResourceCompoundDropdownOption('compounds', 'concrete', value);
                     }),
-                    createButton('Sell', ['option-button', 'red-disabled-text', 'compound-cost-sell-check', 'sell'], () => {
-                        sellCompound('concrete');
-                    }, 'sellCompound', null, null, null, 'concrete', true, null, 'compound'),
+                    createButton({
+                        text: 'Sell',
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check', 'sell'],
+                        onClick: () => {
+                            sellCompound('concrete');
+                        },
+                        dataConditionCheck: 'sellCompound',
+                        quantityArgument: 'concrete',
+                        disableKeyboardForButton: true,
+                        rowCategory: 'compound'
+                    }),
                     createTextElement(`Auto:`, '', ['autoBuyer-building-quantity']),
                     createToggleSwitch('autoSellToggle', false, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'compounds', ['concrete', 'autoSell']);
@@ -830,11 +1056,21 @@ export function drawTab4Content(heading, optionContentElement) {
                 renderNameABs: null,
                 labelText: 'Increase Storage:',
                 inputElements: [
-                    createButton('Increase Storage', ['option-button', 'red-disabled-text', 'compound-cost-sell-check'], () => {
-                        increaseResourceStorage(['concreteQuantity'], ['concrete'], ['compounds']);
-                        disableStorageNotificationActionIfShowing('concrete', 'Already Increased!');
-                        storagePrice = getResourceDataObject('compounds', ['concrete', 'storageCapacity']) - 1;
-                    }, 'upgradeCheck', '', 'storage', null, 'concrete', true, null, 'compound')
+                    createButton({
+                        text: 'Increase Storage',
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check'],
+                        onClick: () => {
+                            increaseResourceStorage(['concreteQuantity'], ['concrete'], ['compounds']);
+                            disableStorageNotificationActionIfShowing('concrete', 'Already Increased!');
+                            storagePrice = getResourceDataObject('compounds', ['concrete', 'storageCapacity']) - 1;
+                        },
+                        dataConditionCheck: 'upgradeCheck',
+                        resourcePriceObject: '',
+                        objectSectionArgument1: 'storage',
+                        quantityArgument: 'concrete',
+                        disableKeyboardForButton: true,
+                        rowCategory: 'compound'
+                    })
                 ],
                 descriptionText: `${storagePrice + " " + getResourceDataObject('compounds', ['concrete', 'nameResource'])}`,
                 resourcePriceObject: '',
@@ -855,9 +1091,20 @@ export function drawTab4Content(heading, optionContentElement) {
                 renderNameABs: getResourceDataObject('compounds', ['concrete', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']),
                 labelText: 'Concrete Auto Buyer Tier 1:',
                 inputElements: [
-                    createButton(`Add ${Math.floor(getResourceDataObject('compounds', ['concrete', 'upgrades', 'autoBuyer', 'tier1', 'rate']) * getTimerRateRatio())} Concrete /s`, ['option-button', 'red-disabled-text', 'compound-cost-sell-check'], () => {
-                        gain(1, 'concreteAB1Quantity', 'autoBuyer', true, 'tier1', 'concrete', 'compounds')
-                    }, 'upgradeCheck', '', 'autoBuyer', null, 'concrete', true, 'tier1', 'compound'),
+                    createButton({
+                        text: `Add ${Math.floor(getResourceDataObject('compounds', ['concrete', 'upgrades', 'autoBuyer', 'tier1', 'rate']) * getTimerRateRatio())} Concrete /s`,
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check'],
+                        onClick: () => {
+                            gain(1, 'concreteAB1Quantity', 'autoBuyer', true, 'tier1', 'concrete', 'compounds')
+                        },
+                        dataConditionCheck: 'upgradeCheck',
+                        resourcePriceObject: '',
+                        objectSectionArgument1: 'autoBuyer',
+                        quantityArgument: 'concrete',
+                        disableKeyboardForButton: true,
+                        autoBuyerTier: 'tier1',
+                        rowCategory: 'compound'
+                    }),
                     createTextElement(`Quantity: ${getResourceDataObject('compounds', ['concrete', 'upgrades', 'autoBuyer', 'tier1', 'quantity'])}`, 'concreteAB1Quantity', ['autoBuyer-building-quantity']),
                     createToggleSwitch('concrete1Toggle', true, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'compounds', ['concrete', 'upgrades', 'autoBuyer', 'tier1', 'active']);
@@ -882,9 +1129,20 @@ export function drawTab4Content(heading, optionContentElement) {
                 renderNameABs: getResourceDataObject('compounds', ['concrete', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']),
                 labelText: 'Concrete Auto Buyer Tier 2:',
                 inputElements: [
-                    createButton(`Add ${Math.floor(getResourceDataObject('compounds', ['concrete', 'upgrades', 'autoBuyer', 'tier2', 'rate']) * getTimerRateRatio())} Concrete /s`, ['option-button', 'red-disabled-text', 'compound-cost-sell-check'], () => {
-                        gain(1, 'concreteAB2Quantity', 'autoBuyer', true, 'tier2', 'concrete', 'compounds')
-                    }, 'upgradeCheck', '', 'autoBuyer', null, 'concrete', true, 'tier2', 'compound'),
+                    createButton({
+                        text: `Add ${Math.floor(getResourceDataObject('compounds', ['concrete', 'upgrades', 'autoBuyer', 'tier2', 'rate']) * getTimerRateRatio())} Concrete /s`,
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check'],
+                        onClick: () => {
+                            gain(1, 'concreteAB2Quantity', 'autoBuyer', true, 'tier2', 'concrete', 'compounds')
+                        },
+                        dataConditionCheck: 'upgradeCheck',
+                        resourcePriceObject: '',
+                        objectSectionArgument1: 'autoBuyer',
+                        quantityArgument: 'concrete',
+                        disableKeyboardForButton: true,
+                        autoBuyerTier: 'tier2',
+                        rowCategory: 'compound'
+                    }),
                     createTextElement(`Quantity: ${getResourceDataObject('compounds', ['concrete', 'upgrades', 'autoBuyer', 'tier2', 'quantity'])}`, 'concreteAB2Quantity', ['autoBuyer-building-quantity']),
                     createToggleSwitch('concrete2Toggle', true, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'compounds', ['concrete', 'upgrades', 'autoBuyer', 'tier2', 'active']);
@@ -909,9 +1167,20 @@ export function drawTab4Content(heading, optionContentElement) {
                 renderNameABs: getResourceDataObject('compounds', ['concrete', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']),
                 labelText: 'Concrete Auto Buyer Tier 3:',
                 inputElements: [
-                    createButton(`Add ${Math.floor(getResourceDataObject('compounds', ['concrete', 'upgrades', 'autoBuyer', 'tier3', 'rate']) * getTimerRateRatio())} Concrete /s`, ['option-button', 'red-disabled-text', 'compound-cost-sell-check'], () => {
-                        gain(1, 'concreteAB3Quantity', 'autoBuyer', true, 'tier3', 'concrete', 'compounds')
-                    }, 'upgradeCheck', '', 'autoBuyer', null, 'concrete', true, 'tier3', 'compound'),
+                    createButton({
+                        text: `Add ${Math.floor(getResourceDataObject('compounds', ['concrete', 'upgrades', 'autoBuyer', 'tier3', 'rate']) * getTimerRateRatio())} Concrete /s`,
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check'],
+                        onClick: () => {
+                            gain(1, 'concreteAB3Quantity', 'autoBuyer', true, 'tier3', 'concrete', 'compounds')
+                        },
+                        dataConditionCheck: 'upgradeCheck',
+                        resourcePriceObject: '',
+                        objectSectionArgument1: 'autoBuyer',
+                        quantityArgument: 'concrete',
+                        disableKeyboardForButton: true,
+                        autoBuyerTier: 'tier3',
+                        rowCategory: 'compound'
+                    }),
                     createTextElement(`Quantity: ${getResourceDataObject('compounds', ['concrete', 'upgrades', 'autoBuyer', 'tier3', 'quantity'])}`, 'concreteAB3Quantity', ['autoBuyer-building-quantity']),
                     createToggleSwitch('concrete3Toggle', true, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'compounds', ['concrete', 'upgrades', 'autoBuyer', 'tier3', 'active']);
@@ -936,9 +1205,20 @@ export function drawTab4Content(heading, optionContentElement) {
                 renderNameABs: getResourceDataObject('compounds', ['concrete', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']),
                 labelText: 'Concrete Auto Buyer Tier 4:',
                 inputElements: [
-                    createButton(`Add ${Math.floor(getResourceDataObject('compounds', ['concrete', 'upgrades', 'autoBuyer', 'tier4', 'rate']) * getTimerRateRatio())} Concrete /s`, ['option-button', 'red-disabled-text', 'compound-cost-sell-check'], () => {
-                        gain(1, 'concreteAB4Quantity', 'autoBuyer', true, 'tier4', 'concrete', 'compounds')
-                    }, 'upgradeCheck', '', 'autoBuyer', null, 'concrete', true, 'tier4', 'compound'),
+                    createButton({
+                        text: `Add ${Math.floor(getResourceDataObject('compounds', ['concrete', 'upgrades', 'autoBuyer', 'tier4', 'rate']) * getTimerRateRatio())} Concrete /s`,
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check'],
+                        onClick: () => {
+                            gain(1, 'concreteAB4Quantity', 'autoBuyer', true, 'tier4', 'concrete', 'compounds')
+                        },
+                        dataConditionCheck: 'upgradeCheck',
+                        resourcePriceObject: '',
+                        objectSectionArgument1: 'autoBuyer',
+                        quantityArgument: 'concrete',
+                        disableKeyboardForButton: true,
+                        autoBuyerTier: 'tier4',
+                        rowCategory: 'compound'
+                    }),
                     createTextElement(`Quantity: ${getResourceDataObject('compounds', ['concrete', 'upgrades', 'autoBuyer', 'tier4', 'quantity'])}`, 'concreteAB4Quantity', ['autoBuyer-building-quantity']),
                     createToggleSwitch('concrete4Toggle', true, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'compounds', ['concrete', 'upgrades', 'autoBuyer', 'tier4', 'active']);
@@ -989,9 +1269,17 @@ export function drawTab4Content(heading, optionContentElement) {
                     ], 'fillToCapacity', (value) => {
                         setCreateCompoundPreview('water', value);
                     }),
-                    createButton('Create', ['option-button', 'red-disabled-text', 'compound-cost-sell-check', 'create'], () => {
-                        handleCompoundCreate('water');
-                    }, 'createCompound', null, null, null, 'water', true, null, 'compound'),
+                    createButton({
+                        text: 'Create',
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check', 'create'],
+                        onClick: () => {
+                            handleCompoundCreate('water');
+                        },
+                        dataConditionCheck: 'createCompound',
+                        quantityArgument: 'water',
+                        disableKeyboardForButton: true,
+                        rowCategory: 'compound'
+                    }),
                     createTextElement(`Auto:`, '', ['autoBuyer-building-quantity']),
                     createToggleSwitch('autoCreateToggle', false, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'compounds', ['water', 'autoCreate']);
@@ -1031,9 +1319,17 @@ export function drawTab4Content(heading, optionContentElement) {
                     ], getLastSellResourceCompoundDropdownOption('compounds', 'water'), (value) => {
                         setLastSellResourceCompoundDropdownOption('compounds', 'water', value);
                     }),
-                    createButton('Sell', ['option-button', 'red-disabled-text', 'compound-cost-sell-check', 'sell'], () => {
-                        sellCompound('water');
-                    }, 'sellCompound', null, null, null, 'water', true, null, 'compound'),
+                    createButton({
+                        text: 'Sell',
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check', 'sell'],
+                        onClick: () => {
+                            sellCompound('water');
+                        },
+                        dataConditionCheck: 'sellCompound',
+                        quantityArgument: 'water',
+                        disableKeyboardForButton: true,
+                        rowCategory: 'compound'
+                    }),
                     createTextElement(`Auto:`, '', ['autoBuyer-building-quantity']),
                     createToggleSwitch('autoSellToggle', false, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'compounds', ['water', 'autoSell']);
@@ -1062,12 +1358,22 @@ export function drawTab4Content(heading, optionContentElement) {
                 renderNameABs: null,
                 labelText: 'Enlarge Reservoir:',
                 inputElements: [
-                    createButton('Enlarge Reservoir', ['option-button', 'red-disabled-text', 'compound-cost-sell-check'], () => {
-                        increaseResourceStorage(['waterQuantity', 'concreteQuantity'], ['water', 'concrete'], ['compounds', 'compounds']);
-                        disableStorageNotificationActionIfShowing('water', 'Already Increased!');
-                        storagePrice = getResourceDataObject('compounds', ['water', 'storageCapacity']) - 1;
-                        extraResourceName = 'Concrete';
-                    }, 'upgradeCheck', '', 'storage', null, 'water', true, null, 'compound')
+                    createButton({
+                        text: 'Enlarge Reservoir',
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check'],
+                        onClick: () => {
+                            increaseResourceStorage(['waterQuantity', 'concreteQuantity'], ['water', 'concrete'], ['compounds', 'compounds']);
+                            disableStorageNotificationActionIfShowing('water', 'Already Increased!');
+                            storagePrice = getResourceDataObject('compounds', ['water', 'storageCapacity']) - 1;
+                            extraResourceName = 'Concrete';
+                        },
+                        dataConditionCheck: 'upgradeCheck',
+                        resourcePriceObject: '',
+                        objectSectionArgument1: 'storage',
+                        quantityArgument: 'water',
+                        disableKeyboardForButton: true,
+                        rowCategory: 'compound'
+                    })
                 ],
                 descriptionText: `${storagePrice + " " + getResourceDataObject('compounds', ['water', 'nameResource'])}, ${getResourceDataObject('compounds', ['concrete', 'currentSecondaryIncreasePrice'])} ${getResourceDataObject('compounds', ['concrete', 'nameResource'])}`,
                 resourcePriceObject: '',
@@ -1088,9 +1394,20 @@ export function drawTab4Content(heading, optionContentElement) {
                 renderNameABs: getResourceDataObject('compounds', ['water', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']),
                 labelText: 'Water Auto Buyer Tier 1:',
                 inputElements: [
-                    createButton(`Add ${Math.floor(getResourceDataObject('compounds', ['water', 'upgrades', 'autoBuyer', 'tier1', 'rate']) * getTimerRateRatio())} Water /s`, ['option-button', 'red-disabled-text', 'compound-cost-sell-check'], () => {
-                        gain(1, 'waterAB1Quantity', 'autoBuyer', true, 'tier1', 'water', 'compounds')
-                    }, 'upgradeCheck', '', 'autoBuyer', null, 'water', true, 'tier1', 'compound'),
+                    createButton({
+                        text: `Add ${Math.floor(getResourceDataObject('compounds', ['water', 'upgrades', 'autoBuyer', 'tier1', 'rate']) * getTimerRateRatio())} Water /s`,
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check'],
+                        onClick: () => {
+                            gain(1, 'waterAB1Quantity', 'autoBuyer', true, 'tier1', 'water', 'compounds')
+                        },
+                        dataConditionCheck: 'upgradeCheck',
+                        resourcePriceObject: '',
+                        objectSectionArgument1: 'autoBuyer',
+                        quantityArgument: 'water',
+                        disableKeyboardForButton: true,
+                        autoBuyerTier: 'tier1',
+                        rowCategory: 'compound'
+                    }),
                     createTextElement(`Quantity: ${getResourceDataObject('compounds', ['water', 'upgrades', 'autoBuyer', 'tier1', 'quantity'])}`, 'waterAB1Quantity', ['autoBuyer-building-quantity']),
                     createToggleSwitch('water1Toggle', true, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'compounds', ['water', 'upgrades', 'autoBuyer', 'tier1', 'active']);
@@ -1115,9 +1432,20 @@ export function drawTab4Content(heading, optionContentElement) {
                 renderNameABs: getResourceDataObject('compounds', ['water', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']),
                 labelText: 'Water Auto Buyer Tier 2:',
                 inputElements: [
-                    createButton(`Add ${Math.floor(getResourceDataObject('compounds', ['water', 'upgrades', 'autoBuyer', 'tier2', 'rate']) * getTimerRateRatio())} Water /s`, ['option-button', 'red-disabled-text', 'compound-cost-sell-check'], () => {
-                        gain(1, 'waterAB2Quantity', 'autoBuyer', true, 'tier2', 'water', 'compounds')
-                    }, 'upgradeCheck', '', 'autoBuyer', null, 'water', true, 'tier2', 'compound'),
+                    createButton({
+                        text: `Add ${Math.floor(getResourceDataObject('compounds', ['water', 'upgrades', 'autoBuyer', 'tier2', 'rate']) * getTimerRateRatio())} Water /s`,
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check'],
+                        onClick: () => {
+                            gain(1, 'waterAB2Quantity', 'autoBuyer', true, 'tier2', 'water', 'compounds')
+                        },
+                        dataConditionCheck: 'upgradeCheck',
+                        resourcePriceObject: '',
+                        objectSectionArgument1: 'autoBuyer',
+                        quantityArgument: 'water',
+                        disableKeyboardForButton: true,
+                        autoBuyerTier: 'tier2',
+                        rowCategory: 'compound'
+                    }),
                     createTextElement(`Quantity: ${getResourceDataObject('compounds', ['water', 'upgrades', 'autoBuyer', 'tier2', 'quantity'])}`, 'waterAB2Quantity', ['autoBuyer-building-quantity']),
                     createToggleSwitch('water2Toggle', true, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'compounds', ['water', 'upgrades', 'autoBuyer', 'tier2', 'active']);
@@ -1142,9 +1470,20 @@ export function drawTab4Content(heading, optionContentElement) {
                 renderNameABs: getResourceDataObject('compounds', ['water', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']),
                 labelText: 'Water Auto Buyer Tier 3:',
                 inputElements: [
-                    createButton(`Add ${Math.floor(getResourceDataObject('compounds', ['water', 'upgrades', 'autoBuyer', 'tier3', 'rate']) * getTimerRateRatio())} Water /s`, ['option-button', 'red-disabled-text', 'compound-cost-sell-check'], () => {
-                        gain(1, 'waterAB3Quantity', 'autoBuyer', true, 'tier3', 'water', 'compounds')
-                    }, 'upgradeCheck', '', 'autoBuyer', null, 'water', true, 'tier3', 'compound'),
+                    createButton({
+                        text: `Add ${Math.floor(getResourceDataObject('compounds', ['water', 'upgrades', 'autoBuyer', 'tier3', 'rate']) * getTimerRateRatio())} Water /s`,
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check'],
+                        onClick: () => {
+                            gain(1, 'waterAB3Quantity', 'autoBuyer', true, 'tier3', 'water', 'compounds')
+                        },
+                        dataConditionCheck: 'upgradeCheck',
+                        resourcePriceObject: '',
+                        objectSectionArgument1: 'autoBuyer',
+                        quantityArgument: 'water',
+                        disableKeyboardForButton: true,
+                        autoBuyerTier: 'tier3',
+                        rowCategory: 'compound'
+                    }),
                     createTextElement(`Quantity: ${getResourceDataObject('compounds', ['water', 'upgrades', 'autoBuyer', 'tier3', 'quantity'])}`, 'waterAB3Quantity', ['autoBuyer-building-quantity']),
                     createToggleSwitch('water3Toggle', true, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'compounds', ['water', 'upgrades', 'autoBuyer', 'tier3', 'active']);
@@ -1169,9 +1508,20 @@ export function drawTab4Content(heading, optionContentElement) {
                 renderNameABs: getResourceDataObject('compounds', ['water', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']),
                 labelText: 'Water Auto Buyer Tier 4:',
                 inputElements: [
-                    createButton(`Add ${Math.floor(getResourceDataObject('compounds', ['water', 'upgrades', 'autoBuyer', 'tier4', 'rate']) * getTimerRateRatio())} Water /s`, ['option-button', 'red-disabled-text', 'compound-cost-sell-check'], () => {
-                        gain(1, 'waterAB4Quantity', 'autoBuyer', true, 'tier4', 'water', 'compounds')
-                    }, 'upgradeCheck', '', 'autoBuyer', null, 'water', true, 'tier4', 'compound'),
+                    createButton({
+                        text: `Add ${Math.floor(getResourceDataObject('compounds', ['water', 'upgrades', 'autoBuyer', 'tier4', 'rate']) * getTimerRateRatio())} Water /s`,
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check'],
+                        onClick: () => {
+                            gain(1, 'waterAB4Quantity', 'autoBuyer', true, 'tier4', 'water', 'compounds')
+                        },
+                        dataConditionCheck: 'upgradeCheck',
+                        resourcePriceObject: '',
+                        objectSectionArgument1: 'autoBuyer',
+                        quantityArgument: 'water',
+                        disableKeyboardForButton: true,
+                        autoBuyerTier: 'tier4',
+                        rowCategory: 'compound'
+                    }),
                     createTextElement(`Quantity: ${getResourceDataObject('compounds', ['water', 'upgrades', 'autoBuyer', 'tier4', 'quantity'])}`, 'waterAB4Quantity', ['autoBuyer-building-quantity']),
                     createToggleSwitch('water4Toggle', true, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'compounds', ['water', 'upgrades', 'autoBuyer', 'tier4', 'active']);
@@ -1219,10 +1569,18 @@ export function drawTab4Content(heading, optionContentElement) {
                     ], 'fillToCapacity', (value) => {
                         setCreateCompoundPreview('titanium', value);
                     }),
-                    createButton('Create', ['option-button', 'red-disabled-text', 'compound-cost-sell-check', 'create'], () => {
-                        handleCompoundCreate('titanium');
-                        setAchievementFlagArray('createTitanium', 'add');
-                    }, 'createCompound', null, null, null, 'titanium', true, null, 'compound'),
+                    createButton({
+                        text: 'Create',
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check', 'create'],
+                        onClick: () => {
+                            handleCompoundCreate('titanium');
+                            setAchievementFlagArray('createTitanium', 'add');
+                        },
+                        dataConditionCheck: 'createCompound',
+                        quantityArgument: 'titanium',
+                        disableKeyboardForButton: true,
+                        rowCategory: 'compound'
+                    }),
                     createTextElement(`Auto:`, '', ['autoBuyer-building-quantity']),
                     createToggleSwitch('autoCreateToggle', false, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'compounds', ['titanium', 'autoCreate']);
@@ -1262,9 +1620,17 @@ export function drawTab4Content(heading, optionContentElement) {
                     ], getLastSellResourceCompoundDropdownOption('compounds', 'titanium'), (value) => {
                         setLastSellResourceCompoundDropdownOption('compounds', 'titanium', value);
                     }),
-                    createButton('Sell', ['option-button', 'red-disabled-text', 'compound-cost-sell-check', 'sell'], () => {
-                        sellCompound('titanium');
-                    }, 'sellCompound', null, null, null, 'titanium', true, null, 'compound'),
+                    createButton({
+                        text: 'Sell',
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check', 'sell'],
+                        onClick: () => {
+                            sellCompound('titanium');
+                        },
+                        dataConditionCheck: 'sellCompound',
+                        quantityArgument: 'titanium',
+                        disableKeyboardForButton: true,
+                        rowCategory: 'compound'
+                    }),
                     createTextElement(`Auto:`, '', ['autoBuyer-building-quantity']),
                     createToggleSwitch('autoSellToggle', false, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'compounds', ['titanium', 'autoSell']);
@@ -1293,11 +1659,21 @@ export function drawTab4Content(heading, optionContentElement) {
                 renderNameABs: null,
                 labelText: 'Increase Storage:',
                 inputElements: [
-                    createButton('Increase Storage', ['option-button', 'red-disabled-text', 'compound-cost-sell-check'], () => {
-                        increaseResourceStorage(['titaniumQuantity'], ['titanium'], ['compounds']);
-                        disableStorageNotificationActionIfShowing('titanium', 'Already Increased!');
-                        storagePrice = getResourceDataObject('compounds', ['titanium', 'storageCapacity']) - 1;
-                    }, 'upgradeCheck', '', 'storage', null, 'titanium', true, null, 'compound')
+                    createButton({
+                        text: 'Increase Storage',
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check'],
+                        onClick: () => {
+                            increaseResourceStorage(['titaniumQuantity'], ['titanium'], ['compounds']);
+                            disableStorageNotificationActionIfShowing('titanium', 'Already Increased!');
+                            storagePrice = getResourceDataObject('compounds', ['titanium', 'storageCapacity']) - 1;
+                        },
+                        dataConditionCheck: 'upgradeCheck',
+                        resourcePriceObject: '',
+                        objectSectionArgument1: 'storage',
+                        quantityArgument: 'titanium',
+                        disableKeyboardForButton: true,
+                        rowCategory: 'compound'
+                    })
                 ],
                 descriptionText: `${storagePrice + " " + getResourceDataObject('compounds', ['titanium', 'nameResource'])}`,
                 resourcePriceObject: '',
@@ -1318,9 +1694,20 @@ export function drawTab4Content(heading, optionContentElement) {
                 renderNameABs: getResourceDataObject('compounds', ['titanium', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']),
                 labelText: 'Titanium Auto Buyer Tier 1:',
                 inputElements: [
-                    createButton(`Add ${Math.floor(getResourceDataObject('compounds', ['titanium', 'upgrades', 'autoBuyer', 'tier1', 'rate']) * getTimerRateRatio())} Titanium /s`, ['option-button', 'red-disabled-text', 'compound-cost-sell-check'], () => {
-                        gain(1, 'titaniumAB1Quantity', 'autoBuyer', true, 'tier1', 'titanium', 'compounds')
-                    }, 'upgradeCheck', '', 'autoBuyer', null, 'titanium', true, 'tier1', 'compound'),
+                    createButton({
+                        text: `Add ${Math.floor(getResourceDataObject('compounds', ['titanium', 'upgrades', 'autoBuyer', 'tier1', 'rate']) * getTimerRateRatio())} Titanium /s`,
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check'],
+                        onClick: () => {
+                            gain(1, 'titaniumAB1Quantity', 'autoBuyer', true, 'tier1', 'titanium', 'compounds')
+                        },
+                        dataConditionCheck: 'upgradeCheck',
+                        resourcePriceObject: '',
+                        objectSectionArgument1: 'autoBuyer',
+                        quantityArgument: 'titanium',
+                        disableKeyboardForButton: true,
+                        autoBuyerTier: 'tier1',
+                        rowCategory: 'compound'
+                    }),
                     createTextElement(`Quantity: ${getResourceDataObject('compounds', ['titanium', 'upgrades', 'autoBuyer', 'tier1', 'quantity'])}`, 'titaniumAB1Quantity', ['autoBuyer-building-quantity']),
                     createToggleSwitch('titanium1Toggle', true, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'compounds', ['titanium', 'upgrades', 'autoBuyer', 'tier1', 'active']);
@@ -1345,9 +1732,20 @@ export function drawTab4Content(heading, optionContentElement) {
                 renderNameABs: getResourceDataObject('compounds', ['titanium', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']),
                 labelText: 'Titanium Auto Buyer Tier 2:',
                 inputElements: [
-                    createButton(`Add ${Math.floor(getResourceDataObject('compounds', ['titanium', 'upgrades', 'autoBuyer', 'tier2', 'rate']) * getTimerRateRatio())} Titanium /s`, ['option-button', 'red-disabled-text', 'compound-cost-sell-check'], () => {
-                        gain(1, 'titaniumAB2Quantity', 'autoBuyer', true, 'tier2', 'titanium', 'compounds')
-                    }, 'upgradeCheck', '', 'autoBuyer', null, 'titanium', true, 'tier2', 'compound'),
+                    createButton({
+                        text: `Add ${Math.floor(getResourceDataObject('compounds', ['titanium', 'upgrades', 'autoBuyer', 'tier2', 'rate']) * getTimerRateRatio())} Titanium /s`,
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check'],
+                        onClick: () => {
+                            gain(1, 'titaniumAB2Quantity', 'autoBuyer', true, 'tier2', 'titanium', 'compounds')
+                        },
+                        dataConditionCheck: 'upgradeCheck',
+                        resourcePriceObject: '',
+                        objectSectionArgument1: 'autoBuyer',
+                        quantityArgument: 'titanium',
+                        disableKeyboardForButton: true,
+                        autoBuyerTier: 'tier2',
+                        rowCategory: 'compound'
+                    }),
                     createTextElement(`Quantity: ${getResourceDataObject('compounds', ['titanium', 'upgrades', 'autoBuyer', 'tier2', 'quantity'])}`, 'titaniumAB2Quantity', ['autoBuyer-building-quantity']),
                     createToggleSwitch('titanium2Toggle', true, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'compounds', ['titanium', 'upgrades', 'autoBuyer', 'tier2', 'active']);
@@ -1372,9 +1770,20 @@ export function drawTab4Content(heading, optionContentElement) {
                 renderNameABs: getResourceDataObject('compounds', ['titanium', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']),
                 labelText: 'Titanium Auto Buyer Tier 3:',
                 inputElements: [
-                    createButton(`Add ${Math.floor(getResourceDataObject('compounds', ['titanium', 'upgrades', 'autoBuyer', 'tier3', 'rate']) * getTimerRateRatio())} Titanium /s`, ['option-button', 'red-disabled-text', 'compound-cost-sell-check'], () => {
-                        gain(1, 'titaniumAB3Quantity', 'autoBuyer', true, 'tier3', 'titanium', 'compounds')
-                    }, 'upgradeCheck', '', 'autoBuyer', null, 'titanium', true, 'tier3', 'compound'),
+                    createButton({
+                        text: `Add ${Math.floor(getResourceDataObject('compounds', ['titanium', 'upgrades', 'autoBuyer', 'tier3', 'rate']) * getTimerRateRatio())} Titanium /s`,
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check'],
+                        onClick: () => {
+                            gain(1, 'titaniumAB3Quantity', 'autoBuyer', true, 'tier3', 'titanium', 'compounds')
+                        },
+                        dataConditionCheck: 'upgradeCheck',
+                        resourcePriceObject: '',
+                        objectSectionArgument1: 'autoBuyer',
+                        quantityArgument: 'titanium',
+                        disableKeyboardForButton: true,
+                        autoBuyerTier: 'tier3',
+                        rowCategory: 'compound'
+                    }),
                     createTextElement(`Quantity: ${getResourceDataObject('compounds', ['titanium', 'upgrades', 'autoBuyer', 'tier3', 'quantity'])}`, 'titaniumAB3Quantity', ['autoBuyer-building-quantity']),
                     createToggleSwitch('titanium3Toggle', true, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'compounds', ['titanium', 'upgrades', 'autoBuyer', 'tier3', 'active']);
@@ -1399,9 +1808,20 @@ export function drawTab4Content(heading, optionContentElement) {
                 renderNameABs: getResourceDataObject('compounds', ['titanium', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']),
                 labelText: 'Titanium Auto Buyer Tier 4:',
                 inputElements: [
-                    createButton(`Add ${Math.floor(getResourceDataObject('compounds', ['titanium', 'upgrades', 'autoBuyer', 'tier4', 'rate']) * getTimerRateRatio())} Titanium /s`, ['option-button', 'red-disabled-text', 'compound-cost-sell-check'], () => {
-                        gain(1, 'titaniumAB4Quantity', 'autoBuyer', true, 'tier4', 'titanium', 'compounds')
-                    }, 'upgradeCheck', '', 'autoBuyer', null, 'titanium', true, 'tier4', 'compound'),
+                    createButton({
+                        text: `Add ${Math.floor(getResourceDataObject('compounds', ['titanium', 'upgrades', 'autoBuyer', 'tier4', 'rate']) * getTimerRateRatio())} Titanium /s`,
+                        classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check'],
+                        onClick: () => {
+                            gain(1, 'titaniumAB4Quantity', 'autoBuyer', true, 'tier4', 'titanium', 'compounds')
+                        },
+                        dataConditionCheck: 'upgradeCheck',
+                        resourcePriceObject: '',
+                        objectSectionArgument1: 'autoBuyer',
+                        quantityArgument: 'titanium',
+                        disableKeyboardForButton: true,
+                        autoBuyerTier: 'tier4',
+                        rowCategory: 'compound'
+                    }),
                     createTextElement(`Quantity: ${getResourceDataObject('compounds', ['titanium', 'upgrades', 'autoBuyer', 'tier4', 'quantity'])}`, 'titaniumAB4Quantity', ['autoBuyer-building-quantity']),
                     createToggleSwitch('titanium4Toggle', true, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'compounds', ['titanium', 'upgrades', 'autoBuyer', 'tier4', 'active']);

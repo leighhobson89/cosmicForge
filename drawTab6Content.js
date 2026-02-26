@@ -4,7 +4,7 @@ import { getRocketPartsNeededInTotalPerRocket, getRocketParts, getResourceDataOb
 import { startTravelToAndFromAsteroidTimer, startInvestigateStarTimer, startSearchAsteroidTimer, launchRocket, gain, startUpdateTimersAndRates, addBuildingPotentialRate, buildSpaceMiningBuilding, addToResourceAllTimeStat, startPillageVoidTimer } from './game.js';
 import { timerManagerDelta } from './timerManagerDelta.js';
 
-import { removeTabAttentionIfNoIndicators, createSvgElement, createDropdown, createToggleSwitch, handleSortAsteroidClick, sortAsteroidTable, switchFuelGaugeWhenFuellerBought, createTextElement, createOptionRow, createButton, createButtonV2, setupInfoTooltips,showNotification, renameRocket } from './ui.js';
+import { removeTabAttentionIfNoIndicators, createSvgElement, createDropdown, createToggleSwitch, handleSortAsteroidClick, sortAsteroidTable, switchFuelGaugeWhenFuellerBought, createTextElement, createOptionRow, createButton, setupInfoTooltips,showNotification, renameRocket } from './ui.js';
 import { capitaliseString } from './utilityFunctions.js';
 import { sfxPlayer } from './audioManager.js'
 
@@ -49,7 +49,7 @@ export function drawTab6Content(heading, optionContentElement) {
             renderNameABs: null,
             labelText: 'Space Telescope:',
             inputElements: [
-                createButtonV2({
+                createButton({
                     text: `Build Space Telescope`,
                     classNames: ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check', 'spaceTelescope'],
                     onClick: () => {
@@ -143,7 +143,7 @@ export function drawTab6Content(heading, optionContentElement) {
             renderNameABs: 'Scan Asteroids',
             labelText: 'Scan Asteroids',
             inputElements: [
-                createButtonV2({
+                createButton({
                     text: `Scan Asteroids`,
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
@@ -189,7 +189,7 @@ export function drawTab6Content(heading, optionContentElement) {
             inputElements: [
                 (() => {
                     const extraClasses = getDemoBuild() ? ['electron-purple-demo-button'] : [];
-                    return createButtonV2({
+                    return createButton({
                         text: `Study Stars`,
                         classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', ...extraClasses],
                         onClick: () => {
@@ -234,7 +234,7 @@ export function drawTab6Content(heading, optionContentElement) {
             renderNameABs: 'Pillage The Void',
             labelText: 'Pillage The Void',
             inputElements: [
-                createButtonV2({
+                createButton({
                     text: `Pillage the Void`,
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'pillageVoid'],
                     onClick: () => {
@@ -316,7 +316,7 @@ export function drawTab6Content(heading, optionContentElement) {
             renderNameABs: null,
             labelText: 'Launch Pad:',
             inputElements: [
-                createButtonV2({
+                createButton({
                     text: `Build Launch Pad`,
                     classNames: ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check', 'launchPad'],
                     onClick: () => {
@@ -376,7 +376,7 @@ export function drawTab6Content(heading, optionContentElement) {
                 renderNameABs: null,
                 labelText: `${rocket.label}:`,
                 inputElements: [
-                    createButtonV2({
+                    createButton({
                         text: `Build Rocket Part`,
                         classNames: ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check', ...extraClasses],
                         onClick: () => {
@@ -663,7 +663,7 @@ function createRocketUI(rocketId, optionContentElement, asteroids, asteroidsBein
     });
 
     document.getElementById(`${rocketId}-rename-btn`).appendChild(
-        createButtonV2({
+        createButton({
             text: 'Rename',
             classNames: ['option-button', 'rename-rocket'],
             onClick: () => { 
@@ -700,7 +700,7 @@ function createRocketUI(rocketId, optionContentElement, asteroids, asteroidsBein
         renderNameABs: getResourceDataObject('space', ['upgrades', rocketId, 'autoBuyer', 'tier1', 'nameUpgrade']),
         labelText: 'Fuel:',
         inputElements: [
-            createButtonV2({
+            createButton({
                 text: `Fuel Rocket`,
                 classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', rocketId],
                 onClick: () => {
@@ -718,7 +718,7 @@ function createRocketUI(rocketId, optionContentElement, asteroids, asteroidsBein
                 rowCategory: 'rocketFuel'
             }),
             createTextElement(`<div id="${rocketId}FuellingProgressBar">`, `${rocketId}FuellingProgressBarContainer`, ['progress-bar-container', 'invisible']),
-            createButtonV2({
+            createButton({
                 text: `Power Off!`,
                 classNames: ['option-button', 'red-disabled-text', 'rocket-fuelled-check', `${rocketId}-launch-button`, 'invisible'],
                 onClick: () => {
@@ -762,7 +762,7 @@ function createRocketUI(rocketId, optionContentElement, asteroids, asteroidsBein
                 '', (value) => {
                     setDestinationAsteroid(rocketId, value);
                 }, ['travel-to']),
-            createButtonV2({
+            createButton({
                 text: `Travel`,
                 classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', `${rocketId}-travel-to-asteroid-button`],
                 onClick: () => {

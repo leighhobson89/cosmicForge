@@ -1,4 +1,4 @@
-import { removeTabAttentionIfNoIndicators, createColoniseOpinionProgressBar, setColoniseOpinionProgressBar, spaceTravelButtonHideAndShowDescription, setupInfoTooltips, drawStarConnectionDrawings, createStarDestinationRow, sortStarTable, handleSortStarClick, createTextElement, createOptionRow, createButton, createButtonV2, generateStarfield, showNotification, showEnterWarModeModal, setWarUI, removeStarConnectionTooltip } from './ui.js';
+import { removeTabAttentionIfNoIndicators, createColoniseOpinionProgressBar, setColoniseOpinionProgressBar, spaceTravelButtonHideAndShowDescription, setupInfoTooltips, drawStarConnectionDrawings, createStarDestinationRow, sortStarTable, handleSortStarClick, createTextElement, createOptionRow, createButton, generateStarfield, showNotification, showEnterWarModeModal, setWarUI, removeStarConnectionTooltip } from './ui.js';
 import { sfxPlayer } from './audioManager.js';
 import { getStarNames, getStarTypeByName } from './descriptions.js';
 import { getFactoryStarsArray, getSettledStars, setInFormation, setRedrawBattleDescription, setFleetChangedSinceLastDiplomacy, setDestinationStarScanned, getDestinationStarScanned, getStellarScannerBuilt, getStarShipTravelling, getDestinationStar, getCurrencySymbol, getSortStarMethod, getCurrentStarSystem, STAR_FIELD_SEED, NUMBER_OF_STARS, getStarMapMode, setStarMapMode, getWarMode, replaceBattleUnits, setNeedNewBattleCanvas, setFormationGoal, setBattleResolved, getBelligerentEnemyFlag, setAchievementFlagArray, getStarsWithAncientManuscripts, getStarShipDestinationReminderVisible, getStarVisionDistance, getMiaplacidusMilestoneLevel, getCurrentTheme } from './constantsAndGlobalVars.js';
@@ -121,7 +121,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
         const buttons = ['Normal', 'Distance', 'Studied', 'In Range'];
         
         buttons.forEach(button => {
-            const buttonElement = createButtonV2({
+            const buttonElement = createButton({
                 text: button,
                 classNames: ['option-button', 'star-option-button'],
                 onClick: () => { 
@@ -730,7 +730,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                     renderNameABs: null,
                     labelText: `${module.label}:`,
                     inputElements: [
-                        createButtonV2({
+                        createButton({
                             text: `Build Module`,
                             classNames: ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check'],
                             onClick: () => {
@@ -797,7 +797,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                 renderNameABs: null,
                 labelText: `Perform System Scan:`,
                 inputElements: [
-                    createButtonV2({
+                    createButton({
                         text: `Scan System`,
                         classNames: ['option-button', 'green-ready-text'],
                         onClick: () => {
@@ -1169,7 +1169,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                 renderNameABs: null,
                 labelText: `${fleetShip.label}:`,
                 inputElements: [
-                    createButtonV2({
+                    createButton({
                         text: `Build`,
                         classNames: ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check'],
                         onClick: () => {
@@ -1251,7 +1251,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                 renderNameABs: null,
                 labelText: 'Relations:',
                 inputElements: [
-                    createButtonV2({
+                    createButton({
                         text: `Bully`,
                         classNames: ['option-button', 'red-disabled-text', 'diplomacy-button', 'bully'],
                         onClick: () => {
@@ -1261,7 +1261,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                         disableKeyboardForButton: true,
                         rowCategory: 'diplomacy'
                     }),
-                    createButtonV2({
+                    createButton({
                         text: `Passive`,
                         classNames: ['option-button', 'red-disabled-text', 'diplomacy-button', 'passive'],
                         onClick: () => {
@@ -1270,7 +1270,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                         disableKeyboardForButton: true,
                         rowCategory: 'diplomacy'
                     }),
-                    createButtonV2({
+                    createButton({
                         text: `Harmony`,
                         classNames: ['option-button', 'red-disabled-text', 'diplomacy-button', 'harmony'],
                         onClick: () => {
@@ -1279,7 +1279,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                         disableKeyboardForButton: true,
                         rowCategory: 'diplomacy'
                     }),
-                    createButtonV2({
+                    createButton({
                         text: `Vassalize`,
                         classNames: ['option-button', 'red-disabled-text', 'diplomacy-button', 'vassalize'],
                         onClick: () => {
@@ -1288,7 +1288,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                         disableKeyboardForButton: true,
                         rowCategory: 'diplomacy'
                     }),
-                    createButtonV2({
+                    createButton({
                         text: `Conquest`,
                         classNames: ['option-button', 'red-disabled-text', 'diplomacy-button', 'conquest'],
                         onClick: () => {

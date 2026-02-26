@@ -1,5 +1,5 @@
 import { getCurrentOptionPane, getCurrentTheme, setAutoSaveToggle, getAutoSaveToggle, getAutoSaveFrequency, setAutoSaveFrequency, getSaveData, setSaveData, getCurrencySymbol, setCurrencySymbol, getNotationType, setNotationType, setNotificationsToggle, getNotificationsToggle, getSaveName, getWeatherEffectSetting, setWeatherEffectSetting, setNewsTickerSetting, getNewsTickerSetting, setSaveExportCloudFlag, getBackgroundAudio, setBackgroundAudio, getSfx, setSfx, setWasAutoSaveToggled, setMouseParticleTrailEnabled, getMouseParticleTrailEnabled, setCustomPointerEnabled, getCustomPointerEnabled, getOnboardingMode, getDemoBuild } from './constantsAndGlobalVars.js';
-import { createButton, createButtonV2, createTextFieldArea, createOptionRow, createDropdown, createToggleSwitch, createHtmlTableAchievementsGrid, createHtmlTableStatistics, createHtmlTextAreaProse, toggleGameFullScreen, selectTheme, callPopupModal, showHideModal, showNotification, applyCustomPointerSetting, setElementPointerEvents, fadeInStartupOverlay, setupAchievementTooltip } from './ui.js';
+import { createButton, createTextFieldArea, createOptionRow, createDropdown, createToggleSwitch, createHtmlTableAchievementsGrid, createHtmlTableStatistics, createHtmlTextAreaProse, toggleGameFullScreen, selectTheme, callPopupModal, showHideModal, showNotification, applyCustomPointerSetting, setElementPointerEvents, fadeInStartupOverlay, setupAchievementTooltip } from './ui.js';
 import { importSaveStringFileFromComputer, downloadSaveStringToComputer, initializeAutoSave, saveGame, saveGameToCloud, loadGameFromCloud, copySaveStringToClipBoard, loadGame, destroySaveGameOnCloud } from './saveLoadGame.js';
 import { hardResetWarningHeader, hardResetWarningText, getStatisticsContent, getHelpContent } from './descriptions.js';
 import { setAchievementIconImageUrls, getAchievementPositionData } from './resourceDataObject.js';
@@ -24,7 +24,7 @@ export function drawTab9Content(heading, optionContentElement) {
             renderNameABs: null,
             labelText: 'Exit Game:',
             inputElements: [
-                createButtonV2({
+                createButton({
                     text: 'EXIT GAME',
                     classNames: ['option-button', 'green-ready-text'],
                     onClick: () => {
@@ -396,7 +396,7 @@ export function drawTab9Content(heading, optionContentElement) {
             renderNameABs: null,
             labelText: 'Toggle Full Screen:',
             inputElements: [
-                createButtonV2({
+                createButton({
                     text: `Toggle`,
                     classNames: ['option-button', 'full-screen-button'],
                     onClick: () => {
@@ -597,14 +597,14 @@ export function drawTab9Content(heading, optionContentElement) {
             labelText: 'Export Save:',
             inputElements: [
                 createTextFieldArea('exportSaveArea', ['export-save'], 'Save Data should appear here', null),
-                createButtonV2({
+                createButton({
                     text: `Export`,
                     classNames: ['option-button', 'save-load-button', ...demoExtraClasses],
                     onClick: () => {
                         copySaveStringToClipBoard();
                     },
                 }),
-                createButtonV2({
+                createButton({
                     text: `Manual Save`,
                     classNames: ['option-button', 'save-load-file-export', ...demoExtraClasses],
                     onClick: () => {
@@ -635,14 +635,14 @@ export function drawTab9Content(heading, optionContentElement) {
             labelText: 'Import Save:',
             inputElements: [
                 createTextFieldArea('importSaveArea', ['import-save'], 'Please paste your Save Data here...', null),
-                createButtonV2({
+                createButton({
                     text: `Import`,
                     classNames: ['option-button', 'save-load-button', ...demoExtraClasses],
                     onClick: () => {
                         loadGame();
                     },
                 }),
-                createButtonV2({
+                createButton({
                     text: `Manual Load`,
                     classNames: ['option-button', 'save-load-file-export', ...demoExtraClasses],
                     onClick: () => {
@@ -672,7 +672,7 @@ export function drawTab9Content(heading, optionContentElement) {
             renderNameABs: null,
             labelText: 'Export Cloud Save:',
             inputElements: [
-                createButtonV2({
+                createButton({
                     text: `Save To Cloud`,
                     classNames: ['option-button', 'save-load-button', ...demoExtraClasses],
                     onClick: () => {
@@ -715,7 +715,7 @@ export function drawTab9Content(heading, optionContentElement) {
             renderNameABs: null,
             labelText: 'Import Cloud Save:',
             inputElements: [
-                createButtonV2({
+                createButton({
                     text: `Load From Cloud`,
                     classNames: ['option-button', 'save-load-button', ...demoExtraClasses],
                     onClick: () => {
@@ -745,7 +745,7 @@ export function drawTab9Content(heading, optionContentElement) {
             renderNameABs: null,
             labelText: 'HARD RESET:',
             inputElements: [
-                createButtonV2({
+                createButton({
                     text: `!!!RESET ALL GAME PROGRESS FOR THIS PIONEER NAME!!!`,
                     classNames: ['option-button', 'hard-reset-button'],
                     onClick: () => {

@@ -1,4 +1,4 @@
-import { removeTabAttentionIfNoIndicators, createOptionRow, createButton, createButtonV2, createDropdown, createTextElement, createTextFieldArea, createSpinningDropdown, callPopupModal, showHideModal, createMegaStructureDiagram, createMegaStructureTable, createBlackHole, setButtonState, showNotification, updateDescriptionRow, setupInfoTooltips } from './ui.js';
+import { removeTabAttentionIfNoIndicators, createOptionRow, createButton, createDropdown, createTextElement, createTextFieldArea, createSpinningDropdown, callPopupModal, showHideModal, createMegaStructureDiagram, createMegaStructureTable, createBlackHole, setButtonState, showNotification, updateDescriptionRow, setupInfoTooltips } from './ui.js';
 import {
     getStarsWithAncientManuscripts,
     getDestinationStar,
@@ -95,7 +95,7 @@ export function drawTab7Content(heading, optionContentElement) {
             renderNameABs: null,
             labelText: 'Rebirth:',
             inputElements: [
-                createButtonV2({
+                createButton({
                     text: `REBIRTH`,
                     classNames: ['option-button', 'red-disabled-text', 'rebirth-check'],
                     onClick: () => {
@@ -160,7 +160,7 @@ export function drawTab7Content(heading, optionContentElement) {
                 ], 'no', (value) => {
                     setGalacticMarketLiquidationAuthorization(value);
                 }),
-                createButtonV2({
+                createButton({
                     text: `LIQUIDATE`,
                     classNames: ['option-button', 'red-disabled-text', 'galactic-market-confirm-liquidate-button'],
                     onClick: () => {
@@ -310,7 +310,7 @@ export function drawTab7Content(heading, optionContentElement) {
                 createTextElement(`Trade <span id="galacticMarketOutgoingQuantityText" class="green-ready-text notation">999</span> <span id="galacticMarketOutgoingStockTypeText" class="green-ready-text">Hydrogen</span>`, 'galacticMarketSummaryOutgoing', ['galactic-market-summary-text'], null),
                 createTextElement(`for <span id="galacticMarketIncomingQuantityText" class="green-ready-text notation">12</span> <span id="galacticMarketIncomingStockTypeText" class="green-ready-text">Diesel</span>`, 'galacticMarketSummaryIncoming', ['galactic-market-summary-text'], null),
                 createTextElement(`Commission: <span id="galacticMarketComissionQuantitySummaryText" class="warning-orange-text">49</span> <span id="galacticMarketComissionQuantityStockTypeText" class="warning-orange-text">Hydrogen</span>`, 'galacticMarketSummaryCommission', ['galactic-market-summary-text-wide'], null),
-                createButtonV2({
+                createButton({
                     text: `CONFIRM`,
                     classNames: ['option-button', 'red-disabled-text', 'galactic-market-confirm-trade-button'],
                     onClick: () => {
@@ -348,7 +348,7 @@ export function drawTab7Content(heading, optionContentElement) {
                 ], 'select', (value) => {
                     setGalacticMarketSellApForCashQuantity(value);
                 }),
-                createButtonV2({
+                createButton({
                     text: `SELL`,
                     classNames: ['option-button', 'red-disabled-text', 'galactic-market-confirm-sell-ap-button'],
                     onClick: () => {
@@ -405,7 +405,7 @@ export function drawTab7Content(heading, optionContentElement) {
                     setGalacticCasinoPurchaseItem(value);
                 }, ['galactic-casino-dropdown']),
                 createTextFieldArea('galacticCasinoPurchaseQuantityTextArea', ['galactic-market-textarea', 'galactic-casino-quantity-textarea'], 'Buy CP Quantity', ''),
-                createButtonV2({
+                createButton({
                     text: `BUY`,
                     classNames: ['option-button', 'red-disabled-text', 'galactic-casino-buy-cp-button'],
                     onClick: () => {
@@ -452,7 +452,7 @@ export function drawTab7Content(heading, optionContentElement) {
             'win',
             ['galactic-casino-spinner']
         );
-        const game1SpinButton = createButtonV2({
+        const game1SpinButton = createButton({
             text: 'SPIN',
             classNames: ['id_galacticCasinoGame1SpinButton', 'option-button', 'red-disabled-text', 'galactic-casino-spin-button'],
             onClick: () => {
@@ -507,7 +507,7 @@ export function drawTab7Content(heading, optionContentElement) {
         wheelIndicator.classList.add('galactic-casino-roulette-indicator');
         wheel.appendChild(wheelIndicator);
 
-        const game2SpinButton = createButtonV2({
+        const game2SpinButton = createButton({
             text: 'SPIN WHEEL',
             classNames: ['id_galacticCasinoGame2SpinWheelButton', 'option-button', 'red-disabled-text', 'galactic-casino-spin-button', 'galactic-casino-wheel-spin-button'],
             onClick: () => {
@@ -552,7 +552,7 @@ export function drawTab7Content(heading, optionContentElement) {
         prizeDropdown.classList.add('dropdown-disabled-red');
         prizeDropdown.style.pointerEvents = 'none';
 
-        const claimButton = createButtonV2({
+        const claimButton = createButton({
             text: 'CLAIM',
             classNames: ['id_galacticCasinoGame2ClaimButton', 'option-button', 'red-disabled-text', 'galactic-casino-spin-button'],
             onClick: () => {
@@ -741,7 +741,7 @@ export function drawTab7Content(heading, optionContentElement) {
             ['galactic-casino-wheel-prize-dropdown']
         );
 
-        const game4SpinButton = createButtonV2({
+        const game4SpinButton = createButton({
             text: 'SPIN',
             classNames: ['galacticCasinoGame4SpinButton', 'id_galacticCasinoGame4SpinButton', 'option-button', 'red-disabled-text', 'galactic-casino-spin-button'],
             onClick: () => {
@@ -914,7 +914,7 @@ export function drawTab7Content(heading, optionContentElement) {
             game3CardRow.appendChild(card);
         }
 
-        const game3LowerButton = createButtonV2({
+        const game3LowerButton = createButton({
             text: 'LOWER',
             classNames: ['id_galacticCasinoGame3LowerButton', 'option-button', 'red-disabled-text', 'galactic-casino-spin-button'],
             onClick: () => {
@@ -923,7 +923,7 @@ export function drawTab7Content(heading, optionContentElement) {
             rowCategory: 'galacticCasinoGame3'
         });
 
-        const game3HigherButton = createButtonV2({
+        const game3HigherButton = createButton({
             text: 'HIGHER',
             classNames: ['id_galacticCasinoGame3HigherButton', 'option-button', 'red-disabled-text', 'galactic-casino-spin-button'],
             onClick: () => {
@@ -1540,7 +1540,7 @@ export function drawTab7Content(heading, optionContentElement) {
             }
         };
 
-        const game3CashOutButton = createButtonV2({
+        const game3CashOutButton = createButton({
             text: 'PLAY',
             classNames: ['id_galacticCasinoGame3CashOutButton', 'option-button', 'green-ready-text', 'galactic-casino-spin-button'],
             onClick: () => {
@@ -1738,7 +1738,7 @@ export function drawTab7Content(heading, optionContentElement) {
                         ['buff-value']
                     ),                
                     createTextElement(buyStatus, `buff${capitaliseString(buffKey)}BuyStatusText`, ['buff-value']),
-                    createButtonV2({
+                    createButton({
                         text: `BUY`,
                         classNames: ['option-button', 'red-disabled-text', 'ascendency-buff-button', `buff-class-${buffNameSlug}`],
                         onClick: () => {
@@ -1935,7 +1935,7 @@ export function drawTab7Content(heading, optionContentElement) {
         blackHoleCanvasContainer.style.height = '220px';
         blackHoleCanvasContainer.style.flex = '0 0 auto';
 
-        const blackHoleButton1 = createButtonV2({
+        const blackHoleButton1 = createButton({
             text: 'Research Black Hole',
             classNames: ['id_blackHoleResearchButton', 'option-button', 'red-disabled-text', 'wide-option-button'],
             onClick: () => {
@@ -1972,7 +1972,7 @@ export function drawTab7Content(heading, optionContentElement) {
                 startBlackHoleChargeTimer([0, 'researchComplete']);
             }
         });
-        const blackHoleButton2 = createButtonV2({
+        const blackHoleButton2 = createButton({
             text: 'Power',
             classNames: ['id_blackHoleButton2', 'option-button', 'wide-option-button', 'option-button--wrap'],
             onClick: () => {
@@ -1995,7 +1995,7 @@ export function drawTab7Content(heading, optionContentElement) {
                 setBlackHolePower(currentPower + increment);
             }
         });
-        const blackHoleButton3 = createButtonV2({
+        const blackHoleButton3 = createButton({
             text: 'Duration',
             classNames: ['id_blackHoleButton3', 'option-button', 'wide-option-button', 'option-button--wrap'],
             onClick: () => {
@@ -2022,7 +2022,7 @@ export function drawTab7Content(heading, optionContentElement) {
                 setBlackHoleDuration(getBlackHoleDuration() + getBlackHoleDurationUpgradeIncrementMs());
             }
         });
-        const blackHoleButton4 = createButtonV2({
+        const blackHoleButton4 = createButton({
             text: 'Recharge',
             classNames: ['id_blackHoleButton4', 'option-button', 'wide-option-button', 'option-button--wrap'],
             onClick: () => {
@@ -2073,7 +2073,7 @@ export function drawTab7Content(heading, optionContentElement) {
                 }
             }
         });
-        const blackHoleActivateChargeButton = createButtonV2({
+        const blackHoleActivateChargeButton = createButton({
             text: 'Charge',
             classNames: ['id_blackHoleChargeButton', 'option-button'],
             onClick: () => {

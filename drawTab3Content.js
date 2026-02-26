@@ -59,16 +59,28 @@ export function drawTab3Content(heading, optionContentElement) {
                 renderNameABs: null,
                 labelText: 'Science Kit:',
                 inputElements: [
-                    createButton(`Add ${getResourceDataObject('research', ['upgrades', 'scienceKit', 'rate']) * getTimerRateRatio()} Research /s`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check'], () => {
-                        gain(1, 'scienceKitQuantity', 'scienceKit', false, null, 'scienceUpgrade', 'resources');
-                        addToResourceAllTimeStat(1, 'scienceKits');
+                    createButton({
+                        text: `Add ${getResourceDataObject('research', ['upgrades', 'scienceKit', 'rate']) * getTimerRateRatio()} Research /s`,
+                        classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
+                        onClick: () => {
+                            gain(1, 'scienceKitQuantity', 'scienceKit', false, null, 'scienceUpgrade', 'resources');
+                            addToResourceAllTimeStat(1, 'scienceKits');
                             deferredActions.push(() => {
                                 if (getCanAffordDeferred()) {
                                     startUpdateTimersAndRates('scienceKit');
                                 }
                                 setCanAffordDeferred(null);
                             });
-                    }, 'upgradeCheck', '', 'scienceUpgrade', 'scienceKit', 'cash', true, null, 'science'),
+                        },
+                        dataConditionCheck: 'upgradeCheck',
+                        resourcePriceObject: '',
+                        objectSectionArgument1: 'scienceUpgrade',
+                        objectSectionArgument2: 'scienceKit',
+                        quantityArgument: 'cash',
+                        disableKeyboardForButton: true,
+                        autoBuyerTier: null,
+                        rowCategory: 'science'
+                    }),
                     createTextElement(`Quantity: ${getResourceDataObject('research', ['upgrades', 'scienceKit', 'quantity'])}`, 'scienceKitQuantity', ['science-building-quantity']),
                     createToggleSwitch('scienceKitToggle', true, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'research', ['upgrades', 'scienceKit', 'active']);
@@ -93,22 +105,34 @@ export function drawTab3Content(heading, optionContentElement) {
                 renderNameABs: null,
                 labelText: 'Open Science Club:',
                 inputElements: [
-                    createButton(`Add ${getResourceDataObject('research', ['upgrades', 'scienceClub', 'rate']) * getTimerRateRatio()} Research /s`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check'], () => {
-                        gain(1, 'scienceClubQuantity', 'scienceClub', false, null, 'scienceUpgrade', 'resources');
-                        addToResourceAllTimeStat(1, 'scienceClubs');
-                        deferredActions.push(() => {
-                            if (getCanAffordDeferred()) {
-                                startUpdateTimersAndRates('scienceClub');
-                            }
-                            setCanAffordDeferred(null);
-                        });
-                    }, 'upgradeCheck', '', 'scienceUpgrade', 'scienceClub', 'cash', true, null, 'science'),
+                    createButton({
+                        text: `Add ${getResourceDataObject('research', ['upgrades', 'scienceClub', 'rate']) * getTimerRateRatio()} Research /s`,
+                        classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
+                        onClick: () => {
+                            gain(1, 'scienceClubQuantity', 'scienceClub', false, null, 'scienceUpgrade', 'resources');
+                            addToResourceAllTimeStat(1, 'scienceClubs');
+                            deferredActions.push(() => {
+                                if (getCanAffordDeferred()) {
+                                    startUpdateTimersAndRates('scienceClub');
+                                }
+                                setCanAffordDeferred(null);
+                            });
+                        },
+                        dataConditionCheck: 'upgradeCheck',
+                        resourcePriceObject: '',
+                        objectSectionArgument1: 'scienceUpgrade',
+                        objectSectionArgument2: 'scienceClub',
+                        quantityArgument: 'cash',
+                        disableKeyboardForButton: true,
+                        autoBuyerTier: null,
+                        rowCategory: 'science'
+                    }),
                     createTextElement(`Quantity: ${getResourceDataObject('research', ['upgrades', 'scienceClub', 'quantity'])}`, 'scienceClubQuantity', ['science-building-quantity']),
                     createToggleSwitch('scienceClubToggle', true, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'research', ['upgrades', 'scienceClub', 'active']);
                     }, ['toggle-switch-spacing']),
                 ],
-                descriptionText: `${getResourceDataObject('research', ['upgrades', 'scienceClub', 'price']) + ' Research'}`,
+                descriptionText: `${getResourceDataObject('research', ['upgrades', 'scienceClub', 'price']) + '$'}`,
                 resourcePriceObject: '',
                 dataConditionCheck: 'upgradeCheck',
                 objectSectionArgument1: 'scienceUpgrade',
@@ -127,22 +151,34 @@ export function drawTab3Content(heading, optionContentElement) {
                 renderNameABs: null,
                 labelText: 'Open Science Lab:',
                 inputElements: [
-                    createButton(`Add ${getResourceDataObject('research', ['upgrades', 'scienceLab', 'rate']) * getTimerRateRatio()} Research /s`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', ...demoExtraClasses], () => {
-                        gain(1, 'scienceLabQuantity', 'scienceLab', false, null, 'scienceUpgrade', 'resources');
-                        addToResourceAllTimeStat(1, 'scienceLabs');
-                        deferredActions.push(() => {
-                            if (getCanAffordDeferred()) {
-                                startUpdateTimersAndRates('scienceLab');
-                            }
-                            setCanAffordDeferred(null);
-                        });
-                    }, 'upgradeCheck', '', 'scienceUpgrade', 'scienceLab', 'cash', true, null, 'science'),
+                    createButton({
+                        text: `Add ${getResourceDataObject('research', ['upgrades', 'scienceLab', 'rate']) * getTimerRateRatio()} Research /s`,
+                        classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', ...demoExtraClasses],
+                        onClick: () => {
+                            gain(1, 'scienceLabQuantity', 'scienceLab', false, null, 'scienceUpgrade', 'resources');
+                            addToResourceAllTimeStat(1, 'scienceLabs');
+                            deferredActions.push(() => {
+                                if (getCanAffordDeferred()) {
+                                    startUpdateTimersAndRates('scienceLab');
+                                }
+                                setCanAffordDeferred(null);
+                            });
+                        },
+                        dataConditionCheck: 'upgradeCheck',
+                        resourcePriceObject: '',
+                        objectSectionArgument1: 'scienceUpgrade',
+                        objectSectionArgument2: 'scienceLab',
+                        quantityArgument: 'cash',
+                        disableKeyboardForButton: true,
+                        autoBuyerTier: null,
+                        rowCategory: 'science'
+                    }),
                     createTextElement(`Quantity: ${getResourceDataObject('research', ['upgrades', 'scienceLab', 'quantity'])}`, 'scienceLabQuantity', ['science-building-quantity']),
                     createToggleSwitch('scienceLabToggle', true, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'research', ['upgrades', 'scienceLab', 'active']);
                     }, ['toggle-switch-spacing']),
                 ],
-                descriptionText: `${getResourceDataObject('research', ['upgrades', 'scienceLab', 'price']) + ' Research'}`,
+                descriptionText: `${getResourceDataObject('research', ['upgrades', 'scienceLab', 'price']) + '$'}`,
                 resourcePriceObject: '',
                 dataConditionCheck: 'upgradeCheck',
                 objectSectionArgument1: 'scienceUpgrade',
@@ -165,9 +201,17 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Knowledge Sharing:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            handleTechnologyButtonClick('knowledgeSharing', event);
-                        }, 'techUnlock', '', 'knowledgeSharing', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => { handleTechnologyButtonClick('knowledgeSharing', event); },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'knowledgeSharing',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['knowledgeSharing', 'price'])} Research${getResourceDataObject('techs', ['knowledgeSharing', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="knowledgeSharingPrereq">${getResourceDataObject('techs', ['knowledgeSharing', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -189,9 +233,17 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Fusion Theory:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            handleTechnologyButtonClick('fusionTheory', event);
-                        }, 'techUnlock', '', 'fusionTheory', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => { handleTechnologyButtonClick('fusionTheory', event); },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'fusionTheory',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['fusionTheory', 'price'])} Research${getResourceDataObject('techs', ['fusionTheory', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="fusionTheoryPrereq">${getResourceDataObject('techs', ['fusionTheory', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -213,9 +265,17 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Hydrogen Fusion:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            handleTechnologyButtonClick('hydrogenFusion', event);
-                        }, 'techUnlock', '', 'hydrogenFusion', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => { handleTechnologyButtonClick('hydrogenFusion', event); },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'hydrogenFusion',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['hydrogenFusion', 'price'])} Research${getResourceDataObject('techs', ['hydrogenFusion', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="hydrogenFusionPrereq">${getResourceDataObject('techs', ['hydrogenFusion', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -237,9 +297,17 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Helium Fusion:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            handleTechnologyButtonClick('heliumFusion', event);
-                        }, 'techUnlock', '', 'heliumFusion', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => { handleTechnologyButtonClick('heliumFusion', event); },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'heliumFusion',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['heliumFusion', 'price'])} Research${getResourceDataObject('techs', ['heliumFusion', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="heliumFusionPrereq">${getResourceDataObject('techs', ['heliumFusion', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -261,9 +329,17 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Carbon Fusion:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            handleTechnologyButtonClick('carbonFusion', event);
-                        }, 'techUnlock', '', 'carbonFusion', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => { handleTechnologyButtonClick('carbonFusion', event); },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'carbonFusion',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['carbonFusion', 'price'])} Research${getResourceDataObject('techs', ['carbonFusion', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="carbonFusionPrereq">${getResourceDataObject('techs', ['carbonFusion', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -285,9 +361,17 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Neon Fusion:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            handleTechnologyButtonClick('neonFusion', event);
-                        }, 'techUnlock', '', 'neonFusion', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => { handleTechnologyButtonClick('neonFusion', event); },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'neonFusion',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['neonFusion', 'price'])} Research${getResourceDataObject('techs', ['neonFusion', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="neonFusionPrereq">${getResourceDataObject('techs', ['neonFusion', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -309,9 +393,17 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Oxygen Fusion:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            handleTechnologyButtonClick('oxygenFusion', event);
-                        }, 'techUnlock', '', 'oxygenFusion', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => { handleTechnologyButtonClick('oxygenFusion', event); },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'oxygenFusion',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['oxygenFusion', 'price'])} Research${getResourceDataObject('techs', ['oxygenFusion', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="oxygenFusionPrereq">${getResourceDataObject('techs', ['oxygenFusion', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -333,9 +425,17 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Silicon Fusion:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            handleTechnologyButtonClick('siliconFusion', event);
-                        }, 'techUnlock', '', 'siliconFusion', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => { handleTechnologyButtonClick('siliconFusion', event); },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'siliconFusion',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['siliconFusion', 'price'])} Research${getResourceDataObject('techs', ['siliconFusion', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="siliconFusionPrereq">${getResourceDataObject('techs', ['siliconFusion', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -357,9 +457,17 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Noble Gas Collection:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            handleTechnologyButtonClick('nobleGasCollection', event);
-                        }, 'techUnlock', '', 'nobleGasCollection', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => { handleTechnologyButtonClick('nobleGasCollection', event); },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'nobleGasCollection',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['nobleGasCollection', 'price'])} Research${getResourceDataObject('techs', ['nobleGasCollection', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="nobleGasCollectionPrereq">${getResourceDataObject('techs', ['nobleGasCollection', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -381,9 +489,17 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Glass Manufacture:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            handleTechnologyButtonClick('glassManufacture', event);
-                        }, 'techUnlock', '', 'glassManufacture', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => { handleTechnologyButtonClick('glassManufacture', event); },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'glassManufacture',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['glassManufacture', 'price'])} Research${getResourceDataObject('techs', ['glassManufacture', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="glassManufacturePrereq">${getResourceDataObject('techs', ['glassManufacture', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -405,9 +521,17 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Aggregate Mixing:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            handleTechnologyButtonClick('aggregateMixing', event);
-                        }, 'techUnlock', '', 'aggregateMixing', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => { handleTechnologyButtonClick('aggregateMixing', event); },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'aggregateMixing',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['aggregateMixing', 'price'])} Research${getResourceDataObject('techs', ['aggregateMixing', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="aggregateMixingPrereq">${getResourceDataObject('techs', ['aggregateMixing', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -429,9 +553,17 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Neutron Capture:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            handleTechnologyButtonClick('neutronCapture', event);
-                        }, 'techUnlock', '', 'neutronCapture', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => { handleTechnologyButtonClick('neutronCapture', event); },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'neutronCapture',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['neutronCapture', 'price'])} Research${getResourceDataObject('techs', ['neutronCapture', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="neutronCapturePrereq">${getResourceDataObject('techs', ['neutronCapture', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -453,9 +585,17 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Quantum Computing:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            handleTechnologyButtonClick('quantumComputing', event);
-                        }, 'techUnlock', '', 'quantumComputing', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => { handleTechnologyButtonClick('quantumComputing', event); },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'quantumComputing',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['quantumComputing', 'price'])} Research${getResourceDataObject('techs', ['quantumComputing', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="quantumComputingPrereq">${getResourceDataObject('techs', ['quantumComputing', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -477,9 +617,17 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Science Laboratories:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            handleTechnologyButtonClick('scienceLaboratories', event);
-                        }, 'techUnlock', '', 'scienceLaboratories', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => { handleTechnologyButtonClick('scienceLaboratories', event); },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'scienceLaboratories',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['scienceLaboratories', 'price'])} Research${getResourceDataObject('techs', ['scienceLaboratories', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="scienceLaboratoriesPrereq">${getResourceDataObject('techs', ['scienceLaboratories', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -501,9 +649,17 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'HydroCarbons:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            handleTechnologyButtonClick('hydroCarbons', event);
-                        }, 'techUnlock', '', 'hydroCarbons', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => { handleTechnologyButtonClick('hydroCarbons', event); },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'hydroCarbons',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['hydroCarbons', 'price'])} Research${getResourceDataObject('techs', ['hydroCarbons', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="hydroCarbonsPrereq">${getResourceDataObject('techs', ['hydroCarbons', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -525,9 +681,17 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Nano Tube Technology:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            handleTechnologyButtonClick('nanoTubeTechnology', event);
-                        }, 'techUnlock', '', 'nanoTubeTechnology', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => { handleTechnologyButtonClick('nanoTubeTechnology', event); },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'nanoTubeTechnology',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['nanoTubeTechnology', 'price'])} Research${getResourceDataObject('techs', ['nanoTubeTechnology', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="nanoTubeTechnologyPrereq">${getResourceDataObject('techs', ['nanoTubeTechnology', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -549,9 +713,17 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Nano Brokers:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            handleTechnologyButtonClick('nanoBrokers', event);
-                        }, 'techUnlock', '', 'nanoBrokers', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => { handleTechnologyButtonClick('nanoBrokers', event); },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'nanoBrokers',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['nanoBrokers', 'price'])} Research${getResourceDataObject('techs', ['nanoBrokers', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="nanoBrokersPrereq">${getResourceDataObject('techs', ['nanoBrokers', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -573,9 +745,17 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Stellar Cartography:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            handleTechnologyButtonClick('stellarCartography', event);
-                        }, 'techUnlock', '', 'stellarCartography', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => { handleTechnologyButtonClick('stellarCartography', event); },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'stellarCartography',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['stellarCartography', 'price'])} Research${getResourceDataObject('techs', ['stellarCartography', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="stellarCartographyPrereq">${getResourceDataObject('techs', ['stellarCartography', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -597,9 +777,17 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Basic Power Generation:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            handleTechnologyButtonClick('basicPowerGeneration', event);
-                        }, 'techUnlock', '', 'basicPowerGeneration', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => { handleTechnologyButtonClick('basicPowerGeneration', event); },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'basicPowerGeneration',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['basicPowerGeneration', 'price'])} Research${getResourceDataObject('techs', ['basicPowerGeneration', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="basicPowerGenerationPrereq">${getResourceDataObject('techs', ['basicPowerGeneration', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -621,9 +809,17 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Sodium Ion Power Storage:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            handleTechnologyButtonClick('sodiumIonPowerStorage', event);
-                        }, 'techUnlock', '', 'sodiumIonPowerStorage', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => { handleTechnologyButtonClick('sodiumIonPowerStorage', event); },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'sodiumIonPowerStorage',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['sodiumIonPowerStorage', 'price'])} Research${getResourceDataObject('techs', ['sodiumIonPowerStorage', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="sodiumIonPowerStoragePrereq">${getResourceDataObject('techs', ['sodiumIonPowerStorage', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -645,9 +841,17 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Advanced Power Generation:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            handleTechnologyButtonClick('advancedPowerGeneration', event);
-                        }, 'techUnlock', '', 'advancedPowerGeneration', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => { handleTechnologyButtonClick('advancedPowerGeneration', event); },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'advancedPowerGeneration',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['advancedPowerGeneration', 'price'])} Research${getResourceDataObject('techs', ['advancedPowerGeneration', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="advancedPowerGenerationPrereq">${getResourceDataObject('techs', ['advancedPowerGeneration', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -669,9 +873,17 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Solar Power Generation:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            handleTechnologyButtonClick('solarPowerGeneration', event);
-                        }, 'techUnlock', '', 'solarPowerGeneration', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => { handleTechnologyButtonClick('solarPowerGeneration', event); },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'solarPowerGeneration',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['solarPowerGeneration', 'price'])} Research${getResourceDataObject('techs', ['solarPowerGeneration', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="solarPowerGenerationPrereq">${getResourceDataObject('techs', ['solarPowerGeneration', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -693,9 +905,19 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Rocket Composites:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            handleTechnologyButtonClick('rocketComposites', event);
-                        }, 'techUnlock', '', 'rocketComposites', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => {
+                                handleTechnologyButtonClick('rocketComposites', event);
+                            },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'rocketComposites',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['rocketComposites', 'price'])} Research${getResourceDataObject('techs', ['rocketComposites', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="rocketCompositesPrereq">${getResourceDataObject('techs', ['rocketComposites', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -717,9 +939,19 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Advanced Fuels:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            handleTechnologyButtonClick('advancedFuels', event);
-                        }, 'techUnlock', '', 'advancedFuels', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => {
+                                handleTechnologyButtonClick('advancedFuels', event);
+                            },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'advancedFuels',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['advancedFuels', 'price'])} Research${getResourceDataObject('techs', ['advancedFuels', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="advancedFuelsPrereq">${getResourceDataObject('techs', ['advancedFuels', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -741,9 +973,19 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Planetary Navigation:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            handleTechnologyButtonClick('planetaryNavigation', event);
-                        }, 'techUnlock', '', 'planetaryNavigation', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => {
+                                handleTechnologyButtonClick('planetaryNavigation', event);
+                            },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'planetaryNavigation',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['planetaryNavigation', 'price'])} Research${getResourceDataObject('techs', ['planetaryNavigation', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="planetaryNavigationPrereq">${getResourceDataObject('techs', ['planetaryNavigation', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -765,9 +1007,19 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Compounds:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            handleTechnologyButtonClick('compounds', event);
-                        }, 'techUnlock', '', 'compounds', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => {
+                                handleTechnologyButtonClick('compounds', event);
+                            },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'compounds',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['compounds', 'price'])} Research${getResourceDataObject('techs', ['compounds', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="compoundsPrereq">${getResourceDataObject('techs', ['compounds', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -789,9 +1041,19 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Steel Foundries:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            handleTechnologyButtonClick('steelFoundries', event);
-                        }, 'techUnlock', '', 'steelFoundries', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => {
+                                handleTechnologyButtonClick('steelFoundries', event);
+                            },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'steelFoundries',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['steelFoundries', 'price'])} Research${getResourceDataObject('techs', ['steelFoundries', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="steelFoundriesPrereq">${getResourceDataObject('techs', ['steelFoundries', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -813,9 +1075,19 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Gigantic Turbines:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            handleTechnologyButtonClick('giganticTurbines', event);
-                        }, 'techUnlock', '', 'giganticTurbines', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => {
+                                handleTechnologyButtonClick('giganticTurbines', event);
+                            },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'giganticTurbines',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['giganticTurbines', 'price'])} Research${getResourceDataObject('techs', ['giganticTurbines', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="giganticTurbinesPrereq">${getResourceDataObject('techs', ['giganticTurbines', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -837,9 +1109,19 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Atmospheric Telescopes:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            handleTechnologyButtonClick('atmosphericTelescopes', event);
-                        }, 'techUnlock', '', 'atmosphericTelescopes', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => {
+                                handleTechnologyButtonClick('atmosphericTelescopes', event);
+                            },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'atmosphericTelescopes',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['atmosphericTelescopes', 'price'])} Research${getResourceDataObject('techs', ['atmosphericTelescopes', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="atmosphericTelescopesPrereq">${getResourceDataObject('techs', ['atmosphericTelescopes', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -861,9 +1143,19 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Fusion Efficiency I:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            handleTechnologyButtonClick('fusionEfficiencyI', event);
-                        }, 'techUnlock', '', 'fusionEfficiencyI', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => {
+                                handleTechnologyButtonClick('fusionEfficiencyI', event);
+                            },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'fusionEfficiencyI',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['fusionEfficiencyI', 'price'])} Research${getResourceDataObject('techs', ['fusionEfficiencyI', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="fusionEfficiencyIPrereq">${getResourceDataObject('techs', ['fusionEfficiencyI', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -885,9 +1177,19 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Fusion Efficiency II:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            handleTechnologyButtonClick('fusionEfficiencyII', event);
-                        }, 'techUnlock', '', 'fusionEfficiencyII', null, 'research', true, null, 'tech'), 
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => {
+                                handleTechnologyButtonClick('fusionEfficiencyII', event);
+                            },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'fusionEfficiencyII',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }), 
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['fusionEfficiencyII', 'price'])} Research${getResourceDataObject('techs', ['fusionEfficiencyII', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="fusionEfficiencyIIPrereq">${getResourceDataObject('techs', ['fusionEfficiencyII', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -909,9 +1211,19 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Fusion Efficiency III:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            handleTechnologyButtonClick('fusionEfficiencyIII', event);
-                        }, 'techUnlock', '', 'fusionEfficiencyIII', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => {
+                                handleTechnologyButtonClick('fusionEfficiencyIII', event);
+                            },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'fusionEfficiencyIII',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['fusionEfficiencyIII', 'price'])} Research${getResourceDataObject('techs', ['fusionEfficiencyIII', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="fusionEfficiencyIIIPrereq">${getResourceDataObject('techs', ['fusionEfficiencyIII', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -935,9 +1247,19 @@ export function drawTab3Content(heading, optionContentElement) {
                     inputElements: [
                         (() => {
                             const extraClasses = getDemoBuild() ? ['electron-purple-demo-button'] : [];
-                            return createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock', ...extraClasses], (event) => {
-                                handleTechnologyButtonClick('orbitalConstruction', event);
-                            }, 'techUnlock', '', 'orbitalConstruction', null, 'research', true, null, 'tech');
+                            return createButton({
+                                text: `Research`,
+                                classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock', ...extraClasses],
+                                onClick: (event) => {
+                                    handleTechnologyButtonClick('orbitalConstruction', event);
+                                },
+                                dataConditionCheck: 'techUnlock',
+                                resourcePriceObject: '',
+                                objectSectionArgument1: 'orbitalConstruction',
+                                quantityArgument: 'research',
+                                disableKeyboardForButton: true,
+                                rowCategory: 'tech'
+                            });
                         })(),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['orbitalConstruction', 'price'])} Research${getResourceDataObject('techs', ['orbitalConstruction', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="orbitalConstructionPrereq">${getResourceDataObject('techs', ['orbitalConstruction', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
@@ -960,9 +1282,19 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Antimatter Engines:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            handleTechnologyButtonClick('antimatterEngines', event);
-                        }, 'techUnlock', '', 'antimatterEngines', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => {
+                                handleTechnologyButtonClick('antimatterEngines', event);
+                            },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'antimatterEngines',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['antimatterEngines', 'price'])} Research${getResourceDataObject('techs', ['antimatterEngines', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="antimatterEnginesPrereq">${getResourceDataObject('techs', ['antimatterEngines', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -984,9 +1316,19 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'FTL Travel Theory:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            handleTechnologyButtonClick('FTLTravelTheory', event);
-                        }, 'techUnlock', '', 'FTLTravelTheory', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => {
+                                handleTechnologyButtonClick('FTLTravelTheory', event);
+                            },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'FTLTravelTheory',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['FTLTravelTheory', 'price'])} Research${getResourceDataObject('techs', ['FTLTravelTheory', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="FTLTravelTheoryPrereq">${getResourceDataObject('techs', ['FTLTravelTheory', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -1008,9 +1350,19 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Life Support Systems:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            handleTechnologyButtonClick('lifeSupportSystems', event);
-                        }, 'techUnlock', '', 'lifeSupportSystems', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => {
+                                handleTechnologyButtonClick('lifeSupportSystems', event);
+                            },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'lifeSupportSystems',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['lifeSupportSystems', 'price'])} Research${getResourceDataObject('techs', ['lifeSupportSystems', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="lifeSupportSystemsPrereq">${getResourceDataObject('techs', ['lifeSupportSystems', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -1032,9 +1384,19 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Starship Fleets:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            handleTechnologyButtonClick('starshipFleets', event);
-                        }, 'techUnlock', '', 'starshipFleets', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => {
+                                handleTechnologyButtonClick('starshipFleets', event);
+                            },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'starshipFleets',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['starshipFleets', 'price'])} Research${getResourceDataObject('techs', ['starshipFleets', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="starshipFleetsPrereq">${getResourceDataObject('techs', ['starshipFleets', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -1056,9 +1418,19 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Stellar Scanners:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            handleTechnologyButtonClick('stellarScanners', event);
-                        }, 'techUnlock', '', 'stellarScanners', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => {
+                                handleTechnologyButtonClick('stellarScanners', event);
+                            },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'stellarScanners',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['stellarScanners', 'price'])} Research${getResourceDataObject('techs', ['stellarScanners', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="stellarScannersPrereq">${getResourceDataObject('techs', ['stellarScanners', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -1084,32 +1456,42 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Dyson Sphere Understanding',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            gain('dysonSphereUnderstanding', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                            event.currentTarget.classList.add('unlocked-tech');
-                            setTechUnlockedArray('dysonSphereUnderstanding');
-                            showNotification(techNotificationMessages.dysonSphereUnderstanding, 'info', 3000, 'tech');
-                            callPopupModal(
-                                modalMegaStructureTechDysonSphere1Header, 
-                                modalMegaStructureTechDysonSphere1Text, 
-                                true, 
-                                false, 
-                                false, 
-                                false, 
-                                function() {
-                                    showHideModal();
-                                },
-                                null, 
-                                null, 
-                                null,
-                                'CONFIRM',
-                                null,
-                                null,
-                                null,
-                                false
-                            );
-                            applyMegaStructureBonuses(1,1);
-                        }, 'techUnlock', '', 'dysonSphereUnderstanding', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => {
+                                gain('dysonSphereUnderstanding', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
+                                event.currentTarget.classList.add('unlocked-tech');
+                                setTechUnlockedArray('dysonSphereUnderstanding');
+                                showNotification(techNotificationMessages.dysonSphereUnderstanding, 'info', 3000, 'tech');
+                                callPopupModal(
+                                    modalMegaStructureTechDysonSphere1Header, 
+                                    modalMegaStructureTechDysonSphere1Text, 
+                                    true, 
+                                    false, 
+                                    false, 
+                                    false, 
+                                    function() {
+                                        showHideModal();
+                                    },
+                                    null, 
+                                    null, 
+                                    null,
+                                    'CONFIRM',
+                                    null,
+                                    null,
+                                    null,
+                                    false
+                                );
+                                applyMegaStructureBonuses(1,1);
+                            },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'dysonSphereUnderstanding',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['dysonSphereUnderstanding', 'price'])} Research${getResourceDataObject('techs', ['dysonSphereUnderstanding', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="dysonSphereUnderstandingPrereq">${getResourceDataObject('techs', ['dysonSphereUnderstanding', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -1132,32 +1514,42 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Dyson Sphere Capabilities',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            gain('dysonSphereCapabilities', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                            event.currentTarget.classList.add('unlocked-tech');
-                            setTechUnlockedArray('dysonSphereCapabilities');
-                            showNotification(techNotificationMessages.dysonSphereCapabilities, 'info', 3000, 'tech');
-                            callPopupModal(
-                                modalMegaStructureTechDysonSphere2Header, 
-                                modalMegaStructureTechDysonSphere2Text, 
-                                true, 
-                                false, 
-                                false, 
-                                false, 
-                                function() {
-                                    showHideModal();
-                                },
-                                null, 
-                                null, 
-                                null,
-                                'CONFIRM',
-                                null,
-                                null,
-                                null,
-                                false
-                            );
-                            applyMegaStructureBonuses(1,2);
-                        }, 'techUnlock', '', 'dysonSphereCapabilities', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => {
+                                gain('dysonSphereCapabilities', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
+                                event.currentTarget.classList.add('unlocked-tech');
+                                setTechUnlockedArray('dysonSphereCapabilities');
+                                showNotification(techNotificationMessages.dysonSphereCapabilities, 'info', 3000, 'tech');
+                                callPopupModal(
+                                    modalMegaStructureTechDysonSphere2Header, 
+                                    modalMegaStructureTechDysonSphere2Text, 
+                                    true, 
+                                    false, 
+                                    false, 
+                                    false, 
+                                    function() {
+                                        showHideModal();
+                                    },
+                                    null, 
+                                    null, 
+                                    null,
+                                    'CONFIRM',
+                                    null,
+                                    null,
+                                    null,
+                                    false
+                                );
+                                applyMegaStructureBonuses(1,2);
+                            },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'dysonSphereCapabilities',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['dysonSphereCapabilities', 'price'])} Research${getResourceDataObject('techs', ['dysonSphereCapabilities', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="dysonSphereCapabilitiesPrereq">${getResourceDataObject('techs', ['dysonSphereCapabilities', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -1180,32 +1572,42 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Dyson Sphere Disconnect',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            gain('dysonSphereDisconnect', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                            event.currentTarget.classList.add('unlocked-tech');
-                            setTechUnlockedArray('dysonSphereDisconnect');
-                            showNotification(techNotificationMessages.dysonSphereDisconnect, 'info', 3000, 'tech');
-                            callPopupModal(
-                                modalMegaStructureTechDysonSphere3Header, 
-                                modalMegaStructureTechDysonSphere3Text, 
-                                true, 
-                                false, 
-                                false, 
-                                false, 
-                                function() {
-                                    showHideModal();
-                                },
-                                null, 
-                                null, 
-                                null,
-                                'CONFIRM',
-                                null,
-                                null,
-                                null,
-                                false
-                            );
-                            applyMegaStructureBonuses(1,3);
-                        }, 'techUnlock', '', 'dysonSphereDisconnect', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => {
+                                gain('dysonSphereDisconnect', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
+                                event.currentTarget.classList.add('unlocked-tech');
+                                setTechUnlockedArray('dysonSphereDisconnect');
+                                showNotification(techNotificationMessages.dysonSphereDisconnect, 'info', 3000, 'tech');
+                                callPopupModal(
+                                    modalMegaStructureTechDysonSphere3Header, 
+                                    modalMegaStructureTechDysonSphere3Text, 
+                                    true, 
+                                    false, 
+                                    false, 
+                                    false, 
+                                    function() {
+                                        showHideModal();
+                                    },
+                                    null, 
+                                    null, 
+                                    null,
+                                    'CONFIRM',
+                                    null,
+                                    null,
+                                    null,
+                                    false
+                                );
+                                applyMegaStructureBonuses(1,3);
+                            },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'dysonSphereDisconnect',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['dysonSphereDisconnect', 'price'])} Research${getResourceDataObject('techs', ['dysonSphereDisconnect', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="dysonSphereDisconnectPrereq">${getResourceDataObject('techs', ['dysonSphereDisconnect', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -1228,32 +1630,42 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Dyson Sphere Power',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            gain('dysonSpherePower', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                            event.currentTarget.classList.add('unlocked-tech');
-                            setTechUnlockedArray('dysonSpherePower');
-                            showNotification(techNotificationMessages.dysonSpherePower, 'info', 3000, 'tech');
-                            callPopupModal(
-                                modalMegaStructureTechDysonSphere4Header, 
-                                modalMegaStructureTechDysonSphere4Text, 
-                                true, 
-                                false, 
-                                false, 
-                                false, 
-                                function() {
-                                    showHideModal();
-                                },
-                                null, 
-                                null, 
-                                null,
-                                'CONFIRM',
-                                null,
-                                null,
-                                null,
-                                false
-                            );
-                            applyMegaStructureBonuses(1,4);
-                        }, 'techUnlock', '', 'dysonSpherePower', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => {
+                                gain('dysonSpherePower', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
+                                event.currentTarget.classList.add('unlocked-tech');
+                                setTechUnlockedArray('dysonSpherePower');
+                                showNotification(techNotificationMessages.dysonSpherePower, 'info', 3000, 'tech');
+                                callPopupModal(
+                                    modalMegaStructureTechDysonSphere4Header, 
+                                    modalMegaStructureTechDysonSphere4Text, 
+                                    true, 
+                                    false, 
+                                    false, 
+                                    false, 
+                                    function() {
+                                        showHideModal();
+                                    },
+                                    null, 
+                                    null, 
+                                    null,
+                                    'CONFIRM',
+                                    null,
+                                    null,
+                                    null,
+                                    false
+                                );
+                                applyMegaStructureBonuses(1,4);
+                            },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'dysonSpherePower',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['dysonSpherePower', 'price'])} Research${getResourceDataObject('techs', ['dysonSpherePower', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="dysonSpherePowerPrereq">${getResourceDataObject('techs', ['dysonSpherePower', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -1276,32 +1688,42 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Dyson Sphere Connect',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            gain('dysonSphereConnect', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                            event.currentTarget.classList.add('unlocked-tech');
-                            setTechUnlockedArray('dysonSphereConnect');
-                            showNotification(techNotificationMessages.dysonSphereConnect, 'info', 3000, 'tech');
-                            callPopupModal(
-                                modalMegaStructureTechDysonSphere5Header, 
-                                modalMegaStructureTechDysonSphere5Text, 
-                                true, 
-                                false, 
-                                false, 
-                                false, 
-                                function() {
-                                    showHideModal();
-                                },
-                                null, 
-                                null, 
-                                null,
-                                'CONFIRM',
-                                null,
-                                null,
-                                null,
-                                false
-                            );
-                            applyMegaStructureBonuses(1,5);
-                        }, 'techUnlock', '', 'dysonSphereConnect', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => {
+                                gain('dysonSphereConnect', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
+                                event.currentTarget.classList.add('unlocked-tech');
+                                setTechUnlockedArray('dysonSphereConnect');
+                                showNotification(techNotificationMessages.dysonSphereConnect, 'info', 3000, 'tech');
+                                callPopupModal(
+                                    modalMegaStructureTechDysonSphere5Header, 
+                                    modalMegaStructureTechDysonSphere5Text, 
+                                    true, 
+                                    false, 
+                                    false, 
+                                    false, 
+                                    function() {
+                                        showHideModal();
+                                    },
+                                    null, 
+                                    null, 
+                                    null,
+                                    'CONFIRM',
+                                    null,
+                                    null,
+                                    null,
+                                    false
+                                );
+                                applyMegaStructureBonuses(1,5);
+                            },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'dysonSphereConnect',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['dysonSphereConnect', 'price'])} Research${getResourceDataObject('techs', ['dysonSphereConnect', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="dysonSphereConnectPrereq">${getResourceDataObject('techs', ['dysonSphereConnect', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -1324,32 +1746,42 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Celestial Processing Core Understanding',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            gain('celestialProcessingCoreUnderstanding', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                            event.currentTarget.classList.add('unlocked-tech');
-                            setTechUnlockedArray('celestialProcessingCoreUnderstanding');
-                            showNotification(techNotificationMessages.celestialProcessingCoreUnderstanding, 'info', 3000, 'tech');
-                            callPopupModal(
-                                modalMegaStructureTechCelestialProcessingCore1Header, 
-                                modalMegaStructureTechCelestialProcessingCore1Text, 
-                                true, 
-                                false, 
-                                false, 
-                                false, 
-                                function() {
-                                    showHideModal();
-                                },
-                                null, 
-                                null, 
-                                null,
-                                'CONFIRM',
-                                null,
-                                null,
-                                null,
-                                false
-                            );
-                            applyMegaStructureBonuses(2,1);
-                        }, 'techUnlock', '', 'celestialProcessingCoreUnderstanding', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => {
+                                gain('celestialProcessingCoreUnderstanding', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
+                                event.currentTarget.classList.add('unlocked-tech');
+                                setTechUnlockedArray('celestialProcessingCoreUnderstanding');
+                                showNotification(techNotificationMessages.celestialProcessingCoreUnderstanding, 'info', 3000, 'tech');
+                                callPopupModal(
+                                    modalMegaStructureTechCelestialProcessingCore1Header, 
+                                    modalMegaStructureTechCelestialProcessingCore1Text, 
+                                    true, 
+                                    false, 
+                                    false, 
+                                    false, 
+                                    function() {
+                                        showHideModal();
+                                    },
+                                    null, 
+                                    null, 
+                                    null,
+                                    'CONFIRM',
+                                    null,
+                                    null,
+                                    null,
+                                    false
+                                );
+                                applyMegaStructureBonuses(2,1);
+                            },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'celestialProcessingCoreUnderstanding',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['celestialProcessingCoreUnderstanding', 'price'])} Research${getResourceDataObject('techs', ['celestialProcessingCoreUnderstanding', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="celestialProcessingCoreUnderstandingPrereq">${getResourceDataObject('techs', ['celestialProcessingCoreUnderstanding', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -1372,32 +1804,42 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Celestial Processing Core Capabilities',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            gain('celestialProcessingCoreCapabilities', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                            event.currentTarget.classList.add('unlocked-tech');
-                            setTechUnlockedArray('celestialProcessingCoreCapabilities');
-                            showNotification(techNotificationMessages.celestialProcessingCoreCapabilities, 'info', 3000, 'tech');
-                            callPopupModal(
-                                modalMegaStructureTechCelestialProcessingCore2Header, 
-                                modalMegaStructureTechCelestialProcessingCore2Text, 
-                                true, 
-                                false, 
-                                false, 
-                                false, 
-                                function() {
-                                    showHideModal();
-                                },
-                                null, 
-                                null, 
-                                null,
-                                'CONFIRM',
-                                null,
-                                null,
-                                null,
-                                false
-                            );
-                            applyMegaStructureBonuses(2,2);
-                        }, 'techUnlock', '', 'celestialProcessingCoreCapabilities', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => {
+                                gain('celestialProcessingCoreCapabilities', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
+                                event.currentTarget.classList.add('unlocked-tech');
+                                setTechUnlockedArray('celestialProcessingCoreCapabilities');
+                                showNotification(techNotificationMessages.celestialProcessingCoreCapabilities, 'info', 3000, 'tech');
+                                callPopupModal(
+                                    modalMegaStructureTechCelestialProcessingCore2Header, 
+                                    modalMegaStructureTechCelestialProcessingCore2Text, 
+                                    true, 
+                                    false, 
+                                    false, 
+                                    false, 
+                                    function() {
+                                        showHideModal();
+                                    },
+                                    null, 
+                                    null, 
+                                    null,
+                                    'CONFIRM',
+                                    null,
+                                    null,
+                                    null,
+                                    false
+                                );
+                                applyMegaStructureBonuses(2,2);
+                            },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'celestialProcessingCoreCapabilities',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['celestialProcessingCoreCapabilities', 'price'])} Research${getResourceDataObject('techs', ['celestialProcessingCoreCapabilities', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="celestialProcessingCoreCapabilitiesPrereq">${getResourceDataObject('techs', ['celestialProcessingCoreCapabilities', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -1420,32 +1862,42 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Celestial Processing Core Disconnect',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            gain('celestialProcessingCoreDisconnect', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                            event.currentTarget.classList.add('unlocked-tech');
-                            setTechUnlockedArray('celestialProcessingCoreDisconnect');
-                            showNotification(techNotificationMessages.celestialProcessingCoreDisconnect, 'info', 3000, 'tech');
-                            callPopupModal(
-                                modalMegaStructureTechCelestialProcessingCore3Header, 
-                                modalMegaStructureTechCelestialProcessingCore3Text, 
-                                true, 
-                                false, 
-                                false, 
-                                false, 
-                                function() {
-                                    showHideModal();
-                                },
-                                null, 
-                                null, 
-                                null,
-                                'CONFIRM',
-                                null,
-                                null,
-                                null,
-                                false
-                            );
-                            applyMegaStructureBonuses(2,3);
-                        }, 'techUnlock', '', 'celestialProcessingCoreDisconnect', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => {
+                                gain('celestialProcessingCoreDisconnect', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
+                                event.currentTarget.classList.add('unlocked-tech');
+                                setTechUnlockedArray('celestialProcessingCoreDisconnect');
+                                showNotification(techNotificationMessages.celestialProcessingCoreDisconnect, 'info', 3000, 'tech');
+                                callPopupModal(
+                                    modalMegaStructureTechCelestialProcessingCore3Header, 
+                                    modalMegaStructureTechCelestialProcessingCore3Text, 
+                                    true, 
+                                    false, 
+                                    false, 
+                                    false, 
+                                    function() {
+                                        showHideModal();
+                                    },
+                                    null, 
+                                    null, 
+                                    null,
+                                    'CONFIRM',
+                                    null,
+                                    null,
+                                    null,
+                                    false
+                                );
+                                applyMegaStructureBonuses(2,3);
+                            },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'celestialProcessingCoreDisconnect',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['celestialProcessingCoreDisconnect', 'price'])} Research${getResourceDataObject('techs', ['celestialProcessingCoreDisconnect', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="celestialProcessingCoreDisconnectPrereq">${getResourceDataObject('techs', ['celestialProcessingCoreDisconnect', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -1468,32 +1920,42 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Celestial Processing Core Power',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            gain('celestialProcessingCorePower', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                            event.currentTarget.classList.add('unlocked-tech');
-                            setTechUnlockedArray('celestialProcessingCorePower');
-                            showNotification(techNotificationMessages.celestialProcessingCorePower, 'info', 3000, 'tech');
-                            callPopupModal(
-                                modalMegaStructureTechCelestialProcessingCore4Header, 
-                                modalMegaStructureTechCelestialProcessingCore4Text, 
-                                true, 
-                                false, 
-                                false, 
-                                false, 
-                                function() {
-                                    showHideModal();
-                                },
-                                null, 
-                                null, 
-                                null,
-                                'CONFIRM',
-                                null,
-                                null,
-                                null,
-                                false
-                            );
-                            applyMegaStructureBonuses(2,4);
-                        }, 'techUnlock', '', 'celestialProcessingCorePower', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => {
+                                gain('celestialProcessingCorePower', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
+                                event.currentTarget.classList.add('unlocked-tech');
+                                setTechUnlockedArray('celestialProcessingCorePower');
+                                showNotification(techNotificationMessages.celestialProcessingCorePower, 'info', 3000, 'tech');
+                                callPopupModal(
+                                    modalMegaStructureTechCelestialProcessingCore4Header, 
+                                    modalMegaStructureTechCelestialProcessingCore4Text, 
+                                    true, 
+                                    false, 
+                                    false, 
+                                    false, 
+                                    function() {
+                                        showHideModal();
+                                    },
+                                    null, 
+                                    null, 
+                                    null,
+                                    'CONFIRM',
+                                    null,
+                                    null,
+                                    null,
+                                    false
+                                );
+                                applyMegaStructureBonuses(2,4);
+                            },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'celestialProcessingCorePower',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['celestialProcessingCorePower', 'price'])} Research${getResourceDataObject('techs', ['celestialProcessingCorePower', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="celestialProcessingCorePowerPrereq">${getResourceDataObject('techs', ['celestialProcessingCorePower', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -1516,32 +1978,42 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Celestial Processing Core Connect',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            gain('celestialProcessingCoreConnect', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                            event.currentTarget.classList.add('unlocked-tech');
-                            setTechUnlockedArray('celestialProcessingCoreConnect');
-                            showNotification(techNotificationMessages.celestialProcessingCoreConnect, 'info', 3000, 'tech');
-                            callPopupModal(
-                                modalMegaStructureTechCelestialProcessingCore5Header, 
-                                modalMegaStructureTechCelestialProcessingCore5Text, 
-                                true, 
-                                false, 
-                                false, 
-                                false, 
-                                function() {
-                                    showHideModal();
-                                },
-                                null, 
-                                null, 
-                                null,
-                                'CONFIRM',
-                                null,
-                                null,
-                                null,
-                                false
-                            );
-                            applyMegaStructureBonuses(2,5);
-                        }, 'techUnlock', '', 'celestialProcessingCoreConnect', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => {
+                                gain('celestialProcessingCoreConnect', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
+                                event.currentTarget.classList.add('unlocked-tech');
+                                setTechUnlockedArray('celestialProcessingCoreConnect');
+                                showNotification(techNotificationMessages.celestialProcessingCoreConnect, 'info', 3000, 'tech');
+                                callPopupModal(
+                                    modalMegaStructureTechCelestialProcessingCore5Header, 
+                                    modalMegaStructureTechCelestialProcessingCore5Text, 
+                                    true, 
+                                    false, 
+                                    false, 
+                                    false, 
+                                    function() {
+                                        showHideModal();
+                                    },
+                                    null, 
+                                    null, 
+                                    null,
+                                    'CONFIRM',
+                                    null,
+                                    null,
+                                    null,
+                                    false
+                                );
+                                applyMegaStructureBonuses(2,5);
+                            },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'celestialProcessingCoreConnect',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['celestialProcessingCoreConnect', 'price'])} Research${getResourceDataObject('techs', ['celestialProcessingCoreConnect', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="celestialProcessingCoreConnectPrereq">${getResourceDataObject('techs', ['celestialProcessingCoreConnect', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -1564,32 +2036,42 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Plasma Forge Understanding',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            gain('plasmaForgeUnderstanding', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                            event.currentTarget.classList.add('unlocked-tech');
-                            setTechUnlockedArray('plasmaForgeUnderstanding');
-                            showNotification(techNotificationMessages.plasmaForgeUnderstanding, 'info', 3000, 'tech');
-                            callPopupModal(
-                                modalMegaStructureTechPlasmaForge1Header, 
-                                modalMegaStructureTechPlasmaForge1Text, 
-                                true, 
-                                false, 
-                                false, 
-                                false, 
-                                function() {
-                                    showHideModal();
-                                },
-                                null, 
-                                null, 
-                                null,
-                                'CONFIRM',
-                                null,
-                                null,
-                                null,
-                                false
-                            );
-                            applyMegaStructureBonuses(3,1);
-                        }, 'techUnlock', '', 'plasmaForgeUnderstanding', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => {
+                                gain('plasmaForgeUnderstanding', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
+                                event.currentTarget.classList.add('unlocked-tech');
+                                setTechUnlockedArray('plasmaForgeUnderstanding');
+                                showNotification(techNotificationMessages.plasmaForgeUnderstanding, 'info', 3000, 'tech');
+                                callPopupModal(
+                                    modalMegaStructureTechPlasmaForge1Header, 
+                                    modalMegaStructureTechPlasmaForge1Text, 
+                                    true, 
+                                    false, 
+                                    false, 
+                                    false, 
+                                    function() {
+                                        showHideModal();
+                                    },
+                                    null, 
+                                    null, 
+                                    null,
+                                    'CONFIRM',
+                                    null,
+                                    null,
+                                    null,
+                                    false
+                                );
+                                applyMegaStructureBonuses(3,1);
+                            },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'plasmaForgeUnderstanding',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['plasmaForgeUnderstanding', 'price'])} Research${getResourceDataObject('techs', ['plasmaForgeUnderstanding', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="plasmaForgeUnderstandingPrereq">${getResourceDataObject('techs', ['plasmaForgeUnderstanding', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -1612,32 +2094,42 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Plasma Forge Capabilities',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            gain('plasmaForgeCapabilities', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                            event.currentTarget.classList.add('unlocked-tech');
-                            setTechUnlockedArray('plasmaForgeCapabilities');
-                            showNotification(techNotificationMessages.plasmaForgeCapabilities, 'info', 3000, 'tech');
-                            callPopupModal(
-                                modalMegaStructureTechPlasmaForge2Header, 
-                                modalMegaStructureTechPlasmaForge2Text, 
-                                true, 
-                                false, 
-                                false, 
-                                false, 
-                                function() {
-                                    showHideModal();
-                                },
-                                null, 
-                                null, 
-                                null,
-                                'CONFIRM',
-                                null,
-                                null,
-                                null,
-                                false
-                            );
-                            applyMegaStructureBonuses(3,2);
-                        }, 'techUnlock', '', 'plasmaForgeCapabilities', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => {
+                                gain('plasmaForgeCapabilities', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
+                                event.currentTarget.classList.add('unlocked-tech');
+                                setTechUnlockedArray('plasmaForgeCapabilities');
+                                showNotification(techNotificationMessages.plasmaForgeCapabilities, 'info', 3000, 'tech');
+                                callPopupModal(
+                                    modalMegaStructureTechPlasmaForge2Header, 
+                                    modalMegaStructureTechPlasmaForge2Text, 
+                                    true, 
+                                    false, 
+                                    false, 
+                                    false, 
+                                    function() {
+                                        showHideModal();
+                                    },
+                                    null, 
+                                    null, 
+                                    null,
+                                    'CONFIRM',
+                                    null,
+                                    null,
+                                    null,
+                                    false
+                                );
+                                applyMegaStructureBonuses(3,2);
+                            },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'plasmaForgeCapabilities',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['plasmaForgeCapabilities', 'price'])} Research${getResourceDataObject('techs', ['plasmaForgeCapabilities', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="plasmaForgeCapabilitiesPrereq">${getResourceDataObject('techs', ['plasmaForgeCapabilities', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -1660,32 +2152,42 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Plasma Forge Disconnect',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            gain('plasmaForgeDisconnect', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                            event.currentTarget.classList.add('unlocked-tech');
-                            setTechUnlockedArray('plasmaForgeDisconnect');
-                            showNotification(techNotificationMessages.plasmaForgeDisconnect, 'info', 3000, 'tech');
-                            callPopupModal(
-                                modalMegaStructureTechPlasmaForge3Header, 
-                                modalMegaStructureTechPlasmaForge3Text, 
-                                true, 
-                                false, 
-                                false, 
-                                false, 
-                                function() {
-                                    showHideModal();
-                                },
-                                null, 
-                                null, 
-                                null,
-                                'CONFIRM',
-                                null,
-                                null,
-                                null,
-                                false
-                            );
-                            applyMegaStructureBonuses(3,3);
-                        }, 'techUnlock', '', 'plasmaForgeDisconnect', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => {
+                                gain('plasmaForgeDisconnect', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
+                                event.currentTarget.classList.add('unlocked-tech');
+                                setTechUnlockedArray('plasmaForgeDisconnect');
+                                showNotification(techNotificationMessages.plasmaForgeDisconnect, 'info', 3000, 'tech');
+                                callPopupModal(
+                                    modalMegaStructureTechPlasmaForge3Header, 
+                                    modalMegaStructureTechPlasmaForge3Text, 
+                                    true, 
+                                    false, 
+                                    false, 
+                                    false, 
+                                    function() {
+                                        showHideModal();
+                                    },
+                                    null, 
+                                    null, 
+                                    null,
+                                    'CONFIRM',
+                                    null,
+                                    null,
+                                    null,
+                                    false
+                                );
+                                applyMegaStructureBonuses(3,3);
+                            },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'plasmaForgeDisconnect',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['plasmaForgeDisconnect', 'price'])} Research${getResourceDataObject('techs', ['plasmaForgeDisconnect', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="plasmaForgeDisconnectPrereq">${getResourceDataObject('techs', ['plasmaForgeDisconnect', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -1708,32 +2210,42 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Plasma Forge Power',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            gain('plasmaForgePower', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                            event.currentTarget.classList.add('unlocked-tech');
-                            setTechUnlockedArray('plasmaForgePower');
-                            showNotification(techNotificationMessages.plasmaForgePower, 'info', 3000, 'tech');
-                            callPopupModal(
-                                modalMegaStructureTechPlasmaForge4Header, 
-                                modalMegaStructureTechPlasmaForge4Text, 
-                                true, 
-                                false, 
-                                false, 
-                                false, 
-                                function() {
-                                    showHideModal();
-                                },
-                                null, 
-                                null, 
-                                null,
-                                'CONFIRM',
-                                null,
-                                null,
-                                null,
-                                false
-                            );
-                            applyMegaStructureBonuses(3,4);
-                        }, 'techUnlock', '', 'plasmaForgePower', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => {
+                                gain('plasmaForgePower', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
+                                event.currentTarget.classList.add('unlocked-tech');
+                                setTechUnlockedArray('plasmaForgePower');
+                                showNotification(techNotificationMessages.plasmaForgePower, 'info', 3000, 'tech');
+                                callPopupModal(
+                                    modalMegaStructureTechPlasmaForge4Header, 
+                                    modalMegaStructureTechPlasmaForge4Text, 
+                                    true, 
+                                    false, 
+                                    false, 
+                                    false, 
+                                    function() {
+                                        showHideModal();
+                                    },
+                                    null, 
+                                    null, 
+                                    null,
+                                    'CONFIRM',
+                                    null,
+                                    null,
+                                    null,
+                                    false
+                                );
+                                applyMegaStructureBonuses(3,4);
+                            },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'plasmaForgePower',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['plasmaForgePower', 'price'])} Research${getResourceDataObject('techs', ['plasmaForgePower', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="plasmaForgePowerPrereq">${getResourceDataObject('techs', ['plasmaForgePower', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -1756,32 +2268,42 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Plasma Forge Connect',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            gain('plasmaForgeConnect', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                            event.currentTarget.classList.add('unlocked-tech');
-                            setTechUnlockedArray('plasmaForgeConnect');
-                            showNotification(techNotificationMessages.plasmaForgeConnect, 'info', 3000, 'tech');
-                            callPopupModal(
-                                modalMegaStructureTechPlasmaForge5Header, 
-                                modalMegaStructureTechPlasmaForge5Text, 
-                                true, 
-                                false, 
-                                false, 
-                                false, 
-                                function() {
-                                    showHideModal();
-                                },
-                                null, 
-                                null, 
-                                null,
-                                'CONFIRM',
-                                null,
-                                null,
-                                null,
-                                false
-                            );
-                            applyMegaStructureBonuses(3,5);
-                        }, 'techUnlock', '', 'plasmaForgeConnect', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => {
+                                gain('plasmaForgeConnect', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
+                                event.currentTarget.classList.add('unlocked-tech');
+                                setTechUnlockedArray('plasmaForgeConnect');
+                                showNotification(techNotificationMessages.plasmaForgeConnect, 'info', 3000, 'tech');
+                                callPopupModal(
+                                    modalMegaStructureTechPlasmaForge5Header, 
+                                    modalMegaStructureTechPlasmaForge5Text, 
+                                    true, 
+                                    false, 
+                                    false, 
+                                    false, 
+                                    function() {
+                                        showHideModal();
+                                    },
+                                    null, 
+                                    null, 
+                                    null,
+                                    'CONFIRM',
+                                    null,
+                                    null,
+                                    null,
+                                    false
+                                );
+                                applyMegaStructureBonuses(3,5);
+                            },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'plasmaForgeConnect',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['plasmaForgeConnect', 'price'])} Research${getResourceDataObject('techs', ['plasmaForgeConnect', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="plasmaForgeConnectPrereq">${getResourceDataObject('techs', ['plasmaForgeConnect', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -1804,32 +2326,42 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Galactic Memory Archive Understanding',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            gain('galacticMemoryArchiveUnderstanding', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                            event.currentTarget.classList.add('unlocked-tech');
-                            setTechUnlockedArray('galacticMemoryArchiveUnderstanding');
-                            showNotification(techNotificationMessages.galacticMemoryArchiveUnderstanding, 'info', 3000, 'tech');
-                            callPopupModal(
-                                modalMegaStructureTechGalacticMemoryArchive1Header, 
-                                modalMegaStructureTechGalacticMemoryArchive1Text, 
-                                true, 
-                                false, 
-                                false, 
-                                false, 
-                                function() {
-                                    showHideModal();
-                                },
-                                null, 
-                                null, 
-                                null,
-                                'CONFIRM',
-                                null,
-                                null,
-                                null,
-                                false
-                            );
-                            applyMegaStructureBonuses(4,1);
-                        }, 'techUnlock', '', 'galacticMemoryArchiveUnderstanding', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => {
+                                gain('galacticMemoryArchiveUnderstanding', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
+                                event.currentTarget.classList.add('unlocked-tech');
+                                setTechUnlockedArray('galacticMemoryArchiveUnderstanding');
+                                showNotification(techNotificationMessages.galacticMemoryArchiveUnderstanding, 'info', 3000, 'tech');
+                                callPopupModal(
+                                    modalMegaStructureTechGalacticMemoryArchive1Header, 
+                                    modalMegaStructureTechGalacticMemoryArchive1Text, 
+                                    true, 
+                                    false, 
+                                    false, 
+                                    false, 
+                                    function() {
+                                        showHideModal();
+                                    },
+                                    null, 
+                                    null, 
+                                    null,
+                                    'CONFIRM',
+                                    null,
+                                    null,
+                                    null,
+                                    false
+                                );
+                                applyMegaStructureBonuses(4,1);
+                            },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'galacticMemoryArchiveUnderstanding',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['galacticMemoryArchiveUnderstanding', 'price'])} Research${getResourceDataObject('techs', ['galacticMemoryArchiveUnderstanding', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="galacticMemoryArchiveUnderstandingPrereq">${getResourceDataObject('techs', ['galacticMemoryArchiveUnderstanding', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -1852,32 +2384,42 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Galactic Memory Archive Capabilities',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            gain('galacticMemoryArchiveCapabilities', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                            event.currentTarget.classList.add('unlocked-tech');
-                            setTechUnlockedArray('galacticMemoryArchiveCapabilities');
-                            showNotification(techNotificationMessages.galacticMemoryArchiveCapabilities, 'info', 3000, 'tech');
-                            callPopupModal(
-                                modalMegaStructureTechGalacticMemoryArchive2Header, 
-                                modalMegaStructureTechGalacticMemoryArchive2Text, 
-                                true, 
-                                false, 
-                                false, 
-                                false, 
-                                function() {
-                                    showHideModal();
-                                },
-                                null, 
-                                null, 
-                                null,
-                                'CONFIRM',
-                                null,
-                                null,
-                                null,
-                                false
-                            );
-                            applyMegaStructureBonuses(4,2);
-                        }, 'techUnlock', '', 'galacticMemoryArchiveCapabilities', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => {
+                                gain('galacticMemoryArchiveCapabilities', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
+                                event.currentTarget.classList.add('unlocked-tech');
+                                setTechUnlockedArray('galacticMemoryArchiveCapabilities');
+                                showNotification(techNotificationMessages.galacticMemoryArchiveCapabilities, 'info', 3000, 'tech');
+                                callPopupModal(
+                                    modalMegaStructureTechGalacticMemoryArchive2Header, 
+                                    modalMegaStructureTechGalacticMemoryArchive2Text, 
+                                    true, 
+                                    false, 
+                                    false, 
+                                    false, 
+                                    function() {
+                                        showHideModal();
+                                    },
+                                    null, 
+                                    null, 
+                                    null,
+                                    'CONFIRM',
+                                    null,
+                                    null,
+                                    null,
+                                    false
+                                );
+                                applyMegaStructureBonuses(4,2);
+                            },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'galacticMemoryArchiveCapabilities',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['galacticMemoryArchiveCapabilities', 'price'])} Research${getResourceDataObject('techs', ['galacticMemoryArchiveCapabilities', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="galacticMemoryArchiveCapabilitiesPrereq">${getResourceDataObject('techs', ['galacticMemoryArchiveCapabilities', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -1900,32 +2442,42 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Galactic Memory Archive Disconnect',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            gain('galacticMemoryArchiveDisconnect', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                            event.currentTarget.classList.add('unlocked-tech');
-                            setTechUnlockedArray('galacticMemoryArchiveDisconnect');
-                            showNotification(techNotificationMessages.galacticMemoryArchiveDisconnect, 'info', 3000, 'tech');
-                            callPopupModal(
-                                modalMegaStructureTechGalacticMemoryArchive3Header, 
-                                modalMegaStructureTechGalacticMemoryArchive3Text, 
-                                true, 
-                                false, 
-                                false, 
-                                false, 
-                                function() {
-                                    showHideModal();
-                                },
-                                null, 
-                                null, 
-                                null,
-                                'CONFIRM',
-                                null,
-                                null,
-                                null,
-                                false
-                            );
-                            applyMegaStructureBonuses(4,3);
-                        }, 'techUnlock', '', 'galacticMemoryArchiveDisconnect', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => {
+                                gain('galacticMemoryArchiveDisconnect', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
+                                event.currentTarget.classList.add('unlocked-tech');
+                                setTechUnlockedArray('galacticMemoryArchiveDisconnect');
+                                showNotification(techNotificationMessages.galacticMemoryArchiveDisconnect, 'info', 3000, 'tech');
+                                callPopupModal(
+                                    modalMegaStructureTechGalacticMemoryArchive3Header, 
+                                    modalMegaStructureTechGalacticMemoryArchive3Text, 
+                                    true, 
+                                    false, 
+                                    false, 
+                                    false, 
+                                    function() {
+                                        showHideModal();
+                                    },
+                                    null, 
+                                    null, 
+                                    null,
+                                    'CONFIRM',
+                                    null,
+                                    null,
+                                    null,
+                                    false
+                                );
+                                applyMegaStructureBonuses(4,3);
+                            },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'galacticMemoryArchiveDisconnect',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['galacticMemoryArchiveDisconnect', 'price'])} Research${getResourceDataObject('techs', ['galacticMemoryArchiveDisconnect', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="galacticMemoryArchiveDisconnectPrereq">${getResourceDataObject('techs', ['galacticMemoryArchiveDisconnect', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -1948,32 +2500,42 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Galactic Memory Archive Power',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            gain('galacticMemoryArchivePower', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                            event.currentTarget.classList.add('unlocked-tech');
-                            setTechUnlockedArray('galacticMemoryArchivePower');
-                            showNotification(techNotificationMessages.galacticMemoryArchivePower, 'info', 3000, 'tech');
-                            callPopupModal(
-                                modalMegaStructureTechGalacticMemoryArchive4Header, 
-                                modalMegaStructureTechGalacticMemoryArchive4Text, 
-                                true, 
-                                false, 
-                                false, 
-                                false, 
-                                function() {
-                                    showHideModal();
-                                },
-                                null, 
-                                null, 
-                                null,
-                                'CONFIRM',
-                                null,
-                                null,
-                                null,
-                                false
-                            );
-                            applyMegaStructureBonuses(4,4);
-                        }, 'techUnlock', '', 'galacticMemoryArchivePower', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => {
+                                gain('galacticMemoryArchivePower', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
+                                event.currentTarget.classList.add('unlocked-tech');
+                                setTechUnlockedArray('galacticMemoryArchivePower');
+                                showNotification(techNotificationMessages.galacticMemoryArchivePower, 'info', 3000, 'tech');
+                                callPopupModal(
+                                    modalMegaStructureTechGalacticMemoryArchive4Header, 
+                                    modalMegaStructureTechGalacticMemoryArchive4Text, 
+                                    true, 
+                                    false, 
+                                    false, 
+                                    false, 
+                                    function() {
+                                        showHideModal();
+                                    },
+                                    null, 
+                                    null, 
+                                    null,
+                                    'CONFIRM',
+                                    null,
+                                    null,
+                                    null,
+                                    false
+                                );
+                                applyMegaStructureBonuses(4,4);
+                            },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'galacticMemoryArchivePower',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['galacticMemoryArchivePower', 'price'])} Research${getResourceDataObject('techs', ['galacticMemoryArchivePower', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="galacticMemoryArchivePowerPrereq">${getResourceDataObject('techs', ['galacticMemoryArchivePower', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -1996,32 +2558,42 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Galactic Memory Archive Connect',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'], (event) => {
-                            gain('galacticMemoryArchiveConnect', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
-                            event.currentTarget.classList.add('unlocked-tech');
-                            setTechUnlockedArray('galacticMemoryArchiveConnect');
-                            showNotification(techNotificationMessages.galacticMemoryArchiveConnect, 'info', 3000, 'tech');
-                            callPopupModal(
-                                modalMegaStructureTechGalacticMemoryArchive5Header, 
-                                modalMegaStructureTechGalacticMemoryArchive5Text, 
-                                true, 
-                                false, 
-                                false, 
-                                false, 
-                                function() {
-                                    showHideModal();
-                                },
-                                null, 
-                                null, 
-                                null,
-                                'CONFIRM',
-                                null,
-                                null,
-                                null,
-                                false
-                            );
-                            applyMegaStructureBonuses(4,5);
-                        }, 'techUnlock', '', 'galacticMemoryArchiveConnect', null, 'research', true, null, 'tech'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
+                            onClick: (event) => {
+                                gain('galacticMemoryArchiveConnect', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
+                                event.currentTarget.classList.add('unlocked-tech');
+                                setTechUnlockedArray('galacticMemoryArchiveConnect');
+                                showNotification(techNotificationMessages.galacticMemoryArchiveConnect, 'info', 3000, 'tech');
+                                callPopupModal(
+                                    modalMegaStructureTechGalacticMemoryArchive5Header, 
+                                    modalMegaStructureTechGalacticMemoryArchive5Text, 
+                                    true, 
+                                    false, 
+                                    false, 
+                                    false, 
+                                    function() {
+                                        showHideModal();
+                                    },
+                                    null, 
+                                    null, 
+                                    null,
+                                    'CONFIRM',
+                                    null,
+                                    null,
+                                    null,
+                                    false
+                                );
+                                applyMegaStructureBonuses(4,5);
+                            },
+                            dataConditionCheck: 'techUnlock',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'galacticMemoryArchiveConnect',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'tech'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('techs', ['galacticMemoryArchiveConnect', 'price'])} Research${getResourceDataObject('techs', ['galacticMemoryArchiveConnect', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="galacticMemoryArchiveConnectPrereq">${getResourceDataObject('techs', ['galacticMemoryArchiveConnect', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
                     resourcePriceObject: '',
@@ -2116,11 +2688,21 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Space Storage Tank Research:',
                     inputElements: [
-                        createButton(`UNLOCK`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock', 'special-ability'], (event) => {
-                            gain('spaceStorageTankResearch', 'ability', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
-                            setIncreaseStorageFactor(5);
-                            showNotification('ABILITY: Base storage expansion multiplier now 5x instead of 2x!', 'info', 3000, 'tech');
-                        }, 'techUnlockPhilosophy', '', 'spaceStorageTankResearch', null, 'research', true, null, 'techPhilosophy'),
+                        createButton({
+                            text: `UNLOCK`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock', 'special-ability'],
+                            onClick: (event) => {
+                                gain('spaceStorageTankResearch', 'ability', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
+                                setIncreaseStorageFactor(5);
+                                showNotification('ABILITY: Base storage expansion multiplier now 5x instead of 2x!', 'info', 3000, 'tech');
+                            },
+                            dataConditionCheck: 'techUnlockPhilosophy',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'spaceStorageTankResearch',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'techPhilosophy'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['constructor', 'spaceStorageTankResearch', 'price'])} Research`,
                     resourcePriceObject: '',
@@ -2142,18 +2724,28 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Efficient Assembly:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'], (event) => {
-                            gain('efficientAssembly', 'efficientAssembly', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
-                            let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('1');
-                            setRepeatableTechMultipliers('1', ++currentRepeatableTechMultiplier);
-                            trackAnalyticsEvent('philosophy_repeatable_researched', {
-                                philosophy_id: getPlayerPhilosophy(),
-                                tech_id: 'efficientAssembly',
-                                repeatable_slot: 1,
-                                new_level: currentRepeatableTechMultiplier
-                            }, { immediate: true, flushReason: 'philosophy_repeatable' });
-                            showNotification('Space Building costs reduced by 1%!', 'info', 3000, 'tech');
-                        }, 'techUnlockPhilosophy', '', 'efficientAssembly', null, 'research', true, null, 'techPhilosophy'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'],
+                            onClick: (event) => {
+                                gain('efficientAssembly', 'efficientAssembly', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
+                                let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('1');
+                                setRepeatableTechMultipliers('1', ++currentRepeatableTechMultiplier);
+                                trackAnalyticsEvent('philosophy_repeatable_researched', {
+                                    philosophy_id: getPlayerPhilosophy(),
+                                    tech_id: 'efficientAssembly',
+                                    repeatable_slot: 1,
+                                    new_level: currentRepeatableTechMultiplier
+                                }, { immediate: true, flushReason: 'philosophy_repeatable' });
+                                showNotification('Space Building costs reduced by 1%!', 'info', 3000, 'tech');
+                            },
+                            dataConditionCheck: 'techUnlockPhilosophy',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'efficientAssembly',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'techPhilosophy'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['constructor', 'efficientAssembly', 'price'])} Research`,
                     resourcePriceObject: '',
@@ -2175,19 +2767,29 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Laser Mining:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'], (event) => {
-                            gain('laserMining', 'laserMining', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
-                            let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('2');
-                            setRepeatableTechMultipliers('2', ++currentRepeatableTechMultiplier);
-                            trackAnalyticsEvent('philosophy_repeatable_researched', {
-                                philosophy_id: getPlayerPhilosophy(),
-                                tech_id: 'laserMining',
-                                repeatable_slot: 2,
-                                new_level: currentRepeatableTechMultiplier
-                            }, { immediate: true, flushReason: 'philosophy_repeatable' });
-                            setResourceAutobuyerPricesAfterRepeatables();
-                            showNotification('Resources AutoBuyers 5% cheaper!', 'info', 3000, 'tech');
-                        }, 'techUnlockPhilosophy', '', 'laserMining', null, 'research', true, null, 'techPhilosophy'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'],
+                            onClick: (event) => {
+                                gain('laserMining', 'laserMining', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
+                                let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('2');
+                                setRepeatableTechMultipliers('2', ++currentRepeatableTechMultiplier);
+                                trackAnalyticsEvent('philosophy_repeatable_researched', {
+                                    philosophy_id: getPlayerPhilosophy(),
+                                    tech_id: 'laserMining',
+                                    repeatable_slot: 2,
+                                    new_level: currentRepeatableTechMultiplier
+                                }, { immediate: true, flushReason: 'philosophy_repeatable' });
+                                setResourceAutobuyerPricesAfterRepeatables();
+                                showNotification('Resources AutoBuyers 5% cheaper!', 'info', 3000, 'tech');
+                            },
+                            dataConditionCheck: 'techUnlockPhilosophy',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'laserMining',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'techPhilosophy'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['constructor', 'laserMining', 'price'])} Research`,
                     resourcePriceObject: '',
@@ -2209,19 +2811,29 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Mass Compound Assembly:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'], (event) => {
-                            gain('massCompoundAssembly', 'massCompoundAssembly', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
-                            let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('3');
-                            setRepeatableTechMultipliers('3', ++currentRepeatableTechMultiplier);
-                            trackAnalyticsEvent('philosophy_repeatable_researched', {
-                                philosophy_id: getPlayerPhilosophy(),
-                                tech_id: 'massCompoundAssembly',
-                                repeatable_slot: 3,
-                                new_level: currentRepeatableTechMultiplier
-                            }, { immediate: true, flushReason: 'philosophy_repeatable' });
-                            setCompoundRecipePricesAfterRepeatables();
-                            showNotification('Compounds recipes cheaper by 5%!', 'info', 3000, 'tech');
-                        }, 'techUnlockPhilosophy', '', 'massCompoundAssembly', null, 'research', true, null, 'techPhilosophy'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'],
+                            onClick: (event) => {
+                                gain('massCompoundAssembly', 'massCompoundAssembly', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
+                                let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('3');
+                                setRepeatableTechMultipliers('3', ++currentRepeatableTechMultiplier);
+                                trackAnalyticsEvent('philosophy_repeatable_researched', {
+                                    philosophy_id: getPlayerPhilosophy(),
+                                    tech_id: 'massCompoundAssembly',
+                                    repeatable_slot: 3,
+                                    new_level: currentRepeatableTechMultiplier
+                                }, { immediate: true, flushReason: 'philosophy_repeatable' });
+                                setCompoundRecipePricesAfterRepeatables();
+                                showNotification('Compounds recipes cheaper by 5%!', 'info', 3000, 'tech');
+                            },
+                            dataConditionCheck: 'techUnlockPhilosophy',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'massCompoundAssembly',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'techPhilosophy'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['constructor', 'massCompoundAssembly', 'price'])} Research`,
                     resourcePriceObject: '',
@@ -2243,19 +2855,29 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Energy Drones:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'], (event) => {
-                            gain('energyDrones', 'energyDrones', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
-                            let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('4');
-                            setRepeatableTechMultipliers('4', ++currentRepeatableTechMultiplier);
-                            trackAnalyticsEvent('philosophy_repeatable_researched', {
-                                philosophy_id: getPlayerPhilosophy(),
-                                tech_id: 'energyDrones',
-                                repeatable_slot: 4,
-                                new_level: currentRepeatableTechMultiplier
-                            }, { immediate: true, flushReason: 'philosophy_repeatable' });
-                            setEnergyAndResearchBuildingPricesAfterRepeatables();
-                            showNotification('Energy and Research Buildings 5% cheaper!', 'info', 3000, 'tech');
-                        }, 'techUnlockPhilosophy', '', 'energyDrones', null, 'research', true, null, 'techPhilosophy'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'],
+                            onClick: (event) => {
+                                gain('energyDrones', 'energyDrones', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
+                                let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('4');
+                                setRepeatableTechMultipliers('4', ++currentRepeatableTechMultiplier);
+                                trackAnalyticsEvent('philosophy_repeatable_researched', {
+                                    philosophy_id: getPlayerPhilosophy(),
+                                    tech_id: 'energyDrones',
+                                    repeatable_slot: 4,
+                                    new_level: currentRepeatableTechMultiplier
+                                }, { immediate: true, flushReason: 'philosophy_repeatable' });
+                                setEnergyAndResearchBuildingPricesAfterRepeatables();
+                                showNotification('Energy and Research Buildings 5% cheaper!', 'info', 3000, 'tech');
+                            },
+                            dataConditionCheck: 'techUnlockPhilosophy',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'energyDrones',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'techPhilosophy'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['constructor', 'energyDrones', 'price'])} Research`,
                     resourcePriceObject: '',
@@ -2280,10 +2902,20 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Fleet Holograms:',
                     inputElements: [
-                        createButton(`UNLOCK`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock', 'special-ability'], (event) => {
-                            gain('fleetHolograms', 'ability', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
-                            showNotification('ABILITY: You can now always Vassalize enemies provided your fleet is 3x larger than theirs!', 'info', 3000, 'tech');
-                        }, 'techUnlockPhilosophy', '', 'fleetHolograms', null, 'research', true, null, 'techPhilosophy'),
+                        createButton({
+                            text: `UNLOCK`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock', 'special-ability'],
+                            onClick: (event) => {
+                                gain('fleetHolograms', 'ability', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
+                                showNotification('ABILITY: You can now always Vassalize enemies provided your fleet is 3x larger than theirs!', 'info', 3000, 'tech');
+                            },
+                            dataConditionCheck: 'techUnlockPhilosophy',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'fleetHolograms',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'techPhilosophy'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['supremacist', 'fleetHolograms', 'price'])} Research`,
                     resourcePriceObject: '',
@@ -2305,19 +2937,29 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Hangar Automation:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'], (event) => {
-                            gain('hangarAutomation', 'hangarAutomation', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
-                            let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('1');
-                            setRepeatableTechMultipliers('1', ++currentRepeatableTechMultiplier);
-                            trackAnalyticsEvent('philosophy_repeatable_researched', {
-                                philosophy_id: getPlayerPhilosophy(),
-                                tech_id: 'hangarAutomation',
-                                repeatable_slot: 1,
-                                new_level: currentRepeatableTechMultiplier
-                            }, { immediate: true, flushReason: 'philosophy_repeatable' });
-                            setFleetPricesAfterRepeatables();
-                            showNotification('Fleet build costs reduced by 5%!', 'info', 3000, 'tech');
-                        }, 'techUnlockPhilosophy', '', 'hangarAutomation', null, 'research', true, null, 'techPhilosophy'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'],
+                            onClick: (event) => {
+                                gain('hangarAutomation', 'hangarAutomation', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
+                                let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('1');
+                                setRepeatableTechMultipliers('1', ++currentRepeatableTechMultiplier);
+                                trackAnalyticsEvent('philosophy_repeatable_researched', {
+                                    philosophy_id: getPlayerPhilosophy(),
+                                    tech_id: 'hangarAutomation',
+                                    repeatable_slot: 1,
+                                    new_level: currentRepeatableTechMultiplier
+                                }, { immediate: true, flushReason: 'philosophy_repeatable' });
+                                setFleetPricesAfterRepeatables();
+                                showNotification('Fleet build costs reduced by 5%!', 'info', 3000, 'tech');
+                            },
+                            dataConditionCheck: 'techUnlockPhilosophy',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'hangarAutomation',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'techPhilosophy'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['supremacist', 'hangarAutomation', 'price'])} Research`,
                     resourcePriceObject: '',
@@ -2339,19 +2981,29 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Synthetic Plating:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'], (event) => {
-                            gain('syntheticPlating', 'syntheticPlating', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
-                            let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('2');
-                            setRepeatableTechMultipliers('2', ++currentRepeatableTechMultiplier);
-                            trackAnalyticsEvent('philosophy_repeatable_researched', {
-                                philosophy_id: getPlayerPhilosophy(),
-                                tech_id: 'syntheticPlating',
-                                repeatable_slot: 2,
-                                new_level: currentRepeatableTechMultiplier
-                            }, { immediate: true, flushReason: 'philosophy_repeatable' });
-                            setFleetArmorBuffsAfterRepeatables();
-                            showNotification('Fleet Armor increased by 5%!', 'info', 3000, 'tech');
-                        }, 'techUnlockPhilosophy', '', 'syntheticPlating', null, 'research', true, null, 'techPhilosophy'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'],
+                            onClick: (event) => {
+                                gain('syntheticPlating', 'syntheticPlating', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
+                                let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('2');
+                                setRepeatableTechMultipliers('2', ++currentRepeatableTechMultiplier);
+                                trackAnalyticsEvent('philosophy_repeatable_researched', {
+                                    philosophy_id: getPlayerPhilosophy(),
+                                    tech_id: 'syntheticPlating',
+                                    repeatable_slot: 2,
+                                    new_level: currentRepeatableTechMultiplier
+                                }, { immediate: true, flushReason: 'philosophy_repeatable' });
+                                setFleetArmorBuffsAfterRepeatables();
+                                showNotification('Fleet Armor increased by 5%!', 'info', 3000, 'tech');
+                            },
+                            dataConditionCheck: 'techUnlockPhilosophy',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'syntheticPlating',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'techPhilosophy'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['supremacist', 'syntheticPlating', 'price'])} Research`,
                     resourcePriceObject: '',
@@ -2373,19 +3025,29 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Antimatter Engine Minaturization:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'], (event) => {
-                            gain('antimatterEngineMinaturization', 'antimatterEngineMinaturization', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
-                            let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('3');
-                            setRepeatableTechMultipliers('3', ++currentRepeatableTechMultiplier);
-                            trackAnalyticsEvent('philosophy_repeatable_researched', {
-                                philosophy_id: getPlayerPhilosophy(),
-                                tech_id: 'antimatterEngineMinaturization',
-                                repeatable_slot: 3,
-                                new_level: currentRepeatableTechMultiplier
-                            }, { immediate: true, flushReason: 'philosophy_repeatable' });
-                            setFleetSpeedsAfterRepeatables();
-                            showNotification('Fleet Speed increased by 5%!', 'info', 3000, 'tech');
-                        }, 'techUnlockPhilosophy', '', 'antimatterEngineMinaturization', null, 'research', true, null, 'techPhilosophy'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'],
+                            onClick: (event) => {
+                                gain('antimatterEngineMinaturization', 'antimatterEngineMinaturization', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
+                                let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('3');
+                                setRepeatableTechMultipliers('3', ++currentRepeatableTechMultiplier);
+                                trackAnalyticsEvent('philosophy_repeatable_researched', {
+                                    philosophy_id: getPlayerPhilosophy(),
+                                    tech_id: 'antimatterEngineMinaturization',
+                                    repeatable_slot: 3,
+                                    new_level: currentRepeatableTechMultiplier
+                                }, { immediate: true, flushReason: 'philosophy_repeatable' });
+                                setFleetSpeedsAfterRepeatables();
+                                showNotification('Fleet Speed increased by 5%!', 'info', 3000, 'tech');
+                            },
+                            dataConditionCheck: 'techUnlockPhilosophy',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'antimatterEngineMinaturization',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'techPhilosophy'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['supremacist', 'antimatterEngineMinaturization', 'price'])} Research`,
                     resourcePriceObject: '',
@@ -2407,19 +3069,29 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Laser Intensity Research:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'], (event) => {
-                            gain('laserIntensityResearch', 'laserIntensityResearch', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
-                            let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('4');
-                            setRepeatableTechMultipliers('4', ++currentRepeatableTechMultiplier);
-                            trackAnalyticsEvent('philosophy_repeatable_researched', {
-                                philosophy_id: getPlayerPhilosophy(),
-                                tech_id: 'laserIntensityResearch',
-                                repeatable_slot: 4,
-                                new_level: currentRepeatableTechMultiplier
-                            }, { immediate: true, flushReason: 'philosophy_repeatable' });
-                            setFleetAttackDamageAfterRepeatables();
-                            showNotification('Fleet Attack Power increased by 5%! (Applicable to Newly Built Ships)', 'info', 3000, 'tech');
-                        }, 'techUnlockPhilosophy', '', 'laserIntensityResearch', null, 'research', true, null, 'techPhilosophy'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'],
+                            onClick: (event) => {
+                                gain('laserIntensityResearch', 'laserIntensityResearch', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
+                                let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('4');
+                                setRepeatableTechMultipliers('4', ++currentRepeatableTechMultiplier);
+                                trackAnalyticsEvent('philosophy_repeatable_researched', {
+                                    philosophy_id: getPlayerPhilosophy(),
+                                    tech_id: 'laserIntensityResearch',
+                                    repeatable_slot: 4,
+                                    new_level: currentRepeatableTechMultiplier
+                                }, { immediate: true, flushReason: 'philosophy_repeatable' });
+                                setFleetAttackDamageAfterRepeatables();
+                                showNotification('Fleet Attack Power increased by 5%! (Applicable to Newly Built Ships)', 'info', 3000, 'tech');
+                            },
+                            dataConditionCheck: 'techUnlockPhilosophy',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'laserIntensityResearch',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'techPhilosophy'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['supremacist', 'laserIntensityResearch', 'price'])} Research`,
                     resourcePriceObject: '',
@@ -2444,10 +3116,20 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Void Seers:',
                     inputElements: [
-                        createButton(`UNLOCK`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock', 'special-ability'], (event) => {
-                            gain('voidSeers', 'ability', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
-                            showNotification('ABILITY: Space Telescope can now scan for instant Resources and Compounds!', 'info', 3000, 'tech');
-                        }, 'techUnlockPhilosophy', '', 'voidSeers', null, 'research', true, null, 'techPhilosophy'),
+                        createButton({
+                            text: `UNLOCK`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock', 'special-ability'],
+                            onClick: (event) => {
+                                gain('voidSeers', 'ability', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
+                                showNotification('ABILITY: Space Telescope can now scan for instant Resources and Compounds!', 'info', 3000, 'tech');
+                            },
+                            dataConditionCheck: 'techUnlockPhilosophy',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'voidSeers',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'techPhilosophy'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['voidborn', 'voidSeers', 'price'])} Research`,
                     resourcePriceObject: '',
@@ -2469,19 +3151,29 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Stellar Whispers:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'], (event) => {
-                            gain('stellarWhispers', 'stellarWhispers', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
-                            let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('1');
-                            setRepeatableTechMultipliers('1', ++currentRepeatableTechMultiplier);
-                            trackAnalyticsEvent('philosophy_repeatable_researched', {
-                                philosophy_id: getPlayerPhilosophy(),
-                                tech_id: 'stellarWhispers',
-                                repeatable_slot: 1,
-                                new_level: currentRepeatableTechMultiplier
-                            }, { immediate: true, flushReason: 'philosophy_repeatable' });
-                            setInitialImpressionBaseAfterRepeatables();
-                            showNotification('Initial Impression of enemies improved by 1%!', 'info', 3000, 'tech');
-                        }, 'techUnlockPhilosophy', '', 'stellarWhispers', null, 'research', true, null, 'techPhilosophy'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'],
+                            onClick: (event) => {
+                                gain('stellarWhispers', 'stellarWhispers', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
+                                let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('1');
+                                setRepeatableTechMultipliers('1', ++currentRepeatableTechMultiplier);
+                                trackAnalyticsEvent('philosophy_repeatable_researched', {
+                                    philosophy_id: getPlayerPhilosophy(),
+                                    tech_id: 'stellarWhispers',
+                                    repeatable_slot: 1,
+                                    new_level: currentRepeatableTechMultiplier
+                                }, { immediate: true, flushReason: 'philosophy_repeatable' });
+                                setInitialImpressionBaseAfterRepeatables();
+                                showNotification('Initial Impression of enemies improved by 1%!', 'info', 3000, 'tech');
+                            },
+                            dataConditionCheck: 'techUnlockPhilosophy',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'stellarWhispers',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'techPhilosophy'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['voidborn', 'stellarWhispers', 'price'])} Research`,
                     resourcePriceObject: '',
@@ -2503,19 +3195,29 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Stellar Insight Manifold:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'], (event) => {
-                            gain('stellarInsightManifold', 'stellarInsightManifold', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
-                            let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('2');
-                            setRepeatableTechMultipliers('2', ++currentRepeatableTechMultiplier);
-                            trackAnalyticsEvent('philosophy_repeatable_researched', {
-                                philosophy_id: getPlayerPhilosophy(),
-                                tech_id: 'stellarInsightManifold',
-                                repeatable_slot: 2,
-                                new_level: currentRepeatableTechMultiplier
-                            }, { immediate: true, flushReason: 'philosophy_repeatable' });
-                            setStarStudyEfficiencyAfterRepeatables();
-                            showNotification('Star Study speed increased by 1%!', 'info', 3000, 'tech');
-                        }, 'techUnlockPhilosophy', '', 'stellarInsightManifold', null, 'research', true, null, 'techPhilosophy'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'],
+                            onClick: (event) => {
+                                gain('stellarInsightManifold', 'stellarInsightManifold', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
+                                let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('2');
+                                setRepeatableTechMultipliers('2', ++currentRepeatableTechMultiplier);
+                                trackAnalyticsEvent('philosophy_repeatable_researched', {
+                                    philosophy_id: getPlayerPhilosophy(),
+                                    tech_id: 'stellarInsightManifold',
+                                    repeatable_slot: 2,
+                                    new_level: currentRepeatableTechMultiplier
+                                }, { immediate: true, flushReason: 'philosophy_repeatable' });
+                                setStarStudyEfficiencyAfterRepeatables();
+                                showNotification('Star Study speed increased by 1%!', 'info', 3000, 'tech');
+                            },
+                            dataConditionCheck: 'techUnlockPhilosophy',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'stellarInsightManifold',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'techPhilosophy'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['voidborn', 'stellarInsightManifold', 'price'])} Research`,
                     resourcePriceObject: '',
@@ -2537,19 +3239,29 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Asteroid Dwellers:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'], (event) => {
-                            gain('asteroidDwellers', 'asteroidDwellers', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
-                            let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('3');
-                            setRepeatableTechMultipliers('3', ++currentRepeatableTechMultiplier);
-                            trackAnalyticsEvent('philosophy_repeatable_researched', {
-                                philosophy_id: getPlayerPhilosophy(),
-                                tech_id: 'asteroidDwellers',
-                                repeatable_slot: 3,
-                                new_level: currentRepeatableTechMultiplier
-                            }, { immediate: true, flushReason: 'philosophy_repeatable' });
-                            setAsteroidSearchEfficiencyAfterRepeatables();
-                            showNotification('Asteroid Search speed increased by 1%!', 'info', 3000, 'tech');
-                        }, 'techUnlockPhilosophy', '', 'asteroidDwellers', null, 'research', true, null, 'techPhilosophy'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'],
+                            onClick: (event) => {
+                                gain('asteroidDwellers', 'asteroidDwellers', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
+                                let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('3');
+                                setRepeatableTechMultipliers('3', ++currentRepeatableTechMultiplier);
+                                trackAnalyticsEvent('philosophy_repeatable_researched', {
+                                    philosophy_id: getPlayerPhilosophy(),
+                                    tech_id: 'asteroidDwellers',
+                                    repeatable_slot: 3,
+                                    new_level: currentRepeatableTechMultiplier
+                                }, { immediate: true, flushReason: 'philosophy_repeatable' });
+                                setAsteroidSearchEfficiencyAfterRepeatables();
+                                showNotification('Asteroid Search speed increased by 1%!', 'info', 3000, 'tech');
+                            },
+                            dataConditionCheck: 'techUnlockPhilosophy',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'asteroidDwellers',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'techPhilosophy'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['voidborn', 'asteroidDwellers', 'price'])} Research`,
                     resourcePriceObject: '',
@@ -2571,18 +3283,28 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Ascendency Philosophy:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'], (event) => {
-                            gain('ascendencyPhilosophy', 'ascendencyPhilosophy', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
-                            let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('4');
-                            setRepeatableTechMultipliers('4', ++currentRepeatableTechMultiplier);
-                            trackAnalyticsEvent('philosophy_repeatable_researched', {
-                                philosophy_id: getPlayerPhilosophy(),
-                                tech_id: 'ascendencyPhilosophy',
-                                repeatable_slot: 4,
-                                new_level: currentRepeatableTechMultiplier
-                            }, { immediate: true, flushReason: 'philosophy_repeatable' });
-                            showNotification('Base Ascendency Point gain +1!', 'info', 3000, 'tech');
-                        }, 'techUnlockPhilosophy', '', 'ascendencyPhilosophy', null, 'research', true, null, 'techPhilosophy'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'],
+                            onClick: (event) => {
+                                gain('ascendencyPhilosophy', 'ascendencyPhilosophy', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
+                                let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('4');
+                                setRepeatableTechMultipliers('4', ++currentRepeatableTechMultiplier);
+                                trackAnalyticsEvent('philosophy_repeatable_researched', {
+                                    philosophy_id: getPlayerPhilosophy(),
+                                    tech_id: 'ascendencyPhilosophy',
+                                    repeatable_slot: 4,
+                                    new_level: currentRepeatableTechMultiplier
+                                }, { immediate: true, flushReason: 'philosophy_repeatable' });
+                                showNotification('Base Ascendency Point gain +1!', 'info', 3000, 'tech');
+                            },
+                            dataConditionCheck: 'techUnlockPhilosophy',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'ascendencyPhilosophy',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'techPhilosophy'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['voidborn', 'ascendencyPhilosophy', 'price'])} Research`,
                     resourcePriceObject: '',
@@ -2607,10 +3329,20 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Rapid Expansion:',
                     inputElements: [
-                        createButton(`UNLOCK`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock', 'special-ability'], (event) => {
-                            gain('rapidExpansion', 'ability', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
-                            showNotification('ABILITY: You now have a chance of capturing up to 3 nearby Systems for every 1!', 'info', 3000, 'tech');
-                        }, 'techUnlockPhilosophy', '', 'rapidExpansion', null, 'research', true, null, 'techPhilosophy'),
+                        createButton({
+                            text: `UNLOCK`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock', 'special-ability'],
+                            onClick: (event) => {
+                                gain('rapidExpansion', 'ability', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
+                                showNotification('ABILITY: You now have a chance of capturing up to 3 nearby Systems for every 1!', 'info', 3000, 'tech');
+                            },
+                            dataConditionCheck: 'techUnlockPhilosophy',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'rapidExpansion',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'techPhilosophy'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['expansionist', 'rapidExpansion', 'price'])} Research`,
                     resourcePriceObject: '',
@@ -2632,19 +3364,29 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Space Elevator:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'], (event) => {
-                            gain('spaceElevator', 'spaceElevator', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
-                            let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('1');
-                            setRepeatableTechMultipliers('1', ++currentRepeatableTechMultiplier);
-                            trackAnalyticsEvent('philosophy_repeatable_researched', {
-                                philosophy_id: getPlayerPhilosophy(),
-                                tech_id: 'spaceElevator',
-                                repeatable_slot: 1,
-                                new_level: currentRepeatableTechMultiplier
-                            }, { immediate: true, flushReason: 'philosophy_repeatable' });
-                            setStarshipPartPricesAfterRepeatables();
-                            showNotification('Starship Parts cost reduced by 5%!', 'info', 3000, 'tech');
-                        }, 'techUnlockPhilosophy', '', 'spaceElevator', null, 'research', true, null, 'techPhilosophy'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'],
+                            onClick: (event) => {
+                                gain('spaceElevator', 'spaceElevator', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
+                                let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('1');
+                                setRepeatableTechMultipliers('1', ++currentRepeatableTechMultiplier);
+                                trackAnalyticsEvent('philosophy_repeatable_researched', {
+                                    philosophy_id: getPlayerPhilosophy(),
+                                    tech_id: 'spaceElevator',
+                                    repeatable_slot: 1,
+                                    new_level: currentRepeatableTechMultiplier
+                                }, { immediate: true, flushReason: 'philosophy_repeatable' });
+                                setStarshipPartPricesAfterRepeatables();
+                                showNotification('Starship Parts cost reduced by 5%!', 'info', 3000, 'tech');
+                            },
+                            dataConditionCheck: 'techUnlockPhilosophy',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'spaceElevator',
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            rowCategory: 'techPhilosophy'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['expansionist', 'spaceElevator', 'price'])} Research`,
                     resourcePriceObject: '',
@@ -2666,19 +3408,31 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Launch Pad Mass Production:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'], (event) => {
-                            gain('launchPadMassProduction', 'launchPadMassProduction', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
-                            let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('2');
-                            setRepeatableTechMultipliers('2', ++currentRepeatableTechMultiplier);
-                            trackAnalyticsEvent('philosophy_repeatable_researched', {
-                                philosophy_id: getPlayerPhilosophy(),
-                                tech_id: 'launchPadMassProduction',
-                                repeatable_slot: 2,
-                                new_level: currentRepeatableTechMultiplier
-                            }, { immediate: true, flushReason: 'philosophy_repeatable' });
-                            setRocketPartPricesAfterRepeatables();
-                            showNotification('Rocket Parts cost reduced by 5%!', 'info', 3000, 'tech');
-                        }, 'techUnlockPhilosophy', '', 'launchPadMassProduction', null, 'research', true, null, 'techPhilosophy'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'],
+                            onClick: (event) => {
+                                gain('launchPadMassProduction', 'launchPadMassProduction', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
+                                let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('2');
+                                setRepeatableTechMultipliers('2', ++currentRepeatableTechMultiplier);
+                                trackAnalyticsEvent('philosophy_repeatable_researched', {
+                                    philosophy_id: getPlayerPhilosophy(),
+                                    tech_id: 'launchPadMassProduction',
+                                    repeatable_slot: 2,
+                                    new_level: currentRepeatableTechMultiplier
+                                }, { immediate: true, flushReason: 'philosophy_repeatable' });
+                                setRocketPartPricesAfterRepeatables();
+                                showNotification('Rocket Parts cost reduced by 5%!', 'info', 3000, 'tech');
+                            },
+                            dataConditionCheck: 'techUnlockPhilosophy',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'launchPadMassProduction',
+                            objectSectionArgument2: null,
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            autoBuyerTier: null,
+                            rowCategory: 'techPhilosophy'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['expansionist', 'launchPadMassProduction', 'price'])} Research`,
                     resourcePriceObject: '',
@@ -2700,19 +3454,31 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Asteroid Attractors:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'], (event) => {
-                            gain('asteroidAttractors', 'asteroidAttractors', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
-                            let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('3');
-                            setRepeatableTechMultipliers('3', ++currentRepeatableTechMultiplier);
-                            trackAnalyticsEvent('philosophy_repeatable_researched', {
-                                philosophy_id: getPlayerPhilosophy(),
-                                tech_id: 'asteroidAttractors',
-                                repeatable_slot: 3,
-                                new_level: currentRepeatableTechMultiplier
-                            }, { immediate: true, flushReason: 'philosophy_repeatable' });
-                            setRocketTravelTimeReductionAfterRepeatables();
-                            showNotification('Rocket Travel time reduced by 5%!', 'info', 3000, 'tech');
-                        }, 'techUnlockPhilosophy', '', 'asteroidAttractors', null, 'research', true, null, 'techPhilosophy'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'],
+                            onClick: (event) => {
+                                gain('asteroidAttractors', 'asteroidAttractors', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
+                                let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('3');
+                                setRepeatableTechMultipliers('3', ++currentRepeatableTechMultiplier);
+                                trackAnalyticsEvent('philosophy_repeatable_researched', {
+                                    philosophy_id: getPlayerPhilosophy(),
+                                    tech_id: 'asteroidAttractors',
+                                    repeatable_slot: 3,
+                                    new_level: currentRepeatableTechMultiplier
+                                }, { immediate: true, flushReason: 'philosophy_repeatable' });
+                                setRocketTravelTimeReductionAfterRepeatables();
+                                showNotification('Rocket Travel time reduced by 5%!', 'info', 3000, 'tech');
+                            },
+                            dataConditionCheck: 'techUnlockPhilosophy',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'asteroidAttractors',
+                            objectSectionArgument2: null,
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            autoBuyerTier: null,
+                            rowCategory: 'techPhilosophy'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['expansionist', 'asteroidAttractors', 'price'])} Research`,
                     resourcePriceObject: '',
@@ -2734,19 +3500,31 @@ export function drawTab3Content(heading, optionContentElement) {
                     renderNameABs: null,
                     labelText: 'Warp Drive:',
                     inputElements: [
-                        createButton(`Research`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'], (event) => {
-                            gain('warpDrive', 'warpDrive', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
-                            let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('4');
-                            setRepeatableTechMultipliers('4', ++currentRepeatableTechMultiplier);
-                            trackAnalyticsEvent('philosophy_repeatable_researched', {
-                                philosophy_id: getPlayerPhilosophy(),
-                                tech_id: 'warpDrive',
-                                repeatable_slot: 4,
-                                new_level: currentRepeatableTechMultiplier
-                            }, { immediate: true, flushReason: 'philosophy_repeatable' });
-                            setStarshipTravelTimeReductionAfterRepeatables();
-                            showNotification('Starship Travel time reduced by 5%!', 'info', 3000, 'tech');
-                        }, 'techUnlockPhilosophy', '', 'warpDrive', null, 'research', true, null, 'techPhilosophy'),
+                        createButton({
+                            text: `Research`,
+                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'],
+                            onClick: (event) => {
+                                gain('warpDrive', 'warpDrive', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
+                                let currentRepeatableTechMultiplier = getRepeatableTechMultipliers('4');
+                                setRepeatableTechMultipliers('4', ++currentRepeatableTechMultiplier);
+                                trackAnalyticsEvent('philosophy_repeatable_researched', {
+                                    philosophy_id: getPlayerPhilosophy(),
+                                    tech_id: 'warpDrive',
+                                    repeatable_slot: 4,
+                                    new_level: currentRepeatableTechMultiplier
+                                }, { immediate: true, flushReason: 'philosophy_repeatable' });
+                                setStarshipTravelTimeReductionAfterRepeatables();
+                                showNotification('Starship Travel time reduced by 5%!', 'info', 3000, 'tech');
+                            },
+                            dataConditionCheck: 'techUnlockPhilosophy',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'warpDrive',
+                            objectSectionArgument2: null,
+                            quantityArgument: 'research',
+                            disableKeyboardForButton: true,
+                            autoBuyerTier: null,
+                            rowCategory: 'techPhilosophy'
+                        }),
                     ],
                     descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['expansionist', 'warpDrive', 'price'])} Research`,
                     resourcePriceObject: '',

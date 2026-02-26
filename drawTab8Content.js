@@ -1,4 +1,4 @@
-import { createButton, createButtonV2, createOptionRow, createTextElement, setButtonState, showNotification, drawSharedSpaceBackdrop, callPopupModal, showHideModal } from './ui.js';
+import { createButton, createOptionRow, createTextElement, setButtonState, showNotification, drawSharedSpaceBackdrop, callPopupModal, showHideModal } from './ui.js';
 import {
     modalCosmicRipLocatedHeader,
     modalCosmicRipLocatedText,
@@ -63,7 +63,7 @@ export function drawTab8Content(heading, optionContentElement) {
             renderNameABs: null,
             labelText: 'Near Space Scanner Array:',
             inputElements: [
-                createButtonV2({
+                createButton({
                     text: 'RESTORE',
                     classNames: ['option-button', 'red-disabled-text', 'cosmic-rip-restore-scanner-array-button'],
                     onClick: () => {
@@ -462,7 +462,7 @@ export function drawTab8Content(heading, optionContentElement) {
             renderNameABs: null,
             labelText: 'Sensor Buoy:',
             inputElements: [
-                createButtonV2({
+                createButton({
                     text: 'DEPLOY',
                     classNames: ['option-button', 'red-disabled-text', 'cosmic-rip-deploy-sensor-buoy-button'],
                     onClick: () => {
@@ -495,7 +495,7 @@ export function drawTab8Content(heading, optionContentElement) {
             renderNameABs: null,
             labelText: 'Rip Research Orbiter:',
             inputElements: [
-                createButtonV2({
+                createButton({
                     text: 'DEPLOY',
                     classNames: ['option-button', 'red-disabled-text', 'cosmic-rip-deploy-rip-research-orbiter-button'],
                     onClick: () => {
@@ -732,7 +732,7 @@ export function drawTab8Content(heading, optionContentElement) {
             renderNameABs: null,
             labelText: 'Stabilizer Array:',
             inputElements: [
-                createButtonV2({
+                createButton({
                     text: 'BUILD',
                     classNames: ['option-button', 'red-disabled-text', 'cosmic-rip-build-stabilizer-array-button'],
                     onClick: () => {

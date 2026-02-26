@@ -3392,7 +3392,7 @@ export function createOptionRow(options = {}) {
             description.classList.add('building-purchase');
         }
 
-        description.id = generateElementId(labelText, resourceString, optionalIterationParam);
+        description.id = generateElementId(labelText, resourceString, null);
         description.innerHTML = descriptionText;
 
         if (dataConditionCheck) {
@@ -3712,100 +3712,7 @@ export function setButtonState(button, options = {}) {
     }
 }
 
-export function createButton(text, classNames, onClick, dataConditionCheck, resourcePriceObject, objectSectionArgument1, objectSectionArgument2, quantityArgument, disableKeyboardForButton, autoBuyerTier, rowCategory) {
-    const button = document.createElement('button');
-    button.innerText = text;
-
-    
-    if (Array.isArray(classNames)) {
-        classNames.forEach(className => {
-            if (className.startsWith('id_')) {
-                button.id = className.slice(3);
-            } else {
-                button.classList.add(className);
-            }
-        });
-    } else if (typeof classNames === 'string') {
-        button.classList.add(classNames);
-    }
-
-
-    if (dataConditionCheck) {
-        if (dataConditionCheck === 'sellResource' || dataConditionCheck === 'fuseResource') {
-            button.dataset.conditionCheck = dataConditionCheck;
-            button.dataset.argumentCheckQuantity = quantityArgument;
-            button.dataset.type = objectSectionArgument1;
-            button.dataset.resourceToFuseTo = objectSectionArgument2;
-        } else if (dataConditionCheck === 'techUnlock' || dataConditionCheck === 'techUnlockPhilosophy') {
-            button.dataset.conditionCheck = dataConditionCheck;
-            button.dataset.argumentCheckQuantity = quantityArgument;
-            button.dataset.type = objectSectionArgument1;
-        }else if (dataConditionCheck === 'toggle') {
-            button.dataset.conditionCheck = dataConditionCheck;
-            button.dataset.toggleTarget = objectSectionArgument2;
-        } else {
-            button.dataset.conditionCheck = dataConditionCheck;
-            button.dataset.resourcePriceObject = resourcePriceObject;
-            button.dataset.type = objectSectionArgument1;
-            button.dataset.resourceToFuseTo = objectSectionArgument2;
-            button.dataset.argumentCheckQuantity = quantityArgument;
-            button.dataset.autoBuyerTier = autoBuyerTier;
-            button.dataset.rowCategory = rowCategory;
-        }
-    }
-
-
-    if (getDemoBuild() && objectSectionArgument1 === 'autoBuyer' && (autoBuyerTier === 'tier3' || autoBuyerTier === 'tier4')) {
-        button.classList.add('electron-purple-demo-button');
-    }
-
-
-    button.addEventListener('click', function(event) {
-        if (objectSectionArgument1 && objectSectionArgument1 === 'storage') {
-            sfxPlayer.playAudio('increaseStorage');
-        } else {
-            playClickSfx();
-        }
-
-        const rect = button.getBoundingClientRect();
-        const x = ((event.clientX - rect.left) / rect.width) * 100;
-        const y = ((event.clientY - rect.top) / rect.height) * 100;
-        button.style.setProperty('--click-x', `${x}%`);
-        button.style.setProperty('--click-y', `${y}%`);
-
-        if (!button.classList.contains('option-button-animating')) {
-            button.classList.add('option-button-animating');
-            setTimeout(() => {
-                button.classList.remove('option-button-animating');
-            }, 210);
-        }
-        onClick(event);
-    });
-
-    
-    if (disableKeyboardForButton) {
-        button.setAttribute('tabindex', '-1');
-    }
-
-
-    if (dataConditionCheck === 'sellResource' && quantityArgument === 'hydrogen') {
-        button.id = 'hydrogenSellButton';
-    }
-
-
-    if (disableKeyboardForButton) {
-        button.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault();
-            }
-        });
-    }
-
-
-    return button;
-}
-
-export function createButtonV2(options = {}) {
+export function createButton(options = {}) {
     const opts = options || {};
 
     const text = opts.text;
@@ -5665,68 +5572,78 @@ export function createStarDestinationRow(starData, isInteresting) {
 
 
     const buttonContainer = document.getElementById('starDestinationButton');
-    const button = createButton(`Travel`, ['option-button', 'red-disabled-text', 'travel-starship-button'], () => {
-        let content = launchStarShipWarningText;
-        if (getFactoryStarsArray().includes(getDestinationStar())) {
-            content += `<br><br><span class="warning-orange-text">WARNING: MegaStructure Systems are Extremely difficult to conquer!<br>Only go if you have high Production to rebuild broken Fleets multiple times!</span>`;
-        } else if (getHomeStarName() === getDestinationStar()) {
-            content += `<br><br><span class="red-disabled-text">WARNING: Flying to Miaplacidus is suicidal unless you are VERY strong with<br>VERY high production capabilities to rebuild broken Fleets multiple times!</span>`;
-        }
+    const button = createButton({
+        text: `Travel`,
+        classNames: ['option-button', 'red-disabled-text', 'travel-starship-button'],
+        onClick: () => {
+            let content = launchStarShipWarningText;
+            if (getFactoryStarsArray().includes(getDestinationStar())) {
+                content += `<br><br><span class="warning-orange-text">WARNING: MegaStructure Systems are Extremely difficult to conquer!<br>Only go if you have high Production to rebuild broken Fleets multiple times!</span>`;
+            } else if (getHomeStarName() === getDestinationStar()) {
+                content += `<br><br><span class="red-disabled-text">WARNING: Flying to Miaplacidus is suicidal unless you are VERY strong with<br>VERY high production capabilities to rebuild broken Fleets multiple times!</span>`;
+            }
 
+            content += `<br><br><span class="${
+                (() => {
+                    const s = Math.floor(calculateStarTravelDurationWithModifiers(getDestinationStar()) / 1000);
+                    return s >= 10800 ? 'red-disabled-text' : s >= 3600 ? 'warning-orange-text' : 'green-ready-text';
+                })()
+            }">Real Time Flight Time to ${capitaliseWordsWithRomanNumerals(getDestinationStar())} approximately: ${
+                (() => {
+                    const s = Math.floor(calculateStarTravelDurationWithModifiers(getDestinationStar()) / 1000);
+                    return s >= 3600
+                        ? `${Math.floor(s / 3600)}h ${Math.floor((s % 3600) / 60)}m ${s % 60}s`
+                        : s >= 60
+                        ? `${Math.floor(s / 60)}m ${s % 60}s`
+                        : `${s}s`;
+                })()
+            }</span>`;
 
-        content += `<br><br><span class="${
-            (() => {
-                const s = Math.floor(calculateStarTravelDurationWithModifiers(getDestinationStar()) / 1000);
-                return s >= 10800 ? 'red-disabled-text' : s >= 3600 ? 'warning-orange-text' : 'green-ready-text';
-            })()
-        }">Real Time Flight Time to ${capitaliseWordsWithRomanNumerals(getDestinationStar())} approximately: ${
-            (() => {
-                const s = Math.floor(calculateStarTravelDurationWithModifiers(getDestinationStar()) / 1000);
-                return s >= 3600
-                    ? `${Math.floor(s / 3600)}h ${Math.floor((s % 3600) / 60)}m ${s % 60}s`
-                    : s >= 60
-                    ? `${Math.floor(s / 60)}m ${s % 60}s`
-                    : `${s}s`;
-            })()
-        }</span>`;
-
-
-        callPopupModal(
-            launchStarShipWarningHeader, 
-            content, 
-            true, 
-            true, 
-            false, 
-            false, 
-            function() {  
-                const destinationStar = getDestinationStar();  
-                const starData = getStarSystemDataObject('stars', [destinationStar]);  
-                trackAnalyticsEvent('starship_launched', {
-                    destination_star: destinationStar,
-                    ts: new Date().toISOString()
-                }, { immediate: true, flushReason: 'starship' });
-                showNotification(`Travelling to ${capitaliseWordsWithRomanNumerals(starData.name)}`, 'info', 3000, 'special');
-                sfxPlayer.playAudio('starShipLaunch', false);
-                startTravelToDestinationStarTimer([0, 'buttonClick'], false);
-                spendAntimatterOnFuelForStarShip(starData.fuel);
-                spaceTravelButtonHideAndShowDescription();
-                addToResourceAllTimeStat(1, 'starShipLaunched');
-                addToResourceAllTimeStat(starData.ascendencyPoints, 'apAnticipated');
-                setAchievementFlagArray('launchStarship', 'add');
-                showHideModal();
-            },
-            function() {  
-                showHideModal();
-            },
-            null,  
-            null,
-            'LAUNCH',
-            'CANCEL',
-            null,
-            null,
-            false
-        );
-    }, 'upgradeCheck', '', 'autoBuyer', 'travelToStar', 'time', true, null, 'starShipPurchase');
+            callPopupModal(
+                launchStarShipWarningHeader,
+                content,
+                true,
+                true,
+                false,
+                false,
+                function() {
+                    const destinationStar = getDestinationStar();
+                    const starData = getStarSystemDataObject('stars', [destinationStar]);
+                    trackAnalyticsEvent('starship_launched', {
+                        destination_star: destinationStar,
+                        ts: new Date().toISOString()
+                    }, { immediate: true, flushReason: 'starship' });
+                    showNotification(`Travelling to ${capitaliseWordsWithRomanNumerals(starData.name)}`, 'info', 3000, 'special');
+                    sfxPlayer.playAudio('starShipLaunch', false);
+                    startTravelToDestinationStarTimer([0, 'buttonClick'], false);
+                    spendAntimatterOnFuelForStarShip(starData.fuel);
+                    spaceTravelButtonHideAndShowDescription();
+                    addToResourceAllTimeStat(1, 'starShipLaunched');
+                    addToResourceAllTimeStat(starData.ascendencyPoints, 'apAnticipated');
+                    setAchievementFlagArray('launchStarship', 'add');
+                    showHideModal();
+                },
+                function() {
+                    showHideModal();
+                },
+                null,
+                null,
+                'LAUNCH',
+                'CANCEL',
+                null,
+                null,
+                false
+            );
+        },
+        dataConditionCheck: 'upgradeCheck',
+        resourcePriceObject: '',
+        objectSectionArgument1: 'autoBuyer',
+        objectSectionArgument2: 'travelToStar',
+        quantityArgument: 'time',
+        disableKeyboardForButton: true,
+        autoBuyerTier: null,
+        rowCategory: 'starShipPurchase'
+    });
     buttonContainer.appendChild(button);
 }
 
