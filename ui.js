@@ -3356,8 +3356,6 @@ export function createOptionRow(
         }
     }
 
-    
-    labelContainer.appendChild(label);
     mainRow.appendChild(labelContainer);
 
     const inputContainer = document.createElement('div');
@@ -3441,6 +3439,213 @@ export function createOptionRow(
     }
     wrapper.appendChild(mainRow);
 
+
+    return wrapper;
+}
+
+
+export function createOptionRowV2(options = {}) {
+    const opts = options || {};
+
+    const labelId = opts.labelId;
+    const renderNameABs = Object.prototype.hasOwnProperty.call(opts, 'renderNameABs') ? opts.renderNameABs : null;
+    const labelText = opts.labelText;
+    const inputElements = Array.isArray(opts.inputElements) ? opts.inputElements : [];
+    const descriptionText = Object.prototype.hasOwnProperty.call(opts, 'descriptionText') ? opts.descriptionText : null;
+    const resourcePriceObject = Object.prototype.hasOwnProperty.call(opts, 'resourcePriceObject') ? opts.resourcePriceObject : null;
+    const dataConditionCheck = Object.prototype.hasOwnProperty.call(opts, 'dataConditionCheck') ? opts.dataConditionCheck : null;
+    const objectSectionArgument1 = Object.prototype.hasOwnProperty.call(opts, 'objectSectionArgument1') ? opts.objectSectionArgument1 : null;
+    const objectSectionArgument2 = Object.prototype.hasOwnProperty.call(opts, 'objectSectionArgument2') ? opts.objectSectionArgument2 : null;
+    const quantityArgument = Object.prototype.hasOwnProperty.call(opts, 'quantityArgument') ? opts.quantityArgument : null;
+    const autoBuyerTier = Object.prototype.hasOwnProperty.call(opts, 'autoBuyerTier') ? opts.autoBuyerTier : null;
+    const startInvisibleValue = Object.prototype.hasOwnProperty.call(opts, 'startInvisibleValue') ? opts.startInvisibleValue : null;
+    const resourceString = Object.prototype.hasOwnProperty.call(opts, 'resourceString') ? opts.resourceString : null;
+    const optionalIterationParam = Object.prototype.hasOwnProperty.call(opts, 'optionalIterationParam') ? opts.optionalIterationParam : null;
+    const rowCategory = Object.prototype.hasOwnProperty.call(opts, 'rowCategory') ? opts.rowCategory : null;
+    const noDescriptionContainer = Object.prototype.hasOwnProperty.call(opts, 'noDescriptionContainer') ? opts.noDescriptionContainer : null;
+    const specialInputContainerClasses = Object.prototype.hasOwnProperty.call(opts, 'specialInputContainerClasses') ? opts.specialInputContainerClasses : false;
+    const hideMainDescriptionRow = Object.prototype.hasOwnProperty.call(opts, 'hideMainDescriptionRow') ? opts.hideMainDescriptionRow : false;
+
+    const wrapper = document.createElement('div');
+    wrapper.classList.add('option-row', 'd-flex');
+    wrapper.id = labelId;
+
+    const descriptionRowContainer = document.createElement('div');
+    descriptionRowContainer.id = labelId + 'Description';
+    descriptionRowContainer.classList.add('option-row-description', 'd-flex');
+    const existingDescription = getOptionDescription(labelId);
+    if (existingDescription) {
+        descriptionRowContainer.innerHTML = existingDescription.content1;
+    }
+
+    const mainRow = document.createElement('div');
+    mainRow.classList.add('option-row-main', 'd-flex');
+    wrapper.dataset.conditionCheck = dataConditionCheck;
+    wrapper.dataset.type = objectSectionArgument1;
+    wrapper.dataset.autoBuyerTier = autoBuyerTier;
+    wrapper.dataset.rowCategory = rowCategory;
+
+    if (dataConditionCheck === 'techUnlock') {
+        const appearsAt = getResourceDataObject('techs', [objectSectionArgument1, 'appearsAt']);
+        const researchPointsToAppear = appearsAt?.[0];
+        const prerequisiteForTech = appearsAt?.[1];
+
+        const researchQty = getResourceDataObject('research', ['quantity']);
+        const alreadyRevealed = getRevealedTechArray().includes(objectSectionArgument1);
+        const prereqUnlocked = getTechUnlockedArray().includes(prerequisiteForTech);
+
+        if (researchQty < researchPointsToAppear && !alreadyRevealed) {
+            wrapper.classList.add('invisible');
+        } else if (!prereqUnlocked) {
+            wrapper.classList.add('invisible');
+        } else if (researchQty >= researchPointsToAppear && !alreadyRevealed) {
+            setRevealedTechArray(objectSectionArgument1);
+        }
+    }
+
+    if (getCurrentOptionPane() === 'launch pad') {
+        if (objectSectionArgument2?.startsWith('rocket') && !getResourceDataObject('space', ['upgrades', 'launchPad', 'launchPadBoughtYet'])) {
+            wrapper.classList.add('invisible');
+        } else if (objectSectionArgument2?.startsWith('rocket')) {
+            wrapper.classList.remove('invisible');
+        }
+    }
+
+    if (getCurrentOptionPane() === 'space telescope') {
+        if (['searchAsteroid', 'investigateStar', 'pillageVoid'].includes(objectSectionArgument2)) {
+            if (!getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'spaceTelescopeBoughtYet'])) {
+                wrapper.classList.add('invisible');
+            } else {
+                if (objectSectionArgument2 === 'pillageVoid') {
+                    const canPillageVoid = getPlayerPhilosophy() === 'voidborn' && getPhilosophyAbilityActive() && getStatRun() > 1;
+                    wrapper.classList.toggle('invisible', !canPillageVoid);
+                } else {
+                    wrapper.classList.remove('invisible');
+                }
+            }
+        }
+    }
+
+    if (startInvisibleValue && startInvisibleValue[0] !== 'research') {
+        const revealElementType = startInvisibleValue[0];
+        const revealElementCondition = startInvisibleValue[1];
+
+        if (revealElementType === 'tech') {
+            if (!getTechUnlockedArray().includes(revealElementCondition)) {
+                wrapper.classList.add('invisible');
+            }
+        }
+
+        if (revealElementType === 'debug') {
+            if (getDebugVisibilityArray().includes(revealElementCondition)) {
+                wrapper.classList.add('invisible');
+            }
+        }
+    }
+
+    const labelContainer = document.createElement('div');
+    labelContainer.classList.add('label-container');
+    if (noDescriptionContainer) {
+        if (noDescriptionContainer[1] !== 'invisible') {
+            labelContainer.style.width = noDescriptionContainer[1];
+        } else {
+            labelContainer.classList.add('invisible');
+        }
+    }
+
+    const label = document.createElement('label');
+    label.classList.add('label-text');
+    labelContainer.appendChild(label);
+
+    if (renderNameABs !== null) {
+        label.innerText = renderNameABs + ':';
+    } else {
+        if (Array.isArray(labelText)) {
+            labelContainer.classList.add(labelText[1]);
+            if (typeof labelText[0] === 'string' && labelText[0].includes('<')) {
+                label.innerHTML = labelText[0];
+            } else {
+                label.innerText = labelText[0];
+            }
+        } else {
+            label.innerText = labelText;
+        }
+    }
+
+    mainRow.appendChild(labelContainer);
+
+    const inputContainer = document.createElement('div');
+    inputContainer.classList.add('input-container');
+    if (specialInputContainerClasses) {
+        if (Array.isArray(specialInputContainerClasses)) {
+            specialInputContainerClasses.forEach((className) => {
+                if (className) inputContainer.classList.add(className);
+            });
+        } else {
+            inputContainer.classList.add(String(specialInputContainerClasses));
+        }
+    }
+
+    if (noDescriptionContainer) {
+        inputContainer.style.width = noDescriptionContainer[2];
+    }
+
+    inputElements.slice(0, 5).forEach((el) => {
+        if (el) inputContainer.appendChild(el);
+    });
+
+    mainRow.appendChild(inputContainer);
+
+    const pane = getCurrentOptionPane();
+    const forceShowDescription = pane === 'energy' || pane === 'power plant' || pane === 'advanced power plant' || pane === 'solar power plant';
+    if (!noDescriptionContainer || forceShowDescription) {
+        const descriptionContainer = document.createElement('div');
+        descriptionContainer.classList.add('description-container');
+        const description = document.createElement('label');
+        description.classList.add('notation');
+
+        if (rowCategory === 'building' || rowCategory === 'spaceMiningPurchase' || rowCategory === 'starShipPurchase' || rowCategory === 'fleetPurchase') {
+            description.classList.add('building-purchase');
+        }
+
+        description.id = generateElementId(labelText, resourceString, optionalIterationParam);
+        description.innerHTML = descriptionText;
+
+        if (dataConditionCheck) {
+            if (rowCategory === 'resource' || rowCategory === 'building' || rowCategory === 'spaceMiningPurchase' || rowCategory === 'starShipPurchase' || rowCategory === 'fleetPurchase' || rowCategory === 'science' || rowCategory === 'tech') {
+                description.classList.add('red-disabled-text', 'resource-cost-sell-check');
+            } else if (rowCategory === 'compound') {
+                description.classList.add('red-disabled-text', 'compound-cost-sell-check');
+            }
+
+            if (dataConditionCheck === 'techUnlock') {
+                description.dataset.conditionCheck = dataConditionCheck;
+                description.dataset.argumentCheckQuantity = quantityArgument;
+                description.dataset.type = objectSectionArgument1;
+            } else {
+                const quantityArgument2 = descriptionText && descriptionText.includes(',') && objectSectionArgument1 && objectSectionArgument1.includes('storage')
+                    ? descriptionText.split(',').pop().trim().split(' ').pop().toLowerCase()
+                    : '';
+
+                description.dataset.conditionCheck = dataConditionCheck;
+                description.dataset.resourcePriceObject = resourcePriceObject;
+                description.dataset.type = objectSectionArgument1;
+                description.dataset.resourceToFuseTo = objectSectionArgument2;
+                description.dataset.argumentCheckQuantity = quantityArgument;
+                description.dataset.argumentCheckQuantity2 = quantityArgument2;
+                description.dataset.autoBuyerTier = autoBuyerTier;
+                description.dataset.rowCategory = rowCategory;
+            }
+        }
+
+        descriptionContainer.appendChild(description);
+        mainRow.appendChild(descriptionContainer);
+    }
+
+    if (!hideMainDescriptionRow) {
+        wrapper.appendChild(descriptionRowContainer);
+    }
+    wrapper.appendChild(mainRow);
 
     return wrapper;
 }
