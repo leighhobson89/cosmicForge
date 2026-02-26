@@ -1,4 +1,4 @@
-import { removeTabAttentionIfNoIndicators, createOptionRow, createButton, createDropdown, createTextElement, createTextFieldArea, createSpinningDropdown, callPopupModal, showHideModal, createMegaStructureDiagram, createMegaStructureTable, createBlackHole, setButtonState, showNotification, updateDescriptionRow, setupInfoTooltips } from './ui.js';
+import { removeTabAttentionIfNoIndicators, createOptionRow, createButton, createButtonV2, createDropdown, createTextElement, createTextFieldArea, createSpinningDropdown, callPopupModal, showHideModal, createMegaStructureDiagram, createMegaStructureTable, createBlackHole, setButtonState, showNotification, updateDescriptionRow, setupInfoTooltips } from './ui.js';
 import {
     getStarsWithAncientManuscripts,
     getDestinationStar,
@@ -95,39 +95,44 @@ export function drawTab7Content(heading, optionContentElement) {
             renderNameABs: null,
             labelText: 'Rebirth:',
             inputElements: [
-                createButton(`REBIRTH`, ['option-button', 'red-disabled-text', 'rebirth-check'], () => {
-                    const currentAp = getResourceDataObject('ascendencyPoints', ['quantity']);
-                    const spanClass = currentAp === 0 ? "red-disabled-text" : "green-ready-text";
+                createButtonV2({
+                    text: `REBIRTH`,
+                    classNames: ['option-button', 'red-disabled-text', 'rebirth-check'],
+                    onClick: () => {
+                        const currentAp = getResourceDataObject('ascendencyPoints', ['quantity']);
+                        const spanClass = currentAp === 0 ? "red-disabled-text" : "green-ready-text";
 
-                    const content = modalRebirthText.replace(
-                        /<span class="green-ready-text">.*?<\/span>/,
-                        `<span class="${spanClass}">You will carry over ${currentAp} AP!</span>`
-                    );
+                        const content = modalRebirthText.replace(
+                            /<span class="green-ready-text">.*?<\/span>/,
+                            `<span class="${spanClass}">You will carry over ${currentAp} AP!</span>`
+                        );
 
-                    callPopupModal(
-                        modalRebirthHeader,
-                        content,
-                        true,
-                        true,
-                        false,
-                        false,
-                        function () {
-                            rebirth();
-                            showHideModal();
-                        },
-                        function () {
-                            showHideModal();
-                        },
-                        null,
-                        null,
-                        'RESET ALL PROGRESS AND KEEP AP',
-                        'CANCEL',
-                        null,
-                        null,
-                        false
-                    );
-
-                }, null, null, null, null, null, true, null, 'rebirth'),
+                        callPopupModal(
+                            modalRebirthHeader,
+                            content,
+                            true,
+                            true,
+                            false,
+                            false,
+                            function () {
+                                rebirth();
+                                showHideModal();
+                            },
+                            function () {
+                                showHideModal();
+                            },
+                            null,
+                            null,
+                            'RESET ALL PROGRESS AND KEEP AP',
+                            'CANCEL',
+                            null,
+                            null,
+                            false
+                        );
+                    },
+                    disableKeyboardForButton: true,
+                    rowCategory: 'rebirth'
+                }),
             ],
             descriptionText: `RESET ALL PROGRESS AND KEEP AWARDED AP`,
             resourcePriceObject: '',
@@ -155,9 +160,15 @@ export function drawTab7Content(heading, optionContentElement) {
                 ], 'no', (value) => {
                     setGalacticMarketLiquidationAuthorization(value);
                 }),
-                createButton(`LIQUIDATE`, ['option-button', 'red-disabled-text', 'galactic-market-confirm-liquidate-button'], () => {
-                    galacticMarketLiquidateForAp(getApLiquidationQuantity());
-                }, null, null, null, null, null, true, null, 'galacticMarketLiquidateForApConfirm'),
+                createButtonV2({
+                    text: `LIQUIDATE`,
+                    classNames: ['option-button', 'red-disabled-text', 'galactic-market-confirm-liquidate-button'],
+                    onClick: () => {
+                        galacticMarketLiquidateForAp(getApLiquidationQuantity());
+                    },
+                    disableKeyboardForButton: true,
+                    rowCategory: 'galacticMarketLiquidateForApConfirm'
+                }),
             ],
             descriptionText: `AP GAIN: <span id ="galacticMarketApLiquidationQuantity" class="green-ready-text">0</span>`,
             resourcePriceObject: '',
@@ -299,9 +310,15 @@ export function drawTab7Content(heading, optionContentElement) {
                 createTextElement(`Trade <span id="galacticMarketOutgoingQuantityText" class="green-ready-text notation">999</span> <span id="galacticMarketOutgoingStockTypeText" class="green-ready-text">Hydrogen</span>`, 'galacticMarketSummaryOutgoing', ['galactic-market-summary-text'], null),
                 createTextElement(`for <span id="galacticMarketIncomingQuantityText" class="green-ready-text notation">12</span> <span id="galacticMarketIncomingStockTypeText" class="green-ready-text">Diesel</span>`, 'galacticMarketSummaryIncoming', ['galactic-market-summary-text'], null),
                 createTextElement(`Commission: <span id="galacticMarketComissionQuantitySummaryText" class="warning-orange-text">49</span> <span id="galacticMarketComissionQuantityStockTypeText" class="warning-orange-text">Hydrogen</span>`, 'galacticMarketSummaryCommission', ['galactic-market-summary-text-wide'], null),
-                createButton(`CONFIRM`, ['option-button', 'red-disabled-text', 'galactic-market-confirm-trade-button'], () => {
-                    galacticMarketTrade();
-                }, null, null, null, null, null, true, null, 'galacticMarketTradeConfirm'),
+                createButtonV2({
+                    text: `CONFIRM`,
+                    classNames: ['option-button', 'red-disabled-text', 'galactic-market-confirm-trade-button'],
+                    onClick: () => {
+                        galacticMarketTrade();
+                    },
+                    disableKeyboardForButton: true,
+                    rowCategory: 'galacticMarketTradeConfirm'
+                }),
             ],
             descriptionText: '',
             resourcePriceObject: '',
@@ -331,9 +348,15 @@ export function drawTab7Content(heading, optionContentElement) {
                 ], 'select', (value) => {
                     setGalacticMarketSellApForCashQuantity(value);
                 }),
-                createButton(`SELL`, ['option-button', 'red-disabled-text', 'galactic-market-confirm-sell-ap-button'], () => {
-                    galacticMarketSellApForCash(getGalacticMarketSellApForCashQuantity());
-                }, null, null, null, null, null, true, null, 'galacticMarketSellApForCashConfirm'),
+                createButtonV2({
+                    text: `SELL`,
+                    classNames: ['option-button', 'red-disabled-text', 'galactic-market-confirm-sell-ap-button'],
+                    onClick: () => {
+                        galacticMarketSellApForCash(getGalacticMarketSellApForCashQuantity());
+                    },
+                    disableKeyboardForButton: true,
+                    rowCategory: 'galacticMarketSellApForCashConfirm'
+                }),
             ],
             descriptionText: `Cash Gain: <span id ="galacticMarketCashGainQuantity" class="green-ready-text notation">0</span>`,
             resourcePriceObject: '',
@@ -382,9 +405,15 @@ export function drawTab7Content(heading, optionContentElement) {
                     setGalacticCasinoPurchaseItem(value);
                 }, ['galactic-casino-dropdown']),
                 createTextFieldArea('galacticCasinoPurchaseQuantityTextArea', ['galactic-market-textarea', 'galactic-casino-quantity-textarea'], 'Buy CP Quantity', ''),
-                createButton(`BUY`, ['option-button', 'red-disabled-text', 'galactic-casino-buy-cp-button'], () => {
-                    buyCasinoPoints();
-                }, null, null, null, null, null, true, null, 'galacticCasinoBuyCp'),
+                createButtonV2({
+                    text: `BUY`,
+                    classNames: ['option-button', 'red-disabled-text', 'galactic-casino-buy-cp-button'],
+                    onClick: () => {
+                        buyCasinoPoints();
+                    },
+                    disableKeyboardForButton: true,
+                    rowCategory: 'galacticCasinoBuyCp'
+                }),
                 createTextElement(`Cost: <span id="galacticCasinoPurchaseCpPreview" class="green-ready-text notation">0</span>`, 'galacticCasinoPurchaseCpPreviewText', ['galactic-market-summary-text'], null),
             ],
             descriptionText: '',
@@ -423,13 +452,19 @@ export function drawTab7Content(heading, optionContentElement) {
             'win',
             ['galactic-casino-spinner']
         );
-        const game1SpinButton = createButton('SPIN', ['id_galacticCasinoGame1SpinButton', 'option-button', 'red-disabled-text', 'galactic-casino-spin-button'], () => {
-            const stakeEl = document.getElementById('galacticCasinoGame1StakeTextArea');
-            playDoubleOrNothing({
-                stake: stakeEl?.value,
-                spinnerId: 'galacticCasinoGame1Spinner'
-            });
-        }, null, null, null, null, null, true, null, 'galacticCasinoGame1');
+        const game1SpinButton = createButtonV2({
+            text: 'SPIN',
+            classNames: ['id_galacticCasinoGame1SpinButton', 'option-button', 'red-disabled-text', 'galactic-casino-spin-button'],
+            onClick: () => {
+                const stakeEl = document.getElementById('galacticCasinoGame1StakeTextArea');
+                playDoubleOrNothing({
+                    stake: stakeEl?.value,
+                    spinnerId: 'galacticCasinoGame1Spinner'
+                });
+            },
+            disableKeyboardForButton: true,
+            rowCategory: 'galacticCasinoGame1'
+        });
 
         const game1Row = createOptionRow({
             labelId: 'galacticCasinoGame1Row',
@@ -472,21 +507,15 @@ export function drawTab7Content(heading, optionContentElement) {
         wheelIndicator.classList.add('galactic-casino-roulette-indicator');
         wheel.appendChild(wheelIndicator);
 
-        const game2SpinButton = createButton(
-            'SPIN WHEEL',
-            ['id_galacticCasinoGame2SpinWheelButton', 'option-button', 'red-disabled-text', 'galactic-casino-spin-button', 'galactic-casino-wheel-spin-button'],
-            () => {
+        const game2SpinButton = createButtonV2({
+            text: 'SPIN WHEEL',
+            classNames: ['id_galacticCasinoGame2SpinWheelButton', 'option-button', 'red-disabled-text', 'galactic-casino-spin-button', 'galactic-casino-wheel-spin-button'],
+            onClick: () => {
                 playWheelOfFortune({ wheelId: 'galacticCasinoGame2Wheel' });
             },
-            null,
-            null,
-            null,
-            null,
-            null,
-            true,
-            null,
-            'galacticCasinoGame2'
-        );
+            disableKeyboardForButton: true,
+            rowCategory: 'galacticCasinoGame2'
+        });
 
         const wheelStack = document.createElement('div');
         wheelStack.classList.add('galactic-casino-wheel-stack');
@@ -523,10 +552,10 @@ export function drawTab7Content(heading, optionContentElement) {
         prizeDropdown.classList.add('dropdown-disabled-red');
         prizeDropdown.style.pointerEvents = 'none';
 
-        const claimButton = createButton(
-            'CLAIM',
-            ['id_galacticCasinoGame2ClaimButton', 'option-button', 'red-disabled-text', 'galactic-casino-spin-button'],
-            () => {
+        const claimButton = createButtonV2({
+            text: 'CLAIM',
+            classNames: ['id_galacticCasinoGame2ClaimButton', 'option-button', 'red-disabled-text', 'galactic-casino-spin-button'],
+            onClick: () => {
                 const w = document.getElementById('galacticCasinoGame2Wheel');
                 const dd = document.getElementById('galacticCasinoGame2PrizeDropdown');
                 const claimBtn = document.getElementById('galacticCasinoGame2ClaimButton');
@@ -562,15 +591,9 @@ export function drawTab7Content(heading, optionContentElement) {
                     setButtonState(spinBtn, { enabled: canSpin, ready: canSpin });
                 }
             },
-            null,
-            null,
-            null,
-            null,
-            null,
-            true,
-            null,
-            'galacticCasinoGame2'
-        );
+            disableKeyboardForButton: true,
+            rowCategory: 'galacticCasinoGame2'
+        });
 
         const game2Row = createOptionRow({
             labelId: 'galacticCasinoGame2Row',
@@ -718,10 +741,10 @@ export function drawTab7Content(heading, optionContentElement) {
             ['galactic-casino-wheel-prize-dropdown']
         );
 
-        const game4SpinButton = createButton(
-            'SPIN',
-            ['galacticCasinoGame4SpinButton', 'id_galacticCasinoGame4SpinButton', 'option-button', 'red-disabled-text', 'galactic-casino-spin-button'],
-            () => {
+        const game4SpinButton = createButtonV2({
+            text: 'SPIN',
+            classNames: ['galacticCasinoGame4SpinButton', 'id_galacticCasinoGame4SpinButton', 'option-button', 'red-disabled-text', 'galactic-casino-spin-button'],
+            onClick: () => {
                 const spinning = String(game4Container.getAttribute('data-spinning') || 'false') === 'true';
                 if (spinning) return;
 
@@ -837,15 +860,9 @@ export function drawTab7Content(heading, optionContentElement) {
                     updateVoidSeerSpinButtonState();
                 });
             },
-            null,
-            null,
-            null,
-            null,
-            null,
-            true,
-            null,
-            'galacticCasinoGame4'
-        );
+            disableKeyboardForButton: true,
+            rowCategory: 'galacticCasinoGame4'
+        });
 
         game4Container.appendChild(game4SpinnerContainer);
         game4Container.appendChild(game4PrizeDropdown);
@@ -897,35 +914,23 @@ export function drawTab7Content(heading, optionContentElement) {
             game3CardRow.appendChild(card);
         }
 
-        const game3LowerButton = createButton(
-            'LOWER',
-            ['id_galacticCasinoGame3LowerButton', 'option-button', 'red-disabled-text', 'galactic-casino-spin-button'],
-            () => {
+        const game3LowerButton = createButtonV2({
+            text: 'LOWER',
+            classNames: ['id_galacticCasinoGame3LowerButton', 'option-button', 'red-disabled-text', 'galactic-casino-spin-button'],
+            onClick: () => {
             },
-            null,
-            null,
-            null,
-            null,
-            null,
-            true,
-            null,
-            'galacticCasinoGame3'
-        );
+            disableKeyboardForButton: true,
+            rowCategory: 'galacticCasinoGame3'
+        });
 
-        const game3HigherButton = createButton(
-            'HIGHER',
-            ['id_galacticCasinoGame3HigherButton', 'option-button', 'red-disabled-text', 'galactic-casino-spin-button'],
-            () => {
+        const game3HigherButton = createButtonV2({
+            text: 'HIGHER',
+            classNames: ['id_galacticCasinoGame3HigherButton', 'option-button', 'red-disabled-text', 'galactic-casino-spin-button'],
+            onClick: () => {
             },
-            null,
-            null,
-            null,
-            null,
-            null,
-            true,
-            null,
-            'galacticCasinoGame3'
-        );
+            disableKeyboardForButton: true,
+            rowCategory: 'galacticCasinoGame3'
+        });
 
         const game3HiloContainer = document.createElement('div');
         game3HiloContainer.id = 'galacticCasinoGame3HiloContainer';
@@ -1535,10 +1540,10 @@ export function drawTab7Content(heading, optionContentElement) {
             }
         };
 
-        const game3CashOutButton = createButton(
-            'PLAY',
-            ['id_galacticCasinoGame3CashOutButton', 'option-button', 'green-ready-text', 'galactic-casino-spin-button'],
-            () => {
+        const game3CashOutButton = createButtonV2({
+            text: 'PLAY',
+            classNames: ['id_galacticCasinoGame3CashOutButton', 'option-button', 'green-ready-text', 'galactic-casino-spin-button'],
+            onClick: () => {
                 const state = String(game3HiloContainer.getAttribute('data-hilo-state') || 'idle');
                 if (state === 'idle') {
                     const cpBalance = getGalacticCasinoDataObject('casinoPoints', ['quantity']) ?? 0;
@@ -1590,15 +1595,9 @@ export function drawTab7Content(heading, optionContentElement) {
                     hiloResetImmediate();
                 }
             },
-            null,
-            null,
-            null,
-            null,
-            null,
-            true,
-            null,
-            'galacticCasinoGame3'
-        );
+            disableKeyboardForButton: true,
+            rowCategory: 'galacticCasinoGame3'
+        });
 
         const game3PrizeInfo = createTextElement(
             `Prize: <span id="galacticCasinoGame3PrizePreview" class="green-ready-text notation">---</span>`,
@@ -1739,9 +1738,15 @@ export function drawTab7Content(heading, optionContentElement) {
                         ['buff-value']
                     ),                
                     createTextElement(buyStatus, `buff${capitaliseString(buffKey)}BuyStatusText`, ['buff-value']),
-                    createButton(`BUY`, ['option-button', 'red-disabled-text', 'ascendency-buff-button', `buff-class-${buffNameSlug}`], () => {
-                        purchaseBuff(buffKey, cost);
-                    }, null, null, null, null, null, true, null, 'ascendency'),
+                    createButtonV2({
+                        text: `BUY`,
+                        classNames: ['option-button', 'red-disabled-text', 'ascendency-buff-button', `buff-class-${buffNameSlug}`],
+                        onClick: () => {
+                            purchaseBuff(buffKey, cost);
+                        },
+                        disableKeyboardForButton: true,
+                        rowCategory: 'ascendency'
+                    }),
                     createTextElement(
                         `<span id="${buffNameId}CostText" class="green-ready-text">${Math.floor(cost)} AP</span>`,
                         'buffCost',
@@ -1930,202 +1935,222 @@ export function drawTab7Content(heading, optionContentElement) {
         blackHoleCanvasContainer.style.height = '220px';
         blackHoleCanvasContainer.style.flex = '0 0 auto';
 
-        const blackHoleButton1 = createButton('Research Black Hole', ['id_blackHoleResearchButton', 'option-button', 'red-disabled-text', 'wide-option-button'], () => {
-            if (getBlackHoleResearchDone()) {
-                return;
-            }
-
-            const price = getBlackHoleResearchPrice();
-            const currentResearch = getResourceDataObject('research', ['quantity']);
-            if (currentResearch < price) {
-                return;
-            }
-
-            setResourceDataObject(currentResearch - price, 'research', ['quantity']);
-            setBlackHoleResearchDone(true);
-
-            trackAnalyticsEvent('black_hole_research_completed', {
-                price,
-                research_before: currentResearch,
-                research_after: currentResearch - price
-            }, { immediate: true, flushReason: 'black_hole' });
-
-            setAchievementFlagArray('discoverBlackHole', 'add');
-
-            const chargeTimerName = 'blackHoleChargeTimer';
-            if (timerManagerDelta.hasTimer(chargeTimerName)) {
-                timerManagerDelta.removeTimer(chargeTimerName);
-            }
-
-            setBlackHoleChargeReady(false);
-            setCurrentlyChargingBlackHole(false);
-            setCurrentBlackHoleChargeTimerDurationTotal(0);
-            setTimeLeftUntilBlackHoleChargeTimerFinishes(0);
-            startBlackHoleChargeTimer([0, 'researchComplete']);
-        });
-        const blackHoleButton2 = createButton('Power', ['id_blackHoleButton2', 'option-button', 'wide-option-button', 'option-button--wrap'], () => {
-            if (!getBlackHoleResearchDone()) {
-                return;
-            }
-
-            const price = getBlackHolePowerPrice();
-            const currentResearch = getResourceDataObject('research', ['quantity']);
-            if (currentResearch < price) {
-                return;
-            }
-
-            setResourceDataObject(currentResearch - price, 'research', ['quantity']);
-            setBlackHolePowerPrice(Math.ceil(price * getGameCostMultiplier()));
-
-            const currentPower = Number(getBlackHolePower());
-            const baseIncrement = Number(getBlackHolePowerUpgradeIncrement());
-            const increment = currentPower >= 50 ? 0.5 : baseIncrement;
-            setBlackHolePower(currentPower + increment);
-        });
-        const blackHoleButton3 = createButton('Duration', ['id_blackHoleButton3', 'option-button', 'wide-option-button', 'option-button--wrap'], () => {
-            if (!getBlackHoleResearchDone()) {
-                return;
-            }
-
-            const minChargeMs = getMinimumBlackHoleChargeTime();
-            const baseChargeMs = getBaseBlackHoleChargeTimerDuration();
-            const currentChargeMs = Math.round(baseChargeMs * getBlackHoleRechargeMultiplier());
-            const rechargeCapped = currentChargeMs <= minChargeMs;
-            if (rechargeCapped) {
-                return;
-            }
-
-            const price = getBlackHoleDurationPrice();
-            const currentResearch = getResourceDataObject('research', ['quantity']);
-            if (currentResearch < price) {
-                return;
-            }
-
-            setResourceDataObject(currentResearch - price, 'research', ['quantity']);
-            setBlackHoleDurationPrice(Math.ceil(price * getGameCostMultiplier()));
-            setBlackHoleDuration(getBlackHoleDuration() + getBlackHoleDurationUpgradeIncrementMs());
-        });
-        const blackHoleButton4 = createButton('Recharge', ['id_blackHoleButton4', 'option-button', 'wide-option-button', 'option-button--wrap'], () => {
-            if (!getBlackHoleResearchDone()) {
-                return;
-            }
-
-            const minChargeMs = getMinimumBlackHoleChargeTime();
-            const baseChargeMs = getBaseBlackHoleChargeTimerDuration();
-            const previousMultiplier = getBlackHoleRechargeMultiplier();
-            const minMultiplier = baseChargeMs > 0 ? (minChargeMs / baseChargeMs) : 0;
-            const nextMultiplier = Math.max(minMultiplier, previousMultiplier * 0.88);
-
-            const currentChargeMs = Math.round(baseChargeMs * previousMultiplier);
-            if (currentChargeMs <= minChargeMs) {
-                return;
-            }
-
-            const price = getBlackHoleRechargePrice();
-            const currentResearch = getResourceDataObject('research', ['quantity']);
-            if (currentResearch < price) {
-                return;
-            }
-
-            setResourceDataObject(currentResearch - price, 'research', ['quantity']);
-            setBlackHoleRechargePrice(Math.ceil(price * getGameCostMultiplier()));
-
-            setBlackHoleRechargeMultiplier(nextMultiplier);
-
-            if (getCurrentlyChargingBlackHole()) {
-                const timerName = 'blackHoleChargeTimer';
-                if (timerManagerDelta.hasTimer(timerName)) {
-                    const previousTotal = getCurrentBlackHoleChargeTimerDurationTotal();
-                    const previousRemaining = getTimeLeftUntilBlackHoleChargeTimerFinishes();
-                    const elapsed = previousTotal - previousRemaining;
-                    const progress = previousTotal > 0 ? Math.max(0, Math.min(1, elapsed / previousTotal)) : 0;
-
-                    timerManagerDelta.removeTimer(timerName);
-                    setCurrentlyChargingBlackHole(false);
-
-                    const scale = previousMultiplier > 0 ? (nextMultiplier / previousMultiplier) : 1;
-                    const newTotal = Math.round(previousTotal * scale);
-                    const newRemaining = Math.round(newTotal * (1 - progress));
-                    setCurrentBlackHoleChargeTimerDurationTotal(newTotal);
-                    setTimeLeftUntilBlackHoleChargeTimerFinishes(newRemaining);
-                    startBlackHoleChargeTimer([newRemaining, 'rechargeUpgrade']);
+        const blackHoleButton1 = createButtonV2({
+            text: 'Research Black Hole',
+            classNames: ['id_blackHoleResearchButton', 'option-button', 'red-disabled-text', 'wide-option-button'],
+            onClick: () => {
+                if (getBlackHoleResearchDone()) {
+                    return;
                 }
-            }
-        });
-        const blackHoleActivateChargeButton = createButton('Charge', ['id_blackHoleChargeButton', 'option-button'], () => {
-            if (getBlackHoleAlwaysOn()) {
-                return;
-            }
-            if (getCurrentlyChargingBlackHole() || getCurrentlyTimeWarpingBlackHole()) {
-                return;
-            }
 
-            if (getBlackHoleChargeReady()) {
+                const price = getBlackHoleResearchPrice();
+                const currentResearch = getResourceDataObject('research', ['quantity']);
+                if (currentResearch < price) {
+                    return;
+                }
+
+                setResourceDataObject(currentResearch - price, 'research', ['quantity']);
+                setBlackHoleResearchDone(true);
+
+                trackAnalyticsEvent('black_hole_research_completed', {
+                    price,
+                    research_before: currentResearch,
+                    research_after: currentResearch - price
+                }, { immediate: true, flushReason: 'black_hole' });
+
+                setAchievementFlagArray('discoverBlackHole', 'add');
+
+                const chargeTimerName = 'blackHoleChargeTimer';
+                if (timerManagerDelta.hasTimer(chargeTimerName)) {
+                    timerManagerDelta.removeTimer(chargeTimerName);
+                }
+
                 setBlackHoleChargeReady(false);
-
-                sfxPlayer.playAudio('blackHoleActivated', false);
-
-                const progressBar = document.getElementById('blackHoleChargeProgressBar');
-                if (progressBar) {
-                    progressBar.style.width = '0%';
+                setCurrentlyChargingBlackHole(false);
+                setCurrentBlackHoleChargeTimerDurationTotal(0);
+                setTimeLeftUntilBlackHoleChargeTimerFinishes(0);
+                startBlackHoleChargeTimer([0, 'researchComplete']);
+            }
+        });
+        const blackHoleButton2 = createButtonV2({
+            text: 'Power',
+            classNames: ['id_blackHoleButton2', 'option-button', 'wide-option-button', 'option-button--wrap'],
+            onClick: () => {
+                if (!getBlackHoleResearchDone()) {
+                    return;
                 }
 
-                const chargeProgressBarContainer = document.getElementById('blackHoleChargeProgressBarContainer');
-                if (chargeProgressBarContainer) {
-                    chargeProgressBarContainer.classList.add('invisible');
+                const price = getBlackHolePowerPrice();
+                const currentResearch = getResourceDataObject('research', ['quantity']);
+                if (currentResearch < price) {
+                    return;
                 }
 
-                const timeWarpProgressBarContainer = document.getElementById('blackHoleTimeWarpProgressBarContainer');
-                if (timeWarpProgressBarContainer) {
-                    timeWarpProgressBarContainer.classList.remove('invisible');
+                setResourceDataObject(currentResearch - price, 'research', ['quantity']);
+                setBlackHolePowerPrice(Math.ceil(price * getGameCostMultiplier()));
+
+                const currentPower = Number(getBlackHolePower());
+                const baseIncrement = Number(getBlackHolePowerUpgradeIncrement());
+                const increment = currentPower >= 50 ? 0.5 : baseIncrement;
+                setBlackHolePower(currentPower + increment);
+            }
+        });
+        const blackHoleButton3 = createButtonV2({
+            text: 'Duration',
+            classNames: ['id_blackHoleButton3', 'option-button', 'wide-option-button', 'option-button--wrap'],
+            onClick: () => {
+                if (!getBlackHoleResearchDone()) {
+                    return;
                 }
 
-                const timeWarpProgressBar = document.getElementById('blackHoleTimeWarpProgressBar');
-                if (timeWarpProgressBar) {
-                    timeWarpProgressBar.style.width = '100%';
+                const minChargeMs = getMinimumBlackHoleChargeTime();
+                const baseChargeMs = getBaseBlackHoleChargeTimerDuration();
+                const currentChargeMs = Math.round(baseChargeMs * getBlackHoleRechargeMultiplier());
+                const rechargeCapped = currentChargeMs <= minChargeMs;
+                if (rechargeCapped) {
+                    return;
                 }
 
-                const durationMs = getBlackHoleDuration();
-                const endTimestampMs = Date.now() + durationMs;
-                setCurrentlyTimeWarpingBlackHole(true);
-                setCurrentBlackHoleTimeWarpDurationTotal(durationMs);
-                setBlackHoleTimeWarpEndTimestampMs(endTimestampMs);
-
-                const blackHoleCanvas = document.getElementById('blackHoleCanvas');
-                if (blackHoleCanvas) {
-                    blackHoleCanvas.dataset.timeWarping = 'true';
-                    blackHoleCanvas.dataset.timeWarpRemainingMs = String(durationMs);
-                    blackHoleCanvas.dataset.timeWarpDurationMs = String(durationMs);
+                const price = getBlackHoleDurationPrice();
+                const currentResearch = getResourceDataObject('research', ['quantity']);
+                if (currentResearch < price) {
+                    return;
                 }
 
-                setTimeout(() => {
-                    if (!getCurrentlyTimeWarpingBlackHole()) {
-                        return;
+                setResourceDataObject(currentResearch - price, 'research', ['quantity']);
+                setBlackHoleDurationPrice(Math.ceil(price * getGameCostMultiplier()));
+                setBlackHoleDuration(getBlackHoleDuration() + getBlackHoleDurationUpgradeIncrementMs());
+            }
+        });
+        const blackHoleButton4 = createButtonV2({
+            text: 'Recharge',
+            classNames: ['id_blackHoleButton4', 'option-button', 'wide-option-button', 'option-button--wrap'],
+            onClick: () => {
+                if (!getBlackHoleResearchDone()) {
+                    return;
+                }
+
+                const minChargeMs = getMinimumBlackHoleChargeTime();
+                const baseChargeMs = getBaseBlackHoleChargeTimerDuration();
+                const previousMultiplier = getBlackHoleRechargeMultiplier();
+                const minMultiplier = baseChargeMs > 0 ? (minChargeMs / baseChargeMs) : 0;
+                const nextMultiplier = Math.max(minMultiplier, previousMultiplier * 0.88);
+
+                const currentChargeMs = Math.round(baseChargeMs * previousMultiplier);
+                if (currentChargeMs <= minChargeMs) {
+                    return;
+                }
+
+                const price = getBlackHoleRechargePrice();
+                const currentResearch = getResourceDataObject('research', ['quantity']);
+                if (currentResearch < price) {
+                    return;
+                }
+
+                setResourceDataObject(currentResearch - price, 'research', ['quantity']);
+                setBlackHoleRechargePrice(Math.ceil(price * getGameCostMultiplier()));
+
+                setBlackHoleRechargeMultiplier(nextMultiplier);
+
+                if (getCurrentlyChargingBlackHole()) {
+                    const timerName = 'blackHoleChargeTimer';
+                    if (timerManagerDelta.hasTimer(timerName)) {
+                        const previousTotal = getCurrentBlackHoleChargeTimerDurationTotal();
+                        const previousRemaining = getTimeLeftUntilBlackHoleChargeTimerFinishes();
+                        const elapsed = previousTotal - previousRemaining;
+                        const progress = previousTotal > 0 ? Math.max(0, Math.min(1, elapsed / previousTotal)) : 0;
+
+                        timerManagerDelta.removeTimer(timerName);
+                        setCurrentlyChargingBlackHole(false);
+
+                        const scale = previousMultiplier > 0 ? (nextMultiplier / previousMultiplier) : 1;
+                        const newTotal = Math.round(previousTotal * scale);
+                        const newRemaining = Math.round(newTotal * (1 - progress));
+                        setCurrentBlackHoleChargeTimerDurationTotal(newTotal);
+                        setTimeLeftUntilBlackHoleChargeTimerFinishes(newRemaining);
+                        startBlackHoleChargeTimer([newRemaining, 'rechargeUpgrade']);
                     }
-                    if (getBlackHoleTimeWarpEndTimestampMs() !== endTimestampMs) {
-                        return;
+                }
+            }
+        });
+        const blackHoleActivateChargeButton = createButtonV2({
+            text: 'Charge',
+            classNames: ['id_blackHoleChargeButton', 'option-button'],
+            onClick: () => {
+                if (getBlackHoleAlwaysOn()) {
+                    return;
+                }
+                if (getCurrentlyChargingBlackHole() || getCurrentlyTimeWarpingBlackHole()) {
+                    return;
+                }
+
+                if (getBlackHoleChargeReady()) {
+                    setBlackHoleChargeReady(false);
+
+                    sfxPlayer.playAudio('blackHoleActivated', false);
+
+                    const progressBar = document.getElementById('blackHoleChargeProgressBar');
+                    if (progressBar) {
+                        progressBar.style.width = '0%';
                     }
 
-                    setCurrentlyTimeWarpingBlackHole(false);
-                    setCurrentBlackHoleTimeWarpDurationTotal(0);
-                    setBlackHoleTimeWarpEndTimestampMs(0);
+                    const chargeProgressBarContainer = document.getElementById('blackHoleChargeProgressBarContainer');
+                    if (chargeProgressBarContainer) {
+                        chargeProgressBarContainer.classList.add('invisible');
+                    }
+
+                    const timeWarpProgressBarContainer = document.getElementById('blackHoleTimeWarpProgressBarContainer');
+                    if (timeWarpProgressBarContainer) {
+                        timeWarpProgressBarContainer.classList.remove('invisible');
+                    }
+
+                    const timeWarpProgressBar = document.getElementById('blackHoleTimeWarpProgressBar');
+                    if (timeWarpProgressBar) {
+                        timeWarpProgressBar.style.width = '100%';
+                    }
+
+                    const durationMs = getBlackHoleDuration();
+                    const endTimestampMs = Date.now() + durationMs;
+                    setCurrentlyTimeWarpingBlackHole(true);
+                    setCurrentBlackHoleTimeWarpDurationTotal(durationMs);
+                    setBlackHoleTimeWarpEndTimestampMs(endTimestampMs);
 
                     const blackHoleCanvas = document.getElementById('blackHoleCanvas');
                     if (blackHoleCanvas) {
-                        blackHoleCanvas.dataset.timeWarping = 'false';
-                        blackHoleCanvas.dataset.timeWarpRemainingMs = '0';
+                        blackHoleCanvas.dataset.timeWarping = 'true';
+                        blackHoleCanvas.dataset.timeWarpRemainingMs = String(durationMs);
+                        blackHoleCanvas.dataset.timeWarpDurationMs = String(durationMs);
                     }
 
-                    if (!getCurrentlyChargingBlackHole() && !getBlackHoleChargeReady()) {
-                        startBlackHoleChargeTimer([0, 'timeWarpFinished']);
-                    }
-                }, durationMs);
+                    setTimeout(() => {
+                        if (!getCurrentlyTimeWarpingBlackHole()) {
+                            return;
+                        }
+                        if (getBlackHoleTimeWarpEndTimestampMs() !== endTimestampMs) {
+                            return;
+                        }
 
-                timeWarp(durationMs, getBlackHolePower());
-                return;
+                        setCurrentlyTimeWarpingBlackHole(false);
+                        setCurrentBlackHoleTimeWarpDurationTotal(0);
+                        setBlackHoleTimeWarpEndTimestampMs(0);
+
+                        const blackHoleCanvas = document.getElementById('blackHoleCanvas');
+                        if (blackHoleCanvas) {
+                            blackHoleCanvas.dataset.timeWarping = 'false';
+                            blackHoleCanvas.dataset.timeWarpRemainingMs = '0';
+                        }
+
+                        if (!getCurrentlyChargingBlackHole() && !getBlackHoleChargeReady()) {
+                            startBlackHoleChargeTimer([0, 'timeWarpFinished']);
+                        }
+                    }, durationMs);
+
+                    timeWarp(durationMs, getBlackHolePower());
+                    return;
+                }
+
+                startBlackHoleChargeTimer([0, 'buttonClick']);
             }
-
-            startBlackHoleChargeTimer([0, 'buttonClick']);
         });
 
         [blackHoleButton2, blackHoleButton3, blackHoleButton4, blackHoleActivateChargeButton].forEach(button => {

@@ -1,4 +1,4 @@
-import { removeTabAttentionIfNoIndicators, createColoniseOpinionProgressBar, setColoniseOpinionProgressBar, spaceTravelButtonHideAndShowDescription, setupInfoTooltips, drawStarConnectionDrawings, createStarDestinationRow, sortStarTable, handleSortStarClick, createTextElement, createOptionRow, createButton, generateStarfield, showNotification, showEnterWarModeModal, setWarUI, removeStarConnectionTooltip } from './ui.js';
+import { removeTabAttentionIfNoIndicators, createColoniseOpinionProgressBar, setColoniseOpinionProgressBar, spaceTravelButtonHideAndShowDescription, setupInfoTooltips, drawStarConnectionDrawings, createStarDestinationRow, sortStarTable, handleSortStarClick, createTextElement, createOptionRow, createButton, createButtonV2, generateStarfield, showNotification, showEnterWarModeModal, setWarUI, removeStarConnectionTooltip } from './ui.js';
 import { sfxPlayer } from './audioManager.js';
 import { getStarNames, getStarTypeByName } from './descriptions.js';
 import { getFactoryStarsArray, getSettledStars, setInFormation, setRedrawBattleDescription, setFleetChangedSinceLastDiplomacy, setDestinationStarScanned, getDestinationStarScanned, getStellarScannerBuilt, getStarShipTravelling, getDestinationStar, getCurrencySymbol, getSortStarMethod, getCurrentStarSystem, STAR_FIELD_SEED, NUMBER_OF_STARS, getStarMapMode, setStarMapMode, getWarMode, replaceBattleUnits, setNeedNewBattleCanvas, setFormationGoal, setBattleResolved, getBelligerentEnemyFlag, setAchievementFlagArray, getStarsWithAncientManuscripts, getStarShipDestinationReminderVisible, getStarVisionDistance, getMiaplacidusMilestoneLevel, getCurrentTheme } from './constantsAndGlobalVars.js';
@@ -121,26 +121,31 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
         const buttons = ['Normal', 'Distance', 'Studied', 'In Range'];
         
         buttons.forEach(button => {
-            const buttonElement = createButton(button, ['option-button', 'star-option-button'], () => { 
-                document.querySelectorAll('.star-option-button').forEach(btn => {
-                    btn.classList.remove('green-ready-text');
-                });
-    
-                buttonElement.classList.add('green-ready-text');
-                
-                setStarMapMode(button.toLowerCase());
-                setSearchEnabledForMode(button.toLowerCase());
+            const buttonElement = createButtonV2({
+                text: button,
+                classNames: ['option-button', 'star-option-button'],
+                onClick: () => { 
+                    document.querySelectorAll('.star-option-button').forEach(btn => {
+                        btn.classList.remove('green-ready-text');
+                    });
 
-                removeStarConnectionTooltip();
-                const destinationRow = document.getElementById('descriptionContentTab5');
-                if (destinationRow) {
-                    destinationRow.innerHTML = 'This is a map of the known galaxy.';
-                }
+                    buttonElement.classList.add('green-ready-text');
+                    
+                    setStarMapMode(button.toLowerCase());
+                    setSearchEnabledForMode(button.toLowerCase());
 
-                const starContainer = document.querySelector('#optionContentTab5');
-                starContainer.innerHTML = '';
-                generateStarfield(starContainer, NUMBER_OF_STARS, STAR_FIELD_SEED, getStarMapMode(), false, null, false);
-            }, '', '', '', null, '', true, null, '');
+                    removeStarConnectionTooltip();
+                    const destinationRow = document.getElementById('descriptionContentTab5');
+                    if (destinationRow) {
+                        destinationRow.innerHTML = 'This is a map of the known galaxy.';
+                    }
+
+                    const starContainer = document.querySelector('#optionContentTab5');
+                    starContainer.innerHTML = '';
+                    generateStarfield(starContainer, NUMBER_OF_STARS, STAR_FIELD_SEED, getStarMapMode(), false, null, false);
+                },
+                disableKeyboardForButton: true
+            });
             
             starButtonContainer.appendChild(buttonElement);
 
@@ -725,9 +730,21 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                     renderNameABs: null,
                     labelText: `${module.label}:`,
                     inputElements: [
-                        createButton(`Build Module`, ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check'], () => {
-                            gain(1, `${module.id}BuiltPartsQuantity`, module.id, false, null, 'space', 'space');
-                        }, 'upgradeCheck', '', 'spaceUpgrade', module.id, 'cash', true, null, 'starShipPurchase'),
+                        createButtonV2({
+                            text: `Build Module`,
+                            classNames: ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check'],
+                            onClick: () => {
+                                gain(1, `${module.id}BuiltPartsQuantity`, module.id, false, null, 'space', 'space');
+                            },
+                            dataConditionCheck: 'upgradeCheck',
+                            resourcePriceObject: '',
+                            objectSectionArgument1: 'spaceUpgrade',
+                            objectSectionArgument2: module.id,
+                            quantityArgument: 'cash',
+                            disableKeyboardForButton: true,
+                            autoBuyerTier: null,
+                            rowCategory: 'starShipPurchase'
+                        }),
                         createTextElement(
                             `Built: <span id="${module.id}BuiltPartsQuantity">${getStarShipParts(module.id)}</span> / <span id="${module.id}TotalPartsQuantity">${getStarShipPartsNeededInTotalPerModule(module.id)}</span>`,
                             `${module.id}PartsCountText`,
@@ -780,15 +797,20 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                 renderNameABs: null,
                 labelText: `Perform System Scan:`,
                 inputElements: [
-                    createButton(`Scan System`, ['option-button', 'green-ready-text'], () => {
-                        sfxPlayer.playAudio("asteroidScan");
-                        setDestinationStarScanned(true);
-                        copyStarDataToDestinationStarField(destinationStar);
-                        generateDestinationStarData();
-                        showNotification(`${capitaliseWordsWithRomanNumerals(destinationStar)} System Scanned!`, 'info', 3000, 'starShip');
+                    createButtonV2({
+                        text: `Scan System`,
+                        classNames: ['option-button', 'green-ready-text'],
+                        onClick: () => {
+                            sfxPlayer.playAudio("asteroidScan");
+                            setDestinationStarScanned(true);
+                            copyStarDataToDestinationStarField(destinationStar);
+                            generateDestinationStarData();
+                            showNotification(`${capitaliseWordsWithRomanNumerals(destinationStar)} System Scanned!`, 'info', 3000, 'starShip');
 
-                        drawTab5Content('Star Ship', optionContentElement, true, false);
-                    }, '', '', '', null, '', true, null, ''),
+                            drawTab5Content('Star Ship', optionContentElement, true, false);
+                        },
+                        disableKeyboardForButton: true
+                    }),
                 ],
                 descriptionText: `Scan ${capitaliseWordsWithRomanNumerals(destinationStar)} System`,
                 resourcePriceObject: '',
@@ -1147,15 +1169,27 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                 renderNameABs: null,
                 labelText: `${fleetShip.label}:`,
                 inputElements: [
-                    createButton(`Build`, ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check'], () => {
-                        gain(1, `${fleetShip.id}BuiltQuantity`, fleetShip.id, false, null, 'space', 'space');
-                        increaseAttackAndDefensePower(fleetShip.id);
-                        setFleetChangedSinceLastDiplomacy(true);
-                        replaceBattleUnits({ player: [], enemy: [] });
-                        setNeedNewBattleCanvas(true);
-                        setFormationGoal(null);
-                        setInFormation(false);
-                    }, 'upgradeCheck', '', 'spaceUpgrade', fleetShip.id, 'cash', true, null, 'fleetPurchase'),
+                    createButtonV2({
+                        text: `Build`,
+                        classNames: ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check'],
+                        onClick: () => {
+                            gain(1, `${fleetShip.id}BuiltQuantity`, fleetShip.id, false, null, 'space', 'space');
+                            increaseAttackAndDefensePower(fleetShip.id);
+                            setFleetChangedSinceLastDiplomacy(true);
+                            replaceBattleUnits({ player: [], enemy: [] });
+                            setNeedNewBattleCanvas(true);
+                            setFormationGoal(null);
+                            setInFormation(false);
+                        },
+                        dataConditionCheck: 'upgradeCheck',
+                        resourcePriceObject: '',
+                        objectSectionArgument1: 'spaceUpgrade',
+                        objectSectionArgument2: fleetShip.id,
+                        quantityArgument: 'cash',
+                        disableKeyboardForButton: true,
+                        autoBuyerTier: null,
+                        rowCategory: 'fleetPurchase'
+                    }),
                     createTextElement(
                         fleetShip.id === 'fleetEnvoy' 
                         ? `Quantity: <span id="${fleetShip.id}BuiltQuantity">${getFleetShips(fleetShip.id)}</span> / <span id="${fleetShip.id}BuiltQuantityMax">${getMaxFleetShip(fleetShip.id)}</span>`
@@ -1217,22 +1251,52 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                 renderNameABs: null,
                 labelText: 'Relations:',
                 inputElements: [
-                    createButton(`Bully`, ['option-button', 'red-disabled-text', 'diplomacy-button', 'bully'], () => {
-                        setStarSystemDataObject(true, 'stars', ['destinationStar', 'triedToBully']);
-                        updateDiplomacySituation('bully', starData);
-                    }, null, null, null, null, null, true, null, 'diplomacy'),
-                    createButton(`Passive`, ['option-button', 'red-disabled-text', 'diplomacy-button', 'passive'], () => {
-                        updateDiplomacySituation('passive', starData);
-                    }, null, null, null, null, null, true, null, 'diplomacy'),
-                    createButton(`Harmony`, ['option-button', 'red-disabled-text', 'diplomacy-button', 'harmony'], () => {
-                        updateDiplomacySituation('harmony', starData);
-                    }, null, null, null, null, null, true, null, 'diplomacy'),
-                    createButton(`Vassalize`, ['option-button', 'red-disabled-text', 'diplomacy-button', 'vassalize'], () => {
-                        updateDiplomacySituation('vassalize', starData);
-                    }, null, null, null, null, null, true, null, 'diplomacy'),
-                    createButton(`Conquest`, ['option-button', 'red-disabled-text', 'diplomacy-button', 'conquest'], () => {
-                        updateDiplomacySituation('conquest', starData);
-                    }, null, null, null, null, null, true, null, 'diplomacy'),
+                    createButtonV2({
+                        text: `Bully`,
+                        classNames: ['option-button', 'red-disabled-text', 'diplomacy-button', 'bully'],
+                        onClick: () => {
+                            setStarSystemDataObject(true, 'stars', ['destinationStar', 'triedToBully']);
+                            updateDiplomacySituation('bully', starData);
+                        },
+                        disableKeyboardForButton: true,
+                        rowCategory: 'diplomacy'
+                    }),
+                    createButtonV2({
+                        text: `Passive`,
+                        classNames: ['option-button', 'red-disabled-text', 'diplomacy-button', 'passive'],
+                        onClick: () => {
+                            updateDiplomacySituation('passive', starData);
+                        },
+                        disableKeyboardForButton: true,
+                        rowCategory: 'diplomacy'
+                    }),
+                    createButtonV2({
+                        text: `Harmony`,
+                        classNames: ['option-button', 'red-disabled-text', 'diplomacy-button', 'harmony'],
+                        onClick: () => {
+                            updateDiplomacySituation('harmony', starData);
+                        },
+                        disableKeyboardForButton: true,
+                        rowCategory: 'diplomacy'
+                    }),
+                    createButtonV2({
+                        text: `Vassalize`,
+                        classNames: ['option-button', 'red-disabled-text', 'diplomacy-button', 'vassalize'],
+                        onClick: () => {
+                            updateDiplomacySituation('vassalize', starData);
+                        },
+                        disableKeyboardForButton: true,
+                        rowCategory: 'diplomacy'
+                    }),
+                    createButtonV2({
+                        text: `Conquest`,
+                        classNames: ['option-button', 'red-disabled-text', 'diplomacy-button', 'conquest'],
+                        onClick: () => {
+                            updateDiplomacySituation('conquest', starData);
+                        },
+                        disableKeyboardForButton: true,
+                        rowCategory: 'diplomacy'
+                    }),
                 ],
                 descriptionText: '',
                 resourcePriceObject: '',

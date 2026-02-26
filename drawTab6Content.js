@@ -4,7 +4,7 @@ import { getRocketPartsNeededInTotalPerRocket, getRocketParts, getResourceDataOb
 import { startTravelToAndFromAsteroidTimer, startInvestigateStarTimer, startSearchAsteroidTimer, launchRocket, gain, startUpdateTimersAndRates, addBuildingPotentialRate, buildSpaceMiningBuilding, addToResourceAllTimeStat, startPillageVoidTimer } from './game.js';
 import { timerManagerDelta } from './timerManagerDelta.js';
 
-import { removeTabAttentionIfNoIndicators, createSvgElement, createDropdown, createToggleSwitch, handleSortAsteroidClick, sortAsteroidTable, switchFuelGaugeWhenFuellerBought, createTextElement, createOptionRow, createButton, setupInfoTooltips,showNotification, renameRocket } from './ui.js';
+import { removeTabAttentionIfNoIndicators, createSvgElement, createDropdown, createToggleSwitch, handleSortAsteroidClick, sortAsteroidTable, switchFuelGaugeWhenFuellerBought, createTextElement, createOptionRow, createButton, createButtonV2, setupInfoTooltips,showNotification, renameRocket } from './ui.js';
 import { capitaliseString } from './utilityFunctions.js';
 import { sfxPlayer } from './audioManager.js'
 
@@ -49,17 +49,29 @@ export function drawTab6Content(heading, optionContentElement) {
             renderNameABs: null,
             labelText: 'Space Telescope:',
             inputElements: [
-                createButton(`Build Space Telescope`, ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check', 'spaceTelescope'], () => {
-                    buildSpaceMiningBuilding('spaceTelescope', false);
-                    sfxPlayer.playAudio('buildTelescope', false);
-                    document.getElementById('spaceTelescopeSearchAsteroidRow').classList.remove('invisible');
-                    document.getElementById('spaceTelescopeInvestigateStarRow').classList.remove('invisible');
-                    if (getPlayerPhilosophy() === 'voidborn' && getPhilosophyAbilityActive() && getStatRun() > 1) {
-                        document.getElementById('spaceTelescopePhilosophyBoostResourcesAndCompoundsRow').classList.remove('invisible');
-                    }
-                    spaceBuildTelescopeRow.classList.add('invisible');
-                    showNotification('Space Telescope Built!', 'info', 3000, 'special');
-                }, 'upgradeCheck', '', 'spaceUpgrade', 'spaceTelescope', 'cash', true, null, 'spaceMiningPurchase'),
+                createButtonV2({
+                    text: `Build Space Telescope`,
+                    classNames: ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check', 'spaceTelescope'],
+                    onClick: () => {
+                        buildSpaceMiningBuilding('spaceTelescope', false);
+                        sfxPlayer.playAudio('buildTelescope', false);
+                        document.getElementById('spaceTelescopeSearchAsteroidRow').classList.remove('invisible');
+                        document.getElementById('spaceTelescopeInvestigateStarRow').classList.remove('invisible');
+                        if (getPlayerPhilosophy() === 'voidborn' && getPhilosophyAbilityActive() && getStatRun() > 1) {
+                            document.getElementById('spaceTelescopePhilosophyBoostResourcesAndCompoundsRow').classList.remove('invisible');
+                        }
+                        spaceBuildTelescopeRow.classList.add('invisible');
+                        showNotification('Space Telescope Built!', 'info', 3000, 'special');
+                    },
+                    dataConditionCheck: 'upgradeCheck',
+                    resourcePriceObject: '',
+                    objectSectionArgument1: 'spaceUpgrade',
+                    objectSectionArgument2: 'spaceTelescope',
+                    quantityArgument: 'cash',
+                    disableKeyboardForButton: true,
+                    autoBuyerTier: null,
+                    rowCategory: 'spaceMiningPurchase'
+                }),
                 createTextElement('Bought', 'spaceTelescopeAlreadyBoughtText', ['green-ready-text', 'invisible']),
             ],
             descriptionText: `${getCurrencySymbol() + getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'price'])}, 
@@ -131,10 +143,22 @@ export function drawTab6Content(heading, optionContentElement) {
             renderNameABs: 'Scan Asteroids',
             labelText: 'Scan Asteroids',
             inputElements: [
-                createButton(`Scan Asteroids`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check'], () => {
-                    startSearchAsteroidTimer([0, 'buttonClick']);
-                    sfxPlayer.playAudio('asteroidScan', false);
-                }, 'upgradeCheck', '', 'autoBuyer', 'searchAsteroid', 'time', true, null, 'spaceMiningPurchase'),
+                createButtonV2({
+                    text: `Scan Asteroids`,
+                    classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
+                    onClick: () => {
+                        startSearchAsteroidTimer([0, 'buttonClick']);
+                        sfxPlayer.playAudio('asteroidScan', false);
+                    },
+                    dataConditionCheck: 'upgradeCheck',
+                    resourcePriceObject: '',
+                    objectSectionArgument1: 'autoBuyer',
+                    objectSectionArgument2: 'searchAsteroid',
+                    quantityArgument: 'time',
+                    disableKeyboardForButton: true,
+                    autoBuyerTier: null,
+                    rowCategory: 'spaceMiningPurchase'
+                }),
                 createTextElement(
                     `<div id="spaceTelescopeSearchAsteroidProgressBar">`,
                     'spaceTelescopeSearchAsteroidProgressBarContainer',
@@ -165,10 +189,22 @@ export function drawTab6Content(heading, optionContentElement) {
             inputElements: [
                 (() => {
                     const extraClasses = getDemoBuild() ? ['electron-purple-demo-button'] : [];
-                    return createButton(`Study Stars`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', ...extraClasses], () => {
-                        startInvestigateStarTimer([0, 'buttonClick']);
-                        sfxPlayer.playAudio('starStudy', false);
-                    }, 'upgradeCheck', '', 'autoBuyer', 'investigateStar', 'time', true, null, 'spaceMiningPurchase');
+                    return createButtonV2({
+                        text: `Study Stars`,
+                        classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', ...extraClasses],
+                        onClick: () => {
+                            startInvestigateStarTimer([0, 'buttonClick']);
+                            sfxPlayer.playAudio('starStudy', false);
+                        },
+                        dataConditionCheck: 'upgradeCheck',
+                        resourcePriceObject: '',
+                        objectSectionArgument1: 'autoBuyer',
+                        objectSectionArgument2: 'investigateStar',
+                        quantityArgument: 'time',
+                        disableKeyboardForButton: true,
+                        autoBuyerTier: null,
+                        rowCategory: 'spaceMiningPurchase'
+                    });
                 })(),
                 createTextElement(
                     `<div id="spaceTelescopeInvestigateStarProgressBar">`,
@@ -198,10 +234,22 @@ export function drawTab6Content(heading, optionContentElement) {
             renderNameABs: 'Pillage The Void',
             labelText: 'Pillage The Void',
             inputElements: [
-                createButton(`Pillage the Void`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'pillageVoid'], () => {
-                    startPillageVoidTimer([0, 'buttonClick']);
-                    sfxPlayer.playAudio('starStudy', false);
-                }, 'upgradeCheck', '', 'autoBuyer', 'pillageVoid', 'time', true, null, 'spaceMiningPurchase'),
+                createButtonV2({
+                    text: `Pillage the Void`,
+                    classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'pillageVoid'],
+                    onClick: () => {
+                        startPillageVoidTimer([0, 'buttonClick']);
+                        sfxPlayer.playAudio('starStudy', false);
+                    },
+                    dataConditionCheck: 'upgradeCheck',
+                    resourcePriceObject: '',
+                    objectSectionArgument1: 'autoBuyer',
+                    objectSectionArgument2: 'pillageVoid',
+                    quantityArgument: 'time',
+                    disableKeyboardForButton: true,
+                    autoBuyerTier: null,
+                    rowCategory: 'spaceMiningPurchase'
+                }),
                 createTextElement(
                     `<div id="spaceTelescopePillageVoidProgressBar">`,
                     'spaceTelescopePillageVoidProgressBarContainer',
@@ -268,16 +316,28 @@ export function drawTab6Content(heading, optionContentElement) {
             renderNameABs: null,
             labelText: 'Launch Pad:',
             inputElements: [
-                createButton(`Build Launch Pad`, ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check', 'launchPad'], () => {
-                    buildSpaceMiningBuilding('launchPad', false);
-                    sfxPlayer.playAudio('buildLaunchPad', false);
-                    document.getElementById('spaceRocket1BuildRow').classList.remove('invisible');
-                    document.getElementById('spaceRocket2BuildRow').classList.remove('invisible');
-                    document.getElementById('spaceRocket3BuildRow').classList.remove('invisible');
-                    document.getElementById('spaceRocket4BuildRow').classList.remove('invisible');
-                    spaceBuildLaunchPadRow.classList.add('invisible');
-                    showNotification('Launch Pad Built!', 'info', 3000, 'special');
-                }, 'upgradeCheck', '', 'spaceUpgrade', 'launchPad', 'cash', true, null, 'spaceMiningPurchase'),
+                createButtonV2({
+                    text: `Build Launch Pad`,
+                    classNames: ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check', 'launchPad'],
+                    onClick: () => {
+                        buildSpaceMiningBuilding('launchPad', false);
+                        sfxPlayer.playAudio('buildLaunchPad', false);
+                        document.getElementById('spaceRocket1BuildRow').classList.remove('invisible');
+                        document.getElementById('spaceRocket2BuildRow').classList.remove('invisible');
+                        document.getElementById('spaceRocket3BuildRow').classList.remove('invisible');
+                        document.getElementById('spaceRocket4BuildRow').classList.remove('invisible');
+                        spaceBuildLaunchPadRow.classList.add('invisible');
+                        showNotification('Launch Pad Built!', 'info', 3000, 'special');
+                    },
+                    dataConditionCheck: 'upgradeCheck',
+                    resourcePriceObject: '',
+                    objectSectionArgument1: 'spaceUpgrade',
+                    objectSectionArgument2: 'launchPad',
+                    quantityArgument: 'cash',
+                    disableKeyboardForButton: true,
+                    autoBuyerTier: null,
+                    rowCategory: 'spaceMiningPurchase'
+                }),
                 createTextElement('Bought', 'launchPadAlreadyBoughtText', ['green-ready-text', 'invisible']),
             ],
             descriptionText: `${getCurrencySymbol() + getResourceDataObject('space', ['upgrades', 'launchPad', 'price'])}, 
@@ -316,13 +376,25 @@ export function drawTab6Content(heading, optionContentElement) {
                 renderNameABs: null,
                 labelText: `${rocket.label}:`,
                 inputElements: [
-                    createButton(`Build Rocket Part`, ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check', ...extraClasses], () => {
-                        trackAnalyticsEvent('rocket_part_built', {
-                            rocket_id: rocket.id,
-                            ts: new Date().toISOString()
-                        });
-                        gain(1, `${rocket.id}BuiltPartsQuantity`, rocket.id, false, null, 'space', 'space')
-                    }, 'upgradeCheck', '', 'spaceUpgrade', rocket.id, 'cash', true, null, 'spaceMiningPurchase'),
+                    createButtonV2({
+                        text: `Build Rocket Part`,
+                        classNames: ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check', ...extraClasses],
+                        onClick: () => {
+                            trackAnalyticsEvent('rocket_part_built', {
+                                rocket_id: rocket.id,
+                                ts: new Date().toISOString()
+                            });
+                            gain(1, `${rocket.id}BuiltPartsQuantity`, rocket.id, false, null, 'space', 'space')
+                        },
+                        dataConditionCheck: 'upgradeCheck',
+                        resourcePriceObject: '',
+                        objectSectionArgument1: 'spaceUpgrade',
+                        objectSectionArgument2: rocket.id,
+                        quantityArgument: 'cash',
+                        disableKeyboardForButton: true,
+                        autoBuyerTier: null,
+                        rowCategory: 'spaceMiningPurchase'
+                    }),
                     createTextElement(
                         `Built: <span id="${rocket.id}BuiltPartsQuantity">${getRocketParts(rocket.id)}</span> / <span id="${rocket.id}TotalPartsQuantity">${getRocketPartsNeededInTotalPerRocket(rocket.id)}</span>`,
                         `${rocket.id}PartsCountText`,
@@ -591,13 +663,17 @@ function createRocketUI(rocketId, optionContentElement, asteroids, asteroidsBein
     });
 
     document.getElementById(`${rocketId}-rename-btn`).appendChild(
-        createButton('Rename', ['option-button', 'rename-rocket'], () => { 
-            renameRocket(rocketId, originalRocketKey);
-        }, '', '', '', null, '', true, '', '')
+        createButtonV2({
+            text: 'Rename',
+            classNames: ['option-button', 'rename-rocket'],
+            onClick: () => { 
+                renameRocket(rocketId, originalRocketKey);
+            },
+            disableKeyboardForButton: true
+        })
     );
 
     const autobuyerPrice = getResourceDataObject('space', ['upgrades', rocketId, 'autoBuyer', 'tier1', 'price']);
-    setCheckRocketFuellingStatus(rocketId, true);
     
     const fuellingState = getRocketsFuellerStartedArray().includes(rocketId);
     const fuelledUpState = getRocketsFuellerStartedArray().includes(`${rocketId}FuelledUp`);
@@ -624,17 +700,34 @@ function createRocketUI(rocketId, optionContentElement, asteroids, asteroidsBein
         renderNameABs: getResourceDataObject('space', ['upgrades', rocketId, 'autoBuyer', 'tier1', 'nameUpgrade']),
         labelText: 'Fuel:',
         inputElements: [
-            createButton(`Fuel Rocket`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', rocketId], () => {
-                setRocketsFuellerStartedArray(rocketId, 'add');
-                sfxPlayer.playAudio('fuelRocket', false);
-                switchFuelGaugeWhenFuellerBought(rocketId, 'normal');
-            }, 'upgradeCheck', '', 'autoBuyer', null, 'cash', true, 'tier1', 'rocketFuel'),
+            createButtonV2({
+                text: `Fuel Rocket`,
+                classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', rocketId],
+                onClick: () => {
+                    setRocketsFuellerStartedArray(rocketId, 'add');
+                    sfxPlayer.playAudio('fuelRocket', false);
+                    switchFuelGaugeWhenFuellerBought(rocketId, 'normal');
+                },
+                dataConditionCheck: 'upgradeCheck',
+                resourcePriceObject: '',
+                objectSectionArgument1: 'autoBuyer',
+                objectSectionArgument2: null,
+                quantityArgument: 'cash',
+                disableKeyboardForButton: true,
+                autoBuyerTier: 'tier1',
+                rowCategory: 'rocketFuel'
+            }),
             createTextElement(`<div id="${rocketId}FuellingProgressBar">`, `${rocketId}FuellingProgressBarContainer`, ['progress-bar-container', 'invisible']),
-            createButton(`Power Off!`, ['option-button', 'red-disabled-text', 'rocket-fuelled-check', `${rocketId}-launch-button`, 'invisible'], () => {
-                launchRocket(rocketId);
-                sfxPlayer.playAudio('rocketLaunch', false);
-                addToResourceAllTimeStat(1, 'totalRocketsLaunched');
-            }, 'upgradeCheck', '', null, null, null, true, null, null),
+            createButtonV2({
+                text: `Power Off!`,
+                classNames: ['option-button', 'red-disabled-text', 'rocket-fuelled-check', `${rocketId}-launch-button`, 'invisible'],
+                onClick: () => {
+                    launchRocket(rocketId);
+                    sfxPlayer.playAudio('rocketLaunch', false);
+                    addToResourceAllTimeStat(1, 'totalRocketsLaunched');
+                },
+                disableKeyboardForButton: true
+            }),
         ],
         descriptionText: `${getCurrencySymbol()}${autobuyerPrice}`,
         resourcePriceObject: '',
@@ -669,11 +762,23 @@ function createRocketUI(rocketId, optionContentElement, asteroids, asteroidsBein
                 '', (value) => {
                     setDestinationAsteroid(rocketId, value);
                 }, ['travel-to']),
-            createButton(`Travel`, ['option-button', 'red-disabled-text', 'resource-cost-sell-check', `${rocketId}-travel-to-asteroid-button`], () => {
-                startTravelToAndFromAsteroidTimer([0, 'buttonClick'], rocketId, false);
-                setRocketDirection(rocketId, false);
-                setCurrentDestinationDropdownText('Select an option');
-            }, 'upgradeCheck', '', 'autoBuyer', 'travelToAsteroid', 'time', true, null, 'spaceMiningPurchase'),
+            createButtonV2({
+                text: `Travel`,
+                classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', `${rocketId}-travel-to-asteroid-button`],
+                onClick: () => {
+                    startTravelToAndFromAsteroidTimer([0, 'buttonClick'], rocketId, false);
+                    setRocketDirection(rocketId, false);
+                    setCurrentDestinationDropdownText('Select an option');
+                },
+                dataConditionCheck: 'upgradeCheck',
+                resourcePriceObject: '',
+                objectSectionArgument1: 'autoBuyer',
+                objectSectionArgument2: 'travelToAsteroid',
+                quantityArgument: 'time',
+                disableKeyboardForButton: true,
+                autoBuyerTier: null,
+                rowCategory: 'spaceMiningPurchase'
+            }),
             createTextElement(`<div id="spaceTravelToAsteroidProgressBar${capitaliseString(rocketId)}">`, `spaceTravelToAsteroidProgressBar${capitaliseString(rocketId)}Container`, ['progress-bar-container', 'invisible']),
         ],
         descriptionText: `Travelling...`,

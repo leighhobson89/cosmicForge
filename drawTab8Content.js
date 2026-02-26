@@ -1,4 +1,4 @@
-import { createButton, createOptionRow, createTextElement, setButtonState, showNotification, drawSharedSpaceBackdrop, callPopupModal, showHideModal } from './ui.js';
+import { createButton, createButtonV2, createOptionRow, createTextElement, setButtonState, showNotification, drawSharedSpaceBackdrop, callPopupModal, showHideModal } from './ui.js';
 import {
     modalCosmicRipLocatedHeader,
     modalCosmicRipLocatedText,
@@ -63,10 +63,10 @@ export function drawTab8Content(heading, optionContentElement) {
             renderNameABs: null,
             labelText: 'Near Space Scanner Array:',
             inputElements: [
-                createButton(
-                    'RESTORE',
-                    ['option-button', 'red-disabled-text', 'cosmic-rip-restore-scanner-array-button'],
-                    () => {
+                createButtonV2({
+                    text: 'RESTORE',
+                    classNames: ['option-button', 'red-disabled-text', 'cosmic-rip-restore-scanner-array-button'],
+                    onClick: () => {
                         const result = restoreNearSpaceScannerArray?.();
                         if (!result?.ok) {
                             showNotification('Unable to restore Near Space Scanner Array.', 'warning', 3000, 'cosmicRip');
@@ -92,15 +92,9 @@ export function drawTab8Content(heading, optionContentElement) {
                             ''
                         );
                     },
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    true,
-                    null,
-                    'cosmicRipRestoreNearSpaceScannerArray'
-                ),
+                    disableKeyboardForButton: true,
+                    rowCategory: 'cosmicRipRestoreNearSpaceScannerArray'
+                }),
             ],
             descriptionText: `Cost: <span class="warning-orange-text">${restoreCost}</span> GP`,
             resourcePriceObject: '',
@@ -386,7 +380,6 @@ export function drawTab8Content(heading, optionContentElement) {
                 const result = scanCosmicRipSector?.(i);
                 if (result?.ok) {
                     if (result.found) {
-                        // eslint-disable-next-line no-undef
                         showNotification(`Scan complete! Cosmic Rip located in sector ${name}`, 'info', 4000, 'cosmicRip');
                         if (getCosmicRipLocatedModalShown() !== true) {
                             setCosmicRipLocatedModalShown(true);
@@ -412,7 +405,6 @@ export function drawTab8Content(heading, optionContentElement) {
                             }, 2000);
                         }
                     } else {
-                        // eslint-disable-next-line no-undef
                         showNotification(`Scan complete! Nothing significant found in sector ${name}`, 'info', 3500, 'cosmicRip');
                     }
                 }
@@ -470,21 +462,15 @@ export function drawTab8Content(heading, optionContentElement) {
             renderNameABs: null,
             labelText: 'Sensor Buoy:',
             inputElements: [
-                createButton(
-                    'DEPLOY',
-                    ['option-button', 'red-disabled-text', 'cosmic-rip-deploy-sensor-buoy-button'],
-                    () => {
+                createButtonV2({
+                    text: 'DEPLOY',
+                    classNames: ['option-button', 'red-disabled-text', 'cosmic-rip-deploy-sensor-buoy-button'],
+                    onClick: () => {
                         showNotification('Coming soon', 'info', 2500, 'cosmicRip');
                     },
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    true,
-                    null,
-                    'cosmicRipDeploySensorBuoy'
-                ),
+                    disableKeyboardForButton: true,
+                    rowCategory: 'cosmicRipDeploySensorBuoy'
+                }),
             ],
             descriptionText: '',
             resourcePriceObject: '',
@@ -509,21 +495,15 @@ export function drawTab8Content(heading, optionContentElement) {
             renderNameABs: null,
             labelText: 'Rip Research Orbiter:',
             inputElements: [
-                createButton(
-                    'DEPLOY',
-                    ['option-button', 'red-disabled-text', 'cosmic-rip-deploy-rip-research-orbiter-button'],
-                    () => {
+                createButtonV2({
+                    text: 'DEPLOY',
+                    classNames: ['option-button', 'red-disabled-text', 'cosmic-rip-deploy-rip-research-orbiter-button'],
+                    onClick: () => {
                         showNotification('Coming soon', 'info', 2500, 'cosmicRip');
                     },
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    true,
-                    null,
-                    'cosmicRipDeployRipResearchOrbiter'
-                ),
+                    disableKeyboardForButton: true,
+                    rowCategory: 'cosmicRipDeployRipResearchOrbiter'
+                }),
             ],
             descriptionText: '',
             resourcePriceObject: '',
@@ -752,21 +732,15 @@ export function drawTab8Content(heading, optionContentElement) {
             renderNameABs: null,
             labelText: 'Stabilizer Array:',
             inputElements: [
-                createButton(
-                    'BUILD',
-                    ['option-button', 'red-disabled-text', 'cosmic-rip-build-stabilizer-array-button'],
-                    () => {
+                createButtonV2({
+                    text: 'BUILD',
+                    classNames: ['option-button', 'red-disabled-text', 'cosmic-rip-build-stabilizer-array-button'],
+                    onClick: () => {
                         showNotification('Coming soon', 'info', 2500, 'cosmicRip');
                     },
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    true,
-                    null,
-                    'cosmicRipBuildStabilizerArray'
-                ),
+                    disableKeyboardForButton: true,
+                    rowCategory: 'cosmicRipBuildStabilizerArray'
+                }),
             ],
             descriptionText: 'Construct stabilizers to reduce instability and unlock safe operations.',
             resourcePriceObject: '',

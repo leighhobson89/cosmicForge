@@ -3712,9 +3712,6 @@ export function setButtonState(button, options = {}) {
     }
 }
 
-
-
-
 export function createButton(text, classNames, onClick, dataConditionCheck, resourcePriceObject, objectSectionArgument1, objectSectionArgument2, quantityArgument, disableKeyboardForButton, autoBuyerTier, rowCategory) {
     const button = document.createElement('button');
     button.innerText = text;
@@ -8113,6 +8110,20 @@ function buildGalacticMarketSidebarStatus() {
             getGalacticMarketIncomingStockType()
         );
     });
+
+    const labelElement = document.getElementById('galacticMarketOption');
+    if (labelElement) {
+        attachSharedTooltip(labelElement, () => {
+            const content = statusElement.dataset.galacticTooltipContent;
+            if (content) {
+                return content;
+            }
+            return buildGalacticMarketSelectionTooltip(
+                getGalacticMarketOutgoingStockType(),
+                getGalacticMarketIncomingStockType()
+            );
+        });
+    }
 
 
     if (isTimedEffectActive?.('galacticMarketLockdown')) {

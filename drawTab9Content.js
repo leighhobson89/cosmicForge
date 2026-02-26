@@ -1,5 +1,5 @@
 import { getCurrentOptionPane, getCurrentTheme, setAutoSaveToggle, getAutoSaveToggle, getAutoSaveFrequency, setAutoSaveFrequency, getSaveData, setSaveData, getCurrencySymbol, setCurrencySymbol, getNotationType, setNotationType, setNotificationsToggle, getNotificationsToggle, getSaveName, getWeatherEffectSetting, setWeatherEffectSetting, setNewsTickerSetting, getNewsTickerSetting, setSaveExportCloudFlag, getBackgroundAudio, setBackgroundAudio, getSfx, setSfx, setWasAutoSaveToggled, setMouseParticleTrailEnabled, getMouseParticleTrailEnabled, setCustomPointerEnabled, getCustomPointerEnabled, getOnboardingMode, getDemoBuild } from './constantsAndGlobalVars.js';
-import { createButton, createTextFieldArea, createOptionRow, createDropdown, createToggleSwitch, createHtmlTableAchievementsGrid, createHtmlTableStatistics, createHtmlTextAreaProse, toggleGameFullScreen, selectTheme, callPopupModal, showHideModal, showNotification, applyCustomPointerSetting, setElementPointerEvents, fadeInStartupOverlay, setupAchievementTooltip } from './ui.js';
+import { createButton, createButtonV2, createTextFieldArea, createOptionRow, createDropdown, createToggleSwitch, createHtmlTableAchievementsGrid, createHtmlTableStatistics, createHtmlTextAreaProse, toggleGameFullScreen, selectTheme, callPopupModal, showHideModal, showNotification, applyCustomPointerSetting, setElementPointerEvents, fadeInStartupOverlay, setupAchievementTooltip } from './ui.js';
 import { importSaveStringFileFromComputer, downloadSaveStringToComputer, initializeAutoSave, saveGame, saveGameToCloud, loadGameFromCloud, copySaveStringToClipBoard, loadGame, destroySaveGameOnCloud } from './saveLoadGame.js';
 import { hardResetWarningHeader, hardResetWarningText, getStatisticsContent, getHelpContent } from './descriptions.js';
 import { setAchievementIconImageUrls, getAchievementPositionData } from './resourceDataObject.js';
@@ -24,81 +24,85 @@ export function drawTab9Content(heading, optionContentElement) {
             renderNameABs: null,
             labelText: 'Exit Game:',
             inputElements: [
-                createButton('EXIT GAME', ['option-button', 'green-ready-text'], () => {
-                    const ua = (typeof window !== 'undefined' && window.navigator?.userAgent) ? window.navigator.userAgent.toLowerCase() : '';
-                    const isElectron = ua.includes('electron') || (typeof window !== 'undefined' && window.process?.versions?.electron);
-                    if (!isElectron) {
-                        return;
-                    }
+                createButtonV2({
+                    text: 'EXIT GAME',
+                    classNames: ['option-button', 'green-ready-text'],
+                    onClick: () => {
+                        const ua = (typeof window !== 'undefined' && window.navigator?.userAgent) ? window.navigator.userAgent.toLowerCase() : '';
+                        const isElectron = ua.includes('electron') || (typeof window !== 'undefined' && window.process?.versions?.electron);
+                        if (!isElectron) {
+                            return;
+                        }
 
-                    callPopupModal(
-                        'EXIT GAME',
-                        'Would you like to save to the cloud before exiting?',
-                        true,
-                        true,
-                        true,
-                        false,
-                        function() {
-                            showHideModal();
-                            (async () => {
-                                await fadeInStartupOverlay(2000);
-                                window.close();
-                            })().catch((error) => {
-                                console.error('Exit & Don\'t Save failed:', error);
-                                window.close();
-                            });
-                        },
-                        function() {
-                            showHideModal();
-                        },
-                        function() {
-                            (async () => {
-                                if (getOnboardingMode()) {
-                                    showNotification("You can't save while onboarding mode is active!", 'info', 4000, 'loadSave');
-                                    return;
-                                }
-
-                                if (getDemoBuild()) {
-                                    showNotification('Saving is disabled in the demo build!', 'info', 4000, 'loadSave');
-                                    return;
-                                }
-
-                                saveGame('manualExportCloud');
-                                const saveData = getSaveData();
-                                if (!saveData) {
-                                    showNotification('No save data available to export.', 'error', 3000, 'loadSave');
-                                    return;
-                                }
-
-                                let savedOk = false;
-                                try {
-                                    savedOk = await saveGameToCloud(saveData, 'manualExportCloud');
-                                    if (savedOk) {
-                                        setSaveExportCloudFlag(saveData);
-                                    }
-                                } finally {
-                                    setSaveData(null);
-                                }
-
-                                if (!savedOk) {
-                                    return;
-                                }
-
+                        callPopupModal(
+                            'EXIT GAME',
+                            'Would you like to save to the cloud before exiting?',
+                            true,
+                            true,
+                            true,
+                            false,
+                            function() {
                                 showHideModal();
-                                await fadeInStartupOverlay(2000);
-                                window.close();
-                            })().catch((error) => {
-                                console.error('Exit & Save failed:', error);
-                                showNotification('Error saving game to cloud!', 'error', 3000, 'loadSave');
-                            });
-                        },
-                        null,
-                        "EXIT AND DON'T SAVE",
-                        'CANCEL',
-                        'EXIT AND SAVE',
-                        null,
-                        false
-                    );
+                                (async () => {
+                                    await fadeInStartupOverlay(2000);
+                                    window.close();
+                                })().catch((error) => {
+                                    console.error('Exit & Don\'t Save failed:', error);
+                                    window.close();
+                                });
+                            },
+                            function() {
+                                showHideModal();
+                            },
+                            function() {
+                                (async () => {
+                                    if (getOnboardingMode()) {
+                                        showNotification("You can't save while onboarding mode is active!", 'info', 4000, 'loadSave');
+                                        return;
+                                    }
+
+                                    if (getDemoBuild()) {
+                                        showNotification('Saving is disabled in the demo build!', 'info', 4000, 'loadSave');
+                                        return;
+                                    }
+
+                                    saveGame('manualExportCloud');
+                                    const saveData = getSaveData();
+                                    if (!saveData) {
+                                        showNotification('No save data available to export.', 'error', 3000, 'loadSave');
+                                        return;
+                                    }
+
+                                    let savedOk = false;
+                                    try {
+                                        savedOk = await saveGameToCloud(saveData, 'manualExportCloud');
+                                        if (savedOk) {
+                                            setSaveExportCloudFlag(saveData);
+                                        }
+                                    } finally {
+                                        setSaveData(null);
+                                    }
+
+                                    if (!savedOk) {
+                                        return;
+                                    }
+
+                                    showHideModal();
+                                    await fadeInStartupOverlay(2000);
+                                    window.close();
+                                })().catch((error) => {
+                                    console.error('Exit & Save failed:', error);
+                                    showNotification('Error saving game to cloud!', 'error', 3000, 'loadSave');
+                                });
+                            },
+                            null,
+                            "EXIT AND DON'T SAVE",
+                            'CANCEL',
+                            'EXIT AND SAVE',
+                            null,
+                            false
+                        );
+                    },
                 }),
             ],
             descriptionText: 'Here you can Exit The Game',
@@ -392,8 +396,12 @@ export function drawTab9Content(heading, optionContentElement) {
             renderNameABs: null,
             labelText: 'Toggle Full Screen:',
             inputElements: [
-                createButton(`Toggle`, ['option-button', 'full-screen-button'], () => {
-                    toggleGameFullScreen();
+                createButtonV2({
+                    text: `Toggle`,
+                    classNames: ['option-button', 'full-screen-button'],
+                    onClick: () => {
+                        toggleGameFullScreen();
+                    },
                 }),
             ],
             descriptionText: 'Toggle Full Screen Mode. (or F11)',
@@ -589,11 +597,19 @@ export function drawTab9Content(heading, optionContentElement) {
             labelText: 'Export Save:',
             inputElements: [
                 createTextFieldArea('exportSaveArea', ['export-save'], 'Save Data should appear here', null),
-                createButton(`Export`, ['option-button', 'save-load-button', ...demoExtraClasses], () => {
-                    copySaveStringToClipBoard();
+                createButtonV2({
+                    text: `Export`,
+                    classNames: ['option-button', 'save-load-button', ...demoExtraClasses],
+                    onClick: () => {
+                        copySaveStringToClipBoard();
+                    },
                 }),
-                createButton(`Manual Save`, ['option-button', 'save-load-file-export', ...demoExtraClasses], () => {
-                    downloadSaveStringToComputer();
+                createButtonV2({
+                    text: `Manual Save`,
+                    classNames: ['option-button', 'save-load-file-export', ...demoExtraClasses],
+                    onClick: () => {
+                        downloadSaveStringToComputer();
+                    },
                 }),
             ],
             descriptionText: '',
@@ -619,11 +635,19 @@ export function drawTab9Content(heading, optionContentElement) {
             labelText: 'Import Save:',
             inputElements: [
                 createTextFieldArea('importSaveArea', ['import-save'], 'Please paste your Save Data here...', null),
-                createButton(`Import`, ['option-button', 'save-load-button', ...demoExtraClasses], () => {
-                    loadGame();
+                createButtonV2({
+                    text: `Import`,
+                    classNames: ['option-button', 'save-load-button', ...demoExtraClasses],
+                    onClick: () => {
+                        loadGame();
+                    },
                 }),
-                createButton(`Manual Load`, ['option-button', 'save-load-file-export', ...demoExtraClasses], () => {
-                    importSaveStringFileFromComputer();
+                createButtonV2({
+                    text: `Manual Load`,
+                    classNames: ['option-button', 'save-load-file-export', ...demoExtraClasses],
+                    onClick: () => {
+                        importSaveStringFileFromComputer();
+                    },
                 }),
             ],
             descriptionText: '',
@@ -648,19 +672,23 @@ export function drawTab9Content(heading, optionContentElement) {
             renderNameABs: null,
             labelText: 'Export Cloud Save:',
             inputElements: [
-                createButton(`Save To Cloud`, ['option-button', 'save-load-button', ...demoExtraClasses], () => {
-                    if (getOnboardingMode()) {
-                        showNotification("You can't save while onboarding mode is active!", 'info', 4000, 'loadSave');
-                        return;
-                    }
+                createButtonV2({
+                    text: `Save To Cloud`,
+                    classNames: ['option-button', 'save-load-button', ...demoExtraClasses],
+                    onClick: () => {
+                        if (getOnboardingMode()) {
+                            showNotification("You can't save while onboarding mode is active!", 'info', 4000, 'loadSave');
+                            return;
+                        }
 
-                    saveGame('manualExportCloud');
-                    const saveData = getSaveData();
-                    if (saveData) {
-                        saveGameToCloud(saveData, 'manualExportCloud');
-                        setSaveExportCloudFlag(saveData);
-                    }
-                    setSaveData(null);
+                        saveGame('manualExportCloud');
+                        const saveData = getSaveData();
+                        if (saveData) {
+                            saveGameToCloud(saveData, 'manualExportCloud');
+                            setSaveExportCloudFlag(saveData);
+                        }
+                        setSaveData(null);
+                    },
                 }),
                 Object.assign(document.createElement('span'), { innerHTML: 'Pioneer Name:', className: 'save-name-margin' }),
                 createTextFieldArea('saveName', ['save-name', 'save-name-width', 'save-name-height', 'save-name-margin'], '', getSaveName()),
@@ -687,8 +715,12 @@ export function drawTab9Content(heading, optionContentElement) {
             renderNameABs: null,
             labelText: 'Import Cloud Save:',
             inputElements: [
-                createButton(`Load From Cloud`, ['option-button', 'save-load-button', ...demoExtraClasses], () => {
-                    loadGameFromCloud();
+                createButtonV2({
+                    text: `Load From Cloud`,
+                    classNames: ['option-button', 'save-load-button', ...demoExtraClasses],
+                    onClick: () => {
+                        loadGameFromCloud();
+                    },
                 }),
             ],
             descriptionText: '',
@@ -713,37 +745,40 @@ export function drawTab9Content(heading, optionContentElement) {
             renderNameABs: null,
             labelText: 'HARD RESET:',
             inputElements: [
-                createButton(`!!!RESET ALL GAME PROGRESS FOR THIS PIONEER NAME!!!`, ['option-button', 'hard-reset-button'], () => {
-                    callPopupModal(
-                        hardResetWarningHeader,
-                        hardResetWarningText,
-                        true,
-                        true,
-                        false,
-                        false,
-                        function () {
-                            destroySaveGameOnCloud();
-                            showNotification(
-                                `GAME HARD RESET!<br><br>Please REFRESH your Browser and use same Pioneer name to start the new game!`,
-                                'error',
-                                200000000,
-                                'special'
-                            );
-                            showHideModal();
-                            document.getElementById('overlay').style.display = 'flex';
-                        },
-                        function () {
-                            showHideModal();
-                        },
-                        null,
-                        null,
-                        '! RESET ALL PROGRESS, EVEN ON CLOUD !',
-                        'CANCEL TO SAFETY',
-                        null,
-                        null,
-                        false
-                    );
-
+                createButtonV2({
+                    text: `!!!RESET ALL GAME PROGRESS FOR THIS PIONEER NAME!!!`,
+                    classNames: ['option-button', 'hard-reset-button'],
+                    onClick: () => {
+                        callPopupModal(
+                            hardResetWarningHeader,
+                            hardResetWarningText,
+                            true,
+                            true,
+                            false,
+                            false,
+                            function () {
+                                destroySaveGameOnCloud();
+                                showNotification(
+                                    `GAME HARD RESET!<br><br>Please REFRESH your Browser and use same Pioneer name to start the new game!`,
+                                    'error',
+                                    200000000,
+                                    'special'
+                                );
+                                showHideModal();
+                                document.getElementById('overlay').style.display = 'flex';
+                            },
+                            function () {
+                                showHideModal();
+                            },
+                            null,
+                            null,
+                            '! RESET ALL PROGRESS, EVEN ON CLOUD !',
+                            'CANCEL TO SAFETY',
+                            null,
+                            null,
+                            false
+                        );
+                    },
                 }),
             ],
             descriptionText: '',
