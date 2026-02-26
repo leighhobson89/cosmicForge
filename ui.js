@@ -3321,7 +3321,6 @@ export function createOptionRow(options = {}) {
         }
     }
 
-    // Also check optionalIterationParam for tech-based visibility
     if (optionalIterationParam && optionalIterationParam[0] === 'tech') {
         if (!getTechUnlockedArray().includes(optionalIterationParam[1])) {
             wrapper.classList.add('invisible');
@@ -3809,6 +3808,104 @@ export function createButton(text, classNames, onClick, dataConditionCheck, reso
     return button;
 }
 
+export function createButtonV2(options = {}) {
+    const opts = options || {};
+
+    const text = opts.text;
+    const classNames = opts.classNames;
+    const onClick = opts.onClick;
+    const dataConditionCheck = Object.prototype.hasOwnProperty.call(opts, 'dataConditionCheck') ? opts.dataConditionCheck : null;
+    const resourcePriceObject = Object.prototype.hasOwnProperty.call(opts, 'resourcePriceObject') ? opts.resourcePriceObject : null;
+    const objectSectionArgument1 = Object.prototype.hasOwnProperty.call(opts, 'objectSectionArgument1') ? opts.objectSectionArgument1 : null;
+    const objectSectionArgument2 = Object.prototype.hasOwnProperty.call(opts, 'objectSectionArgument2') ? opts.objectSectionArgument2 : null;
+    const quantityArgument = Object.prototype.hasOwnProperty.call(opts, 'quantityArgument') ? opts.quantityArgument : null;
+    const disableKeyboardForButton = Object.prototype.hasOwnProperty.call(opts, 'disableKeyboardForButton') ? opts.disableKeyboardForButton : null;
+    const autoBuyerTier = Object.prototype.hasOwnProperty.call(opts, 'autoBuyerTier') ? opts.autoBuyerTier : null;
+    const rowCategory = Object.prototype.hasOwnProperty.call(opts, 'rowCategory') ? opts.rowCategory : null;
+
+    const button = document.createElement('button');
+    button.innerText = text;
+
+    if (Array.isArray(classNames)) {
+        classNames.forEach(className => {
+            if (className.startsWith('id_')) {
+                button.id = className.slice(3);
+            } else {
+                button.classList.add(className);
+            }
+        });
+    } else if (typeof classNames === 'string') {
+        button.classList.add(classNames);
+    }
+
+    if (dataConditionCheck) {
+        if (dataConditionCheck === 'sellResource' || dataConditionCheck === 'fuseResource') {
+            button.dataset.conditionCheck = dataConditionCheck;
+            button.dataset.argumentCheckQuantity = quantityArgument;
+            button.dataset.type = objectSectionArgument1;
+            button.dataset.resourceToFuseTo = objectSectionArgument2;
+        } else if (dataConditionCheck === 'techUnlock' || dataConditionCheck === 'techUnlockPhilosophy') {
+            button.dataset.conditionCheck = dataConditionCheck;
+            button.dataset.argumentCheckQuantity = quantityArgument;
+            button.dataset.type = objectSectionArgument1;
+        } else if (dataConditionCheck === 'toggle') {
+            button.dataset.conditionCheck = dataConditionCheck;
+            button.dataset.toggleTarget = objectSectionArgument2;
+        } else {
+            button.dataset.conditionCheck = dataConditionCheck;
+            button.dataset.resourcePriceObject = resourcePriceObject;
+            button.dataset.type = objectSectionArgument1;
+            button.dataset.resourceToFuseTo = objectSectionArgument2;
+            button.dataset.argumentCheckQuantity = quantityArgument;
+            button.dataset.autoBuyerTier = autoBuyerTier;
+            button.dataset.rowCategory = rowCategory;
+        }
+    }
+
+    if (getDemoBuild() && objectSectionArgument1 === 'autoBuyer' && (autoBuyerTier === 'tier3' || autoBuyerTier === 'tier4')) {
+        button.classList.add('electron-purple-demo-button');
+    }
+
+    button.addEventListener('click', function(event) {
+        if (objectSectionArgument1 && objectSectionArgument1 === 'storage') {
+            sfxPlayer.playAudio('increaseStorage');
+        } else {
+            playClickSfx();
+        }
+
+        const rect = button.getBoundingClientRect();
+        const x = ((event.clientX - rect.left) / rect.width) * 100;
+        const y = ((event.clientY - rect.top) / rect.height) * 100;
+        button.style.setProperty('--click-x', `${x}%`);
+        button.style.setProperty('--click-y', `${y}%`);
+
+        if (!button.classList.contains('option-button-animating')) {
+            button.classList.add('option-button-animating');
+            setTimeout(() => {
+                button.classList.remove('option-button-animating');
+            }, 210);
+        }
+        onClick(event);
+    });
+
+    if (disableKeyboardForButton) {
+        button.setAttribute('tabindex', '-1');
+    }
+
+    if (dataConditionCheck === 'sellResource' && quantityArgument === 'hydrogen') {
+        button.id = 'hydrogenSellButton';
+    }
+
+    if (disableKeyboardForButton) {
+        button.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+            }
+        });
+    }
+
+    return button;
+}
 
 export function createTextElement(text, id, classList, onClick) {
     const div = document.createElement('div');
