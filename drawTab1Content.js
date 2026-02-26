@@ -1,7 +1,7 @@
 import { getLastSellResourceCompoundDropdownOption, setLastSellResourceCompoundDropdownOption, getResourceSalePreview, getTimerRateRatio } from './constantsAndGlobalVars.js';
 import { sellResource, fuseResource, gain, increaseResourceStorage } from './game.js';
 import { getResourceDataObject, setResourceDataObject } from './resourceDataObject.js';
-import { createToggleSwitch, createTextElement, createOptionRow, createOptionRowV2, createDropdown, createButton, removeTabAttentionIfNoIndicators, disableStorageNotificationActionIfShowing } from './ui.js';
+import { removeTabAttentionIfNoIndicators, createTextElement, createToggleSwitch, createOptionRow, createDropdown, createButton, disableStorageNotificationActionIfShowing } from './ui.js';
 
 export function drawTab1Content(heading, optionContentElement) {
     const optionElement = document.getElementById(heading.toLowerCase().replace(/\s(.)/g, (match, group1) => group1.toUpperCase()).replace(/\s+/g, '') + 'Option');
@@ -20,7 +20,7 @@ export function drawTab1Content(heading, optionContentElement) {
         let autobuyer3Price = getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier3', 'price']);
         let autobuyer4Price = getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier4', 'price']);
 
-        const hydrogenSellRow = createOptionRowV2({
+        const hydrogenSellRow = createOptionRow({
             labelId: 'hydrogenSellRow',
             renderNameABs: null,
             labelText: 'Sell Hydrogen:',
@@ -79,7 +79,7 @@ export function drawTab1Content(heading, optionContentElement) {
             toggleSwitch.setAttribute('data-type', 'resources');
         }
 
-        const hydrogenGainRow = createOptionRowV2({
+        const hydrogenGainRow = createOptionRow({
             labelId: 'hydrogenGainRow',
             renderNameABs: null,
             labelText: 'Gain 1 Hydrogen:',
@@ -102,7 +102,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(hydrogenGainRow);
 
-        const hydrogenIncreaseStorageRow = createOptionRowV2({
+        const hydrogenIncreaseStorageRow = createOptionRow({
             labelId: 'hydrogenIncreaseStorageRow',
             renderNameABs: null,
             labelText: 'Increase Storage:',
@@ -127,7 +127,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(hydrogenIncreaseStorageRow);
 
-        const hydrogenAutoBuyer1Row = createOptionRowV2({
+        const hydrogenAutoBuyer1Row = createOptionRow({
             labelId: 'hydrogenAutoBuyer1Row',
             renderNameABs: getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']),
             labelText: 'Hydrogen Auto Buyer Tier 1:',
@@ -154,7 +154,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(hydrogenAutoBuyer1Row);
 
-        const hydrogenAutoBuyer2Row = createOptionRowV2({
+        const hydrogenAutoBuyer2Row = createOptionRow({
             labelId: 'hydrogenAutoBuyer2Row',
             renderNameABs: getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']),
             labelText: 'Hydrogen Auto Buyer Tier 2:',
@@ -181,7 +181,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(hydrogenAutoBuyer2Row);
 
-        const hydrogenAutoBuyer3Row = createOptionRowV2({
+        const hydrogenAutoBuyer3Row = createOptionRow({
             labelId: 'hydrogenAutoBuyer3Row',
             renderNameABs: getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']),
             labelText: 'Hydrogen Auto Buyer Tier 3:',
@@ -208,7 +208,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(hydrogenAutoBuyer3Row);
 
-        const hydrogenAutoBuyer4Row = createOptionRowV2({
+        const hydrogenAutoBuyer4Row = createOptionRow({
             labelId: 'hydrogenAutoBuyer4Row',
             renderNameABs: getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']),
             labelText: 'Hydrogen Auto Buyer Tier 4:',
@@ -242,7 +242,7 @@ export function drawTab1Content(heading, optionContentElement) {
         let autobuyer3Price = getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier3', 'price']);
         let autobuyer4Price = getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier4', 'price']);
 
-        const heliumSellRow = createOptionRowV2({
+        const heliumSellRow = createOptionRow({
             labelId: 'heliumSellRow',
             renderNameABs: null,
             labelText: 'Sell Helium:',
@@ -301,7 +301,7 @@ export function drawTab1Content(heading, optionContentElement) {
             toggleSwitch.setAttribute('data-type', 'resources');
         }
 
-        const heliumGainRow = createOptionRowV2({
+        const heliumGainRow = createOptionRow({
             labelId: 'heliumGainRow',
             renderNameABs: null,
             labelText: 'Gain 1 Helium:',
@@ -324,7 +324,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(heliumGainRow);
 
-        const heliumIncreaseStorageRow = createOptionRowV2({
+        const heliumIncreaseStorageRow = createOptionRow({
             labelId: 'heliumIncreaseStorageRow',
             renderNameABs: null,
             labelText: 'Increase Storage:',
@@ -349,7 +349,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(heliumIncreaseStorageRow);
 
-        const heliumAutoBuyer1Row = createOptionRowV2({
+        const heliumAutoBuyer1Row = createOptionRow({
             labelId: 'heliumAutoBuyer1Row',
             renderNameABs: getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']),
             labelText: 'Helium Auto Buyer Tier 1:',
@@ -376,7 +376,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(heliumAutoBuyer1Row);
 
-        const heliumAutoBuyer2Row = createOptionRowV2({
+        const heliumAutoBuyer2Row = createOptionRow({
             labelId: 'heliumAutoBuyer2Row',
             renderNameABs: getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']),
             labelText: 'Helium Auto Buyer Tier 2:',
@@ -403,7 +403,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(heliumAutoBuyer2Row);
 
-        const heliumAutoBuyer3Row = createOptionRowV2({
+        const heliumAutoBuyer3Row = createOptionRow({
             labelId: 'heliumAutoBuyer3Row',
             renderNameABs: getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']),
             labelText: 'Helium Auto Buyer Tier 3:',
@@ -430,7 +430,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(heliumAutoBuyer3Row);
 
-        const heliumAutoBuyer4Row = createOptionRowV2({
+        const heliumAutoBuyer4Row = createOptionRow({
             labelId: 'heliumAutoBuyer4Row',
             renderNameABs: getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']),
             labelText: 'Helium Auto Buyer Tier 4:',
@@ -465,7 +465,7 @@ export function drawTab1Content(heading, optionContentElement) {
         let autobuyer3Price = getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier3', 'price']);
         let autobuyer4Price = getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier4', 'price']);
 
-        const carbonSellRow = createOptionRowV2({
+        const carbonSellRow = createOptionRow({
             labelId: 'carbonSellRow',
             renderNameABs: null,
             labelText: 'Sell Carbon:',
@@ -531,7 +531,7 @@ export function drawTab1Content(heading, optionContentElement) {
             toggleSwitch.setAttribute('data-type', 'resources');
         }
 
-        const carbonGainRow = createOptionRowV2({
+        const carbonGainRow = createOptionRow({
             labelId: 'carbonGainRow',
             renderNameABs: null,
             labelText: 'Gain 1 Carbon:',
@@ -554,7 +554,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(carbonGainRow);
 
-        const carbonIncreaseStorageRow = createOptionRowV2({
+        const carbonIncreaseStorageRow = createOptionRow({
             labelId: 'carbonIncreaseStorageRow',
             renderNameABs: null,
             labelText: 'Increase Storage:',
@@ -579,7 +579,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(carbonIncreaseStorageRow);
 
-        const carbonAutoBuyer1Row = createOptionRowV2({
+        const carbonAutoBuyer1Row = createOptionRow({
             labelId: 'carbonAutoBuyer1Row',
             renderNameABs: getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']),
             labelText: 'Carbon Auto Buyer Tier 1:',
@@ -606,7 +606,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(carbonAutoBuyer1Row);
 
-        const carbonAutoBuyer2Row = createOptionRowV2({
+        const carbonAutoBuyer2Row = createOptionRow({
             labelId: 'carbonAutoBuyer2Row',
             renderNameABs: getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']),
             labelText: 'Carbon Auto Buyer Tier 2:',
@@ -633,7 +633,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(carbonAutoBuyer2Row);
 
-        const carbonAutoBuyer3Row = createOptionRowV2({
+        const carbonAutoBuyer3Row = createOptionRow({
             labelId: 'carbonAutoBuyer3Row',
             renderNameABs: getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']),
             labelText: 'Carbon Auto Buyer Tier 3:',
@@ -660,7 +660,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(carbonAutoBuyer3Row);
 
-        const carbonAutoBuyer4Row = createOptionRowV2({
+        const carbonAutoBuyer4Row = createOptionRow({
             labelId: 'carbonAutoBuyer4Row',
             renderNameABs: getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']),
             labelText: 'Carbon Auto Buyer Tier 4:',
@@ -695,7 +695,7 @@ export function drawTab1Content(heading, optionContentElement) {
         let autobuyer3Price = getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier3', 'price']);
         let autobuyer4Price = getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier4', 'price']);
 
-        const neonSellRow = createOptionRowV2({
+        const neonSellRow = createOptionRow({
             labelId: 'neonSellRow',
             renderNameABs: null,
             labelText: 'Sell Neon:',
@@ -754,7 +754,7 @@ export function drawTab1Content(heading, optionContentElement) {
             toggleSwitch.setAttribute('data-type', 'resources');
         }
 
-        const neonGainRow = createOptionRowV2({
+        const neonGainRow = createOptionRow({
             labelId: 'neonGainRow',
             renderNameABs: null,
             labelText: 'Gain 1 Neon:',
@@ -777,7 +777,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(neonGainRow);
 
-        const neonIncreaseStorageRow = createOptionRowV2({
+        const neonIncreaseStorageRow = createOptionRow({
             labelId: 'neonIncreaseStorageRow',
             renderNameABs: null,
             labelText: 'Increase Storage:',
@@ -802,7 +802,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(neonIncreaseStorageRow);
 
-        const neonAutoBuyer1Row = createOptionRowV2({
+        const neonAutoBuyer1Row = createOptionRow({
             labelId: 'neonAutoBuyer1Row',
             renderNameABs: getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']),
             labelText: 'Neon Auto Buyer Tier 1:',
@@ -829,7 +829,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(neonAutoBuyer1Row);
 
-        const neonAutoBuyer2Row = createOptionRowV2({
+        const neonAutoBuyer2Row = createOptionRow({
             labelId: 'neonAutoBuyer2Row',
             renderNameABs: getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']),
             labelText: 'Neon Auto Buyer Tier 2:',
@@ -856,7 +856,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(neonAutoBuyer2Row);
 
-        const neonAutoBuyer3Row = createOptionRowV2({
+        const neonAutoBuyer3Row = createOptionRow({
             labelId: 'neonAutoBuyer3Row',
             renderNameABs: getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']),
             labelText: 'Neon Auto Buyer Tier 3:',
@@ -883,7 +883,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(neonAutoBuyer3Row);
 
-        const neonAutoBuyer4Row = createOptionRowV2({
+        const neonAutoBuyer4Row = createOptionRow({
             labelId: 'neonAutoBuyer4Row',
             renderNameABs: getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']),
             labelText: 'Neon Auto Buyer Tier 4:',
@@ -918,7 +918,7 @@ export function drawTab1Content(heading, optionContentElement) {
         let autobuyer3Price = getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier3', 'price']);
         let autobuyer4Price = getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier4', 'price']);
 
-        const oxygenSellRow = createOptionRowV2({
+        const oxygenSellRow = createOptionRow({
             labelId: 'oxygenSellRow',
             renderNameABs: null,
             labelText: 'Sell Oxygen:',
@@ -977,7 +977,7 @@ export function drawTab1Content(heading, optionContentElement) {
             toggleSwitch.setAttribute('data-type', 'resources');
         }
 
-        const oxygenGainRow = createOptionRowV2({
+        const oxygenGainRow = createOptionRow({
             labelId: 'oxygenGainRow',
             renderNameABs: null,
             labelText: 'Gain 1 Oxygen:',
@@ -1000,7 +1000,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(oxygenGainRow);
 
-        const oxygenIncreaseStorageRow = createOptionRowV2({
+        const oxygenIncreaseStorageRow = createOptionRow({
             labelId: 'oxygenIncreaseStorageRow',
             renderNameABs: null,
             labelText: 'Increase Storage:',
@@ -1025,7 +1025,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(oxygenIncreaseStorageRow);
 
-        const oxygenAutoBuyer1Row = createOptionRowV2({
+        const oxygenAutoBuyer1Row = createOptionRow({
             labelId: 'oxygenAutoBuyer1Row',
             renderNameABs: getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']),
             labelText: 'Oxygen Auto Buyer Tier 1:',
@@ -1052,7 +1052,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(oxygenAutoBuyer1Row);
 
-        const oxygenAutoBuyer2Row = createOptionRowV2({
+        const oxygenAutoBuyer2Row = createOptionRow({
             labelId: 'oxygenAutoBuyer2Row',
             renderNameABs: getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']),
             labelText: 'Oxygen Auto Buyer Tier 2:',
@@ -1079,7 +1079,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(oxygenAutoBuyer2Row);
 
-        const oxygenAutoBuyer3Row = createOptionRowV2({
+        const oxygenAutoBuyer3Row = createOptionRow({
             labelId: 'oxygenAutoBuyer3Row',
             renderNameABs: getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']),
             labelText: 'Oxygen Auto Buyer Tier 3:',
@@ -1106,7 +1106,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(oxygenAutoBuyer3Row);
 
-        const oxygenAutoBuyer4Row = createOptionRowV2({
+        const oxygenAutoBuyer4Row = createOptionRow({
             labelId: 'oxygenAutoBuyer4Row',
             renderNameABs: getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']),
             labelText: 'Oxygen Auto Buyer Tier 4:',
@@ -1141,7 +1141,7 @@ export function drawTab1Content(heading, optionContentElement) {
         let autobuyer3Price = getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier3', 'price']);
         let autobuyer4Price = getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier4', 'price']);
 
-        const sodiumSellRow = createOptionRowV2({
+        const sodiumSellRow = createOptionRow({
             labelId: 'sodiumSellRow',
             renderNameABs: null,
             labelText: 'Sell Sodium:',
@@ -1187,7 +1187,7 @@ export function drawTab1Content(heading, optionContentElement) {
             toggleSwitch.setAttribute('data-type', 'resources');
         }
 
-        const sodiumGainRow = createOptionRowV2({
+        const sodiumGainRow = createOptionRow({
             labelId: 'sodiumGainRow',
             renderNameABs: null,
             labelText: 'Gain 1 Sodium:',
@@ -1210,7 +1210,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(sodiumGainRow);
 
-        const sodiumIncreaseStorageRow = createOptionRowV2({
+        const sodiumIncreaseStorageRow = createOptionRow({
             labelId: 'sodiumIncreaseStorageRow',
             renderNameABs: null,
             labelText: 'Increase Storage:',
@@ -1235,7 +1235,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(sodiumIncreaseStorageRow);
 
-        const sodiumAutoBuyer1Row = createOptionRowV2({
+        const sodiumAutoBuyer1Row = createOptionRow({
             labelId: 'sodiumAutoBuyer1Row',
             renderNameABs: getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']),
             labelText: 'Sodium Auto Buyer Tier 1:',
@@ -1262,7 +1262,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(sodiumAutoBuyer1Row);
 
-        const sodiumAutoBuyer2Row = createOptionRowV2({
+        const sodiumAutoBuyer2Row = createOptionRow({
             labelId: 'sodiumAutoBuyer2Row',
             renderNameABs: getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']),
             labelText: 'Sodium Auto Buyer Tier 2:',
@@ -1289,7 +1289,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(sodiumAutoBuyer2Row);
 
-        const sodiumAutoBuyer3Row = createOptionRowV2({
+        const sodiumAutoBuyer3Row = createOptionRow({
             labelId: 'sodiumAutoBuyer3Row',
             renderNameABs: getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']),
             labelText: 'Sodium Auto Buyer Tier 3:',
@@ -1316,7 +1316,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(sodiumAutoBuyer3Row);
 
-        const sodiumAutoBuyer4Row = createOptionRowV2({
+        const sodiumAutoBuyer4Row = createOptionRow({
             labelId: 'sodiumAutoBuyer4Row',
             renderNameABs: getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']),
             labelText: 'Sodium Auto Buyer Tier 4:',
@@ -1351,7 +1351,7 @@ export function drawTab1Content(heading, optionContentElement) {
         let autobuyer3Price = getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier3', 'price']);
         let autobuyer4Price = getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier4', 'price']);
 
-        const siliconSellRow = createOptionRowV2({
+        const siliconSellRow = createOptionRow({
             labelId: 'siliconSellRow',
             renderNameABs: null,
             labelText: 'Sell Silicon:',
@@ -1410,7 +1410,7 @@ export function drawTab1Content(heading, optionContentElement) {
             toggleSwitch.setAttribute('data-type', 'resources');
         }
 
-        const siliconGainRow = createOptionRowV2({
+        const siliconGainRow = createOptionRow({
             labelId: 'siliconGainRow',
             renderNameABs: null,
             labelText: 'Gain 1 Silicon:',
@@ -1433,7 +1433,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(siliconGainRow);
 
-        const siliconIncreaseStorageRow = createOptionRowV2({
+        const siliconIncreaseStorageRow = createOptionRow({
             labelId: 'siliconIncreaseStorageRow',
             renderNameABs: null,
             labelText: 'Increase Storage:',
@@ -1458,7 +1458,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(siliconIncreaseStorageRow);
 
-        const siliconAutoBuyer1Row = createOptionRowV2({
+        const siliconAutoBuyer1Row = createOptionRow({
             labelId: 'siliconAutoBuyer1Row',
             renderNameABs: getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']),
             labelText: 'Silicon Auto Buyer Tier 1:',
@@ -1485,7 +1485,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(siliconAutoBuyer1Row);
 
-        const siliconAutoBuyer2Row = createOptionRowV2({
+        const siliconAutoBuyer2Row = createOptionRow({
             labelId: 'siliconAutoBuyer2Row',
             renderNameABs: getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']),
             labelText: 'Silicon Auto Buyer Tier 2:',
@@ -1512,7 +1512,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(siliconAutoBuyer2Row);
 
-        const siliconAutoBuyer3Row = createOptionRowV2({
+        const siliconAutoBuyer3Row = createOptionRow({
             labelId: 'siliconAutoBuyer3Row',
             renderNameABs: getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']),
             labelText: 'Silicon Auto Buyer Tier 3:',
@@ -1539,7 +1539,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(siliconAutoBuyer3Row);
 
-        const siliconAutoBuyer4Row = createOptionRowV2({
+        const siliconAutoBuyer4Row = createOptionRow({
             labelId: 'siliconAutoBuyer4Row',
             renderNameABs: getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']),
             labelText: 'Silicon Auto Buyer Tier 4:',
@@ -1574,7 +1574,7 @@ export function drawTab1Content(heading, optionContentElement) {
         let autobuyer3Price = getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier3', 'price']);
         let autobuyer4Price = getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier4', 'price']);
 
-        const ironSellRow = createOptionRowV2({
+        const ironSellRow = createOptionRow({
             labelId: 'ironSellRow',
             renderNameABs: null,
             labelText: 'Sell Iron:',
@@ -1620,7 +1620,7 @@ export function drawTab1Content(heading, optionContentElement) {
             toggleSwitch.setAttribute('data-type', 'resources');
         }
 
-        const ironGainRow = createOptionRowV2({
+        const ironGainRow = createOptionRow({
             labelId: 'ironGainRow',
             renderNameABs: null,
             labelText: 'Gain 1 Iron:',
@@ -1643,7 +1643,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(ironGainRow);
 
-        const ironIncreaseStorageRow = createOptionRowV2({
+        const ironIncreaseStorageRow = createOptionRow({
             labelId: 'ironIncreaseStorageRow',
             renderNameABs: null,
             labelText: 'Increase Storage:',
@@ -1668,7 +1668,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(ironIncreaseStorageRow);
 
-        const ironAutoBuyer1Row = createOptionRowV2({
+        const ironAutoBuyer1Row = createOptionRow({
             labelId: 'ironAutoBuyer1Row',
             renderNameABs: getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']),
             labelText: 'Iron Auto Buyer Tier 1:',
@@ -1695,7 +1695,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(ironAutoBuyer1Row);
 
-        const ironAutoBuyer2Row = createOptionRowV2({
+        const ironAutoBuyer2Row = createOptionRow({
             labelId: 'ironAutoBuyer2Row',
             renderNameABs: getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']),
             labelText: 'Iron Auto Buyer Tier 2:',
@@ -1722,7 +1722,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(ironAutoBuyer2Row);
 
-        const ironAutoBuyer3Row = createOptionRowV2({
+        const ironAutoBuyer3Row = createOptionRow({
             labelId: 'ironAutoBuyer3Row',
             renderNameABs: getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']),
             labelText: 'Iron Auto Buyer Tier 3:',
@@ -1749,7 +1749,7 @@ export function drawTab1Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(ironAutoBuyer3Row);
 
-        const ironAutoBuyer4Row = createOptionRowV2({
+        const ironAutoBuyer4Row = createOptionRow({
             labelId: 'ironAutoBuyer4Row',
             renderNameABs: getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']),
             labelText: 'Iron Auto Buyer Tier 4:',

@@ -58,209 +58,163 @@ export function drawTab8Content(heading, optionContentElement) {
         const gp = Number(getCosmicRipGalacticPoints?.()) || 0;
         const restoreCost = Number(getNearSpaceScannerArrayRestoreCostGp?.()) || 10;
 
-        const restoreRow = createOptionRow(
-            'cosmicRipRestoreNearSpaceScannerArrayRow',
-            null,
-            'Near Space Scanner Array:',
-            createButton(
-                'RESTORE',
-                ['option-button', 'red-disabled-text', 'cosmic-rip-restore-scanner-array-button'],
-                () => {
-                    const result = restoreNearSpaceScannerArray?.();
-                    if (!result?.ok) {
-                        showNotification('Unable to restore Near Space Scanner Array.', 'warning', 3000, 'cosmicRip');
-                        return;
-                    }
-                    showNotification('Near Space Scanner Array restored.', 'info', 3000, 'cosmicRip');
-                    callPopupModal(
-                        modalNearSpaceScannerArrayRestoredHeader,
-                        modalNearSpaceScannerArrayRestoredText,
-                        true,
-                        false,
-                        false,
-                        false,
-                        () => {
-                            showHideModal();
-                        },
-                        null,
-                        null,
-                        null,
-                        'CONFIRM',
-                        '',
-                        '',
-                        ''
-                    );
-                },
-                null,
-                null,
-                null,
-                null,
-                null,
-                true,
-                null,
-                'cosmicRipRestoreNearSpaceScannerArray'
-            ),
-            null,
-            null,
-            null,
-            null,
-            `Cost: <span class="warning-orange-text">${restoreCost}</span> GP`,
-            '',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            'cosmicRipRestoreNearSpaceScannerArray'
-        );
+        const restoreRow = createOptionRow({
+            labelId: 'cosmicRipRestoreNearSpaceScannerArrayRow',
+            renderNameABs: null,
+            labelText: 'Near Space Scanner Array:',
+            inputElements: [
+                createButton(
+                    'RESTORE',
+                    ['option-button', 'red-disabled-text', 'cosmic-rip-restore-scanner-array-button'],
+                    () => {
+                        const result = restoreNearSpaceScannerArray?.();
+                        if (!result?.ok) {
+                            showNotification('Unable to restore Near Space Scanner Array.', 'warning', 3000, 'cosmicRip');
+                            return;
+                        }
+                        showNotification('Near Space Scanner Array restored.', 'info', 3000, 'cosmicRip');
+                        callPopupModal(
+                            modalNearSpaceScannerArrayRestoredHeader,
+                            modalNearSpaceScannerArrayRestoredText,
+                            true,
+                            false,
+                            false,
+                            false,
+                            () => {
+                                showHideModal();
+                            },
+                            null,
+                            null,
+                            null,
+                            'CONFIRM',
+                            '',
+                            '',
+                            ''
+                        );
+                    },
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    true,
+                    null,
+                    'cosmicRipRestoreNearSpaceScannerArray'
+                ),
+            ],
+            descriptionText: `Cost: <span class="warning-orange-text">${restoreCost}</span> GP`,
+            resourcePriceObject: '',
+            dataConditionCheck: null,
+            objectSectionArgument1: null,
+            objectSectionArgument2: null,
+            quantityArgument: null,
+            autoBuyerTier: null,
+            startInvisibleValue: false,
+            resourceString: null,
+            optionalIterationParam: null,
+            rowCategory: 'cosmicRipRestoreNearSpaceScannerArray',
+            noDescriptionContainer: false,
+            specialInputContainerClasses: null,
+            hideMainDescriptionRow: false
+        });
 
         if (restored) {
             restoreRow.classList.add('invisible');
         }
 
-        const restoredRow = createOptionRow(
-            'cosmicRipNearSpaceScannerArrayRestoredStatusRow',
-            null,
-            'Near Space Scanner Array:',
-            createTextElement('Requires Restoration', 'cosmicRipNearSpaceScannerArraySituationStatusText', ['red-disabled-text']),
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            '',
-            '',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
+        const restoredRow = createOptionRow({
+            labelId: 'cosmicRipNearSpaceScannerArrayRestoredStatusRow',
+            renderNameABs: null,
+            labelText: 'Near Space Scanner Array:',
+            inputElements: [
+                createTextElement('Requires Restoration', 'cosmicRipNearSpaceScannerArraySituationStatusText', ['red-disabled-text']),
+            ],
+            descriptionText: '',
+            resourcePriceObject: '',
+            dataConditionCheck: null,
+            objectSectionArgument1: null,
+            objectSectionArgument2: null,
+            quantityArgument: null,
+            autoBuyerTier: null,
+            startInvisibleValue: false,
+            resourceString: null,
+            optionalIterationParam: null,
+            rowCategory: null,
+            noDescriptionContainer: false,
+            specialInputContainerClasses: null,
+            hideMainDescriptionRow: false
+        });
 
-        const cosmicRipStatusRow = createOptionRow(
-            'cosmicRipSituationStatusRow',
-            null,
-            'Cosmic Rip Status:',
-            createTextElement('Not Located', 'cosmicRipSituationStatusText', ['red-disabled-text']),
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            '',
-            '',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
+        const cosmicRipStatusRow = createOptionRow({
+            labelId: 'cosmicRipSituationStatusRow',
+            renderNameABs: null,
+            labelText: 'Cosmic Rip Status:',
+            inputElements: [
+                createTextElement('Not Located', 'cosmicRipSituationStatusText', ['red-disabled-text']),
+            ],
+            descriptionText: '',
+            resourcePriceObject: '',
+            dataConditionCheck: null,
+            objectSectionArgument1: null,
+            objectSectionArgument2: null,
+            quantityArgument: null,
+            autoBuyerTier: null,
+            startInvisibleValue: false,
+            resourceString: null,
+            optionalIterationParam: null,
+            rowCategory: null,
+            noDescriptionContainer: false,
+            specialInputContainerClasses: null,
+            hideMainDescriptionRow: false
+        });
         cosmicRipStatusRow.classList.add('invisible');
 
-        const cosmicRipObjectiveRow = createOptionRow(
-            'cosmicRipSituationObjectiveRow',
-            null,
-            'Next Objective:',
-            createTextElement('Scan Local Sectors for the Cosmic Rip', 'cosmicRipSituationObjectiveText', ['green-ready-text']),
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            '',
-            '',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
+        const cosmicRipObjectiveRow = createOptionRow({
+            labelId: 'cosmicRipSituationObjectiveRow',
+            renderNameABs: null,
+            labelText: 'Next Objective:',
+            inputElements: [
+                createTextElement('Scan Local Sectors for the Cosmic Rip', 'cosmicRipSituationObjectiveText', ['green-ready-text']),
+            ],
+            descriptionText: '',
+            resourcePriceObject: '',
+            dataConditionCheck: null,
+            objectSectionArgument1: null,
+            objectSectionArgument2: null,
+            quantityArgument: null,
+            autoBuyerTier: null,
+            startInvisibleValue: false,
+            resourceString: null,
+            optionalIterationParam: null,
+            rowCategory: null,
+            noDescriptionContainer: false,
+            specialInputContainerClasses: null,
+            hideMainDescriptionRow: false
+        });
         cosmicRipObjectiveRow.classList.add('invisible');
 
-        const cosmicRipResearchRow = createOptionRow(
-            'cosmicRipSituationResearchRow',
-            null,
-            'Cosmic Rip Research:',
-            createTextElement('0 pts (L0)', 'cosmicRipSituationResearchText', []),
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            '',
-            '',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
+        const cosmicRipResearchRow = createOptionRow({
+            labelId: 'cosmicRipSituationResearchRow',
+            renderNameABs: null,
+            labelText: 'Cosmic Rip Research:',
+            inputElements: [
+                createTextElement('0 pts (L0)', 'cosmicRipSituationResearchText', []),
+            ],
+            descriptionText: '',
+            resourcePriceObject: '',
+            dataConditionCheck: null,
+            objectSectionArgument1: null,
+            objectSectionArgument2: null,
+            quantityArgument: null,
+            autoBuyerTier: null,
+            startInvisibleValue: false,
+            resourceString: null,
+            optionalIterationParam: null,
+            rowCategory: null,
+            noDescriptionContainer: false,
+            specialInputContainerClasses: null,
+            hideMainDescriptionRow: false
+        });
         cosmicRipResearchRow.classList.add('invisible');
 
         optionContentElement.appendChild(restoreRow);
@@ -284,39 +238,28 @@ export function drawTab8Content(heading, optionContentElement) {
         const scanCost = Number(getCosmicRipSectorScanCostGp?.()) || 1;
         const sectorCount = Number(getCosmicRipSectorCount?.()) || 9;
 
-        const statusRow = createOptionRow(
-            'cosmicRipNearSpaceScannerArrayStatusRow',
-            null,
-            'Miaplacidus Sectors Map:',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            restored
+        const statusRow = createOptionRow({
+            labelId: 'cosmicRipNearSpaceScannerArrayStatusRow',
+            renderNameABs: null,
+            labelText: 'Miaplacidus Sectors Map:',
+            inputElements: null,
+            descriptionText: restored
                 ? (found ? `<span class="green-ready-text">Rip Located</span>` : `<span class="warning-orange-text">Scanning</span>`)
                 : `<span class="red-disabled-text">Offline</span>`,
-            '',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
+            resourcePriceObject: '',
+            dataConditionCheck: null,
+            objectSectionArgument1: null,
+            objectSectionArgument2: null,
+            quantityArgument: null,
+            autoBuyerTier: null,
+            startInvisibleValue: false,
+            resourceString: null,
+            optionalIterationParam: null,
+            rowCategory: null,
+            noDescriptionContainer: false,
+            specialInputContainerClasses: null,
+            hideMainDescriptionRow: false
+        });
         optionContentElement.appendChild(statusRow);
 
         const telescopeContainer = document.createElement('div');
@@ -443,8 +386,8 @@ export function drawTab8Content(heading, optionContentElement) {
                 const result = scanCosmicRipSector?.(i);
                 if (result?.ok) {
                     if (result.found) {
-                        
-                            showNotification(`Scan complete! Cosmic Rip located in sector ${name}`, 'info', 4000, 'cosmicRip');
+                        // eslint-disable-next-line no-undef
+                        showNotification(`Scan complete! Cosmic Rip located in sector ${name}`, 'info', 4000, 'cosmicRip');
                         if (getCosmicRipLocatedModalShown() !== true) {
                             setCosmicRipLocatedModalShown(true);
                             window.setTimeout(() => {
@@ -469,6 +412,7 @@ export function drawTab8Content(heading, optionContentElement) {
                             }, 2000);
                         }
                     } else {
+                        // eslint-disable-next-line no-undef
                         showNotification(`Scan complete! Nothing significant found in sector ${name}`, 'info', 3500, 'cosmicRip');
                     }
                 }
@@ -521,93 +465,81 @@ export function drawTab8Content(heading, optionContentElement) {
         telescopeContainer.appendChild(zoomCanvas);
         optionContentElement.appendChild(telescopeContainer);
 
-        const deploySensorBuoyRow = createOptionRow(
-            'cosmicRipNearSpaceScannerArrayDeploySensorBuoyRow',
-            null,
-            'Sensor Buoy:',
-            createButton(
-                'DEPLOY',
-                ['option-button', 'red-disabled-text', 'cosmic-rip-deploy-sensor-buoy-button'],
-                () => {
-                    showNotification('Coming soon', 'info', 2500, 'cosmicRip');
-                },
-                null,
-                null,
-                null,
-                null,
-                null,
-                true,
-                null,
-                'cosmicRipDeploySensorBuoy'
-            ),
-            null,
-            null,
-            null,
-            null,
-            '',
-            '',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            'cosmicRipDeploySensorBuoy'
-        );
+        const deploySensorBuoyRow = createOptionRow({
+            labelId: 'cosmicRipNearSpaceScannerArrayDeploySensorBuoyRow',
+            renderNameABs: null,
+            labelText: 'Sensor Buoy:',
+            inputElements: [
+                createButton(
+                    'DEPLOY',
+                    ['option-button', 'red-disabled-text', 'cosmic-rip-deploy-sensor-buoy-button'],
+                    () => {
+                        showNotification('Coming soon', 'info', 2500, 'cosmicRip');
+                    },
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    true,
+                    null,
+                    'cosmicRipDeploySensorBuoy'
+                ),
+            ],
+            descriptionText: '',
+            resourcePriceObject: '',
+            dataConditionCheck: null,
+            objectSectionArgument1: null,
+            objectSectionArgument2: null,
+            quantityArgument: null,
+            autoBuyerTier: null,
+            startInvisibleValue: false,
+            resourceString: null,
+            optionalIterationParam: null,
+            rowCategory: 'cosmicRipDeploySensorBuoy',
+            noDescriptionContainer: false,
+            specialInputContainerClasses: null,
+            hideMainDescriptionRow: false
+        });
         deploySensorBuoyRow.classList.add('invisible');
         optionContentElement.appendChild(deploySensorBuoyRow);
 
-        const deployRipResearchOrbiterRow = createOptionRow(
-            'cosmicRipNearSpaceScannerArrayDeployRipResearchOrbiterRow',
-            null,
-            'Rip Research Orbiter:',
-            createButton(
-                'DEPLOY',
-                ['option-button', 'red-disabled-text', 'cosmic-rip-deploy-rip-research-orbiter-button'],
-                () => {
-                    showNotification('Coming soon', 'info', 2500, 'cosmicRip');
-                },
-                null,
-                null,
-                null,
-                null,
-                null,
-                true,
-                null,
-                'cosmicRipDeployRipResearchOrbiter'
-            ),
-            null,
-            null,
-            null,
-            null,
-            '',
-            '',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            'cosmicRipDeployRipResearchOrbiter'
-        );
+        const deployRipResearchOrbiterRow = createOptionRow({
+            labelId: 'cosmicRipNearSpaceScannerArrayDeployRipResearchOrbiterRow',
+            renderNameABs: null,
+            labelText: 'Rip Research Orbiter:',
+            inputElements: [
+                createButton(
+                    'DEPLOY',
+                    ['option-button', 'red-disabled-text', 'cosmic-rip-deploy-rip-research-orbiter-button'],
+                    () => {
+                        showNotification('Coming soon', 'info', 2500, 'cosmicRip');
+                    },
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    true,
+                    null,
+                    'cosmicRipDeployRipResearchOrbiter'
+                ),
+            ],
+            descriptionText: '',
+            resourcePriceObject: '',
+            dataConditionCheck: null,
+            objectSectionArgument1: null,
+            objectSectionArgument2: null,
+            quantityArgument: null,
+            autoBuyerTier: null,
+            startInvisibleValue: false,
+            resourceString: null,
+            optionalIterationParam: null,
+            rowCategory: 'cosmicRipDeployRipResearchOrbiter',
+            noDescriptionContainer: false,
+            specialInputContainerClasses: null,
+            hideMainDescriptionRow: false
+        });
         deployRipResearchOrbiterRow.classList.add('invisible');
         optionContentElement.appendChild(deployRipResearchOrbiterRow);
 
@@ -792,82 +724,65 @@ export function drawTab8Content(heading, optionContentElement) {
         const restored = getCosmicRipNearSpaceScannerArrayRestored?.() === true;
         const found = getCosmicRipRipFound?.() === true;
 
-        const statusRow = createOptionRow(
-            'cosmicRipCosmicRipStatusRow',
-            null,
-            'Cosmic Rip:',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            `<span id="cosmicRipCosmicRipStageText" class="warning-orange-text">Unknown</span>`,
-            '',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
+        const statusRow = createOptionRow({
+            labelId: 'cosmicRipCosmicRipStatusRow',
+            renderNameABs: null,
+            labelText: 'Cosmic Rip:',
+            inputElements: null,
+            descriptionText: `<span id="cosmicRipCosmicRipStageText" class="warning-orange-text">Unknown</span>`,
+            resourcePriceObject: '',
+            dataConditionCheck: null,
+            objectSectionArgument1: null,
+            objectSectionArgument2: null,
+            quantityArgument: null,
+            autoBuyerTier: null,
+            startInvisibleValue: false,
+            resourceString: null,
+            optionalIterationParam: null,
+            rowCategory: null,
+            noDescriptionContainer: false,
+            specialInputContainerClasses: null,
+            hideMainDescriptionRow: false
+        });
         statusRow.classList.add('invisible');
         optionContentElement.appendChild(statusRow);
 
-        const stabilizerProjectRow = createOptionRow(
-            'cosmicRipCosmicRipStabilizerProjectRow',
-            null,
-            'Stabilizer Array:',
-            createButton(
-                'BUILD',
-                ['option-button', 'red-disabled-text', 'cosmic-rip-build-stabilizer-array-button'],
-                () => {
-                    showNotification('Coming soon', 'info', 2500, 'cosmicRip');
-                },
-                null,
-                null,
-                null,
-                null,
-                null,
-                true,
-                null,
-                'cosmicRipBuildStabilizerArray'
-            ),
-            null,
-            null,
-            null,
-            null,
-            'Construct stabilizers to reduce instability and unlock safe operations.',
-            '',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            'cosmicRipBuildStabilizerArray'
-        );
+        const stabilizerProjectRow = createOptionRow({
+            labelId: 'cosmicRipCosmicRipStabilizerProjectRow',
+            renderNameABs: null,
+            labelText: 'Stabilizer Array:',
+            inputElements: [
+                createButton(
+                    'BUILD',
+                    ['option-button', 'red-disabled-text', 'cosmic-rip-build-stabilizer-array-button'],
+                    () => {
+                        showNotification('Coming soon', 'info', 2500, 'cosmicRip');
+                    },
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    true,
+                    null,
+                    'cosmicRipBuildStabilizerArray'
+                ),
+            ],
+            descriptionText: 'Construct stabilizers to reduce instability and unlock safe operations.',
+            resourcePriceObject: '',
+            dataConditionCheck: null,
+            objectSectionArgument1: null,
+            objectSectionArgument2: null,
+            quantityArgument: null,
+            autoBuyerTier: null,
+            startInvisibleValue: false,
+            resourceString: null,
+            optionalIterationParam: null,
+            rowCategory: 'cosmicRipBuildStabilizerArray',
+            noDescriptionContainer: false,
+            specialInputContainerClasses: null,
+            hideMainDescriptionRow: false
+        });
         stabilizerProjectRow.classList.add('invisible');
         optionContentElement.appendChild(stabilizerProjectRow);
 

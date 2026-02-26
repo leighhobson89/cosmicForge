@@ -90,89 +90,87 @@ export function drawTab7Content(heading, optionContentElement) {
     removeTabAttentionIfNoIndicators('tab7');
 
     if (heading === 'Rebirth') {
-        const rebirthRow = createOptionRow(
-            'rebirthRow',
-            null,
-            'Rebirth:',
-            createButton(`REBIRTH`, ['option-button', 'red-disabled-text', 'rebirth-check'], () => {
-                const currentAp = getResourceDataObject('ascendencyPoints', ['quantity']);
-                const spanClass = currentAp === 0 ? "red-disabled-text" : "green-ready-text";
+        const rebirthRow = createOptionRow({
+            labelId: 'rebirthRow',
+            renderNameABs: null,
+            labelText: 'Rebirth:',
+            inputElements: [
+                createButton(`REBIRTH`, ['option-button', 'red-disabled-text', 'rebirth-check'], () => {
+                    const currentAp = getResourceDataObject('ascendencyPoints', ['quantity']);
+                    const spanClass = currentAp === 0 ? "red-disabled-text" : "green-ready-text";
 
-                const content = modalRebirthText.replace(
-                    /<span class="green-ready-text">.*?<\/span>/,
-                    `<span class="${spanClass}">You will carry over ${currentAp} AP!</span>`
-                );
+                    const content = modalRebirthText.replace(
+                        /<span class="green-ready-text">.*?<\/span>/,
+                        `<span class="${spanClass}">You will carry over ${currentAp} AP!</span>`
+                    );
 
-                callPopupModal(
-                    modalRebirthHeader,
-                    content,
-                    true,
-                    true,
-                    false,
-                    false,
-                    function () {
-                        rebirth();
-                        showHideModal();
-                    },
-                    function () {
-                        showHideModal();
-                    },
-                    null,
-                    null,
-                    'RESET ALL PROGRESS AND KEEP AP',
-                    'CANCEL',
-                    null,
-                    null,
-                    false
-                );
+                    callPopupModal(
+                        modalRebirthHeader,
+                        content,
+                        true,
+                        true,
+                        false,
+                        false,
+                        function () {
+                            rebirth();
+                            showHideModal();
+                        },
+                        function () {
+                            showHideModal();
+                        },
+                        null,
+                        null,
+                        'RESET ALL PROGRESS AND KEEP AP',
+                        'CANCEL',
+                        null,
+                        null,
+                        false
+                    );
 
-            }, null, null, null, null, null, true, null, 'rebirth'),
-            null,
-            null,
-            null,
-            null,
-            `RESET ALL PROGRESS AND KEEP AWARDED AP`,
-            '',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            'rebirth'
-        );
+                }, null, null, null, null, null, true, null, 'rebirth'),
+            ],
+            descriptionText: `RESET ALL PROGRESS AND KEEP AWARDED AP`,
+            resourcePriceObject: '',
+            dataConditionCheck: null,
+            objectSectionArgument1: null,
+            objectSectionArgument2: null,
+            quantityArgument: null,
+            autoBuyerTier: null,
+            startInvisibleValue: false,
+            resourceString: null,
+            optionalIterationParam: null,
+            rowCategory: 'rebirth'
+        });
         
         optionContentElement.appendChild(rebirthRow);
 
-        const galacticMarketLiquidateForAPRow = createOptionRow(
-            'galacticMarketLiquidateForAPRow',
-            null,
-            'Liquidate:',
-            createDropdown('galacticMarketLiquidateDropDown', [
-                { value: 'no', text: 'I DO NOT WANT TO LIQUIDATE' },
-                { value: 'yes', text: 'I WANT TO LIQUIDATE' },
-            ], 'no', (value) => {
-                setGalacticMarketLiquidationAuthorization(value);
-            }),
-            createButton(`LIQUIDATE`, ['option-button', 'red-disabled-text', 'galactic-market-confirm-liquidate-button'], () => {
-                galacticMarketLiquidateForAp(getApLiquidationQuantity());
-            }, null, null, null, null, null, true, null, 'galacticMarketLiquidateForApConfirm'),
-            null,
-            null,
-            null,
-            `AP GAIN: <span id ="galacticMarketApLiquidationQuantity" class="green-ready-text">0</span>`, //updateDescriptionRow('galacticMarketLiquidateForAPRow', 'content2'); when user has used this up
-            '',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            'galacticMarketLiquidateForApConfirm'
-        );
+        const galacticMarketLiquidateForAPRow = createOptionRow({
+            labelId: 'galacticMarketLiquidateForAPRow',
+            renderNameABs: null,
+            labelText: 'Liquidate:',
+            inputElements: [
+                createDropdown('galacticMarketLiquidateDropDown', [
+                    { value: 'no', text: 'I DO NOT WANT TO LIQUIDATE' },
+                    { value: 'yes', text: 'I WANT TO LIQUIDATE' },
+                ], 'no', (value) => {
+                    setGalacticMarketLiquidationAuthorization(value);
+                }),
+                createButton(`LIQUIDATE`, ['option-button', 'red-disabled-text', 'galactic-market-confirm-liquidate-button'], () => {
+                    galacticMarketLiquidateForAp(getApLiquidationQuantity());
+                }, null, null, null, null, null, true, null, 'galacticMarketLiquidateForApConfirm'),
+            ],
+            descriptionText: `AP GAIN: <span id ="galacticMarketApLiquidationQuantity" class="green-ready-text">0</span>`,
+            resourcePriceObject: '',
+            dataConditionCheck: null,
+            objectSectionArgument1: null,
+            objectSectionArgument2: null,
+            quantityArgument: null,
+            autoBuyerTier: null,
+            startInvisibleValue: false,
+            resourceString: null,
+            optionalIterationParam: null,
+            rowCategory: 'galacticMarketLiquidateForApConfirm'
+        });
 
         if (getLiquidatedThisRun()) {
             updateDescriptionRow('galacticMarketLiquidateForAPRow', 'content2');
@@ -194,96 +192,95 @@ export function drawTab7Content(heading, optionContentElement) {
         setGalacticMarketLiquidationAuthorization('no');
         setGalacticMarketSellApForCashQuantity('select');
         setApLiquidationQuantity(0);
-        const galacticMarketItemSelectRow = createOptionRow(
-            'galacticMarketItemSelectRow',
-            null,
-            'Trade:',
-            createDropdown('galacticMarketOutgoingStockTypeDropDown', [
-                { value: 'select', text: 'Select Resource / Compound', type: 'select' },
-                { value: 'hydrogen', text: 'Hydrogen', type: 'resources' },
-                { value: 'helium', text: 'Helium', type: 'resources' },
-                { value: 'carbon', text: 'Carbon', type: 'resources' },
-                { value: 'neon', text: 'Neon', type: 'resources' },
-                { value: 'oxygen', text: 'Oxygen', type: 'resources' },
-                { value: 'sodium', text: 'Sodium', type: 'resources' },
-                { value: 'silicon', text: 'Silicon', type: 'resources' },
-                { value: 'iron', text: 'Iron', type: 'resources' },
-                { value: 'diesel', text: 'Diesel', type: 'compounds' },
-                { value: 'glass', text: 'Glass', type: 'compounds' },
-                { value: 'steel', text: 'Steel', type: 'compounds' },
-                { value: 'concrete', text: 'Concrete', type: 'compounds' },
-                { value: 'water', text: 'Water', type: 'compounds' },
-                { value: 'titanium', text: 'Titanium', type: 'compounds' }
-            ], 'select', (value) => {
-                setGalacticMarketOutgoingStockType(value);
-                setHasClickedOutgoingOptionGalacticMarket(true);
-            }),
-            createTextElement(`For:`, 'galacticMarketForText', '', null),
-            createDropdown('galacticMarketIncomingStockTypeDropDown', [
-                { value: 'select', text: 'Select Resource / Compound', type: 'select'},
-                { value: 'hydrogen', text: 'Hydrogen', type: 'resources' },
-                { value: 'helium', text: 'Helium', type: 'resources' },
-                { value: 'carbon', text: 'Carbon', type: 'resources' },
-                { value: 'neon', text: 'Neon', type: 'resources' },
-                { value: 'oxygen', text: 'Oxygen', type: 'resources' },
-                { value: 'sodium', text: 'Sodium', type: 'resources' },
-                { value: 'silicon', text: 'Silicon', type: 'resources' },
-                { value: 'iron', text: 'Iron', type: 'resources' },
-                { value: 'diesel', text: 'Diesel', type: 'compounds' },
-                { value: 'glass', text: 'Glass', type: 'compounds' },
-                { value: 'steel', text: 'Steel', type: 'compounds' },
-                { value: 'concrete', text: 'Concrete', type: 'compounds' },
-                { value: 'water', text: 'Water', type: 'compounds' },
-                { value: 'titanium', text: 'Titanium', type: 'compounds' }
-            ], 'select', (value) => {
-                setGalacticMarketIncomingStockType(value);
-            }),
-            null,
-            null,
-            null,
-            '',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            'galacticMarketResourceTradeTypes',
-            [true, '20%', '80%']
-        );
+        const galacticMarketItemSelectRow = createOptionRow({
+            labelId: 'galacticMarketItemSelectRow',
+            renderNameABs: null,
+            labelText: 'Trade:',
+            inputElements: [
+                createDropdown('galacticMarketOutgoingStockTypeDropDown', [
+                    { value: 'select', text: 'Select Resource / Compound', type: 'select' },
+                    { value: 'hydrogen', text: 'Hydrogen', type: 'resources' },
+                    { value: 'helium', text: 'Helium', type: 'resources' },
+                    { value: 'carbon', text: 'Carbon', type: 'resources' },
+                    { value: 'neon', text: 'Neon', type: 'resources' },
+                    { value: 'oxygen', text: 'Oxygen', type: 'resources' },
+                    { value: 'sodium', text: 'Sodium', type: 'resources' },
+                    { value: 'silicon', text: 'Silicon', type: 'resources' },
+                    { value: 'iron', text: 'Iron', type: 'resources' },
+                    { value: 'diesel', text: 'Diesel', type: 'compounds' },
+                    { value: 'glass', text: 'Glass', type: 'compounds' },
+                    { value: 'steel', text: 'Steel', type: 'compounds' },
+                    { value: 'concrete', text: 'Concrete', type: 'compounds' },
+                    { value: 'water', text: 'Water', type: 'compounds' },
+                    { value: 'titanium', text: 'Titanium', type: 'compounds' }
+                ], 'select', (value) => {
+                    setGalacticMarketOutgoingStockType(value);
+                    setHasClickedOutgoingOptionGalacticMarket(true);
+                }),
+                createTextElement(`For:`, 'galacticMarketForText', '', null),
+                createDropdown('galacticMarketIncomingStockTypeDropDown', [
+                    { value: 'select', text: 'Select Resource / Compound', type: 'select'},
+                    { value: 'hydrogen', text: 'Hydrogen', type: 'resources' },
+                    { value: 'helium', text: 'Helium', type: 'resources' },
+                    { value: 'carbon', text: 'Carbon', type: 'resources' },
+                    { value: 'neon', text: 'Neon', type: 'resources' },
+                    { value: 'oxygen', text: 'Oxygen', type: 'resources' },
+                    { value: 'sodium', text: 'Sodium', type: 'resources' },
+                    { value: 'silicon', text: 'Silicon', type: 'resources' },
+                    { value: 'iron', text: 'Iron', type: 'resources' },
+                    { value: 'diesel', text: 'Diesel', type: 'compounds' },
+                    { value: 'glass', text: 'Glass', type: 'compounds' },
+                    { value: 'steel', text: 'Steel', type: 'compounds' },
+                    { value: 'concrete', text: 'Concrete', type: 'compounds' },
+                    { value: 'water', text: 'Water', type: 'compounds' },
+                    { value: 'titanium', text: 'Titanium', type: 'compounds' }
+                ], 'select', (value) => {
+                    setGalacticMarketIncomingStockType(value);
+                }),
+            ],
+            descriptionText: '',
+            resourcePriceObject: '',
+            dataConditionCheck: null,
+            objectSectionArgument1: null,
+            objectSectionArgument2: null,
+            quantityArgument: null,
+            autoBuyerTier: null,
+            startInvisibleValue: false,
+            resourceString: null,
+            optionalIterationParam: null,
+            rowCategory: 'galacticMarketResourceTradeTypes',
+            noDescriptionContainer: [true, '20%', '80%']
+        });
         optionContentElement.appendChild(galacticMarketItemSelectRow);
 
-        const galacticMarketQuantitySelectorRow = createOptionRow(
-            'galacticMarketQuantitySelectorRow',
-            null,
-            'Quantity:',
-            createDropdown('galacticMarketQuantityToTradeDropDown', [
-                { value: 'select', text: 'Select Quantity' },
-                { value: 'all', text: 'All Stock' },
-                { value: 'enter', text: 'Enter Quantity' },
-            ], 'select', (value) => {
-                setGalacticMarketOutgoingQuantitySelectionType(value);
-                setGalacticMarketOutgoingQuantitySelectionTypeDisabledStatus(value);
-            }, ['dropdown-disabled']),
-            createTextFieldArea('galacticMarketQuantityTextArea', ['galactic-market-textarea', 'invisible'], '', '0'),
-            null,
-            null,
-            null,
-            null,
-            '',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            'galacticMarketResourceTradeQuantity',
-            [true, '20%', '80%']
-        );
+        const galacticMarketQuantitySelectorRow = createOptionRow({
+            labelId: 'galacticMarketQuantitySelectorRow',
+            renderNameABs: null,
+            labelText: 'Quantity:',
+            inputElements: [
+                createDropdown('galacticMarketQuantityToTradeDropDown', [
+                    { value: 'select', text: 'Select Quantity' },
+                    { value: 'all', text: 'All Stock' },
+                    { value: 'enter', text: 'Enter Quantity' },
+                ], 'select', (value) => {
+                    setGalacticMarketOutgoingQuantitySelectionType(value);
+                    setGalacticMarketOutgoingQuantitySelectionTypeDisabledStatus(value);
+                }, ['dropdown-disabled']),
+                createTextFieldArea('galacticMarketQuantityTextArea', ['galactic-market-textarea', 'invisible'], '', '0'),
+            ],
+            descriptionText: '',
+            resourcePriceObject: '',
+            dataConditionCheck: null,
+            objectSectionArgument1: null,
+            objectSectionArgument2: null,
+            quantityArgument: null,
+            autoBuyerTier: null,
+            startInvisibleValue: false,
+            resourceString: null,
+            optionalIterationParam: null,
+            rowCategory: 'galacticMarketResourceTradeQuantity',
+            noDescriptionContainer: [true, '20%', '80%']
+        });
 
         optionContentElement.appendChild(galacticMarketQuantitySelectorRow);
         document.getElementById('galacticMarketQuantityTextArea').addEventListener('input', (event) => {
@@ -294,61 +291,62 @@ export function drawTab7Content(heading, optionContentElement) {
             document.getElementById('galacticMarketQuantityTextArea').value = event.target.value;
         });
 
-        const galacticMarketTradeSummaryAndConfirmRow = createOptionRow(
-            'galacticMarketTradeSummaryAndConfirmRow',
-            null,
-            'Confirm:',
-            createTextElement(`Trade <span id="galacticMarketOutgoingQuantityText" class="green-ready-text notation">999</span> <span id="galacticMarketOutgoingStockTypeText" class="green-ready-text">Hydrogen</span>`, 'galacticMarketSummaryOutgoing', ['galactic-market-summary-text'], null),            
-            createTextElement(`for <span id="galacticMarketIncomingQuantityText" class="green-ready-text notation">12</span> <span id="galacticMarketIncomingStockTypeText" class="green-ready-text">Diesel</span>`, 'galacticMarketSummaryIncoming', ['galactic-market-summary-text'], null),            
-            createTextElement(`Commission: <span id="galacticMarketComissionQuantitySummaryText" class="warning-orange-text">49</span> <span id="galacticMarketComissionQuantityStockTypeText" class="warning-orange-text">Hydrogen</span>`, 'galacticMarketSummaryCommission', ['galactic-market-summary-text-wide'], null),
-            createButton(`CONFIRM`, ['option-button', 'red-disabled-text', 'galactic-market-confirm-trade-button'], () => {
-                galacticMarketTrade();
-            }, null, null, null, null, null, true, null, 'galacticMarketTradeConfirm'),
-            null,
-            null,
-            null,
-            '',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            'galacticMarketTradeConfirm',
-            [true, '20%', '80%']
-        );
+        const galacticMarketTradeSummaryAndConfirmRow = createOptionRow({
+            labelId: 'galacticMarketTradeSummaryAndConfirmRow',
+            renderNameABs: null,
+            labelText: 'Confirm:',
+            inputElements: [
+                createTextElement(`Trade <span id="galacticMarketOutgoingQuantityText" class="green-ready-text notation">999</span> <span id="galacticMarketOutgoingStockTypeText" class="green-ready-text">Hydrogen</span>`, 'galacticMarketSummaryOutgoing', ['galactic-market-summary-text'], null),
+                createTextElement(`for <span id="galacticMarketIncomingQuantityText" class="green-ready-text notation">12</span> <span id="galacticMarketIncomingStockTypeText" class="green-ready-text">Diesel</span>`, 'galacticMarketSummaryIncoming', ['galactic-market-summary-text'], null),
+                createTextElement(`Commission: <span id="galacticMarketComissionQuantitySummaryText" class="warning-orange-text">49</span> <span id="galacticMarketComissionQuantityStockTypeText" class="warning-orange-text">Hydrogen</span>`, 'galacticMarketSummaryCommission', ['galactic-market-summary-text-wide'], null),
+                createButton(`CONFIRM`, ['option-button', 'red-disabled-text', 'galactic-market-confirm-trade-button'], () => {
+                    galacticMarketTrade();
+                }, null, null, null, null, null, true, null, 'galacticMarketTradeConfirm'),
+            ],
+            descriptionText: '',
+            resourcePriceObject: '',
+            dataConditionCheck: null,
+            objectSectionArgument1: null,
+            objectSectionArgument2: null,
+            quantityArgument: null,
+            autoBuyerTier: null,
+            startInvisibleValue: false,
+            resourceString: null,
+            optionalIterationParam: null,
+            rowCategory: 'galacticMarketTradeConfirm',
+            noDescriptionContainer: [true, '20%', '80%']
+        });
         optionContentElement.appendChild(galacticMarketTradeSummaryAndConfirmRow);
 
-        const galacticMarketSellApForCashRow = createOptionRow(
-            'galacticMarketSellApForCashRow',
-            null,
-            'Sell AP:',
-            createDropdown('galacticMarketSellApForCashDropDown', [
-                { value: 'select', text: 'Select Quantity' },
-                { value: '1', text: 'Sell 1 AP' },
-                { value: '5', text: 'Sell 5 AP' },
-                { value: '10', text: 'Sell 10 AP' },
-            ], 'select', (value) => {
-                setGalacticMarketSellApForCashQuantity(value);
-            }),
-            createButton(`SELL`, ['option-button', 'red-disabled-text', 'galactic-market-confirm-sell-ap-button'], () => {
-                galacticMarketSellApForCash(getGalacticMarketSellApForCashQuantity());
-            }, null, null, null, null, null, true, null, 'galacticMarketSellApForCashConfirm'),
-            null,
-            null,
-            null,
-            `Cash Gain: <span id ="galacticMarketCashGainQuantity" class="green-ready-text notation">0</span>`,
-            '',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            'galacticMarketSellApForCashConfirm'
-        );
+        const galacticMarketSellApForCashRow = createOptionRow({
+            labelId: 'galacticMarketSellApForCashRow',
+            renderNameABs: null,
+            labelText: 'Sell AP:',
+            inputElements: [
+                createDropdown('galacticMarketSellApForCashDropDown', [
+                    { value: 'select', text: 'Select Quantity' },
+                    { value: '1', text: 'Sell 1 AP' },
+                    { value: '5', text: 'Sell 5 AP' },
+                    { value: '10', text: 'Sell 10 AP' },
+                ], 'select', (value) => {
+                    setGalacticMarketSellApForCashQuantity(value);
+                }),
+                createButton(`SELL`, ['option-button', 'red-disabled-text', 'galactic-market-confirm-sell-ap-button'], () => {
+                    galacticMarketSellApForCash(getGalacticMarketSellApForCashQuantity());
+                }, null, null, null, null, null, true, null, 'galacticMarketSellApForCashConfirm'),
+            ],
+            descriptionText: `Cash Gain: <span id ="galacticMarketCashGainQuantity" class="green-ready-text notation">0</span>`,
+            resourcePriceObject: '',
+            dataConditionCheck: null,
+            objectSectionArgument1: null,
+            objectSectionArgument2: null,
+            quantityArgument: null,
+            autoBuyerTier: null,
+            startInvisibleValue: false,
+            resourceString: null,
+            optionalIterationParam: null,
+            rowCategory: 'galacticMarketSellApForCashConfirm'
+        });
         optionContentElement.appendChild(galacticMarketSellApForCashRow);
     }
 
@@ -358,50 +356,51 @@ export function drawTab7Content(heading, optionContentElement) {
             headerRow.innerHTML = `Galactic Casino <p id="info_galacticCasinoHeader" class="info-emoji">ℹ️</p>`;
         }
 
-        const purchaseCpRow = createOptionRow(
-            'galacticCasinoPurchaseCpRow',
-            null,
-            'Purchase CP:',
-            createDropdown('galacticCasinoPurchaseItemDropDown', [
-                { value: 'select', text: 'Select Currency', type: 'select' },
-                { value: 'cash', text: '<strong>Cash</strong>', type: 'currency' },
-                { value: 'hydrogen', text: 'Hydrogen', type: 'resources' },
-                { value: 'helium', text: 'Helium', type: 'resources' },
-                { value: 'carbon', text: 'Carbon', type: 'resources' },
-                { value: 'neon', text: 'Neon', type: 'resources' },
-                { value: 'oxygen', text: 'Oxygen', type: 'resources' },
-                { value: 'sodium', text: 'Sodium', type: 'resources' },
-                { value: 'silicon', text: 'Silicon', type: 'resources' },
-                { value: 'iron', text: 'Iron', type: 'resources' },
-                { value: 'diesel', text: 'Diesel', type: 'compounds' },
-                { value: 'glass', text: 'Glass', type: 'compounds' },
-                { value: 'steel', text: 'Steel', type: 'compounds' },
-                { value: 'concrete', text: 'Concrete', type: 'compounds' },
-                { value: 'water', text: 'Water', type: 'compounds' },
-                { value: 'titanium', text: 'Titanium', type: 'compounds' }
-            ], 'select', (value) => {
-                setGalacticCasinoPurchaseItem(value);
-            }, ['galactic-casino-dropdown']),
-            null,
-            createTextFieldArea('galacticCasinoPurchaseQuantityTextArea', ['galactic-market-textarea', 'galactic-casino-quantity-textarea'], 'Buy CP Quantity', ''),
-            createButton(`BUY`, ['option-button', 'red-disabled-text', 'galactic-casino-buy-cp-button'], () => {
-                buyCasinoPoints();
-            }, null, null, null, null, null, true, null, 'galacticCasinoBuyCp'),
-            createTextElement(`Cost: <span id="galacticCasinoPurchaseCpPreview" class="green-ready-text notation">0</span>`, 'galacticCasinoPurchaseCpPreviewText', ['galactic-market-summary-text'], null),
-            null,
-            '',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            'galacticCasinoPurchaseCp',
-            [true, '20%', '80%'],
-            ['no-left-margin', 'galactic-casino-input-container']
-        );
+        const purchaseCpRow = createOptionRow({
+            labelId: 'galacticCasinoPurchaseCpRow',
+            renderNameABs: null,
+            labelText: 'Purchase CP:',
+            inputElements: [
+                createDropdown('galacticCasinoPurchaseItemDropDown', [
+                    { value: 'select', text: 'Select Currency', type: 'select' },
+                    { value: 'cash', text: '<strong>Cash</strong>', type: 'currency' },
+                    { value: 'hydrogen', text: 'Hydrogen', type: 'resources' },
+                    { value: 'helium', text: 'Helium', type: 'resources' },
+                    { value: 'carbon', text: 'Carbon', type: 'resources' },
+                    { value: 'neon', text: 'Neon', type: 'resources' },
+                    { value: 'oxygen', text: 'Oxygen', type: 'resources' },
+                    { value: 'sodium', text: 'Sodium', type: 'resources' },
+                    { value: 'silicon', text: 'Silicon', type: 'resources' },
+                    { value: 'iron', text: 'Iron', type: 'resources' },
+                    { value: 'diesel', text: 'Diesel', type: 'compounds' },
+                    { value: 'glass', text: 'Glass', type: 'compounds' },
+                    { value: 'steel', text: 'Steel', type: 'compounds' },
+                    { value: 'concrete', text: 'Concrete', type: 'compounds' },
+                    { value: 'water', text: 'Water', type: 'compounds' },
+                    { value: 'titanium', text: 'Titanium', type: 'compounds' }
+                ], 'select', (value) => {
+                    setGalacticCasinoPurchaseItem(value);
+                }, ['galactic-casino-dropdown']),
+                createTextFieldArea('galacticCasinoPurchaseQuantityTextArea', ['galactic-market-textarea', 'galactic-casino-quantity-textarea'], 'Buy CP Quantity', ''),
+                createButton(`BUY`, ['option-button', 'red-disabled-text', 'galactic-casino-buy-cp-button'], () => {
+                    buyCasinoPoints();
+                }, null, null, null, null, null, true, null, 'galacticCasinoBuyCp'),
+                createTextElement(`Cost: <span id="galacticCasinoPurchaseCpPreview" class="green-ready-text notation">0</span>`, 'galacticCasinoPurchaseCpPreviewText', ['galactic-market-summary-text'], null),
+            ],
+            descriptionText: '',
+            resourcePriceObject: '',
+            dataConditionCheck: null,
+            objectSectionArgument1: null,
+            objectSectionArgument2: null,
+            quantityArgument: null,
+            autoBuyerTier: null,
+            startInvisibleValue: false,
+            resourceString: null,
+            optionalIterationParam: null,
+            rowCategory: 'galacticCasinoPurchaseCp',
+            noDescriptionContainer: [true, '20%', '80%'],
+            specialInputContainerClasses: ['no-left-margin', 'galactic-casino-input-container']
+        });
         optionContentElement.appendChild(purchaseCpRow);
 
         setupInfoTooltips();
@@ -432,30 +431,30 @@ export function drawTab7Content(heading, optionContentElement) {
             });
         }, null, null, null, null, null, true, null, 'galacticCasinoGame1');
 
-        const game1Row = createOptionRow(
-            'galacticCasinoGame1Row',
-            null,
-            'Double Or Nothing:',
-            game1StakeInput,
-            null,
-            game1Spinner,
-            game1SpinButton,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            'galacticCasinoGame1',
-            [true, '20%', '80%'],
-            ['no-left-margin', 'galactic-casino-input-container'],
-            false
-        );
+        const game1Row = createOptionRow({
+            labelId: 'galacticCasinoGame1Row',
+            renderNameABs: null,
+            labelText: 'Double Or Nothing:',
+            inputElements: [
+                game1StakeInput,
+                game1Spinner,
+                game1SpinButton,
+            ],
+            descriptionText: '',
+            resourcePriceObject: '',
+            dataConditionCheck: null,
+            objectSectionArgument1: null,
+            objectSectionArgument2: null,
+            quantityArgument: null,
+            autoBuyerTier: null,
+            startInvisibleValue: false,
+            resourceString: null,
+            optionalIterationParam: null,
+            rowCategory: 'galacticCasinoGame1',
+            noDescriptionContainer: [true, '20%', '80%'],
+            specialInputContainerClasses: ['no-left-margin', 'galactic-casino-input-container'],
+            hideMainDescriptionRow: false
+        });
 
         const wheel = document.createElement('div');
         wheel.id = 'galacticCasinoGame2Wheel';
@@ -573,30 +572,30 @@ export function drawTab7Content(heading, optionContentElement) {
             'galacticCasinoGame2'
         );
 
-        const game2Row = createOptionRow(
-            'galacticCasinoGame2Row',
-            null,
-            'Wheel Of Fortune:',
-            wheelStack,
-            null,
-            null,
-            prizeDropdown,
-            claimButton,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            'galacticCasinoGame2',
-            [true, '20%', '80%'],
-            ['no-left-margin', 'galactic-casino-input-container'],
-            false
-        );
+        const game2Row = createOptionRow({
+            labelId: 'galacticCasinoGame2Row',
+            renderNameABs: null,
+            labelText: 'Wheel Of Fortune:',
+            inputElements: [
+                wheelStack,
+                prizeDropdown,
+                claimButton,
+            ],
+            descriptionText: '',
+            resourcePriceObject: '',
+            dataConditionCheck: null,
+            objectSectionArgument1: null,
+            objectSectionArgument2: null,
+            quantityArgument: null,
+            autoBuyerTier: null,
+            startInvisibleValue: false,
+            resourceString: null,
+            optionalIterationParam: null,
+            rowCategory: 'galacticCasinoGame2',
+            noDescriptionContainer: [true, '20%', '80%'],
+            specialInputContainerClasses: ['no-left-margin', 'galactic-casino-input-container'],
+            hideMainDescriptionRow: false
+        });
         optionContentElement.appendChild(game2Row);
         setupInfoTooltips();
 
@@ -852,30 +851,28 @@ export function drawTab7Content(heading, optionContentElement) {
         game4Container.appendChild(game4PrizeDropdown);
         game4Container.appendChild(game4SpinButton);
 
-        const game4Row = createOptionRow(
-            'galacticCasinoGame4Row',
-            null,
-            'Visiting VoidSeer:',
-            game4Container,
-            null,
-            null,
-            game4PrizeDropdown,
-            game4SpinButton,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            'galacticCasinoGame4',
-            [true, '20%', '80%'],
-            ['no-left-margin', 'galactic-casino-input-container'],
-            false
-        );
+        const game4Row = createOptionRow({
+            labelId: 'galacticCasinoGame4Row',
+            renderNameABs: null,
+            labelText: 'Visiting VoidSeer:',
+            inputElements: [
+                game4Container,
+            ],
+            descriptionText: '',
+            resourcePriceObject: '',
+            dataConditionCheck: null,
+            objectSectionArgument1: null,
+            objectSectionArgument2: null,
+            quantityArgument: null,
+            autoBuyerTier: null,
+            startInvisibleValue: false,
+            resourceString: null,
+            optionalIterationParam: null,
+            rowCategory: 'galacticCasinoGame4',
+            noDescriptionContainer: [true, '20%', '80%'],
+            specialInputContainerClasses: ['no-left-margin', 'galactic-casino-input-container'],
+            hideMainDescriptionRow: false
+        });
 
         const game3CardRow = document.createElement('div');
         game3CardRow.id = 'galacticCasinoGame3CardRow';
@@ -1630,30 +1627,30 @@ export function drawTab7Content(heading, optionContentElement) {
             hiloRevealNextCard('higher');
         });
 
-        const game3Row = createOptionRow(
-            'galacticCasinoGame3Row',
-            null,
-            'Higher Or Lower:',
-            game3HiloContainer,
-            null,
-            null,
-            game3CashOutButton,
-            game3PrizeInfo,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            'galacticCasinoGame3',
-            [true, '20%', '80%'],
-            ['no-left-margin', 'galactic-casino-input-container'],
-            false
-        );
+        const game3Row = createOptionRow({
+            labelId: 'galacticCasinoGame3Row',
+            renderNameABs: null,
+            labelText: 'Higher Or Lower:',
+            inputElements: [
+                game3HiloContainer,
+                game3CashOutButton,
+                game3PrizeInfo,
+            ],
+            descriptionText: '',
+            resourcePriceObject: '',
+            dataConditionCheck: null,
+            objectSectionArgument1: null,
+            objectSectionArgument2: null,
+            quantityArgument: null,
+            autoBuyerTier: null,
+            startInvisibleValue: false,
+            resourceString: null,
+            optionalIterationParam: null,
+            rowCategory: 'galacticCasinoGame3',
+            noDescriptionContainer: [true, '20%', '80%'],
+            specialInputContainerClasses: ['no-left-margin', 'galactic-casino-input-container'],
+            hideMainDescriptionRow: false
+        });
         optionContentElement.appendChild(game1Row);
         optionContentElement.appendChild(game2Row);
         optionContentElement.appendChild(game3Row);
@@ -1729,156 +1726,148 @@ export function drawTab7Content(heading, optionContentElement) {
             const cost = buff.rebuyable ? buff.baseCostAp * Math.pow(buff.rebuyableIncreaseMultiple, buff.boughtYet) : buff.baseCostAp;
             const buyStatus = buff.boughtYet > 0 ? (buff.rebuyable ? `Bought ${buff.boughtYet} times` : "Purchased") : "Not Bought";
     
-            const buffRow = createOptionRow(
-                buffRowDescription,
-                null,
-                `${buffName}:`,
-                createTextElement(
-                    `Rebuyable: <span class="green-ready-text">
-                    ${buff.rebuyable ? (buff.timesRebuyable === 100000 ? "Yes" : buff.timesRebuyable) : "No"}
-                  </span>`,                  
-                    `buff${capitaliseString(buffKey)}RebuyableText`,
-                    ['buff-value']
-                ),                
-                createTextElement(buyStatus, `buff${capitaliseString(buffKey)}BuyStatusText`, ['buff-value']),
-                createButton(`BUY`, ['option-button', 'red-disabled-text', 'ascendency-buff-button', `buff-class-${buffNameSlug}`], () => {
-                    purchaseBuff(buffKey, cost);
-                }, null, null, null, null, null, true, null, 'ascendency'),
-                createTextElement(
-                    `<span id="${buffNameId}CostText" class="green-ready-text">${Math.floor(cost)} AP</span>`,
-                    'buffCost',
-                    ['buff-value']
-                ),
-                null,
-                ``,
-                '',
-                null,
-                null,
-                null,
-                null,
-                null,
-                false,
-                null,
-                null,
-                'ascendency',
-                [true, '30%', '70%']
-            );
+            const buffRow = createOptionRow({
+                labelId: buffRowDescription,
+                renderNameABs: null,
+                labelText: `${buffName}:`,
+                inputElements: [
+                    createTextElement(
+                        `Rebuyable: <span class="green-ready-text">
+                        ${buff.rebuyable ? (buff.timesRebuyable === 100000 ? "Yes" : buff.timesRebuyable) : "No"}
+                      </span>`,                  
+                        `buff${capitaliseString(buffKey)}RebuyableText`,
+                        ['buff-value']
+                    ),                
+                    createTextElement(buyStatus, `buff${capitaliseString(buffKey)}BuyStatusText`, ['buff-value']),
+                    createButton(`BUY`, ['option-button', 'red-disabled-text', 'ascendency-buff-button', `buff-class-${buffNameSlug}`], () => {
+                        purchaseBuff(buffKey, cost);
+                    }, null, null, null, null, null, true, null, 'ascendency'),
+                    createTextElement(
+                        `<span id="${buffNameId}CostText" class="green-ready-text">${Math.floor(cost)} AP</span>`,
+                        'buffCost',
+                        ['buff-value']
+                    ),
+                ],
+                descriptionText: ``,
+                resourcePriceObject: '',
+                dataConditionCheck: null,
+                objectSectionArgument1: null,
+                objectSectionArgument2: null,
+                quantityArgument: null,
+                autoBuyerTier: null,
+                startInvisibleValue: false,
+                resourceString: null,
+                optionalIterationParam: null,
+                rowCategory: 'ascendency',
+                noDescriptionContainer: [true, '30%', '70%']
+            });
     
             optionContentElement.appendChild(buffRow);
         });
     }  
     
     if (heading === 'Megastructures') {
-        const megastructureDiagramRow = createOptionRow(
-            'megastructureDiagramRow',
-            null,
-            '',
-            createMegaStructureDiagram(),
-            null,
-            null,
-            null,
-            null,
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            null,
-            false,
-            null,
-            null,
-            '',
-            [true, 'invisible', '100%']
-        );
+        const megastructureDiagramRow = createOptionRow({
+            labelId: 'megastructureDiagramRow',
+            renderNameABs: null,
+            labelText: '',
+            inputElements: [
+                createMegaStructureDiagram(),
+            ],
+            descriptionText: '',
+            resourcePriceObject: '',
+            dataConditionCheck: '',
+            objectSectionArgument1: '',
+            objectSectionArgument2: '',
+            quantityArgument: '',
+            autoBuyerTier: null,
+            startInvisibleValue: false,
+            resourceString: null,
+            optionalIterationParam: null,
+            rowCategory: '',
+            noDescriptionContainer: [true, 'invisible', '100%']
+        });
     
         optionContentElement.appendChild(megastructureDiagramRow);
 
-        const megastructureTableRow = createOptionRow(
-            'megastructureTableRow',
-            null,
-            '',
-            createMegaStructureTable(),
-            null,
-            null,
-            null,
-            null,
-            '',
-            '',
-            '',
-            '',
-            '',
-            '',
-            null,
-            false,
-            null,
-            null,
-            '',
-            [true, 'invisible', '100%'],
-            null,
-            true
-        );
+        const megastructureTableRow = createOptionRow({
+            labelId: 'megastructureTableRow',
+            renderNameABs: null,
+            labelText: '',
+            inputElements: [
+                createMegaStructureTable(),
+            ],
+            descriptionText: '',
+            resourcePriceObject: '',
+            dataConditionCheck: '',
+            objectSectionArgument1: '',
+            objectSectionArgument2: '',
+            quantityArgument: '',
+            autoBuyerTier: null,
+            startInvisibleValue: false,
+            resourceString: null,
+            optionalIterationParam: null,
+            rowCategory: '',
+            noDescriptionContainer: [true, 'invisible', '100%'],
+            hideMainDescriptionRow: true
+        });
     
         optionContentElement.appendChild(megastructureTableRow);
     }
     
     if (heading === 'Black Hole') {
-        const blackHoleTimeWarpProgressRow = createOptionRow(
-            'blackHoleTimeWarpProgressRow',
-            null,
-            null,
-            createTextElement(
-                `<div id="blackHoleTimeWarpProgressBar">`,
-                'blackHoleTimeWarpProgressBarContainer',
-                ['progress-bar-container', 'invisible']
-            ),
-            null,
-            null,
-            null,
-            null,
-            '',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            false,
-            null,
-            null,
-            '',
-            [true, '0', '100%'],
-            ['no-left-margin']
-        );
+        const blackHoleTimeWarpProgressRow = createOptionRow({
+            labelId: 'blackHoleTimeWarpProgressRow',
+            renderNameABs: null,
+            labelText: null,
+            inputElements: [
+                createTextElement(
+                    `<div id="blackHoleTimeWarpProgressBar">`,
+                    'blackHoleTimeWarpProgressBarContainer',
+                    ['progress-bar-container', 'invisible']
+                ),
+            ],
+            descriptionText: '',
+            resourcePriceObject: '',
+            dataConditionCheck: null,
+            objectSectionArgument1: null,
+            objectSectionArgument2: null,
+            quantityArgument: null,
+            autoBuyerTier: null,
+            startInvisibleValue: false,
+            resourceString: null,
+            optionalIterationParam: null,
+            rowCategory: '',
+            noDescriptionContainer: [true, '0', '100%'],
+            specialInputContainerClasses: ['no-left-margin']
+        });
         optionContentElement.appendChild(blackHoleTimeWarpProgressRow);
 
-        const blackHoleChargeProgressRow = createOptionRow(
-            'blackHoleChargeProgressRow',
-            null,
-            null,
-            createTextElement(
-                `<div id="blackHoleChargeProgressBar">`,
-                'blackHoleChargeProgressBarContainer',
-                ['progress-bar-container', 'invisible']
-            ),
-            null,
-            null,
-            null,
-            null,
-            '<span id="blackHoleChargeProgressRowDescription">BLACK HOLE CHARGING</span>',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            false,
-            null,
-            null,
-            '',
-            [true, '0', '100%'],
-            ['no-left-margin']
-        );
+        const blackHoleChargeProgressRow = createOptionRow({
+            labelId: 'blackHoleChargeProgressRow',
+            renderNameABs: null,
+            labelText: null,
+            inputElements: [
+                createTextElement(
+                    `<div id="blackHoleChargeProgressBar">`,
+                    'blackHoleChargeProgressBarContainer',
+                    ['progress-bar-container', 'invisible']
+                ),
+            ],
+            descriptionText: '<span id="blackHoleChargeProgressRowDescription">BLACK HOLE CHARGING</span>',
+            resourcePriceObject: '',
+            dataConditionCheck: null,
+            objectSectionArgument1: null,
+            objectSectionArgument2: null,
+            quantityArgument: null,
+            autoBuyerTier: null,
+            startInvisibleValue: false,
+            resourceString: null,
+            optionalIterationParam: null,
+            rowCategory: '',
+            noDescriptionContainer: [true, '0', '100%'],
+            specialInputContainerClasses: ['no-left-margin']
+        });
         optionContentElement.appendChild(blackHoleChargeProgressRow);
 
         if (getCurrentlyChargingBlackHole()) {
@@ -2174,29 +2163,27 @@ export function drawTab7Content(heading, optionContentElement) {
         blackHoleRow2Container.appendChild(blackHoleResearchGateContainer);
         blackHoleRow2Container.appendChild(blackHoleUnlockedContainer);
 
-        optionContentElement.appendChild(createOptionRow(
-            'blackHoleInteractionRow',
-            null,
-            null,
-            blackHoleRow2Container,
-            null,
-            null,
-            null,
-            null,
-            '',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            false,
-            null,
-            null,
-            '',
-            [true, '0', '100%'],
-            ['no-left-margin']
-        ));
+        optionContentElement.appendChild(createOptionRow({
+            labelId: 'blackHoleInteractionRow',
+            renderNameABs: null,
+            labelText: null,
+            inputElements: [
+                blackHoleRow2Container,
+            ],
+            descriptionText: '',
+            resourcePriceObject: '',
+            dataConditionCheck: null,
+            objectSectionArgument1: null,
+            objectSectionArgument2: null,
+            quantityArgument: null,
+            autoBuyerTier: null,
+            startInvisibleValue: false,
+            resourceString: null,
+            optionalIterationParam: null,
+            rowCategory: '',
+            noDescriptionContainer: [true, '0', '100%'],
+            specialInputContainerClasses: ['no-left-margin']
+        }));
     }
 
 }

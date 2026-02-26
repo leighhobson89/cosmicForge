@@ -1,7 +1,7 @@
 import { getCurrentStarSystem, setCanFuelRockets, setCanTravelToAsteroids, getTechTreeDataAndDraw, getTimerRateRatio, deferredActions, getCanAffordDeferred, setCanAffordDeferred, setTechUnlockedArray, setTemporaryCoreTechRowsRepo, setUnlockedCompoundsArray, getTechUnlockedArray, getUnlockedResourcesArray, getPlayerPhilosophy, setRepeatableTechMultipliers, getRepeatableTechMultipliers, setIncreaseStorageFactor, getStatRun, getCurrentRunIsMegaStructureRun, setPermanentAntimatterUnlock, getDemoBuild } from './constantsAndGlobalVars.js';
 import { setAllCompoundsToZeroQuantity, gain, startUpdateTimersAndRates, addToResourceAllTimeStat, setFleetArmorBuffsAfterRepeatables, setFleetSpeedsAfterRepeatables, setFleetAttackDamageAfterRepeatables, setInitialImpressionBaseAfterRepeatables, setStarStudyEfficiencyAfterRepeatables, setAsteroidSearchEfficiencyAfterRepeatables, setRocketTravelTimeReductionAfterRepeatables, setStarshipTravelTimeReductionAfterRepeatables, setResourceAutobuyerPricesAfterRepeatables, setCompoundRecipePricesAfterRepeatables, setEnergyAndResearchBuildingPricesAfterRepeatables, setFleetPricesAfterRepeatables, setStarshipPartPricesAfterRepeatables, setRocketPartPricesAfterRepeatables, applyMegaStructureBonuses } from './game.js';
 import { getStarSystemDataObject, setResourceDataObject, getResourceDataObject, setAutoBuyerTierLevel } from './resourceDataObject.js';
-import { removeTabAttentionIfNoIndicators, createToggleSwitch, createSvgElement, createTextElement, sortTechRows, createOptionRow, createButton, showNotification, updateDescriptionRow, appendAttentionIndicator, callPopupModal, showHideModal, setupInfoTooltips, createOptionRowV2 } from './ui.js';
+import { createOptionRow, removeTabAttentionIfNoIndicators, createToggleSwitch, createSvgElement, createTextElement, sortTechRows, createButton, showNotification, updateDescriptionRow, appendAttentionIndicator, callPopupModal, showHideModal, setupInfoTooltips } from './ui.js';
 import { trackAnalyticsEvent } from './analytics.js';
 import { modalMegaStructureTechDysonSphere1Header, modalMegaStructureTechDysonSphere1Text, modalMegaStructureTechDysonSphere2Header, modalMegaStructureTechDysonSphere2Text, modalMegaStructureTechDysonSphere3Header, modalMegaStructureTechDysonSphere3Text, modalMegaStructureTechDysonSphere4Header, modalMegaStructureTechDysonSphere4Text, modalMegaStructureTechDysonSphere5Header, modalMegaStructureTechDysonSphere5Text, modalMegaStructureTechCelestialProcessingCore1Header, modalMegaStructureTechCelestialProcessingCore1Text, modalMegaStructureTechCelestialProcessingCore2Header, modalMegaStructureTechCelestialProcessingCore2Text, modalMegaStructureTechCelestialProcessingCore3Header, modalMegaStructureTechCelestialProcessingCore3Text, modalMegaStructureTechCelestialProcessingCore4Header, modalMegaStructureTechCelestialProcessingCore4Text, modalMegaStructureTechCelestialProcessingCore5Header, modalMegaStructureTechCelestialProcessingCore5Text, modalMegaStructureTechPlasmaForge1Header, modalMegaStructureTechPlasmaForge1Text, modalMegaStructureTechPlasmaForge2Header, modalMegaStructureTechPlasmaForge2Text, modalMegaStructureTechPlasmaForge3Header, modalMegaStructureTechPlasmaForge3Text, modalMegaStructureTechPlasmaForge4Header, modalMegaStructureTechPlasmaForge4Text, modalMegaStructureTechPlasmaForge5Header, modalMegaStructureTechPlasmaForge5Text, modalMegaStructureTechGalacticMemoryArchive1Header, modalMegaStructureTechGalacticMemoryArchive1Text, modalMegaStructureTechGalacticMemoryArchive2Header, modalMegaStructureTechGalacticMemoryArchive2Text, modalMegaStructureTechGalacticMemoryArchive3Header, modalMegaStructureTechGalacticMemoryArchive3Text, modalMegaStructureTechGalacticMemoryArchive4Header, modalMegaStructureTechGalacticMemoryArchive4Text, modalMegaStructureTechGalacticMemoryArchive5Header, modalMegaStructureTechGalacticMemoryArchive5Text, modalNanoBrokersUnlockHeader, modalNanoBrokersUnlockText, modalRocketCompositesTabUnlockHeader, modalRocketCompositesTabUnlockText, modalQuantumComputingTabUnlockHeader, modalQuantumComputingTabUnlockText, modalScienceLabsTabUnlockHeader, modalScienceLabsTabUnlockText, modalKnowledgeSharingTabUnlockHeader, modalKnowledgeSharingTabUnlockText, modalInterstellarTabUnlockHeader, modalInterstellarTabUnlockText, modalEnergyTabUnlockHeader, modalEnergyTabUnlockText, modalSpaceMiningTabUnlockText, modalSpaceMiningTabUnlockHeader, modalCompoundsTabUnlockHeader, modalCompoundsTabUnlockText, techNotificationMessages } from './descriptions.js';
 
@@ -30,7 +30,7 @@ export function drawTab3Content(heading, optionContentElement) {
 
         const autoBuyerEnabled = !!getResourceDataObject('research', ['upgrades', 'autoBuyer', 'enabled']);
 
-        const researchAutoBuyerRow = createOptionRowV2({
+        const researchAutoBuyerRow = createOptionRow({
                 labelId: 'researchAutoBuyerRow',
                 renderNameABs: null,
                 labelText: 'Research AutoBuyer:',
@@ -54,7 +54,7 @@ export function drawTab3Content(heading, optionContentElement) {
         researchAutoBuyerRow.classList.add('invisible');
         optionContentElement.appendChild(researchAutoBuyerRow);
 
-        const researchScienceKitRow = createOptionRowV2({
+        const researchScienceKitRow = createOptionRow({
                 labelId: 'researchScienceKitRow',
                 renderNameABs: null,
                 labelText: 'Science Kit:',
@@ -88,7 +88,7 @@ export function drawTab3Content(heading, optionContentElement) {
             });
         optionContentElement.appendChild(researchScienceKitRow);
 
-        const researchScienceClubRow = createOptionRowV2({
+        const researchScienceClubRow = createOptionRow({
                 labelId: 'researchScienceClubRow',
                 renderNameABs: null,
                 labelText: 'Open Science Club:',
@@ -122,7 +122,7 @@ export function drawTab3Content(heading, optionContentElement) {
             });
         optionContentElement.appendChild(researchScienceClubRow);
 
-        const researchScienceLabRow = createOptionRowV2({
+        const researchScienceLabRow = createOptionRow({
                 labelId: 'researchScienceLabRow',
                 renderNameABs: null,
                 labelText: 'Open Science Lab:',
@@ -160,7 +160,7 @@ export function drawTab3Content(heading, optionContentElement) {
         const rows = [
             {
                 techName: 'knowledgeSharing',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techKnowledgeSharingRow',
                     renderNameABs: null,
                     labelText: 'Knowledge Sharing:',
@@ -184,7 +184,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'fusionTheory',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techFusionTheoryRow',
                     renderNameABs: null,
                     labelText: 'Fusion Theory:',
@@ -208,7 +208,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'hydrogenFusion',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techHydrogenFusionRow',
                     renderNameABs: null,
                     labelText: 'Hydrogen Fusion:',
@@ -232,7 +232,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'heliumFusion',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techHeliumFusionRow',
                     renderNameABs: null,
                     labelText: 'Helium Fusion:',
@@ -256,7 +256,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'carbonFusion',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techCarbonFusionRow',
                     renderNameABs: null,
                     labelText: 'Carbon Fusion:',
@@ -280,7 +280,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'neonFusion',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techNeonFusionRow',
                     renderNameABs: null,
                     labelText: 'Neon Fusion:',
@@ -304,7 +304,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },            
             {
                 techName: 'oxygenFusion',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techOxygenFusionRow',
                     renderNameABs: null,
                     labelText: 'Oxygen Fusion:',
@@ -328,7 +328,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },            
             {
                 techName: 'siliconFusion',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techSiliconFusionRow',
                     renderNameABs: null,
                     labelText: 'Silicon Fusion:',
@@ -352,7 +352,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },    
             {
                 techName: 'nobleGasCollection',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techNobleGasCollectionRow',
                     renderNameABs: null,
                     labelText: 'Noble Gas Collection:',
@@ -376,7 +376,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'glassManufacture',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techGlassManufactureRow',
                     renderNameABs: null,
                     labelText: 'Glass Manufacture:',
@@ -400,7 +400,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'aggregateMixing',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techAggregateMixingRow',
                     renderNameABs: null,
                     labelText: 'Aggregate Mixing:',
@@ -424,7 +424,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },            
             {
                 techName: 'neutronCapture',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techNeutronCaptureRow',
                     renderNameABs: null,
                     labelText: 'Neutron Capture:',
@@ -448,7 +448,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },                               
             {
                 techName: 'quantumComputing',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techQuantumComputingRow',
                     renderNameABs: null,
                     labelText: 'Quantum Computing:',
@@ -472,7 +472,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'scienceLaboratories',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techScienceLaboratoriesRow',
                     renderNameABs: null,
                     labelText: 'Science Laboratories:',
@@ -496,7 +496,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'hydroCarbons',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techHydroCarbonsRow',
                     renderNameABs: null,
                     labelText: 'HydroCarbons:',
@@ -520,7 +520,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'nanoTubeTechnology',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techNanoTubeTechnologyRow',
                     renderNameABs: null,
                     labelText: 'Nano Tube Technology:',
@@ -544,7 +544,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'nanoBrokers',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techNanoBrokersRow',
                     renderNameABs: null,
                     labelText: 'Nano Brokers:',
@@ -568,7 +568,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'stellarCartography',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techStellarCartographyRow',
                     renderNameABs: null,
                     labelText: 'Stellar Cartography:',
@@ -592,7 +592,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'basicPowerGeneration',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techBasicPowerGenerationRow',
                     renderNameABs: null,
                     labelText: 'Basic Power Generation:',
@@ -616,7 +616,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'sodiumIonPowerStorage',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techSodiumIonPowerStorageRow',
                     renderNameABs: null,
                     labelText: 'Sodium Ion Power Storage:',
@@ -640,7 +640,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'advancedPowerGeneration',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techAdvancedPowerGenerationRow',
                     renderNameABs: null,
                     labelText: 'Advanced Power Generation:',
@@ -664,7 +664,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'solarPowerGeneration',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techSolarPowerGenerationRow',
                     renderNameABs: null,
                     labelText: 'Solar Power Generation:',
@@ -688,7 +688,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'rocketComposites',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techRocketCompositesRow',
                     renderNameABs: null,
                     labelText: 'Rocket Composites:',
@@ -712,7 +712,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'advancedFuels',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techAdvancedFuelsRow',
                     renderNameABs: null,
                     labelText: 'Advanced Fuels:',
@@ -736,7 +736,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'planetaryNavigation',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techPlanetaryNavigationRow',
                     renderNameABs: null,
                     labelText: 'Planetary Navigation:',
@@ -760,7 +760,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'compounds',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techCompoundsRow',
                     renderNameABs: null,
                     labelText: 'Compounds:',
@@ -784,7 +784,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'steelFoundries',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techSteelFoundriesRow',
                     renderNameABs: null,
                     labelText: 'Steel Foundries:',
@@ -808,7 +808,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'giganticTurbines',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techGiganticTurbinesRow',
                     renderNameABs: null,
                     labelText: 'Gigantic Turbines:',
@@ -832,7 +832,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'atmosphericTelescopes',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techAtmosphericTelescopesRow',
                     renderNameABs: null,
                     labelText: 'Atmospheric Telescopes:',
@@ -856,7 +856,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'fusionEfficiencyI',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techFusionEfficiencyIRow',
                     renderNameABs: null,
                     labelText: 'Fusion Efficiency I:',
@@ -880,7 +880,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'fusionEfficiencyII',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techFusionEfficiencyIIRow',
                     renderNameABs: null,
                     labelText: 'Fusion Efficiency II:',
@@ -904,7 +904,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'fusionEfficiencyIII',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techFusionEfficiencyIIIRow',
                     renderNameABs: null,
                     labelText: 'Fusion Efficiency III:',
@@ -928,7 +928,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'orbitalConstruction',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techOrbitalConstructionRow',
                     renderNameABs: null,
                     labelText: 'Orbital Construction:',
@@ -955,7 +955,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'antimatterEngines',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techAntimatterEnginesRow',
                     renderNameABs: null,
                     labelText: 'Antimatter Engines:',
@@ -979,7 +979,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'FTLTravelTheory',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techFTLTravelTheoryRow',
                     renderNameABs: null,
                     labelText: 'FTL Travel Theory:',
@@ -1003,7 +1003,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'lifeSupportSystems',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techLifeSupportSystemsRow',
                     renderNameABs: null,
                     labelText: 'Life Support Systems:',
@@ -1027,7 +1027,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'starshipFleets',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techStarshipFleetsRow',
                     renderNameABs: null,
                     labelText: 'Starship Fleets:',
@@ -1051,7 +1051,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'stellarScanners',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techStellarScannersRow',
                     renderNameABs: null,
                     labelText: 'Stellar Scanners:',
@@ -1079,7 +1079,7 @@ export function drawTab3Content(heading, optionContentElement) {
             {
                 techName: 'dysonSphereUnderstanding',
                 special: ['megastructure', 'Dyson Sphere'],
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techDysonSphereUnderstandingRow',
                     renderNameABs: null,
                     labelText: 'Dyson Sphere Understanding',
@@ -1127,7 +1127,7 @@ export function drawTab3Content(heading, optionContentElement) {
             {
                 techName: 'dysonSphereCapabilities',
                 special: ['megastructure', 'Dyson Sphere'],
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techDysonSphereCapabilitiesRow',
                     renderNameABs: null,
                     labelText: 'Dyson Sphere Capabilities',
@@ -1175,7 +1175,7 @@ export function drawTab3Content(heading, optionContentElement) {
             {
                 techName: 'dysonSphereDisconnect',
                 special: ['megastructure', 'Dyson Sphere'],
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techDysonSphereDisconnectRow',
                     renderNameABs: null,
                     labelText: 'Dyson Sphere Disconnect',
@@ -1223,7 +1223,7 @@ export function drawTab3Content(heading, optionContentElement) {
             {
                 techName: 'dysonSpherePower',
                 special: ['megastructure', 'Dyson Sphere'],
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techDysonSpherePowerRow',
                     renderNameABs: null,
                     labelText: 'Dyson Sphere Power',
@@ -1271,7 +1271,7 @@ export function drawTab3Content(heading, optionContentElement) {
             {
                 techName: 'dysonSphereConnect',
                 special: ['megastructure', 'Dyson Sphere'],
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techDysonSphereConnectRow',
                     renderNameABs: null,
                     labelText: 'Dyson Sphere Connect',
@@ -1319,7 +1319,7 @@ export function drawTab3Content(heading, optionContentElement) {
             {
                 techName: 'celestialProcessingCoreUnderstanding',
                 special: ['megastructure', 'Celestial Processing Core'],
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techCelestialProcessingCoreUnderstandingRow',
                     renderNameABs: null,
                     labelText: 'Celestial Processing Core Understanding',
@@ -1367,7 +1367,7 @@ export function drawTab3Content(heading, optionContentElement) {
             {
                 techName: 'celestialProcessingCoreCapabilities',
                 special: ['megastructure', 'Celestial Processing Core'],
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techCelestialProcessingCoreCapabilitiesRow',
                     renderNameABs: null,
                     labelText: 'Celestial Processing Core Capabilities',
@@ -1415,7 +1415,7 @@ export function drawTab3Content(heading, optionContentElement) {
             {
                 techName: 'celestialProcessingCoreDisconnect',
                 special: ['megastructure', 'Celestial Processing Core'],
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techCelestialProcessingCoreDisconnectRow',
                     renderNameABs: null,
                     labelText: 'Celestial Processing Core Disconnect',
@@ -1463,7 +1463,7 @@ export function drawTab3Content(heading, optionContentElement) {
             {
                 techName: 'celestialProcessingCorePower',
                 special: ['megastructure', 'Celestial Processing Core'],
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techCelestialProcessingCorePowerRow',
                     renderNameABs: null,
                     labelText: 'Celestial Processing Core Power',
@@ -1511,7 +1511,7 @@ export function drawTab3Content(heading, optionContentElement) {
             {
                 techName: 'celestialProcessingCoreConnect',
                 special: ['megastructure', 'Celestial Processing Core'],
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techCelestialProcessingCoreConnectRow',
                     renderNameABs: null,
                     labelText: 'Celestial Processing Core Connect',
@@ -1559,7 +1559,7 @@ export function drawTab3Content(heading, optionContentElement) {
             {
                 techName: 'plasmaForgeUnderstanding',
                 special: ['megastructure', 'Plasma Forge'],
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techPlasmaForgeUnderstandingRow',
                     renderNameABs: null,
                     labelText: 'Plasma Forge Understanding',
@@ -1607,7 +1607,7 @@ export function drawTab3Content(heading, optionContentElement) {
             {
                 techName: 'plasmaForgeCapabilities',
                 special: ['megastructure', 'Plasma Forge'],
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techPlasmaForgeCapabilitiesRow',
                     renderNameABs: null,
                     labelText: 'Plasma Forge Capabilities',
@@ -1655,7 +1655,7 @@ export function drawTab3Content(heading, optionContentElement) {
             {
                 techName: 'plasmaForgeDisconnect',
                 special: ['megastructure', 'Plasma Forge'],
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techPlasmaForgeDisconnectRow',
                     renderNameABs: null,
                     labelText: 'Plasma Forge Disconnect',
@@ -1703,7 +1703,7 @@ export function drawTab3Content(heading, optionContentElement) {
             {
                 techName: 'plasmaForgePower',
                 special: ['megastructure', 'Plasma Forge'],
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techPlasmaForgePowerRow',
                     renderNameABs: null,
                     labelText: 'Plasma Forge Power',
@@ -1751,7 +1751,7 @@ export function drawTab3Content(heading, optionContentElement) {
             {
                 techName: 'plasmaForgeConnect',
                 special: ['megastructure', 'Plasma Forge'],
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techPlasmaForgeConnectRow',
                     renderNameABs: null,
                     labelText: 'Plasma Forge Connect',
@@ -1799,7 +1799,7 @@ export function drawTab3Content(heading, optionContentElement) {
             {
                 techName: 'galacticMemoryArchiveUnderstanding',
                 special: ['megastructure', 'Galactic Memory Archive'],
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techGalacticMemoryArchiveUnderstandingRow',
                     renderNameABs: null,
                     labelText: 'Galactic Memory Archive Understanding',
@@ -1847,7 +1847,7 @@ export function drawTab3Content(heading, optionContentElement) {
             {
                 techName: 'galacticMemoryArchiveCapabilities',
                 special: ['megastructure', 'Galactic Memory Archive'],
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techGalacticMemoryArchiveCapabilitiesRow',
                     renderNameABs: null,
                     labelText: 'Galactic Memory Archive Capabilities',
@@ -1895,7 +1895,7 @@ export function drawTab3Content(heading, optionContentElement) {
             {
                 techName: 'galacticMemoryArchiveDisconnect',
                 special: ['megastructure', 'Galactic Memory Archive'],
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techGalacticMemoryArchiveDisconnectRow',
                     renderNameABs: null,
                     labelText: 'Galactic Memory Archive Disconnect',
@@ -1943,7 +1943,7 @@ export function drawTab3Content(heading, optionContentElement) {
             {
                 techName: 'galacticMemoryArchivePower',
                 special: ['megastructure', 'Galactic Memory Archive'],
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techGalacticMemoryArchivePowerRow',
                     renderNameABs: null,
                     labelText: 'Galactic Memory Archive Power',
@@ -1991,7 +1991,7 @@ export function drawTab3Content(heading, optionContentElement) {
             {
                 techName: 'galacticMemoryArchiveConnect',
                 special: ['megastructure', 'Galactic Memory Archive'],
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techGalacticMemoryArchiveConnectRow',
                     renderNameABs: null,
                     labelText: 'Galactic Memory Archive Connect',
@@ -2076,7 +2076,7 @@ export function drawTab3Content(heading, optionContentElement) {
     }
     
     if (heading === 'Tech Tree') {
-        const techTreeContainerRow = createOptionRowV2({
+        const techTreeContainerRow = createOptionRow({
             labelId: 'techTreeContainerRow',
             renderNameABs: null,
             labelText: '',
@@ -2111,7 +2111,7 @@ export function drawTab3Content(heading, optionContentElement) {
         const constructorRows = [
             {
                 techName: 'spaceStorageTankResearch',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techPhilosophySpaceStorageTankResearchRow',
                     renderNameABs: null,
                     labelText: 'Space Storage Tank Research:',
@@ -2137,7 +2137,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'efficientAssembly',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techPhilosophyEfficientAssemblyRow',
                     renderNameABs: null,
                     labelText: 'Efficient Assembly:',
@@ -2170,7 +2170,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'laserMining',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techPhilosophyLaserMiningRow',
                     renderNameABs: null,
                     labelText: 'Laser Mining:',
@@ -2204,7 +2204,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'massCompoundAssembly',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techPhilosophyMassCompoundAssemblyRow',
                     renderNameABs: null,
                     labelText: 'Mass Compound Assembly:',
@@ -2238,7 +2238,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },   
             {
                 techName: 'energyDrones',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techPhilosophyEnergyDronesRow',
                     renderNameABs: null,
                     labelText: 'Energy Drones:',
@@ -2275,7 +2275,7 @@ export function drawTab3Content(heading, optionContentElement) {
         const supremacistRows = [
             {
                 techName: 'fleetHolograms',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techPhilosophyFleetHologramsRow',
                     renderNameABs: null,
                     labelText: 'Fleet Holograms:',
@@ -2300,7 +2300,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },     
             {
                 techName: 'hangarAutomation',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techPhilosophyHangarAutomationRow',
                     renderNameABs: null,
                     labelText: 'Hangar Automation:',
@@ -2334,7 +2334,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'syntheticPlating',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techPhilosophySyntheticPlatingRow',
                     renderNameABs: null,
                     labelText: 'Synthetic Plating:',
@@ -2368,7 +2368,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'antimatterEngineMinaturization',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techPhilosophyAntimatterEngineMinaturizationRow',
                     renderNameABs: null,
                     labelText: 'Antimatter Engine Minaturization:',
@@ -2402,7 +2402,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'laserIntensityResearch',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techPhilosophyLaserIntensityResearchRow',
                     renderNameABs: null,
                     labelText: 'Laser Intensity Research:',
@@ -2439,7 +2439,7 @@ export function drawTab3Content(heading, optionContentElement) {
         const voidbornRows = [
             {
                 techName: 'voidSeers',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techPhilosophyVoidSeersRow',
                     renderNameABs: null,
                     labelText: 'Void Seers:',
@@ -2464,7 +2464,7 @@ export function drawTab3Content(heading, optionContentElement) {
             }, 
             {
                 techName: 'stellarWhispers',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techPhilosophyStellarWhispersRow',
                     renderNameABs: null,
                     labelText: 'Stellar Whispers:',
@@ -2498,7 +2498,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'stellarInsightManifold',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techPhilosophyStellarInsightManifoldRow',
                     renderNameABs: null,
                     labelText: 'Stellar Insight Manifold:',
@@ -2532,7 +2532,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'asteroidDwellers',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techPhilosophyAsteroidDwellersRow',
                     renderNameABs: null,
                     labelText: 'Asteroid Dwellers:',
@@ -2566,7 +2566,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'ascendencyPhilosophy',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techPhilosophyAscendencyPhilosophyRow',
                     renderNameABs: null,
                     labelText: 'Ascendency Philosophy:',
@@ -2602,7 +2602,7 @@ export function drawTab3Content(heading, optionContentElement) {
         const expansionistRows = [
             {
                 techName: 'rapidExpansion',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techPhilosophyRapidExpansionRow',
                     renderNameABs: null,
                     labelText: 'Rapid Expansion:',
@@ -2627,7 +2627,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },  
             {
                 techName: 'spaceElevator',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techPhilosophySpaceElevatorRow',
                     renderNameABs: null,
                     labelText: 'Space Elevator:',
@@ -2661,7 +2661,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'launchPadMassProduction',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techPhilosophyLaunchPadMassProductionRow',
                     renderNameABs: null,
                     labelText: 'Launch Pad Mass Production:',
@@ -2695,7 +2695,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'asteroidAttractors',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techPhilosophyAsteroidAttractorsRow',
                     renderNameABs: null,
                     labelText: 'Asteroid Attractors:',
@@ -2729,7 +2729,7 @@ export function drawTab3Content(heading, optionContentElement) {
             },
             {
                 techName: 'warpDrive',
-                row: createOptionRowV2({
+                row: createOptionRow({
                     labelId: 'techPhilosophyWarpDriveRow',
                     renderNameABs: null,
                     labelText: 'Warp Drive:',

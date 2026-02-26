@@ -1,4 +1,4 @@
-import { removeTabAttentionIfNoIndicators, createColoniseOpinionProgressBar, setColoniseOpinionProgressBar, spaceTravelButtonHideAndShowDescription, setupInfoTooltips, drawStarConnectionDrawings, createStarDestinationRow, sortStarTable, handleSortStarClick, createTextElement, createOptionRow, createButton, generateStarfield, showNotification, showEnterWarModeModal, setWarUI, removeStarConnectionTooltip, createOptionRowV2 } from './ui.js';
+import { removeTabAttentionIfNoIndicators, createColoniseOpinionProgressBar, setColoniseOpinionProgressBar, spaceTravelButtonHideAndShowDescription, setupInfoTooltips, drawStarConnectionDrawings, createStarDestinationRow, sortStarTable, handleSortStarClick, createTextElement, createOptionRow, createButton, generateStarfield, showNotification, showEnterWarModeModal, setWarUI, removeStarConnectionTooltip } from './ui.js';
 import { sfxPlayer } from './audioManager.js';
 import { getStarNames, getStarTypeByName } from './descriptions.js';
 import { getFactoryStarsArray, getSettledStars, setInFormation, setRedrawBattleDescription, setFleetChangedSinceLastDiplomacy, setDestinationStarScanned, getDestinationStarScanned, getStellarScannerBuilt, getStarShipTravelling, getDestinationStar, getCurrencySymbol, getSortStarMethod, getCurrentStarSystem, STAR_FIELD_SEED, NUMBER_OF_STARS, getStarMapMode, setStarMapMode, getWarMode, replaceBattleUnits, setNeedNewBattleCanvas, setFormationGoal, setBattleResolved, getBelligerentEnemyFlag, setAchievementFlagArray, getStarsWithAncientManuscripts, getStarShipDestinationReminderVisible, getStarVisionDistance, getMiaplacidusMilestoneLevel, getCurrentTheme } from './constantsAndGlobalVars.js';
@@ -528,7 +528,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             )
         );
 
-        const starLegendRow = createOptionRowV2({
+        const starLegendRow = createOptionRow({
             labelId: `starLegendRow`,
             renderNameABs: null,
             labelText: `Sort By:`,
@@ -648,7 +648,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
 
             const starRowName = `starRow_${name}`;
 
-            const starDataRow = createOptionRowV2({
+            const starDataRow = createOptionRow({
                 labelId: `${starRowName}`,
                 renderNameABs: null,
                 labelText: starNameLabel,
@@ -682,7 +682,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
     if (heading === 'Star Ship') {
         if (!starDestinationInfoRedraw) {
             const destinationStar = getDestinationStar();
-            const destinationReminderRow = createOptionRowV2({
+            const destinationReminderRow = createOptionRow({
                 labelId: `spaceStarShipDestinationReminderRow`,
                 renderNameABs: null,
                 labelText: '',
@@ -720,7 +720,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             ];
 
             starShipModules.forEach(module => {
-                const starshipComponentBuildRow = createOptionRowV2({
+                const starshipComponentBuildRow = createOptionRow({
                     labelId: `space${capitaliseString(module.id)}BuildRow`,
                     renderNameABs: null,
                     labelText: `${module.label}:`,
@@ -753,7 +753,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                 optionContentElement.appendChild(starshipComponentBuildRow);
             });
 
-            const starShipTravelRow = createOptionRowV2({
+            const starShipTravelRow = createOptionRow({
                 labelId: `spaceStarShipTravelRow`,
                 renderNameABs: null,
                 labelText: `Travelling To:`,
@@ -775,7 +775,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             });
             optionContentElement.appendChild(starShipTravelRow);
 
-            const starShipStellarScannerRow = createOptionRowV2({
+            const starShipStellarScannerRow = createOptionRow({
                 labelId: `spaceStarShipStellarScannerRow`,
                 renderNameABs: null,
                 labelText: `Perform System Scan:`,
@@ -814,7 +814,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             const starData = getStarSystemDataObject('stars', ['destinationStar']);
             const displayAscendencyPoints = getAscendencyPointsWithRepeatableBonus(starData.ascendencyPoints);
         
-            const starNameRow = createOptionRowV2({
+            const starNameRow = createOptionRow({
                 labelId: 'starNameRow',
                 renderNameABs: null,
                 labelText: 'Star Name:',
@@ -858,7 +858,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                 noDescriptionContainer: [true, '15%', '85%']
             });            
         
-            const civilizationRow = createOptionRowV2({
+            const civilizationRow = createOptionRow({
                 labelId: 'civilizationLevelRow',
                 renderNameABs: null,
                 labelText: 'Civilization:',
@@ -917,7 +917,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
         : `<span class="red-disabled-text">???</span>`;
         
         
-        const populationRow = createOptionRowV2({
+        const populationRow = createOptionRow({
             labelId: 'populationRow',
             renderNameABs: null,
             labelText: 'Population:',
@@ -974,7 +974,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                 threatLevelClass = "red-disabled-text";
             }
         
-        const threatRow = createOptionRowV2({
+        const threatRow = createOptionRow({
             labelId: 'threatLevelRow',
             renderNameABs: null,
             labelText: 'Threat Level:',
@@ -1004,7 +1004,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             noDescriptionContainer: [true, '15%', '85%']
         });                                           
         
-        const fleetRow = createOptionRowV2({
+        const fleetRow = createOptionRow({
             labelId: 'enemyFleetsRow',
             renderNameABs: null,
             labelText: 'Enemy Fleets:',
@@ -1093,7 +1093,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             }).join('<br/>');
         }
         
-        const anomaliesRow = createOptionRowV2({
+        const anomaliesRow = createOptionRow({
             labelId: 'anomaliesRow',
             renderNameABs: null,
             labelText: 'Anomalies:',
@@ -1142,7 +1142,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
         ];
 
         fleetShips.forEach(fleetShip => {
-            const fleetShipBuildRow = createOptionRowV2({
+            const fleetShipBuildRow = createOptionRow({
                 labelId: `space${capitaliseString(fleetShip.id)}BuildRow`,
                 renderNameABs: null,
                 labelText: `${fleetShip.label}:`,
@@ -1212,7 +1212,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
         createColoniseOpinionProgressBar(optionContentElement);
         setColoniseOpinionProgressBar(starData.currentImpression, optionContentElement);
         
-            const diplomacyOptionsRow = createOptionRowV2({
+            const diplomacyOptionsRow = createOptionRow({
                 labelId: 'diplomacyOptionsRow',
                 renderNameABs: null,
                 labelText: 'Relations:',
@@ -1264,7 +1264,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                     ? "warning-orange-text"
                     : "red-disabled-text";
 
-            const receptionStatusRow = createOptionRowV2({
+            const receptionStatusRow = createOptionRow({
                 labelId: 'receptionStatusRow',
                 renderNameABs: null,
                 labelText: 'Attitude:',
@@ -1306,7 +1306,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                     ? "warning-orange-text" 
                     : "green-ready-text"; 
         
-            const intelligenceRow = createOptionRowV2({
+            const intelligenceRow = createOptionRow({
                 labelId: 'intelligenceRow',
                 renderNameABs: null,
                 labelText: 'Intelligence:',
@@ -1349,7 +1349,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                 noDescriptionContainer: [true, '15%', '85%']
             });                                                           
         
-            const fleetRow = createOptionRowV2({
+            const fleetRow = createOptionRow({
                 labelId: 'enemyFleetsRow',
                 renderNameABs: null,
                 labelText: 'Enemy Fleets:',

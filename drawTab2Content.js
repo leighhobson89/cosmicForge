@@ -1,7 +1,7 @@
 import { getImageUrls, getTimerRateRatio, getCurrencySymbol, getBuildingTypeOnOff, setPowerOnOff, getCurrentStarSystemWeatherEfficiency, getInfinitePower, getDemoBuild } from './constantsAndGlobalVars.js';
 import { sellBuilding, toggleBuildingTypeOnOff, addOrRemoveUsedPerSecForFuelRate, setEnergyCapacity, gain, startUpdateTimersAndRates, addBuildingPotentialRate, addToResourceAllTimeStat, getOTypePowerPlantBoostMultiplierForCurrentSystem } from './game.js';
 import { setResourceDataObject, getResourceDataObject } from './resourceDataObject.js';
-import { removeTabAttentionIfNoIndicators, switchBatteryStatBarWhenBatteryBought, createTextElement, createOptionRowV2, createButton } from './ui.js';
+import { removeTabAttentionIfNoIndicators, switchBatteryStatBarWhenBatteryBought, createTextElement, createOptionRow, createButton } from './ui.js';
 import { capitaliseString } from './utilityFunctions.js';
 import { sfxPlayer, playClickSfx } from './audioManager.js';
 
@@ -20,7 +20,7 @@ export function drawTab2Content(heading, optionContentElement) {
 
         const demoExtraClasses = getDemoBuild() ? ['electron-purple-demo-button'] : [];
 
-        const battery1Row = createOptionRowV2({
+        const battery1Row = createOptionRow({
             labelId: 'energyBattery1Row',
             renderNameABs: null,
             labelText: 'Sodium Ion Battery:',
@@ -50,7 +50,7 @@ export function drawTab2Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(battery1Row);
 
-        const battery2Row = createOptionRowV2({
+        const battery2Row = createOptionRow({
             labelId: 'energyBattery2Row',
             renderNameABs: null,
             labelText: 'Lithium Ion Battery:',
@@ -80,7 +80,7 @@ export function drawTab2Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(battery2Row);
 
-        const battery3Row = createOptionRowV2({
+        const battery3Row = createOptionRow({
             labelId: 'energyBattery3Row',
             renderNameABs: null,
             labelText: 'Stellar Capacitor Array:',
@@ -119,7 +119,7 @@ export function drawTab2Content(heading, optionContentElement) {
             toggleButtonText = 'Activate';
         }
 
-        const powerPlant1Row = createOptionRowV2({
+        const powerPlant1Row = createOptionRow({
             labelId: 'energyPowerPlant1Row',
             renderNameABs: null,
             labelText: 'Power Plant:',
@@ -173,7 +173,7 @@ export function drawTab2Content(heading, optionContentElement) {
             toggleButtonText = 'Activate';
         }
 
-        const powerPlant2Row = createOptionRowV2({
+        const powerPlant2Row = createOptionRow({
             labelId: 'energyPowerPlant2Row',
             renderNameABs: null,
             labelText: 'Solar Power Plant:',
@@ -227,7 +227,7 @@ export function drawTab2Content(heading, optionContentElement) {
             toggleButtonText = 'Activate';
         }
 
-        const powerPlant3Row = createOptionRowV2({
+        const powerPlant3Row = createOptionRow({
             labelId: 'energyPowerPlant3Row',
             renderNameABs: null,
             labelText: 'Advanced Power Plant:',
