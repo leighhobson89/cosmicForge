@@ -1,4 +1,4 @@
-import { removeTabAttentionIfNoIndicators, createColoniseOpinionProgressBar, setColoniseOpinionProgressBar, spaceTravelButtonHideAndShowDescription, setupInfoTooltips, drawStarConnectionDrawings, createStarDestinationRow, sortStarTable, handleSortStarClick, createTextElement, createOptionRow, createButton, generateStarfield, showNotification, showEnterWarModeModal, setWarUI, removeStarConnectionTooltip } from './ui.js';
+import { removeTabAttentionIfNoIndicators, createColoniseOpinionProgressBar, setColoniseOpinionProgressBar, spaceTravelButtonHideAndShowDescription, setupInfoTooltips, drawStarConnectionDrawings, createStarDestinationRow, sortStarTable, handleSortStarClick, createTextElement, createOptionRow, createButton, generateStarfield, showNotification, showEnterWarModeModal, setWarUI, removeStarConnectionTooltip, createOptionRowV2 } from './ui.js';
 import { sfxPlayer } from './audioManager.js';
 import { getStarNames, getStarTypeByName } from './descriptions.js';
 import { getFactoryStarsArray, getSettledStars, setInFormation, setRedrawBattleDescription, setFleetChangedSinceLastDiplomacy, setDestinationStarScanned, getDestinationStarScanned, getStellarScannerBuilt, getStarShipTravelling, getDestinationStar, getCurrencySymbol, getSortStarMethod, getCurrentStarSystem, STAR_FIELD_SEED, NUMBER_OF_STARS, getStarMapMode, setStarMapMode, getWarMode, replaceBattleUnits, setNeedNewBattleCanvas, setFormationGoal, setBattleResolved, getBelligerentEnemyFlag, setAchievementFlagArray, getStarsWithAncientManuscripts, getStarShipDestinationReminderVisible, getStarVisionDistance, getMiaplacidusMilestoneLevel, getCurrentTheme } from './constantsAndGlobalVars.js';
@@ -528,28 +528,26 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             )
         );
 
-        const starLegendRow = createOptionRow(
-            `starLegendRow`,
-            null,
-            `Sort By:`,
-            starLegendCells,
-            null,
-            null,
-            null,
-            null,
-            ``,
-            '',
-            null,
-            null,
-            null,
-            null,
-            null,
-            false,
-            null,
-            null,
-            'star',
-            [true, '10%', '90%']
-        );
+        const starLegendRow = createOptionRowV2({
+            labelId: `starLegendRow`,
+            renderNameABs: null,
+            labelText: `Sort By:`,
+            inputElements: [
+                starLegendCells,
+            ],
+            descriptionText: ``,
+            resourcePriceObject: '',
+            dataConditionCheck: null,
+            objectSectionArgument1: null,
+            objectSectionArgument2: null,
+            quantityArgument: null,
+            autoBuyerTier: null,
+            startInvisibleValue: false,
+            resourceString: null,
+            optionalIterationParam: null,
+            rowCategory: 'star',
+            noDescriptionContainer: [true, '10%', '90%']
+        });
 
         optionContentElement.appendChild(starLegendRow);
 
@@ -650,28 +648,26 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
 
             const starRowName = `starRow_${name}`;
 
-            const starDataRow = createOptionRow(
-                `${starRowName}`,
-                null,
-                starNameLabel,
-                starDataCells,
-                null,
-                null,
-                null,
-                null,
-                ``,
-                '',
-                null,
-                null,
-                null,
-                null,
-                null,
-                false,
-                null,
-                null,
-                'star',
-                [true, '10%', '90%']
-            );
+            const starDataRow = createOptionRowV2({
+                labelId: `${starRowName}`,
+                renderNameABs: null,
+                labelText: starNameLabel,
+                inputElements: [
+                    starDataCells,
+                ],
+                descriptionText: ``,
+                resourcePriceObject: '',
+                dataConditionCheck: null,
+                objectSectionArgument1: null,
+                objectSectionArgument2: null,
+                quantityArgument: null,
+                autoBuyerTier: null,
+                startInvisibleValue: false,
+                resourceString: null,
+                optionalIterationParam: null,
+                rowCategory: 'star',
+                noDescriptionContainer: [true, '10%', '90%']
+            });
 
             if (isSettled) {
                 starDataRow.style.opacity = '0.5';
@@ -686,27 +682,23 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
     if (heading === 'Star Ship') {
         if (!starDestinationInfoRedraw) {
             const destinationStar = getDestinationStar();
-            const destinationReminderRow = createOptionRow(
-                `spaceStarShipDestinationReminderRow`,
-                null,
-                '',
-                null,
-                null,
-                null,
-                null,
-                null,
-                '',
-                '',
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null
-            );
+            const destinationReminderRow = createOptionRowV2({
+                labelId: `spaceStarShipDestinationReminderRow`,
+                renderNameABs: null,
+                labelText: '',
+                inputElements: [],
+                descriptionText: '',
+                resourcePriceObject: '',
+                dataConditionCheck: null,
+                objectSectionArgument1: null,
+                objectSectionArgument2: null,
+                quantityArgument: null,
+                autoBuyerTier: null,
+                startInvisibleValue: null,
+                resourceString: null,
+                optionalIterationParam: null,
+                rowCategory: null
+            });
 
             const reminderMainRow = destinationReminderRow.querySelector('.option-row-main');
             if (reminderMainRow) {
@@ -728,92 +720,88 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             ];
 
             starShipModules.forEach(module => {
-                const starshipComponentBuildRow = createOptionRow(
-                    `space${capitaliseString(module.id)}BuildRow`,
-                    null,
-                    `${module.label}:`,
-                    createButton(`Build Module`, ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check'], () => {
-                        gain(1, `${module.id}BuiltPartsQuantity`, module.id, false, null, 'space', 'space');
-                    }, 'upgradeCheck', '', 'spaceUpgrade', module.id, 'cash', true, null, 'starShipPurchase'),
-                    createTextElement(
-                        `Built: <span id="${module.id}BuiltPartsQuantity">${getStarShipParts(module.id)}</span> / <span id="${module.id}TotalPartsQuantity">${getStarShipPartsNeededInTotalPerModule(module.id)}</span>`,
-                        `${module.id}PartsCountText`,
-                        []
-                    ),
-                    null,
-                    null,
-                    null,
-                    `${getCurrencySymbol() + getResourceDataObject('space', ['upgrades', module.id, 'price'])}, 
+                const starshipComponentBuildRow = createOptionRowV2({
+                    labelId: `space${capitaliseString(module.id)}BuildRow`,
+                    renderNameABs: null,
+                    labelText: `${module.label}:`,
+                    inputElements: [
+                        createButton(`Build Module`, ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check'], () => {
+                            gain(1, `${module.id}BuiltPartsQuantity`, module.id, false, null, 'space', 'space');
+                        }, 'upgradeCheck', '', 'spaceUpgrade', module.id, 'cash', true, null, 'starShipPurchase'),
+                        createTextElement(
+                            `Built: <span id="${module.id}BuiltPartsQuantity">${getStarShipParts(module.id)}</span> / <span id="${module.id}TotalPartsQuantity">${getStarShipPartsNeededInTotalPerModule(module.id)}</span>`,
+                            `${module.id}PartsCountText`,
+                            []
+                        ),
+                    ],
+                    descriptionText: `${getCurrencySymbol() + getResourceDataObject('space', ['upgrades', module.id, 'price'])}, 
                     ${getResourceDataObject('space', ['upgrades', module.id, 'resource1Price'])[0]} ${capitaliseString(getResourceDataObject('space', ['upgrades', module.id, 'resource1Price'])[1])}, 
                     ${getResourceDataObject('space', ['upgrades', module.id, 'resource2Price'])[0]} ${capitaliseString(getResourceDataObject('space', ['upgrades', module.id, 'resource2Price'])[1])}, 
                     ${getResourceDataObject('space', ['upgrades', module.id, 'resource3Price'])[0]} ${capitaliseString(getResourceDataObject('space', ['upgrades', module.id, 'resource3Price'])[1])}`,
-                    '',
-                    'upgradeCheck',
-                    'spaceUpgrade',
-                    module.id,
-                    'cash',
-                    null,
-                    false,
-                    null,
-                    null,
-                    'starShipPurchase'
-                );
+                    resourcePriceObject: '',
+                    dataConditionCheck: 'upgradeCheck',
+                    objectSectionArgument1: 'spaceUpgrade',
+                    objectSectionArgument2: module.id,
+                    quantityArgument: 'cash',
+                    autoBuyerTier: null,
+                    startInvisibleValue: false,
+                    resourceString: null,
+                    optionalIterationParam: null,
+                    rowCategory: 'starShipPurchase'
+                });
 
                 optionContentElement.appendChild(starshipComponentBuildRow);
             });
 
-            const starShipTravelRow = createOptionRow(
-                `spaceStarShipTravelRow`,
-                null,
-                `Travelling To:`,
-                createTextElement(`${capitaliseWordsWithRomanNumerals(destinationStar || '')}`, `starShipDestinationStar`, ['green-ready-text', 'destination-text']),
-                createTextElement(`<div id="spaceTravelToStarProgressBar">`, `spaceTravelToStarProgressBarContainer`, ['progress-bar-container']),
-                null,
-                null,
-                null,
-                `Travelling...`,
-                '',
-                null,
-                null,
-                null,
-                null,
-                null,
-                false,
-                null,
-                null,
-                'travel'
-            );
+            const starShipTravelRow = createOptionRowV2({
+                labelId: `spaceStarShipTravelRow`,
+                renderNameABs: null,
+                labelText: `Travelling To:`,
+                inputElements: [
+                    createTextElement(`${capitaliseWordsWithRomanNumerals(destinationStar || '')}`, `starShipDestinationStar`, ['green-ready-text', 'destination-text']),
+                    createTextElement(`<div id="spaceTravelToStarProgressBar">`, `spaceTravelToStarProgressBarContainer`, ['progress-bar-container']),
+                ],
+                descriptionText: `Travelling...`,
+                resourcePriceObject: '',
+                dataConditionCheck: null,
+                objectSectionArgument1: null,
+                objectSectionArgument2: null,
+                quantityArgument: null,
+                autoBuyerTier: null,
+                startInvisibleValue: false,
+                resourceString: null,
+                optionalIterationParam: null,
+                rowCategory: 'travel'
+            });
             optionContentElement.appendChild(starShipTravelRow);
 
-            const starShipStellarScannerRow = createOptionRow(
-                `spaceStarShipStellarScannerRow`,
-                null,
-                `Perform System Scan:`,
-                createButton(`Scan System`, ['option-button', 'green-ready-text'], () => {
-                    sfxPlayer.playAudio("asteroidScan");
-                    setDestinationStarScanned(true);
-                    copyStarDataToDestinationStarField(destinationStar);
-                    generateDestinationStarData();
-                    showNotification(`${capitaliseWordsWithRomanNumerals(destinationStar)} System Scanned!`, 'info', 3000, 'starShip');
+            const starShipStellarScannerRow = createOptionRowV2({
+                labelId: `spaceStarShipStellarScannerRow`,
+                renderNameABs: null,
+                labelText: `Perform System Scan:`,
+                inputElements: [
+                    createButton(`Scan System`, ['option-button', 'green-ready-text'], () => {
+                        sfxPlayer.playAudio("asteroidScan");
+                        setDestinationStarScanned(true);
+                        copyStarDataToDestinationStarField(destinationStar);
+                        generateDestinationStarData();
+                        showNotification(`${capitaliseWordsWithRomanNumerals(destinationStar)} System Scanned!`, 'info', 3000, 'starShip');
 
-                    drawTab5Content('Star Ship', optionContentElement, true, false);
-                }, '', '', '', null, '', true, null, ''),
-                null,
-                null,
-                null,
-                null,
-                `Scan ${capitaliseWordsWithRomanNumerals(destinationStar)} System`,
-                '',
-                null,
-                null,
-                null,
-                null,
-                null,
-                false,
-                null,
-                null,
-                ''
-            );
+                        drawTab5Content('Star Ship', optionContentElement, true, false);
+                    }, '', '', '', null, '', true, null, ''),
+                ],
+                descriptionText: `Scan ${capitaliseWordsWithRomanNumerals(destinationStar)} System`,
+                resourcePriceObject: '',
+                dataConditionCheck: null,
+                objectSectionArgument1: null,
+                objectSectionArgument2: null,
+                quantityArgument: null,
+                autoBuyerTier: null,
+                startInvisibleValue: false,
+                resourceString: null,
+                optionalIterationParam: null,
+                rowCategory: ''
+            });
             optionContentElement.appendChild(starShipStellarScannerRow);
         }
 
@@ -826,65 +814,66 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             const starData = getStarSystemDataObject('stars', ['destinationStar']);
             const displayAscendencyPoints = getAscendencyPointsWithRepeatableBonus(starData.ascendencyPoints);
         
-            const starNameRow = createOptionRow(
-                'starNameRow',
-                null,
-                'Star Name:',
-                createTextElement(
-                    capitaliseWordsWithRomanNumerals(getDestinationStar()),
-                    'starNameText',
-                    ['value-text']
-                ),
-                createTextElement(
-                    `<span class="ap-destination-star-element-right">AP: <span class="green-ready-text">${displayAscendencyPoints}</span> <p id="info_starShipScanAP" class="info-emoji">ℹ️</p></span>
+            const starNameRow = createOptionRowV2({
+                labelId: 'starNameRow',
+                renderNameABs: null,
+                labelText: 'Star Name:',
+                inputElements: [
+                    createTextElement(
+                        capitaliseWordsWithRomanNumerals(getDestinationStar()),
+                        'starNameText',
+                        ['value-text']
+                    ),
+                    createTextElement(
+                        `<span class="ap-destination-star-element-right">AP: <span class="green-ready-text">${displayAscendencyPoints}</span> <p id="info_starShipScanAP" class="info-emoji">ℹ️</p></span>
                     Life: <span class="${getStellarScannerBuilt() ? (starData.lifeDetected ? 'green-ready-text' : 'red-disabled-text') : 'red-disabled-text'}">
                         ${getStellarScannerBuilt() ? (starData.lifeDetected ? 'Yes' : 'No') : '???'}
                     </span>`,
-                    'apContainer',
-                    ['value-text', 'ap-destination-star-element']
-                ),                             
-                createTextElement(
-                    `<span class="ap-destination-star-element-right">
+                        'apContainer',
+                        ['value-text', 'ap-destination-star-element']
+                    ),
+                    createTextElement(
+                        `<span class="ap-destination-star-element-right">
                         Weather: <span class="${starData.weatherTendency[2]}">${starData.weatherTendency[0]}</span> 
                         (<span class="probability-text">${starData.weatherTendency[1]}</span>%) - 
                         <span class="${starData.precipitation !== 'water' ? 'green-ready-text' : ''}">
                             ${capitaliseString(starData.precipitationType)} <p id="info_starShipScanPrecipitation" class="info-emoji">ℹ️</p>
                         </span>
                     </span>`,
-                    'weatherContainer',
-                    ['value-text', 'ap-destination-star-element']
-                ),                
-                null,
-                null,
-                '',
-                '',
-                null,
-                null,
-                null,
-                null,
-                null,
-                false,
-                null,
-                null,
-                '',
-                [true, '15%', '85%']
-            );            
+                        'weatherContainer',
+                        ['value-text', 'ap-destination-star-element']
+                    ),
+                ],
+                descriptionText: '',
+                resourcePriceObject: '',
+                dataConditionCheck: null,
+                objectSectionArgument1: null,
+                objectSectionArgument2: null,
+                quantityArgument: null,
+                autoBuyerTier: null,
+                startInvisibleValue: false,
+                resourceString: null,
+                optionalIterationParam: null,
+                rowCategory: '',
+                noDescriptionContainer: [true, '15%', '85%']
+            });            
         
-            const civilizationRow = createOptionRow(
-                'civilizationLevelRow',
-                null,
-                'Civilization:',
-                createTextElement(
-                    getStellarScannerBuilt() 
-                        ? (starData.raceName === 'None' 
-                            ? '<span class="green-ready-text">None</span>' 
-                            : starData.raceName)
-                        : `<span class="red-disabled-text">???</span>`,
-                    'civilizationLevelText',
-                    ['value-text']
-                ),                
-                createTextElement(
-                    `<span class="ap-destination-star-element-right">Type: 
+            const civilizationRow = createOptionRowV2({
+                labelId: 'civilizationLevelRow',
+                renderNameABs: null,
+                labelText: 'Civilization:',
+                inputElements: [
+                    createTextElement(
+                        getStellarScannerBuilt() 
+                            ? (starData.raceName === 'None' 
+                                ? '<span class="green-ready-text">None</span>' 
+                                : starData.raceName)
+                            : `<span class="red-disabled-text">???</span>`,
+                        'civilizationLevelText',
+                        ['value-text']
+                    ),
+                    createTextElement(
+                        `<span class="ap-destination-star-element-right">Type: 
                         <span class="${getStellarScannerBuilt() 
                             ? (starData.civilizationLevel === 'Unsentient' 
                                 ? 'green-ready-text' 
@@ -897,25 +886,23 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                             ${getStellarScannerBuilt() ? starData.civilizationLevel : '???'}
                         </span> <p id="info_starShipScanType" class="info-emoji">ℹ️</p>
                     </span>`,
-                    'apContainer',
-                    ['value-text', 'ap-destination-star-element']
-                ),                    
-                null,                               
-                null,
-                null,
-                ``,
-                '',
-                null,
-                null,
-                null,
-                null,
-                null,
-                false,
-                null,
-                null,
-                '',
-                [true, '15%', '85%']
-            );            
+                        'apContainer',
+                        ['value-text', 'ap-destination-star-element']
+                    ),
+                ],
+                descriptionText: ``,
+                resourcePriceObject: '',
+                dataConditionCheck: null,
+                objectSectionArgument1: null,
+                objectSectionArgument2: null,
+                quantityArgument: null,
+                autoBuyerTier: null,
+                startInvisibleValue: false,
+                resourceString: null,
+                optionalIterationParam: null,
+                rowCategory: '',
+                noDescriptionContainer: [true, '15%', '85%']
+            });            
         
         const traitsText = getStellarScannerBuilt() 
         ? starData.lifeformTraits.map(trait => 
@@ -930,36 +917,35 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
         : `<span class="red-disabled-text">???</span>`;
         
         
-        const populationRow = createOptionRow(
-            'populationRow',
-            null,
-            'Population:',
-            createTextElement(
-                populationText,
-                'populationText',
-                ['value-text']
-            ),
-            createTextElement(
-                `<span class="ap-destination-star-element-right">Traits: <span class="value-text">${traitsText}</span></span>`,
-                'traitsText',
-                ['value-text', 'ap-destination-star-element']
-            ),
-            null,                               
-            null,
-            null,
-            ``,
-            '',
-            null,
-            null,
-            null,
-            null,
-            null,
-            false,
-            null,
-            null,
-            '',
-            [true, '15%', '85%']
-        );              
+        const populationRow = createOptionRowV2({
+            labelId: 'populationRow',
+            renderNameABs: null,
+            labelText: 'Population:',
+            inputElements: [
+                createTextElement(
+                    populationText,
+                    'populationText',
+                    ['value-text']
+                ),
+                createTextElement(
+                    `<span class="ap-destination-star-element-right">Traits: <span class="value-text">${traitsText}</span></span>`,
+                    'traitsText',
+                    ['value-text', 'ap-destination-star-element']
+                ),
+            ],
+            descriptionText: ``,
+            resourcePriceObject: '',
+            dataConditionCheck: null,
+            objectSectionArgument1: null,
+            objectSectionArgument2: null,
+            quantityArgument: null,
+            autoBuyerTier: null,
+            startInvisibleValue: false,
+            resourceString: null,
+            optionalIterationParam: null,
+            rowCategory: '',
+            noDescriptionContainer: [true, '15%', '85%']
+        });              
         
             let defenseClass = "";
             let defenseText = `${getStellarScannerBuilt() ? starData.defenseRating + '%' : '???'}`;
@@ -987,11 +973,12 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             } else {
                 threatLevelClass = "red-disabled-text";
             }
-            
-            const threatRow = createOptionRow(
-                'threatLevelRow',
-                null,
-                'Threat Level:',
+        
+        const threatRow = createOptionRowV2({
+            labelId: 'threatLevelRow',
+            renderNameABs: null,
+            labelText: 'Threat Level:',
+            inputElements: [
                 createTextElement(
                     `<span class="${threatLevelClass}">${threatLevel}</span> <p id="info_starShipScanThreatLevel" class="info-emoji">ℹ️</p>`,
                     'threatLevelText',
@@ -1002,27 +989,26 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                     'defenseRatingText',
                     ['value-text', 'ap-destination-star-element']
                 ),
-                null,                               
-                null,
-                null,
-                ``,
-                '',
-                null,
-                null,
-                null,
-                null,
-                null,
-                false,
-                null,
-                null,
-                '',
-                [true, '15%', '85%']
-            );                                           
+            ],
+            descriptionText: ``,
+            resourcePriceObject: '',
+            dataConditionCheck: null,
+            objectSectionArgument1: null,
+            objectSectionArgument2: null,
+            quantityArgument: null,
+            autoBuyerTier: null,
+            startInvisibleValue: false,
+            resourceString: null,
+            optionalIterationParam: null,
+            rowCategory: '',
+            noDescriptionContainer: [true, '15%', '85%']
+        });                                           
         
-            const fleetRow = createOptionRow(
-                'enemyFleetsRow',
-                null,
-                'Enemy Fleets:',
+        const fleetRow = createOptionRowV2({
+            labelId: 'enemyFleetsRow',
+            renderNameABs: null,
+            labelText: 'Enemy Fleets:',
+            inputElements: [
                 createTextElement(
                     `Air: <span class="${starData.civilizationLevel === 'None' 
                         ? 'green-ready-text' 
@@ -1068,81 +1054,78 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                     'fleetSeaText',
                     ['value-text', 'ap-destination-star-element']
                 ),                                                 
-                null,
-                null,
-                ``,
-                '',
-                null,
-                null,
-                null,
-                null,
-                null,
-                false,
-                null,
-                null,
-                '',
-                [true, '15%', '85%']
-            );                    
+            ],
+            descriptionText: ``,
+            resourcePriceObject: '',
+            dataConditionCheck: null,
+            objectSectionArgument1: null,
+            objectSectionArgument2: null,
+            quantityArgument: null,
+            autoBuyerTier: null,
+            startInvisibleValue: false,
+            resourceString: null,
+            optionalIterationParam: null,
+            rowCategory: '',
+            noDescriptionContainer: [true, '15%', '85%']
+        });                    
         
-            let anomaliesText;
+        let anomaliesText;
 
-            if (getFactoryStarsArray().includes(getDestinationStar())) {
-                anomaliesText = '<span class="red-disabled-text">Megastructure</span>';
-            } else if (starData.civilizationLevel === 'None') {
-                anomaliesText = '<span>N/A</span>';
-            } else if (!getStellarScannerBuilt()) {
-                anomaliesText = '<span class="red-disabled-text">???</span>';
-            } else if (starData.anomalies.length === 0) {
-                anomaliesText = '<span>None</span>';
-            } else {
-                anomaliesText = starData.anomalies.map(a => {
-                    if (typeof a === 'string') {
-                        return `<span class="red-disabled-text">${a}</span>`;
-                    }
+        if (getFactoryStarsArray().includes(getDestinationStar())) {
+            anomaliesText = '<span class="red-disabled-text">Megastructure</span>';
+        } else if (starData.civilizationLevel === 'None') {
+            anomaliesText = '<span>N/A</span>';
+        } else if (!getStellarScannerBuilt()) {
+            anomaliesText = '<span class="red-disabled-text">???</span>';
+        } else if (starData.anomalies.length === 0) {
+            anomaliesText = '<span>None</span>';
+        } else {
+            anomaliesText = starData.anomalies.map(a => {
+                if (typeof a === 'string') {
+                    return `<span class="red-disabled-text">${a}</span>`;
+                }
 
-                    if (a?.name === 'None') {
-                        return `<span>N/A</span>`;
-                    }
+                if (a?.name === 'None') {
+                    return `<span>N/A</span>`;
+                }
 
-                    return `${a?.name}: <span class="${a?.class}">${a?.effect}</span>`;
-                }).join('<br/>');
-            }
-            
-            const anomaliesRow = createOptionRow(
-                'anomaliesRow',
-                null,
-                'Anomalies:',
+                return `${a?.name}: <span class="${a?.class}">${a?.effect}</span>`;
+            }).join('<br/>');
+        }
+        
+        const anomaliesRow = createOptionRowV2({
+            labelId: 'anomaliesRow',
+            renderNameABs: null,
+            labelText: 'Anomalies:',
+            inputElements: [
                 createTextElement(
                     anomaliesText,
                     'anomaliesTextField',
                     ['value-text']
                 ),
-                null,
-                null,
-                null,
-                null,
-                ``,
-                '',
-                null,
-                null,
-                null,
-                null,
-                null,
-                false,
-                null,
-                null,
-                '',
-                [true, '15%', '85%']
-            );
-            
-            optionContentElement.appendChild(starNameRow);
-            optionContentElement.appendChild(civilizationRow);
-            optionContentElement.appendChild(populationRow);
-            optionContentElement.appendChild(threatRow);
-            optionContentElement.appendChild(fleetRow);
-            optionContentElement.appendChild(anomaliesRow);
-        }
+            ],
+            descriptionText: ``,
+            resourcePriceObject: '',
+            dataConditionCheck: null,
+            objectSectionArgument1: null,
+            objectSectionArgument2: null,
+            quantityArgument: null,
+            autoBuyerTier: null,
+            startInvisibleValue: false,
+            resourceString: null,
+            optionalIterationParam: null,
+            rowCategory: '',
+            noDescriptionContainer: [true, '15%', '85%']
+        });
+
+        optionContentElement.appendChild(starNameRow);
+        optionContentElement.appendChild(civilizationRow);
+        optionContentElement.appendChild(populationRow);
+        optionContentElement.appendChild(threatRow);
+        optionContentElement.appendChild(fleetRow);
+        optionContentElement.appendChild(anomaliesRow);
     }
+}
 
     if (heading === 'Fleet Hangar') {
         const headerRow = document.getElementById('headerContentTab5');
@@ -1159,44 +1142,43 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
         ];
 
         fleetShips.forEach(fleetShip => {
-            const fleetShipBuildRow = createOptionRow(
-                `space${capitaliseString(fleetShip.id)}BuildRow`,
-                null,
-                `${fleetShip.label}:`,
-                createButton(`Build`, ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check'], () => {
-                    gain(1, `${fleetShip.id}BuiltQuantity`, fleetShip.id, false, null, 'space', 'space');
-                    increaseAttackAndDefensePower(fleetShip.id);
-                    setFleetChangedSinceLastDiplomacy(true);
-                    replaceBattleUnits({ player: [], enemy: [] });
-                    setNeedNewBattleCanvas(true);
-                    setFormationGoal(null);
-                    setInFormation(false);
-                }, 'upgradeCheck', '', 'spaceUpgrade', fleetShip.id, 'cash', true, null, 'fleetPurchase'),
-                createTextElement(
-                    fleetShip.id === 'fleetEnvoy' 
-                    ? `Quantity: <span id="${fleetShip.id}BuiltQuantity">${getFleetShips(fleetShip.id)}</span> / <span id="${fleetShip.id}BuiltQuantityMax">${getMaxFleetShip(fleetShip.id)}</span>`
-                    : `Quantity: <span id="${fleetShip.id}BuiltQuantity">${getFleetShips(fleetShip.id)}</span>`,
-                `${fleetShip.id}QuantityText`,
-                []
-                ),
-                null,
-                null,
-                null,
-                `${getCurrencySymbol() + getResourceDataObject('space', ['upgrades', fleetShip.id, 'price'])}, 
+            const fleetShipBuildRow = createOptionRowV2({
+                labelId: `space${capitaliseString(fleetShip.id)}BuildRow`,
+                renderNameABs: null,
+                labelText: `${fleetShip.label}:`,
+                inputElements: [
+                    createButton(`Build`, ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check'], () => {
+                        gain(1, `${fleetShip.id}BuiltQuantity`, fleetShip.id, false, null, 'space', 'space');
+                        increaseAttackAndDefensePower(fleetShip.id);
+                        setFleetChangedSinceLastDiplomacy(true);
+                        replaceBattleUnits({ player: [], enemy: [] });
+                        setNeedNewBattleCanvas(true);
+                        setFormationGoal(null);
+                        setInFormation(false);
+                    }, 'upgradeCheck', '', 'spaceUpgrade', fleetShip.id, 'cash', true, null, 'fleetPurchase'),
+                    createTextElement(
+                        fleetShip.id === 'fleetEnvoy' 
+                        ? `Quantity: <span id="${fleetShip.id}BuiltQuantity">${getFleetShips(fleetShip.id)}</span> / <span id="${fleetShip.id}BuiltQuantityMax">${getMaxFleetShip(fleetShip.id)}</span>`
+                        : `Quantity: <span id="${fleetShip.id}BuiltQuantity">${getFleetShips(fleetShip.id)}</span>`,
+                    `${fleetShip.id}QuantityText`,
+                    []
+                    ),
+                ],
+                descriptionText: `${getCurrencySymbol() + getResourceDataObject('space', ['upgrades', fleetShip.id, 'price'])}, 
                 ${getResourceDataObject('space', ['upgrades', fleetShip.id, 'resource1Price'])[0]} ${capitaliseString(getResourceDataObject('space', ['upgrades', fleetShip.id, 'resource1Price'])[1])}, 
                 ${getResourceDataObject('space', ['upgrades', fleetShip.id, 'resource2Price'])[0]} ${capitaliseString(getResourceDataObject('space', ['upgrades', fleetShip.id, 'resource2Price'])[1])}, 
                 ${getResourceDataObject('space', ['upgrades', fleetShip.id, 'resource3Price'])[0]} ${capitaliseString(getResourceDataObject('space', ['upgrades', fleetShip.id, 'resource3Price'])[1])}`,
-                '',
-                'upgradeCheck',
-                'spaceUpgrade',
-                fleetShip.id,
-                'cash',
-                null,
-                false,
-                null,
-                null,
-                'fleetPurchase'
-            );
+                resourcePriceObject: '',
+                dataConditionCheck: 'upgradeCheck',
+                objectSectionArgument1: 'spaceUpgrade',
+                objectSectionArgument2: fleetShip.id,
+                quantityArgument: 'cash',
+                autoBuyerTier: null,
+                startInvisibleValue: false,
+                resourceString: null,
+                optionalIterationParam: null,
+                rowCategory: 'fleetPurchase'
+            });
             optionContentElement.appendChild(fleetShipBuildRow);
         });
         setupInfoTooltips();
@@ -1230,39 +1212,41 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
         createColoniseOpinionProgressBar(optionContentElement);
         setColoniseOpinionProgressBar(starData.currentImpression, optionContentElement);
         
-            const diplomacyOptionsRow = createOptionRow(
-                'diplomacyOptionsRow',
-                null,
-                'Relations:',
-                createButton(`Bully`, ['option-button', 'red-disabled-text', 'diplomacy-button', 'bully'], () => {
-                    setStarSystemDataObject(true, 'stars', ['destinationStar', 'triedToBully']);
-                    updateDiplomacySituation('bully', starData);
-                }, null, null, null, null, null, true, null, 'diplomacy'),
-                createButton(`Passive`, ['option-button', 'red-disabled-text', 'diplomacy-button', 'passive'], () => {
-                    updateDiplomacySituation('passive', starData);
-                }, null, null, null, null, null, true, null, 'diplomacy'),                            
-                createButton(`Harmony`, ['option-button', 'red-disabled-text', 'diplomacy-button', 'harmony'], () => {
-                    updateDiplomacySituation('harmony', starData);
-                }, null, null, null, null, null, true, null, 'diplomacy'),               
-                createButton(`Vassalize`, ['option-button', 'red-disabled-text', 'diplomacy-button', 'vassalize'], () => {
-                    updateDiplomacySituation('vassalize', starData);
-                }, null, null, null, null, null, true, null, 'diplomacy'),
-                createButton(`Conquest`, ['option-button', 'red-disabled-text', 'diplomacy-button', 'conquest'], () => {
-                    updateDiplomacySituation('conquest', starData);
-                }, null, null, null, null, null, true, null, 'diplomacy'),
-                '',
-                '',
-                null,
-                null,
-                null,
-                null,
-                null,
-                false,
-                null,
-                null,
-                '',
-                [true, '15%', '85%']
-            );  
+            const diplomacyOptionsRow = createOptionRowV2({
+                labelId: 'diplomacyOptionsRow',
+                renderNameABs: null,
+                labelText: 'Relations:',
+                inputElements: [
+                    createButton(`Bully`, ['option-button', 'red-disabled-text', 'diplomacy-button', 'bully'], () => {
+                        setStarSystemDataObject(true, 'stars', ['destinationStar', 'triedToBully']);
+                        updateDiplomacySituation('bully', starData);
+                    }, null, null, null, null, null, true, null, 'diplomacy'),
+                    createButton(`Passive`, ['option-button', 'red-disabled-text', 'diplomacy-button', 'passive'], () => {
+                        updateDiplomacySituation('passive', starData);
+                    }, null, null, null, null, null, true, null, 'diplomacy'),
+                    createButton(`Harmony`, ['option-button', 'red-disabled-text', 'diplomacy-button', 'harmony'], () => {
+                        updateDiplomacySituation('harmony', starData);
+                    }, null, null, null, null, null, true, null, 'diplomacy'),
+                    createButton(`Vassalize`, ['option-button', 'red-disabled-text', 'diplomacy-button', 'vassalize'], () => {
+                        updateDiplomacySituation('vassalize', starData);
+                    }, null, null, null, null, null, true, null, 'diplomacy'),
+                    createButton(`Conquest`, ['option-button', 'red-disabled-text', 'diplomacy-button', 'conquest'], () => {
+                        updateDiplomacySituation('conquest', starData);
+                    }, null, null, null, null, null, true, null, 'diplomacy'),
+                ],
+                descriptionText: '',
+                resourcePriceObject: '',
+                dataConditionCheck: null,
+                objectSectionArgument1: null,
+                objectSectionArgument2: null,
+                quantityArgument: null,
+                autoBuyerTier: null,
+                startInvisibleValue: false,
+                resourceString: null,
+                optionalIterationParam: null,
+                rowCategory: '',
+                noDescriptionContainer: [true, '15%', '85%']
+            });  
 
             const attitude = starData.attitude;
             const attitudeClass = attitude === "Neutral" || attitude === 'None'
@@ -1280,36 +1264,35 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                     ? "warning-orange-text"
                     : "red-disabled-text";
 
-            const receptionStatusRow = createOptionRow(
-                'receptionStatusRow',
-                null,
-                'Attitude:',              
-                createTextElement(
-                    `<span class="${attitudeClass}">${attitude}</span>`,
-                    'attitudeText',
-                    ['value-text', 'intelligence-element']
-                ),  
-                createTextElement(
-                    `Threat: <span class="${threatLevelClass}">${threatLevel}</span>`,
-                    'threatLevelText',
-                    [threatLevelClass, 'intelligence-element']
-                ),                
-                null,                              
-                null,
-                null,
-                ``,
-                '',
-                null,
-                null,
-                null,
-                null,
-                null,
-                false,
-                null,
-                null,
-                '',
-                [true, '15%', '85%']
-            );  
+            const receptionStatusRow = createOptionRowV2({
+                labelId: 'receptionStatusRow',
+                renderNameABs: null,
+                labelText: 'Attitude:',
+                inputElements: [
+                    createTextElement(
+                        `<span class="${attitudeClass}">${attitude}</span>`,
+                        'attitudeText',
+                        ['value-text', 'intelligence-element']
+                    ),
+                    createTextElement(
+                        `Threat: <span class="${threatLevelClass}">${threatLevel}</span>`,
+                        'threatLevelText',
+                        [threatLevelClass, 'intelligence-element']
+                    ),
+                ],
+                descriptionText: ``,
+                resourcePriceObject: '',
+                dataConditionCheck: null,
+                objectSectionArgument1: null,
+                objectSectionArgument2: null,
+                quantityArgument: null,
+                autoBuyerTier: null,
+                startInvisibleValue: false,
+                resourceString: null,
+                optionalIterationParam: null,
+                rowCategory: '',
+                noDescriptionContainer: [true, '15%', '85%']
+            });  
             
             const traitsText = starData.lifeformTraits
             .slice(0, 2)
@@ -1323,113 +1306,113 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                     ? "warning-orange-text" 
                     : "green-ready-text"; 
         
-            const intelligenceRow = createOptionRow(
-                'intelligenceRow',
-                null,
-                'Intelligence:',              
-                createTextElement(
-                    `<span class="${
-                        starData.civilizationLevel === 'Unsentient' || starData.civilizationLevel === 'None'
-                            ? 'green-ready-text'
-                            : starData.civilizationLevel === 'Industrial'
-                                ? 'warning-orange-text'
-                                : 'red-disabled-text'
-                    }">
+            const intelligenceRow = createOptionRowV2({
+                labelId: 'intelligenceRow',
+                renderNameABs: null,
+                labelText: 'Intelligence:',
+                inputElements: [
+                    createTextElement(
+                        `<span class="${
+                            starData.civilizationLevel === 'Unsentient' || starData.civilizationLevel === 'None'
+                                ? 'green-ready-text'
+                                : starData.civilizationLevel === 'Industrial'
+                                    ? 'warning-orange-text'
+                                    : 'red-disabled-text'
+                        }">
                         ${starData.civilizationLevel}
                     </span>`,
-                    'apContainer',
-                    ['value-text', 'intelligence-element']
-                ),  
-                createTextElement(
-                    `<span class="value-text">${traitsText}</span>`,
-                    'traitsText',
-                    ['value-text', 'intelligence-element']
-                ),                  
-                createTextElement(
-                    `Defense: <span class="value-text ${defenseClass}">${defenseText}</span>`,
-                    'defenseRatingText',
-                    ['value-text', 'intelligence-element']
-                ),                               
-                null,
-                null,
-                ``,
-                '',
-                null,
-                null,
-                null,
-                null,
-                null,
-                false,
-                null,
-                null,
-                '',
-                [true, '15%', '85%']
-            );                                                           
+                        'apContainer',
+                        ['value-text', 'intelligence-element']
+                    ),
+                    createTextElement(
+                        `<span class="value-text">${traitsText}</span>`,
+                        'traitsText',
+                        ['value-text', 'intelligence-element']
+                    ),
+                    createTextElement(
+                        `Defense: <span class="value-text ${defenseClass}">${defenseText}</span>`,
+                        'defenseRatingText',
+                        ['value-text', 'intelligence-element']
+                    ),
+                ],
+                descriptionText: ``,
+                resourcePriceObject: '',
+                dataConditionCheck: null,
+                objectSectionArgument1: null,
+                objectSectionArgument2: null,
+                quantityArgument: null,
+                autoBuyerTier: null,
+                startInvisibleValue: false,
+                resourceString: null,
+                optionalIterationParam: null,
+                rowCategory: '',
+                noDescriptionContainer: [true, '15%', '85%']
+            });                                                           
         
-            const fleetRow = createOptionRow(
-                'enemyFleetsRow',
-                null,
-                'Enemy Fleets:',
-                createTextElement(
-                    `Air: <span class="${starData.civilizationLevel === 'None' 
-                        ? 'green-ready-text' 
-                        : (getStellarScannerBuilt() 
-                            ? (starData.enemyFleets.fleetChanges.air.class || '') 
-                            : 'red-disabled-text')}">
+            const fleetRow = createOptionRowV2({
+                labelId: 'enemyFleetsRow',
+                renderNameABs: null,
+                labelText: 'Enemy Fleets:',
+                inputElements: [
+                    createTextElement(
+                        `Air: <span class="${starData.civilizationLevel === 'None' 
+                            ? 'green-ready-text' 
+                            : (getStellarScannerBuilt() 
+                                ? (starData.enemyFleets.fleetChanges.air.class || '') 
+                                : 'red-disabled-text')}">
                         ${starData.civilizationLevel === 'None' 
                             ? 'None' 
                             : (getStellarScannerBuilt() 
                                 ? starData.enemyFleets.air 
                                 : '???')}
                     </span>`,
-                    'fleetAirText',
-                    ['value-text', 'ap-destination-star-element']
-                ),
-                createTextElement(
-                    `Land: <span class="${starData.civilizationLevel === 'None' 
-                        ? 'green-ready-text' 
-                        : (getStellarScannerBuilt() 
-                            ? (starData.enemyFleets.fleetChanges.land.class || '') 
-                            : 'red-disabled-text')}">
+                        'fleetAirText',
+                        ['value-text', 'ap-destination-star-element']
+                    ),
+                    createTextElement(
+                        `Land: <span class="${starData.civilizationLevel === 'None' 
+                            ? 'green-ready-text' 
+                            : (getStellarScannerBuilt() 
+                                ? (starData.enemyFleets.fleetChanges.land.class || '') 
+                                : 'red-disabled-text')}">
                         ${starData.civilizationLevel === 'None' 
                             ? 'None' 
                             : (getStellarScannerBuilt() 
                                 ? starData.enemyFleets.land 
                                 : '???')}
                     </span>`,
-                    'fleetLandText',
-                    ['value-text', 'ap-destination-star-element']
-                ),
-                createTextElement(
-                    `Sea: <span class="${starData.civilizationLevel === 'None' 
-                        ? 'green-ready-text' 
-                        : (getStellarScannerBuilt() 
-                            ? (starData.enemyFleets.fleetChanges.sea.class || '') 
-                            : 'red-disabled-text')}">
+                        'fleetLandText',
+                        ['value-text', 'ap-destination-star-element']
+                    ),
+                    createTextElement(
+                        `Sea: <span class="${starData.civilizationLevel === 'None' 
+                            ? 'green-ready-text' 
+                            : (getStellarScannerBuilt() 
+                                ? (starData.enemyFleets.fleetChanges.sea.class || '') 
+                                : 'red-disabled-text')}">
                         ${starData.civilizationLevel === 'None' 
                             ? 'None' 
                             : (getStellarScannerBuilt() 
                                 ? starData.enemyFleets.sea 
                                 : '???')}
                     </span> <p id="info_starShipScanEnemyFleets" class="info-emoji">ℹ️</p>`,
-                    'fleetSeaText',
-                    ['value-text', 'ap-destination-star-element']
-                ),                                                 
-                null,
-                null,
-                ``,
-                '',
-                null,
-                null,
-                null,
-                null,
-                null,
-                false,
-                null,
-                null,
-                '',
-                [true, '15%', '85%']
-            );       
+                        'fleetSeaText',
+                        ['value-text', 'ap-destination-star-element']
+                    ),
+                ],
+                descriptionText: ``,
+                resourcePriceObject: '',
+                dataConditionCheck: null,
+                objectSectionArgument1: null,
+                objectSectionArgument2: null,
+                quantityArgument: null,
+                autoBuyerTier: null,
+                startInvisibleValue: false,
+                resourceString: null,
+                optionalIterationParam: null,
+                rowCategory: '',
+                noDescriptionContainer: [true, '15%', '85%']
+            });       
         
             optionContentElement.appendChild(diplomacyOptionsRow);
             optionContentElement.appendChild(receptionStatusRow);
