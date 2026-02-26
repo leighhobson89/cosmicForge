@@ -470,8 +470,6 @@ export function initialiseDescriptions() {
         'situation': `Cosmic Rip operations and progression - GP: <span id="cosmicRipGpBalance" class="green-ready-text">${getCosmicRipGalacticPoints()}</span>`,
         'near space scanner array': `Commission the Near Space Scanner Array, scan sectors to locate distortions, and pinpoint the Cosmic Rip. - GP: <span id="cosmicRipGpBalanceNearSpace" class="green-ready-text">${getCosmicRipGalacticPoints()}</span>`,
         'cosmic rip': `Interact with the Cosmic Rip once it has been located. - GP: <span id="cosmicRipGpBalanceCosmicRip" class="green-ready-text">${getCosmicRipGalacticPoints()}</span>`,
-        'ripcraft': `Ripcraft construction and upgrades (coming soon). - GP: <span id="cosmicRipGpBalanceRipcraft" class="green-ready-text">${getCosmicRipGalacticPoints()}</span>`,
-        'expeditions': `Dispatch expeditions into unstable space (coming soon). - GP: <span id="cosmicRipGpBalanceExpeditions" class="green-ready-text">${getCosmicRipGalacticPoints()}</span>`,
 
         'contact': "Contact Channels for Feedback and Suggestions",
         'get started': "Learn how to get started in Cosmic Forge.",
@@ -657,6 +655,16 @@ export function initialiseDescriptions() {
         },
         oxygenGainRow: {
             content1: "Manually gain one unit of Oxygen.",
+            content2: "",
+            updateAt: ""
+        },
+        cosmicRipNearSpaceScannerArrayDeploySensorBuoyRow: {
+            content1: "Deploy a buoy to begin passively collecting rip telemetry.",
+            content2: "",
+            updateAt: ""
+        },
+        cosmicRipNearSpaceScannerArrayDeployRipResearchOrbiterRow: {
+            content1: "Deploy an orbiter to help gather rip research.",
             content2: "",
             updateAt: ""
         },

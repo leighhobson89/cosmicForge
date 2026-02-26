@@ -521,40 +521,6 @@ export function drawTab8Content(heading, optionContentElement) {
         telescopeContainer.appendChild(zoomCanvas);
         optionContentElement.appendChild(telescopeContainer);
 
-        const opsHeaderRow = createOptionRow(
-            'cosmicRipNearSpaceScannerArrayOpsHeaderRow',
-            null,
-            'Rip Sector Operations:',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            found ? '<span class="warning-orange-text">Available</span>' : '<span class="red-disabled-text">Locked</span>',
-            '',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
-        opsHeaderRow.classList.add('invisible');
-        optionContentElement.appendChild(opsHeaderRow);
-
         const deploySensorBuoyRow = createOptionRow(
             'cosmicRipNearSpaceScannerArrayDeploySensorBuoyRow',
             null,
@@ -578,7 +544,7 @@ export function drawTab8Content(heading, optionContentElement) {
             null,
             null,
             null,
-            'Deploy a buoy to begin passively collecting rip telemetry.',
+            '',
             '',
             null,
             null,
@@ -600,13 +566,13 @@ export function drawTab8Content(heading, optionContentElement) {
         deploySensorBuoyRow.classList.add('invisible');
         optionContentElement.appendChild(deploySensorBuoyRow);
 
-        const deployStabilizerNodeRow = createOptionRow(
-            'cosmicRipNearSpaceScannerArrayDeployStabilizerNodeRow',
+        const deployRipResearchOrbiterRow = createOptionRow(
+            'cosmicRipNearSpaceScannerArrayDeployRipResearchOrbiterRow',
             null,
-            'Stabilizer Node:',
+            'Rip Research Orbiter:',
             createButton(
                 'DEPLOY',
-                ['option-button', 'red-disabled-text', 'cosmic-rip-deploy-stabilizer-node-button'],
+                ['option-button', 'red-disabled-text', 'cosmic-rip-deploy-rip-research-orbiter-button'],
                 () => {
                     showNotification('Coming soon', 'info', 2500, 'cosmicRip');
                 },
@@ -617,13 +583,13 @@ export function drawTab8Content(heading, optionContentElement) {
                 null,
                 true,
                 null,
-                'cosmicRipDeployStabilizerNode'
+                'cosmicRipDeployRipResearchOrbiter'
             ),
             null,
             null,
             null,
             null,
-            'Deploy a stabilizer node to reduce local instability.',
+            '',
             '',
             null,
             null,
@@ -640,66 +606,14 @@ export function drawTab8Content(heading, optionContentElement) {
             null,
             null,
             null,
-            'cosmicRipDeployStabilizerNode'
+            'cosmicRipDeployRipResearchOrbiter'
         );
-        deployStabilizerNodeRow.classList.add('invisible');
-        optionContentElement.appendChild(deployStabilizerNodeRow);
-
-        const sampleRipRow = createOptionRow(
-            'cosmicRipNearSpaceScannerArraySampleRipRow',
-            null,
-            'Rip Sampling:',
-            createButton(
-                'SAMPLE',
-                ['option-button', 'red-disabled-text', 'cosmic-rip-sample-rip-button'],
-                () => {
-                    showNotification('Coming soon', 'info', 2500, 'cosmicRip');
-                },
-                null,
-                null,
-                null,
-                null,
-                null,
-                true,
-                null,
-                'cosmicRipSampleRip'
-            ),
-            null,
-            null,
-            null,
-            null,
-            'Perform a controlled sample to gain Cosmic Rip Research.',
-            '',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            'cosmicRipSampleRip'
-        );
-        sampleRipRow.classList.add('invisible');
-        optionContentElement.appendChild(sampleRipRow);
-
-        if (restored) {
-            if (opsHeaderRow) {
-                opsHeaderRow.classList.remove('invisible');
-            }
-        }
+        deployRipResearchOrbiterRow.classList.add('invisible');
+        optionContentElement.appendChild(deployRipResearchOrbiterRow);
 
         if (restored && found) {
             deploySensorBuoyRow.classList.remove('invisible');
-            deployStabilizerNodeRow.classList.remove('invisible');
-            sampleRipRow.classList.remove('invisible');
+            deployRipResearchOrbiterRow.classList.remove('invisible');
         }
 
         setCosmicRipNearSpaceScannerArrayCanvasEl(canvas);
@@ -912,74 +826,6 @@ export function drawTab8Content(heading, optionContentElement) {
         statusRow.classList.add('invisible');
         optionContentElement.appendChild(statusRow);
 
-        const metersRow = createOptionRow(
-            'cosmicRipCosmicRipMetersRow',
-            null,
-            'Field Readings:',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            `<span id="cosmicRipCosmicRipMetersText">Instability: - | Integrity: - | Seal: -</span>`,
-            '',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
-        metersRow.classList.add('invisible');
-        optionContentElement.appendChild(metersRow);
-
-        const projectsHeaderRow = createOptionRow(
-            'cosmicRipCosmicRipProjectsHeaderRow',
-            null,
-            'Projects:',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            found ? '<span class="warning-orange-text">Available</span>' : '<span class="red-disabled-text">Locked</span>',
-            '',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
-        projectsHeaderRow.classList.add('invisible');
-        optionContentElement.appendChild(projectsHeaderRow);
-
         const stabilizerProjectRow = createOptionRow(
             'cosmicRipCosmicRipStabilizerProjectRow',
             null,
@@ -1025,294 +871,12 @@ export function drawTab8Content(heading, optionContentElement) {
         stabilizerProjectRow.classList.add('invisible');
         optionContentElement.appendChild(stabilizerProjectRow);
 
-        const containmentProjectRow = createOptionRow(
-            'cosmicRipCosmicRipContainmentProjectRow',
-            null,
-            'Containment Ring:',
-            createButton(
-                'BUILD',
-                ['option-button', 'red-disabled-text', 'cosmic-rip-build-containment-ring-button'],
-                () => {
-                    showNotification('Coming soon', 'info', 2500, 'cosmicRip');
-                },
-                null,
-                null,
-                null,
-                null,
-                null,
-                true,
-                null,
-                'cosmicRipBuildContainmentRing'
-            ),
-            null,
-            null,
-            null,
-            null,
-            'Construct containment segments to build integrity and prepare sealing.',
-            '',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            'cosmicRipBuildContainmentRing'
-        );
-        containmentProjectRow.classList.add('invisible');
-        optionContentElement.appendChild(containmentProjectRow);
-
-        const operationsHeaderRow = createOptionRow(
-            'cosmicRipCosmicRipOperationsHeaderRow',
-            null,
-            'Operations:',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            found ? '<span class="warning-orange-text">Available</span>' : '<span class="red-disabled-text">Locked</span>',
-            '',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
-        operationsHeaderRow.classList.add('invisible');
-        optionContentElement.appendChild(operationsHeaderRow);
-
-        const sampleOperationRow = createOptionRow(
-            'cosmicRipCosmicRipSampleOperationRow',
-            null,
-            'Controlled Sample:',
-            createButton(
-                'SAMPLE',
-                ['option-button', 'red-disabled-text', 'cosmic-rip-controlled-sample-button'],
-                () => {
-                    showNotification('Coming soon', 'info', 2500, 'cosmicRip');
-                },
-                null,
-                null,
-                null,
-                null,
-                null,
-                true,
-                null,
-                'cosmicRipControlledSample'
-            ),
-            null,
-            null,
-            null,
-            null,
-            'Perform a controlled sample to gain Cosmic Rip Research.',
-            '',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            'cosmicRipControlledSample'
-        );
-        sampleOperationRow.classList.add('invisible');
-        optionContentElement.appendChild(sampleOperationRow);
-
-        const sealHeaderRow = createOptionRow(
-            'cosmicRipCosmicRipSealHeaderRow',
-            null,
-            'Seal Sequence:',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            '<span class="red-disabled-text">Locked</span>',
-            '',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
-        sealHeaderRow.classList.add('invisible');
-        optionContentElement.appendChild(sealHeaderRow);
-
-        const sealStepRow = createOptionRow(
-            'cosmicRipCosmicRipSealStepRow',
-            null,
-            'Seal Progress:',
-            createButton(
-                'EXECUTE',
-                ['option-button', 'red-disabled-text', 'cosmic-rip-execute-seal-step-button'],
-                () => {
-                    showNotification('Coming soon', 'info', 2500, 'cosmicRip');
-                },
-                null,
-                null,
-                null,
-                null,
-                null,
-                true,
-                null,
-                'cosmicRipExecuteSealStep'
-            ),
-            null,
-            null,
-            null,
-            null,
-            'Execute the next sealing step once all prerequisites are met.',
-            '',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            'cosmicRipExecuteSealStep'
-        );
-        sealStepRow.classList.add('invisible');
-        optionContentElement.appendChild(sealStepRow);
-
         if (restored) {
             statusRow.classList.remove('invisible');
-            metersRow.classList.remove('invisible');
         }
         if (restored && found) {
-            projectsHeaderRow.classList.remove('invisible');
             stabilizerProjectRow.classList.remove('invisible');
-            containmentProjectRow.classList.remove('invisible');
-            operationsHeaderRow.classList.remove('invisible');
-            sampleOperationRow.classList.remove('invisible');
-            sealHeaderRow.classList.remove('invisible');
-            sealStepRow.classList.remove('invisible');
         }
-        return;
-    }
-
-    if (heading === 'Ripcraft') {
-        const row = createOptionRow(
-            'cosmicRipRipcraftStubRow',
-            null,
-            'Ripcraft:',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            'Coming soon',
-            '',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
-        optionContentElement.appendChild(row);
-        return;
-    }
-
-    if (heading === 'Expeditions') {
-        const row = createOptionRow(
-            'cosmicRipExpeditionsStubRow',
-            null,
-            'Expeditions:',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            'Coming soon',
-            '',
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
-        optionContentElement.appendChild(row);
         return;
     }
 }

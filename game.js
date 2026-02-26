@@ -1198,16 +1198,12 @@ function cosmicRipChecks() {
         optionPane === 'situation'
         || optionPane === 'near space scanner array'
         || optionPane === 'cosmic rip'
-        || optionPane === 'ripcraft'
-        || optionPane === 'expeditions'
     ) {
         const gp = Math.max(0, (((getSettledStars?.() || []).length) - 1) - (Number(getGalacticPointsSpent?.()) || 0));
         const gpIds = [
             'cosmicRipGpBalance',
             'cosmicRipGpBalanceNearSpace',
-            'cosmicRipGpBalanceCosmicRip',
-            'cosmicRipGpBalanceRipcraft',
-            'cosmicRipGpBalanceExpeditions',
+            'cosmicRipGpBalanceCosmicRip'
         ];
         gpIds.forEach((id) => {
             const el = document.getElementById(id);
@@ -1628,10 +1624,8 @@ function cosmicRipChecks() {
 
                         const deploySensorBuoyRowEl = document.getElementById('cosmicRipNearSpaceScannerArrayDeploySensorBuoyRow');
                         if (deploySensorBuoyRowEl) deploySensorBuoyRowEl.classList.remove('invisible');
-                        const deployStabilizerNodeRowEl = document.getElementById('cosmicRipNearSpaceScannerArrayDeployStabilizerNodeRow');
-                        if (deployStabilizerNodeRowEl) deployStabilizerNodeRowEl.classList.remove('invisible');
-                        const sampleRipRowEl = document.getElementById('cosmicRipNearSpaceScannerArraySampleRipRow');
-                        if (sampleRipRowEl) sampleRipRowEl.classList.remove('invisible');
+                        const deployRipResearchOrbiterRowEl = document.getElementById('cosmicRipNearSpaceScannerArrayDeployRipResearchOrbiterRow');
+                        if (deployRipResearchOrbiterRowEl) deployRipResearchOrbiterRowEl.classList.remove('invisible');
 
                         const fogOverlayEl = getCosmicRipNearSpaceScannerArrayFogOverlayEl();
                         const interactiveOverlayEl = getCosmicRipNearSpaceScannerArrayInteractiveOverlayEl();

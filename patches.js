@@ -18,51 +18,6 @@ export function migrateResourceData(saveData, objectType, options = {}) {
     }
 
     while (saveData.version < currentVersion) {
-        if (saveData.version < 0.91) {
-            if (objectType === 'gameState') {
-                saveData.oTypeMechanicActivatedForThisSave = true;
-            }
-            if (objectType === 'resourceData') {
-                const upgrades = saveData?.space?.upgrades;
-                if (upgrades && typeof upgrades === 'object') {
-                    const applyRocketPatch = (rocketKey, parts, titaniumCostPerPart, oldParts) => {
-                        const rocket = upgrades?.[rocketKey];
-                        if (!rocket || typeof rocket !== 'object') {
-                            return;
-                        }
-                        if (rocket.parts !== undefined) rocket.parts = parts;
-                        if (rocket.builtParts !== undefined) {
-                            const built = Number(rocket.builtParts) || 0;
-                            if (built >= oldParts) {
-                                rocket.builtParts = parts;
-                            }
-                        }
-                        if (Array.isArray(rocket.resource2Price) && rocket.resource2Price.length >= 1) {
-                            rocket.resource2Price[0] = titaniumCostPerPart;
-                        }
-                    };
-                    applyRocketPatch('rocket1', 12, 700, 15);
-                    applyRocketPatch('rocket2', 17, 700, 20);
-                    applyRocketPatch('rocket3', 22, 700, 25);
-                    applyRocketPatch('rocket4', 27, 700, 30);
-                }
-            }
-            saveData.version = 0.91;
-        }
-        if (saveData.version < 0.92) {
-            if (objectType === 'resourceData') {
-                const energyUpgrades = saveData?.buildings?.energy?.upgrades;
-                if (energyUpgrades && typeof energyUpgrades === 'object') {
-                    if (energyUpgrades.powerPlant2 && typeof energyUpgrades.powerPlant2 === 'object') {
-                        energyUpgrades.powerPlant2.price = 1000;
-                    }
-                    if (energyUpgrades.powerPlant3 && typeof energyUpgrades.powerPlant3 === 'object') {
-                        energyUpgrades.powerPlant3.price = 700;
-                    }
-                }
-            }
-            saveData.version = 0.92;
-        }
         if (saveData.version < 0.93) {
             if (objectType === 'galacticCasinoData') {
                 saveData.casinoPoints.cpBaseCost = 100000;
@@ -262,6 +217,44 @@ export function migrateResourceData(saveData, objectType, options = {}) {
             }
 
             saveData.version = 0.969;
+        }
+
+        if (saveData.version < 0.970) {
+            if (objectType === 'resourceData') {
+                const freshCosmicRip = {
+                    galacticPoints: 0,
+                    nearSpaceScannerArrayRestored: false,
+                    ripLocationSectorIndex: -1,
+                    ripFound: false,
+                    scanResultsBySectorIndex: Array(9).fill(false),
+                    upgrades: {
+                        sensorBuoy: {
+                            deployedCount: 0,
+                            basePrices: [1000000, 1000000],
+                            price: 1000000,
+                            resource1Price: [1000000, 'research', 'research'],
+                        },
+                        ripResearchOrbiter: {
+                            deployedCount: 0,
+                            basePrices: [500000, 700000],
+                            price: 500000,
+                            resource1Price: [700000, 'research', 'research'],
+                        },
+                    },
+                    ripResearch: {
+                        points: 0,
+                        level: 0,
+                        unlocked: {
+                            stabilization: false,
+                        }
+                    },
+                    projects: {
+                        stabilizerArrayLevel: 0,
+                    }
+                };
+                saveData.cosmicRip = freshCosmicRip;
+            }
+            saveData.version = 0.970;
         }
     }
     return saveData;

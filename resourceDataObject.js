@@ -8,7 +8,7 @@ import { showNotification } from "./ui.js";
 
 export let achievementImageUrls;
 export let resourceData = {
-    version: 0.967, //update this whenever changes are made to the structure
+    version: 0.970, //update this whenever changes are made to the structure
     resources: {
         solar: {
             autoSell: false,
@@ -933,32 +933,32 @@ export let resourceData = {
         ripLocationSectorIndex: -1,
         ripFound: false,
         scanResultsBySectorIndex: Array(9).fill(false),
-        stage: 'discovery',
-        instability: 100,
-        containmentIntegrity: 0,
-        sealProgress: 0,
+        upgrades: {
+            sensorBuoy: {
+                deployedCount: 0,
+                basePrices: [1000000, 1000000],
+                price: 1000000,
+                resource1Price: [1000000, 'research', 'research'],
+            },
+            ripResearchOrbiter: {
+                deployedCount: 0,
+                basePrices: [500000, 700000],
+                price: 500000,
+                resource1Price: [700000, 'research', 'research'],
+            },
+        },
         ripResearch: {
             points: 0,
             level: 0,
             unlocked: {
                 stabilization: false,
-                containment: false,
-                sealing: false
             }
         },
         projects: {
             stabilizerArrayLevel: 0,
-            containmentRingSegmentsBuilt: 0,
-            containmentRingSegmentsRequired: 8,
-            anchorPylonsBuilt: 0,
-            anchorPylonsRequired: 4,
-            sealDriverBuilt: false,
-            failsafeCapacitorsBuilt: 0,
-            failsafeCapacitorsRequired: 3,
-            sensorBuoyDeployed: false,
-            stabilizerNodeDeployedCount: 0
         }
     },
+
     fleets: {
         attackPower: 0,
         defensePower: 0
@@ -1010,7 +1010,7 @@ export const miaplacidus = {
 
 
 export let starSystems = {
-    version: 0.969,
+    version: 0.970,
     stars: {
         spica: {
             mapSize: 5.504440179536064, //might need to add this to star object when added dynamically for after rebirth
@@ -1029,14 +1029,14 @@ export let starSystems = {
 };
 
 export let oTypePowerPlantBuffs = {
-    version: 0.969,
+    version: 0.970,
     basicPowerPlantStar: { starName: null, settled: false },
     solarPowerPlantStar: { starName: null, settled: false },
     advancedPowerPlantStar: { starName: null, settled: false }
 };
 
 export let galacticCasino = {
-    version: 0.969,
+    version: 0.970,
     settings: {
         baseProbabilityCasino: 0.4,
     },
@@ -1067,7 +1067,7 @@ export let galacticCasino = {
 };
 
 export let galacticMarket = {
-    version: 0.969,
+    version: 0.970,
     resources: {
         hydrogen: { 
             name: "Hydrogen", 
@@ -1173,7 +1173,7 @@ export let galacticMarket = {
 };
 
 export let ascendencyBuffs = {
-    version: 0.969,
+    version: 0.970,
     "littleBagOfHydrogen": {
         name: "Little Bag Of Hydrogen",
         description: "buffLittleBagOfHydrogenRow",

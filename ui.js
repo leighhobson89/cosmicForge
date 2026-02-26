@@ -9801,26 +9801,6 @@ function initializeTabEventListeners() {
         });
     });
 
-    document.querySelectorAll('[class*="tab8"][class*="option4"]').forEach(function(element) {
-        element.addEventListener('click', function() {
-            selectRowCss(this);
-            setLastScreenOpenRegister('tab8', 'ripcraft');
-            setCurrentOptionPane('ripcraft');
-            updateContent('Ripcraft', 'tab8', 'content');
-            setFirstAccessArray('ripcraft');
-        });
-    });
-
-    document.querySelectorAll('[class*="tab8"][class*="option5"]').forEach(function(element) {
-        element.addEventListener('click', function() {
-            selectRowCss(this);
-            setLastScreenOpenRegister('tab8', 'expeditions');
-            setCurrentOptionPane('expeditions');
-            updateContent('Expeditions', 'tab8', 'content');
-            setFirstAccessArray('expeditions');
-        });
-    });
-
 
     const ua = (typeof window !== 'undefined' && window.navigator?.userAgent) ? window.navigator.userAgent.toLowerCase() : '';
     const isElectron = ua.includes('electron') || (typeof window !== 'undefined' && window.process?.versions?.electron);
