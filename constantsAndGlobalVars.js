@@ -28,7 +28,7 @@ let saveData = null;
 //CONSTANTS
 export const HOMESTAR = 'miaplacidus';
 export const MINIMUM_GAME_VERSION_FOR_SAVES = 0.93;
-export const GAME_VERSION_FOR_SAVES = 0.970;
+export const GAME_VERSION_FOR_SAVES = 0.971;
 export const deferredActions = [];
 
 //NOTIFICATIONS
@@ -759,6 +759,7 @@ export function setElements() {
         battery1Quantity: document.getElementById('battery1Quantity'),
         battery2Quantity: document.getElementById('battery2Quantity'),
         battery3Quantity: document.getElementById('battery3Quantity'),
+        sensorBuoyQuantity: document.getElementById('sensorBuoyQuantity'),
         researchRate: document.getElementById('researchRate'),
         researchQuantity: document.getElementById('researchQuantity'),
         scienceKitQuantity: document.getElementById('scienceKitQuantity'),

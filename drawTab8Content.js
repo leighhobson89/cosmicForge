@@ -52,6 +52,12 @@ import {
     getCosmicRipNearSpaceScannerArrayResizeAttached,
 } from './constantsAndGlobalVars.js';
 
+import { getCurrencySymbol } from './constantsAndGlobalVars.js';
+
+import { getResourceDataObject } from './resourceDataObject.js';
+
+import { gain } from './game.js';
+
 export function drawTab8Content(heading, optionContentElement) {
     if (heading === 'Situation') {
         const restored = getCosmicRipNearSpaceScannerArrayRestored?.() === true;
@@ -464,20 +470,28 @@ export function drawTab8Content(heading, optionContentElement) {
             inputElements: [
                 createButton({
                     text: 'DEPLOY',
-                    classNames: ['option-button', 'red-disabled-text', 'cosmic-rip-deploy-sensor-buoy-button'],
+                    classNames: ['option-button', 'red-disabled-text', 'cosmic-rip-deploy-sensor-buoy-button', 'resource-cost-sell-check'],
                     onClick: () => {
-                        showNotification('Coming soon', 'info', 2500, 'cosmicRip');
+                        gain(1, 'sensorBuoyQuantity', 'sensorBuoy', false, null, 'cosmicRip', 'cosmicRip');
                     },
+                    dataConditionCheck: 'upgradeCheck',
+                    resourcePriceObject: '',
+                    objectSectionArgument1: 'cosmicRip',
+                    objectSectionArgument2: 'sensorBuoy',
+                    quantityArgument: 'cash',
+                    autoBuyerTier: null,
                     disableKeyboardForButton: true,
                     rowCategory: 'cosmicRipDeploySensorBuoy'
                 }),
             ],
-            descriptionText: '',
+            descriptionText: `${getCurrencySymbol() + getResourceDataObject('cosmicRip', ['upgrades', 'sensorBuoy', 'price'])}, ` +
+                `${getResourceDataObject('cosmicRip', ['upgrades', 'sensorBuoy', 'resource1Price'])[0]} Titanium, ` +
+                `${getResourceDataObject('cosmicRip', ['upgrades', 'sensorBuoy', 'resource2Price'])[0]} Silicon`,
             resourcePriceObject: '',
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
+            dataConditionCheck: 'upgradeCheck',
+            objectSectionArgument1: 'cosmicRip',
+            objectSectionArgument2: 'sensorBuoy',
+            quantityArgument: 'cash',
             autoBuyerTier: null,
             startInvisibleValue: false,
             resourceString: null,

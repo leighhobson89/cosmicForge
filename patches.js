@@ -211,15 +211,12 @@ export function migrateResourceData(saveData, objectType, options = {}) {
                 if (typeof saveData.cosmicRip.projects.sensorBuoyDeployed !== 'boolean') {
                     saveData.cosmicRip.projects.sensorBuoyDeployed = false;
                 }
-                if (typeof saveData.cosmicRip.projects.stabilizerNodeDeployedCount !== 'number') {
-                    saveData.cosmicRip.projects.stabilizerNodeDeployedCount = 0;
-                }
             }
 
             saveData.version = 0.969;
         }
 
-        if (saveData.version < 0.970) {
+        if (saveData.version < 0.971) {
             if (objectType === 'resourceData') {
                 const freshCosmicRip = {
                     galacticPoints: 0,
@@ -229,13 +226,15 @@ export function migrateResourceData(saveData, objectType, options = {}) {
                     scanResultsBySectorIndex: Array(9).fill(false),
                     upgrades: {
                         sensorBuoy: {
-                            deployedCount: 0,
-                            basePrices: [1000000, 1000000],
-                            price: 1000000,
-                            resource1Price: [1000000, 'research', 'research'],
+                            quantity: 0,
+                            basePrices: [500000, 100000, 600000],
+                            price: 500000,
+                            resource1Price: [100000, 'titanium', 'compounds'],
+                            resource2Price: [600000, 'silicon', 'resources'],
+                            resource3Price: [0, '', ''],
+                            setPrice: 'sensorBuoyPrice',
                         },
                         ripResearchOrbiter: {
-                            deployedCount: 0,
                             basePrices: [500000, 700000],
                             price: 500000,
                             resource1Price: [700000, 'research', 'research'],
@@ -254,7 +253,7 @@ export function migrateResourceData(saveData, objectType, options = {}) {
                 };
                 saveData.cosmicRip = freshCosmicRip;
             }
-            saveData.version = 0.970;
+            saveData.version = 0.971;
         }
     }
     return saveData;

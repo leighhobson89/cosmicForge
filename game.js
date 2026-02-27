@@ -4923,9 +4923,26 @@ function setNewItemPrice(currentPrice, elementName, tier, typeOfResourceCompound
         } else if (elementName.includes('TechPhilosophy')) {
             const repeatableTech = elementName.split("TechPhilosophy")[0];
             setResourceDataObject(newCorePrice, 'philosophyRepeatableTechs', [getPlayerPhilosophy(), repeatableTech, 'price']);
-        } else { //autoBuyer
+        } else if (optionalResource && optionalResource !== 'cash' && optionalResource !== 'research') {
+            const strippedElementName = elementName.slice(0, -5);
+            if (optionalResource === 'cosmicRip') {
+                setResourceDataObject(newCorePrice, 'cosmicRip', ['upgrades', strippedElementName, 'price']);
+                if (resource1Price > 0) {
+                    setResourceDataObject(newResource1Price, 'cosmicRip', ['upgrades', strippedElementName, 'resource1Price']);
+                }
+                if (resource2Price > 0) {
+                    setResourceDataObject(newResource2Price, 'cosmicRip', ['upgrades', strippedElementName, 'resource2Price']);
+                }
+                if (resource3Price > 0) {
+                    setResourceDataObject(newResource3Price, 'cosmicRip', ['upgrades', strippedElementName, 'resource3Price']);
+                }
+            } else { //autoBuyer
+                const itemName = elementName.replace(/([A-Z])/g, '-$1').toLowerCase().split('-')[0];
+                setResourceDataObject(newCorePrice, typeOfResourceCompound, [itemName, 'upgrades', 'autoBuyer', `tier${tier}`, 'price']);       
+            }
+        } else { //autoBuyer fallback
             const itemName = elementName.replace(/([A-Z])/g, '-$1').toLowerCase().split('-')[0];
-            setResourceDataObject(newCorePrice, typeOfResourceCompound, [itemName, 'upgrades', 'autoBuyer', `tier${tier}`, 'price']);       
+            setResourceDataObject(newCorePrice, typeOfResourceCompound, [itemName, 'upgrades', 'autoBuyer', `tier${tier}`, 'price']);
         }
     }
 }
@@ -5036,6 +5053,8 @@ function getAllQuantities() {
     allQuantities.spaceTelescope = null;
     allQuantities.launchPad = null;
 
+    allQuantities.sensorBuoy = getResourceDataObject('cosmicRip', ['upgrades', 'sensorBuoy', 'quantity']);
+
     allQuantities.research = getResourceDataObject('research', ['quantity']);
     allQuantities.scienceKit = getResourceDataObject('research', ['upgrades', 'scienceKit', 'quantity']);
     allQuantities.scienceClub = getResourceDataObject('research', ['upgrades', 'scienceClub', 'quantity']);
@@ -5117,6 +5136,8 @@ function getAllElements(resourcesArray, compoundsArray) {
 
     allElements.spaceTelescope = null;
     allElements.launchPad = null;  
+
+    allElements.sensorBuoy = getElements().sensorBuoyQuantity;
     
     if (getCurrentOptionPane() === 'launch pad') {
         allElements.rocket1BuiltParts = document.getElementById('rocket1BuiltPartsQuantity');
@@ -6886,7 +6907,7 @@ function resourceCostSellChecks(element) {
         setStateOfDescriptionLabelsForBuildingAndOneOffSpacePurchases(element, price, quantity, resourceCategories, resourceNames, resourcePrices);
     } 
 
-    if (resource !== 'energy' && resource !== 'spaceUpgrade' && resource !== 'scienceUpgrade' && resource !== 'cash' && resource !== 'time') {
+    if (resource !== 'energy' && resource !== 'spaceUpgrade' && resource !== 'scienceUpgrade' && resource !== 'cash' && resource !== 'time' && resource !== 'cosmicRip') {
         handleResourceRateStates(resource);
     } else if (resource === 'spaceUpgrade') {
         handleSpaceUpgradeResourceType(element);
@@ -6931,6 +6952,9 @@ function setPriceForAllPurchases(element, type, resource, scienceUpgradeType, bu
     } else if (type === 'spaceUpgrade') {
         mainKey = 'space';
         price = getResourceDataObject(mainKey, ['upgrades', spaceUpgradeType, 'price']);
+    } else if (type === 'cosmicRip') {
+        mainKey = 'cosmicRip';
+        price = getResourceDataObject(mainKey, ['upgrades', scienceUpgradeType, 'price']);
     } else {
         if (element.dataset.type === "research") {
             mainKey = 'research';
@@ -7104,6 +7128,22 @@ function setUpResourcePricesNamesCategories(resource, type, spaceUpgradeType, bu
             getResourceDataObject('space', ['upgrades', spaceUpgradeType, 'resource1Price'])[2],
             getResourceDataObject('space', ['upgrades', spaceUpgradeType, 'resource2Price'])[2],
             getResourceDataObject('space', ['upgrades', spaceUpgradeType, 'resource3Price'])[2]
+        );
+    } else if (type === 'cosmicRip') {
+        resourcePrices.push(
+            getResourceDataObject('cosmicRip', ['upgrades', buildingUpgradeType, 'resource1Price'])[0],
+            getResourceDataObject('cosmicRip', ['upgrades', buildingUpgradeType, 'resource2Price'])[0],
+            getResourceDataObject('cosmicRip', ['upgrades', buildingUpgradeType, 'resource3Price'])[0]
+        );
+        resourceNames.push(
+            getResourceDataObject('cosmicRip', ['upgrades', buildingUpgradeType, 'resource1Price'])[1],
+            getResourceDataObject('cosmicRip', ['upgrades', buildingUpgradeType, 'resource2Price'])[1],
+            getResourceDataObject('cosmicRip', ['upgrades', buildingUpgradeType, 'resource3Price'])[1]
+        );
+        resourceCategories.push(
+            getResourceDataObject('cosmicRip', ['upgrades', buildingUpgradeType, 'resource1Price'])[2],
+            getResourceDataObject('cosmicRip', ['upgrades', buildingUpgradeType, 'resource2Price'])[2],
+            getResourceDataObject('cosmicRip', ['upgrades', buildingUpgradeType, 'resource3Price'])[2]
         );
     } else {
         if (resource !== 'time') {
@@ -9046,6 +9086,8 @@ export function gain(incrementAmount, elementId, item, ABOrTechPurchase, tierAB,
         resourceType = 'energy';
     } else if (resourceCategory === 'space') { 
         resourceType = 'space';
+    } else if (resourceCategory === 'cosmicRip') {
+        resourceType = 'cosmicRip';
     } else {
         resourceType = itemType.slice(0, -1);
     }
@@ -9066,6 +9108,8 @@ export function gain(incrementAmount, elementId, item, ABOrTechPurchase, tierAB,
         currentQuantity = getResourceDataObject('space', ['upgrades', item, 'quantity']);
     } else if (item && item === 'autoBuyer') {
         currentQuantity = getResourceDataObject(itemType, [resourceCategory, 'upgrades', 'autoBuyer', tierAB, 'quantity']);
+    } else if (resourceCategory === 'cosmicRip') {
+        currentQuantity = getResourceDataObject('cosmicRip', ['upgrades', item, 'quantity']);
     } else {
         currentQuantity = getResourceDataObject(itemType, [resourceCategory, 'quantity']);
     }
@@ -9125,6 +9169,8 @@ export function gain(incrementAmount, elementId, item, ABOrTechPurchase, tierAB,
             }
         } else if (item.startsWith('fleet')) {
             setResourceDataObject(currentQuantity + incrementAmount, 'space', ['upgrades', item, 'quantity']);
+        } else if (resourceType === 'cosmicRip') {
+            setResourceDataObject(currentQuantity + incrementAmount, 'cosmicRip', ['upgrades', item, 'quantity']);
         }
     }    
 
@@ -9150,6 +9196,8 @@ export function gain(incrementAmount, elementId, item, ABOrTechPurchase, tierAB,
             itemObject = getResourceDataObject('buildings', ['energy', 'upgrades', item]);
         } else if (resourceCategory === 'space') {
             itemObject = getResourceDataObject('space', ['upgrades', item]);
+        } else if (resourceCategory === 'cosmicRip') {
+            itemObject = getResourceDataObject('cosmicRip', ['upgrades', item]);
         } else {
             itemObject = getResourceDataObject(itemType, [resourceCategory]);
         }
@@ -9178,9 +9226,9 @@ export function gain(incrementAmount, elementId, item, ABOrTechPurchase, tierAB,
         if (ABOrTechPurchase) {
             amountToDeduct = itemObject.upgrades.autoBuyer[tierAB].price;
             itemSetNewPrice = itemObject.upgrades.autoBuyer[tierAB].setPrice;
-        } else { //energy / space
+        } else { //energy / space / cosmicRip
             amountToDeduct = itemObject.price;
-            if (resourceCategory === 'energy' || resourceCategory === 'space') {
+            if (resourceCategory === 'energy' || resourceCategory === 'space' || resourceCategory === 'cosmicRip') {
                 resource1ToDeduct = itemObject.resource1Price[0];
                 resource2ToDeduct = itemObject.resource2Price[0];
                 resource3ToDeduct = itemObject.resource3Price[0];
@@ -9188,9 +9236,9 @@ export function gain(incrementAmount, elementId, item, ABOrTechPurchase, tierAB,
             itemSetNewPrice = itemObject.setPrice;
         }
     
-        if (resourceCategory === 'scienceUpgrade' || resourceCategory === 'energy' || resourceCategory === 'space') {
+        if (resourceCategory === 'scienceUpgrade' || resourceCategory === 'energy' || resourceCategory === 'space' || resourceCategory === 'cosmicRip') {
             itemToDeduct1Name = 'cash';
-            if (resourceCategory === 'energy' || resourceCategory === 'space') {
+            if (resourceCategory === 'energy' || resourceCategory === 'space' || resourceCategory === 'cosmicRip') {
                 itemToDeduct2Name = itemObject.resource1Price[1];
                 itemToDeduct3Name = itemObject.resource2Price[1];
                 itemToDeduct4Name = itemObject.resource3Price[1];
