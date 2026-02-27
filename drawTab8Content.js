@@ -470,7 +470,7 @@ export function drawTab8Content(heading, optionContentElement) {
             inputElements: [
                 createButton({
                     text: 'DEPLOY',
-                    classNames: ['option-button', 'red-disabled-text', 'cosmic-rip-deploy-sensor-buoy-button', 'resource-cost-sell-check'],
+                    classNames: ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check'],
                     onClick: () => {
                         gain(1, 'sensorBuoyQuantity', 'sensorBuoy', false, null, 'cosmicRip', 'cosmicRip');
                     },
@@ -481,7 +481,7 @@ export function drawTab8Content(heading, optionContentElement) {
                     quantityArgument: 'cash',
                     autoBuyerTier: null,
                     disableKeyboardForButton: true,
-                    rowCategory: 'cosmicRipDeploySensorBuoy'
+                    rowCategory: 'cosmicRipPurchase'
                 }),
             ],
             descriptionText: `${getCurrencySymbol() + getResourceDataObject('cosmicRip', ['upgrades', 'sensorBuoy', 'price'])}, ` +
@@ -496,7 +496,7 @@ export function drawTab8Content(heading, optionContentElement) {
             startInvisibleValue: false,
             resourceString: null,
             optionalIterationParam: null,
-            rowCategory: 'cosmicRipDeploySensorBuoy',
+            rowCategory: 'cosmicRipPurchase',
             noDescriptionContainer: false,
             specialInputContainerClasses: null,
             hideMainDescriptionRow: false

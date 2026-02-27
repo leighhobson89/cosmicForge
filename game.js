@@ -4820,6 +4820,12 @@ function checkAndIncreasePrices() {
                     }
                 } else if (setPriceTarget.includes('TechPhilosophy'))    {
                     setNewItemPrice(currentPrice, setPriceTarget, null, null, 'research');
+                } else if (typeOfResourceCompound === 'cosmicRip') {
+                    if (priceIncrease === "cash") {
+                        setNewItemPrice(currentPrice, setPriceTarget, null, null, priceIncreaseObject);
+                    } else {
+                        setNewItemPrice(currentPrice, setPriceTarget, null, null, priceIncreaseObject);
+                    }
                 } else {
                     const tierMatch = setPriceTarget.match(new RegExp(`${priceIncrease}AB(\\d+)Price`));
                     if (tierMatch && tierMatch[1]) {
@@ -4925,20 +4931,15 @@ function setNewItemPrice(currentPrice, elementName, tier, typeOfResourceCompound
             setResourceDataObject(newCorePrice, 'philosophyRepeatableTechs', [getPlayerPhilosophy(), repeatableTech, 'price']);
         } else if (optionalResource && optionalResource !== 'cash' && optionalResource !== 'research') {
             const strippedElementName = elementName.slice(0, -5);
-            if (optionalResource === 'cosmicRip') {
-                setResourceDataObject(newCorePrice, 'cosmicRip', ['upgrades', strippedElementName, 'price']);
-                if (resource1Price > 0) {
-                    setResourceDataObject(newResource1Price, 'cosmicRip', ['upgrades', strippedElementName, 'resource1Price']);
-                }
-                if (resource2Price > 0) {
-                    setResourceDataObject(newResource2Price, 'cosmicRip', ['upgrades', strippedElementName, 'resource2Price']);
-                }
-                if (resource3Price > 0) {
-                    setResourceDataObject(newResource3Price, 'cosmicRip', ['upgrades', strippedElementName, 'resource3Price']);
-                }
-            } else { //autoBuyer
-                const itemName = elementName.replace(/([A-Z])/g, '-$1').toLowerCase().split('-')[0];
-                setResourceDataObject(newCorePrice, typeOfResourceCompound, [itemName, 'upgrades', 'autoBuyer', `tier${tier}`, 'price']);       
+            setResourceDataObject(newCorePrice, 'cosmicRip', ['upgrades', strippedElementName, 'price']);
+            if (resource1Price > 0) {
+                setResourceDataObject(newResource1Price, 'cosmicRip', ['upgrades', strippedElementName, 'resource1Price']);
+            }
+            if (resource2Price > 0) {
+                setResourceDataObject(newResource2Price, 'cosmicRip', ['upgrades', strippedElementName, 'resource2Price']);
+            }
+            if (resource3Price > 0) {
+                setResourceDataObject(newResource3Price, 'cosmicRip', ['upgrades', strippedElementName, 'resource3Price']);
             }
         } else { //autoBuyer fallback
             const itemName = elementName.replace(/([A-Z])/g, '-$1').toLowerCase().split('-')[0];
@@ -6895,7 +6896,7 @@ function resourceCostSellChecks(element) {
     let resourceNames = [];
     let resourceCategories = [];
 
-    if (element.classList.contains('building-purchase')) {
+    if (element.classList.contains('building-purchase') || type === 'cosmicRip') {
         ({ resourcePrices, resourceNames, resourceCategories } = setUpResourcePricesNamesCategories(resource, type, spaceUpgradeType, buildingUpgradeType));
     }
 
@@ -6911,12 +6912,98 @@ function resourceCostSellChecks(element) {
         handleResourceRateStates(resource);
     } else if (resource === 'spaceUpgrade') {
         handleSpaceUpgradeResourceType(element);
+    } else if (resource === 'cosmicRip') {
+        handleCosmicRipUpgradeResourceType(element);
     } else if (resource === 'cash') { //build launchPad, spaceTelescope, startFuellingAutoBuyers
         handleRocketFuellingChecksAndOneOffPurchases(element, price);
         //add any more that need resource === cash
     } else if (resource === 'time') {
         //should be handled in the timer itself
     } 
+}
+
+function handleCosmicRipUpgradeResourceType(element) {
+    const upgradeName = element.dataset.resourceToFuseTo;
+    if (!upgradeName) {
+        return;
+    }
+
+    const buyButton = element.parentElement?.parentElement?.querySelector('.input-container button');
+    if (!buyButton) {
+        return;
+    }
+
+    const currentPrice = getResourceDataObject('cosmicRip', ['upgrades', upgradeName, 'price']);
+    const resource1Price = getResourceDataObject('cosmicRip', ['upgrades', upgradeName, 'resource1Price']);
+    const resource2Price = getResourceDataObject('cosmicRip', ['upgrades', upgradeName, 'resource2Price']);
+
+    const formatCostValue = (value) => {
+        const num = Number(value);
+        if (!Number.isFinite(num)) {
+            return String(value ?? '');
+        }
+        if (getNotationType?.() === 'normal') {
+            return String(Math.floor(num));
+        }
+        return formatNumber?.(num) ?? String(Math.floor(num));
+    };
+
+    const buildResourceText = (priceTuple) => {
+        if (!Array.isArray(priceTuple) || !priceTuple[1]) {
+            return null;
+        }
+        const amount = formatCostValue(priceTuple[0]);
+        const name = capitaliseString(String(priceTuple[1] || ''));
+        return `${amount} ${name}`;
+    };
+
+    const cashQuantity = getResourceDataObject('currency', ['cash']);
+    const resource1Name = resource1Price?.[1];
+    const resource2Name = resource2Price?.[1];
+    const resource1Category = resource1Price?.[2];
+    const resource2Category = resource2Price?.[2];
+    
+    let resource1Quantity = 0;
+    let resource2Quantity = 0;
+    
+    if (resource1Category && resource1Name) {
+        resource1Quantity = getResourceDataObject(resource1Category, [resource1Name, 'quantity']) || 0;
+    }
+    if (resource2Category && resource2Name) {
+        resource2Quantity = getResourceDataObject(resource2Category, [resource2Name, 'quantity']) || 0;
+    }
+
+    const descLabel = element.parentElement?.querySelector('.description-container label');
+    if (descLabel) {
+        const cashText = `${getCurrencySymbol?.() ?? '$'}${formatCostValue(currentPrice)}`;
+        const r1Text = buildResourceText(resource1Price);
+        const r2Text = buildResourceText(resource2Price);
+
+        const canAffordCash = cashQuantity >= currentPrice;
+        const canAffordR1 = resource1Quantity >= (resource1Price?.[0] || 0);
+        const canAffordR2 = resource2Quantity >= (resource2Price?.[0] || 0);
+
+        const cashClass = canAffordCash ? 'green-ready-text' : 'red-disabled-text';
+        const r1Class = canAffordR1 ? 'green-ready-text' : 'red-disabled-text';
+        const r2Class = canAffordR2 ? 'green-ready-text' : 'red-disabled-text';
+
+        const parts = [`<span class="${cashClass}">${cashText}</span>`];
+        if (r1Text) parts.push(`<span class="${r1Class}">${r1Text}</span>`);
+        if (r2Text) parts.push(`<span class="${r2Class}">${r2Text}</span>`);
+
+        const newHtml = parts.join(', ');
+        if (descLabel.innerHTML !== newHtml) {
+            descLabel.innerHTML = newHtml;
+        }
+
+        const canAffordAll = canAffordCash && canAffordR1 && canAffordR2;
+        if (!canAffordAll) {
+            buyButton.classList.add('red-disabled-text');
+            buyButton.classList.remove('green-ready-text');
+        } else {
+            buyButton.classList.remove('red-disabled-text');
+        }
+    }
 }
 
 function setPriceForAllPurchases(element, type, resource, scienceUpgradeType, buildingUpgradeType, spaceUpgradeType) {
@@ -10736,6 +10823,9 @@ function formatAllNotationElements(element, notationType) {
 
 function complexPurchaseBuildingFormatter(element, notationType) {
     if (notationType === 'normalCondensed') {
+        if (element?.dataset?.type === 'cosmicRip') {
+            return;
+        }
         const spans = element.querySelectorAll("span");
     
         spans.forEach((span, index) => {
