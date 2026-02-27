@@ -664,7 +664,7 @@ export function initialiseDescriptions() {
             updateAt: ""
         },
         cosmicRipNearSpaceScannerArrayDeployRipResearchOrbiterRow: {
-            content1: "Deploy an orbiter to help gather rip research.",
+            content1: "Deploy an orbiter to conduct advanced rip research and unlock new technologies.",
             content2: "",
             updateAt: ""
         },

@@ -8,7 +8,7 @@ import { showNotification } from "./ui.js";
 
 export let achievementImageUrls;
 export let resourceData = {
-    version: 0.971, //update this whenever changes are made to the structure
+    version: 0.972, //update this whenever changes are made to the structure
     resources: {
         solar: {
             autoSell: false,
@@ -944,9 +944,13 @@ export let resourceData = {
                 setPrice: 'sensorBuoyPrice',
             },
             ripResearchOrbiter: {
-                basePrices: [500000, 700000],
-                price: 500000,
-                resource1Price: [700000, 'research', 'research'],
+                quantity: 0,
+                basePrices: [1000000, 1000000, 1000000, 500000],
+                price: 1000000,
+                resource1Price: [1000000, 'helium', 'resources'],
+                resource2Price: [1000000, 'sodium', 'resources'],
+                resource3Price: [500000, 'steel', 'compounds'],
+                setPrice: 'ripResearchOrbiterPrice',
             },
         },
         ripResearch: {
@@ -1012,7 +1016,7 @@ export const miaplacidus = {
 
 
 export let starSystems = {
-    version: 0.971,
+    version: 0.972,
     stars: {
         spica: {
             mapSize: 5.504440179536064, //might need to add this to star object when added dynamically for after rebirth
@@ -1031,14 +1035,14 @@ export let starSystems = {
 };
 
 export let oTypePowerPlantBuffs = {
-    version: 0.971,
+    version: 0.972,
     basicPowerPlantStar: { starName: null, settled: false },
     solarPowerPlantStar: { starName: null, settled: false },
     advancedPowerPlantStar: { starName: null, settled: false }
 };
 
 export let galacticCasino = {
-    version: 0.971,
+    version: 0.972,
     settings: {
         baseProbabilityCasino: 0.4,
     },
@@ -1069,7 +1073,7 @@ export let galacticCasino = {
 };
 
 export let galacticMarket = {
-    version: 0.971,
+    version: 0.972,
     resources: {
         hydrogen: { 
             name: "Hydrogen", 
@@ -1175,7 +1179,7 @@ export let galacticMarket = {
 };
 
 export let ascendencyBuffs = {
-    version: 0.971,
+    version: 0.972,
     "littleBagOfHydrogen": {
         name: "Little Bag Of Hydrogen",
         description: "buffLittleBagOfHydrogenRow",

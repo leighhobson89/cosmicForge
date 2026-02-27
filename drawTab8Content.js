@@ -243,9 +243,7 @@ export function drawTab8Content(heading, optionContentElement) {
             renderNameABs: null,
             labelText: 'Miaplacidus Sectors Map:',
             inputElements: null,
-            descriptionText: restored
-                ? (found ? `<span class="green-ready-text">Rip Located</span>` : `<span class="warning-orange-text">Scanning</span>`)
-                : `<span class="red-disabled-text">Offline</span>`,
+            descriptionText: '',
             resourcePriceObject: '',
             dataConditionCheck: null,
             objectSectionArgument1: null,
@@ -511,25 +509,34 @@ export function drawTab8Content(heading, optionContentElement) {
             inputElements: [
                 createButton({
                     text: 'DEPLOY',
-                    classNames: ['option-button', 'red-disabled-text', 'cosmic-rip-deploy-rip-research-orbiter-button'],
+                    classNames: ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check'],
                     onClick: () => {
-                        showNotification('Coming soon', 'info', 2500, 'cosmicRip');
+                        gain(1, 'ripResearchOrbiterQuantity', 'ripResearchOrbiter', false, null, 'cosmicRip', 'cosmicRip');
                     },
+                    dataConditionCheck: 'upgradeCheck',
+                    resourcePriceObject: '',
+                    objectSectionArgument1: 'cosmicRip',
+                    objectSectionArgument2: 'ripResearchOrbiter',
+                    quantityArgument: 'cash',
+                    autoBuyerTier: null,
                     disableKeyboardForButton: true,
-                    rowCategory: 'cosmicRipDeployRipResearchOrbiter'
+                    rowCategory: 'cosmicRipPurchase'
                 }),
             ],
-            descriptionText: '',
+            descriptionText: `${getCurrencySymbol() + getResourceDataObject('cosmicRip', ['upgrades', 'ripResearchOrbiter', 'price'])}, ` +
+                `${getResourceDataObject('cosmicRip', ['upgrades', 'ripResearchOrbiter', 'resource1Price'])[0]} Helium, ` +
+                `${getResourceDataObject('cosmicRip', ['upgrades', 'ripResearchOrbiter', 'resource2Price'])[0]} Sodium, ` +
+                `${getResourceDataObject('cosmicRip', ['upgrades', 'ripResearchOrbiter', 'resource3Price'])[0]} Steel`,
             resourcePriceObject: '',
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
+            dataConditionCheck: 'upgradeCheck',
+            objectSectionArgument1: 'cosmicRip',
+            objectSectionArgument2: 'ripResearchOrbiter',
+            quantityArgument: 'cash',
             autoBuyerTier: null,
             startInvisibleValue: false,
             resourceString: null,
             optionalIterationParam: null,
-            rowCategory: 'cosmicRipDeployRipResearchOrbiter',
+            rowCategory: 'cosmicRipPurchase',
             noDescriptionContainer: false,
             specialInputContainerClasses: null,
             hideMainDescriptionRow: false

@@ -5055,6 +5055,7 @@ function getAllQuantities() {
     allQuantities.launchPad = null;
 
     allQuantities.sensorBuoy = getResourceDataObject('cosmicRip', ['upgrades', 'sensorBuoy', 'quantity']);
+    allQuantities.ripResearchOrbiter = getResourceDataObject('cosmicRip', ['upgrades', 'ripResearchOrbiter', 'quantity']);
 
     allQuantities.research = getResourceDataObject('research', ['quantity']);
     allQuantities.scienceKit = getResourceDataObject('research', ['upgrades', 'scienceKit', 'quantity']);
@@ -5139,6 +5140,7 @@ function getAllElements(resourcesArray, compoundsArray) {
     allElements.launchPad = null;  
 
     allElements.sensorBuoy = getElements().sensorBuoyQuantity;
+    allElements.ripResearchOrbiter = getElements().ripResearchOrbiterQuantity;
     
     if (getCurrentOptionPane() === 'launch pad') {
         allElements.rocket1BuiltParts = document.getElementById('rocket1BuiltPartsQuantity');
@@ -6936,6 +6938,7 @@ function handleCosmicRipUpgradeResourceType(element) {
     const currentPrice = getResourceDataObject('cosmicRip', ['upgrades', upgradeName, 'price']);
     const resource1Price = getResourceDataObject('cosmicRip', ['upgrades', upgradeName, 'resource1Price']);
     const resource2Price = getResourceDataObject('cosmicRip', ['upgrades', upgradeName, 'resource2Price']);
+    const resource3Price = getResourceDataObject('cosmicRip', ['upgrades', upgradeName, 'resource3Price']);
 
     const formatCostValue = (value) => {
         const num = Number(value);
@@ -6960,11 +6963,14 @@ function handleCosmicRipUpgradeResourceType(element) {
     const cashQuantity = getResourceDataObject('currency', ['cash']);
     const resource1Name = resource1Price?.[1];
     const resource2Name = resource2Price?.[1];
+    const resource3Name = resource3Price?.[1];
     const resource1Category = resource1Price?.[2];
     const resource2Category = resource2Price?.[2];
+    const resource3Category = resource3Price?.[2];
     
     let resource1Quantity = 0;
     let resource2Quantity = 0;
+    let resource3Quantity = 0;
     
     if (resource1Category && resource1Name) {
         resource1Quantity = getResourceDataObject(resource1Category, [resource1Name, 'quantity']) || 0;
@@ -6972,31 +6978,38 @@ function handleCosmicRipUpgradeResourceType(element) {
     if (resource2Category && resource2Name) {
         resource2Quantity = getResourceDataObject(resource2Category, [resource2Name, 'quantity']) || 0;
     }
+    if (resource3Category && resource3Name) {
+        resource3Quantity = getResourceDataObject(resource3Category, [resource3Name, 'quantity']) || 0;
+    }
 
     const descLabel = element.parentElement?.querySelector('.description-container label');
     if (descLabel) {
         const cashText = `${getCurrencySymbol?.() ?? '$'}${formatCostValue(currentPrice)}`;
         const r1Text = buildResourceText(resource1Price);
         const r2Text = buildResourceText(resource2Price);
+        const r3Text = buildResourceText(resource3Price);
 
         const canAffordCash = cashQuantity >= currentPrice;
         const canAffordR1 = resource1Quantity >= (resource1Price?.[0] || 0);
         const canAffordR2 = resource2Quantity >= (resource2Price?.[0] || 0);
+        const canAffordR3 = resource3Quantity >= (resource3Price?.[0] || 0);
 
         const cashClass = canAffordCash ? 'green-ready-text' : 'red-disabled-text';
         const r1Class = canAffordR1 ? 'green-ready-text' : 'red-disabled-text';
         const r2Class = canAffordR2 ? 'green-ready-text' : 'red-disabled-text';
+        const r3Class = canAffordR3 ? 'green-ready-text' : 'red-disabled-text';
 
         const parts = [`<span class="${cashClass}">${cashText}</span>`];
         if (r1Text) parts.push(`<span class="${r1Class}">${r1Text}</span>`);
         if (r2Text) parts.push(`<span class="${r2Class}">${r2Text}</span>`);
+        if (r3Text) parts.push(`<span class="${r3Class}">${r3Text}</span>`);
 
         const newHtml = parts.join(', ');
         if (descLabel.innerHTML !== newHtml) {
             descLabel.innerHTML = newHtml;
         }
 
-        const canAffordAll = canAffordCash && canAffordR1 && canAffordR2;
+        const canAffordAll = canAffordCash && canAffordR1 && canAffordR2 && canAffordR3;
         if (!canAffordAll) {
             buyButton.classList.add('red-disabled-text');
             buyButton.classList.remove('green-ready-text');
