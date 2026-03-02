@@ -213,6 +213,7 @@ import {
     getUnlockedCompoundsArray,
     setPowerGracePeriodEnd,
     setLastFocusOfflineGainsAppliedAt,
+    getGalacticPointsSpent,
 } from './constantsAndGlobalVars.js';
 import {
     getResourceDataObject,
@@ -224,7 +225,8 @@ import {
     getBuffEnhancedMiningData,
     getAchievementImageUrl,
     getBlackHolePower,
-    getStarSystemWeather
+    getStarSystemWeather,
+    getCosmicRipGalacticPoints
 } from "./resourceDataObject.js";
 import {
     optionDescriptions,
@@ -6605,7 +6607,6 @@ export function getTimeInStatCell() {
             statLabel.textContent = '';
         }
 
-
         const runStart = getRunStartTime();
         const totalStart = getGameStartTime();
 
@@ -6614,14 +6615,17 @@ export function getTimeInStatCell() {
         const totalDuration = formatDurationSince(totalStart);
         const currentRun = getStatRun();
 
+        const gpQuantity = Math.max(0, (((getSettledStars?.() || []).length) - 1) - (Number(getGalacticPointsSpent?.()) || 0));
+        const showGp = getTechUnlockedArray().includes('cosmicRip');
 
         stat8Element.textContent = timeString;
         stat8Element.dataset.tooltipContent = [
             `<div><strong>${timeString}</strong></div>`,
+            showGp ? `<div>Galactic Points: <span class="green-ready-text">${gpQuantity}</span></div>` : '',
             `<div>Run: <span class="green-ready-text">${currentRun}</span></div>`,
             `<div>Run Time: <span class="green-ready-text">${runDuration}</span></div>`,
-            `<div>Total Time: <span class="green-ready-text">${totalDuration}</span></div>`
-        ].join('');
+            `<div>Total Time: <span class="green-ready-text">${totalDuration}</span></div>`,
+            ].join('');
     }
 }
 
