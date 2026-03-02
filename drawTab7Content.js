@@ -1,5 +1,6 @@
 import { removeTabAttentionIfNoIndicators, createOptionRow, createButton, createDropdown, createTextElement, createTextFieldArea, createSpinningDropdown, callPopupModal, showHideModal, createMegaStructureDiagram, createMegaStructureTable, createBlackHole, setButtonState, showNotification, updateDescriptionRow, setupInfoTooltips } from './ui.js';
 import {
+    getTechUnlockedArray,
     getStarsWithAncientManuscripts,
     getDestinationStar,
     getSettledStars,
@@ -104,7 +105,8 @@ export function drawTab7Content(heading, optionContentElement) {
 
                         const content = modalRebirthText.replace(
                             /<span class="green-ready-text">.*?<\/span>/,
-                            `<span class="${spanClass}">You will carry over ${currentAp} AP!</span>`
+                            `<span class="${spanClass}">You will carry over ${currentAp} AP!</span>` +
+                            (getTechUnlockedArray().includes('cosmicRip') ? `<br><span class="${spanClass}">You will gain 1GP!</span>` : '')
                         );
 
                         callPopupModal(

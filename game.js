@@ -1667,6 +1667,18 @@ function cosmicRipChecks() {
             drawCanvas();
         }
     }
+
+    const sensorBuoyQuantityEl = document.getElementById('sensorBuoyQuantity');
+    if (sensorBuoyQuantityEl) {
+        const sensorBuoyQty = getResourceDataObject('cosmicRip', ['upgrades', 'sensorBuoy', 'quantity']);
+        sensorBuoyQuantityEl.textContent = `Quantity: ${sensorBuoyQty}`;
+    }
+
+    const ripResearchOrbiterQuantityEl = document.getElementById('ripResearchOrbiterQuantity');
+    if (ripResearchOrbiterQuantityEl) {
+        const ripResearchOrbiterQty = getResourceDataObject('cosmicRip', ['upgrades', 'ripResearchOrbiter', 'quantity']);
+        ripResearchOrbiterQuantityEl.textContent = `Quantity: ${ripResearchOrbiterQty}`;
+    }
 }
 
 function getSupplyChainDisruptionMultiplier(category, key) {
@@ -2343,6 +2355,87 @@ function updateResearchRateDisplay(researchRatePerTick) {
     } else {
         researchRateElement.classList.remove('green-ready-text');
     }
+}
+
+function initialiseRipTelemetryDeltaTimer() {
+    const timerId = 'ripTelemetryDeltaTimer';
+    if (timerManagerDelta.hasTimer(timerId)) {
+        return;
+    }
+
+    timerManagerDelta.addTimer(timerId, {
+        durationMs: 0,
+        repeat: true,
+        onUpdate: ({ deltaMs }) => {
+            updateRipTelemetryDelta(deltaMs);
+        },
+        metadata: { type: 'cosmicRip' }
+    });
+}
+
+let lastRipTelemetryConsoleLogMs = 0;
+
+function updateRipTelemetryDelta(deltaMs) {
+    if (!deltaMs) {
+        return;
+    }
+
+    const ripTelemetryRatePerTick = calculateRipTelemetryRatePerTick();
+    updateRipTelemetryDisplay(ripTelemetryRatePerTick);
+    if (ripTelemetryRatePerTick <= 0) {
+        return;
+    }
+
+    const ripTelemetryPerMillisecond = ripTelemetryRatePerTick / getTimerUpdateInterval();
+    const ripTelemetryGain = ripTelemetryPerMillisecond * deltaMs;
+
+    if (ripTelemetryGain <= 0) {
+        return;
+    }
+
+    const current = getResourceDataObject('cosmicRip', ['ripTelemetryData']);
+    setResourceDataObject(current + ripTelemetryGain, 'cosmicRip', ['ripTelemetryData']);
+
+    const now = Date.now();
+    if (now - lastRipTelemetryConsoleLogMs >= 1000) {
+        lastRipTelemetryConsoleLogMs = now;
+        console.log('ripTelemetryData:', getResourceDataObject('cosmicRip', ['ripTelemetryData']));
+    }
+}
+
+function updateRipTelemetryDisplay(ripTelemetryRatePerTick) {
+    const telemetryRateElement = getElements().cosmicRipTelemetryRate;
+    const telemetryQuantityElement = getElements().cosmicRipTelemetryQuantity;
+
+    const displayWarpMultiplier = getBlackHoleAlwaysOn() ? getBlackHolePower() : getTimeWarpMultiplier();
+    const displayRate = (Number(ripTelemetryRatePerTick) || 0) * getTimerRateRatio() * (displayWarpMultiplier || 1);
+
+    if (telemetryRateElement) {
+        telemetryRateElement.textContent = `${displayRate.toFixed(2)} / s`;
+        if (displayRate > 0) {
+            telemetryRateElement.classList.add('green-ready-text');
+        } else {
+            telemetryRateElement.classList.remove('green-ready-text');
+        }
+    }
+
+    if (telemetryQuantityElement) {
+        const q = Number(getResourceDataObject('cosmicRip', ['ripTelemetryData'])) || 0;
+        if (getNotationType?.() === 'normal') {
+            telemetryQuantityElement.textContent = String(Math.floor(q));
+        } else {
+            telemetryQuantityElement.textContent = formatNumber?.(q) ?? String(Math.floor(q));
+        }
+    }
+}
+
+function calculateRipTelemetryRatePerTick() {
+    const sensorBuoyQty = Number(getResourceDataObject('cosmicRip', ['upgrades', 'sensorBuoy', 'quantity'])) || 0;
+    const sensorBuoyRate = Number(getResourceDataObject('cosmicRip', ['upgrades', 'sensorBuoy', 'rate'])) || 0;
+    const orbiterQty = Number(getResourceDataObject('cosmicRip', ['upgrades', 'ripResearchOrbiter', 'quantity'])) || 0;
+    const orbiterRate = Number(getResourceDataObject('cosmicRip', ['upgrades', 'ripResearchOrbiter', 'rate'])) || 0;
+
+    return (sensorBuoyRate * sensorBuoyQty) + (orbiterRate * orbiterQty);
 }
 
 function initialiseEnergyDeltaTimer() {
@@ -9432,6 +9525,7 @@ function startInitialTimers() {
     initialiseCompoundAutoBuyerDeltaTimers();
 
     initialiseResearchDeltaTimer();
+    initialiseRipTelemetryDeltaTimer();
     initialiseEnergyDeltaTimer();
 
     initialiseRandomEventTimers();
@@ -11419,6 +11513,7 @@ export function offlineGains(switchedFocus) {
         const energyValues = {};
         const researchValues = {};
         const antimatterValues = {};
+        const cosmicRipValues = {};
     
         resources.forEach(resource => {
             resourceValues[resource] = {
@@ -11451,6 +11546,12 @@ export function offlineGains(switchedFocus) {
             rate: getResourceDataObject('antimatter', ['rate']),
             quantity: getResourceDataObject('antimatter', ['quantity'])
         }
+
+        cosmicRipValues.ripTelemetryData = {
+            rate: (Number(getResourceDataObject('cosmicRip', ['upgrades', 'sensorBuoy', 'rate'])) || 0) * (Number(getResourceDataObject('cosmicRip', ['upgrades', 'sensorBuoy', 'quantity'])) || 0) +
+                (Number(getResourceDataObject('cosmicRip', ['upgrades', 'ripResearchOrbiter', 'rate'])) || 0) * (Number(getResourceDataObject('cosmicRip', ['upgrades', 'ripResearchOrbiter', 'quantity'])) || 0),
+            quantity: getResourceDataObject('cosmicRip', ['ripTelemetryData']),
+        };
     
         const combinedValues = {
             rate: {
@@ -11458,14 +11559,16 @@ export function offlineGains(switchedFocus) {
                 compounds: Object.fromEntries(Object.entries(compoundValues).map(([key, value]) => [key, value.rate])),
                 energy: energyValues.energy.rate,
                 research: researchValues.research.rate,
-                antimatter: antimatterValues.antimatter.rate
+                antimatter: antimatterValues.antimatter.rate,
+                ripTelemetryData: cosmicRipValues.ripTelemetryData.rate
             },
             quantity: {
                 resources: Object.fromEntries(Object.entries(resourceValues).map(([key, value]) => [key, value.quantity])),
                 compounds: Object.fromEntries(Object.entries(compoundValues).map(([key, value]) => [key, value.quantity])),
                 energy: energyValues.energy.quantity,
                 research: researchValues.research.quantity,
-                antimatter: antimatterValues.antimatter.quantity
+                antimatter: antimatterValues.antimatter.quantity,
+                ripTelemetryData: cosmicRipValues.ripTelemetryData.quantity
             },
         };
 
@@ -11492,6 +11595,7 @@ export function offlineGains(switchedFocus) {
             compounds: calculateOfflineGains(combinedValues.rate.compounds, getTimerRateRatio()),
             energy: combinedValues.rate.energy * getTimerRateRatio() * timeDifferenceInSeconds,
             research: combinedValues.rate.research * getTimerRateRatio() * timeDifferenceInSeconds,
+            ripTelemetryData: combinedValues.rate.ripTelemetryData * getTimerRateRatio() * timeDifferenceInSeconds,
             rocket1: 0,
             rocket2: 0,
             rocket3: 0,
@@ -11525,6 +11629,9 @@ export function offlineGains(switchedFocus) {
         setResourceDataObject(currentResearchQuantity + offlineGains.research, 'research', ['quantity']);
         addToResourceAllTimeStat(offlineGains.research, 'researchPoints');
     
+        const currentRipTelemetryQuantity = getResourceDataObject('cosmicRip', ['ripTelemetryData']);
+        setResourceDataObject(currentRipTelemetryQuantity + offlineGains.ripTelemetryData, 'cosmicRip', ['ripTelemetryData']);
+
         const currentFuelQuantityRockets = getRocketsFuellerStartedArray().filter(rocket => !rocket.includes('FuelledUp'));
         currentFuelQuantityRockets.forEach(rocket => {
             const rocketDetails = getResourceDataObject('space', ['upgrades', rocket]);

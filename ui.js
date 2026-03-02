@@ -2145,6 +2145,29 @@ function setupProductionRateTooltips() {
     }
 
 
+    const cosmicRipTelemetryElement = document.getElementById('cosmicRipTelemetryRate');
+    if (cosmicRipTelemetryElement && !cosmicRipTelemetryElement.dataset.productionTooltipAttached) {
+        cosmicRipTelemetryElement.dataset.productionTooltipAttached = 'true';
+
+
+        const updateCosmicRipTelemetryTooltip = event => {
+            const rateText = cosmicRipTelemetryElement.textContent || '0 / s';
+            const isZeroRate = rateText.trim() === '0 / s';
+            tooltip.innerHTML = `Rip Telemetry Data: <span class="${isZeroRate ? '' : 'green-ready-text'}">${rateText}</span>`;
+            tooltip.style.display = 'block';
+            tooltip.style.left = `${event.pageX + 10}px`;
+            tooltip.style.top = `${event.pageY + 10}px`;
+        };
+
+
+        cosmicRipTelemetryElement.addEventListener('mouseenter', updateCosmicRipTelemetryTooltip);
+        cosmicRipTelemetryElement.addEventListener('mousemove', updateCosmicRipTelemetryTooltip);
+        cosmicRipTelemetryElement.addEventListener('mouseleave', () => {
+            tooltip.style.display = 'none';
+        });
+    }
+
+
     const miningElement = document.getElementById('miningRate');
     if (miningElement && !miningElement.dataset.productionTooltipAttached) {
         miningElement.dataset.productionTooltipAttached = 'true';

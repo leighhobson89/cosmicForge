@@ -28,7 +28,7 @@ let saveData = null;
 //CONSTANTS
 export const HOMESTAR = 'miaplacidus';
 export const MINIMUM_GAME_VERSION_FOR_SAVES = 0.93;
-export const GAME_VERSION_FOR_SAVES = 0.972;
+export const GAME_VERSION_FOR_SAVES = 0.973;
 export const deferredActions = [];
 
 //NOTIFICATIONS
@@ -761,6 +761,8 @@ export function setElements() {
         battery3Quantity: document.getElementById('battery3Quantity'),
         sensorBuoyQuantity: document.getElementById('sensorBuoyQuantity'),
         ripResearchOrbiterQuantity: document.getElementById('ripResearchOrbiterQuantity'),
+        cosmicRipTelemetryRate: document.getElementById('cosmicRipTelemetryRate'),
+        cosmicRipTelemetryQuantity: document.getElementById('cosmicRipTelemetryQuantity'),
         researchRate: document.getElementById('researchRate'),
         researchQuantity: document.getElementById('researchQuantity'),
         scienceKitQuantity: document.getElementById('scienceKitQuantity'),

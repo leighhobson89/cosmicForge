@@ -481,6 +481,7 @@ export function drawTab8Content(heading, optionContentElement) {
                     disableKeyboardForButton: true,
                     rowCategory: 'cosmicRipPurchase'
                 }),
+                createTextElement(`Quantity: ${getResourceDataObject('cosmicRip', ['upgrades', 'sensorBuoy', 'quantity'])}`, 'sensorBuoyQuantity', ['science-building-quantity']),
             ],
             descriptionText: `${getCurrencySymbol() + getResourceDataObject('cosmicRip', ['upgrades', 'sensorBuoy', 'price'])}, ` +
                 `${getResourceDataObject('cosmicRip', ['upgrades', 'sensorBuoy', 'resource1Price'])[0]} Titanium, ` +
@@ -522,6 +523,7 @@ export function drawTab8Content(heading, optionContentElement) {
                     disableKeyboardForButton: true,
                     rowCategory: 'cosmicRipPurchase'
                 }),
+                createTextElement(`Quantity: ${getResourceDataObject('cosmicRip', ['upgrades', 'ripResearchOrbiter', 'quantity'])}`, 'ripResearchOrbiterQuantity', ['science-building-quantity']),
             ],
             descriptionText: `${getCurrencySymbol() + getResourceDataObject('cosmicRip', ['upgrades', 'ripResearchOrbiter', 'price'])}, ` +
                 `${getResourceDataObject('cosmicRip', ['upgrades', 'ripResearchOrbiter', 'resource1Price'])[0]} Helium, ` +

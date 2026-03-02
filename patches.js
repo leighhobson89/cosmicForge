@@ -216,10 +216,11 @@ export function migrateResourceData(saveData, objectType, options = {}) {
             saveData.version = 0.969;
         }
 
-        if (saveData.version < 0.972) {
+        if (saveData.version < 0.973) {
             if (objectType === 'resourceData') {
                 const freshCosmicRip = {
                     galacticPoints: 0,
+                    ripTelemetryData: 0,
                     nearSpaceScannerArrayRestored: false,
                     ripLocationSectorIndex: -1,
                     ripFound: false,
@@ -233,6 +234,7 @@ export function migrateResourceData(saveData, objectType, options = {}) {
                             resource2Price: [600000, 'silicon', 'resources'],
                             resource3Price: [0, '', ''],
                             setPrice: 'sensorBuoyPrice',
+                            rate: 0.06
                         },
                         ripResearchOrbiter: {
                             quantity: 0,
@@ -242,6 +244,7 @@ export function migrateResourceData(saveData, objectType, options = {}) {
                             resource2Price: [1000000, 'sodium', 'resources'],
                             resource3Price: [500000, 'steel', 'compounds'],
                             setPrice: 'ripResearchOrbiterPrice',
+                            rate: 0.1
                         },
                     },
                     ripResearch: {
@@ -257,7 +260,7 @@ export function migrateResourceData(saveData, objectType, options = {}) {
                 };
                 saveData.cosmicRip = freshCosmicRip;
             }
-            saveData.version = 0.972;
+            saveData.version = 0.973;
         }
     }
     return saveData;
