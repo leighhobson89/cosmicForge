@@ -81,6 +81,9 @@ import {
     setTechRenderChange,
     getRevealedTechArray,
     setRevealedTechArray,
+    getRevealedCosmicRipTechArray,
+    setRevealedCosmicRipTechArray,
+    getCosmicRipTechUnlockedArray,
     getDebugVisibilityArray,
     getTechUnlockedArray,
     getLastScreenOpenRegister,
@@ -3303,6 +3306,24 @@ export function createOptionRow(options = {}) {
             wrapper.classList.add('invisible');
         } else if (researchQty >= researchPointsToAppear && !alreadyRevealed) {
             setRevealedTechArray(objectSectionArgument1);
+        }
+    }
+
+    if (dataConditionCheck === 'cosmicRipTechUnlock') {
+        const appearsAt = getResourceDataObject('cosmicRip', ['techs', objectSectionArgument1, 'appearsAt']);
+        const telemetryPointsToAppear = appearsAt?.[0];
+        const prerequisiteForTech = appearsAt?.[1];
+
+        const telemetryQty = getResourceDataObject('cosmicRip', ['ripTelemetryData']);
+        const alreadyRevealed = getRevealedCosmicRipTechArray().includes(objectSectionArgument1);
+        const prereqUnlocked = getCosmicRipTechUnlockedArray().includes(prerequisiteForTech);
+
+        if (telemetryQty < telemetryPointsToAppear && !alreadyRevealed) {
+            wrapper.classList.add('invisible');
+        } else if (!prereqUnlocked) {
+            wrapper.classList.add('invisible');
+        } else if (telemetryQty >= telemetryPointsToAppear && !alreadyRevealed) {
+            setRevealedCosmicRipTechArray(objectSectionArgument1);
         }
     }
 

@@ -216,7 +216,7 @@ export function migrateResourceData(saveData, objectType, options = {}) {
             saveData.version = 0.969;
         }
 
-        if (saveData.version < 0.973) {
+        if (saveData.version < 0.974) {
             if (objectType === 'resourceData') {
                 const freshCosmicRip = {
                     galacticPoints: 0,
@@ -247,20 +247,17 @@ export function migrateResourceData(saveData, objectType, options = {}) {
                             rate: 0.1
                         },
                     },
-                    ripResearch: {
-                        points: 0,
-                        level: 0,
-                        unlocked: {
-                            stabilization: false,
-                        }
-                    },
-                    projects: {
-                        stabilizerArrayLevel: 0,
+                    techs: {
+                        stabilizerArray: { appearsAt: [10000, null, null], prereqs: [null], price: 10000, idForRenderPosition: 1, path: 1 },
+                        quantumContainmentField: { appearsAt: [15000, "stabilizerArray", ""], prereqs: ['Stabilizer Array'], price: 15000, idForRenderPosition: 2, path: 1 },
+                        dimensionalAnchorMatrix: { appearsAt: [25000, "quantumContainmentField", ""], prereqs: ['Quantum Containment Field'], price: 25000, idForRenderPosition: 3, path: 1 },
+                        singularityStabilizer: { appearsAt: [40000, "dimensionalAnchorMatrix", ""], prereqs: ['Dimensional Anchor Matrix'], price: 40000, idForRenderPosition: 4, path: 1 },
+                        realityWeaveRegulator: { appearsAt: [60000, "singularityStabilizer", ""], prereqs: ['Singularity Stabilizer'], price: 60000, idForRenderPosition: 5, path: 1 },
                     }
                 };
                 saveData.cosmicRip = freshCosmicRip;
             }
-            saveData.version = 0.973;
+            saveData.version = 0.974;
         }
     }
     return saveData;

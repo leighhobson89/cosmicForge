@@ -282,6 +282,9 @@ import {
     getUnlockedResourcesArray,
     setUnlockedResourcesArray,
     setRevealedTechArray,
+    setRevealedCosmicRipTechArray,
+    getRevealedCosmicRipTechArray,
+    getCosmicRipTechUnlockedArray,
     getTimerUpdateInterval,
     getTimerRateRatio,
     getLastFocusOfflineGainsAppliedAt,
@@ -2055,6 +2058,7 @@ export async function gameLoop() {
         checkAndStartAutoTelescopeAction();
 
         monitorTechTree();
+        monitorCosmicRipTechTree();
         updateNativeTechCostStates();
         
         const revealRowsCheck = document.querySelectorAll('.option-row');
@@ -2399,7 +2403,6 @@ function updateRipTelemetryDelta(deltaMs) {
     const now = Date.now();
     if (now - lastRipTelemetryConsoleLogMs >= 1000) {
         lastRipTelemetryConsoleLogMs = now;
-        console.log('ripTelemetryData:', getResourceDataObject('cosmicRip', ['ripTelemetryData']));
     }
 }
 
@@ -6254,7 +6257,7 @@ function getSpecificAsteroidExtractionRate(asteroid) {
     const maxRate = getNormalMaxAntimatterRate();
     const minRate = 0.0001;
     const maxEase = 1;
-    const minEase = 10; //leave as 10 even for new complexity scale up to 6 so rate is higher than before even or bad ones
+    const minEase = 10; //leave as 10 even for new complexity scale up to 6 so rate is higher than before even for bad ones
 
     const normalizedEase = (asteroid.easeOfExtraction[0] - maxEase) / (minEase - maxEase);
     const extractionRate = maxRate - (normalizedEase * (maxRate - minRate));
@@ -6291,12 +6294,36 @@ function monitorTechTree() {
     });
 }
 
+function monitorCosmicRipTechTree() {
+    const cosmicRipTechs = getResourceDataObject('cosmicRip', ['techs']);
+    if (!cosmicRipTechs) return;
+    
+    Object.keys(cosmicRipTechs).forEach(techKey => {
+        if (!getCosmicRipTechUnlockedArray().includes(techKey)) {
+            const appearsAt = cosmicRipTechs[techKey].appearsAt;
+            const telemetryQty = getResourceDataObject('cosmicRip', ['ripTelemetryData']);
+            
+            if (telemetryQty > appearsAt[0] && !getRevealedCosmicRipTechArray().includes(techKey)) {
+                setRevealedCosmicRipTechArray(techKey);
+            }
+        }
+    });
+}
+
 function resourceAndCompoundMonitorRevealRowsChecks(element) {
     if (element.classList.contains('invisible') && element.dataset.conditionCheck === 'techUnlock') { //reveal techs check
         if (getRevealedTechArray().includes(element.dataset.type)) {
             element.classList.remove('invisible');
             setTechRenderChange(true);
         } else if (!getRevealedTechArray().includes(element.dataset.type) && getResourceDataObject('research', ['quantity']) >= getResourceDataObject('techs', [element.dataset.type, 'appearsAt'])[0]) {
+            element.classList.remove('invisible');
+            setTechRenderChange(true);
+        }
+    } else if (element.classList.contains('invisible') && element.dataset.conditionCheck === 'cosmicRipTechUnlock') { //reveal cosmic rip techs check
+        if (getRevealedCosmicRipTechArray().includes(element.dataset.type)) {
+            element.classList.remove('invisible');
+            setTechRenderChange(true);
+        } else if (!getRevealedCosmicRipTechArray().includes(element.dataset.type) && getResourceDataObject('cosmicRip', ['ripTelemetryData']) >= getResourceDataObject('cosmicRip', ['techs', element.dataset.type, 'appearsAt'])[0]) {
             element.classList.remove('invisible');
             setTechRenderChange(true);
         }

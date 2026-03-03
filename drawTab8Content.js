@@ -731,8 +731,10 @@ export function drawTab8Content(heading, optionContentElement) {
             labelId: 'cosmicRipCosmicRipStatusRow',
             renderNameABs: null,
             labelText: 'Cosmic Rip:',
-            inputElements: null,
-            descriptionText: `<span id="cosmicRipCosmicRipStageText" class="warning-orange-text">Unknown</span>`,
+            inputElements: [
+                createTextElement('Discovered', 'cosmicRipCosmicRipStatusText', []),
+            ],
+            descriptionText: '',
             resourcePriceObject: '',
             dataConditionCheck: null,
             objectSectionArgument1: null,
@@ -747,11 +749,11 @@ export function drawTab8Content(heading, optionContentElement) {
             specialInputContainerClasses: null,
             hideMainDescriptionRow: false
         });
-        statusRow.classList.add('invisible');
+        statusRow.classList.remove('invisible');
         optionContentElement.appendChild(statusRow);
 
-        const stabilizerProjectRow = createOptionRow({
-            labelId: 'cosmicRipCosmicRipStabilizerProjectRow',
+        const stabilizerArrayRow = createOptionRow({
+            labelId: 'cosmicRipStabilizerArrayRow',
             renderNameABs: null,
             labelText: 'Stabilizer Array:',
             inputElements: [
@@ -765,10 +767,10 @@ export function drawTab8Content(heading, optionContentElement) {
                     rowCategory: 'cosmicRipBuildStabilizerArray'
                 }),
             ],
-            descriptionText: 'Construct stabilizers to reduce instability and unlock safe operations.',
+            descriptionText: '',
             resourcePriceObject: '',
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
+            dataConditionCheck: 'cosmicRipTechUnlock',
+            objectSectionArgument1: 'stabilizerArray',
             objectSectionArgument2: null,
             quantityArgument: null,
             autoBuyerTier: null,
@@ -780,15 +782,140 @@ export function drawTab8Content(heading, optionContentElement) {
             specialInputContainerClasses: null,
             hideMainDescriptionRow: false
         });
-        stabilizerProjectRow.classList.add('invisible');
-        optionContentElement.appendChild(stabilizerProjectRow);
+        stabilizerArrayRow.classList.add('invisible');
+        optionContentElement.appendChild(stabilizerArrayRow);
 
-        if (restored) {
-            statusRow.classList.remove('invisible');
-        }
-        if (restored && found) {
-            stabilizerProjectRow.classList.remove('invisible');
-        }
+        const quantumContainmentFieldRow = createOptionRow({
+            labelId: 'cosmicRipQuantumContainmentFieldRow',
+            renderNameABs: null,
+            labelText: 'Quantum Containment Field:',
+            inputElements: [
+                createButton({
+                    text: 'BUILD',
+                    classNames: ['option-button', 'red-disabled-text', 'cosmic-rip-build-stabilizer-array-button'],
+                    onClick: () => {
+                        showNotification('Coming soon', 'info', 2500, 'cosmicRip');
+                    },
+                    disableKeyboardForButton: true,
+                    rowCategory: 'cosmicRipBuildStabilizerArray'
+                }),
+            ],
+            descriptionText: '',
+            resourcePriceObject: '',
+            dataConditionCheck: 'cosmicRipTechUnlock',
+            objectSectionArgument1: 'quantumContainmentField',
+            objectSectionArgument2: null,
+            quantityArgument: null,
+            autoBuyerTier: null,
+            startInvisibleValue: false,
+            resourceString: null,
+            optionalIterationParam: null,
+            rowCategory: 'cosmicRipBuildStabilizerArray',
+            noDescriptionContainer: false,
+            specialInputContainerClasses: null,
+            hideMainDescriptionRow: false
+        });
+        quantumContainmentFieldRow.classList.add('invisible');
+        optionContentElement.appendChild(quantumContainmentFieldRow);
+
+        const dimensionalAnchorMatrixRow = createOptionRow({
+            labelId: 'cosmicRipDimensionalAnchorMatrixRow',
+            renderNameABs: null,
+            labelText: 'Dimensional Anchor Matrix:',
+            inputElements: [
+                createButton({
+                    text: 'BUILD',
+                    classNames: ['option-button', 'red-disabled-text', 'cosmic-rip-build-stabilizer-array-button'],
+                    onClick: () => {
+                        showNotification('Coming soon', 'info', 2500, 'cosmicRip');
+                    },
+                    disableKeyboardForButton: true,
+                    rowCategory: 'cosmicRipBuildStabilizerArray'
+                }),
+            ],
+            descriptionText: '',
+            resourcePriceObject: '',
+            dataConditionCheck: 'cosmicRipTechUnlock',
+            objectSectionArgument1: 'dimensionalAnchorMatrix',
+            objectSectionArgument2: null,
+            quantityArgument: null,
+            autoBuyerTier: null,
+            startInvisibleValue: false,
+            resourceString: null,
+            optionalIterationParam: null,
+            rowCategory: 'cosmicRipBuildStabilizerArray',
+            noDescriptionContainer: false,
+            specialInputContainerClasses: null,
+            hideMainDescriptionRow: false
+        });
+        dimensionalAnchorMatrixRow.classList.add('invisible');
+        optionContentElement.appendChild(dimensionalAnchorMatrixRow);
+
+        const singularityStabilizerRow = createOptionRow({
+            labelId: 'cosmicRipSingularityStabilizerRow',
+            renderNameABs: null,
+            labelText: 'Singularity Stabilizer:',
+            inputElements: [
+                createButton({
+                    text: 'BUILD',
+                    classNames: ['option-button', 'red-disabled-text', 'cosmic-rip-build-stabilizer-array-button'],
+                    onClick: () => {
+                        showNotification('Coming soon', 'info', 2500, 'cosmicRip');
+                    },
+                    disableKeyboardForButton: true,
+                    rowCategory: 'cosmicRipBuildStabilizerArray'
+                }),
+            ],
+            descriptionText: '',
+            resourcePriceObject: '',
+            dataConditionCheck: 'cosmicRipTechUnlock',
+            objectSectionArgument1: 'singularityStabilizer',
+            objectSectionArgument2: null,
+            quantityArgument: null,
+            autoBuyerTier: null,
+            startInvisibleValue: false,
+            resourceString: null,
+            optionalIterationParam: null,
+            rowCategory: 'cosmicRipBuildStabilizerArray',
+            noDescriptionContainer: false,
+            specialInputContainerClasses: null,
+            hideMainDescriptionRow: false
+        });
+        singularityStabilizerRow.classList.add('invisible');
+        optionContentElement.appendChild(singularityStabilizerRow);
+
+        const realityWeaveRegulatorRow = createOptionRow({
+            labelId: 'cosmicRipRealityWeaveRegulatorRow',
+            renderNameABs: null,
+            labelText: 'Reality Weave Regulator:',
+            inputElements: [
+                createButton({
+                    text: 'BUILD',
+                    classNames: ['option-button', 'red-disabled-text', 'cosmic-rip-build-stabilizer-array-button'],
+                    onClick: () => {
+                        showNotification('Coming soon', 'info', 2500, 'cosmicRip');
+                    },
+                    disableKeyboardForButton: true,
+                    rowCategory: 'cosmicRipBuildStabilizerArray'
+                }),
+            ],
+            descriptionText: '',
+            resourcePriceObject: '',
+            dataConditionCheck: 'cosmicRipTechUnlock',
+            objectSectionArgument1: 'realityWeaveRegulator',
+            objectSectionArgument2: null,
+            quantityArgument: null,
+            autoBuyerTier: null,
+            startInvisibleValue: false,
+            resourceString: null,
+            optionalIterationParam: null,
+            rowCategory: 'cosmicRipBuildStabilizerArray',
+            noDescriptionContainer: false,
+            specialInputContainerClasses: null,
+            hideMainDescriptionRow: false
+        });
+        realityWeaveRegulatorRow.classList.add('invisible');
+        optionContentElement.appendChild(realityWeaveRegulatorRow);
         return;
     }
 }

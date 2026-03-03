@@ -28,7 +28,7 @@ let saveData = null;
 //CONSTANTS
 export const HOMESTAR = 'miaplacidus';
 export const MINIMUM_GAME_VERSION_FOR_SAVES = 0.93;
-export const GAME_VERSION_FOR_SAVES = 0.973;
+export const GAME_VERSION_FOR_SAVES = 0.974;
 export const deferredActions = [];
 
 //NOTIFICATIONS
@@ -256,6 +256,8 @@ let itemsToIncreasePrice = {};
 let techUnlockedArray = ['apAwardedThisRun'];
 let revealedTechArray = [];
 let upcomingTechArray = [];
+let cosmicRipTechUnlockedArray = [];
+let revealedCosmicRipTechArray = [];
 let unlockedResourcesArray = ['hydrogen'];
 let unlockedCompoundsArray = [];
 let temporaryCoreTechRowsRepo = null;
@@ -1534,6 +1536,8 @@ export function captureGameStatusForSaving(type) {
     gameState.constituentPartsObject = getConstituentPartsObject();
     gameState.techUnlockedArray = techUnlockedArray;
     gameState.revealedTechArray = revealedTechArray;
+    gameState.cosmicRipTechUnlockedArray = cosmicRipTechUnlockedArray;
+    gameState.revealedCosmicRipTechArray = revealedCosmicRipTechArray;
     gameState.upcomingTechArray = upcomingTechArray;
     gameState.unlockedResourcesArray = unlockedResourcesArray;
     gameState.unlockedCompoundsArray = unlockedCompoundsArray;
@@ -1822,6 +1826,8 @@ export function restoreGameStatus(gameState, type) {
             blackHoleDiscoveryProbability = gameState.blackHoleDiscoveryProbability ?? 0;
             techUnlockedArray = gameState.techUnlockedArray;
             revealedTechArray = gameState.revealedTechArray;
+            cosmicRipTechUnlockedArray = gameState.cosmicRipTechUnlockedArray ?? [];
+            revealedCosmicRipTechArray = gameState.revealedCosmicRipTechArray ?? [];
             upcomingTechArray = gameState.upcomingTechArray;
             unlockedResourcesArray = gameState.unlockedResourcesArray;
             unlockedCompoundsArray = gameState.unlockedCompoundsArray;
@@ -2781,6 +2787,26 @@ export function getRevealedTechArray() {
 
 export function setRevealedTechArray(value) {
     revealedTechArray.unshift(value);
+}
+
+export function getRevealedCosmicRipTechArray() {
+    return revealedCosmicRipTechArray;
+}
+
+export function setRevealedCosmicRipTechArray(value) {
+    revealedCosmicRipTechArray.unshift(value);
+}
+
+export function getCosmicRipTechUnlockedArray() {
+    return cosmicRipTechUnlockedArray;
+}
+
+export function setCosmicRipTechUnlockedArray(value, direct = false) {
+    if (direct) {
+        cosmicRipTechUnlockedArray = Array.isArray(value) ? value : cosmicRipTechUnlockedArray;
+    } else {
+        cosmicRipTechUnlockedArray.unshift(value);
+    }
 }
 
 export function getUpcomingTechArray() {

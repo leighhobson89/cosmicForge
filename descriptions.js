@@ -668,6 +668,36 @@ export function initialiseDescriptions() {
             content2: "",
             updateAt: ""
         },
+        cosmicRipCosmicRipStatusRow: {
+            content1: "The Cosmic Rip has been discovered through our advanced scanning efforts.",
+            content2: "",
+            updateAt: ""
+        },
+        cosmicRipStabilizerArrayRow: {
+            content1: "Construct stabilizers to reduce instability and unlock safe operations.",
+            content2: "",
+            updateAt: ""
+        },
+        cosmicRipQuantumContainmentFieldRow: {
+            content1: "Generate quantum fields to contain the rip's dimensional bleed.",
+            content2: "",
+            updateAt: ""
+        },
+        cosmicRipDimensionalAnchorMatrixRow: {
+            content1: "Anchor local reality to prevent dimensional drift from the rip.",
+            content2: "",
+            updateAt: ""
+        },
+        cosmicRipSingularityStabilizerRow: {
+            content1: "Stabilize the gravitational singularity at the rip's core.",
+            content2: "",
+            updateAt: ""
+        },
+        cosmicRipRealityWeaveRegulatorRow: {
+            content1: "Regulate the fabric of reality around the cosmic rip.",
+            content2: "",
+            updateAt: ""
+        },
         oxygenIncreaseStorageRow: {
             content1: "Upgrade your Oxygen storage capacity to hold more resources.",
             content2: "",
