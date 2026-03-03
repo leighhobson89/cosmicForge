@@ -1,4 +1,5 @@
 import {
+    setCosmicRipTechUnlockedArray,
     setGalacticPointsSpent,
     setCosmicRipNearSpaceScannerArraySectorNames,
     getCosmicRipNearSpaceScannerArraySectorNames,
@@ -529,6 +530,95 @@ const storageFullNotificationState = {
         compounds: Object.create(null)
     }
 };
+
+function handleCosmicRipTechnologyScreenButtonAndDescriptionStates(element, telemetryQty, techName) {
+    const price = getResourceDataObject('cosmicRip', ['techs', techName, 'price']);
+    const prerequisiteArray = (getResourceDataObject('cosmicRip', ['techs', techName, 'appearsAt']) || [])
+        .slice(1)
+        .filter(prereq => prereq !== null && prereq !== '');
+    const currentGP = Number(getCosmicRipGalacticPoints?.()) || 0;
+    const hasEnoughGP = currentGP >= 1;
+    const hasEnoughTelemetry = telemetryQty >= price;
+    const canAfford = hasEnoughTelemetry && hasEnoughGP;
+
+    if (element.tagName.toLowerCase() === 'button') {
+        if (canAfford) {
+            const allPrerequisitesUnlocked = prerequisiteArray.every(prerequisite => getCosmicRipTechUnlockedArray().includes(prerequisite));
+            if (allPrerequisitesUnlocked) {
+                element.classList.remove('red-disabled-text');
+                element.classList.add('green-ready-text');
+            } else {
+                element.classList.add('red-disabled-text');
+                element.classList.remove('green-ready-text');
+            }
+        } else {
+            element.classList.add('red-disabled-text');
+            element.classList.remove('green-ready-text');
+        }
+    } else {
+        const telemetrySpan = element.querySelector(`#${techName}Telemetry`);
+        if (telemetrySpan) {
+            if (hasEnoughTelemetry) {
+                telemetrySpan.classList.remove('red-disabled-text');
+                telemetrySpan.classList.add('green-ready-text');
+            } else {
+                telemetrySpan.classList.add('red-disabled-text');
+                telemetrySpan.classList.remove('green-ready-text');
+            }
+        }
+
+        const gpSpan = element.querySelector(`#${techName}GP`);
+        if (gpSpan) {
+            if (hasEnoughGP) {
+                gpSpan.classList.remove('red-disabled-text');
+                gpSpan.classList.add('green-ready-text');
+            } else {
+                gpSpan.classList.add('red-disabled-text');
+                gpSpan.classList.remove('green-ready-text');
+            }
+        }
+
+        const prerequisiteSpan = element.querySelector(`#${techName}Prereq`);
+        if (prerequisiteSpan) {
+            const technologiesString = prerequisiteSpan.textContent.trim();
+            if (technologiesString !== "") {
+                const technologiesArray = technologiesString.split(', ');
+                prerequisiteSpan.innerHTML = '';
+
+                technologiesArray.forEach((tech, index) => {
+                    const techSpan = document.createElement('span');
+                    techSpan.textContent = tech.trim();
+
+                    const techSpanArrayName = /^[A-Z]{2,}/.test(tech.split(' ')[0])
+                        ? tech.replace(/\s+/g, '')
+                        : tech.charAt(0).toLowerCase() + tech.slice(1).replace(/\s+/g, '');
+
+                    if (getCosmicRipTechUnlockedArray().includes(techSpanArrayName)) {
+                        techSpan.classList.add('green-ready-text');
+                        techSpan.classList.remove('red-disabled-text');
+                    } else {
+                        techSpan.classList.remove('green-ready-text');
+                        techSpan.classList.add('red-disabled-text');
+                    }
+
+                    prerequisiteSpan.appendChild(techSpan);
+                    if (index < technologiesArray.length - 1) {
+                        prerequisiteSpan.appendChild(document.createTextNode(', '));
+                    }
+                });
+            }
+        }
+    }
+
+    if (getCosmicRipTechUnlockedArray().includes(techName)) {
+        element.classList.remove('red-disabled-text');
+        element.classList.add('green-ready-text');
+        element.textContent = 'Researched';
+        setElementPointerEvents(element, 'none');
+        setTechRenderChange(true);
+    }
+}
+
 
 const STORAGE_FULL_NOTIFICATION_COOLDOWN_MS = 60 * 1000;
 
@@ -1279,7 +1369,24 @@ function cosmicRipChecks() {
     if (situationObjectiveText) {
         const isOneSectorState = getCosmicRipNearSpaceScannerArrayOneSectorState() === true;
         if (scannerRestored && ripFound && isOneSectorState) {
-            situationObjectiveText.textContent = 'Learn how to Investigate the Cosmic Rip';
+            const unlocked = getCosmicRipTechUnlockedArray?.() || [];
+            let nextObjective = 'Build Stabilizer Array';
+            if (unlocked.includes('stabilizerArray')) {
+                nextObjective = 'Build Quantum Containment Field';
+            }
+            if (unlocked.includes('quantumContainmentField')) {
+                nextObjective = 'Build Dimensional Anchor Matrix';
+            }
+            if (unlocked.includes('dimensionalAnchorMatrix')) {
+                nextObjective = 'Build Singularity Stabilizer';
+            }
+            if (unlocked.includes('singularityStabilizer')) {
+                nextObjective = 'Build Reality Weave Regulator';
+            }
+            if (unlocked.includes('realityWeaveRegulator')) {
+                nextObjective = 'All Stabilization Systems Online';
+            }
+            situationObjectiveText.textContent = nextObjective;
             situationObjectiveText.classList.add('green-ready-text');
         } else {
             situationObjectiveText.textContent = 'Scan Local Sectors for the Cosmic Rip';
@@ -2218,7 +2325,7 @@ function ensureElementsToCheckObserver() {
 function buildElementsToCheck() {
     const base = Array.from(
         document.querySelectorAll(
-            '#autoCreateToggle, #autoSellToggle, .energy-check, .fuel-check, .resource-cost-sell-check, .compound-cost-sell-check, [class*="travel-starship"], .diplomacy-button'
+            '#autoCreateToggle, #autoSellToggle, .energy-check, .fuel-check, .resource-cost-sell-check, .compound-cost-sell-check, [class*="travel-starship"], .diplomacy-button, .description-container .resource-cost-sell-check'
         )
     );
 
@@ -6988,6 +7095,8 @@ function resourceCostSellChecks(element) {
         quantity = getResourceDataObject('currency', ['cash']);
     } else if (checkQuantityString === 'time') {
         quantity = 0;
+    } else if (checkQuantityString === 'ripTelemetryData') {
+        quantity = getResourceDataObject('cosmicRip', ['ripTelemetryData']);
     } else {
         if (checkQuantityString === 'research') {
             quantity = getResourceDataObject('research', ['quantity']); //research
@@ -7004,8 +7113,13 @@ function resourceCostSellChecks(element) {
         return setStateOfFuseResourceButton(element, quantity, resource, resourceToFuseTo);
     }
 
-    if (element.classList.contains('tech-unlock') || element.dataset.conditionCheck === 'techUnlock') { 
+    if (element.dataset.conditionCheck === 'techUnlock') { 
         return handleTechnologyScreenButtonAndDescriptionStates(element, quantity, techName);
+    }
+
+    if (element.dataset.conditionCheck === 'cosmicRipTechUnlock') {
+        const telemetryQty = getResourceDataObject('cosmicRip', ['ripTelemetryData']);
+        return handleCosmicRipTechnologyScreenButtonAndDescriptionStates(element, telemetryQty, techName);
     }   
     
     if (element.classList.contains('philosophy-tech-unlock') || element.dataset.conditionCheck === 'techUnlockPhilosophy') { 
@@ -9308,14 +9422,30 @@ export function gain(incrementAmount, elementId, item, ABOrTechPurchase, tierAB,
         resourceType = 'space';
     } else if (resourceCategory === 'cosmicRip') {
         resourceType = 'cosmicRip';
+    } else if (resourceCategory === 'cosmicRipTech') {
+        resourceType = 'cosmicRipTech';
     } else {
         resourceType = itemType.slice(0, -1);
+    }
+
+    if (resourceCategory === 'cosmicRipTech') {
+        const price = getResourceDataObject('cosmicRip', ['techs', item, 'price']);
+        const currentTelemetry = getResourceDataObject('cosmicRip', ['ripTelemetryData']);
+        const currentGP = Number(getCosmicRipGalacticPoints?.()) || 0;
+        if (currentTelemetry >= price && currentGP >= 1) {
+            setResourceDataObject(currentTelemetry - price, 'cosmicRip', ['ripTelemetryData']);
+            setCosmicRipGalacticPoints(Math.max(0, currentGP - 1));
+            setCosmicRipTechUnlockedArray(item);
+        }
+        return;
     }
 
     let currentQuantity;
 
     if (item && item === 'techUnlock') {
         currentQuantity = getResourceDataObject('techs', [incrementAmount, 'price']);
+    } else if (resourceCategory === 'cosmicRipTech') {
+        currentQuantity = getResourceDataObject('cosmicRip', ['techs', item, 'price']);
     } else if (item && item === 'techUnlockPhilosophy') {
         currentQuantity = getResourceDataObject('philosophyRepeatableTechs', [getPlayerPhilosophy(), incrementAmount, 'price']); 
     } else if (item && item.startsWith('science')) {

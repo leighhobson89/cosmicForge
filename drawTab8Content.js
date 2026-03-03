@@ -758,26 +758,30 @@ export function drawTab8Content(heading, optionContentElement) {
             labelText: 'Stabilizer Array:',
             inputElements: [
                 createButton({
-                    text: 'BUILD',
-                    classNames: ['option-button', 'red-disabled-text', 'cosmic-rip-build-stabilizer-array-button'],
+                    text: 'Research',
+                    classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'cosmic-rip-tech-unlock', 'cosmic-rip-build-stabilizer-array-button'],
                     onClick: () => {
-                        showNotification('Coming soon', 'info', 2500, 'cosmicRip');
+                        gain(1, null, 'stabilizerArray', true, null, 'cosmicRipTech', 'tech');
                     },
+                    dataConditionCheck: 'cosmicRipTechUnlock',
+                    resourcePriceObject: '',
+                    objectSectionArgument1: 'stabilizerArray',
+                    quantityArgument: 'ripTelemetryData',
                     disableKeyboardForButton: true,
                     rowCategory: 'cosmicRipBuildStabilizerArray'
                 }),
             ],
-            descriptionText: '',
+            descriptionText: `<span id="stabilizerArrayTelemetry">${getResourceDataObject('cosmicRip', ['techs', 'stabilizerArray', 'price'])} Telemetry Data<span id="stabilizerArrayComma1">, </span></span><span id="stabilizerArrayGP">1GP<span id="stabilizerArrayComma2">, </span></span>${getResourceDataObject('cosmicRip', ['techs', 'stabilizerArray', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? '' : ''}<span id="stabilizerArrayPrereq">${getResourceDataObject('cosmicRip', ['techs', 'stabilizerArray', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
             resourcePriceObject: '',
             dataConditionCheck: 'cosmicRipTechUnlock',
             objectSectionArgument1: 'stabilizerArray',
             objectSectionArgument2: null,
-            quantityArgument: null,
+            quantityArgument: 'ripTelemetryData',
             autoBuyerTier: null,
             startInvisibleValue: false,
             resourceString: null,
             optionalIterationParam: null,
-            rowCategory: 'cosmicRipBuildStabilizerArray',
+            rowCategory: 'tech',
             noDescriptionContainer: false,
             specialInputContainerClasses: null,
             hideMainDescriptionRow: false
@@ -791,26 +795,30 @@ export function drawTab8Content(heading, optionContentElement) {
             labelText: 'Quantum Containment Field:',
             inputElements: [
                 createButton({
-                    text: 'BUILD',
-                    classNames: ['option-button', 'red-disabled-text', 'cosmic-rip-build-stabilizer-array-button'],
+                    text: 'Research',
+                    classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'cosmic-rip-tech-unlock', 'cosmic-rip-build-stabilizer-array-button'],
                     onClick: () => {
-                        showNotification('Coming soon', 'info', 2500, 'cosmicRip');
+                        gain(1, null, 'quantumContainmentField', true, null, 'cosmicRipTech', 'tech');
                     },
+                    dataConditionCheck: 'cosmicRipTechUnlock',
+                    resourcePriceObject: '',
+                    objectSectionArgument1: 'quantumContainmentField',
+                    quantityArgument: 'ripTelemetryData',
                     disableKeyboardForButton: true,
                     rowCategory: 'cosmicRipBuildStabilizerArray'
                 }),
             ],
-            descriptionText: '',
+            descriptionText: `<span id="quantumContainmentFieldTelemetry">${getResourceDataObject('cosmicRip', ['techs', 'quantumContainmentField', 'price'])} Telemetry Data<span id="quantumContainmentFieldComma1">, </span></span><span id="quantumContainmentFieldGP">1GP<span id="quantumContainmentFieldComma2">, </span></span>${getResourceDataObject('cosmicRip', ['techs', 'quantumContainmentField', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? '' : ''}<span id="quantumContainmentFieldPrereq">${getResourceDataObject('cosmicRip', ['techs', 'quantumContainmentField', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
             resourcePriceObject: '',
             dataConditionCheck: 'cosmicRipTechUnlock',
             objectSectionArgument1: 'quantumContainmentField',
             objectSectionArgument2: null,
-            quantityArgument: null,
+            quantityArgument: 'ripTelemetryData',
             autoBuyerTier: null,
             startInvisibleValue: false,
             resourceString: null,
             optionalIterationParam: null,
-            rowCategory: 'cosmicRipBuildStabilizerArray',
+            rowCategory: 'tech',
             noDescriptionContainer: false,
             specialInputContainerClasses: null,
             hideMainDescriptionRow: false
@@ -824,26 +832,30 @@ export function drawTab8Content(heading, optionContentElement) {
             labelText: 'Dimensional Anchor Matrix:',
             inputElements: [
                 createButton({
-                    text: 'BUILD',
-                    classNames: ['option-button', 'red-disabled-text', 'cosmic-rip-build-stabilizer-array-button'],
+                    text: 'Research',
+                    classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'cosmic-rip-tech-unlock', 'cosmic-rip-build-stabilizer-array-button'],
                     onClick: () => {
-                        showNotification('Coming soon', 'info', 2500, 'cosmicRip');
+                        gain(1, null, 'dimensionalAnchorMatrix', true, null, 'cosmicRipTech', 'tech');
                     },
+                    dataConditionCheck: 'cosmicRipTechUnlock',
+                    resourcePriceObject: '',
+                    objectSectionArgument1: 'dimensionalAnchorMatrix',
+                    quantityArgument: 'ripTelemetryData',
                     disableKeyboardForButton: true,
                     rowCategory: 'cosmicRipBuildStabilizerArray'
                 }),
             ],
-            descriptionText: '',
+            descriptionText: `<span id="dimensionalAnchorMatrixTelemetry">${getResourceDataObject('cosmicRip', ['techs', 'dimensionalAnchorMatrix', 'price'])} Telemetry Data<span id="dimensionalAnchorMatrixComma1">, </span></span><span id="dimensionalAnchorMatrixGP">1GP<span id="dimensionalAnchorMatrixComma2">, </span></span>${getResourceDataObject('cosmicRip', ['techs', 'dimensionalAnchorMatrix', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? '' : ''}<span id="dimensionalAnchorMatrixPrereq">${getResourceDataObject('cosmicRip', ['techs', 'dimensionalAnchorMatrix', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
             resourcePriceObject: '',
             dataConditionCheck: 'cosmicRipTechUnlock',
             objectSectionArgument1: 'dimensionalAnchorMatrix',
             objectSectionArgument2: null,
-            quantityArgument: null,
+            quantityArgument: 'ripTelemetryData',
             autoBuyerTier: null,
             startInvisibleValue: false,
             resourceString: null,
             optionalIterationParam: null,
-            rowCategory: 'cosmicRipBuildStabilizerArray',
+            rowCategory: 'tech',
             noDescriptionContainer: false,
             specialInputContainerClasses: null,
             hideMainDescriptionRow: false
@@ -857,26 +869,30 @@ export function drawTab8Content(heading, optionContentElement) {
             labelText: 'Singularity Stabilizer:',
             inputElements: [
                 createButton({
-                    text: 'BUILD',
-                    classNames: ['option-button', 'red-disabled-text', 'cosmic-rip-build-stabilizer-array-button'],
+                    text: 'Research',
+                    classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'cosmic-rip-tech-unlock', 'cosmic-rip-build-stabilizer-array-button'],
                     onClick: () => {
-                        showNotification('Coming soon', 'info', 2500, 'cosmicRip');
+                        gain(1, null, 'singularityStabilizer', true, null, 'cosmicRipTech', 'tech');
                     },
+                    dataConditionCheck: 'cosmicRipTechUnlock',
+                    resourcePriceObject: '',
+                    objectSectionArgument1: 'singularityStabilizer',
+                    quantityArgument: 'ripTelemetryData',
                     disableKeyboardForButton: true,
                     rowCategory: 'cosmicRipBuildStabilizerArray'
                 }),
             ],
-            descriptionText: '',
+            descriptionText: `<span id="singularityStabilizerTelemetry">${getResourceDataObject('cosmicRip', ['techs', 'singularityStabilizer', 'price'])} Telemetry Data<span id="singularityStabilizerComma1">, </span></span><span id="singularityStabilizerGP">1GP<span id="singularityStabilizerComma2">, </span></span>${getResourceDataObject('cosmicRip', ['techs', 'singularityStabilizer', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? '' : ''}<span id="singularityStabilizerPrereq">${getResourceDataObject('cosmicRip', ['techs', 'singularityStabilizer', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
             resourcePriceObject: '',
             dataConditionCheck: 'cosmicRipTechUnlock',
             objectSectionArgument1: 'singularityStabilizer',
             objectSectionArgument2: null,
-            quantityArgument: null,
+            quantityArgument: 'ripTelemetryData',
             autoBuyerTier: null,
             startInvisibleValue: false,
             resourceString: null,
             optionalIterationParam: null,
-            rowCategory: 'cosmicRipBuildStabilizerArray',
+            rowCategory: 'tech',
             noDescriptionContainer: false,
             specialInputContainerClasses: null,
             hideMainDescriptionRow: false
@@ -890,26 +906,30 @@ export function drawTab8Content(heading, optionContentElement) {
             labelText: 'Reality Weave Regulator:',
             inputElements: [
                 createButton({
-                    text: 'BUILD',
-                    classNames: ['option-button', 'red-disabled-text', 'cosmic-rip-build-stabilizer-array-button'],
+                    text: 'Research',
+                    classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'cosmic-rip-tech-unlock', 'cosmic-rip-build-stabilizer-array-button'],
                     onClick: () => {
-                        showNotification('Coming soon', 'info', 2500, 'cosmicRip');
+                        gain(1, null, 'realityWeaveRegulator', true, null, 'cosmicRipTech', 'tech');
                     },
+                    dataConditionCheck: 'cosmicRipTechUnlock',
+                    resourcePriceObject: '',
+                    objectSectionArgument1: 'realityWeaveRegulator',
+                    quantityArgument: 'ripTelemetryData',
                     disableKeyboardForButton: true,
                     rowCategory: 'cosmicRipBuildStabilizerArray'
                 }),
             ],
-            descriptionText: '',
+            descriptionText: `<span id="realityWeaveRegulatorTelemetry">${getResourceDataObject('cosmicRip', ['techs', 'realityWeaveRegulator', 'price'])} Telemetry Data<span id="realityWeaveRegulatorComma1">, </span></span><span id="realityWeaveRegulatorGP">1GP<span id="realityWeaveRegulatorComma2">, </span></span>${getResourceDataObject('cosmicRip', ['techs', 'realityWeaveRegulator', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? '' : ''}<span id="realityWeaveRegulatorPrereq">${getResourceDataObject('cosmicRip', ['techs', 'realityWeaveRegulator', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
             resourcePriceObject: '',
             dataConditionCheck: 'cosmicRipTechUnlock',
             objectSectionArgument1: 'realityWeaveRegulator',
             objectSectionArgument2: null,
-            quantityArgument: null,
+            quantityArgument: 'ripTelemetryData',
             autoBuyerTier: null,
             startInvisibleValue: false,
             resourceString: null,
             optionalIterationParam: null,
-            rowCategory: 'cosmicRipBuildStabilizerArray',
+            rowCategory: 'tech',
             noDescriptionContainer: false,
             specialInputContainerClasses: null,
             hideMainDescriptionRow: false
