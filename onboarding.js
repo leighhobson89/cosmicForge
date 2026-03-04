@@ -21,25 +21,25 @@ export function setShouldPromptOnboarding(value) {
     shouldPromptOnboarding = Boolean(value);
 }
 
-export async function promptOnboardingIfNeeded({ callPopupModal, showHideModal } = {}) {
+export async function promptOnboardingIfNeeded({ callPopupModalv2, showHideModal } = {}) {
     if (!shouldPromptOnboarding) {
         return;
     }
 
-    if (typeof callPopupModal !== 'function') {
+    if (typeof callPopupModalv2 !== 'function') {
         shouldPromptOnboarding = false;
         return;
     }
 
     await new Promise((resolve) => {
-        callPopupModal(
-            onboardingModalHeader,
-            onboardingModalText,
-            true,
-            true,
-            false,
-            false,
-            () => {
+        callPopupModalv2({
+            header: onboardingModalHeader,
+            content: onboardingModalText,
+            showConfirm: true,
+            showCancel: true,
+            showExtra1: false,
+            showExtra2: false,
+            onConfirm: () => {
                 trackAnalyticsEvent('onboarding_prompt_yes', {
                     ts: new Date().toISOString()
                 });
@@ -47,7 +47,7 @@ export async function promptOnboardingIfNeeded({ callPopupModal, showHideModal }
                 showHideModal?.();
                 resolve();
             },
-            () => {
+            onCancel: () => {
                 trackAnalyticsEvent('onboarding_prompt_no', {
                     ts: new Date().toISOString()
                 });
@@ -55,14 +55,14 @@ export async function promptOnboardingIfNeeded({ callPopupModal, showHideModal }
                 showHideModal?.();
                 resolve();
             },
-            null,
-            null,
-            'YES',
-            'NO',
-            null,
-            null,
-            false
-        );
+            onExtra1: null,
+            onExtra2: null,
+            confirmLabel: 'YES',
+            cancelLabel: 'NO',
+            extra1Label: null,
+            extra2Label: null,
+            setupToolTips: false
+        });
     });
 
     shouldPromptOnboarding = false;
@@ -971,7 +971,7 @@ function renderOnboardingSteps(overlay, steps, requiredTab = null) {
 
 export function onboardingChecks(
     {
-        callPopupModal,
+        callPopupModalv2,
         showHideModal,
         calculateResearchRatePerTick
     } = {}
@@ -1066,28 +1066,28 @@ export function onboardingChecks(
         cleanupOnboardingClickListener();
         overlay.style.display = 'none';
 
-        if (typeof callPopupModal === 'function') {
-            callPopupModal(
-                'ONBOARDING COMPLETE',
-                'Onboarding is over.',
-                true,
-                false,
-                false,
-                false,
-                () => {
+        if (typeof callPopupModalv2 === 'function') {
+            callPopupModalv2({
+                header: 'ONBOARDING COMPLETE',
+                content: 'Onboarding is over.',
+                showConfirm: true,
+                showCancel: false,
+                showExtra1: false,
+                showExtra2: false,
+                onConfirm: () => {
                     setOnboardingMode(false);
                     resetOnboardingProgression();
                     showHideModal?.();
                 },
-                null,
-                null,
-                null,
-                'CONTINUE',
-                null,
-                null,
-                null,
-                false
-            );
+                onCancel: null,
+                onExtra1: null,
+                onExtra2: null,
+                confirmLabel: 'CONTINUE',
+                cancelLabel: null,
+                extra1Label: null,
+                extra2Label: null,
+                setupToolTips: false
+            });
         } else {
             setOnboardingMode(false);
             resetOnboardingProgression();

@@ -34,14 +34,14 @@ export function drawTab9Content(heading, optionContentElement) {
                             return;
                         }
 
-                        callPopupModal(
-                            'EXIT GAME',
-                            'Would you like to save to the cloud before exiting?',
-                            true,
-                            true,
-                            true,
-                            false,
-                            function() {
+                        callPopupModal({
+                            header: 'EXIT GAME',
+                            content: 'Would you like to save to the cloud before exiting?',
+                            showConfirm: true,
+                            showCancel: true,
+                            showExtra1: true,
+                            showExtra2: false,
+                            onConfirm: function() {
                                 showHideModal();
                                 (async () => {
                                     await fadeInStartupOverlay(2000);
@@ -51,10 +51,10 @@ export function drawTab9Content(heading, optionContentElement) {
                                     window.close();
                                 });
                             },
-                            function() {
+                            onCancel: function() {
                                 showHideModal();
                             },
-                            function() {
+                            onExtra1: function() {
                                 (async () => {
                                     if (getOnboardingMode()) {
                                         showNotification("You can't save while onboarding mode is active!", 'info', 4000, 'loadSave');
@@ -95,13 +95,13 @@ export function drawTab9Content(heading, optionContentElement) {
                                     showNotification('Error saving game to cloud!', 'error', 3000, 'loadSave');
                                 });
                             },
-                            null,
-                            "EXIT AND DON'T SAVE",
-                            'CANCEL',
-                            'EXIT AND SAVE',
-                            null,
-                            false
-                        );
+                            onExtra2: null,
+                            confirmLabel: "EXIT AND DON'T SAVE",
+                            cancelLabel: 'CANCEL',
+                            extra1Label: 'EXIT AND SAVE',
+                            extra2Label: null,
+                            setupToolTips: false,
+                        });
                     },
                 }),
             ],
@@ -749,14 +749,14 @@ export function drawTab9Content(heading, optionContentElement) {
                     text: `!!!RESET ALL GAME PROGRESS FOR THIS PIONEER NAME!!!`,
                     classNames: ['option-button', 'hard-reset-button'],
                     onClick: () => {
-                        callPopupModal(
-                            hardResetWarningHeader,
-                            hardResetWarningText,
-                            true,
-                            true,
-                            false,
-                            false,
-                            function () {
+                        callPopupModal({
+                            header: hardResetWarningHeader,
+                            content: hardResetWarningText,
+                            showConfirm: true,
+                            showCancel: true,
+                            showExtra1: false,
+                            showExtra2: false,
+                            onConfirm: function () {
                                 destroySaveGameOnCloud();
                                 showNotification(
                                     `GAME HARD RESET!<br><br>Please REFRESH your Browser and use same Pioneer name to start the new game!`,
@@ -767,21 +767,21 @@ export function drawTab9Content(heading, optionContentElement) {
                                 showHideModal();
                                 document.getElementById('overlay').style.display = 'flex';
                             },
-                            function () {
+                            onCancel: function () {
                                 showHideModal();
                             },
-                            null,
-                            null,
-                            '! RESET ALL PROGRESS, EVEN ON CLOUD !',
-                            'CANCEL TO SAFETY',
-                            null,
-                            null,
-                            false
-                        );
+                            onExtra1: null,
+                            onExtra2: null,
+                            confirmLabel: '! RESET ALL PROGRESS, EVEN ON CLOUD !',
+                            cancelLabel: 'CANCEL TO SAFETY',
+                            extra1Label: null,
+                            extra2Label: null,
+                            setupToolTips: false,
+                        });
                     },
                 }),
             ],
-            descriptionText: '',
+            descriptionText: 'Hard Reset',
             resourcePriceObject: null,
             dataConditionCheck: null,
             objectSectionArgument1: null,

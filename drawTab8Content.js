@@ -83,24 +83,24 @@ export function drawTab8Content(heading, optionContentElement) {
                             return;
                         }
                         showNotification('Near Space Scanner Array restored.', 'info', 3000, 'cosmicRip');
-                        callPopupModal(
-                            modalNearSpaceScannerArrayRestoredHeader,
-                            modalNearSpaceScannerArrayRestoredText,
-                            true,
-                            false,
-                            false,
-                            false,
-                            () => {
+                        callPopupModal({
+                            header: modalNearSpaceScannerArrayRestoredHeader,
+                            content: modalNearSpaceScannerArrayRestoredText,
+                            showConfirm: true,
+                            showCancel: false,
+                            showExtra1: false,
+                            showExtra2: false,
+                            onConfirm: () => {
                                 showHideModal();
                             },
-                            null,
-                            null,
-                            null,
-                            'CONFIRM',
-                            '',
-                            '',
-                            ''
-                        );
+                            onCancel: null,
+                            onExtra1: null,
+                            onExtra2: null,
+                            confirmLabel: 'CONFIRM',
+                            cancelLabel: '',
+                            extra1Label: '',
+                            extra2Label: '',
+                        });
                     },
                     disableKeyboardForButton: true,
                     rowCategory: 'cosmicRipRestoreNearSpaceScannerArray'
@@ -396,24 +396,24 @@ export function drawTab8Content(heading, optionContentElement) {
                         if (getCosmicRipLocatedModalShown() !== true) {
                             setCosmicRipLocatedModalShown(true);
                             window.setTimeout(() => {
-                                callPopupModal(
-                                    modalCosmicRipLocatedHeader,
-                                    modalCosmicRipLocatedText,
-                                    true,
-                                    false,
-                                    false,
-                                    false,
-                                    () => {
+                                callPopupModal({
+                                    header: modalCosmicRipLocatedHeader,
+                                    content: modalCosmicRipLocatedText,
+                                    showConfirm: true,
+                                    showCancel: false,
+                                    showExtra1: false,
+                                    showExtra2: false,
+                                    onConfirm: () => {
                                         showHideModal();
                                     },
-                                    null,
-                                    null,
-                                    null,
-                                    'CONFIRM',
-                                    '',
-                                    '',
-                                    ''
-                                );
+                                    onCancel: null,
+                                    onExtra1: null,
+                                    onExtra2: null,
+                                    confirmLabel: 'CONFIRM',
+                                    cancelLabel: '',
+                                    extra1Label: '',
+                                    extra2Label: '',
+                                });
                             }, 2000);
                         }
                     } else {

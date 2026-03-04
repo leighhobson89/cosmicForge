@@ -109,28 +109,28 @@ export function drawTab7Content(heading, optionContentElement) {
                             (getTechUnlockedArray().includes('cosmicRip') ? `<br><span class="${spanClass}">You will gain 1GP!</span>` : '')
                         );
 
-                        callPopupModal(
-                            modalRebirthHeader,
+                        callPopupModal({
+                            header: modalRebirthHeader,
                             content,
-                            true,
-                            true,
-                            false,
-                            false,
-                            function () {
+                            showConfirm: true,
+                            showCancel: true,
+                            showExtra1: false,
+                            showExtra2: false,
+                            onConfirm: function () {
                                 rebirth();
                                 showHideModal();
                             },
-                            function () {
+                            onCancel: function () {
                                 showHideModal();
                             },
-                            null,
-                            null,
-                            'RESET ALL PROGRESS AND KEEP AP',
-                            'CANCEL',
-                            null,
-                            null,
-                            false
-                        );
+                            onExtra1: null,
+                            onExtra2: null,
+                            confirmLabel: 'RESET ALL PROGRESS AND KEEP AP',
+                            cancelLabel: 'CANCEL',
+                            extra1Label: null,
+                            extra2Label: null,
+                            setupToolTips: false,
+                        });
                     },
                     disableKeyboardForButton: true,
                     rowCategory: 'rebirth'

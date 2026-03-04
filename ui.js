@@ -2940,7 +2940,7 @@ function buildFuelConsumptionLines(resourceKey, category, timerRatio) {
         modalConfirmBtn.removeEventListener('click', startGameClickHandler);
 
 
-        await promptOnboardingIfNeeded({ callPopupModal, showHideModal });
+        await promptOnboardingIfNeeded({ callPopupModalv2: callPopupModal, showHideModal });
     };
 
 
@@ -5645,14 +5645,14 @@ export function createStarDestinationRow(starData, isInteresting) {
                 })()
             }</span>`;
 
-            callPopupModal(
-                launchStarShipWarningHeader,
+            callPopupModal({
+                header: launchStarShipWarningHeader,
                 content,
-                true,
-                true,
-                false,
-                false,
-                function() {
+                showConfirm: true,
+                showCancel: true,
+                showExtra1: false,
+                showExtra2: false,
+                onConfirm: function() {
                     const destinationStar = getDestinationStar();
                     const starData = getStarSystemDataObject('stars', [destinationStar]);
                     trackAnalyticsEvent('starship_launched', {
@@ -5669,17 +5669,17 @@ export function createStarDestinationRow(starData, isInteresting) {
                     setAchievementFlagArray('launchStarship', 'add');
                     showHideModal();
                 },
-                function() {
+                onCancel: function() {
                     showHideModal();
                 },
-                null,
-                null,
-                'LAUNCH',
-                'CANCEL',
-                null,
-                null,
-                false
-            );
+                onExtra1: null,
+                onExtra2: null,
+                confirmLabel: 'LAUNCH',
+                cancelLabel: 'CANCEL',
+                extra1Label: null,
+                extra2Label: null,
+                setupToolTips: false
+            });
         },
         dataConditionCheck: 'upgradeCheck',
         resourcePriceObject: '',
@@ -5693,50 +5693,44 @@ export function createStarDestinationRow(starData, isInteresting) {
     buttonContainer.appendChild(button);
 }
 
+export async function callPopupModal(options = {}) {
+    const opts = options || {};
+    const header = Object.prototype.hasOwnProperty.call(opts, 'header') ? opts.header : '';
+    const content = Object.prototype.hasOwnProperty.call(opts, 'content') ? opts.content : '';
+    const showConfirm = Object.prototype.hasOwnProperty.call(opts, 'showConfirm') ? opts.showConfirm : false;
+    const showCancel = Object.prototype.hasOwnProperty.call(opts, 'showCancel') ? opts.showCancel : false;
+    const showExtra1 = Object.prototype.hasOwnProperty.call(opts, 'showExtra1') ? opts.showExtra1 : false;
+    const showExtra2 = Object.prototype.hasOwnProperty.call(opts, 'showExtra2') ? opts.showExtra2 : false;
+    const onConfirm = Object.prototype.hasOwnProperty.call(opts, 'onConfirm') ? opts.onConfirm : null;
+    const onCancel = Object.prototype.hasOwnProperty.call(opts, 'onCancel') ? opts.onCancel : null;
+    const onExtra1 = Object.prototype.hasOwnProperty.call(opts, 'onExtra1') ? opts.onExtra1 : null;
+    const onExtra2 = Object.prototype.hasOwnProperty.call(opts, 'onExtra2') ? opts.onExtra2 : null;
+    const confirmLabel = Object.prototype.hasOwnProperty.call(opts, 'confirmLabel') ? opts.confirmLabel : '';
+    const cancelLabel = Object.prototype.hasOwnProperty.call(opts, 'cancelLabel') ? opts.cancelLabel : '';
+    const extra1Label = Object.prototype.hasOwnProperty.call(opts, 'extra1Label') ? opts.extra1Label : '';
+    const extra2Label = Object.prototype.hasOwnProperty.call(opts, 'extra2Label') ? opts.extra2Label : '';
+    const setupToolTips = Object.prototype.hasOwnProperty.call(opts, 'setupToolTips') ? opts.setupToolTips : false;
 
-export async function callPopupModal(
-  header,
-  content,
-  showConfirm,
-  showCancel,
-  showExtra1,
-  showExtra2,
-  onConfirm,
-  onCancel,
-  onExtra1,
-  onExtra2,
-  confirmLabel,
-  cancelLabel,
-  extra1Label,
-  extra2Label,
-  setupToolTips = false
-) {
     await waitForModalToHide();
-
 
     if (setupToolTips) {
         setupModalButtonTooltips();
     }
 
-
     const modalContainer = document.getElementById('modal');
     const overlay = document.getElementById('overlay');
-
 
     const confirmButton = document.getElementById('modalConfirm');
     const cancelButton = document.getElementById('modalCancel');
     const extra1Button = document.getElementById('modalExtraChoice1');
     const extra2Button = document.getElementById('modalExtraChoice2');
 
-
     confirmButton.onclick = null;
     cancelButton.onclick = null;
     extra1Button.onclick = null;
     extra2Button.onclick = null;
 
-
     populateModal(header, content);
-
 
     if (showConfirm) {
         confirmButton.classList.remove('invisible');
@@ -5748,7 +5742,6 @@ export async function callPopupModal(
         confirmButton.classList.add('invisible');
     }
 
-
     if (showCancel) {
         cancelButton.classList.remove('invisible');
         cancelButton.innerText = cancelLabel;
@@ -5758,7 +5751,6 @@ export async function callPopupModal(
     } else {
         cancelButton.classList.add('invisible');
     }
-
 
     if (showExtra1) {
         extra1Button.classList.remove('invisible');
@@ -5770,7 +5762,6 @@ export async function callPopupModal(
         extra1Button.classList.add('invisible');
     }
 
-
     if (showExtra2) {
         extra2Button.classList.remove('invisible');
         extra2Button.innerText = extra2Label;
@@ -5780,7 +5771,6 @@ export async function callPopupModal(
     } else {
         extra2Button.classList.add('invisible');
     }
-
 
     modalContainer.style.display = 'flex';
     overlay.style.display = 'flex';
@@ -14233,25 +14223,25 @@ setRandomEventUiHandlers({
         }
 
 
-        callPopupModal(
+        callPopupModal({
             header,
             content,
-            true,
-            false,
-            false,
-            false,
-            function () {
+            showConfirm: true,
+            showCancel: false,
+            showExtra1: false,
+            showExtra2: false,
+            onConfirm: function () {
                 showHideModal();
             },
-            null,
-            null,
-            null,
-            'OK',
-            null,
-            null,
-            null,
-            false
-        );
+            onCancel: null,
+            onExtra1: null,
+            onExtra2: null,
+            confirmLabel: 'OK',
+            cancelLabel: null,
+            extra1Label: null,
+            extra2Label: null,
+            setupToolTips: false
+        });
     }
 });
 

@@ -2222,7 +2222,7 @@ export async function gameLoop() {
         cosmicRipChecks();
         rebirthChecks();
         onboardingChecks({
-            callPopupModal,
+            callPopupModalv2: callPopupModal,
             showHideModal,
             calculateResearchRatePerTick
         });
@@ -10267,25 +10267,25 @@ export function purchaseBuff(buff) {
 
     if (buff === 'compoundAutomation') {
         if (getStatRun() === 1) {
-            callPopupModal(
-                modalCompoundMachiningTabUnlockHeader, 
-                modalCompoundMachiningTabUnlockText, 
-                true, 
-                false, 
-                false, 
-                false, 
-                function() {
+            callPopupModal({
+                header: modalCompoundMachiningTabUnlockHeader,
+                content: modalCompoundMachiningTabUnlockText,
+                showConfirm: true,
+                showCancel: false,
+                showExtra1: false,
+                showExtra2: false,
+                onConfirm: function() {
                     showHideModal();
                 },
-                null, 
-                null, 
-                null,
-                'CONFIRM',
-                null,
-                null,
-                null,
-                false
-            );
+                onCancel: null,
+                onExtra1: null,
+                onExtra2: null,
+                confirmLabel: 'CONFIRM',
+                cancelLabel: null,
+                extra1Label: null,
+                extra2Label: null,
+                setupToolTips: false,
+            });
         }
         setTechUnlockedArray('compoundMachining');
     }
@@ -10589,26 +10589,26 @@ export function startTravelToDestinationStarTimer(adjustment) {
                     if (!getTechUnlockedArray().includes('apAwardedThisRun')) {
                         setTechUnlockedArray('apAwardedThisRun');
                     }
-                    callPopupModal(
-                        modalGalacticTabUnlockHeader,
-                        modalGalacticTabUnlockText,
-                        true,
-                        false,
-                        false,
-                        false,
-                        function() {
+                    callPopupModal({
+                        header: modalGalacticTabUnlockHeader,
+                        content: modalGalacticTabUnlockText,
+                        showConfirm: true,
+                        showCancel: false,
+                        showExtra1: false,
+                        showExtra2: false,
+                        onConfirm: function() {
                             showHideModal();
                             showNotification('Galactic Tab Unlocked!', 'warning', 3000, 'special');
                         },
-                        null,
-                        null,
-                        null,
-                        'CONFIRM',
-                        null,
-                        null,
-                        null,
-                        false
-                    );
+                        onCancel: null,
+                        onExtra1: null,
+                        onExtra2: null,
+                        confirmLabel: 'CONFIRM',
+                        cancelLabel: null,
+                        extra1Label: null,
+                        extra2Label: null,
+                        setupToolTips: false,
+                    });
                 }
 
                 const destinationStarType =
@@ -10630,26 +10630,26 @@ export function startTravelToDestinationStarTimer(adjustment) {
                         'X',
                         capitaliseWordsWithRomanNumerals(getDestinationStar())
                     );
-                    callPopupModal(
+                    callPopupModal({
                         header,
                         content,
-                        true,
-                        false,
-                        false,
-                        false,
-                        function() {
+                        showConfirm: true,
+                        showCancel: false,
+                        showExtra1: false,
+                        showExtra2: false,
+                        onConfirm: function() {
                             markOStarArrivalPopupShown(getDestinationStar());
                             showHideModal();
                         },
-                        null,
-                        null,
-                        null,
-                        'CONFIRM',
-                        null,
-                        null,
-                        null,
-                        false
-                    );
+                        onCancel: null,
+                        onExtra1: null,
+                        onExtra2: null,
+                        confirmLabel: 'CONFIRM',
+                        cancelLabel: null,
+                        extra1Label: null,
+                        extra2Label: null,
+                        setupToolTips: false,
+                    });
                 }
 
                 if (getFactoryStarsArray().includes(getDestinationStar())) {
@@ -10658,28 +10658,28 @@ export function startTravelToDestinationStarTimer(adjustment) {
                         ensureFactoryStarMegaStructureAssigned(getDestinationStar());
                     }
                     const content = `Your Starship arrived at the <span class="factory-star-text">${capitaliseWordsWithRomanNumerals(getDestinationStar())}</span> System!<br>You gasp at what you see! The main star has been completely enveloped by a gigantic structure!<br>It looks to be some kind of <span class="factory-star-text">${getStarSystemDataObject('stars', [getDestinationStar(), 'factoryStar'])}</span><br>No wonder we didn't discover this System before,<br>the star is not visible due to the size of this structure!<br>This system is going to be heavily defended for sure, but if we can conquer it,<br>for sure it will open up vast opportunities for us...`;
-                    callPopupModal(
+                    callPopupModal({
                         header,
                         content,
-                        true,
-                        false,
-                        false,
-                        false,
-                        function() {
+                        showConfirm: true,
+                        showCancel: false,
+                        showExtra1: false,
+                        showExtra2: false,
+                        onConfirm: function() {
                             showHideModal();
                             if (getStatRun() === 1) {
                                 showNotification('Galactic Tab Unlocked!', 'warning', 3000, 'special');
                             }
                         },
-                        null,
-                        null,
-                        null,
-                        'CONFIRM',
-                        null,
-                        null,
-                        null,
-                        false
-                    );
+                        onCancel: null,
+                        onExtra1: null,
+                        onExtra2: null,
+                        confirmLabel: 'CONFIRM',
+                        cancelLabel: null,
+                        extra1Label: null,
+                        extra2Label: null,
+                        setupToolTips: false,
+                    });
                 }
 
                 addToResourceAllTimeStat(distance, 'starShipTravelDistance');
@@ -10833,14 +10833,14 @@ export function startInvestigateStarTimer(adjustment) {
             if (timeRemaining <= 0) {
                 extendStarDataRange(false);
                 if (!getPlayerPhilosophy()) {
-                    callPopupModal(
-                        modalPlayerLeaderPhilosophyHeaderText, 
-                        modalPlayerLeaderPhilosophyContentText, 
-                        true, 
-                        true, 
-                        true, 
-                        true, 
-                        function() {  
+                    callPopupModal({
+                        header: modalPlayerLeaderPhilosophyHeaderText,
+                        content: modalPlayerLeaderPhilosophyContentText,
+                        showConfirm: true,
+                        showCancel: true,
+                        showExtra1: true,
+                        showExtra2: true,
+                        onConfirm: () => {
                             setPlayerPhilosophy('constructor');
                             trackAnalyticsEvent('philosophy_selected', {
                                 philosophy_id: 'constructor',
@@ -10850,8 +10850,8 @@ export function startInvestigateStarTimer(adjustment) {
                             showNotification('You are a CONSTRUCTOR!', 'warning', 3000, 'special');
                             showHideModal();
                             removeModalButtonTooltips();
-                        }, 
-                        function() {  
+                        },
+                        onCancel: () => {
                             setPlayerPhilosophy('supremacist');
                             trackAnalyticsEvent('philosophy_selected', {
                                 philosophy_id: 'supremacist',
@@ -10861,8 +10861,8 @@ export function startInvestigateStarTimer(adjustment) {
                             showNotification('You are a SUPREMACIST!', 'warning', 3000, 'special');
                             showHideModal();
                             removeModalButtonTooltips();
-                        }, 
-                        function() {  
+                        },
+                        onExtra1: function() {
                             setPlayerPhilosophy('voidborn');
                             trackAnalyticsEvent('philosophy_selected', {
                                 philosophy_id: 'voidborn',
@@ -10872,8 +10872,8 @@ export function startInvestigateStarTimer(adjustment) {
                             showNotification('You are VOIDBORN!', 'warning', 3000, 'special');
                             showHideModal();
                             removeModalButtonTooltips();
-                        }, 
-                        function() {  
+                        },
+                        onExtra2: function() {
                             setPlayerPhilosophy('expansionist');
                             trackAnalyticsEvent('philosophy_selected', {
                                 philosophy_id: 'expansionist',
@@ -10884,12 +10884,12 @@ export function startInvestigateStarTimer(adjustment) {
                             showHideModal();
                             removeModalButtonTooltips();
                         },
-                        'CONSTRUCTOR', 
-                        'SUPREMACIST', 
-                        'VOIDBORN', 
-                        'EXPANSIONIST',
-                        true
-                    );
+                        confirmLabel: 'CONSTRUCTOR',
+                        cancelLabel: 'SUPREMACIST',
+                        extra1Label: 'VOIDBORN',
+                        extra2Label: 'EXPANSIONIST',
+                        setupToolTips: true
+                    });
                 }
 
                 timerManagerDelta.removeTimer(timerName);
@@ -11052,95 +11052,95 @@ export function startCosmicRipTechResearchTimer(techName, adjustment = [0, 'norm
                 showNotification(`${capitaliseString(techName).replace(/([a-z])([A-Z])/g, '$1 $2')} Researched!`, 'info', 3000, 'cosmicRip');
 
                 if (techName === 'stabilizerArray') {
-                    callPopupModal(
-                        modalCosmicRipTechStabilizerArrayHeader, 
-                        modalCosmicRipTechStabilizerArrayText, 
-                        true, 
-                        false, 
-                        false, 
-                        false, 
-                        function() { showHideModal(); },
-                        null, 
-                        null, 
-                        null,
-                        'CONFIRM',
-                        null,
-                        null,
-                        null,
-                        false
-                    );
+                    callPopupModal({
+                        header: modalCosmicRipTechStabilizerArrayHeader,
+                        content: modalCosmicRipTechStabilizerArrayText,
+                        showConfirm: true,
+                        showCancel: false,
+                        showExtra1: false,
+                        showExtra2: false,
+                        onConfirm: function() { showHideModal(); },
+                        onCancel: null,
+                        onExtra1: null,
+                        onExtra2: null,
+                        confirmLabel: 'CONFIRM',
+                        cancelLabel: null,
+                        extra1Label: null,
+                        extra2Label: null,
+                        setupToolTips: false,
+                    });
                 } else if (techName === 'quantumContainmentField') {
-                    callPopupModal(
-                        modalCosmicRipTechQuantumContainmentFieldHeader, 
-                        modalCosmicRipTechQuantumContainmentFieldText, 
-                        true, 
-                        false, 
-                        false, 
-                        false, 
-                        function() { showHideModal(); },
-                        null, 
-                        null, 
-                        null,
-                        'CONFIRM',
-                        null,
-                        null,
-                        null,
-                        false
-                    );
+                    callPopupModal({
+                        header: modalCosmicRipTechQuantumContainmentFieldHeader,
+                        content: modalCosmicRipTechQuantumContainmentFieldText,
+                        showConfirm: true,
+                        showCancel: false,
+                        showExtra1: false,
+                        showExtra2: false,
+                        onConfirm: function() { showHideModal(); },
+                        onCancel: null,
+                        onExtra1: null,
+                        onExtra2: null,
+                        confirmLabel: 'CONFIRM',
+                        cancelLabel: null,
+                        extra1Label: null,
+                        extra2Label: null,
+                        setupToolTips: false,
+                    });
                 } else if (techName === 'dimensionalAnchorMatrix') {
-                    callPopupModal(
-                        modalCosmicRipTechDimensionalAnchorMatrixHeader, 
-                        modalCosmicRipTechDimensionalAnchorMatrixText, 
-                        true, 
-                        false, 
-                        false, 
-                        false, 
-                        function() { showHideModal(); },
-                        null, 
-                        null, 
-                        null,
-                        'CONFIRM',
-                        null,
-                        null,
-                        null,
-                        false
-                    );
+                    callPopupModal({
+                        header: modalCosmicRipTechDimensionalAnchorMatrixHeader,
+                        content: modalCosmicRipTechDimensionalAnchorMatrixText,
+                        showConfirm: true,
+                        showCancel: false,
+                        showExtra1: false,
+                        showExtra2: false,
+                        onConfirm: function() { showHideModal(); },
+                        onCancel: null,
+                        onExtra1: null,
+                        onExtra2: null,
+                        confirmLabel: 'CONFIRM',
+                        cancelLabel: null,
+                        extra1Label: null,
+                        extra2Label: null,
+                        setupToolTips: false,
+                    });
                 } else if (techName === 'singularityStabilizer') {
-                    callPopupModal(
-                        modalCosmicRipTechSingularityStabilizerHeader, 
-                        modalCosmicRipTechSingularityStabilizerText, 
-                        true, 
-                        false, 
-                        false, 
-                        false, 
-                        function() { showHideModal(); },
-                        null, 
-                        null, 
-                        null,
-                        'CONFIRM',
-                        null,
-                        null,
-                        null,
-                        false
-                    );
+                    callPopupModal({
+                        header: modalCosmicRipTechSingularityStabilizerHeader,
+                        content: modalCosmicRipTechSingularityStabilizerText,
+                        showConfirm: true,
+                        showCancel: false,
+                        showExtra1: false,
+                        showExtra2: false,
+                        onConfirm: function() { showHideModal(); },
+                        onCancel: null,
+                        onExtra1: null,
+                        onExtra2: null,
+                        confirmLabel: 'CONFIRM',
+                        cancelLabel: null,
+                        extra1Label: null,
+                        extra2Label: null,
+                        setupToolTips: false,
+                    });
                 } else if (techName === 'realityWeaveRegulator') {
-                    callPopupModal(
-                        modalCosmicRipTechRealityWeaveRegulatorHeader, 
-                        modalCosmicRipTechRealityWeaveRegulatorText, 
-                        true, 
-                        false, 
-                        false, 
-                        false, 
-                        function() { showHideModal(); },
-                        null, 
-                        null, 
-                        null,
-                        'CONFIRM',
-                        null,
-                        null,
-                        null,
-                        false
-                    );
+                    callPopupModal({
+                        header: modalCosmicRipTechRealityWeaveRegulatorHeader,
+                        content: modalCosmicRipTechRealityWeaveRegulatorText,
+                        showConfirm: true,
+                        showCancel: false,
+                        showExtra1: false,
+                        showExtra2: false,
+                        onConfirm: function() { showHideModal(); },
+                        onCancel: null,
+                        onExtra1: null,
+                        onExtra2: null,
+                        confirmLabel: 'CONFIRM',
+                        cancelLabel: null,
+                        extra1Label: null,
+                        extra2Label: null,
+                        setupToolTips: false,
+                    });
                 }
             } else {
                 const elapsedTime = totalDurationForCalc - currentTimeRemaining;
@@ -12151,11 +12151,101 @@ export function offlineGains(switchedFocus) {
                 setCosmicRipTechUnlockedArray(techName);
                 updateCosmicRipStabilityProgressBar();
 
-                if (techName === 'stabilizerArray') { callPopupModal(modalCosmicRipTechStabilizerArrayHeader, modalCosmicRipTechStabilizerArrayText, true, false, false, false, function() { showHideModal(); }, null, null, null, 'CONFIRM', null, null, null, false); }
-                if (techName === 'quantumContainmentField') { callPopupModal(modalCosmicRipTechQuantumContainmentFieldHeader, modalCosmicRipTechQuantumContainmentFieldText, true, false, false, false, function() { showHideModal(); }, null, null, null, 'CONFIRM', null, null, null, false); }
-                if (techName === 'dimensionalAnchorMatrix') { callPopupModal(modalCosmicRipTechDimensionalAnchorMatrixHeader, modalCosmicRipTechDimensionalAnchorMatrixText, true, false, false, false, function() { showHideModal(); }, null, null, null, 'CONFIRM', null, null, null, false); }
-                if (techName === 'singularityStabilizer') { callPopupModal(modalCosmicRipTechSingularityStabilizerHeader, modalCosmicRipTechSingularityStabilizerText, true, false, false, false, function() { showHideModal(); }, null, null, null, 'CONFIRM', null, null, null, false); }
-                if (techName === 'realityWeaveRegulator') { callPopupModal(modalCosmicRipTechRealityWeaveRegulatorHeader, modalCosmicRipTechRealityWeaveRegulatorText, true, false, false, false, function() { showHideModal(); }, null, null, null, 'CONFIRM', null, null, null, false); }
+                if (techName === 'stabilizerArray') {
+                    callPopupModal({
+                        header: modalCosmicRipTechStabilizerArrayHeader,
+                        content: modalCosmicRipTechStabilizerArrayText,
+                        showConfirm: true,
+                        showCancel: false,
+                        showExtra1: false,
+                        showExtra2: false,
+                        onConfirm: function() { showHideModal(); },
+                        onCancel: null,
+                        onExtra1: null,
+                        onExtra2: null,
+                        confirmLabel: 'CONFIRM',
+                        cancelLabel: null,
+                        extra1Label: null,
+                        extra2Label: null,
+                        setupToolTips: false,
+                    });
+                }
+                if (techName === 'quantumContainmentField') {
+                    callPopupModal({
+                        header: modalCosmicRipTechQuantumContainmentFieldHeader,
+                        content: modalCosmicRipTechQuantumContainmentFieldText,
+                        showConfirm: true,
+                        showCancel: false,
+                        showExtra1: false,
+                        showExtra2: false,
+                        onConfirm: function() { showHideModal(); },
+                        onCancel: null,
+                        onExtra1: null,
+                        onExtra2: null,
+                        confirmLabel: 'CONFIRM',
+                        cancelLabel: null,
+                        extra1Label: null,
+                        extra2Label: null,
+                        setupToolTips: false,
+                    });
+                }
+                if (techName === 'dimensionalAnchorMatrix') {
+                    callPopupModal({
+                        header: modalCosmicRipTechDimensionalAnchorMatrixHeader,
+                        content: modalCosmicRipTechDimensionalAnchorMatrixText,
+                        showConfirm: true,
+                        showCancel: false,
+                        showExtra1: false,
+                        showExtra2: false,
+                        onConfirm: function() { showHideModal(); },
+                        onCancel: null,
+                        onExtra1: null,
+                        onExtra2: null,
+                        confirmLabel: 'CONFIRM',
+                        cancelLabel: null,
+                        extra1Label: null,
+                        extra2Label: null,
+                        setupToolTips: false,
+                    });
+                }
+                if (techName === 'singularityStabilizer') {
+                    callPopupModal({
+                        header: modalCosmicRipTechSingularityStabilizerHeader,
+                        content: modalCosmicRipTechSingularityStabilizerText,
+                        showConfirm: true,
+                        showCancel: false,
+                        showExtra1: false,
+                        showExtra2: false,
+                        onConfirm: function() { showHideModal(); },
+                        onCancel: null,
+                        onExtra1: null,
+                        onExtra2: null,
+                        confirmLabel: 'CONFIRM',
+                        cancelLabel: null,
+                        extra1Label: null,
+                        extra2Label: null,
+                        setupToolTips: false,
+                    });
+                }
+                if (techName === 'realityWeaveRegulator') {
+                    callPopupModal({
+                        header: modalCosmicRipTechRealityWeaveRegulatorHeader,
+                        content: modalCosmicRipTechRealityWeaveRegulatorText,
+                        showConfirm: true,
+                        showCancel: false,
+                        showExtra1: false,
+                        showExtra2: false,
+                        onConfirm: function() { showHideModal(); },
+                        onCancel: null,
+                        onExtra1: null,
+                        onExtra2: null,
+                        confirmLabel: 'CONFIRM',
+                        cancelLabel: null,
+                        extra1Label: null,
+                        extra2Label: null,
+                        setupToolTips: false,
+                    });
+                }
 
                 const finalTimeLefts = getCosmicRipTechTimeLeftUntilResearchFinishes() || {};
                 delete finalTimeLefts[techName];
@@ -12806,25 +12896,25 @@ function handleBlackHoleDiscoveryRoll() {
         }, { immediate: true, flushReason: 'black_hole' });
 
         appendAttentionIndicator(document.getElementById('blackholeOption'));
-        callPopupModal(
-            modalBlackHoleDiscoveredHeader,
-            modalBlackHoleDiscoveredText,
-            true,
-            false,
-            false,
-            false,
-            () => {
+        callPopupModal({
+            header: modalBlackHoleDiscoveredHeader,
+            content: modalBlackHoleDiscoveredText,
+            showConfirm: true,
+            showCancel: false,
+            showExtra1: false,
+            showExtra2: false,
+            onConfirm: () => {
                 showHideModal();
             },
-            null,
-            null,
-            null,
-            'This should be interesting!',
-            null,
-            null,
-            null,
-            false
-        );
+            onCancel: null,
+            onExtra1: null,
+            onExtra2: null,
+            confirmLabel: 'This should be interesting!',
+            cancelLabel: null,
+            extra1Label: null,
+            extra2Label: null,
+            setupToolTips: false,
+        });
         showNotification('You have discovered a Black Hole - interact with it in the Galactic Tab!', 'info', 3000, 'special');
     }
 }
@@ -14499,29 +14589,29 @@ export async function settleSystemAfterBattle(accessPoint) {
 
     if (getStatRun() < 2) {
         await new Promise((resolve) => {
-            callPopupModal(
-                modalPlayerLeaderIntroHeaderText,
-                getPlayerPhilosophy() === 'constructor' ? modalPlayerLeaderIntroContentText1 :
-                getPlayerPhilosophy() === 'supremacist' ? modalPlayerLeaderIntroContentText2 :
-                getPlayerPhilosophy() === 'voidborn' ? modalPlayerLeaderIntroContentText3 :
-                modalPlayerLeaderIntroContentText4,
-                true,
-                false,
-                false,
-                false,
-                function() {
+            callPopupModal({
+                header: modalPlayerLeaderIntroHeaderText,
+                content: getPlayerPhilosophy() === 'constructor' ? modalPlayerLeaderIntroContentText1 :
+                    getPlayerPhilosophy() === 'supremacist' ? modalPlayerLeaderIntroContentText2 :
+                        getPlayerPhilosophy() === 'voidborn' ? modalPlayerLeaderIntroContentText3 :
+                            modalPlayerLeaderIntroContentText4,
+                showConfirm: true,
+                showCancel: false,
+                showExtra1: false,
+                showExtra2: false,
+                onConfirm: function() {
                     showHideModal();
                     resolve();
                 },
-                null,
-                null,
-                null,
-                'IT SHALL BE DONE',
-                null,
-                null,
-                null,
-                false
-            );
+                onCancel: null,
+                onExtra1: null,
+                onExtra2: null,
+                confirmLabel: 'IT SHALL BE DONE',
+                cancelLabel: null,
+                extra1Label: null,
+                extra2Label: null,
+                setupToolTips: false,
+            });
         });
     }
 
@@ -14649,26 +14739,26 @@ export async function settleSystemAfterBattle(accessPoint) {
         const content = `Exploring a habitable Planet in the ${capitaliseWordsWithRomanNumerals(getDestinationStar())} System after your victory, you discover<br>an Ancient Manuscript!  It seems to point out about strange activities<br>in a previously undiscovered System, the <span class="factory-star-text">${capitaliseWordsWithRomanNumerals(factoryStarToReport)}</span> System! Its location has also<br>been revealed to us!`;
 
         await new Promise((resolve) => {
-            callPopupModal(
-                header, 
-                content, 
-                true, 
-                false, 
-                false, 
-                false, 
-                function() {
+            callPopupModal({
+                header,
+                content,
+                showConfirm: true,
+                showCancel: false,
+                showExtra1: false,
+                showExtra2: false,
+                onConfirm: function() {
                     showHideModal();
                     resolve();
                 },
-                null, 
-                null, 
-                null,
-                'CONFIRM',
-                null,
-                null,
-                null,
-                false
-            );
+                onCancel: null,
+                onExtra1: null,
+                onExtra2: null,
+                confirmLabel: 'CONFIRM',
+                cancelLabel: null,
+                extra1Label: null,
+                extra2Label: null,
+                setupToolTips: false,
+            });
         });
     }    
 
@@ -14678,26 +14768,26 @@ export async function settleSystemAfterBattle(accessPoint) {
 
 async function showMiaplacidusEndgameStory() {
     const show = ({ header, content, confirmLabel }) => new Promise(resolve => {
-        callPopupModal(
+        callPopupModal({
             header,
             content,
-            true,
-            false,
-            false,
-            false,
-            async function() {
+            showConfirm: true,
+            showCancel: false,
+            showExtra1: false,
+            showExtra2: false,
+            onConfirm: async function() {
                 showHideModal();
                 resolve();
             },
-            null,
-            null,
-            null,
+            onCancel: null,
+            onExtra1: null,
+            onExtra2: null,
             confirmLabel,
-            null,
-            null,
-            null,
-            false
-        );
+            cancelLabel: null,
+            extra1Label: null,
+            extra2Label: null,
+            setupToolTips: false,
+        });
     });
 
     const lastIndex = miaplacidusEndgameStoryPopups.length - 1;
@@ -14891,25 +14981,25 @@ export function rebirth() {
                 .replaceAll('{DISPLAY_NAME}', displayName)
                 .replaceAll('{STRENGTH_BOOST}', strengthBoost);
 
-            callPopupModal(
-                modalOTypeStarTechAcquiredHeader,
+            callPopupModal({
+                header: modalOTypeStarTechAcquiredHeader,
                 content,
-                true,
-                false,
-                false,
-                false,
-                function() {
+                showConfirm: true,
+                showCancel: false,
+                showExtra1: false,
+                showExtra2: false,
+                onConfirm: function() {
                     showHideModal();
                 },
-                null,
-                null,
-                null,
-                'CONFIRM',
-                null,
-                null,
-                null,
-                false
-            );
+                onCancel: null,
+                onExtra1: null,
+                onExtra2: null,
+                confirmLabel: 'CONFIRM',
+                cancelLabel: null,
+                extra1Label: null,
+                extra2Label: null,
+                setupToolTips: false,
+            });
         }
     }
 

@@ -1,7 +1,7 @@
 import { getCurrentStarSystem, setCanFuelRockets, setCanTravelToAsteroids, getTechTreeDataAndDraw, getTimerRateRatio, deferredActions, getCanAffordDeferred, setCanAffordDeferred, setTechUnlockedArray, setTemporaryCoreTechRowsRepo, setUnlockedCompoundsArray, getTechUnlockedArray, getUnlockedResourcesArray, getPlayerPhilosophy, setRepeatableTechMultipliers, getRepeatableTechMultipliers, setIncreaseStorageFactor, getStatRun, getCurrentRunIsMegaStructureRun, setPermanentAntimatterUnlock, getDemoBuild } from './constantsAndGlobalVars.js';
 import { setAllCompoundsToZeroQuantity, gain, startUpdateTimersAndRates, addToResourceAllTimeStat, setFleetArmorBuffsAfterRepeatables, setFleetSpeedsAfterRepeatables, setFleetAttackDamageAfterRepeatables, setInitialImpressionBaseAfterRepeatables, setStarStudyEfficiencyAfterRepeatables, setAsteroidSearchEfficiencyAfterRepeatables, setRocketTravelTimeReductionAfterRepeatables, setStarshipTravelTimeReductionAfterRepeatables, setResourceAutobuyerPricesAfterRepeatables, setCompoundRecipePricesAfterRepeatables, setEnergyAndResearchBuildingPricesAfterRepeatables, setFleetPricesAfterRepeatables, setStarshipPartPricesAfterRepeatables, setRocketPartPricesAfterRepeatables, applyMegaStructureBonuses } from './game.js';
 import { getStarSystemDataObject, setResourceDataObject, getResourceDataObject, setAutoBuyerTierLevel } from './resourceDataObject.js';
-import { createOptionRow, removeTabAttentionIfNoIndicators, createToggleSwitch, createSvgElement, createTextElement, sortTechRows, createButton, showNotification, updateDescriptionRow, appendAttentionIndicator, callPopupModal, showHideModal, setupInfoTooltips } from './ui.js';
+import { createOptionRow, removeTabAttentionIfNoIndicators, createToggleSwitch, createSvgElement, createTextElement, sortTechRows, createButton, showNotification, updateDescriptionRow, appendAttentionIndicator, showHideModal, setupInfoTooltips, callPopupModal } from './ui.js';
 import { trackAnalyticsEvent } from './analytics.js';
 import { modalMegaStructureTechDysonSphere1Header, modalMegaStructureTechDysonSphere1Text, modalMegaStructureTechDysonSphere2Header, modalMegaStructureTechDysonSphere2Text, modalMegaStructureTechDysonSphere3Header, modalMegaStructureTechDysonSphere3Text, modalMegaStructureTechDysonSphere4Header, modalMegaStructureTechDysonSphere4Text, modalMegaStructureTechDysonSphere5Header, modalMegaStructureTechDysonSphere5Text, modalMegaStructureTechCelestialProcessingCore1Header, modalMegaStructureTechCelestialProcessingCore1Text, modalMegaStructureTechCelestialProcessingCore2Header, modalMegaStructureTechCelestialProcessingCore2Text, modalMegaStructureTechCelestialProcessingCore3Header, modalMegaStructureTechCelestialProcessingCore3Text, modalMegaStructureTechCelestialProcessingCore4Header, modalMegaStructureTechCelestialProcessingCore4Text, modalMegaStructureTechCelestialProcessingCore5Header, modalMegaStructureTechCelestialProcessingCore5Text, modalMegaStructureTechPlasmaForge1Header, modalMegaStructureTechPlasmaForge1Text, modalMegaStructureTechPlasmaForge2Header, modalMegaStructureTechPlasmaForge2Text, modalMegaStructureTechPlasmaForge3Header, modalMegaStructureTechPlasmaForge3Text, modalMegaStructureTechPlasmaForge4Header, modalMegaStructureTechPlasmaForge4Text, modalMegaStructureTechPlasmaForge5Header, modalMegaStructureTechPlasmaForge5Text, modalMegaStructureTechGalacticMemoryArchive1Header, modalMegaStructureTechGalacticMemoryArchive1Text, modalMegaStructureTechGalacticMemoryArchive2Header, modalMegaStructureTechGalacticMemoryArchive2Text, modalMegaStructureTechGalacticMemoryArchive3Header, modalMegaStructureTechGalacticMemoryArchive3Text, modalMegaStructureTechGalacticMemoryArchive4Header, modalMegaStructureTechGalacticMemoryArchive4Text, modalMegaStructureTechGalacticMemoryArchive5Header, modalMegaStructureTechGalacticMemoryArchive5Text, modalNanoBrokersUnlockHeader, modalNanoBrokersUnlockText, modalRocketCompositesTabUnlockHeader, modalRocketCompositesTabUnlockText, modalQuantumComputingTabUnlockHeader, modalQuantumComputingTabUnlockText, modalScienceLabsTabUnlockHeader, modalScienceLabsTabUnlockText, modalKnowledgeSharingTabUnlockHeader, modalKnowledgeSharingTabUnlockText, modalInterstellarTabUnlockHeader, modalInterstellarTabUnlockText, modalEnergyTabUnlockHeader, modalEnergyTabUnlockText, modalSpaceMiningTabUnlockText, modalSpaceMiningTabUnlockHeader, modalCompoundsTabUnlockHeader, modalCompoundsTabUnlockText, techNotificationMessages } from './descriptions.js';
 
@@ -1464,25 +1464,25 @@ export function drawTab3Content(heading, optionContentElement) {
                                 event.currentTarget.classList.add('unlocked-tech');
                                 setTechUnlockedArray('dysonSphereUnderstanding');
                                 showNotification(techNotificationMessages.dysonSphereUnderstanding, 'info', 3000, 'tech');
-                                callPopupModal(
-                                    modalMegaStructureTechDysonSphere1Header, 
-                                    modalMegaStructureTechDysonSphere1Text, 
-                                    true, 
-                                    false, 
-                                    false, 
-                                    false, 
-                                    function() {
+                                callPopupModal({
+                                    header: modalMegaStructureTechDysonSphere1Header,
+                                    content: modalMegaStructureTechDysonSphere1Text,
+                                    showConfirm: true,
+                                    showCancel: false,
+                                    showExtra1: false,
+                                    showExtra2: false,
+                                    onConfirm: function() {
                                         showHideModal();
                                     },
-                                    null, 
-                                    null, 
-                                    null,
-                                    'CONFIRM',
-                                    null,
-                                    null,
-                                    null,
-                                    false
-                                );
+                                    onCancel: null,
+                                    onExtra1: null,
+                                    onExtra2: null,
+                                    confirmLabel: 'CONFIRM',
+                                    cancelLabel: null,
+                                    extra1Label: null,
+                                    extra2Label: null,
+                                    setupToolTips: false
+                                });
                                 applyMegaStructureBonuses(1,1);
                             },
                             dataConditionCheck: 'techUnlock',
@@ -1522,25 +1522,25 @@ export function drawTab3Content(heading, optionContentElement) {
                                 event.currentTarget.classList.add('unlocked-tech');
                                 setTechUnlockedArray('dysonSphereCapabilities');
                                 showNotification(techNotificationMessages.dysonSphereCapabilities, 'info', 3000, 'tech');
-                                callPopupModal(
-                                    modalMegaStructureTechDysonSphere2Header, 
-                                    modalMegaStructureTechDysonSphere2Text, 
-                                    true, 
-                                    false, 
-                                    false, 
-                                    false, 
-                                    function() {
+                                callPopupModal({
+                                    header: modalMegaStructureTechDysonSphere2Header,
+                                    content: modalMegaStructureTechDysonSphere2Text,
+                                    showConfirm: true,
+                                    showCancel: false,
+                                    showExtra1: false,
+                                    showExtra2: false,
+                                    onConfirm: function() {
                                         showHideModal();
                                     },
-                                    null, 
-                                    null, 
-                                    null,
-                                    'CONFIRM',
-                                    null,
-                                    null,
-                                    null,
-                                    false
-                                );
+                                    onCancel: null,
+                                    onExtra1: null,
+                                    onExtra2: null,
+                                    confirmLabel: 'CONFIRM',
+                                    cancelLabel: null,
+                                    extra1Label: null,
+                                    extra2Label: null,
+                                    setupToolTips: false
+                                });
                                 applyMegaStructureBonuses(1,2);
                             },
                             dataConditionCheck: 'techUnlock',
@@ -1580,25 +1580,25 @@ export function drawTab3Content(heading, optionContentElement) {
                                 event.currentTarget.classList.add('unlocked-tech');
                                 setTechUnlockedArray('dysonSphereDisconnect');
                                 showNotification(techNotificationMessages.dysonSphereDisconnect, 'info', 3000, 'tech');
-                                callPopupModal(
-                                    modalMegaStructureTechDysonSphere3Header, 
-                                    modalMegaStructureTechDysonSphere3Text, 
-                                    true, 
-                                    false, 
-                                    false, 
-                                    false, 
-                                    function() {
+                                callPopupModal({
+                                    header: modalMegaStructureTechDysonSphere3Header,
+                                    content: modalMegaStructureTechDysonSphere3Text,
+                                    showConfirm: true,
+                                    showCancel: false,
+                                    showExtra1: false,
+                                    showExtra2: false,
+                                    onConfirm: function() {
                                         showHideModal();
                                     },
-                                    null, 
-                                    null, 
-                                    null,
-                                    'CONFIRM',
-                                    null,
-                                    null,
-                                    null,
-                                    false
-                                );
+                                    onCancel: null,
+                                    onExtra1: null,
+                                    onExtra2: null,
+                                    confirmLabel: 'CONFIRM',
+                                    cancelLabel: null,
+                                    extra1Label: null,
+                                    extra2Label: null,
+                                    setupToolTips: false
+                                });
                                 applyMegaStructureBonuses(1,3);
                             },
                             dataConditionCheck: 'techUnlock',
@@ -1638,25 +1638,25 @@ export function drawTab3Content(heading, optionContentElement) {
                                 event.currentTarget.classList.add('unlocked-tech');
                                 setTechUnlockedArray('dysonSpherePower');
                                 showNotification(techNotificationMessages.dysonSpherePower, 'info', 3000, 'tech');
-                                callPopupModal(
-                                    modalMegaStructureTechDysonSphere4Header, 
-                                    modalMegaStructureTechDysonSphere4Text, 
-                                    true, 
-                                    false, 
-                                    false, 
-                                    false, 
-                                    function() {
+                                callPopupModal({
+                                    header: modalMegaStructureTechDysonSphere4Header,
+                                    content: modalMegaStructureTechDysonSphere4Text,
+                                    showConfirm: true,
+                                    showCancel: false,
+                                    showExtra1: false,
+                                    showExtra2: false,
+                                    onConfirm: function() {
                                         showHideModal();
                                     },
-                                    null, 
-                                    null, 
-                                    null,
-                                    'CONFIRM',
-                                    null,
-                                    null,
-                                    null,
-                                    false
-                                );
+                                    onCancel: null,
+                                    onExtra1: null,
+                                    onExtra2: null,
+                                    confirmLabel: 'CONFIRM',
+                                    cancelLabel: null,
+                                    extra1Label: null,
+                                    extra2Label: null,
+                                    setupToolTips: false
+                                });
                                 applyMegaStructureBonuses(1,4);
                             },
                             dataConditionCheck: 'techUnlock',
@@ -1696,25 +1696,25 @@ export function drawTab3Content(heading, optionContentElement) {
                                 event.currentTarget.classList.add('unlocked-tech');
                                 setTechUnlockedArray('dysonSphereConnect');
                                 showNotification(techNotificationMessages.dysonSphereConnect, 'info', 3000, 'tech');
-                                callPopupModal(
-                                    modalMegaStructureTechDysonSphere5Header, 
-                                    modalMegaStructureTechDysonSphere5Text, 
-                                    true, 
-                                    false, 
-                                    false, 
-                                    false, 
-                                    function() {
+                                callPopupModal({
+                                    header: modalMegaStructureTechDysonSphere5Header,
+                                    content: modalMegaStructureTechDysonSphere5Text,
+                                    showConfirm: true,
+                                    showCancel: false,
+                                    showExtra1: false,
+                                    showExtra2: false,
+                                    onConfirm: function() {
                                         showHideModal();
                                     },
-                                    null, 
-                                    null, 
-                                    null,
-                                    'CONFIRM',
-                                    null,
-                                    null,
-                                    null,
-                                    false
-                                );
+                                    onCancel: null,
+                                    onExtra1: null,
+                                    onExtra2: null,
+                                    confirmLabel: 'CONFIRM',
+                                    cancelLabel: null,
+                                    extra1Label: null,
+                                    extra2Label: null,
+                                    setupToolTips: false
+                                });
                                 applyMegaStructureBonuses(1,5);
                             },
                             dataConditionCheck: 'techUnlock',
@@ -1754,25 +1754,25 @@ export function drawTab3Content(heading, optionContentElement) {
                                 event.currentTarget.classList.add('unlocked-tech');
                                 setTechUnlockedArray('celestialProcessingCoreUnderstanding');
                                 showNotification(techNotificationMessages.celestialProcessingCoreUnderstanding, 'info', 3000, 'tech');
-                                callPopupModal(
-                                    modalMegaStructureTechCelestialProcessingCore1Header, 
-                                    modalMegaStructureTechCelestialProcessingCore1Text, 
-                                    true, 
-                                    false, 
-                                    false, 
-                                    false, 
-                                    function() {
+                                callPopupModal({
+                                    header: modalMegaStructureTechCelestialProcessingCore1Header,
+                                    content: modalMegaStructureTechCelestialProcessingCore1Text,
+                                    showConfirm: true,
+                                    showCancel: false,
+                                    showExtra1: false,
+                                    showExtra2: false,
+                                    onConfirm: function() {
                                         showHideModal();
                                     },
-                                    null, 
-                                    null, 
-                                    null,
-                                    'CONFIRM',
-                                    null,
-                                    null,
-                                    null,
-                                    false
-                                );
+                                    onCancel: null,
+                                    onExtra1: null,
+                                    onExtra2: null,
+                                    confirmLabel: 'CONFIRM',
+                                    cancelLabel: null,
+                                    extra1Label: null,
+                                    extra2Label: null,
+                                    setupToolTips: false
+                                });
                                 applyMegaStructureBonuses(2,1);
                             },
                             dataConditionCheck: 'techUnlock',
@@ -1812,25 +1812,25 @@ export function drawTab3Content(heading, optionContentElement) {
                                 event.currentTarget.classList.add('unlocked-tech');
                                 setTechUnlockedArray('celestialProcessingCoreCapabilities');
                                 showNotification(techNotificationMessages.celestialProcessingCoreCapabilities, 'info', 3000, 'tech');
-                                callPopupModal(
-                                    modalMegaStructureTechCelestialProcessingCore2Header, 
-                                    modalMegaStructureTechCelestialProcessingCore2Text, 
-                                    true, 
-                                    false, 
-                                    false, 
-                                    false, 
-                                    function() {
+                                callPopupModal({
+                                    header: modalMegaStructureTechCelestialProcessingCore2Header,
+                                    content: modalMegaStructureTechCelestialProcessingCore2Text,
+                                    showConfirm: true,
+                                    showCancel: false,
+                                    showExtra1: false,
+                                    showExtra2: false,
+                                    onConfirm: function() {
                                         showHideModal();
                                     },
-                                    null, 
-                                    null, 
-                                    null,
-                                    'CONFIRM',
-                                    null,
-                                    null,
-                                    null,
-                                    false
-                                );
+                                    onCancel: null,
+                                    onExtra1: null,
+                                    onExtra2: null,
+                                    confirmLabel: 'CONFIRM',
+                                    cancelLabel: null,
+                                    extra1Label: null,
+                                    extra2Label: null,
+                                    setupToolTips: false
+                                });
                                 applyMegaStructureBonuses(2,2);
                             },
                             dataConditionCheck: 'techUnlock',
@@ -1870,25 +1870,25 @@ export function drawTab3Content(heading, optionContentElement) {
                                 event.currentTarget.classList.add('unlocked-tech');
                                 setTechUnlockedArray('celestialProcessingCoreDisconnect');
                                 showNotification(techNotificationMessages.celestialProcessingCoreDisconnect, 'info', 3000, 'tech');
-                                callPopupModal(
-                                    modalMegaStructureTechCelestialProcessingCore3Header, 
-                                    modalMegaStructureTechCelestialProcessingCore3Text, 
-                                    true, 
-                                    false, 
-                                    false, 
-                                    false, 
-                                    function() {
+                                callPopupModal({
+                                    header: modalMegaStructureTechCelestialProcessingCore3Header,
+                                    content: modalMegaStructureTechCelestialProcessingCore3Text,
+                                    showConfirm: true,
+                                    showCancel: false,
+                                    showExtra1: false,
+                                    showExtra2: false,
+                                    onConfirm: function() {
                                         showHideModal();
                                     },
-                                    null, 
-                                    null, 
-                                    null,
-                                    'CONFIRM',
-                                    null,
-                                    null,
-                                    null,
-                                    false
-                                );
+                                    onCancel: null,
+                                    onExtra1: null,
+                                    onExtra2: null,
+                                    confirmLabel: 'CONFIRM',
+                                    cancelLabel: null,
+                                    extra1Label: null,
+                                    extra2Label: null,
+                                    setupToolTips: false
+                                });
                                 applyMegaStructureBonuses(2,3);
                             },
                             dataConditionCheck: 'techUnlock',
@@ -1928,25 +1928,25 @@ export function drawTab3Content(heading, optionContentElement) {
                                 event.currentTarget.classList.add('unlocked-tech');
                                 setTechUnlockedArray('celestialProcessingCorePower');
                                 showNotification(techNotificationMessages.celestialProcessingCorePower, 'info', 3000, 'tech');
-                                callPopupModal(
-                                    modalMegaStructureTechCelestialProcessingCore4Header, 
-                                    modalMegaStructureTechCelestialProcessingCore4Text, 
-                                    true, 
-                                    false, 
-                                    false, 
-                                    false, 
-                                    function() {
+                                callPopupModal({
+                                    header: modalMegaStructureTechCelestialProcessingCore4Header,
+                                    content: modalMegaStructureTechCelestialProcessingCore4Text,
+                                    showConfirm: true,
+                                    showCancel: false,
+                                    showExtra1: false,
+                                    showExtra2: false,
+                                    onConfirm: function() {
                                         showHideModal();
                                     },
-                                    null, 
-                                    null, 
-                                    null,
-                                    'CONFIRM',
-                                    null,
-                                    null,
-                                    null,
-                                    false
-                                );
+                                    onCancel: null,
+                                    onExtra1: null,
+                                    onExtra2: null,
+                                    confirmLabel: 'CONFIRM',
+                                    cancelLabel: null,
+                                    extra1Label: null,
+                                    extra2Label: null,
+                                    setupToolTips: false
+                                });
                                 applyMegaStructureBonuses(2,4);
                             },
                             dataConditionCheck: 'techUnlock',
@@ -1986,25 +1986,25 @@ export function drawTab3Content(heading, optionContentElement) {
                                 event.currentTarget.classList.add('unlocked-tech');
                                 setTechUnlockedArray('celestialProcessingCoreConnect');
                                 showNotification(techNotificationMessages.celestialProcessingCoreConnect, 'info', 3000, 'tech');
-                                callPopupModal(
-                                    modalMegaStructureTechCelestialProcessingCore5Header, 
-                                    modalMegaStructureTechCelestialProcessingCore5Text, 
-                                    true, 
-                                    false, 
-                                    false, 
-                                    false, 
-                                    function() {
+                                callPopupModal({
+                                    header: modalMegaStructureTechCelestialProcessingCore5Header,
+                                    content: modalMegaStructureTechCelestialProcessingCore5Text,
+                                    showConfirm: true,
+                                    showCancel: false,
+                                    showExtra1: false,
+                                    showExtra2: false,
+                                    onConfirm: function() {
                                         showHideModal();
                                     },
-                                    null, 
-                                    null, 
-                                    null,
-                                    'CONFIRM',
-                                    null,
-                                    null,
-                                    null,
-                                    false
-                                );
+                                    onCancel: null,
+                                    onExtra1: null,
+                                    onExtra2: null,
+                                    confirmLabel: 'CONFIRM',
+                                    cancelLabel: null,
+                                    extra1Label: null,
+                                    extra2Label: null,
+                                    setupToolTips: false
+                                });
                                 applyMegaStructureBonuses(2,5);
                             },
                             dataConditionCheck: 'techUnlock',
@@ -2044,25 +2044,25 @@ export function drawTab3Content(heading, optionContentElement) {
                                 event.currentTarget.classList.add('unlocked-tech');
                                 setTechUnlockedArray('plasmaForgeUnderstanding');
                                 showNotification(techNotificationMessages.plasmaForgeUnderstanding, 'info', 3000, 'tech');
-                                callPopupModal(
-                                    modalMegaStructureTechPlasmaForge1Header, 
-                                    modalMegaStructureTechPlasmaForge1Text, 
-                                    true, 
-                                    false, 
-                                    false, 
-                                    false, 
-                                    function() {
+                                callPopupModal({
+                                    header: modalMegaStructureTechPlasmaForge1Header,
+                                    content: modalMegaStructureTechPlasmaForge1Text,
+                                    showConfirm: true,
+                                    showCancel: false,
+                                    showExtra1: false,
+                                    showExtra2: false,
+                                    onConfirm: function() {
                                         showHideModal();
                                     },
-                                    null, 
-                                    null, 
-                                    null,
-                                    'CONFIRM',
-                                    null,
-                                    null,
-                                    null,
-                                    false
-                                );
+                                    onCancel: null,
+                                    onExtra1: null,
+                                    onExtra2: null,
+                                    confirmLabel: 'CONFIRM',
+                                    cancelLabel: null,
+                                    extra1Label: null,
+                                    extra2Label: null,
+                                    setupToolTips: false
+                                });
                                 applyMegaStructureBonuses(3,1);
                             },
                             dataConditionCheck: 'techUnlock',
@@ -2102,25 +2102,25 @@ export function drawTab3Content(heading, optionContentElement) {
                                 event.currentTarget.classList.add('unlocked-tech');
                                 setTechUnlockedArray('plasmaForgeCapabilities');
                                 showNotification(techNotificationMessages.plasmaForgeCapabilities, 'info', 3000, 'tech');
-                                callPopupModal(
-                                    modalMegaStructureTechPlasmaForge2Header, 
-                                    modalMegaStructureTechPlasmaForge2Text, 
-                                    true, 
-                                    false, 
-                                    false, 
-                                    false, 
-                                    function() {
+                                callPopupModal({
+                                    header: modalMegaStructureTechPlasmaForge2Header,
+                                    content: modalMegaStructureTechPlasmaForge2Text,
+                                    showConfirm: true,
+                                    showCancel: false,
+                                    showExtra1: false,
+                                    showExtra2: false,
+                                    onConfirm: function() {
                                         showHideModal();
                                     },
-                                    null, 
-                                    null, 
-                                    null,
-                                    'CONFIRM',
-                                    null,
-                                    null,
-                                    null,
-                                    false
-                                );
+                                    onCancel: null,
+                                    onExtra1: null,
+                                    onExtra2: null,
+                                    confirmLabel: 'CONFIRM',
+                                    cancelLabel: null,
+                                    extra1Label: null,
+                                    extra2Label: null,
+                                    setupToolTips: false
+                                });
                                 applyMegaStructureBonuses(3,2);
                             },
                             dataConditionCheck: 'techUnlock',
@@ -2160,25 +2160,25 @@ export function drawTab3Content(heading, optionContentElement) {
                                 event.currentTarget.classList.add('unlocked-tech');
                                 setTechUnlockedArray('plasmaForgeDisconnect');
                                 showNotification(techNotificationMessages.plasmaForgeDisconnect, 'info', 3000, 'tech');
-                                callPopupModal(
-                                    modalMegaStructureTechPlasmaForge3Header, 
-                                    modalMegaStructureTechPlasmaForge3Text, 
-                                    true, 
-                                    false, 
-                                    false, 
-                                    false, 
-                                    function() {
+                                callPopupModal({
+                                    header: modalMegaStructureTechPlasmaForge3Header,
+                                    content: modalMegaStructureTechPlasmaForge3Text,
+                                    showConfirm: true,
+                                    showCancel: false,
+                                    showExtra1: false,
+                                    showExtra2: false,
+                                    onConfirm: function() {
                                         showHideModal();
                                     },
-                                    null, 
-                                    null, 
-                                    null,
-                                    'CONFIRM',
-                                    null,
-                                    null,
-                                    null,
-                                    false
-                                );
+                                    onCancel: null,
+                                    onExtra1: null,
+                                    onExtra2: null,
+                                    confirmLabel: 'CONFIRM',
+                                    cancelLabel: null,
+                                    extra1Label: null,
+                                    extra2Label: null,
+                                    setupToolTips: false
+                                });
                                 applyMegaStructureBonuses(3,3);
                             },
                             dataConditionCheck: 'techUnlock',
@@ -2218,25 +2218,25 @@ export function drawTab3Content(heading, optionContentElement) {
                                 event.currentTarget.classList.add('unlocked-tech');
                                 setTechUnlockedArray('plasmaForgePower');
                                 showNotification(techNotificationMessages.plasmaForgePower, 'info', 3000, 'tech');
-                                callPopupModal(
-                                    modalMegaStructureTechPlasmaForge4Header, 
-                                    modalMegaStructureTechPlasmaForge4Text, 
-                                    true, 
-                                    false, 
-                                    false, 
-                                    false, 
-                                    function() {
+                                callPopupModal({
+                                    header: modalMegaStructureTechPlasmaForge4Header,
+                                    content: modalMegaStructureTechPlasmaForge4Text,
+                                    showConfirm: true,
+                                    showCancel: false,
+                                    showExtra1: false,
+                                    showExtra2: false,
+                                    onConfirm: function() {
                                         showHideModal();
                                     },
-                                    null, 
-                                    null, 
-                                    null,
-                                    'CONFIRM',
-                                    null,
-                                    null,
-                                    null,
-                                    false
-                                );
+                                    onCancel: null,
+                                    onExtra1: null,
+                                    onExtra2: null,
+                                    confirmLabel: 'CONFIRM',
+                                    cancelLabel: null,
+                                    extra1Label: null,
+                                    extra2Label: null,
+                                    setupToolTips: false
+                                });
                                 applyMegaStructureBonuses(3,4);
                             },
                             dataConditionCheck: 'techUnlock',
@@ -2276,25 +2276,25 @@ export function drawTab3Content(heading, optionContentElement) {
                                 event.currentTarget.classList.add('unlocked-tech');
                                 setTechUnlockedArray('plasmaForgeConnect');
                                 showNotification(techNotificationMessages.plasmaForgeConnect, 'info', 3000, 'tech');
-                                callPopupModal(
-                                    modalMegaStructureTechPlasmaForge5Header, 
-                                    modalMegaStructureTechPlasmaForge5Text, 
-                                    true, 
-                                    false, 
-                                    false, 
-                                    false, 
-                                    function() {
+                                callPopupModal({
+                                    header: modalMegaStructureTechPlasmaForge5Header,
+                                    content: modalMegaStructureTechPlasmaForge5Text,
+                                    showConfirm: true,
+                                    showCancel: false,
+                                    showExtra1: false,
+                                    showExtra2: false,
+                                    onConfirm: function() {
                                         showHideModal();
                                     },
-                                    null, 
-                                    null, 
-                                    null,
-                                    'CONFIRM',
-                                    null,
-                                    null,
-                                    null,
-                                    false
-                                );
+                                    onCancel: null,
+                                    onExtra1: null,
+                                    onExtra2: null,
+                                    confirmLabel: 'CONFIRM',
+                                    cancelLabel: null,
+                                    extra1Label: null,
+                                    extra2Label: null,
+                                    setupToolTips: false
+                                });
                                 applyMegaStructureBonuses(3,5);
                             },
                             dataConditionCheck: 'techUnlock',
@@ -2334,25 +2334,25 @@ export function drawTab3Content(heading, optionContentElement) {
                                 event.currentTarget.classList.add('unlocked-tech');
                                 setTechUnlockedArray('galacticMemoryArchiveUnderstanding');
                                 showNotification(techNotificationMessages.galacticMemoryArchiveUnderstanding, 'info', 3000, 'tech');
-                                callPopupModal(
-                                    modalMegaStructureTechGalacticMemoryArchive1Header, 
-                                    modalMegaStructureTechGalacticMemoryArchive1Text, 
-                                    true, 
-                                    false, 
-                                    false, 
-                                    false, 
-                                    function() {
+                                callPopupModal({
+                                    header: modalMegaStructureTechGalacticMemoryArchive1Header,
+                                    content: modalMegaStructureTechGalacticMemoryArchive1Text,
+                                    showConfirm: true,
+                                    showCancel: false,
+                                    showExtra1: false,
+                                    showExtra2: false,
+                                    onConfirm: function() {
                                         showHideModal();
                                     },
-                                    null, 
-                                    null, 
-                                    null,
-                                    'CONFIRM',
-                                    null,
-                                    null,
-                                    null,
-                                    false
-                                );
+                                    onCancel: null,
+                                    onExtra1: null,
+                                    onExtra2: null,
+                                    confirmLabel: 'CONFIRM',
+                                    cancelLabel: null,
+                                    extra1Label: null,
+                                    extra2Label: null,
+                                    setupToolTips: false
+                                });
                                 applyMegaStructureBonuses(4,1);
                             },
                             dataConditionCheck: 'techUnlock',
@@ -2392,25 +2392,25 @@ export function drawTab3Content(heading, optionContentElement) {
                                 event.currentTarget.classList.add('unlocked-tech');
                                 setTechUnlockedArray('galacticMemoryArchiveCapabilities');
                                 showNotification(techNotificationMessages.galacticMemoryArchiveCapabilities, 'info', 3000, 'tech');
-                                callPopupModal(
-                                    modalMegaStructureTechGalacticMemoryArchive2Header, 
-                                    modalMegaStructureTechGalacticMemoryArchive2Text, 
-                                    true, 
-                                    false, 
-                                    false, 
-                                    false, 
-                                    function() {
+                                callPopupModal({
+                                    header: modalMegaStructureTechGalacticMemoryArchive2Header,
+                                    content: modalMegaStructureTechGalacticMemoryArchive2Text,
+                                    showConfirm: true,
+                                    showCancel: false,
+                                    showExtra1: false,
+                                    showExtra2: false,
+                                    onConfirm: function() {
                                         showHideModal();
                                     },
-                                    null, 
-                                    null, 
-                                    null,
-                                    'CONFIRM',
-                                    null,
-                                    null,
-                                    null,
-                                    false
-                                );
+                                    onCancel: null,
+                                    onExtra1: null,
+                                    onExtra2: null,
+                                    confirmLabel: 'CONFIRM',
+                                    cancelLabel: null,
+                                    extra1Label: null,
+                                    extra2Label: null,
+                                    setupToolTips: false
+                                });
                                 applyMegaStructureBonuses(4,2);
                             },
                             dataConditionCheck: 'techUnlock',
@@ -2450,25 +2450,25 @@ export function drawTab3Content(heading, optionContentElement) {
                                 event.currentTarget.classList.add('unlocked-tech');
                                 setTechUnlockedArray('galacticMemoryArchiveDisconnect');
                                 showNotification(techNotificationMessages.galacticMemoryArchiveDisconnect, 'info', 3000, 'tech');
-                                callPopupModal(
-                                    modalMegaStructureTechGalacticMemoryArchive3Header, 
-                                    modalMegaStructureTechGalacticMemoryArchive3Text, 
-                                    true, 
-                                    false, 
-                                    false, 
-                                    false, 
-                                    function() {
+                                callPopupModal({
+                                    header: modalMegaStructureTechGalacticMemoryArchive3Header,
+                                    content: modalMegaStructureTechGalacticMemoryArchive3Text,
+                                    showConfirm: true,
+                                    showCancel: false,
+                                    showExtra1: false,
+                                    showExtra2: false,
+                                    onConfirm: function() {
                                         showHideModal();
                                     },
-                                    null, 
-                                    null, 
-                                    null,
-                                    'CONFIRM',
-                                    null,
-                                    null,
-                                    null,
-                                    false
-                                );
+                                    onCancel: null,
+                                    onExtra1: null,
+                                    onExtra2: null,
+                                    confirmLabel: 'CONFIRM',
+                                    cancelLabel: null,
+                                    extra1Label: null,
+                                    extra2Label: null,
+                                    setupToolTips: false
+                                });
                                 applyMegaStructureBonuses(4,3);
                             },
                             dataConditionCheck: 'techUnlock',
@@ -2508,25 +2508,25 @@ export function drawTab3Content(heading, optionContentElement) {
                                 event.currentTarget.classList.add('unlocked-tech');
                                 setTechUnlockedArray('galacticMemoryArchivePower');
                                 showNotification(techNotificationMessages.galacticMemoryArchivePower, 'info', 3000, 'tech');
-                                callPopupModal(
-                                    modalMegaStructureTechGalacticMemoryArchive4Header, 
-                                    modalMegaStructureTechGalacticMemoryArchive4Text, 
-                                    true, 
-                                    false, 
-                                    false, 
-                                    false, 
-                                    function() {
+                                callPopupModal({
+                                    header: modalMegaStructureTechGalacticMemoryArchive4Header,
+                                    content: modalMegaStructureTechGalacticMemoryArchive4Text,
+                                    showConfirm: true,
+                                    showCancel: false,
+                                    showExtra1: false,
+                                    showExtra2: false,
+                                    onConfirm: function() {
                                         showHideModal();
                                     },
-                                    null, 
-                                    null, 
-                                    null,
-                                    'CONFIRM',
-                                    null,
-                                    null,
-                                    null,
-                                    false
-                                );
+                                    onCancel: null,
+                                    onExtra1: null,
+                                    onExtra2: null,
+                                    confirmLabel: 'CONFIRM',
+                                    cancelLabel: null,
+                                    extra1Label: null,
+                                    extra2Label: null,
+                                    setupToolTips: false
+                                });
                                 applyMegaStructureBonuses(4,4);
                             },
                             dataConditionCheck: 'techUnlock',
@@ -2566,25 +2566,25 @@ export function drawTab3Content(heading, optionContentElement) {
                                 event.currentTarget.classList.add('unlocked-tech');
                                 setTechUnlockedArray('galacticMemoryArchiveConnect');
                                 showNotification(techNotificationMessages.galacticMemoryArchiveConnect, 'info', 3000, 'tech');
-                                callPopupModal(
-                                    modalMegaStructureTechGalacticMemoryArchive5Header, 
-                                    modalMegaStructureTechGalacticMemoryArchive5Text, 
-                                    true, 
-                                    false, 
-                                    false, 
-                                    false, 
-                                    function() {
+                                callPopupModal({
+                                    header: modalMegaStructureTechGalacticMemoryArchive5Header,
+                                    content: modalMegaStructureTechGalacticMemoryArchive5Text,
+                                    showConfirm: true,
+                                    showCancel: false,
+                                    showExtra1: false,
+                                    showExtra2: false,
+                                    onConfirm: function() {
                                         showHideModal();
                                     },
-                                    null, 
-                                    null, 
-                                    null,
-                                    'CONFIRM',
-                                    null,
-                                    null,
-                                    null,
-                                    false
-                                );
+                                    onCancel: null,
+                                    onExtra1: null,
+                                    onExtra2: null,
+                                    confirmLabel: 'CONFIRM',
+                                    cancelLabel: null,
+                                    extra1Label: null,
+                                    extra2Label: null,
+                                    setupToolTips: false
+                                });
                                 applyMegaStructureBonuses(4,5);
                             },
                             dataConditionCheck: 'techUnlock',
@@ -3585,25 +3585,25 @@ export function handleTechnologyButtonClick(techName, event) {
         case 'knowledgeSharing':
             appendAttentionIndicator(document.getElementById('researchOption'));
             if (getStatRun() === 1) {
-                callPopupModal(
-                    modalKnowledgeSharingTabUnlockHeader,
-                    modalKnowledgeSharingTabUnlockText,
-                    true,
-                    false,
-                    false,
-                    false,
-                    () => {
+                callPopupModal({
+                    header: modalKnowledgeSharingTabUnlockHeader,
+                    content: modalKnowledgeSharingTabUnlockText,
+                    showConfirm: true,
+                    showCancel: false,
+                    showExtra1: false,
+                    showExtra2: false,
+                    onConfirm: () => {
                         showHideModal();
                     },
-                    null,
-                    null,
-                    null,
-                    'CONFIRM',
-                    null,
-                    null,
-                    null,
-                    false
-                );
+                    onCancel: null,
+                    onExtra1: null,
+                    onExtra2: null,
+                    confirmLabel: 'CONFIRM',
+                    cancelLabel: null,
+                    extra1Label: null,
+                    extra2Label: null,
+                    setupToolTips: false
+                });
             }
             break;
         case 'fusionTheory':
@@ -3659,50 +3659,50 @@ export function handleTechnologyButtonClick(techName, event) {
             });
             indicateAllResources();
             if (getStatRun() === 1) {
-                callPopupModal(
-                    modalQuantumComputingTabUnlockHeader,
-                    modalQuantumComputingTabUnlockText,
-                    true,
-                    false,
-                    false,
-                    false,
-                    () => {
+                callPopupModal({
+                    header: modalQuantumComputingTabUnlockHeader,
+                    content: modalQuantumComputingTabUnlockText,
+                    showConfirm: true,
+                    showCancel: false,
+                    showExtra1: false,
+                    showExtra2: false,
+                    onConfirm: () => {
                         showHideModal();
                     },
-                    null,
-                    null,
-                    null,
-                    'CONFIRM',
-                    null,
-                    null,
-                    null,
-                    false
-                );
+                    onCancel: null,
+                    onExtra1: null,
+                    onExtra2: null,
+                    confirmLabel: 'CONFIRM',
+                    cancelLabel: null,
+                    extra1Label: null,
+                    extra2Label: null,
+                    setupToolTips: false,
+                });
             }
             break;
         }
         case 'scienceLaboratories':
             appendAttentionIndicator(document.getElementById('researchOption'));
             if (getStatRun() === 1) {
-                callPopupModal(
-                    modalScienceLabsTabUnlockHeader,
-                    modalScienceLabsTabUnlockText,
-                    true,
-                    false,
-                    false,
-                    false,
-                    () => {
+                callPopupModal({
+                    header: modalScienceLabsTabUnlockHeader,
+                    content: modalScienceLabsTabUnlockText,
+                    showConfirm: true,
+                    showCancel: false,
+                    showExtra1: false,
+                    showExtra2: false,
+                    onConfirm: () => {
                         showHideModal();
                     },
-                    null,
-                    null,
-                    null,
-                    'CONFIRM',
-                    null,
-                    null,
-                    null,
-                    false
-                );
+                    onCancel: null,
+                    onExtra1: null,
+                    onExtra2: null,
+                    confirmLabel: 'CONFIRM',
+                    cancelLabel: null,
+                    extra1Label: null,
+                    extra2Label: null,
+                    setupToolTips: false,
+                });
             }
             break;
         case 'hydroCarbons':
@@ -3715,71 +3715,71 @@ export function handleTechnologyButtonClick(techName, event) {
             break;
         case 'nanoBrokers':
             if (getStatRun() === 1) {
-                callPopupModal(
-                    modalNanoBrokersUnlockHeader,
-                    modalNanoBrokersUnlockText,
-                    true,
-                    false,
-                    false,
-                    false,
-                    () => {
+                callPopupModal({
+                    header: modalNanoBrokersUnlockHeader,
+                    content: modalNanoBrokersUnlockText,
+                    showConfirm: true,
+                    showCancel: false,
+                    showExtra1: false,
+                    showExtra2: false,
+                    onConfirm: () => {
                         showHideModal();
                     },
-                    null,
-                    null,
-                    null,
-                    'CONFIRM',
-                    null,
-                    null,
-                    null,
-                    false
-                );
+                    onCancel: null,
+                    onExtra1: null,
+                    onExtra2: null,
+                    confirmLabel: 'CONFIRM',
+                    cancelLabel: null,
+                    extra1Label: null,
+                    extra2Label: null,
+                    setupToolTips: false,
+                });
             }
             break;
         case 'stellarCartography':
             if (getStatRun() === 1) {
-                callPopupModal(
-                    modalInterstellarTabUnlockHeader,
-                    modalInterstellarTabUnlockText,
-                    true,
-                    false,
-                    false,
-                    false,
-                    () => {
+                callPopupModal({
+                    header: modalInterstellarTabUnlockHeader,
+                    content: modalInterstellarTabUnlockText,
+                    showConfirm: true,
+                    showCancel: false,
+                    showExtra1: false,
+                    showExtra2: false,
+                    onConfirm: () => {
                         showHideModal();
                     },
-                    null,
-                    null,
-                    null,
-                    'CONFIRM',
-                    null,
-                    null,
-                    null,
-                    false
-                );
+                    onCancel: null,
+                    onExtra1: null,
+                    onExtra2: null,
+                    confirmLabel: 'CONFIRM',
+                    cancelLabel: null,
+                    extra1Label: null,
+                    extra2Label: null,
+                    setupToolTips: false,
+                });
             }
             break;
         case 'basicPowerGeneration':
             if (getStatRun() === 1) {
-                callPopupModal(
-                    modalEnergyTabUnlockHeader,
-                    modalEnergyTabUnlockText,
-                    true,
-                    false,
-                    false,
-                    false,
-                    () => {
+                callPopupModal({
+                    header: modalEnergyTabUnlockHeader,
+                    content: modalEnergyTabUnlockText,
+                    showConfirm: true,
+                    showCancel: false,
+                    showExtra1: false,
+                    showExtra2: false,
+                    onConfirm: () => {
                         showHideModal();
                     },
-                    null,
-                    null,
-                    null,
-                    'CONFIRM',
-                    null,
-                    null,
-                    null,
-                    false
-                );
+                    onCancel: null,
+                    onExtra1: null,
+                    onExtra2: null,
+                    confirmLabel: 'CONFIRM',
+                    cancelLabel: null,
+                    extra1Label: null,
+                    extra2Label: null,
+                    setupToolTips: false,
+                });
             }
             break;
         case 'sodiumIonPowerStorage':
@@ -3801,25 +3801,25 @@ export function handleTechnologyButtonClick(techName, event) {
                 appendAttentionIndicator(document.getElementById('launchPadOption'));
             }
             if (getStatRun() === 1) {
-                callPopupModal(
-                    modalRocketCompositesTabUnlockHeader,
-                    modalRocketCompositesTabUnlockText,
-                    true,
-                    false,
-                    false,
-                    false,
-                    () => {
+                callPopupModal({
+                    header: modalRocketCompositesTabUnlockHeader,
+                    content: modalRocketCompositesTabUnlockText,
+                    showConfirm: true,
+                    showCancel: false,
+                    showExtra1: false,
+                    showExtra2: false,
+                    onConfirm: () => {
                         showHideModal();
                     },
-                    null,
-                    null,
-                    null,
-                    'CONFIRM',
-                    null,
-                    null,
-                    null,
-                    false
-                );
+                    onCancel: null,
+                    onExtra1: null,
+                    onExtra2: null,
+                    confirmLabel: 'CONFIRM',
+                    cancelLabel: null,
+                    extra1Label: null,
+                    extra2Label: null,
+                    setupToolTips: false,
+                });
             }
             const launchPadOption = document.getElementById('launchPadOption');
             launchPadOption?.parentElement?.parentElement?.classList.remove('invisible');
@@ -3834,25 +3834,25 @@ export function handleTechnologyButtonClick(techName, event) {
         case 'compounds':
             setAllCompoundsToZeroQuantity();
             if (getStatRun() === 1) {
-                callPopupModal(
-                    modalCompoundsTabUnlockHeader,
-                    modalCompoundsTabUnlockText,
-                    true,
-                    false,
-                    false,
-                    false,
-                    () => {
+                callPopupModal({
+                    header: modalCompoundsTabUnlockHeader,
+                    content: modalCompoundsTabUnlockText,
+                    showConfirm: true,
+                    showCancel: false,
+                    showExtra1: false,
+                    showExtra2: false,
+                    onConfirm: () => {
                         showHideModal();
                     },
-                    null,
-                    null,
-                    null,
-                    'CONFIRM',
-                    null,
-                    null,
-                    null,
-                    false
-                );
+                    onCancel: null,
+                    onExtra1: null,
+                    onExtra2: null,
+                    confirmLabel: 'CONFIRM',
+                    cancelLabel: null,
+                    extra1Label: null,
+                    extra2Label: null,
+                    setupToolTips: false,
+                });
             }
             break;
         case 'steelFoundries':
@@ -3869,25 +3869,25 @@ export function handleTechnologyButtonClick(techName, event) {
                 appendAttentionIndicator(document.getElementById('spaceTelescopeOption'));
             }
             if (getStatRun() === 1) {
-                callPopupModal(
-                    modalSpaceMiningTabUnlockHeader,
-                    modalSpaceMiningTabUnlockText,
-                    true,
-                    false,
-                    false,
-                    false,
-                    () => {
+                callPopupModal({
+                    header: modalSpaceMiningTabUnlockHeader,
+                    content: modalSpaceMiningTabUnlockText,
+                    showConfirm: true,
+                    showCancel: false,
+                    showExtra1: false,
+                    showExtra2: false,
+                    onConfirm: () => {
                         showHideModal();
                     },
-                    null,
-                    null,
-                    null,
-                    'CONFIRM',
-                    null,
-                    null,
-                    null,
-                    false
-                );
+                    onCancel: null,
+                    onExtra1: null,
+                    onExtra2: null,
+                    confirmLabel: 'CONFIRM',
+                    cancelLabel: null,
+                    extra1Label: null,
+                    extra2Label: null,
+                    setupToolTips: false,
+                });
             }
             break;
         }
