@@ -14015,11 +14015,168 @@ export function playWinCinematic(durationMs = 14000) {
     return activeWinCinematicPromise;
 }
 
-    
+
+let activeWinCinematic2Promise = null;
+
+
+export function playWinCinematic2(durationMs = 20000) {
+    if (activeWinCinematic2Promise) return activeWinCinematic2Promise;
+
+    activeWinCinematic2Promise = new Promise((resolve) => {
+        const existing = document.getElementById('winCinematic2Overlay');
+        if (existing) {
+            resolve();
+            activeWinCinematic2Promise = null;
+            return;
+        }
+
+        const overlay = document.createElement('div');
+        overlay.id = 'winCinematic2Overlay';
+        overlay.className = 'win-cinematic2-overlay';
+
+        const scene = document.createElement('div');
+        scene.className = 'win-cinematic2-scene';
+
+        const stars = document.createElement('div');
+        stars.className = 'win-cinematic2-stars';
+
+        const rip = document.createElement('div');
+        rip.className = 'win-cinematic2-rip win-cinematic2-rip-open';
+
+        const ripZip = document.createElement('div');
+        ripZip.className = 'win-cinematic2-rip-zip';
+
+        const flash = document.createElement('div');
+        flash.className = 'win-cinematic2-flash';
+
+        const ships = document.createElement('div');
+        ships.className = 'win-cinematic2-ships';
+
+        for (let i = 0; i < 80; i++) {
+            const ship = document.createElement('div');
+            ship.className = 'win-cinematic2-ship';
+            const yPos = 5 + Math.random() * 90;
+            const leftToRight = i % 2 === 0;
+            const startX = leftToRight ? '-20vw' : '120vw';
+            const endX = leftToRight ? '120vw' : '-20vw';
+            const rotation = leftToRight ? '90deg' : '-90deg';
+            
+            ship.style.setProperty('--ship-start-x', startX);
+            ship.style.setProperty('--ship-end-x', endX);
+            ship.style.setProperty('--ship-y', `${yPos}vh`);
+            ship.style.setProperty('--ship-rot', rotation);
+            ship.style.setProperty('--ship-duration', `${5 + Math.random() * 5}s`);
+            ship.style.setProperty('--ship-delay', `${0.5 + Math.random() * 14}s`);
+            
+            ships.appendChild(ship);
+        }
+
+        const credits = document.createElement('div');
+        credits.className = 'win-cinematic2-credits';
+
+        const creditsHeader = document.createElement('div');
+        creditsHeader.className = 'win-cinematic2-credits-header';
+        creditsHeader.textContent = 'CREDITS:';
+        credits.appendChild(creditsHeader);
+
+        const creditsContainer = document.createElement('div');
+        creditsContainer.className = 'win-cinematic2-credits-container';
+        
+        const creditsLines = [
+            'Game Design - Leigh Hobson',
+            'Development - Leigh Hobson',
+            'Graphics and UI Design - Leigh Hobson',
+            'QA - Leigh Hobson',
+            'Story - Leigh Hobson',
+            'Cosmic Forge © 2026 Leigh Hobson'
+        ];
+        
+        creditsLines.forEach((line, idx) => {
+            const row = document.createElement('div');
+            row.className = 'win-cinematic2-credits-line';
+            if (idx === creditsLines.length - 1) row.classList.add('win-cinematic2-credits-final');
+            row.textContent = line;
+            row.style.setProperty('--credits-i', String(idx));
+            creditsContainer.appendChild(row);
+        });
+        
+        credits.appendChild(creditsContainer);
+
+        scene.appendChild(stars);
+        scene.appendChild(rip);
+        scene.appendChild(ripZip);
+        scene.appendChild(flash);
+        scene.appendChild(ships);
+        scene.appendChild(credits);
+        overlay.appendChild(scene);
+        document.body.appendChild(overlay);
+
+        const previousOverflow = document.documentElement.style.overflow;
+        document.documentElement.style.overflow = 'hidden';
+
+        const stopEvent = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        };
+
+        const blockedPointerEvents = [
+            'click',
+            'dblclick',
+            'contextmenu',
+            'mousedown',
+            'mouseup',
+            'mousemove',
+            'pointerdown',
+            'pointerup',
+            'pointermove',
+            'touchstart',
+            'touchmove',
+            'touchend'
+        ];
+
+        blockedPointerEvents.forEach(type => overlay.addEventListener(type, stopEvent, { capture: true }));
+        overlay.addEventListener('wheel', stopEvent, { capture: true, passive: false });
+
+        const keyBlocker = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (typeof e.stopImmediatePropagation === 'function') {
+                e.stopImmediatePropagation();
+            }
+        };
+        document.addEventListener('keydown', keyBlocker, true);
+        document.addEventListener('keyup', keyBlocker, true);
+
+        const totalDurationMs = durationMs;
+        const end = () => {
+            overlay.classList.add('win-cinematic2-out');
+            setTimeout(cleanup, 950);
+        };
+
+        const cleanup = () => {
+            blockedPointerEvents.forEach(type => overlay.removeEventListener(type, stopEvent, { capture: true }));
+            overlay.removeEventListener('wheel', stopEvent, { capture: true });
+            document.removeEventListener('keydown', keyBlocker, true);
+            document.removeEventListener('keyup', keyBlocker, true);
+            document.documentElement.style.overflow = previousOverflow;
+            overlay.remove();
+            activeWinCinematic2Promise = null;
+            resolve();
+        };
+
+        requestAnimationFrame(() => {
+            overlay.classList.add('win-cinematic2-play');
+        });
+
+        setTimeout(end, totalDurationMs);
+    });
+
+    return activeWinCinematic2Promise;
+}
+
 //-------------------------------------------------------------------------------------------------
 //--------------DEBUG-------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
-
 
 function toggleDebugWindow() {
     if (debugWindow.style.display === 'none' || !debugWindow.style.display) {

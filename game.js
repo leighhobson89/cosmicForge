@@ -525,7 +525,8 @@ import {
     setButtonState,
     setElementPointerEvents,
     setElementOpacity,
-    playWinCinematic
+    playWinCinematic,
+    playWinCinematic2
 } from "./ui.js";
 
 const storageFullNotificationState = {
