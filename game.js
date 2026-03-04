@@ -4,6 +4,8 @@ import {
     setCosmicRipTechTimeLeftUntilResearchFinishes,
     getCosmicRipTechTimeLeftUntilResearchFinishes,
     setCosmicRipTechUnlockedArray,
+    setCosmicRipTechCurrentResearchProgress,
+    getCosmicRipTechCurrentResearchProgress,
     setGalacticPointsSpent,
     setCosmicRipNearSpaceScannerArraySectorNames,
     getCosmicRipNearSpaceScannerArraySectorNames,
@@ -808,7 +810,8 @@ import {
     modalCosmicRipTechSingularityStabilizerHeader,
     modalCosmicRipTechSingularityStabilizerText,
     modalCosmicRipTechRealityWeaveRegulatorHeader,
-    modalCosmicRipTechRealityWeaveRegulatorText
+    modalCosmicRipTechRealityWeaveRegulatorText,
+    cosmicRipStatusMessages
 } from './descriptions.js';
 
 import { initializeAutoSave, saveGame } from './saveLoadGame.js';
@@ -1366,20 +1369,36 @@ function cosmicRipChecks() {
     const situationStatusText = document.getElementById('cosmicRipSituationStatusText');
     if (situationStatusText) {
         const isOneSectorState = getCosmicRipNearSpaceScannerArrayOneSectorState() === true;
+        const unlocked = getCosmicRipTechUnlockedArray?.() || [];
+        
         if (!scannerRestored) {
             situationStatusText.textContent = 'Not Located';
             situationStatusText.classList.remove('green-ready-text');
             situationStatusText.classList.add('red-disabled-text');
         } else if (ripFound && isOneSectorState) {
-            const idx = Number(getCosmicRipFoundSectorIndexForZoom());
-            const safeIdx = Number.isFinite(idx) ? Math.max(0, Math.min(8, Math.floor(idx))) : 0;
-            const sectorNamesArr = getCosmicRipNearSpaceScannerArraySectorNames();
-            let sectorLabel = Array.isArray(sectorNamesArr) ? String(sectorNamesArr[safeIdx] || '') : '';
-            if (!sectorLabel) {
-                const sectorEl = document.getElementById(`cosmicRipNearSpaceScannerArraySector${safeIdx}`);
-                sectorLabel = sectorEl?.dataset?.sectorId ? String(sectorEl.dataset.sectorId) : '';
+            let statusMessage = '';
+            if (unlocked.includes('realityWeaveRegulator')) {
+                statusMessage = cosmicRipStatusMessages.fullyStabilised;
+            } else if (unlocked.includes('singularityStabilizer')) {
+                statusMessage = cosmicRipStatusMessages.singularityStabilizer;
+            } else if (unlocked.includes('dimensionalAnchorMatrix')) {
+                statusMessage = cosmicRipStatusMessages.dimensionalAnchorMatrix;
+            } else if (unlocked.includes('quantumContainmentField')) {
+                statusMessage = cosmicRipStatusMessages.quantumContainmentField;
+            } else if (unlocked.includes('stabilizerArray')) {
+                statusMessage = cosmicRipStatusMessages.stabilizerArray;
+            } else {
+                const idx = Number(getCosmicRipFoundSectorIndexForZoom());
+                const safeIdx = Number.isFinite(idx) ? Math.max(0, Math.min(8, Math.floor(idx))) : 0;
+                const sectorNamesArr = getCosmicRipNearSpaceScannerArraySectorNames();
+                let sectorLabel = Array.isArray(sectorNamesArr) ? String(sectorNamesArr[safeIdx] || '') : '';
+                if (!sectorLabel) {
+                    const sectorEl = document.getElementById(`cosmicRipNearSpaceScannerArraySector${safeIdx}`);
+                    sectorLabel = sectorEl?.dataset?.sectorId ? String(sectorEl.dataset.sectorId) : '';
+                }
+                statusMessage = `Located in Sector ${sectorLabel}`;
             }
-            situationStatusText.textContent = `Located in Sector ${sectorLabel}`;
+            situationStatusText.textContent = statusMessage;
             situationStatusText.classList.remove('red-disabled-text');
             situationStatusText.classList.add('green-ready-text');
         } else {
@@ -1394,35 +1413,27 @@ function cosmicRipChecks() {
         const isOneSectorState = getCosmicRipNearSpaceScannerArrayOneSectorState() === true;
         if (scannerRestored && ripFound && isOneSectorState) {
             const unlocked = getCosmicRipTechUnlockedArray?.() || [];
-            let nextObjective = 'Build Stabilizer Array';
+            let nextObjective = cosmicRipStatusMessages.objectiveBuildStabilizerArray;
             if (unlocked.includes('stabilizerArray')) {
-                nextObjective = 'Build Quantum Containment Field';
+                nextObjective = cosmicRipStatusMessages.objectiveBuildQuantumContainmentField;
             }
             if (unlocked.includes('quantumContainmentField')) {
-                nextObjective = 'Build Dimensional Anchor Matrix';
+                nextObjective = cosmicRipStatusMessages.objectiveBuildDimensionalAnchorMatrix;
             }
             if (unlocked.includes('dimensionalAnchorMatrix')) {
-                nextObjective = 'Build Singularity Stabilizer';
+                nextObjective = cosmicRipStatusMessages.objectiveBuildSingularityStabilizer;
             }
             if (unlocked.includes('singularityStabilizer')) {
-                nextObjective = 'Build Reality Weave Regulator';
+                nextObjective = cosmicRipStatusMessages.objectiveBuildRealityWeaveRegulator;
             }
             if (unlocked.includes('realityWeaveRegulator')) {
-                nextObjective = 'All Stabilization Systems Online';
+                nextObjective = cosmicRipStatusMessages.objectiveCloseCosmicRip;
             }
             situationObjectiveText.textContent = nextObjective;
             situationObjectiveText.classList.add('green-ready-text');
         } else {
-            situationObjectiveText.textContent = 'Scan Local Sectors for the Cosmic Rip';
+            situationObjectiveText.textContent = cosmicRipStatusMessages.objectiveScanSectors;
             situationObjectiveText.classList.add('green-ready-text');
-        }
-    }
-
-    const situationResearchText = document.getElementById('cosmicRipSituationResearchText');
-    if (situationResearchText) {
-        const desired = `${ripResearchPoints} pts (L${ripResearchLevel})`;
-        if (situationResearchText.textContent !== desired) {
-            situationResearchText.textContent = desired;
         }
     }
 
@@ -1434,26 +1445,40 @@ function cosmicRipChecks() {
     if (situationObjectiveRow) {
         situationObjectiveRow.classList.toggle('invisible', !scannerRestored);
     }
-    const situationResearchRow = document.getElementById('cosmicRipSituationResearchRow');
-    if (situationResearchRow) {
-        situationResearchRow.classList.toggle('invisible', !scannerRestored);
-    }
+    const closeCosmicRipRow = document.getElementById('closeCosmicRipRow');
+    if (closeCosmicRipRow) {
+        const unlockedTechs = getCosmicRipTechUnlockedArray?.() || [];
+        const allFiveTechsResearched = ['stabilizerArray', 'quantumContainmentField', 'dimensionalAnchorMatrix', 'singularityStabilizer', 'realityWeaveRegulator']
+            .every(tech => unlockedTechs.includes(tech));
+        closeCosmicRipRow.classList.toggle('invisible', !allFiveTechsResearched);
 
-    const cosmicRipStageText = document.getElementById('cosmicRipCosmicRipStageText');
-    if (cosmicRipStageText) {
-        const desired = scannerRestored
-            ? (ripFound ? stage : 'Searching')
-            : 'Offline';
-        if (cosmicRipStageText.textContent !== desired) {
-            cosmicRipStageText.textContent = desired;
-        }
-    }
+        if (allFiveTechsResearched) {
+            const closeCosmicRipCostEl = document.getElementById('closeCosmicRipCostGP');
+            const closeCosmicRipBtn = closeCosmicRipRow.querySelector?.('.cosmic-rip-close-rip-button');
+            const currentGP = Math.max(0, (((getSettledStars?.() || []).length) - 1) - (Number(getGalacticPointsSpent?.()) || 0));
+            const hasEnoughGP = currentGP >= 1;
 
-    const cosmicRipMetersText = document.getElementById('cosmicRipCosmicRipMetersText');
-    if (cosmicRipMetersText) {
-        const desired = `Instability: ${instability} | Integrity: ${containmentIntegrity} | Seal: ${sealProgress}`;
-        if (cosmicRipMetersText.textContent !== desired) {
-            cosmicRipMetersText.textContent = desired;
+            if (closeCosmicRipCostEl) {
+                if (hasEnoughGP) {
+                    closeCosmicRipCostEl.classList.remove('red-disabled-text');
+                    closeCosmicRipCostEl.classList.add('green-ready-text');
+                } else {
+                    closeCosmicRipCostEl.classList.add('red-disabled-text');
+                    closeCosmicRipCostEl.classList.remove('green-ready-text');
+                }
+            }
+
+            if (closeCosmicRipBtn) {
+                if (hasEnoughGP) {
+                    closeCosmicRipBtn.classList.remove('red-disabled-text');
+                    closeCosmicRipBtn.classList.add('green-ready-text');
+                    setElementPointerEvents(closeCosmicRipBtn, 'auto');
+                } else {
+                    closeCosmicRipBtn.classList.add('red-disabled-text');
+                    closeCosmicRipBtn.classList.remove('green-ready-text');
+                    setElementPointerEvents(closeCosmicRipBtn, 'none');
+                }
+            }
         }
     }
 
@@ -1814,7 +1839,7 @@ function cosmicRipChecks() {
         ripResearchOrbiterQuantityEl.textContent = `Quantity: ${ripResearchOrbiterQty}`;
     }
 
-    updateCosmicRipStabilityProgressBar();
+    updateCosmicRipStabilityProgressBar(getCosmicRipTechCurrentResearchProgress());
 
     const techTimeLefts = getCosmicRipTechTimeLeftUntilResearchFinishes?.() || {};
     const techDurations = getCosmicRipTechResearchDurations?.() || {};
@@ -6470,7 +6495,7 @@ function monitorTechTree() {
     });
 }
 
-function updateCosmicRipStabilityProgressBar() {
+function updateCosmicRipStabilityProgressBar(currentResearchProgress = 0) {
     const cosmicRipTechs = getResourceDataObject('cosmicRip', ['techs']);
     if (!cosmicRipTechs) return;
     
@@ -6478,7 +6503,9 @@ function updateCosmicRipStabilityProgressBar() {
     if (totalTechs === 0) return;
     
     const unlockedTechs = getCosmicRipTechUnlockedArray().length;
-    const percentage = Math.round((unlockedTechs / totalTechs) * 100);
+    const basePercentage = (unlockedTechs / totalTechs) * 100;
+    const techContribution = (1 / totalTechs) * 100 * currentResearchProgress;
+    const percentage = Math.round(basePercentage + techContribution);
     
     const progressBar = document.getElementById('cosmicRipStabilityProgressBar');
     const percentageText = document.getElementById('cosmicRipStabilityPercentageText');
@@ -6486,7 +6513,6 @@ function updateCosmicRipStabilityProgressBar() {
     if (progressBar) {
         progressBar.style.width = `${percentage}%`;
     }
-    
     if (percentageText) {
         percentageText.textContent = `${percentage}% Stabilised`;
     }
@@ -11025,6 +11051,7 @@ export function startCosmicRipTechResearchTimer(techName, adjustment = [0, 'norm
             if (currentTimeRemaining <= 0) {
                 timerManagerDelta.removeTimer(timerName);
                 setCosmicRipTechUnlockedArray(techName);
+                setCosmicRipTechCurrentResearchProgress(0);
                 updateCosmicRipStabilityProgressBar();
 
                 if (progressBarContainer) {
@@ -11145,6 +11172,7 @@ export function startCosmicRipTechResearchTimer(techName, adjustment = [0, 'norm
             } else {
                 const elapsedTime = totalDurationForCalc - currentTimeRemaining;
                 const progressBarPercentage = (elapsedTime / totalDurationForCalc) * 100;
+                const researchProgress = elapsedTime / totalDurationForCalc;
 
                 if (progressBar) {
                     progressBar.style.width = `${progressBarPercentage}%`;
@@ -11153,6 +11181,9 @@ export function startCosmicRipTechResearchTimer(techName, adjustment = [0, 'norm
                     descriptionEl.classList.add('green-ready-text');
                     descriptionEl.textContent = `Researching ... ${timeLeftUI}s`;
                 }
+                
+                setCosmicRipTechCurrentResearchProgress(researchProgress);
+                updateCosmicRipStabilityProgressBar(researchProgress);
             }
         },
         metadata: { type: 'cosmicRipTech', techName: techName }

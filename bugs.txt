@@ -12,3 +12,12 @@ Future Developer:
 
 bun run build:all will produce 4 builds a demo and a full game for linux and windows.
 python create_build.py cosmicForge_v1.02 will create a pushable build to my account on itch.io via butler but the manual executable build must be uploaded seperately.
+
+Things to do:
+- check where cosmic rip chapter starts
+- edit ending cinematic and decide where to play it and remove credits
+- edit ending popup to say well done but we need to now address the cosmic rip and close it to secure your people for ever
+- add new debug options for cosmic rip and variables to variable debugger if necessary
+- add statistics to stats section for new chapter and check if events has stats and casino
+- add achievements for casino, cosmic rip section, events
+- add a new final end sequence

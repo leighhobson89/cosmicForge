@@ -322,6 +322,7 @@ let cosmicRipRipFoundUiSequenceStarted = false;
 let cosmicRipTechResearchTimers = {};
 let cosmicRipTechTimeLeftUntilResearchFinishes = {};
 let cosmicRipTechResearchDurations = {};
+let cosmicRipTechCurrentResearchProgress = 0;
 let apSellForCashPrice = AP_BASE_SELL_PRICE;
 let apBuyForCashPrice = AP_BASE_BUY_PRICE;
 let apLiquidationQuantity = 0;
@@ -5644,6 +5645,14 @@ export function getCosmicRipTechResearchDurations() {
 
 export function setCosmicRipTechResearchDurations(value) {
     cosmicRipTechResearchDurations = value || {};
+}
+
+export function getCosmicRipTechCurrentResearchProgress() {
+    return cosmicRipTechCurrentResearchProgress;
+}
+
+export function setCosmicRipTechCurrentResearchProgress(value) {
+    cosmicRipTechCurrentResearchProgress = typeof value === 'number' ? value : 0;
 }
 
 export function setMiaplacidusEndgameStoryShown(value) {

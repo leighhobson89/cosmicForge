@@ -179,6 +179,8 @@ export let modalCosmicRipTechSingularityStabilizerText;
 export let modalCosmicRipTechRealityWeaveRegulatorHeader;
 export let modalCosmicRipTechRealityWeaveRegulatorText;
 
+export let cosmicRipStatusMessages;
+
 export let randomEventTriggerDescriptions;
 
 export function initialiseDescriptions() {
@@ -386,6 +388,22 @@ export function initialiseDescriptions() {
         minerBrokeDown: 'One mining rocket produces 0 antimatter for 15 minutes',
         supplyChainDisruption: 'One resource or compound produces only 25% for 15 minutes',
         blackHoleInstability: 'Black Hole fluctuates in strength (and duration) for 15-25 minutes'
+    };
+
+    cosmicRipStatusMessages = {
+        stabilizerArray: 'Stabiliser Array Built',
+        quantumContainmentField: 'Quantum Containment Field Generated',
+        dimensionalAnchorMatrix: 'Dimensional Anchor Matrix Built',
+        singularityStabilizer: 'Singularity Stabilizer Constructed',
+        realityWeaveRegulator: 'Reality Weave Regulator Built',
+        fullyStabilised: 'Cosmic Rip Fully Stabilised and Secured',
+        objectiveBuildStabilizerArray: 'Build Stabilizer Array',
+        objectiveBuildQuantumContainmentField: 'Build Quantum Containment Field',
+        objectiveBuildDimensionalAnchorMatrix: 'Build Dimensional Anchor Matrix',
+        objectiveBuildSingularityStabilizer: 'Build Singularity Stabilizer',
+        objectiveBuildRealityWeaveRegulator: 'Build Reality Weave Regulator',
+        objectiveCloseCosmicRip: 'Close the Cosmic Rip Forever and Secure your People!',
+        objectiveScanSectors: 'Scan Local Sectors for the Cosmic Rip'
     };
 
     miaplacidusEndgameStoryPopups = [
@@ -2428,7 +2446,17 @@ export function initialiseDescriptions() {
             "Apparently there are Ancient Manuscripts dotted around the Galaxy that point to Ancient Megastructures...",
             "If you are playing in the United States, there is an 87% chance you are American, but only a 66% chance that at least one of your parents is.",
             "If you think this game is worth paying for, then tough, you can't pay for it, MUHAHAHAH!  Wait, actually there is a way on itch if you get the Downloadable version, Phew!",
-            "What do Rome, Italy, Santander, Spain, Chicago, IL, Buffalo, NY, Detroit, MI, Portland, OR, and Boston, MA all have in common? Somewhere in Canada is further South than all of them!"
+            "What do Rome, Italy, Santander, Spain, Chicago, IL, Buffalo, NY, Detroit, MI, Portland, OR, and Boston, MA all have in common? Somewhere in Canada is further South than all of them!",
+            "The Galactic Casino reports record profits as high rollers flock to test their fortunes.",
+            "Rumors suggest the Galactic Casino's slot machines are rigged, but management denies all allegations.",
+            "A mysterious gambler won 10,000 CP in a single night at the Galactic Casino Double Or Nothing table.",
+            "Galactic Casino security increased after a string of lucky streaks deemed 'statistically impossible'.",
+            "The Galactic Gaming Commission considers new regulations on roulette wheel calibration.",
+            "Strange energy readings detected near the Cosmic Rip - scientists urge caution.",
+            "The Reality Weave around the Cosmic Rip fluctuates unpredictably, causing concern among researchers.",
+            "Dimensional anchors holding the Cosmic Rip stable require additional reinforcement.",
+            "Quantum containment fields show micro-fractures - emergency protocols on standby.",
+            "Astronomers report the Cosmic Rip is emitting harmonics that match ancient guardian frequencies."
         ]
     };
 }
@@ -2810,7 +2838,7 @@ helpContent = {
         subBody3: "Miaplacidus - your Homeland - It is protected by a powerful force field maintained by the machine race. As you dismantle MegaStructures, and connect them to your own cause, that force field will weaken until it eventually collapses, where you will then face the almighty battle of your life to recover your Ancestral homeland.",
 
         subHeading4: "The End Goal",
-        subBody4: "Once the Miaplacidus force field is gone, you can attack the Master AI race, reclaim Miaplacidus, and reconquer your homeland. This is the end goal of the game."
+        subBody4: "Once the Miaplacidus force field is gone, you can attack the Master AI race, reclaim Miaplacidus, reconquer your homeland, and close the Cosmic Rip, forever securing the future for your People! This is the end goal of the game."
     },
     'philosophies': {
     subHeading1: "Philosophies",

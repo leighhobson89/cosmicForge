@@ -56,7 +56,11 @@ import {
     getCosmicRipTechResearchDurations,
 } from './constantsAndGlobalVars.js';
 
-import { getCurrencySymbol } from './constantsAndGlobalVars.js';
+import {
+    getCurrencySymbol,
+    getGalacticPointsSpent,
+    setGalacticPointsSpent
+} from './constantsAndGlobalVars.js';
 
 import { getResourceDataObject } from './resourceDataObject.js';
 
@@ -197,21 +201,31 @@ export function drawTab8Content(heading, optionContentElement) {
         });
         cosmicRipObjectiveRow.classList.add('invisible');
 
-        const cosmicRipResearchRow = createOptionRow({
-            labelId: 'cosmicRipSituationResearchRow',
+        const closeCosmicRipRow = createOptionRow({
+            labelId: 'closeCosmicRipRow',
             renderNameABs: null,
-            labelText: 'Cosmic Rip Research:',
+            labelText: 'Close Rip:',
             inputElements: [
-                createTextElement('0 pts (L0)', 'cosmicRipSituationResearchText', []),
+                createButton({
+                    text: 'CLOSE COSMIC RIP',
+                    classNames: ['option-button', 'cosmic-rip-close-rip-button'],
+                    onClick: () => {
+                        const currentGPSpent = Number(getGalacticPointsSpent?.()) || 0;
+                        setGalacticPointsSpent(currentGPSpent + 1);
+                        console.log('WON THE GAME!');
+                    },
+                    disableKeyboardForButton: true,
+                    rowCategory: null
+                }),
             ],
-            descriptionText: '',
+            descriptionText: '<span id="closeCosmicRipCostGP">1GP</span>',
             resourcePriceObject: '',
             dataConditionCheck: null,
             objectSectionArgument1: null,
             objectSectionArgument2: null,
             quantityArgument: null,
             autoBuyerTier: null,
-            startInvisibleValue: false,
+            startInvisibleValue: true,
             resourceString: null,
             optionalIterationParam: null,
             rowCategory: null,
@@ -219,13 +233,12 @@ export function drawTab8Content(heading, optionContentElement) {
             specialInputContainerClasses: null,
             hideMainDescriptionRow: false
         });
-        cosmicRipResearchRow.classList.add('invisible');
 
         optionContentElement.appendChild(restoreRow);
         optionContentElement.appendChild(restoredRow);
         optionContentElement.appendChild(cosmicRipStatusRow);
         optionContentElement.appendChild(cosmicRipObjectiveRow);
-        optionContentElement.appendChild(cosmicRipResearchRow);
+        optionContentElement.appendChild(closeCosmicRipRow);
 
         const btn = optionContentElement.querySelector?.('.cosmic-rip-restore-scanner-array-button');
         if (btn) {
