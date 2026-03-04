@@ -28,7 +28,7 @@ let saveData = null;
 //CONSTANTS
 export const HOMESTAR = 'miaplacidus';
 export const MINIMUM_GAME_VERSION_FOR_SAVES = 0.93;
-export const GAME_VERSION_FOR_SAVES = 0.975;
+export const GAME_VERSION_FOR_SAVES = 0.976;
 export const deferredActions = [];
 
 //NOTIFICATIONS
@@ -319,6 +319,9 @@ let cosmicRipNearSpaceScannerArrayDrawCanvas = null;
 let cosmicRipNearSpaceScannerArrayResizeAttached = false;
 let cosmicRipPrevScanResultsBySectorIndex = null;
 let cosmicRipRipFoundUiSequenceStarted = false;
+let cosmicRipTechResearchTimers = {};
+let cosmicRipTechTimeLeftUntilResearchFinishes = {};
+let cosmicRipTechResearchDurations = {};
 let apSellForCashPrice = AP_BASE_SELL_PRICE;
 let apBuyForCashPrice = AP_BASE_BUY_PRICE;
 let apLiquidationQuantity = 0;
@@ -1562,6 +1565,8 @@ export function captureGameStatusForSaving(type) {
     gameState.currentBlackHoleChargeTimerDurationTotal = currentBlackHoleChargeTimerDurationTotal;
     gameState.timeLeftUntilRocketTravelToAsteroidTimerFinishes = timeLeftUntilRocketTravelToAsteroidTimerFinishes;
     gameState.asteroidArray = asteroidArray;
+    gameState.cosmicRipTechTimeLeftUntilResearchFinishes = cosmicRipTechTimeLeftUntilResearchFinishes;
+    gameState.cosmicRipTechResearchDurations = cosmicRipTechResearchDurations;
     gameState.rocketTravelDuration = rocketTravelDuration;
     gameState.starTravelDuration = starTravelDuration;
     gameState.miningObject = miningObject;
@@ -1853,6 +1858,8 @@ export function restoreGameStatus(gameState, type) {
             currentBlackHoleChargeTimerDurationTotal = gameState.currentBlackHoleChargeTimerDurationTotal ?? 0;
             asteroidArray = (gameState.asteroidArray ?? []).filter(item => item !== '') || null;
             rocketTravelDuration = gameState.rocketTravelDuration ?? {rocket1: 0, rocket2: 0, rocket3: 0, rocket4: 0};
+            cosmicRipTechTimeLeftUntilResearchFinishes = gameState.cosmicRipTechTimeLeftUntilResearchFinishes ?? {};
+            cosmicRipTechResearchDurations = gameState.cosmicRipTechResearchDurations ?? {};
             starTravelDuration = gameState.starTravelDuration ?? 0;
             miningObject = gameState.miningObject ?? {rocket1: null, rocket2: null, rocket3: null, rocket4: null};
             destinationAsteroid = gameState.destinationAsteroid ?? {rocket1: null, rocket2: null, rocket3: null, rocket4: null};
@@ -5613,6 +5620,30 @@ export function getCosmicRipRipFoundUiSequenceStarted() {
 
 export function setCosmicRipRipFoundUiSequenceStarted(value) {
     cosmicRipRipFoundUiSequenceStarted = value === true;
+}
+
+export function getCosmicRipTechResearchTimers() {
+    return cosmicRipTechResearchTimers;
+}
+
+export function setCosmicRipTechResearchTimers(value) {
+    cosmicRipTechResearchTimers = value || {};
+}
+
+export function getCosmicRipTechTimeLeftUntilResearchFinishes() {
+    return cosmicRipTechTimeLeftUntilResearchFinishes;
+}
+
+export function setCosmicRipTechTimeLeftUntilResearchFinishes(value) {
+    cosmicRipTechTimeLeftUntilResearchFinishes = value || {};
+}
+
+export function getCosmicRipTechResearchDurations() {
+    return cosmicRipTechResearchDurations;
+}
+
+export function setCosmicRipTechResearchDurations(value) {
+    cosmicRipTechResearchDurations = value || {};
 }
 
 export function setMiaplacidusEndgameStoryShown(value) {

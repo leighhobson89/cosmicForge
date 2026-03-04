@@ -20,6 +20,8 @@ import {
 } from './cosmicRip.js';
 
 import {
+    getCosmicRipNearSpaceScannerArrayInteractiveOverlayEl,
+    getCosmicRipTechUnlockedArray,
     getCosmicRipNearSpaceScannerArrayFogEls,
     setCosmicRipNearSpaceScannerArraySectorNames,
     getCosmicRipNearSpaceScannerArraySectorNames,
@@ -50,6 +52,8 @@ import {
     getCosmicRipNearSpaceScannerArrayDrawCanvas,
     setCosmicRipNearSpaceScannerArrayResizeAttached,
     getCosmicRipNearSpaceScannerArrayResizeAttached,
+    getCosmicRipTechTimeLeftUntilResearchFinishes,
+    getCosmicRipTechResearchDurations,
 } from './constantsAndGlobalVars.js';
 
 import { getCurrencySymbol } from './constantsAndGlobalVars.js';
@@ -384,6 +388,10 @@ export function drawTab8Content(heading, optionContentElement) {
                 const result = scanCosmicRipSector?.(i);
                 if (result?.ok) {
                     if (result.found) {
+                        const interactiveOverlay = getCosmicRipNearSpaceScannerArrayInteractiveOverlayEl?.();
+                        if (interactiveOverlay) {
+                            interactiveOverlay.style.pointerEvents = 'none';
+                        }
                         showNotification(`Scan complete! Cosmic Rip located in sector ${name}`, 'info', 4000, 'cosmicRip');
                         if (getCosmicRipLocatedModalShown() !== true) {
                             setCosmicRipLocatedModalShown(true);
@@ -732,7 +740,14 @@ export function drawTab8Content(heading, optionContentElement) {
             renderNameABs: null,
             labelText: 'Cosmic Rip:',
             inputElements: [
-                createTextElement('Discovered', 'cosmicRipCosmicRipStatusText', []),
+                createTextElement(`<div id="cosmicRipStabilityProgressBar">`, `cosmicRipStabilityProgressBarContainer`, ['progress-bar-container']),
+                createButton({
+                    text: '0%',
+                    classNames: ['no-interaction', 'option-button', 'cosmic-rip-progress-bar-button-margin', 'id_cosmicRipStabilityPercentageText'],
+                    onClick: () => {},
+                    disableKeyboardForButton: true,
+                    rowCategory: null
+                }),
             ],
             descriptionText: '',
             resourcePriceObject: '',
@@ -745,23 +760,43 @@ export function drawTab8Content(heading, optionContentElement) {
             resourceString: null,
             optionalIterationParam: null,
             rowCategory: null,
-            noDescriptionContainer: false,
+            noDescriptionContainer: [true, '15%', '70%'],
             specialInputContainerClasses: null,
             hideMainDescriptionRow: false
         });
         statusRow.classList.remove('invisible');
         optionContentElement.appendChild(statusRow);
 
+        setTimeout(() => {
+            const progressBar = document.getElementById('cosmicRipStabilityProgressBar');
+            const percentageText = document.getElementById('cosmicRipStabilityPercentageText');
+            if (progressBar && percentageText) {
+                const cosmicRipTechs = getResourceDataObject('cosmicRip', ['techs']);
+                if (cosmicRipTechs) {
+                    const totalTechs = Object.keys(cosmicRipTechs).length;
+                    const unlockedTechs = getCosmicRipTechUnlockedArray().length;
+                    const percentage = totalTechs > 0 ? Math.round((unlockedTechs / totalTechs) * 100) : 0;
+                    progressBar.style.width = `${percentage}%`;
+                    percentageText.textContent = `${percentage}% Stabilised`;
+                }
+            }
+        }, 0);
+
         const stabilizerArrayRow = createOptionRow({
             labelId: 'cosmicRipStabilizerArrayRow',
             renderNameABs: null,
             labelText: 'Stabilizer Array:',
             inputElements: [
+                createTextElement(`<div id="cosmicRipTechProgressBar_stabilizerArray">`, `cosmicRipTechProgressBarContainer_stabilizerArray`, ['progress-bar-container', 'invisible']),
                 createButton({
                     text: 'Research',
-                    classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'cosmic-rip-tech-unlock', 'cosmic-rip-build-stabilizer-array-button'],
+                    classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'cosmic-rip-tech-unlock', 'cosmic-rip-build-stabilizer-array-button', 'id_cosmicRipTechResearchButton_stabilizerArray'],
                     onClick: () => {
                         gain(1, null, 'stabilizerArray', true, null, 'cosmicRipTech', 'tech');
+                        const btn = document.getElementById('cosmicRipTechResearchButton_stabilizerArray');
+                        const progressBarContainer = document.getElementById('cosmicRipTechProgressBarContainer_stabilizerArray');
+                        if (btn) btn.classList.add('invisible');
+                        if (progressBarContainer) progressBarContainer.classList.remove('invisible');
                     },
                     dataConditionCheck: 'cosmicRipTechUnlock',
                     resourcePriceObject: '',
@@ -771,7 +806,7 @@ export function drawTab8Content(heading, optionContentElement) {
                     rowCategory: 'cosmicRipBuildStabilizerArray'
                 }),
             ],
-            descriptionText: `<span id="stabilizerArrayTelemetry">${getResourceDataObject('cosmicRip', ['techs', 'stabilizerArray', 'price'])} Telemetry Data<span id="stabilizerArrayComma1">, </span></span><span id="stabilizerArrayGP">1GP<span id="stabilizerArrayComma2">, </span></span>${getResourceDataObject('cosmicRip', ['techs', 'stabilizerArray', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? '' : ''}<span id="stabilizerArrayPrereq">${getResourceDataObject('cosmicRip', ['techs', 'stabilizerArray', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+            descriptionText: `<span id="cosmicRipTechDescription_stabilizerArray"><span id="stabilizerArrayTelemetry">${getResourceDataObject('cosmicRip', ['techs', 'stabilizerArray', 'price'])} Telemetry Data<span id="stabilizerArrayComma1">, </span></span><span id="stabilizerArrayGP">1GP<span id="stabilizerArrayComma2">, </span></span>${getResourceDataObject('cosmicRip', ['techs', 'stabilizerArray', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? '' : ''}<span id="stabilizerArrayPrereq">${getResourceDataObject('cosmicRip', ['techs', 'stabilizerArray', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span></span>`,
             resourcePriceObject: '',
             dataConditionCheck: 'cosmicRipTechUnlock',
             objectSectionArgument1: 'stabilizerArray',
@@ -794,11 +829,16 @@ export function drawTab8Content(heading, optionContentElement) {
             renderNameABs: null,
             labelText: 'Quantum Containment Field:',
             inputElements: [
+                createTextElement(`<div id="cosmicRipTechProgressBar_quantumContainmentField">`, `cosmicRipTechProgressBarContainer_quantumContainmentField`, ['progress-bar-container', 'invisible']),
                 createButton({
                     text: 'Research',
-                    classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'cosmic-rip-tech-unlock', 'cosmic-rip-build-stabilizer-array-button'],
+                    classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'cosmic-rip-tech-unlock', 'cosmic-rip-build-stabilizer-array-button', 'id_cosmicRipTechResearchButton_quantumContainmentField'],
                     onClick: () => {
                         gain(1, null, 'quantumContainmentField', true, null, 'cosmicRipTech', 'tech');
+                        const btn = document.getElementById('cosmicRipTechResearchButton_quantumContainmentField');
+                        const progressBarContainer = document.getElementById('cosmicRipTechProgressBarContainer_quantumContainmentField');
+                        if (btn) btn.classList.add('invisible');
+                        if (progressBarContainer) progressBarContainer.classList.remove('invisible');
                     },
                     dataConditionCheck: 'cosmicRipTechUnlock',
                     resourcePriceObject: '',
@@ -808,7 +848,7 @@ export function drawTab8Content(heading, optionContentElement) {
                     rowCategory: 'cosmicRipBuildStabilizerArray'
                 }),
             ],
-            descriptionText: `<span id="quantumContainmentFieldTelemetry">${getResourceDataObject('cosmicRip', ['techs', 'quantumContainmentField', 'price'])} Telemetry Data<span id="quantumContainmentFieldComma1">, </span></span><span id="quantumContainmentFieldGP">1GP<span id="quantumContainmentFieldComma2">, </span></span>${getResourceDataObject('cosmicRip', ['techs', 'quantumContainmentField', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? '' : ''}<span id="quantumContainmentFieldPrereq">${getResourceDataObject('cosmicRip', ['techs', 'quantumContainmentField', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+            descriptionText: `<span id="cosmicRipTechDescription_quantumContainmentField"><span id="quantumContainmentFieldTelemetry">${getResourceDataObject('cosmicRip', ['techs', 'quantumContainmentField', 'price'])} Telemetry Data<span id="quantumContainmentFieldComma1">, </span></span><span id="quantumContainmentFieldGP">1GP<span id="quantumContainmentFieldComma2">, </span></span>${getResourceDataObject('cosmicRip', ['techs', 'quantumContainmentField', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? '' : ''}<span id="quantumContainmentFieldPrereq">${getResourceDataObject('cosmicRip', ['techs', 'quantumContainmentField', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span></span>`,
             resourcePriceObject: '',
             dataConditionCheck: 'cosmicRipTechUnlock',
             objectSectionArgument1: 'quantumContainmentField',
@@ -831,11 +871,16 @@ export function drawTab8Content(heading, optionContentElement) {
             renderNameABs: null,
             labelText: 'Dimensional Anchor Matrix:',
             inputElements: [
+                createTextElement(`<div id="cosmicRipTechProgressBar_dimensionalAnchorMatrix">`, `cosmicRipTechProgressBarContainer_dimensionalAnchorMatrix`, ['progress-bar-container', 'invisible']),
                 createButton({
                     text: 'Research',
-                    classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'cosmic-rip-tech-unlock', 'cosmic-rip-build-stabilizer-array-button'],
+                    classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'cosmic-rip-tech-unlock', 'cosmic-rip-build-stabilizer-array-button', 'id_cosmicRipTechResearchButton_dimensionalAnchorMatrix'],
                     onClick: () => {
                         gain(1, null, 'dimensionalAnchorMatrix', true, null, 'cosmicRipTech', 'tech');
+                        const btn = document.getElementById('cosmicRipTechResearchButton_dimensionalAnchorMatrix');
+                        const progressBarContainer = document.getElementById('cosmicRipTechProgressBarContainer_dimensionalAnchorMatrix');
+                        if (btn) btn.classList.add('invisible');
+                        if (progressBarContainer) progressBarContainer.classList.remove('invisible');
                     },
                     dataConditionCheck: 'cosmicRipTechUnlock',
                     resourcePriceObject: '',
@@ -845,7 +890,7 @@ export function drawTab8Content(heading, optionContentElement) {
                     rowCategory: 'cosmicRipBuildStabilizerArray'
                 }),
             ],
-            descriptionText: `<span id="dimensionalAnchorMatrixTelemetry">${getResourceDataObject('cosmicRip', ['techs', 'dimensionalAnchorMatrix', 'price'])} Telemetry Data<span id="dimensionalAnchorMatrixComma1">, </span></span><span id="dimensionalAnchorMatrixGP">1GP<span id="dimensionalAnchorMatrixComma2">, </span></span>${getResourceDataObject('cosmicRip', ['techs', 'dimensionalAnchorMatrix', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? '' : ''}<span id="dimensionalAnchorMatrixPrereq">${getResourceDataObject('cosmicRip', ['techs', 'dimensionalAnchorMatrix', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+            descriptionText: `<span id="cosmicRipTechDescription_dimensionalAnchorMatrix"><span id="dimensionalAnchorMatrixTelemetry">${getResourceDataObject('cosmicRip', ['techs', 'dimensionalAnchorMatrix', 'price'])} Telemetry Data<span id="dimensionalAnchorMatrixComma1">, </span></span><span id="dimensionalAnchorMatrixGP">1GP<span id="dimensionalAnchorMatrixComma2">, </span></span>${getResourceDataObject('cosmicRip', ['techs', 'dimensionalAnchorMatrix', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? '' : ''}<span id="dimensionalAnchorMatrixPrereq">${getResourceDataObject('cosmicRip', ['techs', 'dimensionalAnchorMatrix', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span></span>`,
             resourcePriceObject: '',
             dataConditionCheck: 'cosmicRipTechUnlock',
             objectSectionArgument1: 'dimensionalAnchorMatrix',
@@ -868,11 +913,16 @@ export function drawTab8Content(heading, optionContentElement) {
             renderNameABs: null,
             labelText: 'Singularity Stabilizer:',
             inputElements: [
+                createTextElement(`<div id="cosmicRipTechProgressBar_singularityStabilizer">`, `cosmicRipTechProgressBarContainer_singularityStabilizer`, ['progress-bar-container', 'invisible']),
                 createButton({
                     text: 'Research',
-                    classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'cosmic-rip-tech-unlock', 'cosmic-rip-build-stabilizer-array-button'],
+                    classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'cosmic-rip-tech-unlock', 'cosmic-rip-build-stabilizer-array-button', 'id_cosmicRipTechResearchButton_singularityStabilizer'],
                     onClick: () => {
                         gain(1, null, 'singularityStabilizer', true, null, 'cosmicRipTech', 'tech');
+                        const btn = document.getElementById('cosmicRipTechResearchButton_singularityStabilizer');
+                        const progressBarContainer = document.getElementById('cosmicRipTechProgressBarContainer_singularityStabilizer');
+                        if (btn) btn.classList.add('invisible');
+                        if (progressBarContainer) progressBarContainer.classList.remove('invisible');
                     },
                     dataConditionCheck: 'cosmicRipTechUnlock',
                     resourcePriceObject: '',
@@ -882,7 +932,7 @@ export function drawTab8Content(heading, optionContentElement) {
                     rowCategory: 'cosmicRipBuildStabilizerArray'
                 }),
             ],
-            descriptionText: `<span id="singularityStabilizerTelemetry">${getResourceDataObject('cosmicRip', ['techs', 'singularityStabilizer', 'price'])} Telemetry Data<span id="singularityStabilizerComma1">, </span></span><span id="singularityStabilizerGP">1GP<span id="singularityStabilizerComma2">, </span></span>${getResourceDataObject('cosmicRip', ['techs', 'singularityStabilizer', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? '' : ''}<span id="singularityStabilizerPrereq">${getResourceDataObject('cosmicRip', ['techs', 'singularityStabilizer', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+            descriptionText: `<span id="cosmicRipTechDescription_singularityStabilizer"><span id="singularityStabilizerTelemetry">${getResourceDataObject('cosmicRip', ['techs', 'singularityStabilizer', 'price'])} Telemetry Data<span id="singularityStabilizerComma1">, </span></span><span id="singularityStabilizerGP">1GP<span id="singularityStabilizerComma2">, </span></span>${getResourceDataObject('cosmicRip', ['techs', 'singularityStabilizer', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? '' : ''}<span id="singularityStabilizerPrereq">${getResourceDataObject('cosmicRip', ['techs', 'singularityStabilizer', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span></span>`,
             resourcePriceObject: '',
             dataConditionCheck: 'cosmicRipTechUnlock',
             objectSectionArgument1: 'singularityStabilizer',
@@ -905,11 +955,16 @@ export function drawTab8Content(heading, optionContentElement) {
             renderNameABs: null,
             labelText: 'Reality Weave Regulator:',
             inputElements: [
+                createTextElement(`<div id="cosmicRipTechProgressBar_realityWeaveRegulator">`, `cosmicRipTechProgressBarContainer_realityWeaveRegulator`, ['progress-bar-container', 'invisible']),
                 createButton({
                     text: 'Research',
-                    classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'cosmic-rip-tech-unlock', 'cosmic-rip-build-stabilizer-array-button'],
+                    classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'cosmic-rip-tech-unlock', 'cosmic-rip-build-stabilizer-array-button', 'id_cosmicRipTechResearchButton_realityWeaveRegulator'],
                     onClick: () => {
                         gain(1, null, 'realityWeaveRegulator', true, null, 'cosmicRipTech', 'tech');
+                        const btn = document.getElementById('cosmicRipTechResearchButton_realityWeaveRegulator');
+                        const progressBarContainer = document.getElementById('cosmicRipTechProgressBarContainer_realityWeaveRegulator');
+                        if (btn) btn.classList.add('invisible');
+                        if (progressBarContainer) progressBarContainer.classList.remove('invisible');
                     },
                     dataConditionCheck: 'cosmicRipTechUnlock',
                     resourcePriceObject: '',
@@ -919,7 +974,7 @@ export function drawTab8Content(heading, optionContentElement) {
                     rowCategory: 'cosmicRipBuildStabilizerArray'
                 }),
             ],
-            descriptionText: `<span id="realityWeaveRegulatorTelemetry">${getResourceDataObject('cosmicRip', ['techs', 'realityWeaveRegulator', 'price'])} Telemetry Data<span id="realityWeaveRegulatorComma1">, </span></span><span id="realityWeaveRegulatorGP">1GP<span id="realityWeaveRegulatorComma2">, </span></span>${getResourceDataObject('cosmicRip', ['techs', 'realityWeaveRegulator', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? '' : ''}<span id="realityWeaveRegulatorPrereq">${getResourceDataObject('cosmicRip', ['techs', 'realityWeaveRegulator', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+            descriptionText: `<span id="cosmicRipTechDescription_realityWeaveRegulator"><span id="realityWeaveRegulatorTelemetry">${getResourceDataObject('cosmicRip', ['techs', 'realityWeaveRegulator', 'price'])} Telemetry Data<span id="realityWeaveRegulatorComma1">, </span></span><span id="realityWeaveRegulatorGP">1GP<span id="realityWeaveRegulatorComma2">, </span></span>${getResourceDataObject('cosmicRip', ['techs', 'realityWeaveRegulator', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? '' : ''}<span id="realityWeaveRegulatorPrereq">${getResourceDataObject('cosmicRip', ['techs', 'realityWeaveRegulator', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span></span>`,
             resourcePriceObject: '',
             dataConditionCheck: 'cosmicRipTechUnlock',
             objectSectionArgument1: 'realityWeaveRegulator',

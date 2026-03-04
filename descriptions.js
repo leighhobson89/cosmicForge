@@ -168,6 +168,17 @@ export let modalCosmicRipLocatedText;
 export let modalNearSpaceScannerArrayRestoredHeader;
 export let modalNearSpaceScannerArrayRestoredText;
 
+export let modalCosmicRipTechStabilizerArrayHeader;
+export let modalCosmicRipTechStabilizerArrayText;
+export let modalCosmicRipTechQuantumContainmentFieldHeader;
+export let modalCosmicRipTechQuantumContainmentFieldText;
+export let modalCosmicRipTechDimensionalAnchorMatrixHeader;
+export let modalCosmicRipTechDimensionalAnchorMatrixText;
+export let modalCosmicRipTechSingularityStabilizerHeader;
+export let modalCosmicRipTechSingularityStabilizerText;
+export let modalCosmicRipTechRealityWeaveRegulatorHeader;
+export let modalCosmicRipTechRealityWeaveRegulatorText;
+
 export let randomEventTriggerDescriptions;
 
 export function initialiseDescriptions() {
@@ -290,7 +301,22 @@ export function initialiseDescriptions() {
     modalNearSpaceScannerArrayRestoredText = `We have restored the strange <span class="green-ready-text">Near Space Scanner Array</span> orbiting Miaplacidus inside the ruined force field.<br><br>With Galactic Points (GP), we can bring it fully online and scan Miaplacidus' local space to locate the source of the AI invasion!`;
 
     modalCosmicRipLocatedHeader = 'Cosmic Rip Located!';
-    modalCosmicRipLocatedText = `The <span class="green-ready-text">Cosmic Rip</span> opened by the scientist, through which the evil AI race travelled has been located.<br><br>We will dispatch science teams to investigate at once!<br><br>This is going to be huge!`;
+    modalCosmicRipLocatedText = `The <span class="green-ready-text">Cosmic Rip</span> opened by the scientist, through which the evil AI race travelled has been located.<br><br>We will dispatch science teams to investigate at once!`;
+
+    modalCosmicRipTechStabilizerArrayHeader = 'Cosmic Rip Progress!';
+    modalCosmicRipTechStabilizerArrayText = `You have successfully researched the <span class="green-ready-text">Stabilizer Array</span>.<br><br>This foundational technology reduces initial instability around the Cosmic Rip,<br>allowing for safer operations and further research.<br><br>Overall progress toward full stabilisation: <span class="green-ready-text">20%</span>`;
+
+    modalCosmicRipTechQuantumContainmentFieldHeader = 'Cosmic Rip Progress!';
+    modalCosmicRipTechQuantumContainmentFieldText = `You have successfully researched the <span class="green-ready-text">Quantum Containment Field</span>.<br><br>Advanced quantum barriers now prevent energy leakage from the Cosmic Rip,<br>significantly reducing volatility in the surrounding space-time.<br><br>Overall progress toward full stabilisation: <span class="green-ready-text">40%</span>`;
+
+    modalCosmicRipTechDimensionalAnchorMatrixHeader = 'Cosmic Rip Progress!';
+    modalCosmicRipTechDimensionalAnchorMatrixText = `You have successfully researched the <span class="green-ready-text">Dimensional Anchor Matrix</span>.<br><br>The dimensional fabric around the Cosmic Rip is now reinforced,<br>preventing unwanted dimensional shifts and securing the breach.<br><br>Overall progress toward full stabilisation: <span class="green-ready-text">60%</span>`;
+
+    modalCosmicRipTechSingularityStabilizerHeader = 'Cosmic Rip Progress!';
+    modalCosmicRipTechSingularityStabilizerText = `You have successfully researched the <span class="green-ready-text">Singularity Stabilizer</span>.<br><br>The gravitational singularity at the heart of the Cosmic Rip<br>is now under control, dramatically reducing its destabilising effects.<br><br>Overall progress toward full stabilisation: <span class="green-ready-text">80%</span>`;
+
+    modalCosmicRipTechRealityWeaveRegulatorHeader = 'Cosmic Rip Progress!';
+    modalCosmicRipTechRealityWeaveRegulatorText = `You have successfully researched the <span class="green-ready-text">Reality Weave Regulator</span>.<br><br>The final layer of stabilisation is now in place. The Cosmic Rip<br>has been transformed from a dangerous anomaly into a controlled phenomenon.<br><br>Overall progress toward full stabilisation: <span class="green-ready-text">100%</span><br><br><span class="green-ready-text">Congratulations! The Cosmic Rip is now fully stabilised and secure!</span>`;
 
     modalEventPowerPlantExplosionHeader = 'POWER PLANT EXPLOSION!';
     modalEventPowerPlantExplosionText = `A catastrophic failure rocked your energy grid.<br><br><span class="red-disabled-text">{destroyedBuilding} destroyed!</span>`;
@@ -469,7 +495,7 @@ export function initialiseDescriptions() {
 
         'situation': `Cosmic Rip operations and progression - GP: <span id="cosmicRipGpBalance" class="green-ready-text">${getCosmicRipGalacticPoints()}</span>`,
         'near space scanner array': `Commission the Near Space Scanner Array, scan sectors to locate distortions, and pinpoint the Cosmic Rip. - GP: <span id="cosmicRipGpBalanceNearSpace" class="green-ready-text">${getCosmicRipGalacticPoints()}</span>`,
-        'cosmic rip': `Interact with the Cosmic Rip once it has been located. - GP: <span id="cosmicRipGpBalanceCosmicRip" class="green-ready-text">${getCosmicRipGalacticPoints()}</span>`,
+        'cosmic rip': `Investigate and Research how to stabilise and secure the Cosmic Rip once located. - GP: <span id="cosmicRipGpBalanceCosmicRip" class="green-ready-text">${getCosmicRipGalacticPoints()}</span>`,
 
         'contact': "Contact Channels for Feedback and Suggestions",
         'get started': "Learn how to get started in Cosmic Forge.",
@@ -669,12 +695,12 @@ export function initialiseDescriptions() {
             updateAt: ""
         },
         cosmicRipCosmicRipStatusRow: {
-            content1: "The Cosmic Rip has been discovered through our advanced scanning efforts.",
+            content1: "The Cosmic Rip has been discovered through our advanced scanning efforts, and now we must stabilise and secure it.",
             content2: "",
             updateAt: ""
         },
         cosmicRipStabilizerArrayRow: {
-            content1: "Construct stabilizers to reduce instability and unlock safe operations.",
+            content1: "Build a Stabilizer Array to reduce instability and permit further operations safely.",
             content2: "",
             updateAt: ""
         },

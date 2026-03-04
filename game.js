@@ -1,4 +1,8 @@
 import {
+    setCosmicRipTechResearchDurations,
+    getCosmicRipTechResearchDurations,
+    setCosmicRipTechTimeLeftUntilResearchFinishes,
+    getCosmicRipTechTimeLeftUntilResearchFinishes,
     setCosmicRipTechUnlockedArray,
     setGalacticPointsSpent,
     setCosmicRipNearSpaceScannerArraySectorNames,
@@ -541,6 +545,16 @@ function handleCosmicRipTechnologyScreenButtonAndDescriptionStates(element, tele
     const hasEnoughTelemetry = telemetryQty >= price;
     const canAfford = hasEnoughTelemetry && hasEnoughGP;
 
+    if (getCosmicRipTechUnlockedArray().includes(techName)) {
+        if (element.tagName.toLowerCase() === 'button') {
+            element.textContent = 'Researched';
+        }
+        element.classList.remove('red-disabled-text');
+        element.classList.add('green-ready-text');
+        setElementPointerEvents(element, 'none');
+        return;
+    }
+
     if (element.tagName.toLowerCase() === 'button') {
         if (canAfford) {
             const allPrerequisitesUnlocked = prerequisiteArray.every(prerequisite => getCosmicRipTechUnlockedArray().includes(prerequisite));
@@ -784,7 +798,17 @@ import {
     refreshAchievementTooltipDescriptions,
     modalBlackHoleDiscoveredHeader,
     modalBlackHoleDiscoveredText,
-    miaplacidusEndgameStoryPopups
+    miaplacidusEndgameStoryPopups,
+    modalCosmicRipTechStabilizerArrayHeader,
+    modalCosmicRipTechStabilizerArrayText,
+    modalCosmicRipTechQuantumContainmentFieldHeader,
+    modalCosmicRipTechQuantumContainmentFieldText,
+    modalCosmicRipTechDimensionalAnchorMatrixHeader,
+    modalCosmicRipTechDimensionalAnchorMatrixText,
+    modalCosmicRipTechSingularityStabilizerHeader,
+    modalCosmicRipTechSingularityStabilizerText,
+    modalCosmicRipTechRealityWeaveRegulatorHeader,
+    modalCosmicRipTechRealityWeaveRegulatorText
 } from './descriptions.js';
 
 import { initializeAutoSave, saveGame } from './saveLoadGame.js';
@@ -1789,6 +1813,51 @@ function cosmicRipChecks() {
         const ripResearchOrbiterQty = getResourceDataObject('cosmicRip', ['upgrades', 'ripResearchOrbiter', 'quantity']);
         ripResearchOrbiterQuantityEl.textContent = `Quantity: ${ripResearchOrbiterQty}`;
     }
+
+    updateCosmicRipStabilityProgressBar();
+
+    const techTimeLefts = getCosmicRipTechTimeLeftUntilResearchFinishes?.() || {};
+    const techDurations = getCosmicRipTechResearchDurations?.() || {};
+    const unlockedTechs = getCosmicRipTechUnlockedArray?.() || [];
+
+    unlockedTechs.forEach(techName => {
+        const progressBarContainer = document.getElementById(`cosmicRipTechProgressBarContainer_${techName}`);
+        const researchButton = document.getElementById(`cosmicRipTechResearchButton_${techName}`);
+        const descriptionEl = document.getElementById(`cosmicRipTechDescription_${techName}`);
+
+        if (!techTimeLefts[techName] || techTimeLefts[techName] <= 0) {
+            if (progressBarContainer) progressBarContainer.classList.add('invisible');
+            if (researchButton) {
+                researchButton.classList.remove('invisible');
+                researchButton.textContent = 'Researched';
+                researchButton.classList.remove('red-disabled-text');
+                researchButton.classList.add('green-ready-text');
+                researchButton.style.pointerEvents = 'none';
+            }
+            if (descriptionEl) {
+                descriptionEl.textContent = 'Researched';
+                descriptionEl.classList.add('green-ready-text');
+            }
+        }
+    });
+
+    Object.keys(techTimeLefts).forEach(techName => {
+        const timeLeft = techTimeLefts[techName] || 0;
+        if (timeLeft > 0) {
+            const progressBarContainer = document.getElementById(`cosmicRipTechProgressBarContainer_${techName}`);
+            const researchButton = document.getElementById(`cosmicRipTechResearchButton_${techName}`);
+            const descriptionEl = document.getElementById(`cosmicRipTechDescription_${techName}`);
+            
+            if (progressBarContainer) progressBarContainer.classList.remove('invisible');
+            if (researchButton) researchButton.classList.add('invisible');
+            
+            if (descriptionEl) {
+                const timeLeftUI = Math.max(Math.floor(timeLeft / 1000), 0);
+                descriptionEl.classList.add('green-ready-text');
+                descriptionEl.textContent = `Researching ... ${timeLeftUI}s`;
+            }
+        }
+    });
 }
 
 function getSupplyChainDisruptionMultiplier(category, key) {
@@ -6401,6 +6470,28 @@ function monitorTechTree() {
     });
 }
 
+function updateCosmicRipStabilityProgressBar() {
+    const cosmicRipTechs = getResourceDataObject('cosmicRip', ['techs']);
+    if (!cosmicRipTechs) return;
+    
+    const totalTechs = Object.keys(cosmicRipTechs).length;
+    if (totalTechs === 0) return;
+    
+    const unlockedTechs = getCosmicRipTechUnlockedArray().length;
+    const percentage = Math.round((unlockedTechs / totalTechs) * 100);
+    
+    const progressBar = document.getElementById('cosmicRipStabilityProgressBar');
+    const percentageText = document.getElementById('cosmicRipStabilityPercentageText');
+    
+    if (progressBar) {
+        progressBar.style.width = `${percentage}%`;
+    }
+    
+    if (percentageText) {
+        percentageText.textContent = `${percentage}% Stabilised`;
+    }
+}
+
 function monitorCosmicRipTechTree() {
     const cosmicRipTechs = getResourceDataObject('cosmicRip', ['techs']);
     if (!cosmicRipTechs) return;
@@ -9435,7 +9526,9 @@ export function gain(incrementAmount, elementId, item, ABOrTechPurchase, tierAB,
         if (currentTelemetry >= price && currentGP >= 1) {
             setResourceDataObject(currentTelemetry - price, 'cosmicRip', ['ripTelemetryData']);
             setCosmicRipGalacticPoints(Math.max(0, currentGP - 1));
-            setCosmicRipTechUnlockedArray(item);
+            const spent = Number(getGalacticPointsSpent?.()) || 0;
+            setGalacticPointsSpent(spent + 1);
+            startCosmicRipTechResearchTimer(item, [0, 'normal']);
         }
         return;
     }
@@ -10892,6 +10985,180 @@ function getAsteroidSearchDuration() {
     return baseTimeDuration + randomOffset;
 }
 
+export function startCosmicRipTechResearchTimer(techName, adjustment = [0, 'normal']) {
+    const timerName = `cosmicRipTechResearch_${techName}`;
+
+    if (timerManagerDelta.hasTimer(timerName)) {
+        return;
+    }
+
+    let totalDuration = getCosmicRipTechResearchDurations()?.[techName] || 0;
+    if (adjustment[0] === 0 || !totalDuration) {
+        totalDuration = getResourceDataObject('cosmicRip', ['techs', techName, 'timeToResearch']) || 60000;
+        const durations = getCosmicRipTechResearchDurations() || {};
+        durations[techName] = totalDuration;
+        setCosmicRipTechResearchDurations(durations);
+    }
+
+    let timeRemaining = adjustment[0] === 0 ? totalDuration : adjustment[0];
+    const timeLefts = getCosmicRipTechTimeLeftUntilResearchFinishes() || {};
+    timeLefts[techName] = timeRemaining;
+    setCosmicRipTechTimeLeftUntilResearchFinishes(timeLefts);
+
+    timerManagerDelta.addTimer(timerName, {
+        durationMs: 0,
+        repeat: true,
+        onUpdate: ({ deltaMs }) => {
+            const currentTimeLefts = getCosmicRipTechTimeLeftUntilResearchFinishes() || {};
+            let currentTimeRemaining = currentTimeLefts[techName] || 0;
+            currentTimeRemaining = Math.max(currentTimeRemaining - deltaMs, 0);
+            currentTimeLefts[techName] = currentTimeRemaining;
+            setCosmicRipTechTimeLeftUntilResearchFinishes(currentTimeLefts);
+
+            const progressBar = document.getElementById(`cosmicRipTechProgressBar_${techName}`);
+            const progressBarContainer = document.getElementById(`cosmicRipTechProgressBarContainer_${techName}`);
+            const researchButton = document.getElementById(`cosmicRipTechResearchButton_${techName}`);
+            const descriptionEl = document.getElementById(`cosmicRipTechDescription_${techName}`);
+            const timeLeftUI = Math.max(Math.floor(currentTimeRemaining / 1000), 0);
+            const totalDurationForCalc = getCosmicRipTechResearchDurations()?.[techName] || 60000;
+
+            if (currentTimeRemaining <= 0) {
+                timerManagerDelta.removeTimer(timerName);
+                setCosmicRipTechUnlockedArray(techName);
+                updateCosmicRipStabilityProgressBar();
+
+                if (progressBarContainer) {
+                progressBarContainer.classList.add('invisible');
+                }
+                if (researchButton) {
+                researchButton.classList.remove('invisible');
+                researchButton.textContent = 'Researched';
+                researchButton.classList.remove('red-disabled-text');
+                researchButton.classList.add('green-ready-text');
+                setElementPointerEvents(researchButton, 'none');
+                }
+                if (descriptionEl) {
+                descriptionEl.textContent = 'Researched';
+                }
+
+                const finalTimeLefts = getCosmicRipTechTimeLeftUntilResearchFinishes() || {};
+                delete finalTimeLefts[techName];
+                setCosmicRipTechTimeLeftUntilResearchFinishes(finalTimeLefts);
+
+                const finalDurations = getCosmicRipTechResearchDurations() || {};
+                delete finalDurations[techName];
+                setCosmicRipTechResearchDurations(finalDurations);
+
+                showNotification(`${capitaliseString(techName).replace(/([a-z])([A-Z])/g, '$1 $2')} Researched!`, 'info', 3000, 'cosmicRip');
+
+                if (techName === 'stabilizerArray') {
+                    callPopupModal(
+                        modalCosmicRipTechStabilizerArrayHeader, 
+                        modalCosmicRipTechStabilizerArrayText, 
+                        true, 
+                        false, 
+                        false, 
+                        false, 
+                        function() { showHideModal(); },
+                        null, 
+                        null, 
+                        null,
+                        'CONFIRM',
+                        null,
+                        null,
+                        null,
+                        false
+                    );
+                } else if (techName === 'quantumContainmentField') {
+                    callPopupModal(
+                        modalCosmicRipTechQuantumContainmentFieldHeader, 
+                        modalCosmicRipTechQuantumContainmentFieldText, 
+                        true, 
+                        false, 
+                        false, 
+                        false, 
+                        function() { showHideModal(); },
+                        null, 
+                        null, 
+                        null,
+                        'CONFIRM',
+                        null,
+                        null,
+                        null,
+                        false
+                    );
+                } else if (techName === 'dimensionalAnchorMatrix') {
+                    callPopupModal(
+                        modalCosmicRipTechDimensionalAnchorMatrixHeader, 
+                        modalCosmicRipTechDimensionalAnchorMatrixText, 
+                        true, 
+                        false, 
+                        false, 
+                        false, 
+                        function() { showHideModal(); },
+                        null, 
+                        null, 
+                        null,
+                        'CONFIRM',
+                        null,
+                        null,
+                        null,
+                        false
+                    );
+                } else if (techName === 'singularityStabilizer') {
+                    callPopupModal(
+                        modalCosmicRipTechSingularityStabilizerHeader, 
+                        modalCosmicRipTechSingularityStabilizerText, 
+                        true, 
+                        false, 
+                        false, 
+                        false, 
+                        function() { showHideModal(); },
+                        null, 
+                        null, 
+                        null,
+                        'CONFIRM',
+                        null,
+                        null,
+                        null,
+                        false
+                    );
+                } else if (techName === 'realityWeaveRegulator') {
+                    callPopupModal(
+                        modalCosmicRipTechRealityWeaveRegulatorHeader, 
+                        modalCosmicRipTechRealityWeaveRegulatorText, 
+                        true, 
+                        false, 
+                        false, 
+                        false, 
+                        function() { showHideModal(); },
+                        null, 
+                        null, 
+                        null,
+                        'CONFIRM',
+                        null,
+                        null,
+                        null,
+                        false
+                    );
+                }
+            } else {
+                const elapsedTime = totalDurationForCalc - currentTimeRemaining;
+                const progressBarPercentage = (elapsedTime / totalDurationForCalc) * 100;
+
+                if (progressBar) {
+                    progressBar.style.width = `${progressBarPercentage}%`;
+                }
+                if (descriptionEl) {
+                    descriptionEl.classList.add('green-ready-text');
+                    descriptionEl.textContent = `Researching ... ${timeLeftUI}s`;
+                }
+            }
+        },
+        metadata: { type: 'cosmicRipTech', techName: techName }
+    });
+}
+
 function getStarInvestigationDuration() {
     const baseTimeDuration = getBaseInvestigateStarTimerDuration();
     const variance = baseTimeDuration * 0.2;
@@ -11867,6 +12134,38 @@ export function offlineGains(switchedFocus) {
             timerManagerDelta.removeTimer('blackHoleChargeTimer');
             startBlackHoleChargeTimer([remainingTime, 'offlineGains']);
         }
+
+        const cosmicRipTechTimeLefts = getCosmicRipTechTimeLeftUntilResearchFinishes() || {};
+        const cosmicRipTechDurations = getCosmicRipTechResearchDurations() || {};
+        
+        Object.keys(cosmicRipTechTimeLefts).forEach(techName => {
+            const timeLeft = cosmicRipTechTimeLefts[techName] || 0;
+            const offlineTimeInMilliseconds = timeDifferenceInSeconds * 1000;
+            const remainingTime = Math.max(timeLeft - offlineTimeInMilliseconds, 100);
+
+            timerManagerDelta.removeTimer(`cosmicRipTechResearch_${techName}`);
+            if (remainingTime > 100) {
+                startCosmicRipTechResearchTimer(techName, [remainingTime, 'offlineGains']);
+            } else {
+
+                setCosmicRipTechUnlockedArray(techName);
+                updateCosmicRipStabilityProgressBar();
+
+                if (techName === 'stabilizerArray') { callPopupModal(modalCosmicRipTechStabilizerArrayHeader, modalCosmicRipTechStabilizerArrayText, true, false, false, false, function() { showHideModal(); }, null, null, null, 'CONFIRM', null, null, null, false); }
+                if (techName === 'quantumContainmentField') { callPopupModal(modalCosmicRipTechQuantumContainmentFieldHeader, modalCosmicRipTechQuantumContainmentFieldText, true, false, false, false, function() { showHideModal(); }, null, null, null, 'CONFIRM', null, null, null, false); }
+                if (techName === 'dimensionalAnchorMatrix') { callPopupModal(modalCosmicRipTechDimensionalAnchorMatrixHeader, modalCosmicRipTechDimensionalAnchorMatrixText, true, false, false, false, function() { showHideModal(); }, null, null, null, 'CONFIRM', null, null, null, false); }
+                if (techName === 'singularityStabilizer') { callPopupModal(modalCosmicRipTechSingularityStabilizerHeader, modalCosmicRipTechSingularityStabilizerText, true, false, false, false, function() { showHideModal(); }, null, null, null, 'CONFIRM', null, null, null, false); }
+                if (techName === 'realityWeaveRegulator') { callPopupModal(modalCosmicRipTechRealityWeaveRegulatorHeader, modalCosmicRipTechRealityWeaveRegulatorText, true, false, false, false, function() { showHideModal(); }, null, null, null, 'CONFIRM', null, null, null, false); }
+
+                const finalTimeLefts = getCosmicRipTechTimeLeftUntilResearchFinishes() || {};
+                delete finalTimeLefts[techName];
+                setCosmicRipTechTimeLeftUntilResearchFinishes(finalTimeLefts);
+                
+                const finalDurations = getCosmicRipTechResearchDurations() || {};
+                delete finalDurations[techName];
+                setCosmicRipTechResearchDurations(finalDurations);
+            }
+        });
         
         const currentAntimatterQuantity = combinedValues.quantity.antimatter;
         const asteroidArray = getAsteroidArray();

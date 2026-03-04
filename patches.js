@@ -216,7 +216,7 @@ export function migrateResourceData(saveData, objectType, options = {}) {
             saveData.version = 0.969;
         }
 
-        if (saveData.version < 0.975) {
+        if (saveData.version < 0.976) {
             if (objectType === 'resourceData') {
                 const freshCosmicRip = {
                     galacticPoints: 0,
@@ -248,16 +248,16 @@ export function migrateResourceData(saveData, objectType, options = {}) {
                         },
                     },
                     techs: {
-                        stabilizerArray: { appearsAt: [10000, null, null], prereqs: [null], price: 10000, idForRenderPosition: 1, path: 1 },
-                        quantumContainmentField: { appearsAt: [15000, "stabilizerArray", ""], prereqs: ['Stabilizer Array'], price: 15000, idForRenderPosition: 2, path: 1 },
-                        dimensionalAnchorMatrix: { appearsAt: [25000, "quantumContainmentField", ""], prereqs: ['Quantum Containment Field'], price: 25000, idForRenderPosition: 3, path: 1 },
-                        singularityStabilizer: { appearsAt: [40000, "dimensionalAnchorMatrix", ""], prereqs: ['Dimensional Anchor Matrix'], price: 40000, idForRenderPosition: 4, path: 1 },
-                        realityWeaveRegulator: { appearsAt: [60000, "singularityStabilizer", ""], prereqs: ['Singularity Stabilizer'], price: 60000, idForRenderPosition: 5, path: 1 },
+                        stabilizerArray: { appearsAt: [5000, null, null], prereqs: [null], price: 10000, idForRenderPosition: 1, timeToResearch: 60000 },
+                        quantumContainmentField: { appearsAt: [12000, "stabilizerArray", ""], prereqs: ['Stabilizer Array'], price: 15000, idForRenderPosition: 2, timeToResearch: 120000 },
+                        dimensionalAnchorMatrix: { appearsAt: [16000, "quantumContainmentField", ""], prereqs: ['Quantum Containment Field'], price: 25000, idForRenderPosition: 3, timeToResearch: 180000 },
+                        singularityStabilizer: { appearsAt: [30000, "dimensionalAnchorMatrix", ""], prereqs: ['Dimensional Anchor Matrix'], price: 40000, idForRenderPosition: 4, timeToResearch: 240000 },
+                        realityWeaveRegulator: { appearsAt: [40000, "singularityStabilizer", ""], prereqs: ['Singularity Stabilizer'], price: 60000, idForRenderPosition: 5, timeToResearch: 300000 },
                     }
                 };
                 saveData.cosmicRip = freshCosmicRip;
             }
-            saveData.version = 0.975;
+            saveData.version = 0.976;
         }
     }
     return saveData;

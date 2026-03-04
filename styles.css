@@ -2459,7 +2459,8 @@ button.red-disabled-text {
 #spaceTelescopePillageVoidProgressBarContainer,
 #spaceTravelToStarProgressBarContainer,
 #blackHoleTimeWarpProgressBarContainer,
-#blackHoleChargeProgressBarContainer
+#blackHoleChargeProgressBarContainer,
+[id^="cosmicRipTechProgressBarContainer_"]
  {
     background-color: var(--disabled-text);
     height: 25px;
@@ -2480,7 +2481,8 @@ button.red-disabled-text {
  #spaceTelescopePillageVoidProgressBar,
  #spaceTravelToStarProgressBar,
  #blackHoleTimeWarpProgressBar,
- #blackHoleChargeProgressBar
+ #blackHoleChargeProgressBar,
+ [id^="cosmicRipTechProgressBar_"]
  {
     background-color: var(--text-color);
     width: 0%;
@@ -2488,9 +2490,32 @@ button.red-disabled-text {
     z-index: 1000
  }
 
- #blackHoleTimeWarpProgressBar {
-     background-color: var(--ready-text);
+ blackHoleTimeWarpProgressBar {
+     background-color: var(--text-color);
  }
+
+ #cosmicRipStabilityProgressBarContainer
+ {
+    background-color: var(--disabled-text);
+    height: 25px;
+    width: 100%;
+    z-index: 999;
+ }
+
+ #cosmicRipStabilityProgressBar
+ {
+    background-color: var(--text-color);
+    width: 0%;
+    height: 25px;
+    z-index: 1000
+ }
+
+#cosmicRipStabilityPercentageText {
+    pointer-events: none;
+    background: none;
+    color: var(--text-color);
+    width: 200px;
+}
 
  .label-star,
  .label-asteroid {
@@ -3402,7 +3427,7 @@ canvas {
 }
 @keyframes wobbleAnimation {
     0% {
-        transform: rotate(0deg);
+    transform: rotate(0deg);
     }
     25% {
         transform: rotate(-6deg);
@@ -3902,4 +3927,8 @@ body.debug-window-open {
 .name-cell {
     font-weight: bold;
     font-size: 0.95rem;
+}
+
+.cosmic-rip-progress-bar-button-margin {
+    margin-left: 30px;
 }
