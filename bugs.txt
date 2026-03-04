@@ -20,4 +20,3 @@ Things to do:
 - add new debug options for cosmic rip and variables to variable debugger if necessary
 - add statistics to stats section for new chapter and check if events has stats and casino
 - add achievements for casino, cosmic rip section, events
-- add a new final end sequence
