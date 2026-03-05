@@ -1474,6 +1474,10 @@ export function getRandomEventDebugOptions() {
     }));
 }
 
+export function getRandomEventIds() {
+    return Object.keys(randomEventDefinitions);
+}
+
 function getBuildingDisplayName(buildingKey) {
     const map = {
         powerPlant1: 'Power Plant',

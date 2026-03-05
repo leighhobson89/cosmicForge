@@ -216,8 +216,9 @@ import {
     getNotationType,
     getUnlockedCompoundsArray,
     setPowerGracePeriodEnd,
-    setLastFocusOfflineGainsAppliedAt,
+    getLastFocusOfflineGainsAppliedAt,
     getGalacticPointsSpent,
+    recordRandomEventTriggered,
 } from './constantsAndGlobalVars.js';
 import {
     getResourceDataObject,
@@ -4265,7 +4266,7 @@ export function createHtmlTableStatistics(id, classList = [], mainHeadings, subH
 
     for (let i = 0; i < mainHeadings.length; i++) {
         const mainHeading = capitaliseString(mainHeadings[i]);
-        const dualColumnPerRow = ['resources', 'compounds', 'research', 'energy', 'spacemining', 'interstellar', 'galactic casino', 'cosmic rip chapter'].includes(String(mainHeadings[i]).toLowerCase());
+        const dualColumnPerRow = ['resources', 'compounds', 'research', 'energy', 'spacemining', 'interstellar', 'events', 'galactic casino', 'cosmic rip chapter'].includes(String(mainHeadings[i]).toLowerCase());
 
 
         innerTextString += `<span class="${mainHeaderClasses.join(' ')}">${mainHeading}</span><br/>`;
@@ -14077,7 +14078,8 @@ setRandomEventUiHandlers({
         const tab7 = document.getElementById('tab7');
         return !!tab7 && !String(tab7.textContent || '').includes('???');
     },
-    onAnyEventTriggered: () => {
+    onAnyEventTriggered: (eventId) => {
+        recordRandomEventTriggered?.(eventId);
         if (getEventsTriggeredOnce?.()) {
             return;
         }

@@ -2491,6 +2491,46 @@ statisticsContent = {
         subHeading6: "Antimatter",
         subBody6: "10000"
     },
+    'events': {
+        subHeading1: "Power Plant Explosion",
+        subBody1: "0",
+
+        subHeading2: "Battery Explosion",
+        subBody2: "0",
+
+        subHeading3: "Science Theft",
+        subBody3: "0",
+
+        subHeading4: "Research Breakthrough",
+        subBody4: "0",
+
+        subHeading5: "Rocket Instant Arrival",
+        subBody5: "0",
+
+        subHeading6: "Starship Lost In Space",
+        subBody6: "0",
+
+        subHeading7: "Antimatter Reaction",
+        subBody7: "0",
+
+        subHeading8: "Stock Loss",
+        subBody8: "0",
+
+        subHeading9: "Galactic Market Lockdown",
+        subBody9: "0",
+
+        subHeading10: "Endless Summer",
+        subBody10: "0",
+
+        subHeading11: "Miner Broke Down",
+        subBody11: "0",
+
+        subHeading12: "Supply Chain Disruption",
+        subBody12: "0",
+
+        subHeading13: "Black Hole Instability",
+        subBody13: "0",
+    },
     'resources': {
         subHeading1: "Hydrogen ",
         subBody1: "10000",

@@ -1,6 +1,9 @@
 import {
-  restoreAchievementsDataObject, restoreAscendencyBuffsDataObject, restoreGalacticMarketDataObject, restoreGalacticCasinoDataObject, restoreRocketNamesObject, restoreResourceDataObject, restoreStarSystemsDataObject, resourceData, starSystems, getResourceDataObject, setResourceDataObject, galacticMarket, galacticCasino, ascendencyBuffs, achievementsData, getStarSystemDataObject, getBlackHoleResearchDone, getBlackHolePower, getBlackHoleDuration, getBlackHoleRechargeMultiplier, getBlackHoleResearchPrice, getBlackHolePowerPrice, getBlackHoleDurationPrice, getBlackHoleRechargePrice, setBlackHoleResearchDone, setBlackHolePower, setBlackHoleDuration, setBlackHoleRechargeMultiplier, setBlackHoleResearchPrice, setBlackHolePowerPrice, setBlackHoleDurationPrice, setBlackHoleRechargePrice, oTypePowerPlantBuffs, restoreOTypePowerPlantBuffsObject, getAchievementDataObject
+  restoreAchievementsDataObject, restoreAscendencyBuffsDataObject, restoreGalacticMarketDataObject, restoreGalacticCasinoDataObject, restoreRocketNamesObject, restoreResourceDataObject, restoreStarSystemsDataObject, resourceData, starSystems, getResourceDataObject, setResourceDataObject, galacticMarket, galacticCasino, ascendencyBuffs, achievementsData, getStarSystemDataObject, getBlackHoleResearchDone, getBlackHolePower, getBlackHoleDuration, getBlackHoleRechargeMultiplier, getBlackHoleResearchPrice, getBlackHolePowerPrice, getBlackHoleDurationPrice, getBlackHoleRechargePrice, setBlackHoleResearchDone, setBlackHolePower, setBlackHoleDuration, setBlackHoleRechargeMultiplier, setBlackHoleResearchPrice, setBlackHolePowerPrice, setBlackHoleDurationPrice, setBlackHoleRechargePrice, oTypePowerPlantBuffs, restoreOTypePowerPlantBuffsObject, getAchievementDataObject,
+  getGalacticCasinoDataObject,
+  setGalacticCasinoDataObject,
 } from './resourceDataObject.js';
+import { getRandomEventIds } from './events.js';
 import { achievementFunctionsMap } from "./achievements.js";
 import { drawNativeTechTree, selectTheme, startWeatherEffect, stopWeatherEffect, applyCustomPointerSetting, showNotification, generateStarfield } from "./ui.js";
 import { capitaliseWordsWithRomanNumerals, capitaliseString } from './utilityFunctions.js';
@@ -817,6 +820,9 @@ let demoBuild = false;
 
 let eventsTriggeredOnce = false;
 
+let randomEventTriggerCountsThisRun = {};
+let randomEventTriggerCountsAllTime = {};
+
 let miaplacidusEndgameStoryShown = false;
 
 //GETTER SETTER METHODS
@@ -933,6 +939,34 @@ export const statFunctionsGets = {
     "stat_cash": getStatCash,
     "stat_apAnticipated": getStatApAnticipated,
     "stat_antimatter": getStatAntimatter,
+
+    // Events
+    "stat_powerPlantExplosionThisRun": getStatEventPowerPlantExplosionThisRun,
+    "stat_powerPlantExplosion": getStatEventPowerPlantExplosionAllTime,
+    "stat_batteryExplosionThisRun": getStatEventBatteryExplosionThisRun,
+    "stat_batteryExplosion": getStatEventBatteryExplosionAllTime,
+    "stat_scienceTheftThisRun": getStatEventScienceTheftThisRun,
+    "stat_scienceTheft": getStatEventScienceTheftAllTime,
+    "stat_researchBreakthroughThisRun": getStatEventResearchBreakthroughThisRun,
+    "stat_researchBreakthrough": getStatEventResearchBreakthroughAllTime,
+    "stat_rocketInstantArrivalThisRun": getStatEventRocketInstantArrivalThisRun,
+    "stat_rocketInstantArrival": getStatEventRocketInstantArrivalAllTime,
+    "stat_starshipLostInSpaceThisRun": getStatEventStarshipLostInSpaceThisRun,
+    "stat_starshipLostInSpace": getStatEventStarshipLostInSpaceAllTime,
+    "stat_antimatterReactionThisRun": getStatEventAntimatterReactionThisRun,
+    "stat_antimatterReaction": getStatEventAntimatterReactionAllTime,
+    "stat_stockLossThisRun": getStatEventStockLossThisRun,
+    "stat_stockLoss": getStatEventStockLossAllTime,
+    "stat_galacticMarketLockdownThisRun": getStatEventGalacticMarketLockdownThisRun,
+    "stat_galacticMarketLockdown": getStatEventGalacticMarketLockdownAllTime,
+    "stat_endlessSummerThisRun": getStatEventEndlessSummerThisRun,
+    "stat_endlessSummer": getStatEventEndlessSummerAllTime,
+    "stat_minerBrokeDownThisRun": getStatEventMinerBrokeDownThisRun,
+    "stat_minerBrokeDown": getStatEventMinerBrokeDownAllTime,
+    "stat_supplyChainDisruptionThisRun": getStatEventSupplyChainDisruptionThisRun,
+    "stat_supplyChainDisruption": getStatEventSupplyChainDisruptionAllTime,
+    "stat_blackHoleInstabilityThisRun": getStatEventBlackHoleInstabilityThisRun,
+    "stat_blackHoleInstability": getStatEventBlackHoleInstabilityAllTime,
 
     "stat_hydrogen": getStatHydrogen,
     "stat_helium": getStatHelium,
@@ -1384,6 +1418,8 @@ export function resetAllVariablesOnRebirth() {
     casinoGame4VoidSeerPlayedThisRun = 0;
     casinoGame4VoidSeerWonThisRun = 0;
     ripTelemetryDataEarnedThisRun = 0;
+
+    randomEventTriggerCountsThisRun = {};
 
     runNumber++;
     
@@ -2263,6 +2299,9 @@ export function restoreGameStatus(gameState, type) {
             feedbackCanBeRequested = gameState.flags.feedbackCanBeRequested ?? true;
             philosophyAbilityActive = gameState.flags.philosophyAbilityActive ?? false;
             eventsTriggeredOnce = gameState.flags.eventsTriggeredOnce ?? false;
+
+            randomEventTriggerCountsThisRun = gameState.randomEventTriggerCountsThisRun ?? {};
+            randomEventTriggerCountsAllTime = gameState.randomEventTriggerCountsAllTime ?? {};
             currentRunIsMegaStructureRun = gameState.flags.currentRunIsMegaStructureRun ?? false;
             megaStructureTabNotificationShown = gameState.flags.megaStructureTabNotificationShown ?? false;
             hasVisitedMegaStructure = gameState.flags.hasVisitedMegaStructure ?? false;
@@ -5349,6 +5388,33 @@ function getStatRipTelemetryDataGainedAllTime() {
     return allTimeRipTelemetryDataEarned;
 }
 
+function getStatEventPowerPlantExplosionThisRun() { return getRandomEventCountThisRun('powerPlantExplosion'); }
+function getStatEventPowerPlantExplosionAllTime() { return getRandomEventCountAllTime('powerPlantExplosion'); }
+function getStatEventBatteryExplosionThisRun() { return getRandomEventCountThisRun('batteryExplosion'); }
+function getStatEventBatteryExplosionAllTime() { return getRandomEventCountAllTime('batteryExplosion'); }
+function getStatEventScienceTheftThisRun() { return getRandomEventCountThisRun('scienceTheft'); }
+function getStatEventScienceTheftAllTime() { return getRandomEventCountAllTime('scienceTheft'); }
+function getStatEventResearchBreakthroughThisRun() { return getRandomEventCountThisRun('researchBreakthrough'); }
+function getStatEventResearchBreakthroughAllTime() { return getRandomEventCountAllTime('researchBreakthrough'); }
+function getStatEventRocketInstantArrivalThisRun() { return getRandomEventCountThisRun('rocketInstantArrival'); }
+function getStatEventRocketInstantArrivalAllTime() { return getRandomEventCountAllTime('rocketInstantArrival'); }
+function getStatEventStarshipLostInSpaceThisRun() { return getRandomEventCountThisRun('starshipLostInSpace'); }
+function getStatEventStarshipLostInSpaceAllTime() { return getRandomEventCountAllTime('starshipLostInSpace'); }
+function getStatEventAntimatterReactionThisRun() { return getRandomEventCountThisRun('antimatterReaction'); }
+function getStatEventAntimatterReactionAllTime() { return getRandomEventCountAllTime('antimatterReaction'); }
+function getStatEventStockLossThisRun() { return getRandomEventCountThisRun('stockLoss'); }
+function getStatEventStockLossAllTime() { return getRandomEventCountAllTime('stockLoss'); }
+function getStatEventGalacticMarketLockdownThisRun() { return getRandomEventCountThisRun('galacticMarketLockdown'); }
+function getStatEventGalacticMarketLockdownAllTime() { return getRandomEventCountAllTime('galacticMarketLockdown'); }
+function getStatEventEndlessSummerThisRun() { return getRandomEventCountThisRun('endlessSummer'); }
+function getStatEventEndlessSummerAllTime() { return getRandomEventCountAllTime('endlessSummer'); }
+function getStatEventMinerBrokeDownThisRun() { return getRandomEventCountThisRun('minerBrokeDown'); }
+function getStatEventMinerBrokeDownAllTime() { return getRandomEventCountAllTime('minerBrokeDown'); }
+function getStatEventSupplyChainDisruptionThisRun() { return getRandomEventCountThisRun('supplyChainDisruption'); }
+function getStatEventSupplyChainDisruptionAllTime() { return getRandomEventCountAllTime('supplyChainDisruption'); }
+function getStatEventBlackHoleInstabilityThisRun() { return getRandomEventCountThisRun('blackHoleInstability'); }
+function getStatEventBlackHoleInstabilityAllTime() { return getRandomEventCountAllTime('blackHoleInstability'); }
+
 function getStatEnemyTotalDefenceRemaining() {
     return getStarSystemDataObject('stars', ['destinationStar', 'enemyFleets', 'fleetPower'], true) ?? 0;
 }
@@ -6018,6 +6084,37 @@ export function getCasinoGame5VoidSeerAlwaysMatch() {
 
 export function setCasinoGame5VoidSeerAlwaysMatch(value) {
     casinoGame5VoidSeerAlwaysMatch = value === 'true' || value === true;
+}
+
+function incrementRandomEventTriggerCounts(eventId) {
+    const id = String(eventId || '').trim();
+    if (!id) return;
+
+    const prevThisRun = Number(randomEventTriggerCountsThisRun?.[id]) || 0;
+    const prevAllTime = Number(randomEventTriggerCountsAllTime?.[id]) || 0;
+
+    randomEventTriggerCountsThisRun = {
+        ...(randomEventTriggerCountsThisRun || {}),
+        [id]: prevThisRun + 1,
+    };
+    randomEventTriggerCountsAllTime = {
+        ...(randomEventTriggerCountsAllTime || {}),
+        [id]: prevAllTime + 1,
+    };
+}
+
+export function recordRandomEventTriggered(eventId) {
+    incrementRandomEventTriggerCounts(eventId);
+}
+
+function getRandomEventCountThisRun(eventId) {
+    const id = String(eventId || '').trim();
+    return Number(randomEventTriggerCountsThisRun?.[id]) || 0;
+}
+
+function getRandomEventCountAllTime(eventId) {
+    const id = String(eventId || '').trim();
+    return Number(randomEventTriggerCountsAllTime?.[id]) || 0;
 }
 
 //image urls----------------------------------------------------------------------------------------------------------------------

@@ -1,26 +1,6 @@
-Future Developer:
-- Started implementing the Cosmic Rip Tab, flagged on with buildflags.js/window.__COSMIC_RIP_ENABLED__ = true;
-- Debug Cheats and Variable Debugger now in buildflags.js/window.__VARIABLE_DEBUGGER_AND_CHEATS__ and must be set to true to see these menus in game.
-- Currently can use GP from Settled Stars to Restore the Near Space Scanner Array
-- Then you can scan and find the Cosmic Rip and this is all animated and ready to build on
-- Once you find the Cosmic Rip, a new UI opens up, and two science upgrade rows open up below the Near Space Scanner Array screen.
-- At this point the game ideas have dried up and it needs brainstorming for a plan but basically:
-- Buy Upgrades to earn Cosmic Rip Research Points
-- Research Techs to understand the Cosmic Rip
-- Stabilize the Cosmic Rip so you can approach it
-- Seal the Cosmic Rip to end the game.
-
 bun run build:all will produce 4 builds a demo and a full game for linux and windows.
 python create_build.py cosmicForge_v1.02 will create a pushable build to my account on itch.io via butler but the manual executable build must be uploaded seperately.
 
 Things to do:
-- add statistics to stats section for new chapter and check if events has stats and casino
 - add achievements for casino, cosmic rip section, events
 - add end navigation ie close game or something after the end credit animation
-
-How game works now:
-- Player settles Miaplacidus triggers popup story and playWinCinematic() and gets told about Cosmic Rip
-- Cosmic Rip (tab8) is shown to the player and unlocked
-- Player plays through Cosmic Rip content.
-- Once scanned sector and researched all 5 techs Close Cosmic Rip button row and button are shown in situation UI
-- Once clicked, popup is shown explainig end game and playWinCinematic2() plays
