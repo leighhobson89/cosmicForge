@@ -659,6 +659,8 @@ let allTimeCasinoGame3HigherLowerWon = 0;
 let allTimeCasinoGame4VoidSeerPlayed = 0;
 let allTimeCasinoGame4VoidSeerWon = 0;
 
+let allTimeRipTelemetryDataEarned = 0;
+
 let hydrogenThisRun = 0;
 let heliumThisRun = 0;
 let carbonThisRun = 0;
@@ -690,6 +692,8 @@ let casinoGame3HigherLowerPlayedThisRun = 0;
 let casinoGame3HigherLowerWonThisRun = 0;
 let casinoGame4VoidSeerPlayedThisRun = 0;
 let casinoGame4VoidSeerWonThisRun = 0;
+
+let ripTelemetryDataEarnedThisRun = 0;
 
 let starStudyRange = 0;
 let allTimeTotalAntimatterMined = 0;
@@ -1057,6 +1061,28 @@ export const statFunctionsGets = {
     "stat_blackHoleStrengthThisRun": getStatBlackHoleStrengthThisRun,
     "stat_blackHoleStrength": getStatBlackHoleStrengthAllTime,
 
+    // Cosmic Rip Chapter
+    "stat_galacticPointsEarnedThisRun": getStatCosmicRipChapterGalacticPointsEarnedThisRun,
+    "stat_galacticPointsEarned": getStatCosmicRipChapterGalacticPointsEarnedAllTime,
+
+    "stat_galacticPointsSpentThisRun": getStatCosmicRipChapterGalacticPointsSpentThisRun,
+    "stat_galacticPointsSpent": getStatCosmicRipChapterGalacticPointsSpentAllTime,
+
+    "stat_cosmicRipChapterUnlockThisRun": getStatCosmicRipChapterUnlockThisRun,
+    "stat_cosmicRipChapterUnlock": getStatCosmicRipChapterUnlockAllTime,
+
+    "stat_nearSpaceScannerArrayRestoredThisRun": getStatNearSpaceScannerArrayRestoredThisRun,
+    "stat_nearSpaceScannerArrayRestored": getStatNearSpaceScannerArrayRestoredAllTime,
+
+    "stat_cosmicRipLocatedThisRun": getStatCosmicRipLocatedThisRun,
+    "stat_cosmicRipLocated": getStatCosmicRipLocatedAllTime,
+
+    "stat_cosmicRipStabilisedThisRun": getStatCosmicRipStabilisedThisRun,
+    "stat_cosmicRipStabilised": getStatCosmicRipStabilisedAllTime,
+
+    "stat_ripTelemetryDataGainedThisRun": getStatRipTelemetryDataGainedThisRun,
+    "stat_ripTelemetryDataGained": getStatRipTelemetryDataGainedAllTime,
+
     // Galactic Casino
     "stat_casinoPointsSpentThisRun": () => getGalacticCasinoStatValue('casinoPointsSpent', 'currentRun'),
     "stat_casinoPointsSpent": () => getGalacticCasinoStatValue('casinoPointsSpent', 'allTime'),
@@ -1357,6 +1383,7 @@ export function resetAllVariablesOnRebirth() {
     casinoGame3HigherLowerWonThisRun = 0;
     casinoGame4VoidSeerPlayedThisRun = 0;
     casinoGame4VoidSeerWonThisRun = 0;
+    ripTelemetryDataEarnedThisRun = 0;
 
     runNumber++;
     
@@ -1796,6 +1823,7 @@ export function captureGameStatusForSaving(type) {
     gameState.casinoGame3HigherLowerWonThisRun = casinoGame3HigherLowerWonThisRun;
     gameState.casinoGame4VoidSeerPlayedThisRun = casinoGame4VoidSeerPlayedThisRun;
     gameState.casinoGame4VoidSeerWonThisRun = casinoGame4VoidSeerWonThisRun;
+    gameState.ripTelemetryDataEarnedThisRun = ripTelemetryDataEarnedThisRun;
     gameState.allTimeTotalRocketsLaunched = allTimeTotalRocketsLaunched;
     gameState.allTimeTotalStarShipsLaunched = allTimeTotalStarShipsLaunched;
     gameState.allTimeTotalAsteroidsDiscovered = allTimeTotalAsteroidsDiscovered;
@@ -1811,6 +1839,7 @@ export function captureGameStatusForSaving(type) {
     gameState.allTimeCasinoGame3HigherLowerWon = allTimeCasinoGame3HigherLowerWon;
     gameState.allTimeCasinoGame4VoidSeerPlayed = allTimeCasinoGame4VoidSeerPlayed;
     gameState.allTimeCasinoGame4VoidSeerWon = allTimeCasinoGame4VoidSeerWon;
+    gameState.allTimeRipTelemetryDataEarned = allTimeRipTelemetryDataEarned;
     gameState.allTimeTotalStarsStudied = starStudyRange;
     gameState.allTimeTotalAntimatterMined = allTimeTotalAntimatterMined;
     gameState.antimatterMinedThisRun = antimatterMinedThisRun;
@@ -2109,6 +2138,7 @@ export function restoreGameStatus(gameState, type) {
             casinoGame3HigherLowerWonThisRun = gameState.casinoGame3HigherLowerWonThisRun ?? 0;
             casinoGame4VoidSeerPlayedThisRun = gameState.casinoGame4VoidSeerPlayedThisRun ?? 0;
             casinoGame4VoidSeerWonThisRun = gameState.casinoGame4VoidSeerWonThisRun ?? 0;
+            ripTelemetryDataEarnedThisRun = gameState.ripTelemetryDataEarnedThisRun ?? 0;
             allTimeTotalRocketsLaunched = gameState.allTimeTotalRocketsLaunched ?? 0;
             allTimeTotalStarShipsLaunched = gameState.allTimeTotalStarShipsLaunched ?? 0;
             allTimeTotalAsteroidsDiscovered = gameState.allTimeTotalAsteroidsDiscovered ?? 0;
@@ -2124,6 +2154,7 @@ export function restoreGameStatus(gameState, type) {
             allTimeCasinoGame3HigherLowerWon = gameState.allTimeCasinoGame3HigherLowerWon ?? 0;
             allTimeCasinoGame4VoidSeerPlayed = gameState.allTimeCasinoGame4VoidSeerPlayed ?? 0;
             allTimeCasinoGame4VoidSeerWon = gameState.allTimeCasinoGame4VoidSeerWon ?? 0;
+            allTimeRipTelemetryDataEarned = gameState.allTimeRipTelemetryDataEarned ?? 0;
             starStudyRange = gameState.allTimeTotalStarsStudied ?? 0;
             allTimeTotalAntimatterMined = gameState.allTimeTotalAntimatterMined ?? 0;
             antimatterMinedThisRun = gameState.antimatterMinedThisRun ?? 0;
@@ -5257,6 +5288,67 @@ function getStatBlackHoleStrengthAllTime() {
     return getBlackHolePower();
 }
 
+function getStatCosmicRipChapterGalacticPointsEarnedThisRun() {
+    return 'N/A';
+}
+
+function getStatCosmicRipChapterGalacticPointsEarnedAllTime() {
+    const settledCount = ((getSettledStars?.() || []).length) - 1;
+    return Math.max(0, settledCount);
+}
+
+function getStatCosmicRipChapterGalacticPointsSpentThisRun() {
+    return 'N/A';
+}
+
+function getStatCosmicRipChapterGalacticPointsSpentAllTime() {
+    return Number(getGalacticPointsSpent?.()) || 0;
+}
+
+function getStatCosmicRipChapterUnlockThisRun() {
+    return 'N/A';
+}
+
+function getStatCosmicRipChapterUnlockAllTime() {
+    return getTechUnlockedArray?.().includes('cosmicRip') ? 'Yes' : 'No';
+}
+
+function getStatNearSpaceScannerArrayRestoredThisRun() {
+    return 'N/A';
+}
+
+function getStatNearSpaceScannerArrayRestoredAllTime() {
+    return (getResourceDataObject('cosmicRip', ['nearSpaceScannerArrayRestored']) === true) ? 'Yes' : 'No';
+}
+
+function getStatCosmicRipLocatedThisRun() {
+    return 'N/A';
+}
+
+function getStatCosmicRipLocatedAllTime() {
+    return (getResourceDataObject('cosmicRip', ['ripFound']) === true) ? 'Yes' : 'No';
+}
+
+function getStatCosmicRipStabilisedThisRun() {
+    return 'N/A';
+}
+
+function getStatCosmicRipStabilisedAllTime() {
+    const techs = getResourceDataObject('cosmicRip', ['techs']) || {};
+    const total = Object.keys(techs).length;
+    const unlocked = (getCosmicRipTechUnlockedArray?.() || []).length;
+    if (!total) return 'No';
+    return unlocked >= total ? 'Yes' : 'No';
+}
+
+function getStatRipTelemetryDataGainedThisRun() {
+    return 'N/A';
+}
+
+function getStatRipTelemetryDataGainedAllTime() {
+    return allTimeRipTelemetryDataEarned;
+}
+
 function getStatEnemyTotalDefenceRemaining() {
     return getStarSystemDataObject('stars', ['destinationStar', 'enemyFleets', 'fleetPower'], true) ?? 0;
 }
@@ -5652,6 +5744,22 @@ export function getGalacticPointsSpent() {
 
 export function setGalacticPointsSpent(value) {
     galacticPointsSpent = typeof value === 'number' && Number.isFinite(value) ? value : 0;
+}
+
+export function getAllTimeRipTelemetryDataEarned() {
+    return allTimeRipTelemetryDataEarned;
+}
+
+export function setAllTimeRipTelemetryDataEarned(value) {
+    allTimeRipTelemetryDataEarned = typeof value === 'number' && Number.isFinite(value) ? value : 0;
+}
+
+export function addToAllTimeRipTelemetryDataEarned(amount) {
+    const add = Number(amount);
+    if (Number.isFinite(add) && add > 0) {
+        allTimeRipTelemetryDataEarned += add;
+        ripTelemetryDataEarnedThisRun += add;
+    }
 }
 
 export function getCosmicRipNearSpaceScannerArraySectorNames() {

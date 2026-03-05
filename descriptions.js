@@ -2688,6 +2688,29 @@ statisticsContent = {
         subHeading10: "VoidSeer Won",
         subBody10: "0",
     }
+    ,
+    'cosmic Rip Chapter': {
+        subHeading1: "Galactic Points Earned",
+        subBody1: "N/A",
+
+        subHeading2: "Galactic Points Spent",
+        subBody2: "N/A",
+
+        subHeading3: "Rip Telemetry Data Gained",
+        subBody3: "N/A",
+
+        subHeading4: "Cosmic Rip Chapter Unlock",
+        subBody4: "N/A",
+
+        subHeading5: "Near Space Scanner Array Restored",
+        subBody5: "N/A",
+
+        subHeading6: "Cosmic Rip Located",
+        subBody6: "N/A",
+
+        subHeading7: "Cosmic Rip Stabilised",
+        subBody7: "N/A",
+    }
 }
 
 helpContent = {

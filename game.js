@@ -411,6 +411,7 @@ import {
     setBlackHoleAlwaysOn,
     getPriceCasinoGame3,
     setGalacticCasinoUnlocked,
+    addToAllTimeRipTelemetryDataEarned,
 } from "./constantsAndGlobalVars.js";
 
 import {
@@ -2601,6 +2602,7 @@ function updateRipTelemetryDelta(deltaMs) {
 
     const current = getResourceDataObject('cosmicRip', ['ripTelemetryData']);
     setResourceDataObject(current + ripTelemetryGain, 'cosmicRip', ['ripTelemetryData']);
+    addToAllTimeRipTelemetryDataEarned(ripTelemetryGain);
 
     const now = Date.now();
     if (now - lastRipTelemetryConsoleLogMs >= 1000) {
@@ -12087,6 +12089,7 @@ export function offlineGains(switchedFocus) {
     
         const currentRipTelemetryQuantity = getResourceDataObject('cosmicRip', ['ripTelemetryData']);
         setResourceDataObject(currentRipTelemetryQuantity + offlineGains.ripTelemetryData, 'cosmicRip', ['ripTelemetryData']);
+        addToAllTimeRipTelemetryDataEarned(offlineGains.ripTelemetryData);
 
         const currentFuelQuantityRockets = getRocketsFuellerStartedArray().filter(rocket => !rocket.includes('FuelledUp'));
         currentFuelQuantityRockets.forEach(rocket => {
