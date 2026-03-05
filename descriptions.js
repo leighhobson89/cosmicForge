@@ -3574,6 +3574,107 @@ function generateAchievementTooltipDescriptions() {
             Status: ${getAchievementDataObject('tryAllThemes', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
         </span>
         `
+        ,
+        "buyCasinoPoints": `
+        ${getAchievementTooltipDescriptionTexts('buyCasinoPoints')}<br>
+        <span class="green-ready-text">Reward: Pride!</span><br>
+        <span class="${getAchievementDataObject('buyCasinoPoints', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
+            Reset on Rebirth: ${getAchievementDataObject('buyCasinoPoints', ['resetOnRebirth']) ? 'YES' : 'NO'}
+        </span><br><br>
+        <span class="${getAchievementDataObject('buyCasinoPoints', ['active']) ? 'green-ready-text' : ''}">
+            Status: ${getAchievementDataObject('buyCasinoPoints', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+        </span>
+        `,
+        "winAllCasinoGames": `
+        ${getAchievementTooltipDescriptionTexts('winAllCasinoGames')}<br>
+        <span class="green-ready-text">Reward: Pride!</span><br>
+        <span class="${getAchievementDataObject('winAllCasinoGames', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
+            Reset on Rebirth: ${getAchievementDataObject('winAllCasinoGames', ['resetOnRebirth']) ? 'YES' : 'NO'}
+        </span><br><br>
+        <span class="${getAchievementDataObject('winAllCasinoGames', ['active']) ? 'green-ready-text' : ''}">
+            Status: ${getAchievementDataObject('winAllCasinoGames', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+        </span>
+        `,
+        "winWheelSpecialPrize": `
+        ${getAchievementTooltipDescriptionTexts('winWheelSpecialPrize')}<br>
+        <span class="green-ready-text">Reward: Pride!</span><br>
+        <span class="${getAchievementDataObject('winWheelSpecialPrize', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
+            Reset on Rebirth: ${getAchievementDataObject('winWheelSpecialPrize', ['resetOnRebirth']) ? 'YES' : 'NO'}
+        </span><br><br>
+        <span class="${getAchievementDataObject('winWheelSpecialPrize', ['active']) ? 'green-ready-text' : ''}">
+            Status: ${getAchievementDataObject('winWheelSpecialPrize', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+        </span>
+        `,
+        "restoreNearSpaceScannerArray": `
+        ${getAchievementTooltipDescriptionTexts('restoreNearSpaceScannerArray')}<br>
+        <span class="green-ready-text">Reward: Pride!</span><br>
+        <span class="${getAchievementDataObject('restoreNearSpaceScannerArray', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
+            Reset on Rebirth: ${getAchievementDataObject('restoreNearSpaceScannerArray', ['resetOnRebirth']) ? 'YES' : 'NO'}
+        </span><br><br>
+        <span class="${getAchievementDataObject('restoreNearSpaceScannerArray', ['active']) ? 'green-ready-text' : ''}">
+            Status: ${getAchievementDataObject('restoreNearSpaceScannerArray', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+        </span>
+        `,
+        "findCosmicRip": `
+        ${getAchievementTooltipDescriptionTexts('findCosmicRip')}<br>
+        <span class="green-ready-text">Reward: Pride!</span><br>
+        <span class="${getAchievementDataObject('findCosmicRip', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
+            Reset on Rebirth: ${getAchievementDataObject('findCosmicRip', ['resetOnRebirth']) ? 'YES' : 'NO'}
+        </span><br><br>
+        <span class="${getAchievementDataObject('findCosmicRip', ['active']) ? 'green-ready-text' : ''}">
+            Status: ${getAchievementDataObject('findCosmicRip', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+        </span>
+        `,
+        "gain1MTelemetryData": `
+        ${getAchievementTooltipDescriptionTexts('gain1MTelemetryData')}<br>
+        <span class="green-ready-text">Reward: Pride!</span><br>
+        <span class="${getAchievementDataObject('gain1MTelemetryData', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
+            Reset on Rebirth: ${getAchievementDataObject('gain1MTelemetryData', ['resetOnRebirth']) ? 'YES' : 'NO'}
+        </span><br><br>
+        <span class="${getAchievementDataObject('gain1MTelemetryData', ['active']) ? 'green-ready-text' : ''}">
+            Status: ${getAchievementDataObject('gain1MTelemetryData', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+        </span>
+        `,
+        "closeCosmicRip": `
+        ${getAchievementTooltipDescriptionTexts('closeCosmicRip')}<br>
+        <span class="green-ready-text">Reward: Pride!</span><br>
+        <span class="${getAchievementDataObject('closeCosmicRip', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
+            Reset on Rebirth: ${getAchievementDataObject('closeCosmicRip', ['resetOnRebirth']) ? 'YES' : 'NO'}
+        </span><br><br>
+        <span class="${getAchievementDataObject('closeCosmicRip', ['active']) ? 'green-ready-text' : ''}">
+            Status: ${getAchievementDataObject('closeCosmicRip', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+        </span>
+        `,
+        "suffer5NegativeEvents": `
+        ${getAchievementTooltipDescriptionTexts('suffer5NegativeEvents')}<br>
+        <span class="green-ready-text">Reward: Pride!</span><br>
+        <span class="${getAchievementDataObject('suffer5NegativeEvents', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
+            Reset on Rebirth: ${getAchievementDataObject('suffer5NegativeEvents', ['resetOnRebirth']) ? 'YES' : 'NO'}
+        </span><br><br>
+        <span class="${getAchievementDataObject('suffer5NegativeEvents', ['active']) ? 'green-ready-text' : ''}">
+            Status: ${getAchievementDataObject('suffer5NegativeEvents', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+        </span>
+        `,
+        "enjoyEndlessSummer": `
+        ${getAchievementTooltipDescriptionTexts('enjoyEndlessSummer')}<br>
+        <span class="green-ready-text">Reward: Pride!</span><br>
+        <span class="${getAchievementDataObject('enjoyEndlessSummer', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
+            Reset on Rebirth: ${getAchievementDataObject('enjoyEndlessSummer', ['resetOnRebirth']) ? 'YES' : 'NO'}
+        </span><br><br>
+        <span class="${getAchievementDataObject('enjoyEndlessSummer', ['active']) ? 'green-ready-text' : ''}">
+            Status: ${getAchievementDataObject('enjoyEndlessSummer', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+        </span>
+        `,
+        "completeOnboarding": `
+        ${getAchievementTooltipDescriptionTexts('completeOnboarding')}<br>
+        <span class="green-ready-text">Reward: Pride!</span><br>
+        <span class="${getAchievementDataObject('completeOnboarding', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
+            Reset on Rebirth: ${getAchievementDataObject('completeOnboarding', ['resetOnRebirth']) ? 'YES' : 'NO'}
+        </span><br><br>
+        <span class="${getAchievementDataObject('completeOnboarding', ['active']) ? 'green-ready-text' : ''}">
+            Status: ${getAchievementDataObject('completeOnboarding', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+        </span>
+        `
     };    
 }
 
@@ -3637,7 +3738,17 @@ achievementTooltipDescriptionTexts = {
     "completeGame": "Complete the Game",
     "completeRunOnMiaplacidus": "Complete a Run on Miaplacidus",
     "haveFleetSizeOf50EachShipType": "Have at least 50 of each Ship Type",
-    "tryAllThemes": "Try All Themes"      
+    "tryAllThemes": "Try All Themes",
+    "buyCasinoPoints": "Buy some Casino Points",
+    "winAllCasinoGames": "Win a prize in all Casino games",
+    "winWheelSpecialPrize": "Win a Wheel of Fortune special prize",
+    "restoreNearSpaceScannerArray": "Restore the Near Space Scanner Array",
+    "findCosmicRip": "Find the Cosmic Rip",
+    "gain1MTelemetryData": "Gain 1M Telemetry Data",
+    "closeCosmicRip": "Close the Cosmic Rip",
+    "suffer5NegativeEvents": "Suffer 5 negative events",
+    "enjoyEndlessSummer": "Enjoy an Endless Summer",
+    "completeOnboarding": "Complete the onboarding"      
 };
 
 achievementNotifications = {
@@ -3700,7 +3811,17 @@ achievementNotifications = {
     "completeGameNotification": "ACHIEVEMENT:\nYou have completed the game!\n\nREWARD: Pride!",
     "completeRunOnMiaplacidusNotification": "ACHIEVEMENT:\nYou have completed a run on Miaplacidus!\n\nREWARD: Glutton For Punishment!",
     "haveFleetSizeOf50EachShipTypeNotification": "ACHIEVEMENT:\nYou have at least 50 of each ship type!\n\nREWARD: 1000000 Titanium (capped at storage)",
-    "tryAllThemesNotification": "ACHIEVEMENT:\nYou have tried all Themes!\n\nREWARD: Pride!"
+    "tryAllThemesNotification": "ACHIEVEMENT:\nYou have tried all Themes!\n\nREWARD: Pride!",
+    "buyCasinoPointsNotification": "ACHIEVEMENT:\nYou have bought some Casino Points!\n\nREWARD: Pride!",
+    "winAllCasinoGamesNotification": "ACHIEVEMENT:\nYou have won a prize in all Casino games!\n\nREWARD: Pride!",
+    "winWheelSpecialPrizeNotification": "ACHIEVEMENT:\nYou have claimed a Wheel of Fortune Special Prize!\n\nREWARD: Pride!",
+    "restoreNearSpaceScannerArrayNotification": "ACHIEVEMENT:\nYou have restored the Near Space Scanner Array!\n\nREWARD: Pride!",
+    "findCosmicRipNotification": "ACHIEVEMENT:\nYou have found the Cosmic Rip!\n\nREWARD: Pride!",
+    "gain1MTelemetryDataNotification": "ACHIEVEMENT:\nYou have gained 1,000,000 Telemetry Data!\n\nREWARD: Pride!",
+    "closeCosmicRipNotification": "ACHIEVEMENT:\nYou have closed the Cosmic Rip!\n\nREWARD: Pride!",
+    "suffer5NegativeEventsNotification": "ACHIEVEMENT:\nYou have suffered 5 negative events!\n\nREWARD: Pride!",
+    "enjoyEndlessSummerNotification": "ACHIEVEMENT:\nYou are enjoying an Endless Summer!\n\nREWARD: Pride!",
+    "completeOnboardingNotification": "ACHIEVEMENT:\nYou have completed the onboarding!\n\nREWARD: Pride!"
 };
 
 export const megaStructureTableText = {

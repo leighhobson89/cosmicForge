@@ -76,6 +76,7 @@ import {
 } from './resourceDataObject.js';
 
 import { getOptionDescription } from './descriptions.js';
+import { checkForAchievements } from './achievements.js';
 
 import { playDoubleOrNothing, playWheelOfFortune, claimWheelSpecialPrize } from './casino.js';
 import { sfxPlayer } from './audioManager.js';
@@ -792,6 +793,18 @@ export function drawTab7Content(heading, optionContentElement) {
 
                     if (final1 === final2) {
                         incrementGalacticCasinoStatBothScopes('game4_voidSeerWon');
+
+                        try {
+                            const won = getGalacticCasinoDataObject('casinoGamesWon');
+                            const list = Array.isArray(won) ? [...won] : [];
+                            if (!list.includes('game4')) {
+                                list.push('game4');
+                                setGalacticCasinoDataObject(list, 'casinoGamesWon');
+                            }
+                        } catch {
+                        }
+
+                        checkForAchievements();
                         const settledStarSet = new Set((getSettledStars?.() || []).map((name) => String(name || '').toLowerCase()));
                         const starshipDestination = String(getDestinationStar?.() || '').toLowerCase();
                         const starshipStatus = getStarShipStatus?.() || [];
@@ -1537,6 +1550,18 @@ export function drawTab7Content(heading, optionContentElement) {
                 const prizeKey = String(game3HiloContainer.getAttribute('data-hilo-tier-prize-key') || '');
                 const awarded = awardHiloPrize({ key: prizeKey });
                 incrementGalacticCasinoStatBothScopes('game3_higherLowerWon');
+
+                try {
+                    const won = getGalacticCasinoDataObject('casinoGamesWon');
+                    const list = Array.isArray(won) ? [...won] : [];
+                    if (!list.includes('game3')) {
+                        list.push('game3');
+                        setGalacticCasinoDataObject(list, 'casinoGamesWon');
+                    }
+                } catch {
+                }
+
+                checkForAchievements();
                 const prizeName = getHiloNotificationPrizeName(prizeNameRaw, awarded);
                 const details = formatHiloAwardDetails(awarded);
                 const suffix = shouldAppendHiloAwardDetails(prizeName, awarded, details) ? ` - ${details}` : '';

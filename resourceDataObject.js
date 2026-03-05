@@ -3,12 +3,12 @@ import { migrateResourceData } from "./patches.js";
 import { addPermanentBuffsBackInAfterRebirth, setResourceAutobuyerPricesAfterRepeatables, setCompoundRecipePricesAfterRepeatables, setEnergyAndResearchBuildingPricesAfterRepeatables, setFleetPricesAfterRepeatables, setFleetArmorBuffsAfterRepeatables, setFleetSpeedsAfterRepeatables, setFleetAttackDamageAfterRepeatables, setInitialImpressionBaseAfterRepeatables, setStarStudyEfficiencyAfterRepeatables, setAsteroidSearchEfficiencyAfterRepeatables, calculateAndAddExtraAPFromPhilosophyRepeatable, setStarshipPartPricesAfterRepeatables, setRocketPartPricesAfterRepeatables, setRocketTravelTimeReductionAfterRepeatables, setStarshipTravelTimeReductionAfterRepeatables, applyRateMultiplierToAllResources, addStorageCapacityAndCompoundsToAllResources } from './game.js';
 import { getMultiplierPermanentCompounds, getMultiplierPermanentResources, getCurrentTheme, setCompoundCreateDropdownRecipeText, getCompoundCreateDropdownRecipeText, getStatRun, getPlayerPhilosophy, getAllRepeatableTechMultipliersObject, getFactoryStarsArray, getMegaStructureTechsResearched, getMegaStructureResourceBonus, getStorageAdderBonus, mapFactoryStarValue, getTechUnlockedArray, setTechUnlockedArrayDirect, getCurrentGameVersion, getMinimumVersion } from "./constantsAndGlobalVars.js";
 
-import { achievementAchieve100FusionEfficiency, achievementActivateAllWackyNewsTickers, achievementAdoptPhilosophy, achievementBeatEnemy, achievementBringDownMiaplacideanForceField, achievementCollect100Precipitation, achievementCollect100TitaniumAsPrecipitation, achievementCompleteGame, achievementCompleteRunOnMiaplacidus, achievementConquerMegastructureSystem, achievementConquerStarSystems, achievementCreateCompound, achievementDiscoverAsteroid, achievementDiscoverBlackHole, achievementDiscoverLegendaryAsteroid, achievementFindAncientManuscript, achievementHave4RocketsMiningAntimatter, achievementHave50HoursWithOnePioneer, achievementHaveFleetSizeOf50EachShipType, achievementInitiateDiplomacyWithAlienRace, achievementLaunchRocket, achievementLaunchStarShip, achievementLiquidateAllAssets, achievementMineAllAntimatterAsteroid, achievementPerformGalaticMarketTransaction, achievementRebirth, achievementResearchAllTechnologies, achievementSeeAllNewsTickers, achievementSpendAp, achievementStudyAllStarsInOneRun, achievementStudyAStar, achievementTrade10APForCash, achievementTripPower, achievementActivateBlackHoleOver10x, achievementTryAllThemes } from "./achievements.js";
+import { achievementAchieve100FusionEfficiency, achievementActivateAllWackyNewsTickers, achievementAdoptPhilosophy, achievementBeatEnemy, achievementBringDownMiaplacideanForceField, achievementBuyCasinoPoints, achievementCollect100Precipitation, achievementCollect100TitaniumAsPrecipitation, achievementCompleteGame, achievementCompleteOnboarding, achievementCompleteRunOnMiaplacidus, achievementConquerMegastructureSystem, achievementConquerStarSystems, achievementCreateCompound, achievementDiscoverAsteroid, achievementDiscoverBlackHole, achievementDiscoverLegendaryAsteroid, achievementEnjoyEndlessSummer, achievementFindAncientManuscript, achievementFindCosmicRip, achievementGain1MTelemetryData, achievementHave4RocketsMiningAntimatter, achievementHave50HoursWithOnePioneer, achievementHaveFleetSizeOf50EachShipType, achievementInitiateDiplomacyWithAlienRace, achievementLaunchRocket, achievementLaunchStarShip, achievementLiquidateAllAssets, achievementMineAllAntimatterAsteroid, achievementPerformGalaticMarketTransaction, achievementRebirth, achievementResearchAllTechnologies, achievementRestoreNearSpaceScannerArray, achievementSeeAllNewsTickers, achievementSpendAp, achievementStudyAllStarsInOneRun, achievementStudyAStar, achievementSuffer5NegativeEvents, achievementTrade10APForCash, achievementTripPower, achievementActivateBlackHoleOver10x, achievementTryAllThemes, achievementWinAllCasinoGames, achievementWinWheelSpecialPrize, achievementCloseCosmicRip } from "./achievements.js";
 import { showNotification } from "./ui.js";
 
 export let achievementImageUrls;
 export let resourceData = {
-    version: 0.976, //update this whenever changes are made to the structure
+    version: 0.977, //update this whenever changes are made to the structure
     resources: {
         solar: {
             autoSell: false,
@@ -1016,7 +1016,7 @@ export const miaplacidus = {
 
 
 export let starSystems = {
-    version: 0.976,
+    version: 0.977,
     stars: {
         spica: {
             mapSize: 5.504440179536064, //might need to add this to star object when added dynamically for after rebirth
@@ -1035,17 +1035,18 @@ export let starSystems = {
 };
 
 export let oTypePowerPlantBuffs = {
-    version: 0.976,
+    version: 0.977,
     basicPowerPlantStar: { starName: null, settled: false },
     solarPowerPlantStar: { starName: null, settled: false },
     advancedPowerPlantStar: { starName: null, settled: false }
 };
 
 export let galacticCasino = {
-    version: 0.976,
+    version: 0.977,
     settings: {
         baseProbabilityCasino: 0.4,
     },
+    casinoGamesWon: [],
     casinoPoints: {
         quantity: 0,
         cpBaseCost: 100000,
@@ -1073,7 +1074,7 @@ export let galacticCasino = {
 };
 
 export let galacticMarket = {
-    version: 0.976,
+    version: 0.977,
     resources: {
         hydrogen: { 
             name: "Hydrogen", 
@@ -1179,7 +1180,7 @@ export let galacticMarket = {
 };
 
 export let ascendencyBuffs = {
-    version: 0.976,
+    version: 0.977,
     "littleBagOfHydrogen": {
         name: "Little Bag Of Hydrogen",
         description: "buffLittleBagOfHydrogenRow",
@@ -2568,6 +2569,216 @@ export let achievementsData = {
             }
         },
         notification: "tryAllThemesNotification"
+    },
+    buyCasinoPoints: {
+        id: "buyCasinoPoints",
+        name: "Buy Some Casino Points",
+        specialConditionName: 'achievementBuyCasinoPoints',
+        specialCondition: achievementBuyCasinoPoints,
+        specialConditionArguments: false,
+        resetOnRebirth: false,
+        active: false,
+        requirements: {
+            requirement1: "special",
+            value1: ""
+        },
+        gives: {
+            gives1: "rewardString",
+            value1: {
+                type: "pride",
+                quantity: 0
+            }
+        },
+        notification: "buyCasinoPointsNotification"
+    },
+    winAllCasinoGames: {
+        id: "winAllCasinoGames",
+        name: "Win a Prize in All Casino Games",
+        specialConditionName: 'achievementWinAllCasinoGames',
+        specialCondition: achievementWinAllCasinoGames,
+        specialConditionArguments: false,
+        resetOnRebirth: false,
+        active: false,
+        requirements: {
+            requirement1: "special",
+            value1: ""
+        },
+        gives: {
+            gives1: "rewardString",
+            value1: {
+                type: "pride",
+                quantity: 0
+            }
+        },
+        notification: "winAllCasinoGamesNotification"
+    },
+    winWheelSpecialPrize: {
+        id: "winWheelSpecialPrize",
+        name: "Win a Wheel of Fortune Special Prize",
+        specialConditionName: 'achievementWinWheelSpecialPrize',
+        specialCondition: achievementWinWheelSpecialPrize,
+        specialConditionArguments: false,
+        resetOnRebirth: false,
+        active: false,
+        requirements: {
+            requirement1: "special",
+            value1: ""
+        },
+        gives: {
+            gives1: "rewardString",
+            value1: {
+                type: "pride",
+                quantity: 0
+            }
+        },
+        notification: "winWheelSpecialPrizeNotification"
+    },
+    restoreNearSpaceScannerArray: {
+        id: "restoreNearSpaceScannerArray",
+        name: "Restore the Near Space Scanner Array",
+        specialConditionName: 'achievementRestoreNearSpaceScannerArray',
+        specialCondition: achievementRestoreNearSpaceScannerArray,
+        specialConditionArguments: false,
+        resetOnRebirth: false,
+        active: false,
+        requirements: {
+            requirement1: "special",
+            value1: ""
+        },
+        gives: {
+            gives1: "rewardString",
+            value1: {
+                type: "pride",
+                quantity: 0
+            }
+        },
+        notification: "restoreNearSpaceScannerArrayNotification"
+    },
+    findCosmicRip: {
+        id: "findCosmicRip",
+        name: "Find the Cosmic Rip",
+        specialConditionName: 'achievementFindCosmicRip',
+        specialCondition: achievementFindCosmicRip,
+        specialConditionArguments: false,
+        resetOnRebirth: false,
+        active: false,
+        requirements: {
+            requirement1: "special",
+            value1: ""
+        },
+        gives: {
+            gives1: "rewardString",
+            value1: {
+                type: "pride",
+                quantity: 0
+            }
+        },
+        notification: "findCosmicRipNotification"
+    },
+    gain1MTelemetryData: {
+        id: "gain1MTelemetryData",
+        name: "Gain 1M Telemetry Data",
+        specialConditionName: 'achievementGain1MTelemetryData',
+        specialCondition: achievementGain1MTelemetryData,
+        specialConditionArguments: false,
+        resetOnRebirth: false,
+        active: false,
+        requirements: {
+            requirement1: "special",
+            value1: ""
+        },
+        gives: {
+            gives1: "rewardString",
+            value1: {
+                type: "pride",
+                quantity: 0
+            }
+        },
+        notification: "gain1MTelemetryDataNotification"
+    },
+    closeCosmicRip: {
+        id: "closeCosmicRip",
+        name: "Close the Cosmic Rip",
+        specialConditionName: 'achievementCloseCosmicRip',
+        specialCondition: achievementCloseCosmicRip,
+        specialConditionArguments: false,
+        resetOnRebirth: false,
+        active: false,
+        requirements: {
+            requirement1: "special",
+            value1: ""
+        },
+        gives: {
+            gives1: "rewardString",
+            value1: {
+                type: "pride",
+                quantity: 0
+            }
+        },
+        notification: "closeCosmicRipNotification"
+    },
+    suffer5NegativeEvents: {
+        id: "suffer5NegativeEvents",
+        name: "Suffer 5 Negative Events",
+        specialConditionName: 'achievementSuffer5NegativeEvents',
+        specialCondition: achievementSuffer5NegativeEvents,
+        specialConditionArguments: false,
+        resetOnRebirth: false,
+        active: false,
+        requirements: {
+            requirement1: "special",
+            value1: ""
+        },
+        gives: {
+            gives1: "rewardString",
+            value1: {
+                type: "pride",
+                quantity: 0
+            }
+        },
+        notification: "suffer5NegativeEventsNotification"
+    },
+    enjoyEndlessSummer: {
+        id: "enjoyEndlessSummer",
+        name: "Enjoy an Endless Summer",
+        specialConditionName: 'achievementEnjoyEndlessSummer',
+        specialCondition: achievementEnjoyEndlessSummer,
+        specialConditionArguments: false,
+        resetOnRebirth: false,
+        active: false,
+        requirements: {
+            requirement1: "special",
+            value1: ""
+        },
+        gives: {
+            gives1: "rewardString",
+            value1: {
+                type: "pride",
+                quantity: 0
+            }
+        },
+        notification: "enjoyEndlessSummerNotification"
+    },
+    completeOnboarding: {
+        id: "completeOnboarding",
+        name: "Complete the Onboarding",
+        specialConditionName: 'achievementCompleteOnboarding',
+        specialCondition: achievementCompleteOnboarding,
+        specialConditionArguments: false,
+        resetOnRebirth: false,
+        active: false,
+        requirements: {
+            requirement1: "special",
+            value1: ""
+        },
+        gives: {
+            gives1: "rewardString",
+            value1: {
+                type: "pride",
+                quantity: 0
+            }
+        },
+        notification: "completeOnboardingNotification"
     }
 };
 
@@ -2633,6 +2844,16 @@ export function setAchievementIconImageUrls() {
         completeRunOnMiaplacidus: `./images/achievements/${getCurrentTheme()}/images/completeRunOnMiaplacidus.png`,
         haveFleetSizeOf50EachShipType: `./images/achievements/${getCurrentTheme()}/images/haveFleetSizeOf50EachShipType.png`,
         tryAllThemes: `./images/achievements/${getCurrentTheme()}/images/tryAllThemes.png`,
+        buyCasinoPoints: `./images/achievements/${getCurrentTheme()}/images/buyCasinoPoints.png`,
+        winAllCasinoGames: `./images/achievements/${getCurrentTheme()}/images/winAllCasinoGames.png`,
+        winWheelSpecialPrize: `./images/achievements/${getCurrentTheme()}/images/winWheelSpecialPrize.png`,
+        restoreNearSpaceScannerArray: `./images/achievements/${getCurrentTheme()}/images/restoreNearSpaceScannerArray.png`,
+        findCosmicRip: `./images/achievements/${getCurrentTheme()}/images/findCosmicRip.png`,
+        gain1MTelemetryData: `./images/achievements/${getCurrentTheme()}/images/gain1MTelemetryData.png`,
+        closeCosmicRip: `./images/achievements/${getCurrentTheme()}/images/closeCosmicRip.png`,
+        suffer5NegativeEvents: `./images/achievements/${getCurrentTheme()}/images/suffer5NegativeEvents.png`,
+        enjoyEndlessSummer: `./images/achievements/${getCurrentTheme()}/images/enjoyEndlessSummer.png`,
+        completeOnboarding: `./images/achievements/${getCurrentTheme()}/images/completeOnboarding.png`,
     };    
 }  
 
@@ -2696,7 +2917,17 @@ const achievementPositionDataLinker = {
     completeGame: { id: 'completeGame', gridRow: 5, gridColumn: 6 },
     completeRunOnMiaplacidus: { id: 'completeRunOnMiaplacidus', gridRow: 5, gridColumn: 7 },
     haveFleetSizeOf50EachShipType: { id: 'haveFleetSizeOf50EachShipType', gridRow: 5, gridColumn: 8 },
-    tryAllThemes: { id: 'tryAllThemes', gridRow: 5, gridColumn: 9 }
+    tryAllThemes: { id: 'tryAllThemes', gridRow: 5, gridColumn: 9 },
+    buyCasinoPoints: { id: 'buyCasinoPoints', gridRow: 6, gridColumn: 0 },
+    winAllCasinoGames: { id: 'winAllCasinoGames', gridRow: 6, gridColumn: 1 },
+    winWheelSpecialPrize: { id: 'winWheelSpecialPrize', gridRow: 6, gridColumn: 2 },
+    restoreNearSpaceScannerArray: { id: 'restoreNearSpaceScannerArray', gridRow: 6, gridColumn: 3 },
+    findCosmicRip: { id: 'findCosmicRip', gridRow: 6, gridColumn: 4 },
+    gain1MTelemetryData: { id: 'gain1MTelemetryData', gridRow: 6, gridColumn: 5 },
+    closeCosmicRip: { id: 'closeCosmicRip', gridRow: 6, gridColumn: 6 },
+    suffer5NegativeEvents: { id: 'suffer5NegativeEvents', gridRow: 6, gridColumn: 7 },
+    enjoyEndlessSummer: { id: 'enjoyEndlessSummer', gridRow: 6, gridColumn: 8 },
+    completeOnboarding: { id: 'completeOnboarding', gridRow: 6, gridColumn: 9 }
 };
 
 export function getAchievementIconImageUrls() {
@@ -3082,6 +3313,10 @@ export function restoreGalacticCasinoDataObject(value) {
             ...(value.settings && typeof value.settings === 'object' ? value.settings : {})
         };
 
+        merged.casinoGamesWon = Array.isArray(value.casinoGamesWon)
+            ? value.casinoGamesWon
+            : (Array.isArray(template.casinoGamesWon) ? [...template.casinoGamesWon] : []);
+
         const savedCasinoPoints = value.casinoPoints && typeof value.casinoPoints === 'object' ? value.casinoPoints : {};
         merged.casinoPoints = {
             ...(template.casinoPoints || {}),
@@ -3385,6 +3620,11 @@ export function setGalacticCasinoDataObject(value, key, subKeys = []) {
     }
 
     let current = galacticCasino;
+    if (!Array.isArray(subKeys) || subKeys.length === 0) {
+        current[key] = value;
+        return;
+    }
+
     current = current[key] || (current[key] = {});
 
     for (let i = 0; i < subKeys.length; i++) {

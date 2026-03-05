@@ -1252,6 +1252,9 @@ export function buyCasinoPoints() {
     const currentCp = getGalacticCasinoDataObject('casinoPoints', ['quantity']) ?? 0;
     setGalacticCasinoDataObject(Math.max(0, currentCp + desiredCp), 'casinoPoints', ['quantity']);
 
+    setAchievementFlagArray('buyCasinoPoints', 'add');
+    checkForAchievements();
+
     purchaseQuantityTextArea.value = '';
     previewEl.textContent = '0';
 }

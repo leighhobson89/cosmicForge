@@ -61,7 +61,8 @@ import {
 import {
     getCurrencySymbol,
     getGalacticPointsSpent,
-    setGalacticPointsSpent
+    setGalacticPointsSpent,
+    setAchievementFlagArray
 } from './constantsAndGlobalVars.js';
 
 import { getResourceDataObject } from './resourceDataObject.js';
@@ -214,6 +215,8 @@ export function drawTab8Content(heading, optionContentElement) {
                     onClick: () => {
                         const currentGPSpent = Number(getGalacticPointsSpent?.()) || 0;
                         setGalacticPointsSpent(currentGPSpent + 1);
+
+                        setAchievementFlagArray('closeCosmicRip', 'add');
                         callPopupModal({
                             header: modalCosmicRipClosedHeader,
                             content: modalCosmicRipClosedText,

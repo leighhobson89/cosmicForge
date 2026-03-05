@@ -1,6 +1,6 @@
 import { getAchievementFlagArray, getActivatedWackyNewsEffectsArray, getAlreadySeenNewsTickerArray, getCollectedPrecipitationQuantityThisRun, getCompoundCreateDropdownRecipeText, getCurrentOptionPane, getCurrentStarSystem, getGameActiveCountTime, getInfinitePower, getMiningObject, getMultiplierPermanentResources, getStarVisionDistance, getStatRun, getTechUnlockedArray, getUnlockedResourcesArray, setAchievementFlagArray, setCompoundCreateDropdownRecipeText, setMultiplierPermanentCompounds, setMultiplierPermanentResources } from "./constantsAndGlobalVars.js";
 import { getAchievementNotification, newsTickerContent, refreshAchievementTooltipDescriptions } from "./descriptions.js";
-import { achievementsData, getAchievementDataObject, getResourceDataObject, getStarSystemDataObject, setAchievementDataObject, setResourceDataObject } from "./resourceDataObject.js";
+import { achievementsData, getAchievementDataObject, getGalacticCasinoDataObject, getResourceDataObject, getStarSystemDataObject, setAchievementDataObject, setResourceDataObject } from "./resourceDataObject.js";
 import { showNotification } from "./ui.js";
 import { trackAnalyticsEvent } from "./analytics.js";
 
@@ -50,7 +50,17 @@ export const achievementFunctionsMap = {
     achievementCompleteGame,
     achievementCompleteRunOnMiaplacidus,
     achievementHaveFleetSizeOf50EachShipType,
-    achievementTryAllThemes
+    achievementTryAllThemes,
+    achievementBuyCasinoPoints,
+    achievementWinAllCasinoGames,
+    achievementWinWheelSpecialPrize,
+    achievementRestoreNearSpaceScannerArray,
+    achievementFindCosmicRip,
+    achievementGain1MTelemetryData,
+    achievementCloseCosmicRip,
+    achievementSuffer5NegativeEvents,
+    achievementEnjoyEndlessSummer,
+    achievementCompleteOnboarding
 };
 
 export function checkForAchievements() {
@@ -688,6 +698,91 @@ export function achievementTryAllThemes() {
     const achievement = getAchievementDataObject('tryAllThemes');
     if (getAchievementFlagArray().includes('tryAllThemes')) {
         setAchievementFlagArray('tryAllThemes', 'remove');
+        grantAchievement(achievement);
+    }
+}
+
+export function achievementBuyCasinoPoints() {
+    const achievement = getAchievementDataObject('buyCasinoPoints');
+    if (getAchievementFlagArray().includes('buyCasinoPoints')) {
+        setAchievementFlagArray('buyCasinoPoints', 'remove');
+        grantAchievement(achievement);
+    }
+}
+
+export function achievementWinAllCasinoGames() {
+    const achievement = getAchievementDataObject('winAllCasinoGames');
+    try {
+        const won = getGalacticCasinoDataObject('casinoGamesWon');
+        const list = Array.isArray(won) ? won : [];
+        const unique = new Set(list.map((x) => String(x || '').toLowerCase()).filter(Boolean));
+        if (unique.size >= 4) {
+            grantAchievement(achievement);
+        }
+    } catch {
+    }
+}
+
+export function achievementWinWheelSpecialPrize() {
+    const achievement = getAchievementDataObject('winWheelSpecialPrize');
+    if (getAchievementFlagArray().includes('winWheelSpecialPrize')) {
+        setAchievementFlagArray('winWheelSpecialPrize', 'remove');
+        grantAchievement(achievement);
+    }
+}
+
+export function achievementRestoreNearSpaceScannerArray() {
+    const achievement = getAchievementDataObject('restoreNearSpaceScannerArray');
+    if (getAchievementFlagArray().includes('restoreNearSpaceScannerArray')) {
+        setAchievementFlagArray('restoreNearSpaceScannerArray', 'remove');
+        grantAchievement(achievement);
+    }
+}
+
+export function achievementFindCosmicRip() {
+    const achievement = getAchievementDataObject('findCosmicRip');
+    if (getAchievementFlagArray().includes('findCosmicRip')) {
+        setAchievementFlagArray('findCosmicRip', 'remove');
+        grantAchievement(achievement);
+    }
+}
+
+export function achievementGain1MTelemetryData() {
+    const achievement = getAchievementDataObject('gain1MTelemetryData');
+    const telemetry = Number(getResourceDataObject('cosmicRip', ['ripTelemetryData'], true) ?? 0);
+    if (Number.isFinite(telemetry) && telemetry >= 1000000) {
+        grantAchievement(achievement);
+    }
+}
+
+export function achievementCloseCosmicRip() {
+    const achievement = getAchievementDataObject('closeCosmicRip');
+    if (getAchievementFlagArray().includes('closeCosmicRip')) {
+        setAchievementFlagArray('closeCosmicRip', 'remove');
+        grantAchievement(achievement);
+    }
+}
+
+export function achievementSuffer5NegativeEvents() {
+    const achievement = getAchievementDataObject('suffer5NegativeEvents');
+    if (getAchievementFlagArray().includes('suffer5NegativeEvents')) {
+        setAchievementFlagArray('suffer5NegativeEvents', 'remove');
+        grantAchievement(achievement);
+    }
+}
+
+export function achievementEnjoyEndlessSummer() {
+    const achievement = getAchievementDataObject('enjoyEndlessSummer');
+    if (getAchievementFlagArray().includes('enjoyEndlessSummer')) {
+        setAchievementFlagArray('enjoyEndlessSummer', 'remove');
+        grantAchievement(achievement);
+    }
+}
+
+export function achievementCompleteOnboarding() {
+    const achievement = getAchievementDataObject('completeOnboarding');
+    if (getAchievementFlagArray().includes('completeOnboarding')) {
+        setAchievementFlagArray('completeOnboarding', 'remove');
         grantAchievement(achievement);
     }
 }

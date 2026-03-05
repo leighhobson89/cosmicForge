@@ -259,6 +259,151 @@ export function migrateResourceData(saveData, objectType, options = {}) {
             }
             saveData.version = 0.976;
         }
+
+        if (saveData.version < 0.977) {
+            if (objectType === 'galacticCasinoData') {
+                if (!Array.isArray(saveData.casinoGamesWon)) {
+                    saveData.casinoGamesWon = [];
+                }
+            }
+
+            if (objectType === 'achievementsData') {
+                if (!saveData || typeof saveData !== 'object') {
+                    saveData = {};
+                }
+
+                const newAchievements = {
+                    buyCasinoPoints: {
+                        id: "buyCasinoPoints",
+                        name: "Buy Some Casino Points",
+                        specialConditionName: 'achievementBuyCasinoPoints',
+                        specialCondition: false,
+                        specialConditionArguments: false,
+                        resetOnRebirth: false,
+                        active: false,
+                        requirements: { requirement1: "special", value1: "" },
+                        gives: { gives1: "rewardString", value1: { type: "pride", quantity: 0 } },
+                        notification: "buyCasinoPointsNotification"
+                    },
+                    winAllCasinoGames: {
+                        id: "winAllCasinoGames",
+                        name: "Win a Prize in All Casino Games",
+                        specialConditionName: 'achievementWinAllCasinoGames',
+                        specialCondition: false,
+                        specialConditionArguments: false,
+                        resetOnRebirth: false,
+                        active: false,
+                        requirements: { requirement1: "special", value1: "" },
+                        gives: { gives1: "rewardString", value1: { type: "pride", quantity: 0 } },
+                        notification: "winAllCasinoGamesNotification"
+                    },
+                    winWheelSpecialPrize: {
+                        id: "winWheelSpecialPrize",
+                        name: "Win a Wheel of Fortune Special Prize",
+                        specialConditionName: 'achievementWinWheelSpecialPrize',
+                        specialCondition: false,
+                        specialConditionArguments: false,
+                        resetOnRebirth: false,
+                        active: false,
+                        requirements: { requirement1: "special", value1: "" },
+                        gives: { gives1: "rewardString", value1: { type: "pride", quantity: 0 } },
+                        notification: "winWheelSpecialPrizeNotification"
+                    },
+                    restoreNearSpaceScannerArray: {
+                        id: "restoreNearSpaceScannerArray",
+                        name: "Restore the Near Space Scanner Array",
+                        specialConditionName: 'achievementRestoreNearSpaceScannerArray',
+                        specialCondition: false,
+                        specialConditionArguments: false,
+                        resetOnRebirth: false,
+                        active: false,
+                        requirements: { requirement1: "special", value1: "" },
+                        gives: { gives1: "rewardString", value1: { type: "pride", quantity: 0 } },
+                        notification: "restoreNearSpaceScannerArrayNotification"
+                    },
+                    findCosmicRip: {
+                        id: "findCosmicRip",
+                        name: "Find the Cosmic Rip",
+                        specialConditionName: 'achievementFindCosmicRip',
+                        specialCondition: false,
+                        specialConditionArguments: false,
+                        resetOnRebirth: false,
+                        active: false,
+                        requirements: { requirement1: "special", value1: "" },
+                        gives: { gives1: "rewardString", value1: { type: "pride", quantity: 0 } },
+                        notification: "findCosmicRipNotification"
+                    },
+                    gain1MTelemetryData: {
+                        id: "gain1MTelemetryData",
+                        name: "Gain 1M Telemetry Data",
+                        specialConditionName: 'achievementGain1MTelemetryData',
+                        specialCondition: false,
+                        specialConditionArguments: false,
+                        resetOnRebirth: false,
+                        active: false,
+                        requirements: { requirement1: "special", value1: "" },
+                        gives: { gives1: "rewardString", value1: { type: "pride", quantity: 0 } },
+                        notification: "gain1MTelemetryDataNotification"
+                    },
+                    closeCosmicRip: {
+                        id: "closeCosmicRip",
+                        name: "Close the Cosmic Rip",
+                        specialConditionName: 'achievementCloseCosmicRip',
+                        specialCondition: false,
+                        specialConditionArguments: false,
+                        resetOnRebirth: false,
+                        active: false,
+                        requirements: { requirement1: "special", value1: "" },
+                        gives: { gives1: "rewardString", value1: { type: "pride", quantity: 0 } },
+                        notification: "closeCosmicRipNotification"
+                    },
+                    suffer5NegativeEvents: {
+                        id: "suffer5NegativeEvents",
+                        name: "Suffer 5 Negative Events",
+                        specialConditionName: 'achievementSuffer5NegativeEvents',
+                        specialCondition: false,
+                        specialConditionArguments: false,
+                        resetOnRebirth: false,
+                        active: false,
+                        requirements: { requirement1: "special", value1: "" },
+                        gives: { gives1: "rewardString", value1: { type: "pride", quantity: 0 } },
+                        notification: "suffer5NegativeEventsNotification"
+                    },
+                    enjoyEndlessSummer: {
+                        id: "enjoyEndlessSummer",
+                        name: "Enjoy an Endless Summer",
+                        specialConditionName: 'achievementEnjoyEndlessSummer',
+                        specialCondition: false,
+                        specialConditionArguments: false,
+                        resetOnRebirth: false,
+                        active: false,
+                        requirements: { requirement1: "special", value1: "" },
+                        gives: { gives1: "rewardString", value1: { type: "pride", quantity: 0 } },
+                        notification: "enjoyEndlessSummerNotification"
+                    },
+                    completeOnboarding: {
+                        id: "completeOnboarding",
+                        name: "Complete the Onboarding",
+                        specialConditionName: 'achievementCompleteOnboarding',
+                        specialCondition: false,
+                        specialConditionArguments: false,
+                        resetOnRebirth: false,
+                        active: false,
+                        requirements: { requirement1: "special", value1: "" },
+                        gives: { gives1: "rewardString", value1: { type: "pride", quantity: 0 } },
+                        notification: "completeOnboardingNotification"
+                    }
+                };
+
+                for (const [key, achievement] of Object.entries(newAchievements)) {
+                    if (!saveData[key]) {
+                        saveData[key] = achievement;
+                    }
+                }
+            }
+
+            saveData.version = 0.977;
+        }
     }
     return saveData;
 }

@@ -11,7 +11,7 @@ import {
     setCosmicRipGalacticPoints,
 } from './resourceDataObject.js';
 
-import { getGalacticPointsSpent, setGalacticPointsSpent } from './constantsAndGlobalVars.js';
+import { getGalacticPointsSpent, setGalacticPointsSpent, setAchievementFlagArray } from './constantsAndGlobalVars.js';
 
 const TELESCOPE_RESTORE_COST_GP = 10;
 const SECTOR_SCAN_COST_GP = 1;
@@ -55,6 +55,8 @@ export function restoreNearSpaceScannerArray() {
     setGalacticPointsSpent(spent + TELESCOPE_RESTORE_COST_GP);
 
     setCosmicRipNearSpaceScannerArrayRestored(true);
+
+    setAchievementFlagArray('restoreNearSpaceScannerArray', 'add');
 
     ensureCosmicRipLocationSeeded();
 
@@ -100,6 +102,7 @@ export function scanCosmicRipSector(sectorIndex) {
     const found = idx === ripIdx;
     if (found) {
         setCosmicRipRipFound(true);
+        setAchievementFlagArray('findCosmicRip', 'add');
     }
 
     return { ok: true, found, sectorIndex: idx };

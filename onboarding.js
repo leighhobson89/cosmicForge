@@ -6,6 +6,8 @@ import {
     getTechUnlockedArray
 } from './constantsAndGlobalVars.js';
 
+import { setAchievementFlagArray } from './constantsAndGlobalVars.js';
+
 import { getResourceDataObject } from './resourceDataObject.js';
 
 import {
@@ -1036,7 +1038,7 @@ export function onboardingChecks(
             ['condition', ['RESEARCH', 0], ['computed', 'techUnlocked'], 'knowledgeSharing', 'contains'],
             ['spotlight', ['researchOption', 1], 'Click Research', { waitForClick: false }, 'Research'],
             ['timedSpotlight', ['Add 8 Research /s', 0], 'Once you save up more Cash you can buy a Science Club * You will Research much faster!', 4000, 'Research'],
-            ['spotlight', ['tab8', 1], 'Next we will take a look at the Settings Tab.', 'Research'],
+            ['spotlight', ['tab9', 1], 'Next we will take a look at the Settings Tab.', 'Research'],
             ['spotlight', ['Visual', 0], 'While we are here, lets change the look and feel.', 'Settings'],
             ['timedSpotlight', ['themeSelect', 1], 'In this menu you can customise the look and feel of the game.*Scroll down to find Themes.', 4000, 'Settings'],
             ['spotlight', ['themeSelect', 1], 'Click the Dropdown', 'Settings'],
@@ -1075,6 +1077,7 @@ export function onboardingChecks(
                 showExtra1: false,
                 showExtra2: false,
                 onConfirm: () => {
+                    setAchievementFlagArray('completeOnboarding', 'add');
                     setOnboardingMode(false);
                     resetOnboardingProgression();
                     showHideModal?.();

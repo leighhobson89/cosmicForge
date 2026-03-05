@@ -44,7 +44,8 @@ import {
     getAllRepeatableTechMultipliersObject,
     getPlayerPhilosophy,
     getStatRun,
-    setBuildingTypeOnOff
+    setBuildingTypeOnOff,
+    setAchievementFlagArray
 } from "./constantsAndGlobalVars.js";
 import {
     getBlackHoleDuration,
@@ -174,6 +175,15 @@ const TIMED_RANDOM_EVENT_IDS = new Set([
     'blackHoleInstability'
 ]);
 
+const NEGATIVE_INSTANT_EVENT_IDS = new Set([
+    'powerPlantExplosion',
+    'batteryExplosion',
+    'scienceTheft',
+    'antimatterReaction',
+    'stockLoss',
+    'starshipLostInSpace'
+]);
+
 function buildInstantEventUiDescription(eventId, triggerResult) {
     const safe = (triggerResult && typeof triggerResult === 'object') ? triggerResult : {};
 
@@ -239,6 +249,16 @@ function recordInstantEventHistory(eventId, triggerResult) {
         description: buildInstantEventUiDescription(eventId, triggerResult),
         context: (triggerResult && typeof triggerResult === 'object') ? { ...triggerResult } : null
     });
+
+    if (NEGATIVE_INSTANT_EVENT_IDS.has(eventId)) {
+        const history = getResourceDataObject('randomEvents', ['instantEventsHistory'], true) || [];
+        const negativeCount = Array.isArray(history)
+            ? history.filter((entry) => NEGATIVE_INSTANT_EVENT_IDS.has(entry?.id)).length
+            : 0;
+        if (negativeCount >= 5) {
+            setAchievementFlagArray('suffer5NegativeEvents', 'add');
+        }
+    }
 }
 
 const randomEventDefinitions = {
@@ -856,6 +876,12 @@ function recordTimedEffectHistory(effectId) {
     });
 }
 
+function recordTimedEffectAchievementFlags(effectId) {
+    if (effectId === 'endlessSummer') {
+        setAchievementFlagArray('enjoyEndlessSummer', 'add');
+    }
+}
+
 function getTimedEffectState(effectId) {
     getTimedEffectsRoot();
     const stored = getResourceDataObject('randomEvents', ['timedEffects', effectId], true);
@@ -893,6 +919,8 @@ function startTimedEffect(effectId, durationMs, extraState = null) {
     const safeDuration = Math.max(0, Number(durationMs) || 0);
     const extra = (extraState && typeof extraState === 'object') ? extraState : null;
     setTimedEffectState(effectId, { remainingMs: safeDuration, totalDurationMs: safeDuration, startedAtMs: Date.now(), ...(extra || {}) });
+
+    recordTimedEffectAchievementFlags(effectId);
 
     if (typeof randomEventUiHandlers.onTimedEffectStarted === 'function') {
         randomEventUiHandlers.onTimedEffectStarted(effectId);

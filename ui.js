@@ -1,4 +1,5 @@
 import {
+    setLastFocusOfflineGainsAppliedAt,
     setGalacticPointsSpent,
     getInFormation,
     getGalacticCasinoUnlocked,
@@ -4223,7 +4224,7 @@ export function createHtmlTableAchievementsGrid(id, classList = [], achievements
     container.classList.add(...classList);
     container.style.display = 'grid';
     container.style.gridTemplateColumns = 'repeat(10, 80px)';
-    container.style.gridTemplateRows = 'repeat(6, 80px)';
+    container.style.gridTemplateRows = 'repeat(7, 80px)';
     container.style.gap = '0px';
     container.style.padding = '10px';
     container.style.justifyContent = 'start';
