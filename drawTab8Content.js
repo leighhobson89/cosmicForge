@@ -5,8 +5,7 @@ import {
     modalNearSpaceScannerArrayRestoredHeader,
     modalNearSpaceScannerArrayRestoredText,
     modalCosmicRipClosedHeader,
-    modalCosmicRipClosedText,
-    modalCosmicRipClosedConfirmText,
+    modalCosmicRipClosedText
 } from './descriptions.js';
 import {
     getCosmicRipGalacticPoints,
