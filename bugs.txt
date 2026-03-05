@@ -17,3 +17,10 @@ Things to do:
 - add statistics to stats section for new chapter and check if events has stats and casino
 - add achievements for casino, cosmic rip section, events
 - add end navigation ie close game or something after the end credit animation
+
+How game works now:
+- Player settles Miaplacidus triggers popup story and playWinCinematic() and gets told about Cosmic Rip
+- Cosmic Rip (tab8) is shown to the player and unlocked
+- Player plays through Cosmic Rip content.
+- Once scanned sector and researched all 5 techs Close Cosmic Rip button row and button are shown in situation UI
+- Once clicked, popup is shown explainig end game and playWinCinematic2() plays
