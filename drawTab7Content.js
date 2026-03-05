@@ -46,6 +46,8 @@ import {
     getUnlockedCompoundsArray,
     getVoidSeerPrizeCatalog,
     getLiquidatedThisRun,
+    incrementGalacticCasinoStatBothScopes,
+    addGalacticCasinoStatBothScopes,
 } from './constantsAndGlobalVars.js';
 import { purchaseBuff, buyCasinoPoints, galacticMarketLiquidateForAp, galacticMarketSellApForCash, galacticMarketTrade, rebirth, startBlackHoleChargeTimer, timeWarp } from './game.js';
 import { claimCasinoSpecialPrizeByKey, spinNumericSpinner } from './casino.js';
@@ -763,6 +765,9 @@ export function drawTab7Content(heading, optionContentElement) {
                     return;
                 }
 
+                incrementGalacticCasinoStatBothScopes('game4_voidSeerPlayed');
+                addGalacticCasinoStatBothScopes(cost, 'casinoPointsSpent');
+
                 game4Container.setAttribute('data-spinning', 'true');
                 updateVoidSeerSpinButtonState();
 
@@ -786,6 +791,7 @@ export function drawTab7Content(heading, optionContentElement) {
                     game4Container.setAttribute('data-spinning', 'false');
 
                     if (final1 === final2) {
+                        incrementGalacticCasinoStatBothScopes('game4_voidSeerWon');
                         const settledStarSet = new Set((getSettledStars?.() || []).map((name) => String(name || '').toLowerCase()));
                         const starshipDestination = String(getDestinationStar?.() || '').toLowerCase();
                         const starshipStatus = getStarShipStatus?.() || [];
@@ -1530,6 +1536,7 @@ export function drawTab7Content(heading, optionContentElement) {
                 const prizeNameRaw = String(game3HiloContainer.getAttribute('data-hilo-tier-prize') || '---') || '---';
                 const prizeKey = String(game3HiloContainer.getAttribute('data-hilo-tier-prize-key') || '');
                 const awarded = awardHiloPrize({ key: prizeKey });
+                incrementGalacticCasinoStatBothScopes('game3_higherLowerWon');
                 const prizeName = getHiloNotificationPrizeName(prizeNameRaw, awarded);
                 const details = formatHiloAwardDetails(awarded);
                 const suffix = shouldAppendHiloAwardDetails(prizeName, awarded, details) ? ` - ${details}` : '';
@@ -1555,6 +1562,9 @@ export function drawTab7Content(heading, optionContentElement) {
                         return;
                     }
 
+                    incrementGalacticCasinoStatBothScopes('game3_higherLowerPlayed');
+                    addGalacticCasinoStatBothScopes(5, 'casinoPointsSpent');
+
                     trackAnalyticsEvent('casino_game_played', {
                         game_id: 'game3_hilo'
                     }, { immediate: true, flushReason: 'casino' });
@@ -1574,6 +1584,10 @@ export function drawTab7Content(heading, optionContentElement) {
                     const prizeNameRaw = String(game3HiloContainer.getAttribute('data-hilo-tier-prize') || '---') || '---';
                     const prizeKey = String(game3HiloContainer.getAttribute('data-hilo-tier-prize-key') || '');
                     const awarded = awardHiloPrize({ key: prizeKey });
+
+                    if (awarded) {
+                        incrementGalacticCasinoStatBothScopes('game3_higherLowerWon');
+                    }
 
                     if (awarded) {
                         trackAnalyticsEvent('casino_prize_won', {

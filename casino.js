@@ -5,6 +5,8 @@ import {
 } from './resourceDataObject.js';
 import {
     getWheelForceSpecial,
+    incrementGalacticCasinoStatBothScopes,
+    addGalacticCasinoStatBothScopes,
 } from './constantsAndGlobalVars.js';
 
 import { getResourceDataObject, setResourceDataObject } from './resourceDataObject.js';
@@ -432,6 +434,7 @@ export function claimCasinoSpecialPrizeByKey(selection, { notify = true } = {}) 
 }
 
 export function claimWheelSpecialPrize({ wheelId } = {}) {
+
     const id = String(wheelId || '');
     if (!id) return null;
 
@@ -447,6 +450,7 @@ export function claimWheelSpecialPrize({ wheelId } = {}) {
 
     const claimed = claimCasinoSpecialPrizeByKey(selection, { notify: true });
     if (claimed) {
+
         trackAnalyticsEvent('casino_prize_won', {
             game_id: 'game2_wheel_special',
             prize_key: selection,
@@ -456,6 +460,7 @@ export function claimWheelSpecialPrize({ wheelId } = {}) {
             old_quantity: claimed.oldQuantity ?? null,
             new_quantity: claimed.newQuantity ?? null,
         }, { immediate: true, flushReason: 'casino' });
+        incrementGalacticCasinoStatBothScopes('game2_wheelSpecialWon');
     }
     return claimed;
 }
@@ -941,6 +946,8 @@ export function playDoubleOrNothing({ stake, spinnerId }) {
         game_id: 'game1_double_or_nothing'
     }, { immediate: true, flushReason: 'casino' });
 
+    incrementGalacticCasinoStatBothScopes('game1_doubleOrNothingPlayed');
+
     const currentCp = getGalacticCasinoDataObject('casinoPoints', ['quantity']) ?? 0;
     const stakeInt = parseInt(String(stake ?? '0'), 10);
     const desiredStake = Number.isFinite(stakeInt) ? Math.max(0, stakeInt) : 0;
@@ -956,6 +963,7 @@ export function playDoubleOrNothing({ stake, spinnerId }) {
     }
 
     setGalacticCasinoDataObject(Math.max(0, currentCp - desiredStake), 'casinoPoints', ['quantity']);
+    addGalacticCasinoStatBothScopes(desiredStake, 'casinoPointsSpent');
 
     const spinButton = document.getElementById('galacticCasinoGame1SpinButton');
     if (spinButton) {
@@ -967,6 +975,7 @@ export function playDoubleOrNothing({ stake, spinnerId }) {
     spinDoubleOrNothing(spinnerId, 5000)
         .then((outcome) => {
             if (outcome === 'win') {
+                incrementGalacticCasinoStatBothScopes('game1_doubleOrNothingWon');
                 const cpAfterSpin = getGalacticCasinoDataObject('casinoPoints', ['quantity']) ?? 0;
                 setGalacticCasinoDataObject(Math.max(0, cpAfterSpin + (desiredStake * 2)), 'casinoPoints', ['quantity']);
                 showNotification('WIN! Stake doubled.', 'info', 2500, 'galacticCasino');
@@ -999,6 +1008,8 @@ export function playWheelOfFortune({ wheelId, costCp = 1, durationMs = 5000 } = 
     trackAnalyticsEvent('casino_game_played', {
         game_id: 'game2_wheel'
     }, { immediate: true, flushReason: 'casino' });
+
+    incrementGalacticCasinoStatBothScopes('game2_wheelPlayed');
 
     const id = String(wheelId || '');
     if (!id) {
@@ -1041,6 +1052,7 @@ export function playWheelOfFortune({ wheelId, costCp = 1, durationMs = 5000 } = 
         spinButton.classList.remove('green-ready-text');
     }
     setGalacticCasinoDataObject(Math.max(0, currentCp - cost), 'casinoPoints', ['quantity']);
+    addGalacticCasinoStatBothScopes(cost, 'casinoPointsSpent');
 
     const segmentCount = 16;
     const segmentAngle = 360 / segmentCount;
@@ -1088,11 +1100,13 @@ export function playWheelOfFortune({ wheelId, costCp = 1, durationMs = 5000 } = 
                 }
 
                 if (selectedIndex === 0) {
+                    incrementGalacticCasinoStatBothScopes('game2_wheelWon');
                     wheelEl.setAttribute('data-special-ready', 'true');
                     showNotification('WIN! Special Prize! - Select a Prize from the dropdown to continue.', 'info', 3500, 'galacticCasino');
                 } else if (selectedIndex % 2 === 1) {
                     showNotification('LOSE! Better luck next time.', 'error', 2000, 'galacticCasino');
                 } else {
+                    incrementGalacticCasinoStatBothScopes('game2_wheelWon');
                     const prize = awardRegularPrize(cost);
 
                     if (prize) {

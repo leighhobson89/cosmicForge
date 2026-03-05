@@ -2656,6 +2656,38 @@ statisticsContent = {
         subHeading17: "Black Hole Strength",
         subBody17: "N/A",
     }
+    ,
+    'galactic Casino': {
+        subHeading1: "Casino Points Spent",
+        subBody1: "0",
+
+        subHeading2: "Double Or Nothing Played",
+        subBody2: "0",
+
+        subHeading3: "Double Or Nothing Won",
+        subBody3: "0",
+
+        subHeading4: "Wheel Of Fortune Played",
+        subBody4: "0",
+
+        subHeading5: "Wheel Of Fortune Won",
+        subBody5: "0",
+
+        subHeading6: "Wheel Special Won",
+        subBody6: "0",
+
+        subHeading7: "Higher/Lower Played",
+        subBody7: "0",
+
+        subHeading8: "Higher/Lower Won",
+        subBody8: "0",
+
+        subHeading9: "VoidSeer Played",
+        subBody9: "0",
+
+        subHeading10: "VoidSeer Won",
+        subBody10: "0",
+    }
 }
 
 helpContent = {

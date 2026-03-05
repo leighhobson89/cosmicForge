@@ -1,4 +1,6 @@
-import { restoreAchievementsDataObject, restoreAscendencyBuffsDataObject, restoreGalacticMarketDataObject, restoreGalacticCasinoDataObject, restoreRocketNamesObject, restoreResourceDataObject, restoreStarSystemsDataObject, resourceData, starSystems, getResourceDataObject, setResourceDataObject, galacticMarket, galacticCasino, ascendencyBuffs, achievementsData, getStarSystemDataObject, getBlackHoleResearchDone, getBlackHolePower, getBlackHoleDuration, getBlackHoleRechargeMultiplier, getBlackHoleResearchPrice, getBlackHolePowerPrice, getBlackHoleDurationPrice, getBlackHoleRechargePrice, setBlackHoleResearchDone, setBlackHolePower, setBlackHoleDuration, setBlackHoleRechargeMultiplier, setBlackHoleResearchPrice, setBlackHolePowerPrice, setBlackHoleDurationPrice, setBlackHoleRechargePrice, oTypePowerPlantBuffs, restoreOTypePowerPlantBuffsObject, getGalacticCasinoDataObject, setGalacticCasinoDataObject } from "./resourceDataObject.js";
+import {
+  restoreAchievementsDataObject, restoreAscendencyBuffsDataObject, restoreGalacticMarketDataObject, restoreGalacticCasinoDataObject, restoreRocketNamesObject, restoreResourceDataObject, restoreStarSystemsDataObject, resourceData, starSystems, getResourceDataObject, setResourceDataObject, galacticMarket, galacticCasino, ascendencyBuffs, achievementsData, getStarSystemDataObject, getBlackHoleResearchDone, getBlackHolePower, getBlackHoleDuration, getBlackHoleRechargeMultiplier, getBlackHoleResearchPrice, getBlackHolePowerPrice, getBlackHoleDurationPrice, getBlackHoleRechargePrice, setBlackHoleResearchDone, setBlackHolePower, setBlackHoleDuration, setBlackHoleRechargeMultiplier, setBlackHoleResearchPrice, setBlackHolePowerPrice, setBlackHoleDurationPrice, setBlackHoleRechargePrice, oTypePowerPlantBuffs, restoreOTypePowerPlantBuffsObject, getAchievementDataObject
+} from './resourceDataObject.js';
 import { achievementFunctionsMap } from "./achievements.js";
 import { drawNativeTechTree, selectTheme, startWeatherEffect, stopWeatherEffect, applyCustomPointerSetting, showNotification, generateStarfield } from "./ui.js";
 import { capitaliseWordsWithRomanNumerals, capitaliseString } from './utilityFunctions.js';
@@ -64,7 +66,104 @@ export const VOID_SEER_PRIZE_CATALOG = {
     prize1: { costCp: 7, maxReel: 6, label: 'O Type Star Clue - 7CP - Odds: 6/1' },
     prize2: { costCp: 10, maxReel: 8, label: 'Ancient Manuscript Clue - 10CP - Odds: 8/1' },
     prize3: { costCp: 15, maxReel: 12, label: 'Pillage Antimatter - 15CP - Odds: 12/1' }
+
 };
+
+export function addGalacticCasinoStatBothScopes(amountToAdd, statKey) {
+    const amt = Number(amountToAdd);
+    if (!Number.isFinite(amt) || amt === 0) return;
+    const key = String(statKey || '').trim();
+    if (!key) return;
+
+    const apply = (k, add) => {
+        switch (k) {
+            case 'casinoPointsSpent':
+                casinoPointsSpentThisRun += add;
+                allTimeCasinoPointsSpent += add;
+                break;
+            case 'game1_doubleOrNothingPlayed':
+                casinoGame1DoubleOrNothingPlayedThisRun += add;
+                allTimeCasinoGame1DoubleOrNothingPlayed += add;
+                break;
+            case 'game1_doubleOrNothingWon':
+                casinoGame1DoubleOrNothingWonThisRun += add;
+                allTimeCasinoGame1DoubleOrNothingWon += add;
+                break;
+            case 'game2_wheelPlayed':
+                casinoGame2WheelPlayedThisRun += add;
+                allTimeCasinoGame2WheelPlayed += add;
+                break;
+            case 'game2_wheelWon':
+                casinoGame2WheelWonThisRun += add;
+                allTimeCasinoGame2WheelWon += add;
+                break;
+            case 'game2_wheelSpecialWon':
+                casinoGame2WheelSpecialWonThisRun += add;
+                allTimeCasinoGame2WheelSpecialWon += add;
+                break;
+            case 'game3_higherLowerPlayed':
+                casinoGame3HigherLowerPlayedThisRun += add;
+                allTimeCasinoGame3HigherLowerPlayed += add;
+                break;
+            case 'game3_higherLowerWon':
+                casinoGame3HigherLowerWonThisRun += add;
+                allTimeCasinoGame3HigherLowerWon += add;
+                break;
+            case 'game4_voidSeerPlayed':
+                casinoGame4VoidSeerPlayedThisRun += add;
+                allTimeCasinoGame4VoidSeerPlayed += add;
+                break;
+            case 'game4_voidSeerWon':
+                casinoGame4VoidSeerWonThisRun += add;
+                allTimeCasinoGame4VoidSeerWon += add;
+                break;
+            default:
+                break;
+        }
+    };
+
+    apply(key, amt);
+}
+
+export function incrementGalacticCasinoStatBothScopes(statKey) {
+    addGalacticCasinoStatBothScopes(1, statKey);
+}
+
+function getGalacticCasinoStatValue(statKey, scope) {
+    const safeScope = scope === 'currentRun' ? 'currentRun' : 'allTime';
+    const key = String(statKey || '').trim();
+    if (!key) return 0;
+
+    const allTimeMap = {
+        casinoPointsSpent: () => allTimeCasinoPointsSpent,
+        game1_doubleOrNothingPlayed: () => allTimeCasinoGame1DoubleOrNothingPlayed,
+        game1_doubleOrNothingWon: () => allTimeCasinoGame1DoubleOrNothingWon,
+        game2_wheelPlayed: () => allTimeCasinoGame2WheelPlayed,
+        game2_wheelWon: () => allTimeCasinoGame2WheelWon,
+        game2_wheelSpecialWon: () => allTimeCasinoGame2WheelSpecialWon,
+        game3_higherLowerPlayed: () => allTimeCasinoGame3HigherLowerPlayed,
+        game3_higherLowerWon: () => allTimeCasinoGame3HigherLowerWon,
+        game4_voidSeerPlayed: () => allTimeCasinoGame4VoidSeerPlayed,
+        game4_voidSeerWon: () => allTimeCasinoGame4VoidSeerWon,
+    };
+
+    const thisRunMap = {
+        casinoPointsSpent: () => casinoPointsSpentThisRun,
+        game1_doubleOrNothingPlayed: () => casinoGame1DoubleOrNothingPlayedThisRun,
+        game1_doubleOrNothingWon: () => casinoGame1DoubleOrNothingWonThisRun,
+        game2_wheelPlayed: () => casinoGame2WheelPlayedThisRun,
+        game2_wheelWon: () => casinoGame2WheelWonThisRun,
+        game2_wheelSpecialWon: () => casinoGame2WheelSpecialWonThisRun,
+        game3_higherLowerPlayed: () => casinoGame3HigherLowerPlayedThisRun,
+        game3_higherLowerWon: () => casinoGame3HigherLowerWonThisRun,
+        game4_voidSeerPlayed: () => casinoGame4VoidSeerPlayedThisRun,
+        game4_voidSeerWon: () => casinoGame4VoidSeerWonThisRun,
+    };
+
+    const getter = safeScope === 'currentRun' ? thisRunMap[key] : allTimeMap[key];
+    const value = typeof getter === 'function' ? getter() : 0;
+    return Number(value ?? 0);
+}
 
 export const AP_BASE_SELL_PRICE = 100000;
 export const AP_BASE_BUY_PRICE = 1000000;
@@ -549,6 +648,17 @@ let allTimeTotalStarShipsLaunched = 0;
 let allTimeTotalAsteroidsDiscovered = 0;
 let allTimeTotalLegendaryAsteroidsDiscovered = 0;
 
+let allTimeCasinoPointsSpent = 0;
+let allTimeCasinoGame1DoubleOrNothingPlayed = 0;
+let allTimeCasinoGame1DoubleOrNothingWon = 0;
+let allTimeCasinoGame2WheelPlayed = 0;
+let allTimeCasinoGame2WheelWon = 0;
+let allTimeCasinoGame2WheelSpecialWon = 0;
+let allTimeCasinoGame3HigherLowerPlayed = 0;
+let allTimeCasinoGame3HigherLowerWon = 0;
+let allTimeCasinoGame4VoidSeerPlayed = 0;
+let allTimeCasinoGame4VoidSeerWon = 0;
+
 let hydrogenThisRun = 0;
 let heliumThisRun = 0;
 let carbonThisRun = 0;
@@ -569,6 +679,17 @@ let researchPointsThisRun = 0;
 let scienceKitsThisRun = 0;
 let scienceClubsThisRun = 0;
 let scienceLabsThisRun = 0;
+
+let casinoPointsSpentThisRun = 0;
+let casinoGame1DoubleOrNothingPlayedThisRun = 0;
+let casinoGame1DoubleOrNothingWonThisRun = 0;
+let casinoGame2WheelPlayedThisRun = 0;
+let casinoGame2WheelWonThisRun = 0;
+let casinoGame2WheelSpecialWonThisRun = 0;
+let casinoGame3HigherLowerPlayedThisRun = 0;
+let casinoGame3HigherLowerWonThisRun = 0;
+let casinoGame4VoidSeerPlayedThisRun = 0;
+let casinoGame4VoidSeerWonThisRun = 0;
 
 let starStudyRange = 0;
 let allTimeTotalAntimatterMined = 0;
@@ -935,6 +1056,37 @@ export const statFunctionsGets = {
     "stat_blackHoleAlwaysActive": getStatBlackHoleAlwaysActiveAllTime,
     "stat_blackHoleStrengthThisRun": getStatBlackHoleStrengthThisRun,
     "stat_blackHoleStrength": getStatBlackHoleStrengthAllTime,
+
+    // Galactic Casino
+    "stat_casinoPointsSpentThisRun": () => getGalacticCasinoStatValue('casinoPointsSpent', 'currentRun'),
+    "stat_casinoPointsSpent": () => getGalacticCasinoStatValue('casinoPointsSpent', 'allTime'),
+
+    "stat_doubleOrNothingPlayedThisRun": () => getGalacticCasinoStatValue('game1_doubleOrNothingPlayed', 'currentRun'),
+    "stat_doubleOrNothingPlayed": () => getGalacticCasinoStatValue('game1_doubleOrNothingPlayed', 'allTime'),
+
+    "stat_doubleOrNothingWonThisRun": () => getGalacticCasinoStatValue('game1_doubleOrNothingWon', 'currentRun'),
+    "stat_doubleOrNothingWon": () => getGalacticCasinoStatValue('game1_doubleOrNothingWon', 'allTime'),
+
+    "stat_wheelOfFortunePlayedThisRun": () => getGalacticCasinoStatValue('game2_wheelPlayed', 'currentRun'),
+    "stat_wheelOfFortunePlayed": () => getGalacticCasinoStatValue('game2_wheelPlayed', 'allTime'),
+
+    "stat_wheelOfFortuneWonThisRun": () => getGalacticCasinoStatValue('game2_wheelWon', 'currentRun'),
+    "stat_wheelOfFortuneWon": () => getGalacticCasinoStatValue('game2_wheelWon', 'allTime'),
+
+    "stat_wheelSpecialWonThisRun": () => getGalacticCasinoStatValue('game2_wheelSpecialWon', 'currentRun'),
+    "stat_wheelSpecialWon": () => getGalacticCasinoStatValue('game2_wheelSpecialWon', 'allTime'),
+
+    "stat_higherLowerPlayedThisRun": () => getGalacticCasinoStatValue('game3_higherLowerPlayed', 'currentRun'),
+    "stat_higherLowerPlayed": () => getGalacticCasinoStatValue('game3_higherLowerPlayed', 'allTime'),
+
+    "stat_higherLowerWonThisRun": () => getGalacticCasinoStatValue('game3_higherLowerWon', 'currentRun'),
+    "stat_higherLowerWon": () => getGalacticCasinoStatValue('game3_higherLowerWon', 'allTime'),
+
+    "stat_voidseerPlayedThisRun": () => getGalacticCasinoStatValue('game4_voidSeerPlayed', 'currentRun'),
+    "stat_voidseerPlayed": () => getGalacticCasinoStatValue('game4_voidSeerPlayed', 'allTime'),
+
+    "stat_voidseerWonThisRun": () => getGalacticCasinoStatValue('game4_voidSeerWon', 'currentRun'),
+    "stat_voidseerWon": () => getGalacticCasinoStatValue('game4_voidSeerWon', 'allTime'),
 };
 
 export const statFunctionsSets = {
@@ -1194,6 +1346,17 @@ export function resetAllVariablesOnRebirth() {
     starShipStatus = ['preconstruction', null];
     collectedPrecipitationQuantityThisRun = 0;
     additionalSystemsToSettleThisRun = [];
+
+    casinoPointsSpentThisRun = 0;
+    casinoGame1DoubleOrNothingPlayedThisRun = 0;
+    casinoGame1DoubleOrNothingWonThisRun = 0;
+    casinoGame2WheelPlayedThisRun = 0;
+    casinoGame2WheelWonThisRun = 0;
+    casinoGame2WheelSpecialWonThisRun = 0;
+    casinoGame3HigherLowerPlayedThisRun = 0;
+    casinoGame3HigherLowerWonThisRun = 0;
+    casinoGame4VoidSeerPlayedThisRun = 0;
+    casinoGame4VoidSeerWonThisRun = 0;
 
     runNumber++;
     
@@ -1622,10 +1785,32 @@ export function captureGameStatusForSaving(type) {
     gameState.scienceKitsThisRun = scienceKitsThisRun;
     gameState.scienceClubsThisRun = scienceClubsThisRun;
     gameState.scienceLabsThisRun = scienceLabsThisRun;
+
+    gameState.casinoPointsSpentThisRun = casinoPointsSpentThisRun;
+    gameState.casinoGame1DoubleOrNothingPlayedThisRun = casinoGame1DoubleOrNothingPlayedThisRun;
+    gameState.casinoGame1DoubleOrNothingWonThisRun = casinoGame1DoubleOrNothingWonThisRun;
+    gameState.casinoGame2WheelPlayedThisRun = casinoGame2WheelPlayedThisRun;
+    gameState.casinoGame2WheelWonThisRun = casinoGame2WheelWonThisRun;
+    gameState.casinoGame2WheelSpecialWonThisRun = casinoGame2WheelSpecialWonThisRun;
+    gameState.casinoGame3HigherLowerPlayedThisRun = casinoGame3HigherLowerPlayedThisRun;
+    gameState.casinoGame3HigherLowerWonThisRun = casinoGame3HigherLowerWonThisRun;
+    gameState.casinoGame4VoidSeerPlayedThisRun = casinoGame4VoidSeerPlayedThisRun;
+    gameState.casinoGame4VoidSeerWonThisRun = casinoGame4VoidSeerWonThisRun;
     gameState.allTimeTotalRocketsLaunched = allTimeTotalRocketsLaunched;
     gameState.allTimeTotalStarShipsLaunched = allTimeTotalStarShipsLaunched;
     gameState.allTimeTotalAsteroidsDiscovered = allTimeTotalAsteroidsDiscovered;
     gameState.allTimeTotalLegendaryAsteroidsDiscovered = allTimeTotalLegendaryAsteroidsDiscovered;
+
+    gameState.allTimeCasinoPointsSpent = allTimeCasinoPointsSpent;
+    gameState.allTimeCasinoGame1DoubleOrNothingPlayed = allTimeCasinoGame1DoubleOrNothingPlayed;
+    gameState.allTimeCasinoGame1DoubleOrNothingWon = allTimeCasinoGame1DoubleOrNothingWon;
+    gameState.allTimeCasinoGame2WheelPlayed = allTimeCasinoGame2WheelPlayed;
+    gameState.allTimeCasinoGame2WheelWon = allTimeCasinoGame2WheelWon;
+    gameState.allTimeCasinoGame2WheelSpecialWon = allTimeCasinoGame2WheelSpecialWon;
+    gameState.allTimeCasinoGame3HigherLowerPlayed = allTimeCasinoGame3HigherLowerPlayed;
+    gameState.allTimeCasinoGame3HigherLowerWon = allTimeCasinoGame3HigherLowerWon;
+    gameState.allTimeCasinoGame4VoidSeerPlayed = allTimeCasinoGame4VoidSeerPlayed;
+    gameState.allTimeCasinoGame4VoidSeerWon = allTimeCasinoGame4VoidSeerWon;
     gameState.allTimeTotalStarsStudied = starStudyRange;
     gameState.allTimeTotalAntimatterMined = allTimeTotalAntimatterMined;
     gameState.antimatterMinedThisRun = antimatterMinedThisRun;
@@ -1913,10 +2098,32 @@ export function restoreGameStatus(gameState, type) {
             scienceKitsThisRun = gameState.scienceKitsThisRun ?? 0;
             scienceClubsThisRun = gameState.scienceClubsThisRun ?? 0;
             scienceLabsThisRun = gameState.scienceLabsThisRun ?? 0;
+
+            casinoPointsSpentThisRun = gameState.casinoPointsSpentThisRun ?? 0;
+            casinoGame1DoubleOrNothingPlayedThisRun = gameState.casinoGame1DoubleOrNothingPlayedThisRun ?? 0;
+            casinoGame1DoubleOrNothingWonThisRun = gameState.casinoGame1DoubleOrNothingWonThisRun ?? 0;
+            casinoGame2WheelPlayedThisRun = gameState.casinoGame2WheelPlayedThisRun ?? 0;
+            casinoGame2WheelWonThisRun = gameState.casinoGame2WheelWonThisRun ?? 0;
+            casinoGame2WheelSpecialWonThisRun = gameState.casinoGame2WheelSpecialWonThisRun ?? 0;
+            casinoGame3HigherLowerPlayedThisRun = gameState.casinoGame3HigherLowerPlayedThisRun ?? 0;
+            casinoGame3HigherLowerWonThisRun = gameState.casinoGame3HigherLowerWonThisRun ?? 0;
+            casinoGame4VoidSeerPlayedThisRun = gameState.casinoGame4VoidSeerPlayedThisRun ?? 0;
+            casinoGame4VoidSeerWonThisRun = gameState.casinoGame4VoidSeerWonThisRun ?? 0;
             allTimeTotalRocketsLaunched = gameState.allTimeTotalRocketsLaunched ?? 0;
             allTimeTotalStarShipsLaunched = gameState.allTimeTotalStarShipsLaunched ?? 0;
             allTimeTotalAsteroidsDiscovered = gameState.allTimeTotalAsteroidsDiscovered ?? 0;
             allTimeTotalLegendaryAsteroidsDiscovered = gameState.allTimeTotalLegendaryAsteroidsDiscovered ?? 0;
+
+            allTimeCasinoPointsSpent = gameState.allTimeCasinoPointsSpent ?? 0;
+            allTimeCasinoGame1DoubleOrNothingPlayed = gameState.allTimeCasinoGame1DoubleOrNothingPlayed ?? 0;
+            allTimeCasinoGame1DoubleOrNothingWon = gameState.allTimeCasinoGame1DoubleOrNothingWon ?? 0;
+            allTimeCasinoGame2WheelPlayed = gameState.allTimeCasinoGame2WheelPlayed ?? 0;
+            allTimeCasinoGame2WheelWon = gameState.allTimeCasinoGame2WheelWon ?? 0;
+            allTimeCasinoGame2WheelSpecialWon = gameState.allTimeCasinoGame2WheelSpecialWon ?? 0;
+            allTimeCasinoGame3HigherLowerPlayed = gameState.allTimeCasinoGame3HigherLowerPlayed ?? 0;
+            allTimeCasinoGame3HigherLowerWon = gameState.allTimeCasinoGame3HigherLowerWon ?? 0;
+            allTimeCasinoGame4VoidSeerPlayed = gameState.allTimeCasinoGame4VoidSeerPlayed ?? 0;
+            allTimeCasinoGame4VoidSeerWon = gameState.allTimeCasinoGame4VoidSeerWon ?? 0;
             starStudyRange = gameState.allTimeTotalStarsStudied ?? 0;
             allTimeTotalAntimatterMined = gameState.allTimeTotalAntimatterMined ?? 0;
             antimatterMinedThisRun = gameState.antimatterMinedThisRun ?? 0;
@@ -5031,7 +5238,7 @@ function getStatBlackHoleDiscoveredThisRun() {
 }
 
 function getStatBlackHoleDiscoveredAllTime() {
-    return getBlackHoleDiscovered() ? 'true' : 'false';
+    return getBlackHoleDiscovered() ? 'Yes' : 'No';
 }
 
 function getStatBlackHoleAlwaysActiveThisRun() {
@@ -5039,7 +5246,7 @@ function getStatBlackHoleAlwaysActiveThisRun() {
 }
 
 function getStatBlackHoleAlwaysActiveAllTime() {
-    return getBlackHoleAlwaysOn() ? 'true' : 'false';
+    return getBlackHoleAlwaysOn() ? 'Yes' : 'No';
 }
 
 function getStatBlackHoleStrengthThisRun() {
