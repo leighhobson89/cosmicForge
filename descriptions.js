@@ -167,7 +167,8 @@ export let modalCosmicRipLocatedHeader;
 export let modalCosmicRipLocatedText;
 export let modalNearSpaceScannerArrayRestoredHeader;
 export let modalNearSpaceScannerArrayRestoredText;
-
+export let modalCosmicRipClosedHeader;
+export let modalCosmicRipClosedText;
 export let modalCosmicRipTechStabilizerArrayHeader;
 export let modalCosmicRipTechStabilizerArrayText;
 export let modalCosmicRipTechQuantumContainmentFieldHeader;
@@ -298,79 +299,56 @@ export function initialiseDescriptions() {
     modalMegaStructureTechGalacticMemoryArchive5Text = `You have connected this Galactic Memory Archive into the fabric of the galaxy<br>meaning its benefits are now permanently available in whichever<br>system you might one day settle. This has enormous potential.<br><br><span class="green-ready-text">All Resource And Compound Storage Capacity + 10B!<br>All Resource And Compound Storage Capacity starts at 10B in every new System!</span>`;
     modalBlackHoleDiscoveredHeader = 'Black Hole Discovered!';
     modalBlackHoleDiscoveredText = `While studying the stars with the Space Telescope, you stumbled upon a Black Hole!<br>Time Dilation is a feature of these objects, and maybe we can harness its power for our own uses!<br><br><span class="green-ready-text">Take a look in the Galactic tab to interact with it.</span>`;
-
     modalNearSpaceScannerArrayRestoredHeader = 'Near Space Scanner Array Restored!';
     modalNearSpaceScannerArrayRestoredText = `We have restored the strange <span class="green-ready-text">Near Space Scanner Array</span> orbiting Miaplacidus inside the ruined force field.<br><br>With Galactic Points (GP), we can bring it fully online and scan Miaplacidus' local space to locate the source of the AI invasion!`;
-
     modalCosmicRipLocatedHeader = 'Cosmic Rip Located!';
     modalCosmicRipLocatedText = `The <span class="green-ready-text">Cosmic Rip</span> opened by the scientist, through which the evil AI race travelled has been located.<br><br>We will dispatch science teams to investigate at once!`;
-
+    modalCosmicRipClosedHeader = 'COSMIC RIP CLOSED!';
+    modalCosmicRipClosedText = `Congratulations! The future of your people is secured forever. You have fulfilled your prophecy, Cosmic Forger!`;
     modalCosmicRipTechStabilizerArrayHeader = 'Cosmic Rip Progress!';
     modalCosmicRipTechStabilizerArrayText = `You have successfully researched the <span class="green-ready-text">Stabilizer Array</span>.<br><br>This foundational technology reduces initial instability around the Cosmic Rip,<br>allowing for safer operations and further research.<br><br>Overall progress toward full stabilisation: <span class="green-ready-text">20%</span>`;
-
     modalCosmicRipTechQuantumContainmentFieldHeader = 'Cosmic Rip Progress!';
     modalCosmicRipTechQuantumContainmentFieldText = `You have successfully researched the <span class="green-ready-text">Quantum Containment Field</span>.<br><br>Advanced quantum barriers now prevent energy leakage from the Cosmic Rip,<br>significantly reducing volatility in the surrounding space-time.<br><br>Overall progress toward full stabilisation: <span class="green-ready-text">40%</span>`;
-
     modalCosmicRipTechDimensionalAnchorMatrixHeader = 'Cosmic Rip Progress!';
     modalCosmicRipTechDimensionalAnchorMatrixText = `You have successfully researched the <span class="green-ready-text">Dimensional Anchor Matrix</span>.<br><br>The dimensional fabric around the Cosmic Rip is now reinforced,<br>preventing unwanted dimensional shifts and securing the breach.<br><br>Overall progress toward full stabilisation: <span class="green-ready-text">60%</span>`;
-
     modalCosmicRipTechSingularityStabilizerHeader = 'Cosmic Rip Progress!';
     modalCosmicRipTechSingularityStabilizerText = `You have successfully researched the <span class="green-ready-text">Singularity Stabilizer</span>.<br><br>The gravitational singularity at the heart of the Cosmic Rip<br>is now under control, dramatically reducing its destabilising effects.<br><br>Overall progress toward full stabilisation: <span class="green-ready-text">80%</span>`;
-
     modalCosmicRipTechRealityWeaveRegulatorHeader = 'Cosmic Rip Progress!';
     modalCosmicRipTechRealityWeaveRegulatorText = `You have successfully researched the <span class="green-ready-text">Reality Weave Regulator</span>.<br><br>The final layer of stabilisation is now in place. The Cosmic Rip<br>has been transformed from a dangerous anomaly into a controlled phenomenon.<br><br>Overall progress toward full stabilisation: <span class="green-ready-text">100%</span><br><br><span class="green-ready-text">Congratulations! The Cosmic Rip is now fully stabilised and secure!</span>`;
-
     modalEventPowerPlantExplosionHeader = 'POWER PLANT EXPLOSION!';
     modalEventPowerPlantExplosionText = `A catastrophic failure rocked your energy grid.<br><br><span class="red-disabled-text">{destroyedBuilding} destroyed!</span>`;
-
     modalEventBatteryExplosionHeader = 'BATTERY EXPLOSION!';
     modalEventBatteryExplosionText = `A battery containment breach caused a violent explosion.<br><br><span class="red-disabled-text">{destroyedBuilding} destroyed!</span>`;
-
     modalEventScienceTheftHeader = 'SCIENCE THEFT!';
     modalEventScienceTheftText = `A clandestine raid struck your research labs.<br><br><span class="red-disabled-text">-{amountStolen} Research</span>`;
-
     modalEventResearchBreakthroughHeader = 'RESEARCH BREAKTHROUGH!';
     modalEventResearchBreakthroughText = `A sudden insight unlocks new understanding.<br><br><span class="green-ready-text">+{amountGained} Research</span>`;
-
     modalEventRocketInstantArrivalHeader = 'WARP ANOMALY!';
     modalEventRocketInstantArrivalText = `A space-time distortion accelerates one of your rockets.<br><br><span class="green-ready-text">{rocketName}</span> instantly arrives!`;
-
     modalEventAntimatterReactionHeader = 'ANTIMATTER REACTION!';
     modalEventAntimatterReactionText = `A catastrophic reaction annihilates a mining operation.<br><br><span class="red-disabled-text">{rocketName} lost</span><br><span class="red-disabled-text">{asteroidName} destroyed</span><br><span class="red-disabled-text">-{antimatterLost} Antimatter</span>`;
-
     modalEventStockLossHeader = 'STOCK LOSS!';
     modalEventStockLossText = `A major incident has struck your stores.<br><br><span class="red-disabled-text">-{lostPercent}% {itemName}</span><br>Lost due to {reason}.`;
-
     modalEventStarshipLostInSpaceHeader = 'STARSHIP LOST IN SPACE!';
     modalEventStarshipLostInSpaceText = `You lose communications with the Starship while en route.<br><br><span class="red-disabled-text">Starship lost</span><br><span class="red-disabled-text">Destination cleared</span><br><span class="red-disabled-text">All fleet units lost</span>`;
-
     modalEventEndlessSummerHeader = 'ENDLESS SUMMER!';
     modalEventEndlessSummerText = `The skies are clearing and sunny weather is on the way.<br><br><span class="green-ready-text">Sunny weather for {minutes} minutes.</span>`;
-
     modalEventEndlessSummerEndedHeader = 'ENDLESS SUMMER ENDED!';
     modalEventEndlessSummerEndedText = `The climate returns to normal variability.<br><br><span class="green-ready-text">Weather patterns restored.</span>`;
-
     modalEventGalacticMarketLockdownHeader = 'GALACTIC MARKET OFFLINE!';
     modalEventGalacticMarketLockdownText = `A network disruption has shut down access to the Galactic Market.<br><br><span class="red-disabled-text">Trading is unavailable for 30 minutes.</span>`;
-
     modalEventGalacticMarketLockdownEndedHeader = 'GALACTIC MARKET RESTORED!';
     modalEventGalacticMarketLockdownEndedText = `The disruption has cleared.<br><br><span class="green-ready-text">Galactic Market access has been restored.</span>`;
-
     modalEventMinerBrokeDownHeader = 'MINER BROKE DOWN!';
     modalEventMinerBrokeDownText = `A critical failure has halted one of your mining rockets.<br><br><span class="red-disabled-text">{rocketName} mining rate is 0 for 15 minutes.</span>`;
-
     modalEventMinerBrokeDownEndedHeader = 'MINER REPAIRED!';
     modalEventMinerBrokeDownEndedText = `Field repairs complete.<br><br><span class="green-ready-text">{rocketName} has been repaired and is ready to resume mining.</span>`;
-
     modalEventSupplyChainDisruptionHeader = 'SUPPLY CHAIN DISRUPTION!';
     modalEventSupplyChainDisruptionText = `A major logistics disruption has hit your operations.<br><br><span class="warning-orange-text">{itemName} production reduced by -{percentDown}% for 15 minutes.</span>`;
-
     modalEventSupplyChainDisruptionEndedHeader = 'SUPPLY CHAINS RESTORED!';
     modalEventSupplyChainDisruptionEndedText = `Shipments are flowing again.<br><br><span class="green-ready-text">{itemName} production has returned to normal.</span>`;
-
     modalEventBlackHoleInstabilityHeader = 'BLACK HOLE INSTABILITY!';
     modalEventBlackHoleInstabilityText = `A violent fluctuation ripples through the singularity.<br><br><span class="warning-orange-text">Strength and duration will shift every minute for {minutes} minutes.</span>`;
-
     modalEventBlackHoleInstabilityEndedHeader = 'BLACK HOLE STABILISED!';
     modalEventBlackHoleInstabilityEndedText = `The singularity calms and returns to equilibrium.<br><br><span class="green-ready-text">Black Hole strength and duration restored to standard.</span>`;
 
@@ -413,25 +391,7 @@ export function initialiseDescriptions() {
                 'The great force field is gone, and the sky finally opens.<br>' +
                 'You step onto soil you once knew only in memory.<br>' +
                 'Spicite banners rise beside Miaplacidean symbols, unbroken.<br>' +
-                'For the first time since exile... you are home.',
-            confirmLabel: 'CONTINUE'
-        },
-        {
-            header: 'THE PORTAL',
-            content: 'Deep in the ruins, you find the scar in space - the old breach.<br>' +
-                'This is where the first explorer vanished into the disturbance.<br>' +
-                'This is where the machine race traced your people back.<br>' +
-                'Now the portal flickers, starved of power and authority.<br>' +
-                'You mark it not as a doorway, but as a warning.',
-            confirmLabel: 'CONTINUE'
-        },
-        {
-            header: 'THE FORGE',
-            content: 'Spica\'s colony stands at your side, stronger than any prophecy.<br>' +
-                'The galaxy remembers: Megastructures fall, systems unite, fear fades.<br>' +
-                'Your name is no longer a refugee\'s whisper - Mia\'Plac is legend.<br>' +
-                'You did not only survive... you built a future from hydrogen and hope.<br>' +
-                'The Cosmic Forge burns brighter than ever.',
+                'For the first time since exile... you are home.<br>',
             confirmLabel: 'CONTINUE'
         },
         {
@@ -440,17 +400,27 @@ export function initialiseDescriptions() {
                 'Your people\'s story is no longer one of loss, but of return.<br>' +
                 'This was the promise at the beginning of your long drift.<br>' +
                 'And now... you have fulfilled it.<br>' +
-                '<span class="green-ready-text">The game is complete.</span>',
-            confirmLabel: 'END GAME'
+                'But a new chapter opens. The hunt for the Cosmic Rip awaits.<br>' +
+                'The war is not over. The Wardens came from somewhere.<br>' +
+                'You must find the breach they used to enter your system.',
+            confirmLabel: 'CONTINUE'
+        },
+        {
+            header: 'THE HUNT BEGINS',
+            content: 'Intelligence reports point to a disturbance in the outer reaches.<br>' +
+                'The Wardens did not simply appear - they tore through from somewhere else.<br>' +
+                'Traces of exotic energy linger where the fabric of space was ripped.<br>' +
+                'Your scouts call it the Cosmic Rip - a wound in reality itself.<br>' +
+                'This is your ultimate mission: find it, stabilise it, secure it.',
+            confirmLabel: 'CONTINUE'
         },
         {
             header: 'ONE LAST THING... ',
-            content: 'You can keep playing if you wish.<br>' +
-                'Keep conquering and settling until every system is yours.<br>' +
-                'Build, optimize, and prove your supremacy across the stars.<br>' +
-                'But in truth, your greatest victory is already written.<br>' +
-                'Welcome home, Cosmic Forger.',
-            confirmLabel: 'GLUTTON FOR PUNISHMENT'
+            content: 'Now that you have control of your home system, it is time to trace where<br>' + 
+                'the evil AI Wardens entered into your System.<br>' +
+                'The hunt for the Cosmic Rip begins!!<br>' +
+                'It must be stabilised and secured!',
+            confirmLabel: 'LETS FINISH THIS'
         }
     ];
 

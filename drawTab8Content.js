@@ -1,9 +1,12 @@
-import { createButton, createOptionRow, createTextElement, setButtonState, showNotification, drawSharedSpaceBackdrop, callPopupModal, showHideModal } from './ui.js';
+import { createButton, createOptionRow, createTextElement, setButtonState, showNotification, drawSharedSpaceBackdrop, callPopupModal, showHideModal, playWinCinematic2 } from './ui.js';
 import {
     modalCosmicRipLocatedHeader,
     modalCosmicRipLocatedText,
     modalNearSpaceScannerArrayRestoredHeader,
     modalNearSpaceScannerArrayRestoredText,
+    modalCosmicRipClosedHeader,
+    modalCosmicRipClosedText,
+    modalCosmicRipClosedConfirmText,
 } from './descriptions.js';
 import {
     getCosmicRipGalacticPoints,
@@ -212,7 +215,26 @@ export function drawTab8Content(heading, optionContentElement) {
                     onClick: () => {
                         const currentGPSpent = Number(getGalacticPointsSpent?.()) || 0;
                         setGalacticPointsSpent(currentGPSpent + 1);
-                        console.log('WON THE GAME!');
+                        callPopupModal({
+                            header: modalCosmicRipClosedHeader,
+                            content: modalCosmicRipClosedText,
+                                    showConfirm: true,
+                                    showCancel: false,
+                                    showExtra1: false,
+                                    showExtra2: false,
+                                    onConfirm: function() {
+                                        showHideModal();
+                                        playWinCinematic2();
+                                    },
+                                    onCancel: null,
+                                    onExtra1: null,
+                                    onExtra2: null,
+                                    confirmLabel: 'END GAME COSMIC FORGER',
+                                    cancelLabel: null,
+                                    extra1Label: null,
+                                    extra2Label: null,
+                                    setupToolTips: false
+                        });
                     },
                     disableKeyboardForButton: true,
                     rowCategory: null

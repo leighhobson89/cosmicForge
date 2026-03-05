@@ -13137,25 +13137,18 @@ export function createMegaStructureTable() {
 
 let activeWinCinematicPromise = null;
 
-
-
-
 export function playWinCinematic(durationMs = 14000) {
     if (activeWinCinematicPromise) return activeWinCinematicPromise;
 
-
     setAchievementFlagArray('completeGame', 'add');
-
 
     if (!getTechUnlockedArray().includes('cosmicRip')) {
         setTechUnlockedArray('cosmicRip');
     }
 
-
     trackAnalyticsEvent('miaplacidus_settled', {
         ts: new Date().toISOString()
     }, { immediate: true, flushReason: 'miaplacidus' });
-
 
     activeWinCinematicPromise = new Promise((resolve) => {
         const existing = document.getElementById('winCinematicOverlay');
@@ -13180,27 +13173,22 @@ export function playWinCinematic(durationMs = 14000) {
         overlay.style.pointerEvents = 'auto';
         overlay.style.userSelect = 'none';
 
-
         const canvas = document.createElement('canvas');
         canvas.id = 'winCinematicCanvas';
         canvas.style.width = '100%';
         canvas.style.height = '100%';
         canvas.style.display = 'block';
 
-
         overlay.appendChild(canvas);
         document.body.appendChild(overlay);
 
-
         const previousOverflow = document.documentElement.style.overflow;
         document.documentElement.style.overflow = 'hidden';
-
 
         const stopEvent = (e) => {
             e.preventDefault();
             e.stopPropagation();
         };
-
 
         const blockedPointerEvents = [
             'click',
@@ -13217,10 +13205,8 @@ export function playWinCinematic(durationMs = 14000) {
             'touchend'
         ];
 
-
         blockedPointerEvents.forEach(type => overlay.addEventListener(type, stopEvent, { capture: true }));
         overlay.addEventListener('wheel', stopEvent, { capture: true, passive: false });
-
 
         const keyBlocker = (e) => {
             e.preventDefault();
@@ -13232,9 +13218,7 @@ export function playWinCinematic(durationMs = 14000) {
         document.addEventListener('keydown', keyBlocker, true);
         document.addEventListener('keyup', keyBlocker, true);
 
-
         const ctx = canvas.getContext('2d', { alpha: true });
-
 
         const clamp01 = (v) => Math.max(0, Math.min(1, v));
         const lerp = (a, b, t) => a + (b - a) * t;
@@ -13242,10 +13226,8 @@ export function playWinCinematic(durationMs = 14000) {
         const easeInOutSine = (t) => -(Math.cos(Math.PI * t) - 1) / 2;
         const rnd = (min, max) => min + Math.random() * (max - min);
 
-
-        const holdAfterTitleMs = 13000;
+        const holdAfterTitleMs = 2000;
         const totalDurationMs = durationMs + holdAfterTitleMs;
-
 
         const stars = [];
         const landBlobs = [];
@@ -13255,15 +13237,12 @@ export function playWinCinematic(durationMs = 14000) {
         const troops = [];
         const fireworks = [];
 
-
         let nextShipSpawnAt = 0;
         let nextFireworkAt = 0;
-
 
         let rafId = null;
         let finished = false;
         let resizeHandler = null;
-
 
         const resize = () => {
             const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
@@ -13272,13 +13251,11 @@ export function playWinCinematic(durationMs = 14000) {
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         };
 
-
         const initScene = () => {
             stars.length = 0;
             landBlobs.length = 0;
             cloudPuffs.length = 0;
             ringPieces.length = 0;
-
 
             const w = window.innerWidth;
             const h = window.innerHeight;
@@ -13293,7 +13270,6 @@ export function playWinCinematic(durationMs = 14000) {
                 });
             }
 
-
             for (let i = 0; i < 36; i++) {
                 const a = rnd(-Math.PI, Math.PI);
                 const d = Math.sqrt(Math.random()) * 0.92;
@@ -13304,7 +13280,6 @@ export function playWinCinematic(durationMs = 14000) {
                     hue: rnd(92, 140)
                 });
             }
-
 
             for (let i = 0; i < 28; i++) {
                 const a = rnd(-Math.PI, Math.PI);
@@ -13317,7 +13292,6 @@ export function playWinCinematic(durationMs = 14000) {
                     sp: rnd(-0.25, 0.25)
                 });
             }
-
 
             const pieceCount = 22;
             for (let i = 0; i < pieceCount; i++) {
@@ -13340,57 +13314,46 @@ export function playWinCinematic(durationMs = 14000) {
             }
         };
 
-
         const drawRingDebris = (planet, t, layer, alphaBase = 1) => {
             const w = window.innerWidth;
             const h = window.innerHeight;
             const rBase = Math.min(w, h) * 0.42;
-
 
             const cx = planet.cx;
             const cy = planet.cy;
             const tilt = -0.55;
             const squash = 0.34;
 
-
             ctx.save();
             ctx.translate(cx, cy);
             ctx.rotate(tilt);
             ctx.scale(1, squash);
 
-
             const wob = 0.5 + 0.5 * Math.sin(t * 0.8);
             const ringR = rBase * 1.12;
 
-
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
-
 
             for (const p of ringPieces) {
                 const depth = Math.sin(p.mid);
                 if (layer === 'back' && depth >= 0) continue;
                 if (layer === 'front' && depth < 0) continue;
 
-
                 const localAlpha = (layer === 'front' ? 0.42 : 0.18) * alphaBase;
                 const flicker = 0.75 + 0.25 * Math.sin(t * 2.1 + p.mid * 3.0);
-
 
                 ctx.save();
                 const rr = ringR * (1 + p.radJitter);
                 ctx.globalAlpha = localAlpha * flicker;
 
-
                 ctx.setLineDash([p.dashA * (1 + wob), p.dashB]);
                 ctx.lineWidth = (rBase * 0.055) * p.thick;
                 ctx.strokeStyle = `hsla(${p.hue}, 90%, 72%, 0.95)`;
 
-
                 ctx.beginPath();
                 ctx.arc(0, 0, rr, p.start, p.end);
                 ctx.stroke();
-
 
                 ctx.setLineDash([]);
                 ctx.lineWidth *= 0.35;
@@ -13399,7 +13362,6 @@ export function playWinCinematic(durationMs = 14000) {
                 ctx.beginPath();
                 ctx.arc(0, 0, rr + rBase * 0.015, p.start + 0.02, p.end - 0.02);
                 ctx.stroke();
-
 
                 const fragmentCount = Math.floor(rnd(1, 4));
                 for (let i = 0; i < fragmentCount; i++) {
@@ -13416,14 +13378,11 @@ export function playWinCinematic(durationMs = 14000) {
                     ctx.restore();
                 }
 
-
                 ctx.restore();
             }
 
-
             ctx.restore();
         };
-
 
         const drawStars = (w, h, t) => {
             ctx.save();
@@ -13440,7 +13399,6 @@ export function playWinCinematic(durationMs = 14000) {
             ctx.restore();
         };
 
-
         const drawAurora = (w, h, tt) => {
             const a = clamp01((tt - 0.05) / 0.35);
             if (a <= 0) return;
@@ -13454,7 +13412,6 @@ export function playWinCinematic(durationMs = 14000) {
                 grad.addColorStop(0.45, `rgba(120, 255, 210, ${0.35 + 0.2 * Math.sin(phase)})`);
                 grad.addColorStop(0.55, `rgba(170, 140, 255, ${0.3 + 0.2 * Math.cos(phase)})`);
                 grad.addColorStop(1, 'rgba(170, 140, 255, 0)');
-
 
                 ctx.fillStyle = grad;
                 ctx.beginPath();
@@ -13472,21 +13429,17 @@ export function playWinCinematic(durationMs = 14000) {
             ctx.restore();
         };
 
-
         const drawPlanet = (w, h, t) => {
             const rBase = Math.min(w, h) * 0.42;
             const cx = w * 0.74;
             const cy = h * 0.78;
 
-
             const breathe = 1 + Math.sin(t * 2.4) * 0.006;
             const r = rBase * breathe;
             const rot = t * 0.2;
 
-
             ctx.save();
             ctx.translate(cx, cy);
-
 
             const glow = ctx.createRadialGradient(0, 0, r * 0.6, 0, 0, r * 1.25);
             glow.addColorStop(0, 'rgba(90, 255, 210, 0.20)');
@@ -13497,11 +13450,9 @@ export function playWinCinematic(durationMs = 14000) {
             ctx.arc(0, 0, r * 1.25, 0, Math.PI * 2);
             ctx.fill();
 
-
             ctx.beginPath();
             ctx.arc(0, 0, r, 0, Math.PI * 2);
             ctx.clip();
-
 
             const ocean = ctx.createRadialGradient(-r * 0.3, -r * 0.3, r * 0.2, 0, 0, r);
             ocean.addColorStop(0, 'rgba(90, 210, 255, 1)');
@@ -13509,7 +13460,6 @@ export function playWinCinematic(durationMs = 14000) {
             ocean.addColorStop(1, 'rgba(0, 40, 90, 1)');
             ctx.fillStyle = ocean;
             ctx.fillRect(-r, -r, r * 2, r * 2);
-
 
             ctx.save();
             ctx.rotate(rot);
@@ -13527,7 +13477,6 @@ export function playWinCinematic(durationMs = 14000) {
             }
             ctx.restore();
 
-
             ctx.save();
             ctx.rotate(-rot * 0.7);
             for (const c of cloudPuffs) {
@@ -13542,10 +13491,7 @@ export function playWinCinematic(durationMs = 14000) {
                 ctx.fill();
             }
             ctx.restore();
-
-
             ctx.restore();
-
 
             ctx.save();
             ctx.translate(cx, cy);
@@ -13561,10 +13507,8 @@ export function playWinCinematic(durationMs = 14000) {
             ctx.stroke();
             ctx.restore();
 
-
             return { cx, cy, r };
         };
-
 
         const bezier = (p0, p1, p2, p3, t) => {
             const u = 1 - t;
@@ -13578,7 +13522,6 @@ export function playWinCinematic(durationMs = 14000) {
             };
         };
 
-
         const bezierTangent = (p0, p1, p2, p3, t) => {
             const u = 1 - t;
             return {
@@ -13587,7 +13530,6 @@ export function playWinCinematic(durationMs = 14000) {
             };
         };
 
-
         const spawnShip = (planet, elapsed) => {
             const w = window.innerWidth;
             const h = window.innerHeight;
@@ -13595,12 +13537,10 @@ export function playWinCinematic(durationMs = 14000) {
             const endX = planet.cx + Math.cos(angle) * planet.r * 0.96;
             const endY = planet.cy + Math.sin(angle) * planet.r * 0.96;
 
-
             const p0 = { x: rnd(-w * 0.25, w * 0.15), y: rnd(-h * 0.25, h * 0.15) };
             const p3 = { x: endX, y: endY };
             const p1 = { x: lerp(p0.x, p3.x, 0.45) + rnd(-120, 140), y: lerp(p0.y, p3.y, 0.35) + rnd(-220, 120) };
             const p2 = { x: lerp(p0.x, p3.x, 0.75) + rnd(-80, 90), y: lerp(p0.y, p3.y, 0.65) + rnd(-120, 80) };
-
 
             const colorHue = rnd(185, 220);
             const ship = {
@@ -13617,10 +13557,8 @@ export function playWinCinematic(durationMs = 14000) {
                 lastPos: { x: p0.x, y: p0.y }
             };
 
-
             ships.push(ship);
         };
-
 
         const drawShip = (ship, planet, elapsed, introA) => {
             const t0 = clamp01((elapsed - ship.spawnAt) / ship.duration);
@@ -13629,20 +13567,16 @@ export function playWinCinematic(durationMs = 14000) {
             const tan = bezierTangent(ship.p0, ship.p1, ship.p2, ship.p3, t1);
             const ang = Math.atan2(tan.y, tan.x);
 
-
             ship.lastPos = pos;
             ship.trail.push({ x: pos.x, y: pos.y, a: elapsed });
             if (ship.trail.length > 16) ship.trail.shift();
-
 
             const distToPlanet = Math.hypot(pos.x - planet.cx, pos.y - planet.cy);
             const near = clamp01((planet.r * 1.2 - distToPlanet) / (planet.r * 0.55));
             const size = ship.size * lerp(1, 0.72, near);
 
-
             ctx.save();
             ctx.globalAlpha = 0.85 * introA;
-
 
             for (let i = 0; i < ship.trail.length - 1; i++) {
                 const a = (i / ship.trail.length);
@@ -13656,10 +13590,8 @@ export function playWinCinematic(durationMs = 14000) {
                 ctx.stroke();
             }
 
-
             ctx.translate(pos.x, pos.y);
             ctx.rotate(ang);
-
 
             const body = `hsla(${ship.hue}, 86%, 68%, 0.95)`;
             ctx.fillStyle = body;
@@ -13671,12 +13603,10 @@ export function playWinCinematic(durationMs = 14000) {
             ctx.closePath();
             ctx.fill();
 
-
             ctx.fillStyle = 'rgba(255,255,255,0.22)';
             ctx.beginPath();
             ctx.arc(size * 0.2, -size * 0.18, size * 0.45, 0, Math.PI * 2);
             ctx.fill();
-
 
             const thrustA = clamp01(1 - t0);
             ctx.globalAlpha = (0.35 + 0.35 * thrustA) * introA;
@@ -13688,9 +13618,7 @@ export function playWinCinematic(durationMs = 14000) {
             ctx.closePath();
             ctx.fill();
 
-
             ctx.restore();
-
 
             if (t0 >= 1 && ship.landedAt === null) {
                 ship.landedAt = elapsed;
@@ -13707,14 +13635,12 @@ export function playWinCinematic(durationMs = 14000) {
             }
         };
 
-
         const drawTroops = (elapsed, introA) => {
             const w = window.innerWidth;
             const h = window.innerHeight;
             const rBase = Math.min(w, h) * 0.42;
             const cx = w * 0.74;
             const cy = h * 0.78;
-
 
             ctx.save();
             ctx.globalAlpha = 0.95 * introA;
@@ -13724,24 +13650,20 @@ export function playWinCinematic(durationMs = 14000) {
                 const age = elapsed - tr.spawnAt;
                 if (age > maxAge) continue;
 
-
                 const a = clamp01(1 - age / maxAge);
                 const dx = tr.dir * (age / 1000) * tr.sp;
                 const dy = (age / 1000) * rnd(2, 6);
                 const px = tr.x + dx;
                 const py = tr.y + dy;
 
-
                 const dist = Math.hypot(px - cx, py - cy);
                 if (dist > rBase * 1.02) continue;
-
 
                 ctx.globalAlpha = a * 0.95 * introA;
                 ctx.fillStyle = `hsla(${tr.hue}, 70%, 65%, 1)`;
                 ctx.beginPath();
                 ctx.arc(px, py, 1.6, 0, Math.PI * 2);
                 ctx.fill();
-
 
                 ctx.fillStyle = `rgba(255,255,255,${0.55 * a})`;
                 ctx.beginPath();
@@ -13750,7 +13672,6 @@ export function playWinCinematic(durationMs = 14000) {
             }
             ctx.restore();
         };
-
 
         const spawnFirework = (elapsed) => {
             const w = window.innerWidth;
@@ -13774,7 +13695,6 @@ export function playWinCinematic(durationMs = 14000) {
             fireworks.push({ x, y, hue, born: elapsed, parts });
         };
 
-
         const drawFireworks = (elapsed, introA) => {
             ctx.save();
             ctx.globalAlpha = 1;
@@ -13785,7 +13705,6 @@ export function playWinCinematic(durationMs = 14000) {
                     fireworks.splice(i, 1);
                     continue;
                 }
-
 
                 for (const p of fw.parts) {
                     const t = clamp01(age / p.life);
@@ -13801,73 +13720,10 @@ export function playWinCinematic(durationMs = 14000) {
             ctx.restore();
         };
 
-
-        const creditsLines = [
-            'CREDITS:',
-            'Game Design - Leigh Hobson',
-            'Development - Leigh Hobson',
-            'Graphics and UI Design - Leigh Hobson',
-            'QA - Leigh Hobson',
-            'Story - Leigh Hobson',
-            'Cosmic Forge © 2026 Leigh Hobson'
-        ];
-        const creditsLineVisibleMs = 2500;
-        const creditsFadeMs = 750;
-        const creditsStepMs = creditsLineVisibleMs - creditsFadeMs;
-        const creditsStartMs = durationMs * 0.76;
-
-
-        const drawCredits = (w, h, elapsed, titleA) => {
-            const t = elapsed - creditsStartMs;
-            if (t < 0) return;
-
-
-            const size = Math.max(34, Math.min(74, w * 0.055));
-            const baseY = h * 0.355;
-
-
-            ctx.save();
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.shadowColor = 'rgba(120, 255, 230, 0.45)';
-            ctx.shadowBlur = 18;
-            ctx.fillStyle = 'rgba(220, 255, 245, 1)';
-
-
-            for (let i = 0; i < creditsLines.length; i++) {
-                const local = t - i * creditsStepMs;
-                if (local < 0 || local > creditsLineVisibleMs) continue;
-
-
-                const fadeIn = clamp01(local / creditsFadeMs);
-                const fadeOut = clamp01((creditsLineVisibleMs - local) / creditsFadeMs);
-                const a = Math.min(fadeIn, fadeOut);
-
-
-                const phase = clamp01(local / creditsLineVisibleMs);
-                const y = baseY + lerp(22, -22, easeInOutSine(phase));
-
-
-                const fontScale = i === 0 ? 0.30 : (i === creditsLines.length - 1 ? 0.26 : 0.28);
-                const weight = i === 0 ? 700 : (i === creditsLines.length - 1 ? 600 : 500);
-
-
-                ctx.globalAlpha = 0.85 * a * titleA;
-                ctx.font = `${weight} ${Math.round(size * fontScale)}px system-ui, -apple-system, Segoe UI, Roboto, Arial`;
-                ctx.fillText(creditsLines[i], w * 0.5, y);
-            }
-
-
-            ctx.restore();
-        };
-
-
         const drawTitle = (w, h, tt, elapsed) => {
             const endA = clamp01((tt - 0.76) / 0.16);
             if (endA <= 0) return;
 
-
-            ctx.save();
             const a = easeInOutSine(endA);
             ctx.globalAlpha = 0.9 * a;
             const size = Math.max(34, Math.min(74, w * 0.055));
@@ -13877,27 +13733,16 @@ export function playWinCinematic(durationMs = 14000) {
             ctx.shadowColor = 'rgba(120, 255, 230, 0.6)';
             ctx.shadowBlur = 24;
             ctx.fillStyle = 'rgba(220, 255, 245, 1)';
-            ctx.fillText('VICTORY', w * 0.5, h * 0.18);
-
+            ctx.fillText('YOU ARE HOME', w * 0.5, h * 0.18);
 
             ctx.shadowColor = 'rgba(255, 255, 255, 0.2)';
             ctx.shadowBlur = 12;
             ctx.globalAlpha = 0.65 * a;
             ctx.font = `500 ${Math.round(size * 0.36)}px system-ui, -apple-system, Segoe UI, Roboto, Arial`;
             ctx.fillStyle = 'rgba(220, 255, 245, 1)';
-            ctx.fillText('WELCOME HOME, MIA\' PLAC', w * 0.5, h * 0.245);
-
-
-            ctx.globalAlpha = 0.55 * a;
-            ctx.font = `600 ${Math.round(size * 0.28)}px system-ui, -apple-system, Segoe UI, Roboto, Arial`;
-            ctx.fillStyle = 'rgba(220, 255, 245, 1)';
-            ctx.fillText('YOU ARE THE COSMIC FORGER', w * 0.5, h * 0.285);
+            ctx.fillText('WELCOME, MIA\' PLAC', w * 0.5, h * 0.245);
             ctx.restore();
-
-
-            drawCredits(w, h, elapsed, a);
         };
-
 
         const cleanup = () => {
             if (rafId) {
@@ -13917,14 +13762,12 @@ export function playWinCinematic(durationMs = 14000) {
             resolve();
         };
 
-
         const end = () => {
             if (finished) return;
             finished = true;
             overlay.style.opacity = '0';
             setTimeout(cleanup, 950);
         };
-
 
         resize();
         initScene();
@@ -13934,9 +13777,7 @@ export function playWinCinematic(durationMs = 14000) {
         };
         window.addEventListener('resize', resizeHandler);
 
-
         const start = performance.now();
-
 
         const frame = (now) => {
             const elapsed = now - start;
@@ -13944,15 +13785,12 @@ export function playWinCinematic(durationMs = 14000) {
             const w = window.innerWidth;
             const h = window.innerHeight;
 
-
             const introA = easeOutCubic(clamp01(elapsed / 1100));
             const outroA = 1 - easeInOutSine(clamp01((elapsed - (totalDurationMs - 1200)) / 1200));
             const sceneA = clamp01(introA * outroA);
 
-
             drawStars(w, h, elapsed / 1000);
             drawAurora(w, h, ttBase);
-
 
             const planetT = elapsed / 1000;
             const planet = { cx: w * 0.74, cy: h * 0.78, r: Math.min(w, h) * 0.42 };
@@ -13960,14 +13798,12 @@ export function playWinCinematic(durationMs = 14000) {
             const planetDrawn = drawPlanet(w, h, planetT);
             drawRingDebris(planetDrawn, planetT, 'front', sceneA);
 
-
             const shipPhase = clamp01((ttBase - 0.08) / 0.62);
             if (shipPhase > 0 && elapsed >= nextShipSpawnAt && shipPhase < 1) {
                 const intensity = lerp(85, 18, shipPhase);
                 spawnShip(planetDrawn, elapsed);
                 nextShipSpawnAt = elapsed + rnd(intensity * 0.6, intensity * 1.05);
             }
-
 
             for (let i = ships.length - 1; i >= 0; i--) {
                 const ship = ships[i];
@@ -13978,9 +13814,7 @@ export function playWinCinematic(durationMs = 14000) {
                 drawShip(ship, planetDrawn, elapsed, sceneA);
             }
 
-
             drawTroops(elapsed, sceneA);
-
 
             const fireworkPhase = clamp01((ttBase - 0.52) / 0.34);
             if (fireworkPhase > 0 && elapsed >= nextFireworkAt && ttBase < 0.9) {
@@ -13990,36 +13824,29 @@ export function playWinCinematic(durationMs = 14000) {
             drawFireworks(elapsed, sceneA);
             drawTitle(w, h, ttBase, elapsed);
 
-
             ctx.save();
             ctx.globalAlpha = (1 - sceneA);
             ctx.fillStyle = 'rgba(0,0,0,1)';
             ctx.fillRect(0, 0, w, h);
             ctx.restore();
 
-
             if (elapsed >= totalDurationMs) {
                 end();
                 return;
             }
 
-
             rafId = requestAnimationFrame(frame);
         };
-
 
         rafId = requestAnimationFrame(frame);
     });
 
-
     return activeWinCinematicPromise;
 }
 
-
 let activeWinCinematic2Promise = null;
 
-
-export function playWinCinematic2(durationMs = 20000) {
+export function playWinCinematic2(durationMs = 22000) {
     if (activeWinCinematic2Promise) return activeWinCinematic2Promise;
 
     activeWinCinematic2Promise = new Promise((resolve) => {
@@ -14102,12 +13929,19 @@ export function playWinCinematic2(durationMs = 20000) {
         
         credits.appendChild(creditsContainer);
 
+        const victoryTitle = document.createElement('div');
+        victoryTitle.className = 'win-cinematic2-victory';
+        victoryTitle.innerHTML = '<div class="win-cinematic2-victory-main">VICTORY</div>' +
+            '<div class="win-cinematic2-victory-sub">WELCOME, MIA\' PLAC, YOU HAVE SECURED YOUR PEOPLE\'S FUTURE</div>' +
+            '<div class="win-cinematic2-victory-sub2">YOU ARE THE COSMIC FORGER</div>';
+
         scene.appendChild(stars);
         scene.appendChild(rip);
         scene.appendChild(ripZip);
         scene.appendChild(flash);
         scene.appendChild(ships);
         scene.appendChild(credits);
+        scene.appendChild(victoryTitle);
         overlay.appendChild(scene);
         document.body.appendChild(overlay);
 

@@ -245,11 +245,13 @@
      animation: winCinematic2ShipFly linear forwards;
      animation-duration: var(--ship-duration, 8s);
      animation-delay: var(--ship-delay, 0s);
+     transform: translateX(var(--ship-start-x, -20vw)) translateY(var(--ship-y, 0)) rotate(var(--ship-rot, 0deg));
+     opacity: 0;
  }
 
  @keyframes winCinematic2ShipFly {
      0% {
-         transform: translateX(var(--ship-start-x, -10vw)) translateY(var(--ship-y, 0)) rotate(var(--ship-rot, 0deg));
+         transform: translateX(var(--ship-start-x, -20vw)) translateY(var(--ship-y, 0)) rotate(var(--ship-rot, 0deg));
          opacity: 0;
      }
      5% {
@@ -274,7 +276,7 @@
      text-shadow: 0 0 18px rgba(120, 255, 230, 0.55);
      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
      opacity: 0;
-     animation: winCinematic2CreditsScroll 14s linear forwards;
+     animation: winCinematic2CreditsScroll 12s linear forwards;
      animation-delay: 4s;
  }
 
@@ -298,6 +300,52 @@
  .win-cinematic2-credits-final {
      font-weight: 650;
      opacity: 0.92;
+ }
+
+ .win-cinematic2-victory {
+     position: absolute;
+     left: 50%;
+     top: 10%;
+     transform: translateX(-50%);
+     text-align: center;
+     pointer-events: none;
+     opacity: 0;
+     width: 90vw;
+     animation: winCinematic2VictoryFade 22s ease-in-out forwards;
+ }
+
+ .win-cinematic2-victory-main {
+     font-size: clamp(34px, 5.5vw, 74px);
+     font-weight: 700;
+     color: rgba(220, 255, 245, 1);
+     text-shadow: 0 0 24px rgba(120, 255, 230, 0.6);
+     margin-bottom: 8px;
+ }
+
+ .win-cinematic2-victory-sub {
+     font-size: clamp(12px, 2vw, 27px);
+     font-weight: 500;
+     color: rgba(220, 255, 245, 1);
+     text-shadow: 0 0 12px rgba(255, 255, 255, 0.2);
+     opacity: 0.65;
+     margin-bottom: 4px;
+ }
+
+ .win-cinematic2-victory-sub2 {
+     font-size: clamp(10px, 1.5vw, 21px);
+     font-weight: 600;
+     color: rgba(220, 255, 245, 1);
+     text-shadow: 0 0 12px rgba(255, 255, 255, 0.2);
+     opacity: 0.55;
+ }
+
+ @keyframes winCinematic2VictoryFade {
+     0% { opacity: 0; }
+     74% { opacity: 0; }
+     78% { opacity: 1; }
+     88% { opacity: 1; }
+     92% { opacity: 0; }
+     100% { opacity: 0; }
  }
 
  .win-cinematic2-overlay.win-cinematic2-play .win-cinematic2-rip {
