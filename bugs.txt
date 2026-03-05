@@ -3,4 +3,19 @@ python create_build.py cosmicForge_v1.02 will create a pushable build to my acco
 
 Things to do:
 - add achievements for casino, cosmic rip section, events
+- check if any info points need adding for the cosmic rip tab
 - add end navigation ie close game or something after the end credit animation
+
+- achievements to add:
+- buy some casino points
+- win a prize in all casino games
+- win a wheel of fortune special prize
+- restore the near space scanner array
+- find the cosmic rip
+- gain 1M Telemetry Data
+- close the cosmic rip
+- suffer 5 negative events
+- enjoy an endless summer
+- complete the onboarding
+
+update complete the game (move it to after cosmic rip) and reward for complete a run on miaplacidus (not glutton for punishment anymore)
