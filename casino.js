@@ -1,5 +1,12 @@
 import { showNotification } from './ui.js';
-import { getGalacticCasinoDataObject, setGalacticCasinoDataObject } from './resourceDataObject.js';
+import {
+    getGalacticCasinoDataObject,
+    setGalacticCasinoDataObject,
+} from './resourceDataObject.js';
+import {
+    getWheelForceSpecial,
+} from './constantsAndGlobalVars.js';
+
 import { getResourceDataObject, setResourceDataObject } from './resourceDataObject.js';
 import {
     startTravelToAndFromAsteroidTimer,
@@ -954,6 +961,7 @@ export function playDoubleOrNothing({ stake, spinnerId }) {
     if (spinButton) {
         spinButton.disabled = true;
         spinButton.classList.add('red-disabled-text');
+        spinButton.classList.remove('green-ready-text');
     }
 
     spinDoubleOrNothing(spinnerId, 5000)
@@ -1037,14 +1045,14 @@ export function playWheelOfFortune({ wheelId, costCp = 1, durationMs = 5000 } = 
     const segmentCount = 16;
     const segmentAngle = 360 / segmentCount;
 
-    //globalThis.__wheelForceSpecial = true; //debug to win special prize
     const forcedIndexRaw = globalThis.__wheelForceIndex;
     const forcedIndex = Number.isFinite(Number(forcedIndexRaw)) ? Math.floor(Number(forcedIndexRaw)) : null;
-    const selectedIndex = globalThis.__wheelForceSpecial
+    const selectedIndex = getWheelForceSpecial()
         ? 0
         : (forcedIndex !== null
             ? ((forcedIndex % segmentCount) + segmentCount) % segmentCount
             : Math.floor(Math.random() * segmentCount));
+
     const selectedCenter = (selectedIndex * segmentAngle) + (segmentAngle / 2);
     const currentRotation = Number.parseFloat(String(wheelEl.getAttribute('data-rotation') || '0')) || 0;
     const normalizedCurrent = ((currentRotation % 360) + 360) % 360;

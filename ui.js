@@ -1,4 +1,5 @@
 import {
+    setGalacticPointsSpent,
     getInFormation,
     getGalacticCasinoUnlocked,
     setGalacticCasinoUnlocked,
@@ -229,7 +230,9 @@ import {
     getAchievementImageUrl,
     getBlackHolePower,
     getStarSystemWeather,
-    getCosmicRipGalacticPoints
+    getCosmicRipGalacticPoints,
+    getGalacticCasinoDataObject,
+    setGalacticCasinoDataObject,
 } from "./resourceDataObject.js";
 import {
     optionDescriptions,
@@ -14762,9 +14765,32 @@ holdEnterToGainDebugButton?.addEventListener('click', () => {
     updateHoldEnterToGainDebugStatus();
 });
 
-
 updateHoldEnterToGainDebugStatus();
 
+const add10000CpButton = document.getElementById('add10000CpButton');
+add10000CpButton?.addEventListener('click', () => {
+    const currentCp = getGalacticCasinoDataObject('casinoPoints', ['quantity']);
+    setGalacticCasinoDataObject(currentCp + 10000, 'casinoPoints', ['quantity']);
+    showNotification('CHEAT! 10000 Casino Points added!', 'info', 3000, 'debug');
+});
+
+const resetGpSpentButton = document.getElementById('resetGpSpentButton');
+resetGpSpentButton?.addEventListener('click', () => {
+    setGalacticPointsSpent(0);
+    showNotification('CHEAT! GP Spent reset to 0!', 'info', 3000, 'debug');
+});
+
+const playMiaplacidusCinematicButton = document.getElementById('playMiaplacidusCinematicButton');
+playMiaplacidusCinematicButton?.addEventListener('click', () => {
+    playWinCinematic();
+    showNotification('Playing Miaplacidus Cinematic!', 'info', 3000, 'debug');
+});
+
+const playEndGameCinematicButton = document.getElementById('playEndGameCinematicButton');
+playEndGameCinematicButton?.addEventListener('click', () => {
+    playWinCinematic2();
+    showNotification('Playing End Game Cinematic!', 'info', 3000, 'debug');
+});
 
 function toggleVariableDebuggerWindow() {
     if (variableDebuggerWindow.style.display === 'none' || !variableDebuggerWindow.style.display) {

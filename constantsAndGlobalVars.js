@@ -1,4 +1,4 @@
-import { restoreAchievementsDataObject, restoreAscendencyBuffsDataObject, restoreGalacticMarketDataObject, restoreGalacticCasinoDataObject, restoreRocketNamesObject, restoreResourceDataObject, restoreStarSystemsDataObject, resourceData, starSystems, getResourceDataObject, setResourceDataObject, galacticMarket, galacticCasino, ascendencyBuffs, achievementsData, getStarSystemDataObject, getBlackHoleResearchDone, getBlackHolePower, getBlackHoleDuration, getBlackHoleRechargeMultiplier, getBlackHoleResearchPrice, getBlackHolePowerPrice, getBlackHoleDurationPrice, getBlackHoleRechargePrice, setBlackHoleResearchDone, setBlackHolePower, setBlackHoleDuration, setBlackHoleRechargeMultiplier, setBlackHoleResearchPrice, setBlackHolePowerPrice, setBlackHoleDurationPrice, setBlackHoleRechargePrice, oTypePowerPlantBuffs, restoreOTypePowerPlantBuffsObject } from "./resourceDataObject.js";
+import { restoreAchievementsDataObject, restoreAscendencyBuffsDataObject, restoreGalacticMarketDataObject, restoreGalacticCasinoDataObject, restoreRocketNamesObject, restoreResourceDataObject, restoreStarSystemsDataObject, resourceData, starSystems, getResourceDataObject, setResourceDataObject, galacticMarket, galacticCasino, ascendencyBuffs, achievementsData, getStarSystemDataObject, getBlackHoleResearchDone, getBlackHolePower, getBlackHoleDuration, getBlackHoleRechargeMultiplier, getBlackHoleResearchPrice, getBlackHolePowerPrice, getBlackHoleDurationPrice, getBlackHoleRechargePrice, setBlackHoleResearchDone, setBlackHolePower, setBlackHoleDuration, setBlackHoleRechargeMultiplier, setBlackHoleResearchPrice, setBlackHolePowerPrice, setBlackHoleDurationPrice, setBlackHoleRechargePrice, oTypePowerPlantBuffs, restoreOTypePowerPlantBuffsObject, getGalacticCasinoDataObject, setGalacticCasinoDataObject } from "./resourceDataObject.js";
 import { achievementFunctionsMap } from "./achievements.js";
 import { drawNativeTechTree, selectTheme, startWeatherEffect, stopWeatherEffect, applyCustomPointerSetting, showNotification, generateStarfield } from "./ui.js";
 import { capitaliseWordsWithRomanNumerals, capitaliseString } from './utilityFunctions.js';
@@ -12,14 +12,12 @@ export let debugFlag = false;
 export let debugOptionFlag = false;
 export let stateLoading = false;
 export const debugVisibilityArray = ['settingsNotificationTestRow'];
-
+let wheelForceSpecial = false;
+let casinoGame4AlwaysWin = false;
+let casinoGame5VoidSeerAlwaysMatch = false;
 var debugTimeWarpDurationMs = 5000;
 var debugTimeWarpMultiplier = 50;
 var debugHoldEnterToGainEnabled = false;
-let blackHoleDiscovered = false;
-let blackHoleDiscoveryProbability = 0;
-
-let oTypePowerPlantStrengthBoost = 8;
 
 //ELEMENTS
 let elements;
@@ -211,7 +209,9 @@ let compoundCreateDropdownRecipeText = {
 //GLOBAL VARIABLES
 export let gameState;
 let achievementFlagArray = [];
-
+let blackHoleDiscoveryProbability = 0;
+let blackHoleDiscovered = false;
+let oTypePowerPlantStrengthBoost = 8;
 let megaStructureTechsResearched = [];
 let miaplacidusMilestoneLevel = 0;
 let increaseStorageFactor = 2;
@@ -5681,6 +5681,30 @@ export function getMinimumBlackHoleChargeTime() {
     return MINIMUM_BLACK_HOLE_CHARGE_TIME;
 }
 
+export function getWheelForceSpecial() {
+    return wheelForceSpecial;
+}
+
+export function setWheelForceSpecial(value) {
+    wheelForceSpecial = value === 'true' || value === true;
+}
+
+export function getCasinoGame4AlwaysWin() {
+    return casinoGame4AlwaysWin;
+}
+
+export function setCasinoGame4AlwaysWin(value) {
+    casinoGame4AlwaysWin = value === 'true' || value === true;
+}
+
+export function getCasinoGame5VoidSeerAlwaysMatch() {
+    return casinoGame5VoidSeerAlwaysMatch;
+}
+
+export function setCasinoGame5VoidSeerAlwaysMatch(value) {
+    casinoGame5VoidSeerAlwaysMatch = value === 'true' || value === true;
+}
+
 //image urls----------------------------------------------------------------------------------------------------------------------
 
 const IMAGE_URLS = {
@@ -6114,6 +6138,15 @@ export function populateVariableDebugger() {
         { label: "blackHolePowerPrice", value: getBlackHolePowerPrice() },
         { label: "blackHoleDurationPrice", value: getBlackHoleDurationPrice() },
         { label: "blackHoleRechargePrice", value: getBlackHoleRechargePrice() },
+
+        { label: "", value: "" },
+        { label: "Galactic Casino:", value: "" },
+        { label: "", value: "" },
+
+        { label: "casinoPoints.quantity", value: getGalacticCasinoDataObject('casinoPoints', ['quantity']) ?? 0 },
+        { label: "wheelForceSpecial", value: getWheelForceSpecial() },
+        { label: "casinoGame4AlwaysWin", value: getCasinoGame4AlwaysWin() },
+        { label: "casinoGame5VoidSeerAlwaysMatch", value: getCasinoGame5VoidSeerAlwaysMatch() },
 
         { label: "", value: "" },
         { label: "Cosmic Rip:", value: "" },
@@ -6774,6 +6807,12 @@ function getVariableDebuggerSetterForLabel(label) {
         blackHoleDurationPrice: (v) => setBlackHoleDurationPrice(v),
         blackHoleRechargePrice: (v) => setBlackHoleRechargePrice(v),
 
+        // Galactic Casino
+        'casinoPoints.quantity': (v) => setGalacticCasinoDataObject(Number(v), 'casinoPoints', ['quantity']),
+        wheelForceSpecial: (v) => setWheelForceSpecial(v),
+        casinoGame4AlwaysWin: (v) => setCasinoGame4AlwaysWin(v),
+        casinoGame5VoidSeerAlwaysMatch: (v) => setCasinoGame5VoidSeerAlwaysMatch(v),
+
         // Cosmic Rip
         settledStars: (v) => { settledStars = v; },
         cosmicRip: (v) => setResourceDataObject(v, 'cosmicRip', []),
@@ -7146,6 +7185,11 @@ function getCurrentVariableDebuggerValueForLabel(label) {
     if (label === 'blackHolePowerPrice') return String(getBlackHolePowerPrice());
     if (label === 'blackHoleDurationPrice') return String(getBlackHoleDurationPrice());
     if (label === 'blackHoleRechargePrice') return String(getBlackHoleRechargePrice());
+
+    if (label === 'casinoPoints.quantity') return String(getGalacticCasinoDataObject('casinoPoints', ['quantity']) ?? 0);
+    if (label === 'wheelForceSpecial') return String(getWheelForceSpecial());
+    if (label === 'casinoGame4AlwaysWin') return String(getCasinoGame4AlwaysWin());
+    if (label === 'casinoGame5VoidSeerAlwaysMatch') return String(getCasinoGame5VoidSeerAlwaysMatch());
 
     if (label === 'settledStars') return JSON.stringify(settledStars);
     if (label === 'cosmicRip') return JSON.stringify(getResourceDataObject('cosmicRip'));

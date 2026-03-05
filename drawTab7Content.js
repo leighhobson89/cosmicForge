@@ -1,5 +1,7 @@
 import { removeTabAttentionIfNoIndicators, createOptionRow, createButton, createDropdown, createTextElement, createTextFieldArea, createSpinningDropdown, callPopupModal, showHideModal, createMegaStructureDiagram, createMegaStructureTable, createBlackHole, setButtonState, showNotification, updateDescriptionRow, setupInfoTooltips } from './ui.js';
 import {
+    getCasinoGame4AlwaysWin,
+    getCasinoGame5VoidSeerAlwaysMatch,
     getTechUnlockedArray,
     getStarsWithAncientManuscripts,
     getDestinationStar,
@@ -768,14 +770,14 @@ export function drawTab7Content(heading, optionContentElement) {
 
                 const max = Math.max(0, Math.floor(Number(prize.maxReel)));
                 const rollMid = () => {
-                    const upper = Math.max(0, max);
-                    const minMid = Math.max(0, Math.floor(upper * 0.25));
-                    const maxMid = Math.max(minMid, Math.ceil(upper * 0.75));
+                    const minMid = Math.ceil(0);
+                    const maxMid = Math.floor(max);
+                    if (maxMid < minMid) return minMid;
                     return minMid + Math.floor(Math.random() * (maxMid - minMid + 1));
                 };
 
                 const final1 = rollMid();
-                const final2 = rollMid();
+                const final2 = getCasinoGame5VoidSeerAlwaysMatch() === true ? final1 : rollMid();
 
                 Promise.all([
                     spinNumericSpinner('galacticCasinoGame4Spinner1', String(final1), { durationMs: 4200, minLoops: 4 }),
@@ -938,8 +940,7 @@ export function drawTab7Content(heading, optionContentElement) {
         game3HiloContainer.id = 'galacticCasinoGame3HiloContainer';
         game3HiloContainer.classList.add('galactic-casino-hilo-container');
 
-        // Debug: set true to force every Higher/Lower guess to be treated as correct.
-        const DEBUG_HILO_ALWAYS_WIN = false;
+        const shouldHiloAlwaysWin = () => getCasinoGame4AlwaysWin() === true;
 
         let hiloEndResetTimeoutId = null;
 
@@ -1494,7 +1495,7 @@ export function drawTab7Content(heading, optionContentElement) {
             const isHigher = nextValue > currentValue;
             const isLower = nextValue < currentValue;
 
-            if (!DEBUG_HILO_ALWAYS_WIN && guess === 'higher' && !isHigher) {
+            if (!shouldHiloAlwaysWin() && guess === 'higher' && !isHigher) {
                 if (cards[nextIndex]) {
                     setCardRevealed(cards[nextIndex], nextCard);
                     game3HiloContainer.setAttribute('data-hilo-index', String(nextIndex));
@@ -1504,7 +1505,7 @@ export function drawTab7Content(heading, optionContentElement) {
                 return;
             }
 
-            if (!DEBUG_HILO_ALWAYS_WIN && guess === 'lower' && !isLower) {
+            if (!shouldHiloAlwaysWin() && guess === 'lower' && !isLower) {
                 if (cards[nextIndex]) {
                     setCardRevealed(cards[nextIndex], nextCard);
                     game3HiloContainer.setAttribute('data-hilo-index', String(nextIndex));
