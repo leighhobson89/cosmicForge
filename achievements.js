@@ -1,4 +1,4 @@
-import { getAchievementFlagArray, getActivatedWackyNewsEffectsArray, getAlreadySeenNewsTickerArray, getCollectedPrecipitationQuantityThisRun, getCompoundCreateDropdownRecipeText, getCurrentOptionPane, getCurrentStarSystem, getGameActiveCountTime, getInfinitePower, getMiningObject, getMultiplierPermanentResources, getStarVisionDistance, getStatRun, getTechUnlockedArray, getUnlockedResourcesArray, setAchievementFlagArray, setCompoundCreateDropdownRecipeText, setMultiplierPermanentCompounds, setMultiplierPermanentResources } from "./constantsAndGlobalVars.js";
+import { getAchievementFlagArray, getActivatedWackyNewsEffectsArray, getAlreadySeenNewsTickerArray, getCollectedPrecipitationQuantityThisRun, getCompoundCreateDropdownRecipeText, getCurrentOptionPane, getCurrentStarSystem, getGameActiveCountTime, getGalacticPointsSpent, getInfinitePower, getMiningObject, getMultiplierPermanentResources, getStarVisionDistance, getStatRun, getTechUnlockedArray, getUnlockedResourcesArray, setAchievementFlagArray, setCompoundCreateDropdownRecipeText, setGalacticPointsSpent, setMultiplierPermanentCompounds, setMultiplierPermanentResources } from "./constantsAndGlobalVars.js";
 import { getAchievementNotification, newsTickerContent, refreshAchievementTooltipDescriptions } from "./descriptions.js";
 import { achievementsData, getAchievementDataObject, getGalacticCasinoDataObject, getResourceDataObject, getStarSystemDataObject, setAchievementDataObject, setResourceDataObject } from "./resourceDataObject.js";
 import { showNotification } from "./ui.js";
@@ -677,6 +677,8 @@ export function achievementCompleteRunOnMiaplacidus() {
     const achievement = getAchievementDataObject('completeRunOnMiaplacidus');
     if (getAchievementFlagArray().includes('completeRunOnMiaplacidus')) {
         setAchievementFlagArray('completeRunOnMiaplacidus', 'remove');
+        const currentSpent = getGalacticPointsSpent?.() || 0;
+        setGalacticPointsSpent(Math.max(0, currentSpent - 1));
         grantAchievement(achievement);
     }
 }
@@ -717,6 +719,8 @@ export function achievementWinAllCasinoGames() {
         const list = Array.isArray(won) ? won : [];
         const unique = new Set(list.map((x) => String(x || '').toLowerCase()).filter(Boolean));
         if (unique.size >= 4) {
+            const currentSpent = getGalacticPointsSpent?.() || 0;
+            setGalacticPointsSpent(Math.max(0, currentSpent - 1));
             grantAchievement(achievement);
         }
     } catch {

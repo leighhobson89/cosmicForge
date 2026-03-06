@@ -260,7 +260,7 @@ export function migrateResourceData(saveData, objectType, options = {}) {
             saveData.version = 0.976;
         }
 
-        if (saveData.version < 0.977) {
+        if (saveData.version < 0.978) {
             if (objectType === 'galacticCasinoData') {
                 if (!Array.isArray(saveData.casinoGamesWon)) {
                     saveData.casinoGamesWon = [];
@@ -359,7 +359,7 @@ export function migrateResourceData(saveData, objectType, options = {}) {
                     },
                     suffer5NegativeEvents: {
                         id: "suffer5NegativeEvents",
-                        name: "Suffer 5 Negative Events",
+                        name: "Suffer 5 Negative Instant Events",
                         specialConditionName: 'achievementSuffer5NegativeEvents',
                         specialCondition: false,
                         specialConditionArguments: false,
@@ -402,7 +402,7 @@ export function migrateResourceData(saveData, objectType, options = {}) {
                 }
             }
 
-            saveData.version = 0.977;
+            saveData.version = 0.978;
         }
     }
     return saveData;

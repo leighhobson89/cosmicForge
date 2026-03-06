@@ -73,12 +73,76 @@
      top: 0;
      width: 100vw;
      height: 100vh;
-     z-index: 95001;
+     z-index: 101001;
      background: rgba(0, 0, 0, 1);
      opacity: 1;
      transition: opacity 900ms ease;
      pointer-events: auto;
      user-select: none;
+ }
+
+ .win-cinematic2-black-overlay {
+     position: fixed;
+     left: 0;
+     top: 0;
+     width: 100vw;
+     height: 100vh;
+     z-index: 101000;
+     background: var(--container-bg-color, #1e1e1e);
+     opacity: 1;
+     pointer-events: none;
+     user-select: none;
+     overflow: hidden;
+ }
+
+ .win-cinematic2-star {
+     position: absolute;
+     border-radius: 50%;
+     background-color: var(--ready-text);
+     box-shadow: 0 0 4px var(--ready-text);
+ }
+
+ .win-cinematic2-star.size-1 {
+     width: 1px;
+     height: 1px;
+ }
+
+ .win-cinematic2-star.size-2 {
+     width: 2px;
+     height: 2px;
+ }
+
+ .win-cinematic2-star.size-3 {
+     width: 3px;
+     height: 3px;
+ }
+
+ .win-cinematic2-the-end {
+     position: absolute;
+     left: 50%;
+     top: 50%;
+     transform: translate(-50%, -50%);
+     width: 98%;
+     height: 400px;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     font-size: clamp(80px, 15vw, 200px);
+     font-weight: 700;
+     text-transform: uppercase;
+     letter-spacing: 0.1em;
+     opacity: 0;
+     animation: winCinematic2TheEndFadeIn 1s ease-out forwards;
+     animation-delay: 3s;
+ }
+
+ .win-cinematic2-the-end.green-ready-text {
+     text-shadow: var(--ui-glow);
+ }
+
+ @keyframes winCinematic2TheEndFadeIn {
+     0% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+     100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
  }
 
  .win-cinematic2-overlay.win-cinematic2-out {
@@ -633,7 +697,7 @@ button.option-button {
     --tab-invisible-bg-color: rgba(255, 141, 92, 0.06);
     --tab-invisible-text-color: rgba(240, 247, 255, 0.30);
     --container-border-color: rgba(255, 213, 79, 0.28);
-    --container-bg-color: rgba(38, 6, 12, 0.86);
+    --container-bg-color: rgba(38, 6, 12, 1);
     --button-bg-color: rgba(255, 141, 92, 0.10);
     --button-bg-active: rgba(255, 109, 0, 0.26);
     --star-color-prominent: #ffd54f;
@@ -671,7 +735,7 @@ button.option-button {
     --tab-invisible-bg-color: rgba(255, 255, 255, 0.02);
     --tab-invisible-text-color: rgba(230, 235, 245, 0.28);
     --container-border-color: rgba(255, 255, 255, 0.10);
-    --container-bg-color: rgba(15, 20, 30, 0.86);
+    --container-bg-color: rgba(15, 20, 30, 1);
     --button-bg-color: rgba(255, 255, 255, 0.06);
     --button-bg-active: rgba(88, 166, 255, 0.16);
     --star-color-prominent: #ffcc00;
@@ -709,7 +773,7 @@ button.option-button {
     --tab-invisible-bg-color: rgba(255, 255, 255, 0.02);
     --tab-invisible-text-color: rgba(238, 238, 255, 0.25);
     --container-border-color: rgba(0, 245, 255, 0.35);
-    --container-bg-color: rgba(10, 4, 18, 0.82);
+    --container-bg-color: rgba(10, 4, 18, 1);
     --button-bg-color: rgba(255, 255, 255, 0.05);
     --button-bg-active: rgba(0, 245, 255, 0.18);
     --star-color-prominent: #ffe600;

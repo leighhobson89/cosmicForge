@@ -1,4 +1,4 @@
-import { createButton, createOptionRow, createTextElement, setButtonState, showNotification, drawSharedSpaceBackdrop, callPopupModal, showHideModal, playWinCinematic2 } from './ui.js';
+import { createButton, createOptionRow, createTextElement, setButtonState, showNotification, drawSharedSpaceBackdrop, callPopupModal, showHideModal, playWinCinematic2, setupInfoTooltips } from './ui.js';
 import {
     modalCosmicRipLocatedHeader,
     modalCosmicRipLocatedText,
@@ -71,6 +71,12 @@ import { gain } from './game.js';
 
 export function drawTab8Content(heading, optionContentElement) {
     if (heading === 'Situation') {
+        const headerRow = document.getElementById('headerContentTab8');
+        if (headerRow) {
+            headerRow.innerHTML = `Situation <p id="info_situationHeader" class="info-emoji">ℹ️</p>`;
+        }
+        setupInfoTooltips();
+
         const restored = getCosmicRipNearSpaceScannerArrayRestored?.() === true;
         const gp = Number(getCosmicRipGalacticPoints?.()) || 0;
         const restoreCost = Number(getNearSpaceScannerArrayRestoreCostGp?.()) || 10;
@@ -217,6 +223,7 @@ export function drawTab8Content(heading, optionContentElement) {
                         setGalacticPointsSpent(currentGPSpent + 1);
 
                         setAchievementFlagArray('closeCosmicRip', 'add');
+                        setAchievementFlagArray('completeGame', 'add');
                         callPopupModal({
                             header: modalCosmicRipClosedHeader,
                             content: modalCosmicRipClosedText,
@@ -273,6 +280,12 @@ export function drawTab8Content(heading, optionContentElement) {
     }
 
     if (heading === 'Near Space Scanner Array') {
+        const headerRow = document.getElementById('headerContentTab8');
+        if (headerRow) {
+            headerRow.innerHTML = `Near Space Scanner Array <p id="info_nearSpaceScannerArrayHeader" class="info-emoji">ℹ️</p>`;
+        }
+        setupInfoTooltips();
+
         const restored = getCosmicRipNearSpaceScannerArrayRestored?.() === true;
         const found = getCosmicRipRipFound?.() === true;
         const gp = Number(getCosmicRipGalacticPoints?.()) || 0;
@@ -769,6 +782,12 @@ export function drawTab8Content(heading, optionContentElement) {
     }
 
     if (heading === 'Cosmic Rip') {
+        const headerRow = document.getElementById('headerContentTab8');
+        if (headerRow) {
+            headerRow.innerHTML = `Cosmic Rip <p id="info_cosmicRipHeader" class="info-emoji">ℹ️</p>`;
+        }
+        setupInfoTooltips();
+
         const restored = getCosmicRipNearSpaceScannerArrayRestored?.() === true;
         const found = getCosmicRipRipFound?.() === true;
 

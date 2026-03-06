@@ -37,7 +37,7 @@ function readCosmicRipEnabledFlag() {
     }
   } catch {
   }
-  return false;
+  return true;
 }
 
 function readVariableDebuggerAndCheatsFlag() {
@@ -57,7 +57,7 @@ function writePackageJson(obj) {
 }
 
 try {
-  const cosmicRipEnabled = readCosmicRipEnabledFlag();
+  const cosmicRipEnabled = true;
   // Always force variable debugger and cheats to false for builds
   fs.writeFileSync(
     buildFlagsPath,

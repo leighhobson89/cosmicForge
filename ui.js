@@ -13145,8 +13145,6 @@ let activeWinCinematicPromise = null;
 export function playWinCinematic(durationMs = 14000) {
     if (activeWinCinematicPromise) return activeWinCinematicPromise;
 
-    setAchievementFlagArray('completeGame', 'add');
-
     if (!getTechUnlockedArray().includes('cosmicRip')) {
         setTechUnlockedArray('cosmicRip');
     }
@@ -13866,6 +13864,24 @@ export function playWinCinematic2(durationMs = 22000) {
         overlay.id = 'winCinematic2Overlay';
         overlay.className = 'win-cinematic2-overlay';
 
+        const blackOverlay = document.createElement('div');
+        blackOverlay.id = 'winCinematic2BlackOverlay';
+        blackOverlay.className = 'win-cinematic2-black-overlay';
+
+        const theEndText = document.createElement('div');
+        theEndText.className = 'win-cinematic2-the-end green-ready-text';
+        theEndText.textContent = 'THE END';
+        blackOverlay.appendChild(theEndText);
+
+        for (let i = 0; i < 400; i++) {
+            const star = document.createElement('div');
+            const size = Math.floor(Math.random() * 3) + 1;
+            star.className = `win-cinematic2-star size-${size}`;
+            star.style.left = `${Math.random() * 100}%`;
+            star.style.top = `${Math.random() * 100}%`;
+            blackOverlay.appendChild(star);
+        }
+
         const scene = document.createElement('div');
         scene.className = 'win-cinematic2-scene';
 
@@ -13992,22 +14008,15 @@ export function playWinCinematic2(durationMs = 22000) {
             setTimeout(cleanup, 950);
         };
 
-        const cleanup = () => {
-            blockedPointerEvents.forEach(type => overlay.removeEventListener(type, stopEvent, { capture: true }));
-            overlay.removeEventListener('wheel', stopEvent, { capture: true });
-            document.removeEventListener('keydown', keyBlocker, true);
-            document.removeEventListener('keyup', keyBlocker, true);
-            document.documentElement.style.overflow = previousOverflow;
-            overlay.remove();
-            activeWinCinematic2Promise = null;
-            resolve();
-        };
-
         requestAnimationFrame(() => {
             overlay.classList.add('win-cinematic2-play');
         });
 
         setTimeout(end, totalDurationMs);
+
+        setTimeout(() => {
+            document.body.appendChild(blackOverlay);
+        }, totalDurationMs - 1000);
     });
 
     return activeWinCinematic2Promise;

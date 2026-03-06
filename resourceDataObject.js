@@ -8,7 +8,7 @@ import { showNotification } from "./ui.js";
 
 export let achievementImageUrls;
 export let resourceData = {
-    version: 0.977, //update this whenever changes are made to the structure
+    version: 0.978, //update this whenever changes are made to the structure
     resources: {
         solar: {
             autoSell: false,
@@ -1016,7 +1016,7 @@ export const miaplacidus = {
 
 
 export let starSystems = {
-    version: 0.977,
+    version: 0.978,
     stars: {
         spica: {
             mapSize: 5.504440179536064, //might need to add this to star object when added dynamically for after rebirth
@@ -1035,14 +1035,14 @@ export let starSystems = {
 };
 
 export let oTypePowerPlantBuffs = {
-    version: 0.977,
+    version: 0.978,
     basicPowerPlantStar: { starName: null, settled: false },
     solarPowerPlantStar: { starName: null, settled: false },
     advancedPowerPlantStar: { starName: null, settled: false }
 };
 
 export let galacticCasino = {
-    version: 0.977,
+    version: 0.978,
     settings: {
         baseProbabilityCasino: 0.4,
     },
@@ -1074,7 +1074,7 @@ export let galacticCasino = {
 };
 
 export let galacticMarket = {
-    version: 0.977,
+    version: 0.978,
     resources: {
         hydrogen: { 
             name: "Hydrogen", 
@@ -1180,7 +1180,7 @@ export let galacticMarket = {
 };
 
 export let ascendencyBuffs = {
-    version: 0.977,
+    version: 0.978,
     "littleBagOfHydrogen": {
         name: "Little Bag Of Hydrogen",
         description: "buffLittleBagOfHydrogenRow",
@@ -2719,7 +2719,7 @@ export let achievementsData = {
     },
     suffer5NegativeEvents: {
         id: "suffer5NegativeEvents",
-        name: "Suffer 5 Negative Events",
+        name: "Suffer 5 Negative Instant Events",
         specialConditionName: 'achievementSuffer5NegativeEvents',
         specialCondition: achievementSuffer5NegativeEvents,
         specialConditionArguments: false,

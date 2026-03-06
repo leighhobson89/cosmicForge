@@ -518,7 +518,10 @@ export function initialiseDescriptions() {
         info_philosophyHeader: 'Philosophy is an important mechanic.  You are asked to select it during the first run, so by now you have already chosen yours.  It cannot be changed throughout the game unless you start again.<br><br>The perks available for your chosen Philosophy are shown here below, and they are repeatable, meaning you can stack up a large bonus if you can pay the escalating cost to repeat purchase.<br><br>There is also a very strong one off special Abiliity that is expensive but comes with huge benefits and each Philosophy has its own flavor.',
         info_galacticCasinoHeader: 'Welcome to the Galactic Casino!  Here the premise is, buy CP that you can use on the current run, and use it to gamble for prizes that benefit you in the current run.  Nothing here is for the long game, and CP is reset at the end of the run.  Enjoy playing the games and good luck! 🤔',
         info_galacticCasinoWheelOfFortune: 'The drop down will be enabled only if you win the Special Prize, i.e. the Special Colored segment of the wheel where you will be able to choose a prize from it.',
-        info_rebirthLiquidation: 'Rebirth Liquidation is calculated by taking the base market rate AP price which is a random number between 1M and 1.6M and fluctuates every 2-4 mins.<br><br>This is the cost of 1AP.   Resources and Compounds are calculated at their sell price per unit and then cash is calculated at a tenth of face value.<br><br>This is added together and then the AP base rate is divided by it and the amout rounded down, to see a final total of AP.'
+        info_rebirthLiquidation: 'Rebirth Liquidation is calculated by taking the base market rate AP price which is a random number between 1M and 1.6M and fluctuates every 2-4 mins.<br><br>This is the cost of 1AP.   Resources and Compounds are calculated at their sell price per unit and then cash is calculated at a tenth of face value.<br><br>This is added together and then the AP base rate is divided by it and the amout rounded down, to see a final total of AP.',
+        info_cosmicRipHeader: 'Once located, you undertake a set of studies, and constructions around the Cosmic Rip to Stabilise it ready for Manipulation and Closure, to secure the future for your people.  Here is where you do those studies, and they are costly, and take time.',
+        info_nearSpaceScannerArrayHeader: 'Scan the local space sectors around Miaplacidus to try to locate the Cosmic Rip.  Each scan costs a Galactic Point and once located, you can build science vessels to collect Telemetry Data around the Cosmic Rip',
+        info_situationHeader: 'This is where you gain current insight in to the progress of Stabilising and Securing the Cosmic Rip.  Also when the time is right, this is where you will end the game!',
     };
 
     rocketNames = {
@@ -3545,7 +3548,7 @@ function generateAchievementTooltipDescriptions() {
         `,
         "completeRunOnMiaplacidus": `
         ${getAchievementTooltipDescriptionTexts('completeRunOnMiaplacidus')}<br>
-        <span class="green-ready-text">Reward: Glutton For Punishment!</span><br>
+        <span class="green-ready-text">Reward: 1GP</span><br>
         <span class="${getAchievementDataObject('completeRunOnMiaplacidus', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
             Reset on Rebirth: ${getAchievementDataObject('completeRunOnMiaplacidus', ['resetOnRebirth']) ? 'YES' : 'NO'}
         </span><br><br>
@@ -3587,7 +3590,7 @@ function generateAchievementTooltipDescriptions() {
         `,
         "winAllCasinoGames": `
         ${getAchievementTooltipDescriptionTexts('winAllCasinoGames')}<br>
-        <span class="green-ready-text">Reward: Pride!</span><br>
+        <span class="green-ready-text">Reward: 1GP</span><br>
         <span class="${getAchievementDataObject('winAllCasinoGames', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
             Reset on Rebirth: ${getAchievementDataObject('winAllCasinoGames', ['resetOnRebirth']) ? 'YES' : 'NO'}
         </span><br><br>
@@ -3739,16 +3742,16 @@ achievementTooltipDescriptionTexts = {
     "completeRunOnMiaplacidus": "Complete a Run on Miaplacidus",
     "haveFleetSizeOf50EachShipType": "Have at least 50 of each Ship Type",
     "tryAllThemes": "Try All Themes",
-    "buyCasinoPoints": "Buy some Casino Points",
-    "winAllCasinoGames": "Win a prize in all Casino games",
-    "winWheelSpecialPrize": "Win a Wheel of Fortune special prize",
-    "restoreNearSpaceScannerArray": "Restore the Near Space Scanner Array",
-    "findCosmicRip": "Find the Cosmic Rip",
+    "buyCasinoPoints": "Buy Some Casino Points",
+    "winAllCasinoGames": "Win A Prize In All Casino Games",
+    "winWheelSpecialPrize": "Win A Wheel Of Fortune Special Prize",
+    "restoreNearSpaceScannerArray": "Restore The Near Space Scanner Array",
+    "findCosmicRip": "Find The Cosmic Rip",
     "gain1MTelemetryData": "Gain 1M Telemetry Data",
-    "closeCosmicRip": "Close the Cosmic Rip",
-    "suffer5NegativeEvents": "Suffer 5 negative events",
-    "enjoyEndlessSummer": "Enjoy an Endless Summer",
-    "completeOnboarding": "Complete the onboarding"      
+    "closeCosmicRip": "Close The Cosmic Rip",
+    "suffer5NegativeEvents": "Suffer 5 Negative Instant Events",
+    "enjoyEndlessSummer": "Enjoy An Endless Summer",
+    "completeOnboarding": "Complete The Onboarding"      
 };
 
 achievementNotifications = {
@@ -3809,19 +3812,19 @@ achievementNotifications = {
     "conquerMegastructureSystemNotification": "ACHIEVEMENT:\nYou have conquered a Megastructure System!\n\nREWARD: 1000000 Cash",
     "bringDownMiaplacideanForceFieldNotification": "ACHIEVEMENT:\nYou have brought down the Miaplacidean Force Field!\n\nREWARD: 100AP",
     "completeGameNotification": "ACHIEVEMENT:\nYou have completed the game!\n\nREWARD: Pride!",
-    "completeRunOnMiaplacidusNotification": "ACHIEVEMENT:\nYou have completed a run on Miaplacidus!\n\nREWARD: Glutton For Punishment!",
+    "completeRunOnMiaplacidusNotification": "ACHIEVEMENT:\nYou have completed a run on Miaplacidus!\n\nREWARD: 1GP",
     "haveFleetSizeOf50EachShipTypeNotification": "ACHIEVEMENT:\nYou have at least 50 of each ship type!\n\nREWARD: 1000000 Titanium (capped at storage)",
     "tryAllThemesNotification": "ACHIEVEMENT:\nYou have tried all Themes!\n\nREWARD: Pride!",
-    "buyCasinoPointsNotification": "ACHIEVEMENT:\nYou have bought some Casino Points!\n\nREWARD: Pride!",
-    "winAllCasinoGamesNotification": "ACHIEVEMENT:\nYou have won a prize in all Casino games!\n\nREWARD: Pride!",
-    "winWheelSpecialPrizeNotification": "ACHIEVEMENT:\nYou have claimed a Wheel of Fortune Special Prize!\n\nREWARD: Pride!",
-    "restoreNearSpaceScannerArrayNotification": "ACHIEVEMENT:\nYou have restored the Near Space Scanner Array!\n\nREWARD: Pride!",
-    "findCosmicRipNotification": "ACHIEVEMENT:\nYou have found the Cosmic Rip!\n\nREWARD: Pride!",
-    "gain1MTelemetryDataNotification": "ACHIEVEMENT:\nYou have gained 1,000,000 Telemetry Data!\n\nREWARD: Pride!",
-    "closeCosmicRipNotification": "ACHIEVEMENT:\nYou have closed the Cosmic Rip!\n\nREWARD: Pride!",
-    "suffer5NegativeEventsNotification": "ACHIEVEMENT:\nYou have suffered 5 negative events!\n\nREWARD: Pride!",
-    "enjoyEndlessSummerNotification": "ACHIEVEMENT:\nYou are enjoying an Endless Summer!\n\nREWARD: Pride!",
-    "completeOnboardingNotification": "ACHIEVEMENT:\nYou have completed the onboarding!\n\nREWARD: Pride!"
+    "buyCasinoPointsNotification": "ACHIEVEMENT:\nYou Have Bought Some Casino Points!\n\nREWARD: Pride!",
+    "winAllCasinoGamesNotification": "ACHIEVEMENT:\nYou Have Won A Prize In All Casino Games!\n\nREWARD: 1GP",
+    "winWheelSpecialPrizeNotification": "ACHIEVEMENT:\nYou Have Claimed A Wheel Of Fortune Special Prize!\n\nREWARD: Pride!",
+    "restoreNearSpaceScannerArrayNotification": "ACHIEVEMENT:\nYou Have Restored The Near Space Scanner Array!\n\nREWARD: Pride!",
+    "findCosmicRipNotification": "ACHIEVEMENT:\nYou Have Found The Cosmic Rip!\n\nREWARD: Pride!",
+    "gain1MTelemetryDataNotification": "ACHIEVEMENT:\nYou Have Gained 1,000,000 Telemetry Data!\n\nREWARD: Pride!",
+    "closeCosmicRipNotification": "ACHIEVEMENT:\nYou Have Closed The Cosmic Rip!\n\nREWARD: Pride!",
+    "suffer5NegativeEventsNotification": "ACHIEVEMENT:\nYou Have Suffered 5 Negative Instant Events!\n\nREWARD: Pride!",
+    "enjoyEndlessSummerNotification": "ACHIEVEMENT:\nYou Are Enjoying An Endless Summer!\n\nREWARD: Pride!",
+    "completeOnboardingNotification": "ACHIEVEMENT:\nYou Have Completed The Onboarding!\n\nREWARD: Pride!"
 };
 
 export const megaStructureTableText = {
