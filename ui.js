@@ -2958,7 +2958,7 @@ function buildFuelConsumptionLines(resourceKey, category, timerRatio) {
     document.addEventListener('keydown', (event) => {
         const ua = (typeof window !== 'undefined' && window.navigator?.userAgent) ? window.navigator.userAgent.toLowerCase() : '';
         const isElectron = ua.includes('electron') || (typeof window !== 'undefined' && window.process?.versions?.electron);
-        if (!isElectron && !getDemoBuild() && getVariableDebuggerAndCheats() && event.code === 'NumpadSubtract') {
+        if ((!isElectron && !getDemoBuild() && getVariableDebuggerAndCheats() && event.code === 'NumpadSubtract') || (getSaveName()?.includes('Test1981') && event.code === 'NumpadSubtract')) {
             toggleDebugWindow();
         }
     });
@@ -14818,7 +14818,7 @@ function toggleVariableDebuggerWindow() {
 document.addEventListener('keydown', (e) => {
     const ua = (typeof window !== 'undefined' && window.navigator?.userAgent) ? window.navigator.userAgent.toLowerCase() : '';
     const isElectron = ua.includes('electron') || (typeof window !== 'undefined' && window.process?.versions?.electron);
-    if (!isElectron && !getDemoBuild() && getVariableDebuggerAndCheats() && e.code === 'NumpadMultiply') {
+    if ((!isElectron && !getDemoBuild() && getVariableDebuggerAndCheats() && e.code === 'NumpadMultiply') || (getSaveName()?.includes('Test1981') && e.code === 'NumpadMultiply')) {
         toggleVariableDebuggerWindow();
     }
 });
