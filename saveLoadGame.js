@@ -45,6 +45,13 @@ function isElectronDemoBuild() {
     return getDemoBuild();
 }
 
+export function stopAutoSave() {
+    if (autoSaveTimer) {
+        clearTimeout(autoSaveTimer);
+        autoSaveTimer = null;
+    }
+}
+
 export function initializeAutoSave() {
     if (autoSaveTimer) {
         //console.log("Clearing existing auto-save timer.");

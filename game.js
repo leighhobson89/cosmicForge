@@ -816,7 +816,7 @@ import {
     cosmicRipStatusMessages
 } from './descriptions.js';
 
-import { initializeAutoSave, saveGame } from './saveLoadGame.js';
+import { initializeAutoSave, saveGame, stopAutoSave } from './saveLoadGame.js';
 import { playClickSfx, sfxPlayer, weatherAmbienceManager, backgroundAudio } from './audioManager.js';
 import { timerManager } from './timerManager.js';
 import { timerManagerDelta } from './timerManagerDelta.js';
@@ -14969,6 +14969,7 @@ export function addPermanentBuffsBackInAfterRebirth() {
 }
 
 export function rebirth() {
+    stopAutoSave();
     setAchievementFlagArray('rebirth', 'add');
 
     const rebirthCalledOnRun1 = getStatRun() === 1;
@@ -15101,6 +15102,8 @@ export function rebirth() {
             updateAttentionIndicators();
         }
     }
+
+    initializeAutoSave();
 }
 
 function resetUIElementsOnRebirth() {

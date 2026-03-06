@@ -48,7 +48,6 @@ import {
     setRocketTravelDuration,
     getDestinationAsteroid,
     setCurrentlyTravellingToAsteroid,
-    setMiningObject,
     setAntimatterUnlocked,
     getStarShipStatus,
     setStarShipStatus,
