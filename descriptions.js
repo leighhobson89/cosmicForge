@@ -2415,7 +2415,7 @@ export function initialiseDescriptions() {
             "You can’t breathe and swallow at the same time.",
             "The first known contraceptive was used in ancient Egypt and involved crocodile dung.",
             "An astronaut's helmet costs over $3 million.",
-            "Pressing '-' on the numpad doesn't do anything. No,now it really doesn't :)",
+            "Pressing '-' on the numpad doesn't do anything. No, now it really doesn't :)",
             "Apparently there are Ancient Manuscripts dotted around the Galaxy that point to Ancient Megastructures...",
             "If you are playing in the United States, there is an 87% chance you are American, but only a 66% chance that at least one of your parents is.",
             "If you think this game is worth paying for, then tough, you can't pay for it, MUHAHAHAH!  Wait, actually there is a way on itch if you get the Downloadable version, Phew!",
@@ -2425,7 +2425,7 @@ export function initialiseDescriptions() {
             "A mysterious gambler won 10,000 CP in a single night at the Galactic Casino Double Or Nothing table.",
             "Galactic Casino security increased after a string of lucky streaks deemed 'statistically impossible'.",
             "The Galactic Gaming Commission considers new regulations on roulette wheel calibration.",
-            "Strange energy readings detected near the Cosmic Rip - scientists urge caution.",
+            "Strange energy readings detected near the Cosmic Rip - Scientists urge caution.",
             "The Reality Weave around the Cosmic Rip fluctuates unpredictably, causing concern among researchers.",
             "Dimensional anchors holding the Cosmic Rip stable require additional reinforcement.",
             "Quantum containment fields show micro-fractures - emergency protocols on standby.",
@@ -2905,9 +2905,12 @@ helpContent = {
         subHeading3: "Miaplacidus",
         subBody3: "Miaplacidus - your Homeland - It is protected by a powerful force field maintained by the machine race. As you dismantle MegaStructures, and connect them to your own cause, that force field will weaken until it eventually collapses, where you will then face the almighty battle of your life to recover your Ancestral homeland.",
 
-        subHeading4: "The End Goal",
-        subBody4: "Once the Miaplacidus force field is gone, you can attack the Master AI race, reclaim Miaplacidus, reconquer your homeland, and close the Cosmic Rip, forever securing the future for your People! This is the end goal of the game."
-    },
+        subHeading4: "Cosmic Rip",
+        subBody4: "The Cosmic Rip is a dangerous anomaly threatening the future of your people. Once your forces are strong enough to reclaim Miaplacidus, you must first locate the Rip by scanning local space sectors. After locating it, you will undertake costly studies and constructions to stabilise it. Only once stabilised and secured can you finally close it forever.",
+        
+        subHeading5: "The End Goal",
+        subBody5: "Once the Miaplacidus force field is gone, you can attack the Master AI race, reclaim Miaplacidus, reconquer your homeland, and close the Cosmic Rip, forever securing the future for your People! This is the end goal of the game."
+},
     'philosophies': {
     subHeading1: "Philosophies",
     subBody1: "Philosophies are introduced slowly over the first run.  You are encouraged to select one of four possible paths, each of which is a one off, permanent decision that applies for the rest of the game.  Once a Philosophy is chosen, and you complete the first run, a new option shall appear under the Research Tab where you can research a unique special Ability, and a series of unique Repeatable Techs, fitting for the type of Philosophy you selected.  All these bonuses stay with you throughout the game, even persisting through Rebirths.",

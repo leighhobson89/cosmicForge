@@ -4619,8 +4619,8 @@ function updateAP() {
 
 function updateAntimatterStat() {
     const statLabelElement = document.getElementById('stat5').closest('.stat-cell').querySelector('.stat-label');
-    if (getAntimatterUnlocked()) {
-        statLabelElement.innerHTML = 'Antimatter:'
+    if (getAntimatterUnlocked() || getStatRun() >= 2) {
+        statLabelElement.innerHTML = 'Antimatter:';
         const antimatterTotalQuantity = Math.floor(getResourceDataObject('antimatter', ['quantity']));
         const antimatterValueClass = antimatterTotalQuantity > 0 ? 'green-ready-text' : 'red-disabled-text';
         document.getElementById('stat5').innerHTML = `<span class="${antimatterValueClass}">${antimatterTotalQuantity}</span>`;
