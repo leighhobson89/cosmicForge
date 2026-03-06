@@ -194,7 +194,7 @@ export function initialiseDescriptions() {
     `;
     gameIntroText = 'You wake to dust. Your knowledge knows the path of stars.<br>Start with Hydrogen—spark fusion to forge heavier elements.<br>Build machines that compound creation into momentum.<br>Reach for the stars. Claim systems. Gather ascendency.<br><br>Good luck in your Forging!<br>';
     onboardingModalHeader = 'NEED A HAND?';
-    onboardingModalText = `Looks like you're starting a new journey.<br>Would you like a short tutorial onboarding to help you get started?<br>You can continue normally either way.<br><br><span class="green-ready-text">This is the only opportunity to access the Onboarding.</span>`;
+    onboardingModalText = `Looks like you're starting a new journey.<br>Would you like a short tutorial onboarding to help you get started?<br>You can continue normally either way.<br><br><span class="green-ready-text">This is the only opportunity to access the Onboarding.</span><br><br><span class="green-ready-text">There is an Achievement for completing the Onboarding that will be Lost Forever if you don't complete it!</span>`;
     launchStarShipWarningHeader = 'WARNING: POINT OF NO RETURN!';
     launchStarShipWarningText = 'Once your Starship is launched you may not retrieve it this run.<br>So please revise the Star Data section and ensure you really want to select this destination,<br>then please click OK to confirm, or CANCEL to check.';
     enterWarModeModalHeader = `CONQUEST!`;
