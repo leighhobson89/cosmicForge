@@ -25,8 +25,8 @@ import { showNotification } from './ui.js';
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 import { getNavigatorLanguage } from './game.js';
 
-const supabaseUrl = 'https://riogcxvtomyjlzkcnujf.supabase.co';
-const supabaseKey = 'sb_publishable_aocxf5kurMeS6QmQ_RMsAQ_Fio1271m';
+const supabaseUrl = 'https://bliqglhwteenckkykkzy.supabase.co';
+const supabaseKey = 'sb_publishable_lVoQQd3mNFOBVVmzp0EVVg_4bnNJpcz';
 const supabase = createClient(supabaseUrl, supabaseKey, {
     auth: {
         persistSession: false,
