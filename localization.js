@@ -32,8 +32,10 @@ function localize(key, language) {
         console.error(`Localization data not loaded or language '${language}' not found`);
         return key;
     }
-    const localizedString = data[language][key];
+    let localizedString = data[language][key];
     if (!localizedString) return key;
+
+    localizedString = localizedString.replace(/\n/g, '<br>');
 
     if (localizedString.includes('${')) {
         try {

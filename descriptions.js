@@ -238,112 +238,112 @@ export function initialiseDescriptions() {
     modalPlayerLeaderIntroContentText4 = localize('modalPlayerLeaderIntroContentText4', getLanguage());
     hardResetWarningHeader = localize('hardResetWarningHeader', getLanguage());
     hardResetWarningText = localize('hardResetWarningText', getLanguage());
-    modalCompoundsTabUnlockHeader = `COMPOUNDS UNLOCKED!`;
-    modalCompoundsTabUnlockText = `Your Scientists have experimented with combining Hydrogen and Carbon Resources,<br>and have discovered Diesel!  With this knowledge, they are sure that<br>more of these Compounds will follow.<br><br><span class="green-ready-text">Compounds Tab Unlocked!</span>`;
-    modalSpaceMiningTabUnlockHeader = `SPACE MINING UNLOCKED!`;
-    modalSpaceMiningTabUnlockText = `You have successfully developed optics capable of scanning the Stars and Asteroids<br>Perhaps we can use these Asteroids for our benefit and mine them!<br>We will realise our dream of returning to the stars!<br><br><span class="green-ready-text">Space Mining Tab Unlocked!</span>`;
-    modalEnergyTabUnlockHeader = `ENERGY UNLOCKED!`;
-    modalEnergyTabUnlockText = `Your Engineers have harnessed the power of stored Resources<br>to generate Energy for advanced systems and automation.<br>This marks a pivotal step toward a sustainable future, and opens up possibilities unavailable until now.<br><br><span class="green-ready-text">Energy Tab Unlocked!</span>`;
-    modalInterstellarTabUnlockHeader = `INTERSTELLAR UNLOCKED!`;
-    modalInterstellarTabUnlockText = `Your Engineers have begun mapping the Stars!<br>With this capability, you will one day have a reference to explore and Colonise the Galaxy!<br><br><span class="green-ready-text">Interstellar Tab Unlocked!</span>`;
-    modalKnowledgeSharingTabUnlockHeader = `TECH RESEARCH!`;
-    modalKnowledgeSharingTabUnlockText = `People are getting together to share knowledge!<br>Scientific research will advance much faster with new Science Clubs where enthusiasts<br>can convene and develop their ideas!<br><br><span class="green-ready-text">Science Clubs Unlocked!</span>`;
-    modalScienceLabsTabUnlockHeader = `SCIENCE LABS!`;
-    modalScienceLabsTabUnlockText = `Scientists now have dedicated laboratories to carry out their experiments.<br>Research will rocket with this advancement!<br><br><span class="green-ready-text">Science Labs Unlocked!</span>`;
-    modalQuantumComputingTabUnlockHeader = `QUANTUM COMPUTING UNLOCKED!`;
-    modalQuantumComputingTabUnlockText = `Your Researchers have breached the boundaries of classical computation.<br>With Quantum Computing, reality itself bends to optimize processes.<br>This advancement will allow us to extract Resources much faster<br><br><span class="green-ready-text">Level 2 AutoBuyers Unlocked!</span>`;
-    modalRocketCompositesTabUnlockHeader = `ROCKET COMPOSITES!`;
-    modalRocketCompositesTabUnlockText = `Scientists have developed new materials that can be used in advanced Mining, both here and on Asteroids!<br>With this technology you can now build a Launch Pad and Rockets!<br>Not only that, but also you now have access to the most advanced extraction machinery on the ground too!<br><br><span class="green-ready-text">LaunchPad and Rockets Unlocked!</span><br><span class="green-ready-text">Level 3 and 4 AutoBuyers Unlocked!</span>`
-    modalNanoBrokersUnlockHeader = 'NANO BROKERS!';
-    modalNanoBrokersUnlockText = `With this extremely advanced tech, our scientists have developed robots that can go to market<br>automatically and sell our Resources and Compounds for the best possible price!<br><br><span class="green-ready-text">Automated Resource Selling Unlocked!</span>`
-    modalCompoundMachiningTabUnlockHeader = `AUTOMATED COMPOUND CREATION!`;
-    modalCompoundMachiningTabUnlockText = `Our scientists have done it again! Now we have advanced machinery capable of automatically<br>creating Compounds at will.  This is extremely powerful indeed!<br>If we cannot conquer the Galaxy now, it is your fault!<br><br><span class="green-ready-text">Automated Compound Creation Unlocked!</span>`
-    modalMegaStructureTechDysonSphere1Header = `UNDERSTANDING THE DYSON SPHERE`;
-    modalMegaStructureTechDysonSphere1Text = `You have studied and now understand what the MegaStructure before you is - it is a Dyson Sphere<br><br><span class="green-ready-text">All Batteries Double in Capacity!</span>`;
-    modalMegaStructureTechDysonSphere2Header = `DYSON SPHERE CAPABILITIES`;
-    modalMegaStructureTechDysonSphere2Text = `After studying how the Dyson Sphere works you are now<br>confident of its capabilities and you now want to plan how you are going to disconnect<br>it from its current role so you can somehow harness it.<br><br><span class="green-ready-text">All Energy producing Buildings 25% more powerful!</span>`;
-    modalMegaStructureTechDysonSphere3Header = `DISCONNECTING THE DYSON SPHERE`;
-    modalMegaStructureTechDysonSphere3Text = `You have managed to disconnect the Dyson Sphere from its current role,<br>which was providing power to the great force field around your home star Miaplacidus<br><br><span class="green-ready-text">Miaplacidus Milestone Achieved!<br>+0.15 Antimatter /s forever!</span>`;
-    modalMegaStructureTechDysonSphere4Header = `HARNESSING THE DYSON SPHERE`;
-    modalMegaStructureTechDysonSphere4Text = `You have harnessed the Dyson Sphere for the benefit of this System,<br>its huge power will benefit you as it provides the following bonus:<br><br><span class="green-ready-text">Power Always On for this System!</span>`;
-    modalMegaStructureTechDysonSphere5Header = `CONNECTING THE DYSON SPHERE TO THE FABRIC`;
-    modalMegaStructureTechDysonSphere5Text = `You have connected this Dyson Sphere into the fabric of the galaxy<br>meaning its benefits are now permanently available in whichever<br>system you might one day settle. This has enormous potential.<br><br><span class="green-ready-text">Power Always On!</span>`;
-    modalMegaStructureTechCelestialProcessingCore1Header = `UNDERSTANDING THE CELESTIAL PROCESSING CORE`;
-    modalMegaStructureTechCelestialProcessingCore1Text = `You have studied and now understand what the MegaStructure before you is - it is a Celestial Processing Core<br><br><span class="green-ready-text">Gain 50 Research per Second!</span>`;
-    modalMegaStructureTechCelestialProcessingCore2Header = `CELESTIAL PROCESSING CORE CAPABILITIES`;
-    modalMegaStructureTechCelestialProcessingCore2Text = `After studying how the Celestial Processing Core works you are now<br>confident of its capabilities and you now want to plan how you are going to disconnect<br>it from its current role so you can somehow harness it.<br><br><span class="green-ready-text">Gain 100 Research per Second!</span>`;
-    modalMegaStructureTechCelestialProcessingCore3Header = `DISCONNECTING THE CELESTIAL PROCESSING CORE`;
-    modalMegaStructureTechCelestialProcessingCore3Text = `You have managed to disconnect the Celestial Processing Core from its current role<br>which was providing processing power to the great force field around your home star Miaplacidus<br><br><span class="green-ready-text">Miaplacidus Milestone Achieved!<br>+0.15 Antimatter /s forever!</span>`;
-    modalMegaStructureTechCelestialProcessingCore4Header = `HARNESSING THE CELESTIAL PROCESSING CORE`;
-    modalMegaStructureTechCelestialProcessingCore4Text = `You have harnessed the Celestial Processing Core for the benefit of this System,<br>its huge power will benefit you as it provides the following bonus:<br><br><span class="green-ready-text">Gain 150 Research per Second!</span>`;
-    modalMegaStructureTechCelestialProcessingCore5Header = `CONNECTING THE CELESTIAL PROCESSING CORE TO THE FABRIC`;
-    modalMegaStructureTechCelestialProcessingCore5Text = `You have connected this Celestial Processing Core into the fabric of the galaxy<br>meaning its benefits are now permanently available in whichever<br>system you might one day settle. This has enormous potential.<br><br><span class="green-ready-text">Gain 200 Research Per Second!<br>Gain 500 Research Per Second in every new System!</span>`;
-    modalMegaStructureTechPlasmaForge1Header = `UNDERSTANDING THE PLASMA FORGE`;
-    modalMegaStructureTechPlasmaForge1Text = `You have studied and now understand what the MegaStructure before you is - it is a Plasma Forge<br><br><span class="green-ready-text">+25% Resource AutoBuyer Rates!</span>`;
-    modalMegaStructureTechPlasmaForge2Header = `PLASMA FORGE CAPABILITIES`;
-    modalMegaStructureTechPlasmaForge2Text = `After studying how the Plasma Forge works you are now<br>confident of its capabilities and you now want to plan how you are going to disconnect<br>it from its current role so you can somehow harness it.<br><br><span class="green-ready-text">+50% Resource AutoBuyer Rates!</span>`;
-    modalMegaStructureTechPlasmaForge3Header = `DISCONNECTING THE PLASMA FORGE`;
-    modalMegaStructureTechPlasmaForge3Text = `You have managed to disconnect the Plasma Forge from its current role<br>which was providing plasma to the great force field around your home star Miaplacidus<br><br><span class="green-ready-text">Miaplacidus Milestone Achieved!<br>+0.15 Antimatter /s forever!</span>`;
-    modalMegaStructureTechPlasmaForge4Header = `HARNESSING THE PLASMA FORGE`;
-    modalMegaStructureTechPlasmaForge4Text = `You have harnessed the Plasma Forge for the benefit of this System,<br>its huge power will benefit you as it provides the following bonus:<br><br><span class="green-ready-text">+75% Resource AutoBuyer Rates!</span>`;
-    modalMegaStructureTechPlasmaForge5Header = `CONNECTING THE PLASMA FORGE TO THE FABRIC`;
-    modalMegaStructureTechPlasmaForge5Text = `You have connected this Plasma Forge into the fabric of the galaxy<br>meaning its benefits are now permanently available in whichever<br>system you might one day settle. This has enormous potential.<br><br><span class="green-ready-text">Double Resource AutoBuyer Rates!<br>Resource AutoBuyer Rates are 500% higher in every new System!</span>`;
-    modalMegaStructureTechGalacticMemoryArchive1Header = `UNDERSTANDING THE GALACTIC MEMORY ARCHIVE`;
-    modalMegaStructureTechGalacticMemoryArchive1Text = `You have studied and now understand what the MegaStructure before you is - it is a Galactic Memory Archive<br><br><span class="green-ready-text">All Resource And Compound Storage Capacity + 100K!</span>`;
-    modalMegaStructureTechGalacticMemoryArchive2Header = `GALACTIC MEMORY ARCHIVE CAPABILITIES`;
-    modalMegaStructureTechGalacticMemoryArchive2Text = `After studying how the Galactic Memory Archive works you are now<br>confident of its capabilities and you now want to plan how you are going to disconnect<br>it from its current role so you can somehow harness it.<br><br><span class="green-ready-text">All Resource And Compound Storage Capacity + 1M!</span>`;
-    modalMegaStructureTechGalacticMemoryArchive3Header = `DISCONNECTING THE GALACTIC MEMORY ARCHIVE`;
-    modalMegaStructureTechGalacticMemoryArchive3Text = `You have managed to disconnect the Galactic Memory Archive from its current role<br>which was providing memory functions to the great force field around your home star Miaplacidus<br><br><span class="green-ready-text">Miaplacidus Milestone Achieved!<br>+0.15 Antimatter /s forever!</span>`;
-    modalMegaStructureTechGalacticMemoryArchive4Header = `HARNESSING THE GALACTIC MEMORY ARCHIVE`;
-    modalMegaStructureTechGalacticMemoryArchive4Text = `You have harnessed the Galactic Memory Archive for the benefit of this System,<br>its huge power will benefit you as it provides the following bonus:<br><br><span class="green-ready-text">All Resource And Compound Storage Capacity + 1B!</span>`;
-    modalMegaStructureTechGalacticMemoryArchive5Header = `CONNECTING THE GALACTIC MEMORY ARCHIVE TO THE FABRIC`;
-    modalMegaStructureTechGalacticMemoryArchive5Text = `You have connected this Galactic Memory Archive into the fabric of the galaxy<br>meaning its benefits are now permanently available in whichever<br>system you might one day settle. This has enormous potential.<br><br><span class="green-ready-text">All Resource And Compound Storage Capacity + 10B!<br>All Resource And Compound Storage Capacity starts at 10B in every new System!</span>`;
-    modalBlackHoleDiscoveredHeader = 'Black Hole Discovered!';
-    modalBlackHoleDiscoveredText = `While studying the stars with the Space Telescope, you stumbled upon a Black Hole!<br>Time Dilation is a feature of these objects, and maybe we can harness its power for our own uses!<br><br><span class="green-ready-text">Take a look in the Galactic tab to interact with it.</span>`;
-    modalNearSpaceScannerArrayRestoredHeader = 'Near Space Scanner Array Restored!';
-    modalNearSpaceScannerArrayRestoredText = `We have restored the strange <span class="green-ready-text">Near Space Scanner Array</span> orbiting Miaplacidus inside the ruined force field.<br><br>With Galactic Points (GP), we can bring it fully online and scan Miaplacidus' local space to locate the source of the AI invasion!`;
-    modalCosmicRipLocatedHeader = 'Cosmic Rip Located!';
-    modalCosmicRipLocatedText = `The <span class="green-ready-text">Cosmic Rip</span> opened by the scientist, through which the evil AI race travelled has been located.<br><br>We will dispatch science teams to investigate at once!`;
-    modalCosmicRipClosedHeader = 'COSMIC RIP CLOSED!';
-    modalCosmicRipClosedText = `Congratulations! The future of your people is secured forever. You have fulfilled your prophecy, Cosmic Forger!`;
-    modalCosmicRipTechStabilizerArrayHeader = 'Cosmic Rip Progress!';
-    modalCosmicRipTechStabilizerArrayText = `You have successfully researched the <span class="green-ready-text">Stabilizer Array</span>.<br><br>This foundational technology reduces initial instability around the Cosmic Rip,<br>allowing for safer operations and further research.<br><br>Overall progress toward full stabilisation: <span class="green-ready-text">20%</span>`;
-    modalCosmicRipTechQuantumContainmentFieldHeader = 'Cosmic Rip Progress!';
-    modalCosmicRipTechQuantumContainmentFieldText = `You have successfully researched the <span class="green-ready-text">Quantum Containment Field</span>.<br><br>Advanced quantum barriers now prevent energy leakage from the Cosmic Rip,<br>significantly reducing volatility in the surrounding space-time.<br><br>Overall progress toward full stabilisation: <span class="green-ready-text">40%</span>`;
-    modalCosmicRipTechDimensionalAnchorMatrixHeader = 'Cosmic Rip Progress!';
-    modalCosmicRipTechDimensionalAnchorMatrixText = `You have successfully researched the <span class="green-ready-text">Dimensional Anchor Matrix</span>.<br><br>The dimensional fabric around the Cosmic Rip is now reinforced,<br>preventing unwanted dimensional shifts and securing the breach.<br><br>Overall progress toward full stabilisation: <span class="green-ready-text">60%</span>`;
-    modalCosmicRipTechSingularityStabilizerHeader = 'Cosmic Rip Progress!';
-    modalCosmicRipTechSingularityStabilizerText = `You have successfully researched the <span class="green-ready-text">Singularity Stabilizer</span>.<br><br>The gravitational singularity at the heart of the Cosmic Rip<br>is now under control, dramatically reducing its destabilising effects.<br><br>Overall progress toward full stabilisation: <span class="green-ready-text">80%</span>`;
-    modalCosmicRipTechRealityWeaveRegulatorHeader = 'Cosmic Rip Progress!';
-    modalCosmicRipTechRealityWeaveRegulatorText = `You have successfully researched the <span class="green-ready-text">Reality Weave Regulator</span>.<br><br>The final layer of stabilisation is now in place. The Cosmic Rip<br>has been transformed from a dangerous anomaly into a controlled phenomenon.<br><br>Overall progress toward full stabilisation: <span class="green-ready-text">100%</span><br><br><span class="green-ready-text">Congratulations! The Cosmic Rip is now fully stabilised and secure!</span>`;
-    modalEventPowerPlantExplosionHeader = 'POWER PLANT EXPLOSION!';
-    modalEventPowerPlantExplosionText = `A catastrophic failure rocked your energy grid.<br><br><span class="red-disabled-text">{destroyedBuilding} destroyed!</span>`;
-    modalEventBatteryExplosionHeader = 'BATTERY EXPLOSION!';
-    modalEventBatteryExplosionText = `A battery containment breach caused a violent explosion.<br><br><span class="red-disabled-text">{destroyedBuilding} destroyed!</span>`;
-    modalEventScienceTheftHeader = 'SCIENCE THEFT!';
-    modalEventScienceTheftText = `A clandestine raid struck your research labs.<br><br><span class="red-disabled-text">-{amountStolen} Research</span>`;
-    modalEventResearchBreakthroughHeader = 'RESEARCH BREAKTHROUGH!';
-    modalEventResearchBreakthroughText = `A sudden insight unlocks new understanding.<br><br><span class="green-ready-text">+{amountGained} Research</span>`;
-    modalEventRocketInstantArrivalHeader = 'WARP ANOMALY!';
-    modalEventRocketInstantArrivalText = `A space-time distortion accelerates one of your rockets.<br><br><span class="green-ready-text">{rocketName}</span> instantly arrives!`;
-    modalEventAntimatterReactionHeader = 'ANTIMATTER REACTION!';
-    modalEventAntimatterReactionText = `A catastrophic reaction annihilates a mining operation.<br><br><span class="red-disabled-text">{rocketName} lost</span><br><span class="red-disabled-text">{asteroidName} destroyed</span><br><span class="red-disabled-text">-{antimatterLost} Antimatter</span>`;
-    modalEventStockLossHeader = 'STOCK LOSS!';
-    modalEventStockLossText = `A major incident has struck your stores.<br><br><span class="red-disabled-text">-{lostPercent}% {itemName}</span><br>Lost due to {reason}.`;
-    modalEventStarshipLostInSpaceHeader = 'STARSHIP LOST IN SPACE!';
-    modalEventStarshipLostInSpaceText = `You lose communications with the Starship while en route.<br><br><span class="red-disabled-text">Starship lost</span><br><span class="red-disabled-text">Destination cleared</span><br><span class="red-disabled-text">All fleet units lost</span>`;
-    modalEventEndlessSummerHeader = 'ENDLESS SUMMER!';
-    modalEventEndlessSummerText = `The skies are clearing and sunny weather is on the way.<br><br><span class="green-ready-text">Sunny weather for {minutes} minutes.</span>`;
-    modalEventEndlessSummerEndedHeader = 'ENDLESS SUMMER ENDED!';
-    modalEventEndlessSummerEndedText = `The climate returns to normal variability.<br><br><span class="green-ready-text">Weather patterns restored.</span>`;
-    modalEventGalacticMarketLockdownHeader = 'GALACTIC MARKET OFFLINE!';
-    modalEventGalacticMarketLockdownText = `A network disruption has shut down access to the Galactic Market.<br><br><span class="red-disabled-text">Trading is unavailable for 30 minutes.</span>`;
-    modalEventGalacticMarketLockdownEndedHeader = 'GALACTIC MARKET RESTORED!';
-    modalEventGalacticMarketLockdownEndedText = `The disruption has cleared.<br><br><span class="green-ready-text">Galactic Market access has been restored.</span>`;
-    modalEventMinerBrokeDownHeader = 'MINER BROKE DOWN!';
-    modalEventMinerBrokeDownText = `A critical failure has halted one of your mining rockets.<br><br><span class="red-disabled-text">{rocketName} mining rate is 0 for 15 minutes.</span>`;
-    modalEventMinerBrokeDownEndedHeader = 'MINER REPAIRED!';
-    modalEventMinerBrokeDownEndedText = `Field repairs complete.<br><br><span class="green-ready-text">{rocketName} has been repaired and is ready to resume mining.</span>`;
+    modalCompoundsTabUnlockHeader = localize('modalCompoundsTabUnlockHeader', getLanguage());
+    modalCompoundsTabUnlockText = localize('modalCompoundsTabUnlockText', getLanguage());
+    modalSpaceMiningTabUnlockHeader = localize('modalSpaceMiningTabUnlockHeader', getLanguage());
+    modalSpaceMiningTabUnlockText = localize('modalSpaceMiningTabUnlockText', getLanguage());
+    modalEnergyTabUnlockHeader = localize('modalEnergyTabUnlockHeader', getLanguage());
+    modalEnergyTabUnlockText = localize('modalEnergyTabUnlockText', getLanguage());
+    modalInterstellarTabUnlockHeader = localize('modalInterstellarTabUnlockHeader', getLanguage());
+    modalInterstellarTabUnlockText = localize('modalInterstellarTabUnlockText', getLanguage());
+    modalKnowledgeSharingTabUnlockHeader = localize('modalKnowledgeSharingTabUnlockHeader', getLanguage());
+    modalKnowledgeSharingTabUnlockText = localize('modalKnowledgeSharingTabUnlockText', getLanguage());
+    modalScienceLabsTabUnlockHeader = localize('modalScienceLabsTabUnlockHeader', getLanguage());
+    modalScienceLabsTabUnlockText = localize('modalScienceLabsTabUnlockText', getLanguage());
+    modalQuantumComputingTabUnlockHeader = localize('modalQuantumComputingTabUnlockHeader', getLanguage());
+    modalQuantumComputingTabUnlockText = localize('modalQuantumComputingTabUnlockText', getLanguage());
+    modalRocketCompositesTabUnlockHeader = localize('modalRocketCompositesTabUnlockHeader', getLanguage());
+    modalRocketCompositesTabUnlockText = localize('modalRocketCompositesTabUnlockText', getLanguage());
+    modalNanoBrokersUnlockHeader = localize('modalNanoBrokersUnlockHeader', getLanguage());
+    modalNanoBrokersUnlockText = localize('modalNanoBrokersUnlockText', getLanguage());
+    modalCompoundMachiningTabUnlockHeader = localize('modalCompoundMachiningTabUnlockHeader', getLanguage());
+    modalCompoundMachiningTabUnlockText = localize('modalCompoundMachiningTabUnlockText', getLanguage());
+    modalMegaStructureTechDysonSphere1Header = localize('modalMegaStructureTechDysonSphere1Header', getLanguage());
+    modalMegaStructureTechDysonSphere1Text = localize('modalMegaStructureTechDysonSphere1Text', getLanguage());
+    modalMegaStructureTechDysonSphere2Header = localize('modalMegaStructureTechDysonSphere2Header', getLanguage());
+    modalMegaStructureTechDysonSphere2Text = localize('modalMegaStructureTechDysonSphere2Text', getLanguage());
+    modalMegaStructureTechDysonSphere3Header = localize('modalMegaStructureTechDysonSphere3Header', getLanguage());
+    modalMegaStructureTechDysonSphere3Text = localize('modalMegaStructureTechDysonSphere3Text', getLanguage());
+    modalMegaStructureTechDysonSphere4Header = localize('modalMegaStructureTechDysonSphere4Header', getLanguage());
+    modalMegaStructureTechDysonSphere4Text = localize('modalMegaStructureTechDysonSphere4Text', getLanguage());
+    modalMegaStructureTechDysonSphere5Header = localize('modalMegaStructureTechDysonSphere5Header', getLanguage());
+    modalMegaStructureTechDysonSphere5Text = localize('modalMegaStructureTechDysonSphere5Text', getLanguage());
+    modalMegaStructureTechCelestialProcessingCore1Header = localize('modalMegaStructureTechCelestialProcessingCore1Header', getLanguage());
+    modalMegaStructureTechCelestialProcessingCore1Text = localize('modalMegaStructureTechCelestialProcessingCore1Text', getLanguage());
+    modalMegaStructureTechCelestialProcessingCore2Header = localize('modalMegaStructureTechCelestialProcessingCore2Header', getLanguage());
+    modalMegaStructureTechCelestialProcessingCore2Text = localize('modalMegaStructureTechCelestialProcessingCore2Text', getLanguage());
+    modalMegaStructureTechCelestialProcessingCore3Header = localize('modalMegaStructureTechCelestialProcessingCore3Header', getLanguage());
+    modalMegaStructureTechCelestialProcessingCore3Text = localize('modalMegaStructureTechCelestialProcessingCore3Text', getLanguage());
+    modalMegaStructureTechCelestialProcessingCore4Header = localize('modalMegaStructureTechCelestialProcessingCore4Header', getLanguage());
+    modalMegaStructureTechCelestialProcessingCore4Text = localize('modalMegaStructureTechCelestialProcessingCore4Text', getLanguage());
+    modalMegaStructureTechCelestialProcessingCore5Header = localize('modalMegaStructureTechCelestialProcessingCore5Header', getLanguage());
+    modalMegaStructureTechCelestialProcessingCore5Text = localize('modalMegaStructureTechCelestialProcessingCore5Text', getLanguage());
+    modalMegaStructureTechPlasmaForge1Header = localize('modalMegaStructureTechPlasmaForge1Header', getLanguage());
+    modalMegaStructureTechPlasmaForge1Text = localize('modalMegaStructureTechPlasmaForge1Text', getLanguage());
+    modalMegaStructureTechPlasmaForge2Header = localize('modalMegaStructureTechPlasmaForge2Header', getLanguage());
+    modalMegaStructureTechPlasmaForge2Text = localize('modalMegaStructureTechPlasmaForge2Text', getLanguage());
+    modalMegaStructureTechPlasmaForge3Header = localize('modalMegaStructureTechPlasmaForge3Header', getLanguage());
+    modalMegaStructureTechPlasmaForge3Text = localize('modalMegaStructureTechPlasmaForge3Text', getLanguage());
+    modalMegaStructureTechPlasmaForge4Header = localize('modalMegaStructureTechPlasmaForge4Header', getLanguage());
+    modalMegaStructureTechPlasmaForge4Text = localize('modalMegaStructureTechPlasmaForge4Text', getLanguage());
+    modalMegaStructureTechPlasmaForge5Header = localize('modalMegaStructureTechPlasmaForge5Header', getLanguage());
+    modalMegaStructureTechPlasmaForge5Text = localize('modalMegaStructureTechPlasmaForge5Text', getLanguage());
+    modalMegaStructureTechGalacticMemoryArchive1Header = localize('modalMegaStructureTechGalacticMemoryArchive1Header', getLanguage());
+    modalMegaStructureTechGalacticMemoryArchive1Text = localize('modalMegaStructureTechGalacticMemoryArchive1Text', getLanguage());
+    modalMegaStructureTechGalacticMemoryArchive2Header = localize('modalMegaStructureTechGalacticMemoryArchive2Header', getLanguage());
+    modalMegaStructureTechGalacticMemoryArchive2Text = localize('modalMegaStructureTechGalacticMemoryArchive2Text', getLanguage());
+    modalMegaStructureTechGalacticMemoryArchive3Header = localize('modalMegaStructureTechGalacticMemoryArchive3Header', getLanguage());
+    modalMegaStructureTechGalacticMemoryArchive3Text = localize('modalMegaStructureTechGalacticMemoryArchive3Text', getLanguage());
+    modalMegaStructureTechGalacticMemoryArchive4Header = localize('modalMegaStructureTechGalacticMemoryArchive4Header', getLanguage());
+    modalMegaStructureTechGalacticMemoryArchive4Text = localize('modalMegaStructureTechGalacticMemoryArchive4Text', getLanguage());
+    modalMegaStructureTechGalacticMemoryArchive5Header = localize('modalMegaStructureTechGalacticMemoryArchive5Header', getLanguage());
+    modalMegaStructureTechGalacticMemoryArchive5Text = localize('modalMegaStructureTechGalacticMemoryArchive5Text', getLanguage());
+    modalBlackHoleDiscoveredHeader = localize('modalBlackHoleDiscoveredHeader', getLanguage());
+    modalBlackHoleDiscoveredText = localize('modalBlackHoleDiscoveredText', getLanguage());
+    modalNearSpaceScannerArrayRestoredHeader = localize('modalNearSpaceScannerArrayRestoredHeader', getLanguage());
+    modalNearSpaceScannerArrayRestoredText = localize('modalNearSpaceScannerArrayRestoredText', getLanguage());
+    modalCosmicRipLocatedHeader = localize('modalCosmicRipLocatedHeader', getLanguage());
+    modalCosmicRipLocatedText = localize('modalCosmicRipLocatedText', getLanguage());
+    modalCosmicRipClosedHeader = localize('modalCosmicRipClosedHeader', getLanguage());
+    modalCosmicRipClosedText = localize('modalCosmicRipClosedText', getLanguage());
+    modalCosmicRipTechStabilizerArrayHeader = localize('modalCosmicRipTechStabilizerArrayHeader', getLanguage());
+    modalCosmicRipTechStabilizerArrayText = localize('modalCosmicRipTechStabilizerArrayText', getLanguage());
+    modalCosmicRipTechQuantumContainmentFieldHeader = localize('modalCosmicRipTechQuantumContainmentFieldHeader', getLanguage());
+    modalCosmicRipTechQuantumContainmentFieldText = localize('modalCosmicRipTechQuantumContainmentFieldText', getLanguage());
+    modalCosmicRipTechDimensionalAnchorMatrixHeader = localize('modalCosmicRipTechDimensionalAnchorMatrixHeader', getLanguage());
+    modalCosmicRipTechDimensionalAnchorMatrixText = localize('modalCosmicRipTechDimensionalAnchorMatrixText', getLanguage());
+    modalCosmicRipTechSingularityStabilizerHeader = localize('modalCosmicRipTechSingularityStabilizerHeader', getLanguage());
+    modalCosmicRipTechSingularityStabilizerText = localize('modalCosmicRipTechSingularityStabilizerText', getLanguage());
+    modalCosmicRipTechRealityWeaveRegulatorHeader = localize('modalCosmicRipTechRealityWeaveRegulatorHeader', getLanguage());
+    modalCosmicRipTechRealityWeaveRegulatorText = localize('modalCosmicRipTechRealityWeaveRegulatorText', getLanguage());
+    modalEventPowerPlantExplosionHeader = localize('modalEventPowerPlantExplosionHeader', getLanguage());
+    modalEventPowerPlantExplosionText = localize('modalEventPowerPlantExplosionText', getLanguage());
+    modalEventBatteryExplosionHeader = localize('modalEventBatteryExplosionHeader', getLanguage());
+    modalEventBatteryExplosionText = localize('modalEventBatteryExplosionText', getLanguage());
+    modalEventScienceTheftHeader = localize('modalEventScienceTheftHeader', getLanguage());
+    modalEventScienceTheftText = localize('modalEventScienceTheftText', getLanguage());
+    modalEventResearchBreakthroughHeader = localize('modalEventResearchBreakthroughHeader', getLanguage());
+    modalEventResearchBreakthroughText = localize('modalEventResearchBreakthroughText', getLanguage());
+    modalEventRocketInstantArrivalHeader = localize('modalEventRocketInstantArrivalHeader', getLanguage());
+    modalEventRocketInstantArrivalText = localize('modalEventRocketInstantArrivalText', getLanguage());
+    modalEventAntimatterReactionHeader = localize('modalEventAntimatterReactionHeader', getLanguage());
+    modalEventAntimatterReactionText = localize('modalEventAntimatterReactionText', getLanguage());
+    modalEventStockLossHeader = localize('modalEventStockLossHeader', getLanguage());
+    modalEventStockLossText = localize('modalEventStockLossText', getLanguage());
+    modalEventStarshipLostInSpaceHeader = localize('modalEventStarshipLostInSpaceHeader', getLanguage());
+    modalEventStarshipLostInSpaceText = localize('modalEventStarshipLostInSpaceText', getLanguage());
+    modalEventEndlessSummerHeader = localize('modalEventEndlessSummerHeader', getLanguage());
+    modalEventEndlessSummerText = localize('modalEventEndlessSummerText', getLanguage());
+    modalEventEndlessSummerEndedHeader = localize('modalEventEndlessSummerEndedHeader', getLanguage());
+    modalEventEndlessSummerEndedText = localize('modalEventEndlessSummerEndedText', getLanguage());
+    modalEventGalacticMarketLockdownHeader = localize('modalEventGalacticMarketLockdownHeader', getLanguage());
+    modalEventGalacticMarketLockdownText = localize('modalEventGalacticMarketLockdownText', getLanguage());
+    modalEventGalacticMarketLockdownEndedHeader = localize('modalEventGalacticMarketLockdownEndedHeader', getLanguage());
+    modalEventGalacticMarketLockdownEndedText = localize('modalEventGalacticMarketLockdownEndedText', getLanguage());
+    modalEventMinerBrokeDownHeader = localize('modalEventMinerBrokeDownHeader', getLanguage());
+    modalEventMinerBrokeDownText = localize('modalEventMinerBrokeDownText', getLanguage());
+    modalEventMinerBrokeDownEndedHeader = localize('modalEventMinerBrokeDownEndedHeader', getLanguage());
+    modalEventMinerBrokeDownEndedText = localize('modalEventMinerBrokeDownEndedText', getLanguage());
     modalEventSupplyChainDisruptionHeader = localize('modalEventSupplyChainDisruptionHeader', getLanguage());
     modalEventSupplyChainDisruptionText = localize('modalEventSupplyChainDisruptionText', getLanguage());
     modalEventSupplyChainDisruptionEndedHeader = localize('modalEventSupplyChainDisruptionEndedHeader', getLanguage());
@@ -487,105 +487,105 @@ export function initialiseDescriptions() {
     };
 
     infoTooltipDescriptions = {
-        info_starLegendWeather: 'Weather Data can be read as Prevailing Weather Type - Not exact Science - If 57% Sunny for example then it is largely a sunny System, as all the other weather types are sharing at 43% probability, but if it is 26% Sunny then it is really saying it is a mixed climate as the other 3 types are sharing the other 74%',
-        info_starMapModes: 'Normal - Shows all Unstudied, Studied, Settled, O-Type, and Megastructure Stars.<br><br>Distance - Colours all Studied Stars by their distance, red being the furthest away.<br><br>Studied removes all Unstudied Stars, leaving Studied, Settled, O-Type, and MegaStructure Stars.<br><br>In Range - Same as Studied but stars too far to travel to with current Antimatter levels will be colored in red.',
-        info_starShipScanAP: 'This is the base AP amount that the System is worth, when travelled to from your current System.  There are modifiers to this such as the type of battle undertaken there, which may give more AP, and there are yet other modifiers to this available in some Philosophies and Ascendency Perks.',
-        info_starShipScanPrecipitation: 'Weather Data can be read as Prevailing Weather Type - Not exact Science - If 57% Sunny for example then it is largely a sunny System, as all the other weather types are sharing at 43% probability, but if it is 26% Sunny then it is really saying it is a mixed climate as the other 3 types are sharing the other 74% Also shown is the type of compound received by collecting this System\'s Precipitation.',
-        info_starShipScanType: 'How advanced the Civilization is.  This directly impacts the Civilizations Defense if they are SpaceFaring their unit defenses are twice as strong as if they are Industrial.',
-        info_starShipScanDefense: 'The defense rating modifies the enemy ship\'s hitpoints.  Whatever they would normally start with, they are reduced to this percentage when fighting.  This number may be colored, meaning its value has been modified by an Anomaly in the System, which are described below in the Anomalies row.  For comparison, the player always has 100% defense to start with.',
-        info_starShipScanEnemyFleets: 'The number of each unit the enemy starts a battle with, this is not the same as the Fleet Power.  A number may be colored, meaning its quantity has been modified by an Anomaly in the System, which are described below in the Anomalies row.',
-        info_starShipScanThreatLevel: 'Threat Level modifies the defense level of the enemy units defending the System.  Extreme threat get the full bonus (no reduction) High means it is 70% as strong as it would be if Extreme, Moderate is 40%, Low is 20% and None is 0% (only Unsentient or Lifeless Systems)  The final calculated value is still shown to the right of this value, it is not modifying that value after the fact, but showing what has gone in to reaching that final value.',
-        info_fleetHangarHeader: 'Here you can build the Fleets that will conquer the System you are at or travelling to.<br><br>Envoys are non battle units that you build once to open up diplomacy with the enemy, not in all cases but in most.<br><br>Scouts are fast Air Units and can target enemy Air Units and Sea units with a Speed of 5.<br><br>Marauders are special Air Units that only the player has, and can target both enemy Land and Sea Units with a Speed of 4.<br><br>Land Stalkers are Land Units and can target enemy Air and Land Units with a Speed of 2.<br><br>Naval Strafers are Sea Units and can target Enemy Sea and Land Units with a Speed of 1.',
-        info_miningHeader: 'Up to 4 rockets can be Mining Antimatter simultaneously and that information is shown here.  This screen will not show extra Antimatter /s produced by MegaStructure Disconnects, but that information is shown to the left in the side bar where the overall total is shown and broken down to see.<br><br>You can click and hold the bar on the right to boost your antimatter production - useful if you are nearly there and impatient for the last 200 or so!',
-        info_launchPadHeader: 'The Launch Pad is where rockets are built.  You must build all modules of each rocket for it to be considered built.<br><br>Once you click on Launch Pad you can then click on the rocket you want more info about, and there you can launch it, and select a destination for it to go.',
-        info_asteroidsHeader: 'The Asteroids table gives you information about discovered asteroids, ones being Mined currently, Exhausted ones, and Destroyed ones too. <br><br> Distance - The time it takes to travel there (and also back!), without any modifications to reduce it ie the base time, is 1 second per 100 of distance, e.g. Distance to Asteroid 360000 base time to get there 3600 seconds (1hr) <br><br>Complexity - The higher this number is the slower Antimatter will be extracted from the Asteroid. <br><br>Antimatter - This is the quantity at the Asteroid available to be Mined.',
-        info_philosophyHeader: 'Philosophy is an important mechanic.  You are asked to select it during the first run, so by now you have already chosen yours.  It cannot be changed throughout the game unless you start again.<br><br>The perks available for your chosen Philosophy are shown here below, and they are repeatable, meaning you can stack up a large bonus if you can pay the escalating cost to repeat purchase.<br><br>There is also a very strong one off special Abiliity that is expensive but comes with huge benefits and each Philosophy has its own flavor.',
-        info_galacticCasinoHeader: 'Welcome to the Galactic Casino!  Here the premise is, buy CP that you can use on the current run, and use it to gamble for prizes that benefit you in the current run.  Nothing here is for the long game, and CP is reset at the end of the run.  Enjoy playing the games and good luck! 🤔',
-        info_galacticCasinoWheelOfFortune: 'The drop down will be enabled only if you win the Special Prize, i.e. the Special Colored segment of the wheel where you will be able to choose a prize from it.',
-        info_rebirthLiquidation: 'Rebirth Liquidation is calculated by taking the base market rate AP price which is a random number between 1M and 1.6M and fluctuates every 2-4 mins.<br><br>This is the cost of 1AP.   Resources and Compounds are calculated at their sell price per unit and then cash is calculated at a tenth of face value.<br><br>This is added together and then the AP base rate is divided by it and the amout rounded down, to see a final total of AP.',
-        info_cosmicRipHeader: 'Once located, you undertake a set of studies, and constructions around the Cosmic Rip to Stabilise it ready for Manipulation and Closure, to secure the future for your people.  Here is where you do those studies, and they are costly, and take time.',
-        info_nearSpaceScannerArrayHeader: 'Scan the local space sectors around Miaplacidus to try to locate the Cosmic Rip.  Each scan costs a Galactic Point and once located, you can build science vessels to collect Telemetry Data around the Cosmic Rip',
-        info_situationHeader: 'This is where you gain current insight in to the progress of Stabilising and Securing the Cosmic Rip.  Also when the time is right, this is where you will end the game!',
+        info_starLegendWeather: localize('infoTooltipStarLegendWeather', getLanguage()),
+        info_starMapModes: localize('infoTooltipStarMapModes', getLanguage()),
+        info_starShipScanAP: localize('infoTooltipStarShipScanAP', getLanguage()),
+        info_starShipScanPrecipitation: localize('infoTooltipStarShipScanPrecipitation', getLanguage()),
+        info_starShipScanType: localize('infoTooltipStarShipScanType', getLanguage()),
+        info_starShipScanDefense: localize('infoTooltipStarShipScanDefense', getLanguage()),
+        info_starShipScanEnemyFleets: localize('infoTooltipStarShipScanEnemyFleets', getLanguage()),
+        info_starShipScanThreatLevel: localize('infoTooltipStarShipScanThreatLevel', getLanguage()),
+        info_fleetHangarHeader: localize('infoTooltipFleetHangarHeader', getLanguage()),
+        info_miningHeader: localize('infoTooltipMiningHeader', getLanguage()),
+        info_launchPadHeader: localize('infoTooltipLaunchPadHeader', getLanguage()),
+        info_asteroidsHeader: localize('infoTooltipAsteroidsHeader', getLanguage()),
+        info_philosophyHeader: localize('infoTooltipPhilosophyHeader', getLanguage()),
+        info_galacticCasinoHeader: localize('infoTooltipGalacticCasinoHeader', getLanguage()),
+        info_galacticCasinoWheelOfFortune: localize('infoTooltipGalacticCasinoWheelOfFortune', getLanguage()),
+        info_rebirthLiquidation: localize('infoTooltipRebirthLiquidation', getLanguage()),
+        info_cosmicRipHeader: localize('infoTooltipCosmicRipHeader', getLanguage()),
+        info_nearSpaceScannerArrayHeader: localize('infoTooltipNearSpaceScannerArrayHeader', getLanguage()),
+        info_situationHeader: localize('infoTooltipSituationHeader', getLanguage()),
     };
 
     rocketNames = {
-        rocketDescription: "Build the launch pad to launch built rockets and mine asteroids for Antimatter.",
-        [getRocketUserName('rocket1').toLowerCase()]: "Build the launch pad to launch built rockets and mine asteroids for Antimatter.",
-        [getRocketUserName('rocket2').toLowerCase()]: "Build the launch pad to launch built rockets and mine asteroids for Antimatter.",
-        [getRocketUserName('rocket3').toLowerCase()]: "Build the launch pad to launch built rockets and mine asteroids for Antimatter.",
-        [getRocketUserName('rocket4').toLowerCase()]: "Build the launch pad to launch built rockets and mine asteroids for Antimatter.",
+        rocketDescription: localize('rocketDescription', getLanguage()),
+        [getRocketUserName('rocket1').toLowerCase()]: localize('rocketDescription', getLanguage()),
+        [getRocketUserName('rocket2').toLowerCase()]: localize('rocketDescription', getLanguage()),
+        [getRocketUserName('rocket3').toLowerCase()]: localize('rocketDescription', getLanguage()),
+        [getRocketUserName('rocket4').toLowerCase()]: localize('rocketDescription', getLanguage()),
     }
 
     techNotificationMessages = {
-        knowledgeSharing: 'Knowledge Sharing Researched\n\nYou can now open Science Clubs!',
-        fusionTheory: 'Fusion Theory Researched\n\nUseful for future experiments!',
-        hydrogenFusion: 'Hydrogen Fusion Researched\n\nYou can now fuse Hydrogen!',
-        heliumFusion: 'Helium Fusion Researched\n\nYou can now fuse Helium!',
-        carbonFusion: 'Carbon Fusion Researched\n\nYou can now fuse Carbon!',
-        neonFusion: 'Neon Fusion Researched\n\nYou can now fuse Neon!',
-        oxygenFusion: 'Oxygen Fusion Researched\n\nYou can now fuse Oxygen!',
-        siliconFusion: 'Silicon Fusion Researched\n\nYou can now fuse Silicon!',
-        nobleGasCollection: 'Noble Gas Collection Researched\n\nYou can now store Noble Gases when fused!',
-        glassManufacture: 'Glass Manufacture Researched\n\nYou can now produce Glass compounds!',
-        aggregateMixing: 'Aggregate Mixing Researched\n\nYou can now produce Concrete compounds!',
-        neutronCapture: 'Neutron Capture Researched\n\nThis will now allow us to fuse Titanium, a versatile and durable material essential for advanced construction and technology!',
-        quantumComputing: 'Quantum Computing Researched\n\nMore advanced Machinery is now available!',
-        scienceLaboratories: 'Science Laboratories Researched\n\nYou can now build Science Labs!',
-        hydroCarbons: 'HydroCarbons Researched\n\nYou can gain access to Diesel Fuel once you have Compounds unlocked!',
-        nanoTubeTechnology: 'Nano Tube Technology Researched\n\nWith this we can start to learn about how to fuse Carbon in the future!',
-        nanoBrokers: 'Nano Brokers Researched\n\nYou can toggle resources to be automatically sold for cash instead of accumulating!',
-        stellarCartography: 'Stellar Cartography Researched\n\nYou unlocked Interstellar tab!',
-        fusionEfficiencyI: 'Fusion Efficiency I Researched\n\n20% Boost to Fusion returns!',
-        fusionEfficiencyII: 'Fusion Efficiency II Researched\n\nFurther 20% Boost to Fusion returns!',
-        fusionEfficiencyIII: 'Fusion Efficiency III Researched\n\n100% Fusion returns!',
-        atmosphericTelescopes: 'Atmospheric Telescopes Researched\n\nYou can now get data from the local stellar neighborhood!',
-        giganticTurbines: 'Gigantic Turbines Researched\n\nThis opens up new research in power generation!',
-        steelFoundries: 'Steel Foundries Researched\n\nYou can now create Steel compounds!',
-        rocketComposites: 'Rocket Composites Researched\n\nYou can now build Rocket Parts and Level 3 and 4 AutoBuyers!',
-        advancedFuels: 'Advanced Fuels Researched\n\nYou can now fuel Rockets!',
-        planetaryNavigation: 'Planetary Navigation Researched\n\nYou can now travel to Asteroids!',
-        advancedPowerGeneration: 'Advanced Power Generation \n\nBuild Advanced Power Plants!',
-        basicPowerGeneration: 'Basic Power Generation Researched\n\nYou can now build basic Power Stations!',
-        solarPowerGeneration: 'Solar Power Generation Researched\n\nYou can now build Solar Panels to generate power!',
-        compounds: 'Compounds Researched\n\nUnlocks the Compounds tab!',
-        sodiumIonPowerStorage: 'Sodium Ion Power Storage Researched\n\nYou can build a Sodium Ion Battery to store energy!',
-        orbitalConstruction: 'Orbital Construction Researched\n\nYou can now build Starship Modules!',
-        antimatterEngines: 'Antimatter Engines Researched\n\nYou can now build Antimatter Engines allowing Interstellar Travel!',
-        FTLTravelTheory: 'FTL Travel Theory Researched\n\nYou can now research how to travel faster than light!',
-        lifeSupportSystems: 'Life Support Systems Researched\n\nYou can now sustain life in deep space!',
-        starshipFleets: 'Starship Fleets Researched\n\nYou can now construct Starship Offensive capabilities!',
-        stellarScanners: 'Stellar Scanners Researched\n\nWhen you arrive at a new Star System you can see details of alien life and if it poses a threat!',
-        dysonSphereUnderstanding: 'Dyson Sphere Understanding Researched\n\nYou now understand what a Dyson Sphere is.',
-        dysonSphereCapabilities: 'Dyson Sphere Capabilities Researched\n\nYou now understand what a Dyson Sphere can do.',
-        dysonSphereDisconnect: 'Dyson Sphere Disconnect Researched\n\nYou have disconnected the Dyson Sphere from the Miaplacidus System Force Field.',
-        dysonSpherePower: 'Dyson Sphere Power Researched\n\nYou can now harness the Dyson Sphere\'s power for use within the system.',
-        dysonSphereConnect: 'Dyson Sphere Connect Researched\n\nYou can now connect the Dyson Sphere\'s power across the galaxy.',
-        celestialProcessingCoreUnderstanding: 'Celestial Processing Core Understanding Researched\n\nYou now understand what the Celestial Processing Core is.',
-        celestialProcessingCoreCapabilities: 'Celestial Processing Core Capabilities Researched\n\nYou now understand what the Celestial Processing Core can do.',
-        celestialProcessingCoreDisconnect: 'Celestial Processing Core Disconnect Researched\n\nYou have disconnected the Celestial Processing Core from the Miaplacidus System Force Field.',
-        celestialProcessingCorePower: 'Celestial Processing Core Power Researched\n\nYou can now harness the Celestial Processing Core\'s power for use within the system.',
-        celestialProcessingCoreConnect: 'Celestial Processing Core Connect Researched\n\nYou can now connect the Celestial Processing Core\'s power across the galaxy.',
-        plasmaForgeUnderstanding: 'Plasma Forge Understanding Researched\n\nYou now understand what the Plasma Forge is.',
-        plasmaForgeCapabilities: 'Plasma Forge Capabilities Researched\n\nYou now understand what the Plasma Forge can do.',
-        plasmaForgeDisconnect: 'Plasma Forge Disconnect Researched\n\nYou have disconnected the Plasma Forge from the Miaplacidus System Force Field.',
-        plasmaForgePower: 'Plasma Forge Power Researched\n\nYou can now harness the Plasma Forge\'s power for use within the system.',
-        plasmaForgeConnect: 'Plasma Forge Connect Researched\n\nYou can now connect the Plasma Forge\'s power across the galaxy.',
-        galacticMemoryArchiveUnderstanding: 'Galactic Memory Archive Understanding Researched\n\nYou now understand what the Galactic Memory Archive is.',
-        galacticMemoryArchiveCapabilities: 'Galactic Memory Archive Capabilities Researched\n\nYou now understand what the Galactic Memory Archive can do.',
-        galacticMemoryArchiveDisconnect: 'Galactic Memory Archive Disconnect Researched\n\nYou have disconnected the Galactic Memory Archive from the Miaplacidus System Force Field.',
-        galacticMemoryArchivePower: 'Galactic Memory Archive Power Researched\n\nYou can now harness the Galactic Memory Archive\'s power for use within the system.',
-        galacticMemoryArchiveConnect: 'Galactic Memory Archive Connect Researched\n\nYou can now connect the Galactic Memory Archive\'s power across the galaxy.'
+        knowledgeSharing: localize('techNotifyKnowledgeSharing', getLanguage()),
+        fusionTheory: localize('techNotifyFusionTheory', getLanguage()),
+        hydrogenFusion: localize('techNotifyHydrogenFusion', getLanguage()),
+        heliumFusion: localize('techNotifyHeliumFusion', getLanguage()),
+        carbonFusion: localize('techNotifyCarbonFusion', getLanguage()),
+        neonFusion: localize('techNotifyNeonFusion', getLanguage()),
+        oxygenFusion: localize('techNotifyOxygenFusion', getLanguage()),
+        siliconFusion: localize('techNotifySiliconFusion', getLanguage()),
+        nobleGasCollection: localize('techNotifyNobleGasCollection', getLanguage()),
+        glassManufacture: localize('techNotifyGlassManufacture', getLanguage()),
+        aggregateMixing: localize('techNotifyAggregateMixing', getLanguage()),
+        neutronCapture: localize('techNotifyNeutronCapture', getLanguage()),
+        quantumComputing: localize('techNotifyQuantumComputing', getLanguage()),
+        scienceLaboratories: localize('techNotifyScienceLaboratories', getLanguage()),
+        hydroCarbons: localize('techNotifyHydroCarbons', getLanguage()),
+        nanoTubeTechnology: localize('techNotifyNanoTubeTechnology', getLanguage()),
+        nanoBrokers: localize('techNotifyNanoBrokers', getLanguage()),
+        stellarCartography: localize('techNotifyStellarCartography', getLanguage()),
+        fusionEfficiencyI: localize('techNotifyFusionEfficiencyI', getLanguage()),
+        fusionEfficiencyII: localize('techNotifyFusionEfficiencyII', getLanguage()),
+        fusionEfficiencyIII: localize('techNotifyFusionEfficiencyIII', getLanguage()),
+        atmosphericTelescopes: localize('techNotifyAtmosphericTelescopes', getLanguage()),
+        giganticTurbines: localize('techNotifyGiganticTurbines', getLanguage()),
+        steelFoundries: localize('techNotifySteelFoundries', getLanguage()),
+        rocketComposites: localize('techNotifyRocketComposites', getLanguage()),
+        advancedFuels: localize('techNotifyAdvancedFuels', getLanguage()),
+        planetaryNavigation: localize('techNotifyPlanetaryNavigation', getLanguage()),
+        advancedPowerGeneration: localize('techNotifyAdvancedPowerGeneration', getLanguage()),
+        basicPowerGeneration: localize('techNotifyBasicPowerGeneration', getLanguage()),
+        solarPowerGeneration: localize('techNotifySolarPowerGeneration', getLanguage()),
+        compounds: localize('techNotifyCompounds', getLanguage()),
+        sodiumIonPowerStorage: localize('techNotifySodiumIonPowerStorage', getLanguage()),
+        orbitalConstruction: localize('techNotifyOrbitalConstruction', getLanguage()),
+        antimatterEngines: localize('techNotifyAntimatterEngines', getLanguage()),
+        FTLTravelTheory: localize('techNotifyFTLTravelTheory', getLanguage()),
+        lifeSupportSystems: localize('techNotifyLifeSupportSystems', getLanguage()),
+        starshipFleets: localize('techNotifyStarshipFleets', getLanguage()),
+        stellarScanners: localize('techNotifyStellarScanners', getLanguage()),
+        dysonSphereUnderstanding: localize('techNotifyDysonSphereUnderstanding', getLanguage()),
+        dysonSphereCapabilities: localize('techNotifyDysonSphereCapabilities', getLanguage()),
+        dysonSphereDisconnect: localize('techNotifyDysonSphereDisconnect', getLanguage()),
+        dysonSpherePower: localize('techNotifyDysonSpherePower', getLanguage()),
+        dysonSphereConnect: localize('techNotifyDysonSphereConnect', getLanguage()),
+        celestialProcessingCoreUnderstanding: localize('techNotifyCelestialProcessingCoreUnderstanding', getLanguage()),
+        celestialProcessingCoreCapabilities: localize('techNotifyCelestialProcessingCoreCapabilities', getLanguage()),
+        celestialProcessingCoreDisconnect: localize('techNotifyCelestialProcessingCoreDisconnect', getLanguage()),
+        celestialProcessingCorePower: localize('techNotifyCelestialProcessingCorePower', getLanguage()),
+        celestialProcessingCoreConnect: localize('techNotifyCelestialProcessingCoreConnect', getLanguage()),
+        plasmaForgeUnderstanding: localize('techNotifyPlasmaForgeUnderstanding', getLanguage()),
+        plasmaForgeCapabilities: localize('techNotifyPlasmaForgeCapabilities', getLanguage()),
+        plasmaForgeDisconnect: localize('techNotifyPlasmaForgeDisconnect', getLanguage()),
+        plasmaForgePower: localize('techNotifyPlasmaForgePower', getLanguage()),
+        plasmaForgeConnect: localize('techNotifyPlasmaForgeConnect', getLanguage()),
+        galacticMemoryArchiveUnderstanding: localize('techNotifyGalacticMemoryArchiveUnderstanding', getLanguage()),
+        galacticMemoryArchiveCapabilities: localize('techNotifyGalacticMemoryArchiveCapabilities', getLanguage()),
+        galacticMemoryArchiveDisconnect: localize('techNotifyGalacticMemoryArchiveDisconnect', getLanguage()),
+        galacticMemoryArchivePower: localize('techNotifyGalacticMemoryArchivePower', getLanguage()),
+        galacticMemoryArchiveConnect: localize('techNotifyGalacticMemoryArchiveConnect', getLanguage())
     };
 
     galacticMarketTooltipDescriptions = {
-        outgoingTitle: 'Outgoing Bias',
-        outgoingText: 'Positive: this resource will be priced lower in the future (you\'ll get less when selling). Negative: this resource will be priced higher in the future (you\'ll get more when selling).',
-        incomingTitle: 'Incoming Bias',
-        incomingText: 'Positive: this resource costs less than baseline to buy right now. Negative: this resource costs more than baseline to buy right now.',
-        comparisonTitle: 'Market Outlook',
-        comparisonHigherOutgoing: 'Outgoing bias higher → future selling prices for your exports are trending down.',
-        comparisonHigherIncoming: 'Incoming bias higher → good time to buy imports as prices are favorable.',
-        comparisonBalanced: 'Market is stable with no strong price trends in either direction.'
+        outgoingTitle: localize('galacticMarketOutgoingTitle', getLanguage()),
+        outgoingText: localize('galacticMarketOutgoingText', getLanguage()),
+        incomingTitle: localize('galacticMarketIncomingTitle', getLanguage()),
+        incomingText: localize('galacticMarketIncomingText', getLanguage()),
+        comparisonTitle: localize('galacticMarketComparisonTitle', getLanguage()),
+        comparisonHigherOutgoing: localize('galacticMarketComparisonHigherOutgoing', getLanguage()),
+        comparisonHigherIncoming: localize('galacticMarketComparisonHigherIncoming', getLanguage()),
+        comparisonBalanced: localize('galacticMarketComparisonBalanced', getLanguage())
     };
 
     optionDescriptions = {
