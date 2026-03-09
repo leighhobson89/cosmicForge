@@ -360,6 +360,7 @@ import {
     formatProductionRateValue,
     formatNumber,
     getOTypePowerPlantBoostMultiplierForCurrentSystem,
+    getBTypeAutoBuyerBoostForTier,
     timeWarp,
     forceClearWeather,
     sellAllUnlockedResources,
@@ -2635,16 +2636,32 @@ function buildAutoBuyerGenerationLines(resourceKey, category, timerRatio) {
             return null;
         }
 
+        if (tier > 1 && !getPowerOnOff()) {
+            return null;
+        }
+
 
         const perUnitRate = tierData.rate ?? 0;
-        const contribution = perUnitRate * quantity * timerRatio * supplyChainMultiplier;
+        const baseContribution = perUnitRate * quantity * timerRatio * supplyChainMultiplier;
+        
+        let bTypeBoost = 0;
+        let bTypeText = '';
+        if (category === 'resources') {
+            const bTypeBoostPerUnit = (getBTypeAutoBuyerBoostForTier?.(tier) || 0);
+            bTypeBoost = bTypeBoostPerUnit * quantity * timerRatio * supplyChainMultiplier;
+            if (bTypeBoost > 0) {
+                bTypeText = ` (${formatProductionRateValue(bTypeBoost)}/s from Type B star)`;
+            }
+        }
+        
+        const contribution = baseContribution + bTypeBoost;
         const className = contribution > 0 ? 'green-ready-text' : 'red-disabled-text';
         const label = tierData.nameUpgrade || `Tier ${tier}`;
         const tierLabel = `${label} (Tier ${tier})`;
         const formattedContribution = formatProductionRateValue(contribution);
 
 
-        return `<div>${tierLabel}: <span class="${className}">${formattedContribution} / s</span></div>`;
+        return `<div>${tierLabel}: <span class="${className}">${formattedContribution}/s</span>${bTypeText}</div>`;
     }).filter(Boolean);
 
 
@@ -7090,6 +7107,7 @@ export function statToolBarCustomizations() {
 
     if (stat7Element) {
         const systemName = capitaliseString(getCurrentStarSystem());
+        const starType = getStarTypeByName(getCurrentStarSystem());
         const stat7Text = stat7Element.textContent.trim();
         const solarOutputMatch = stat7Text.match(/(\d+%)/);
         const solarOutput = solarOutputMatch?.[1] ?? (stat7Text.split(' ')[0] || 'N/A');
@@ -7125,7 +7143,7 @@ export function statToolBarCustomizations() {
 
 
         stat7Element.dataset.tooltipContent = [
-            `<div>System: <span class="green-ready-text">${systemName}</span></div>`,
+            `<div>System: <span class="green-ready-text">${systemName} (Type: ${starType})</span></div>`,
                         `<div>Precipitation Type: <span class="green-ready-text">${capitaliseString(precipitationType)}</span></div>`,
             `<div>Solar Energy Output: <span class="${weatherClass}">${solarOutput}</span></div>`,
             `<div>Weather: ${weatherSymbolHtml}</div>`,

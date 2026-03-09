@@ -372,6 +372,7 @@ import {
     getSettledStars,
     getGalacticPointsSpent,
     getOTypePowerPlantStrengthBoost,
+    getBTypeAutoBuyerBoostValues,
     getBasePillageVoidTimerDuration,
     getInfinitePowerRate,
     getCurrentTheme,
@@ -860,6 +861,23 @@ export function getOTypePowerPlantBoostMultiplierForCurrentSystem(powerPlantKey)
     if (!settledStarSet.has(requiredStar)) return 1;
 
     return getOTypePowerPlantStrengthBoost?.() || 1;
+}
+
+export function getBTypeAutoBuyerBoostForTier(tier) {
+    const currentStar = getCurrentStarSystem?.();
+    if (!currentStar) return 0;
+    
+    const starType = getStarTypeByName?.(currentStar);
+    if (starType !== 'B') return 0;
+    
+    const boostValues = getBTypeAutoBuyerBoostValues?.();
+    const tierKey = `tier${tier}`;
+    return boostValues[tierKey] || 0;
+}
+
+export function getTotalAutoBuyerRateWithBTypeBoost(resource, tier, baseRate) {
+    const bTypeBoost = getBTypeAutoBuyerBoostForTier(tier);
+    return baseRate + bTypeBoost;
 }
 
 function galacticCasinoChecks() {
@@ -2909,7 +2927,8 @@ function updateResourceAutoBuyerDelta(resource, tier, deltaMs) {
         const autoBuyerExtractionRate = getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', `tier${tier}`, 'rate']) || 0;
         const currentTierAutoBuyerQuantity = getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', `tier${tier}`, 'quantity']) || 0;
         const activeAutoBuyer = getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', `tier${tier}`, 'active']);
-        const calculatedResourceRate = (activeAutoBuyer ? autoBuyerExtractionRate * currentTierAutoBuyerQuantity : 0) * supplyChainMultiplier;
+        const bTypeBoost = getBTypeAutoBuyerBoostForTier(tier);
+        const calculatedResourceRate = (activeAutoBuyer ? ((autoBuyerExtractionRate + bTypeBoost) * currentTierAutoBuyerQuantity) : 0) * supplyChainMultiplier;
 
         const productionAmount = calculatedResourceRate * tickMultiplier;
         const updatedQuantity = Math.min(currentQuantity + productionAmount, storageCapacity);
@@ -2923,10 +2942,10 @@ function updateResourceAutoBuyerDelta(resource, tier, deltaMs) {
         const getResourceTierContribution = tierIndex => {
             const isActive = getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', `tier${tierIndex}`, 'active']);
             if (!isActive) return 0;
-            return (
-                (getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', `tier${tierIndex}`, 'rate']) || 0) *
-                (getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', `tier${tierIndex}`, 'quantity']) || 0)
-            ) * supplyChainMultiplier;
+            const tierQuantity = getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', `tier${tierIndex}`, 'quantity']) || 0;
+            const tierRate = getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', `tier${tierIndex}`, 'rate']) || 0;
+            const bTypeBoostPerUnit = getBTypeAutoBuyerBoostForTier(tierIndex);
+            return ((tierRate + bTypeBoostPerUnit) * tierQuantity) * supplyChainMultiplier;
         };
 
         const allResourceRatesAddedTogether =
@@ -2968,8 +2987,9 @@ function updateResourceAutoBuyerDelta(resource, tier, deltaMs) {
         const autoBuyerExtractionRate = getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', 'tier1', 'rate']) || 0;
         const currentTierAutoBuyerQuantity = getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', 'tier1', 'quantity']) || 0;
         const activeAutoBuyer = getResourceDataObject('resources', [resource, 'upgrades', 'autoBuyer', 'tier1', 'active']);
+        const bTypeBoost = getBTypeAutoBuyerBoostForTier(1);
 
-        const calculatedResourceRate = (activeAutoBuyer ? autoBuyerExtractionRate * currentTierAutoBuyerQuantity : 0) * supplyChainMultiplier;
+        const calculatedResourceRate = (activeAutoBuyer ? ((autoBuyerExtractionRate + bTypeBoost) * currentTierAutoBuyerQuantity) : 0) * supplyChainMultiplier;
         const productionAmount = calculatedResourceRate * tickMultiplier;
         const updatedQuantity = Math.min(currentQuantity + productionAmount, storageCapacity);
         const actualGain = Math.max(0, Math.min(storageCapacity - currentQuantity, productionAmount));

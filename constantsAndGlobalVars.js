@@ -314,6 +314,7 @@ let achievementFlagArray = [];
 let blackHoleDiscoveryProbability = 0;
 let blackHoleDiscovered = false;
 let oTypePowerPlantStrengthBoost = 8;
+let bTypeAutoBuyerBoostValues = { tier1: 0.02, tier2: 0.08, tier3: 0.25, tier4: 0.8 };
 let megaStructureTechsResearched = [];
 let miaplacidusMilestoneLevel = 0;
 let increaseStorageFactor = 2;
@@ -1909,6 +1910,7 @@ export function captureGameStatusForSaving(type) {
     gameState.oStarArrivalPopupsShown = oStarArrivalPopupsShown;
     gameState.oTypeMechanicActivatedForThisSave = oTypeMechanicActivatedForThisSave;
     gameState.oTypePowerPlantBuffs = JSON.parse(JSON.stringify(oTypePowerPlantBuffs));
+    gameState.bTypeAutoBuyerBoostValues = { ...bTypeAutoBuyerBoostValues };
     gameState.miaplacidusMilestoneLevel = miaplacidusMilestoneLevel;
     gameState.megaStructureTechsResearched = megaStructureTechsResearched;
     gameState.megaStructureAntimatterAmount = megastructureAntimatterAmount;
@@ -2064,7 +2066,10 @@ export function restoreGameStatus(gameState, type) {
             } else {
                 gameState.oTypePowerPlantBuffs = oTypePowerPlantBuffs;
             }
-            
+
+            if (gameState.bTypeAutoBuyerBoostValues && typeof gameState.bTypeAutoBuyerBoostValues === 'object') {
+                bTypeAutoBuyerBoostValues = { ...bTypeAutoBuyerBoostValues, ...gameState.bTypeAutoBuyerBoostValues };
+            }
 
             if (type === 'cloud') {
                 if (gameState.saveName) {
@@ -4233,6 +4238,16 @@ export function setOTypePowerPlantStrengthBoost(value) {
         return;
     }
     oTypePowerPlantStrengthBoost = value;
+}
+
+export function getBTypeAutoBuyerBoostValues() {
+    return bTypeAutoBuyerBoostValues;
+}
+
+export function setBTypeAutoBuyerBoostValues(values) {
+    if (values && typeof values === 'object') {
+        bTypeAutoBuyerBoostValues = { ...bTypeAutoBuyerBoostValues, ...values };
+    }
 }
 
 export function getStellarScannerRange() {

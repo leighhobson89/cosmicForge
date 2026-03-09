@@ -2893,7 +2893,10 @@ helpContent = {
         subBody13: "You can accidentally discover a Black Hole, and once researched it can be used to Time Warp, speeding up travel times and Resource collection. It needs to be charged which takes time, but the time can be reduced with upgrades. You can also increase the time it stays active for and the power of it with further upgrades, and once it is unlocked it is available across different runs.",
 
         subHeading14: "O-type Stars",
-        subBody14: "O-type stars are the rarest and most violent stars in the galaxy. Each one you control dramatically amplifies the power output of a Power Building type. Expect hardened defenses when attempting to conquer these systems."
+        subBody14: "O-type stars are the rarest and most violent stars in the galaxy. Each one you control dramatically amplifies the power output of a Power Building type. Expect hardened defenses when attempting to conquer these systems.",
+
+        subHeading15: "B-type Stars",
+        subBody15: "B-type stars are massive, hot blue stars that supercharge your Auto Buyers. When you're in a B-type star system, all your Resource Auto Buyers gain a fixed bonus rate: Tier 1 gets +2/s, Tier 2 gets +8/s, Tier 3 gets +25/s, and Tier 4 gets +80/s. This bonus applies to all Resources but not Compounds, and only on the B-type system run."
     },
     'concepts - end goal': {
         subHeading1: "Ancient Manuscripts",
