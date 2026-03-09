@@ -590,1109 +590,1109 @@ export function initialiseDescriptions() {
 
     optionDescriptions = {
         hydrogenSellRow: {
-            content1: "Here you can sell Hydrogen for cash",
-            content2: "Here you can sell Hydrogen for cash or fuse it into Helium",
+            content1: localize('optionDescHydrogenSellContent1', getLanguage()),
+            content2: localize('optionDescHydrogenSellContent2', getLanguage()),
             updateAt: "hydrogenFusion"
         },
         hydrogenGainRow: {
-            content1: "Manually gain one unit of Hydrogen.",
+            content1: localize('optionDescHydrogenGainContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         hydrogenIncreaseStorageRow: {
-            content1: "Upgrade your Hydrogen storage capacity to hold more resources.",
+            content1: localize('optionDescHydrogenStorageContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         heliumSellRow: {
-            content1: "Here you can sell Helium for cash",
-            content2: "Here you can sell Helium for cash or fuse it into Carbon",
+            content1: localize('optionDescHeliumSellContent1', getLanguage()),
+            content2: localize('optionDescHeliumSellContent2', getLanguage()),
             updateAt: "heliumFusion"
         },
         heliumGainRow: {
-            content1: "Manually scrape one unit of Helium.",
+            content1: localize('optionDescHeliumGainContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         heliumIncreaseStorageRow: {
-            content1: "Increase your Helium storage capacity to store more Helium.",
+            content1: localize('optionDescHeliumStorageContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         carbonSellRow: {
-            content1: "Here you can sell Carbon for cash",
-            content2: "Here you can sell Carbon for cash or fuse it into Neon",
+            content1: localize('optionDescCarbonSellContent1', getLanguage()),
+            content2: localize('optionDescCarbonSellContent2', getLanguage()),
             updateAt: "carbonFusion"
         },
         carbonGainRow: {
-            content1: "Extract Carbon manually from the environment.",
+            content1: localize('optionDescCarbonGainContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         carbonIncreaseStorageRow: {
-            content1: "Expand your Carbon storage.",
+            content1: localize('optionDescCarbonStorageContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         neonSellRow: {
-            content1: "Here you can sell Neon for cash",
-            content2: "Here you can sell Neon for cash or fuse it into Oxygen",
+            content1: localize('optionDescNeonSellContent1', getLanguage()),
+            content2: localize('optionDescNeonSellContent2', getLanguage()),
             updateAt: "neonFusion"
         },
         neonGainRow: {
-            content1: "Manually gain one unit of Neon.",
+            content1: localize('optionDescNeonGainContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         neonIncreaseStorageRow: {
-            content1: "Upgrade your Neon storage capacity to hold more resources.",
+            content1: localize('optionDescNeonStorageContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         oxygenSellRow: {
-            content1: "Here you can sell Oxygen for cash.",
-            content2: "Here you can sell Oxygen for cash or fuse it into Silicon.",
+            content1: localize('optionDescOxygenSellContent1', getLanguage()),
+            content2: localize('optionDescOxygenSellContent2', getLanguage()),
             updateAt: "oxygenFusion"
         },
         oxygenGainRow: {
-            content1: "Manually gain one unit of Oxygen.",
-            content2: "",
-            updateAt: ""
-        },
-        cosmicRipNearSpaceScannerArrayDeploySensorBuoyRow: {
-            content1: "Deploy a buoy to begin passively collecting rip telemetry.",
-            content2: "",
-            updateAt: ""
-        },
-        cosmicRipNearSpaceScannerArrayDeployRipResearchOrbiterRow: {
-            content1: "Deploy an orbiter to conduct advanced rip research and unlock new technologies.",
-            content2: "",
-            updateAt: ""
-        },
-        cosmicRipCosmicRipStatusRow: {
-            content1: "The Cosmic Rip has been discovered through our advanced scanning efforts, and now we must stabilise and secure it.",
-            content2: "",
-            updateAt: ""
-        },
-        cosmicRipStabilizerArrayRow: {
-            content1: "Build a Stabilizer Array to reduce instability and permit further operations safely.",
-            content2: "",
-            updateAt: ""
-        },
-        cosmicRipQuantumContainmentFieldRow: {
-            content1: "Generate quantum fields to contain the rip's dimensional bleed.",
-            content2: "",
-            updateAt: ""
-        },
-        cosmicRipDimensionalAnchorMatrixRow: {
-            content1: "Anchor local reality to prevent dimensional drift from the rip.",
-            content2: "",
-            updateAt: ""
-        },
-        cosmicRipSingularityStabilizerRow: {
-            content1: "Stabilize the gravitational singularity at the rip's core.",
-            content2: "",
-            updateAt: ""
-        },
-        cosmicRipRealityWeaveRegulatorRow: {
-            content1: "Regulate the fabric of reality around the cosmic rip.",
+            content1: localize('optionDescOxygenGainContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         oxygenIncreaseStorageRow: {
-            content1: "Upgrade your Oxygen storage capacity to hold more resources.",
+            content1: localize('optionDescOxygenStorageContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         sodiumSellRow: {
-            content1: "Here you can sell Sodium for cash.",
+            content1: localize('optionDescSodiumSellContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         sodiumGainRow: {
-            content1: "Manually gain one unit of Sodium.",
+            content1: localize('optionDescSodiumGainContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         sodiumIncreaseStorageRow: {
-            content1: "Upgrade your Sodium storage capacity to hold more resources.",
+            content1: localize('optionDescSodiumStorageContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         siliconSellRow: {
-            content1: "Here you can sell Silicon for cash.",
-            content2: "Here you can sell Silicon for cash or fuse it into Iron.",
+            content1: localize('optionDescSiliconSellContent1', getLanguage()),
+            content2: localize('optionDescSiliconSellContent2', getLanguage()),
             updateAt: "siliconFusion"
         },
         siliconGainRow: {
-            content1: "Manually gain one unit of Silicon.",
+            content1: localize('optionDescSiliconGainContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         siliconIncreaseStorageRow: {
-            content1: "Upgrade your Silicon storage capacity to hold more resources.",
+            content1: localize('optionDescSiliconStorageContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         ironSellRow: {
-            content1: "Here you can sell Iron for cash.",
+            content1: localize('optionDescIronSellContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         ironGainRow: {
-            content1: "Manually gain one unit of Iron.",
+            content1: localize('optionDescIronGainContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         ironIncreaseStorageRow: {
-            content1: "Upgrade your Iron storage capacity to hold more resources.",
+            content1: localize('optionDescIronStorageContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         dieselCreateRow: {
-            content1: "Here you can create Diesel from its constituent parts, provided you have them, and the power is ON.",
+            content1: localize('optionDescDieselCreateContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         dieselSellRow: {
-            content1: "Here you can sell Diesel for cash.",
+            content1: localize('optionDescDieselSellContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         dieselIncreaseStorageRow: {
-            content1: "Upgrade your Diesel storage capacity to hold more resources.",
+            content1: localize('optionDescDieselStorageContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         glassCreateRow: {
-            content1: "Here you can create Glass from its constituent parts, provided you have them, and the power is ON.",
+            content1: localize('optionDescGlassCreateContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         glassSellRow: {
-            content1: "Here you can sell Glass for cash.",
+            content1: localize('optionDescGlassSellContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         glassIncreaseStorageRow: {
-            content1: "Upgrade your Glass storage capacity to hold more resources.",
+            content1: localize('optionDescGlassStorageContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         steelCreateRow: {
-            content1: "Here you can create Steel from its constituent parts, provided you have them, and the power is ON.",
+            content1: localize('optionDescSteelCreateContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         steelSellRow: {
-            content1: "Here you can sell Steel for cash.",
+            content1: localize('optionDescSteelSellContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         steelIncreaseStorageRow: {
-            content1: "Upgrade your Steel storage capacity to hold more resources.",
+            content1: localize('optionDescSteelStorageContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         waterCreateRow: {
-            content1: "Here you can manage the production of Water, provided you have the materials, and the power is ON.",
+            content1: localize('optionDescWaterCreateContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         waterSellRow: {
-            content1: "Here you can sell Water for cash.",
+            content1: localize('optionDescWaterSellContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         waterIncreaseStorageRow: {
-            content1: "Upgrade your Water reservoir capacity to store more water.",
+            content1: localize('optionDescWaterStorageContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         concreteCreateRow: {
-            content1: "Here you can create Concrete, provided you have the materials, and the power is ON.",
+            content1: localize('optionDescConcreteCreateContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         concreteSellRow: {
-            content1: "Here you can sell Concrete for cash.",
+            content1: localize('optionDescConcreteSellContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         concreteIncreaseStorageRow: {
-            content1: "Upgrade your Concrete storage capacity to hold more resources.",
+            content1: localize('optionDescConcreteStorageContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         titaniumCreateRow: {
-            content1: "Here you can create Titanium, provided you have the materials, and the power is ON.",
+            content1: localize('optionDescTitaniumCreateContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         titaniumSellRow: {
-            content1: "Here you can sell Titanium for cash.",
+            content1: localize('optionDescTitaniumSellContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         titaniumIncreaseStorageRow: {
-            content1: "Upgrade your Titanium storage capacity to hold more resources.",
+            content1: localize('optionDescTitaniumStorageContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         hydrogenAutoBuyer1Row: {
-            content1: `Add a Hydrogen Compressor to automate Hydrogen generation.`,
+            content1: localize('optionDescHydrogenAutoBuyer1Content1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         hydrogenAutoBuyer2Row: {
-            content1: `Add an Advanced Hydrogen Compressor for enhanced automation - Power: ${Math.floor(getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescHydrogenAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         hydrogenAutoBuyer3Row: {
-            content1: `Install a Hydrogen Refinery to maximize efficiency in Hydrogen generation - Power: ${Math.floor(getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescHydrogenAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         hydrogenAutoBuyer4Row: {
-            content1: `Add a Quantum Hydrogen Synthesizer for cutting-edge Hydrogen production - Power: ${Math.floor(getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescHydrogenAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         heliumAutoBuyer1Row: {
-            content1: `Helium seems lighter than air - add an Atmosphere Scraper to automate Helium collection.`,
+            content1: localize('optionDescHeliumAutoBuyer1Content1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         heliumAutoBuyer2Row: {
-            content1: `Add an Advanced Helium Scraper for enhanced Helium collection - Power: ${Math.floor(getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescHeliumAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         heliumAutoBuyer3Row: {
-            content1: `Install a Helium Refinery to improve automation of Helium generation - Power: ${Math.floor(getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescHeliumAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         heliumAutoBuyer4Row: {
-            content1: `Add a Quantum Helium Synthesizer for cutting-edge Helium production - Power: ${Math.floor(getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescHeliumAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         carbonAutoBuyer1Row: {
-            content1: `Buy a miner to automate the collection of Carbon.`,
+            content1: localize('optionDescCarbonAutoBuyer1Content1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         carbonAutoBuyer2Row: {
-            content1: `Install an Advanced Carbon Miner for improved Carbon extraction - Power: ${Math.floor(getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescCarbonAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         carbonAutoBuyer3Row: {
-            content1: `Add a Carbon Refinery to maximize automated Carbon collection - Power: ${Math.floor(getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescCarbonAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         carbonAutoBuyer4Row: {
-            content1: `Add a Quantum Carbon Synthesizer for cutting-edge Carbon generation - Power: ${Math.floor(getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescCarbonAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         neonAutoBuyer1Row: {
-            content1: `Add an Neon Extractor to automate Neon generation.`,
+            content1: localize('optionDescNeonAutoBuyer1Content1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         neonAutoBuyer2Row: {
-            content1: `Add an Advanced Neon Extractor to improve automation of Neon collection - Power: ${Math.floor(getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescNeonAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         neonAutoBuyer3Row: {
-            content1: `Install a Neon Refinery to enhance Neon collection - Power: ${Math.floor(getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescNeonAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         neonAutoBuyer4Row: {
-            content1: `Add a Quantum Neon Synthesizer for cutting-edge Neon production - Power: ${Math.floor(getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescNeonAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         oxygenAutoBuyer1Row: {
-            content1: `Add an Oxygen Extractor to automate Oxygen generation.`,
+            content1: localize('optionDescOxygenAutoBuyer1Content1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         oxygenAutoBuyer2Row: {
-            content1: `Install an Advanced Oxygen Extractor for improved Oxygen generation - Power: ${Math.floor(getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescOxygenAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         oxygenAutoBuyer3Row: {
-            content1: `Add an Oxygen Refinery to maximize automation of Oxygen production - Power: ${Math.floor(getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescOxygenAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         oxygenAutoBuyer4Row: {
-            content1: `Add a Quantum Oxygen Synthesizer for advanced Oxygen generation - Power: ${Math.floor(getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescOxygenAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         sodiumAutoBuyer1Row: {
-            content1: `Add a Sodium Extractor to automate Sodium generation.`,
+            content1: localize('optionDescSodiumAutoBuyer1Content1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         sodiumAutoBuyer2Row: {
-            content1: `Add an Advanced Sodium Extractor for better Sodium automation - Power: ${Math.floor(getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescSodiumAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         sodiumAutoBuyer3Row: {
-            content1: `Install a Sodium Refinery to boost Sodium production - Power: ${Math.floor(getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescSodiumAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         sodiumAutoBuyer4Row: {
-            content1: `Add a Quantum Sodium Synthesizer for advanced Sodium generation - Power: ${Math.floor(getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescSodiumAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         siliconAutoBuyer1Row: {
-            content1: `Add a Silicon Extractor to automate Silicon generation.`,
+            content1: localize('optionDescSiliconAutoBuyer1Content1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         siliconAutoBuyer2Row: {
-            content1: `Add an Advanced Silicon Extractor for improved Silicon collection - Power: ${Math.floor(getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescSiliconAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         siliconAutoBuyer3Row: {
-            content1: `Install a Silicon Refinery to maximize Silicon automation - Power: ${Math.floor(getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescSiliconAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         siliconAutoBuyer4Row: {
-            content1: `Add a Quantum Silicon Synthesizer for cutting-edge Silicon production - Power: ${Math.floor(getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescSiliconAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         ironAutoBuyer1Row: {
-            content1: `Add an Iron Extractor to automate Iron generation.`,
+            content1: localize('optionDescIronAutoBuyer1Content1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         ironAutoBuyer2Row: {
-            content1: `Add an Advanced Iron Extractor for enhanced Iron collection - Power: ${Math.floor(getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescIronAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         ironAutoBuyer3Row: {
-            content1: `Install an Iron Refinery to maximize Iron production automation - Power: ${Math.floor(getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescIronAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         ironAutoBuyer4Row: {
-            content1: `Add a Quantum Iron Synthesizer for advanced Iron generation - Power: ${Math.floor(getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescIronAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         dieselAutoBuyer1Row: {
-            content1: `Add an Extractor to collect oil and make Diesel.`,
+            content1: localize('optionDescDieselAutoBuyer1Content1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         dieselAutoBuyer2Row: {
-            content1: `Add an Advanced Diesel Refinery for enhanced Diesel production - Power: ${Math.floor(getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescDieselAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         dieselAutoBuyer3Row: {
-            content1: `Install a Diesel Synthesizer for improved Diesel automation - Power: ${Math.floor(getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescDieselAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         dieselAutoBuyer4Row: {
-            content1: `Add a Quantum Diesel Synthesizer for cutting-edge Diesel generation - Power: ${Math.floor(getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescDieselAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         glassAutoBuyer1Row: {
-            content1: `Add a Workshop Glass Fabricator to create glass.`,
+            content1: localize('optionDescGlassAutoBuyer1Content1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         glassAutoBuyer2Row: {
-            content1: `Install an Advanced Glass Fabricator for better Glass production - Power: ${Math.floor(getResourceDataObject('compounds', ['glass', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescGlassAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['glass', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         glassAutoBuyer3Row: {
-            content1: `Add a Glass Refinery to enhance Glass automation - Power: ${Math.floor(getResourceDataObject('compounds', ['glass', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescGlassAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['glass', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         glassAutoBuyer4Row: {
-            content1: `Add a Quantum Glass Synthesizer for cutting-edge Glass production - Power: ${Math.floor(getResourceDataObject('compounds', ['glass', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescGlassAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['glass', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         steelAutoBuyer1Row: {
-            content1: `Add a Back Yard Steel Foundry to create steel.`,
+            content1: localize('optionDescSteelAutoBuyer1Content1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         steelAutoBuyer2Row: {
-            content1: `Add an Advanced Steel Foundry for enhanced Steel production - Power: ${Math.floor(getResourceDataObject('compounds', ['steel', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescSteelAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['steel', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         steelAutoBuyer3Row: {
-            content1: `Install a Steel Refinery to improve Steel automation - Power: ${Math.floor(getResourceDataObject('compounds', ['steel', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescSteelAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['steel', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         steelAutoBuyer4Row: {
-            content1: `Add a Quantum Steel Synthesizer for advanced Steel generation - Power: ${Math.floor(getResourceDataObject('compounds', ['steel', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescSteelAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['steel', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         waterAutoBuyer1Row: {
-            content1: `Add a Water Mixer to facilitate water processing.`,
+            content1: localize('optionDescWaterAutoBuyer1Content1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         waterAutoBuyer2Row: {
-            content1: `Add an Advanced Water Mixer for better Water production - Power: ${Math.floor(getResourceDataObject('compounds', ['water', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescWaterAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['water', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         waterAutoBuyer3Row: {
-            content1: `Install a Water Refinery to maximize Water automation - Power: ${Math.floor(getResourceDataObject('compounds', ['water', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescWaterAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['water', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         waterAutoBuyer4Row: {
-            content1: `Add a Quantum Water Synthesizer for advanced Water generation - Power: ${Math.floor(getResourceDataObject('compounds', ['water', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescWaterAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['water', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         concreteAutoBuyer1Row: {
-            content1: `Add a Concrete Mixer to automate Concrete production.`,
+            content1: localize('optionDescConcreteAutoBuyer1Content1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         concreteAutoBuyer2Row: {
-            content1: `Install an Advanced Concrete Mixer for enhanced Concrete production - Power: ${Math.floor(getResourceDataObject('compounds', ['concrete', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescConcreteAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['concrete', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         concreteAutoBuyer3Row: {
-            content1: `Add a Concrete Refinery to maximize Concrete automation - Power: ${Math.floor(getResourceDataObject('compounds', ['concrete', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescConcreteAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['concrete', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         concreteAutoBuyer4Row: {
-            content1: `Add a Quantum Concrete Synthesizer for cutting-edge Concrete production - Power: ${Math.floor(getResourceDataObject('compounds', ['concrete', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescConcreteAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['concrete', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         titaniumAutoBuyer1Row: {
-            content1: `Add a Titanium Mixer to automate Titanium production.`,
+            content1: localize('optionDescTitaniumAutoBuyer1Content1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         titaniumAutoBuyer2Row: {
-            content1: `Install an Advanced Titanium Mixer for enhanced Titanium production - Power: ${Math.floor(getResourceDataObject('compounds', ['titanium', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescTitaniumAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['titanium', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         titaniumAutoBuyer3Row: {
-            content1: `Add a Titanium Refinery to maximize Titanium automation - Power: ${Math.floor(getResourceDataObject('compounds', ['titanium', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescTitaniumAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['titanium', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         titaniumAutoBuyer4Row: {
-            content1: `Add a Quantum Titanium Synthesizer for cutting-edge Titanium production - Power: ${Math.floor(getResourceDataObject('compounds', ['titanium', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescTitaniumAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['titanium', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
-        }, 
+        },
+        cosmicRipNearSpaceScannerArrayDeploySensorBuoyRow: {
+            content1: localize('optionDescCosmicRipDeployBuoyContent1', getLanguage()),
+            content2: "",
+            updateAt: ""
+        },
+        cosmicRipNearSpaceScannerArrayDeployRipResearchOrbiterRow: {
+            content1: localize('optionDescCosmicRipDeployOrbiterContent1', getLanguage()),
+            content2: "",
+            updateAt: ""
+        },
+        cosmicRipCosmicRipStatusRow: {
+            content1: localize('optionDescCosmicRipStatusContent1', getLanguage()),
+            content2: "",
+            updateAt: ""
+        },
+        cosmicRipStabilizerArrayRow: {
+            content1: localize('optionDescCosmicRipStabilizerArrayContent1', getLanguage()),
+            content2: "",
+            updateAt: ""
+        },
+        cosmicRipQuantumContainmentFieldRow: {
+            content1: localize('optionDescCosmicRipQuantumContainmentContent1', getLanguage()),
+            content2: "",
+            updateAt: ""
+        },
+        cosmicRipDimensionalAnchorMatrixRow: {
+            content1: localize('optionDescCosmicRipDimensionalAnchorContent1', getLanguage()),
+            content2: "",
+            updateAt: ""
+        },
+        cosmicRipSingularityStabilizerRow: {
+            content1: localize('optionDescCosmicRipSingularityStabilizerContent1', getLanguage()),
+            content2: "",
+            updateAt: ""
+        },
+        cosmicRipRealityWeaveRegulatorRow: {
+            content1: localize('optionDescCosmicRipRealityWeaveContent1', getLanguage()),
+            content2: "",
+            updateAt: ""
+        },
         researchAutoBuyerRow: {
-            content1: "Toggle the Research AutoBuyer ON and OFF. (Will research the first available tech with all requisites fulfilled)",
+            content1: localize('optionDescResearchAutoBuyerContent1', getLanguage()),
             content2: "",
             updateAt: ""
-        },            
+        },
         researchScienceKitRow: {
-            content1: "Purchase a Science Kit to start generating Research points.",
+            content1: localize('optionDescResearchScienceKitContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         researchScienceClubRow: {
-            content1: "Open a Science Club to produce Research points more effectively.",
+            content1: localize('optionDescResearchScienceClubContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
         researchScienceLabRow: {
-            content1: `Build a Science Lab to do large amounts of Research - Power: ${Math.floor(getResourceDataObject('research', ['upgrades', 'scienceLab', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescResearchScienceLabContent1', getLanguage()) + ` ${Math.floor(getResourceDataObject('research', ['upgrades', 'scienceLab', 'energyUse']) * getTimerRateRatio())}KW / s`,
             content2: "",
             updateAt: ""
         },
         techKnowledgeSharingRow: {
-            content1: "Unlock Knowledge Sharing to advance research capabilities.",
-            content2: "Unlock Knowledge Sharing to improve research capacity and make new technologies accessible.<br><br><span class='green-ready-text'>Build Science Club</span>",
+            content1: localize('optionDescTechKnowledgeSharingContent1', getLanguage()),
+            content2: localize('optionDescTechKnowledgeSharingContent2', getLanguage()),
             updateAt: ""
         },
         techFusionTheoryRow: {
-            content1: "Unlock Fusion Theory to pave the way for advanced fusion technologies.",
-            content2: "Unlock Fusion Theory to unlock the potential of advanced fusion technologies for greater energy production.<br><br><span class='green-ready-text'>Prerequisite for Fusion technologies</span>",
+            content1: localize('optionDescTechFusionTheoryContent1', getLanguage()),
+            content2: localize('optionDescTechFusionTheoryContent2', getLanguage()),
             updateAt: ""
         },
         techHydrogenFusionRow: {
-            content1: "Unlock Hydrogen Fusion to experiment with fusing Hydrogen atoms.",
-            content2: "Unlock Hydrogen Fusion to explore the potential of fusing Hydrogen atoms for sustainable energy.<br><br><span class='green-ready-text'>Unlock Helium resource</span>",
+            content1: localize('optionDescTechHydrogenFusionContent1', getLanguage()),
+            content2: localize('optionDescTechHydrogenFusionContent2', getLanguage()),
             updateAt: ""
         },
         techStellarCartographyRow: {
-            content1: "Unlock Stellar Cartography to map the stars.",
-            content2: "Unlock Stellar Cartography to map distant stars and unlock new astronomical research capabilities.<br><br><span class='green-ready-text'>Unlock Star Map</span>",
+            content1: localize('optionDescTechStellarCartographyContent1', getLanguage()),
+            content2: localize('optionDescTechStellarCartographyContent2', getLanguage()),
             updateAt: ""
         },
         techNanoBrokersRow: {
-            content1: "Unlock Nano Brokers to automatically sell Resources and Compounds!",
-            content2: "Unlock Nano Brokers to automatically sell Resources and Compounds!<br><br><span class='green-ready-text'>Unlock Auto Sellers on all Resources and Compounds</span>",
+            content1: localize('optionDescTechNanoBrokersContent1', getLanguage()),
+            content2: localize('optionDescTechNanoBrokersContent2', getLanguage()),
             updateAt: ""
         },
         techQuantumComputingRow: {
-            content1: "Unlock Quantum Computing to enhance computational power and enable more advanced machinery.",
-            content2: "Unlock Quantum Computing to drive technological advancements through enhanced computational capabilities.<br><br><span class='green-ready-text'>Unlock Tier 2 AutoBuyers</span>",
+            content1: localize('optionDescTechQuantumComputingContent1', getLanguage()),
+            content2: localize('optionDescTechQuantumComputingContent2', getLanguage()),
             updateAt: ""
         },
         techHeliumFusionRow: {
-            content1: "Unlock Helium Fusion to enable the fusion of Helium atoms.",
-            content2: "Unlock Helium Fusion to develop methods for fusing Helium and generate more energy.<br><br><span class='green-ready-text'>Unlock Carbon resource</span>",
+            content1: localize('optionDescTechHeliumFusionContent1', getLanguage()),
+            content2: localize('optionDescTechHeliumFusionContent2', getLanguage()),
             updateAt: ""
         },
         techHydroCarbonsRow: {
-            content1: "Unlock HydroCarbons to produce early fuel for power generation.",
-            content2: "Unlock HydroCarbons to start generating energy by using early forms of fuel.<br><br><span class='green-ready-text'>Create Diesel (with Compounds Tab)</span>",
+            content1: localize('optionDescTechHydroCarbonsContent1', getLanguage()),
+            content2: localize('optionDescTechHydroCarbonsContent2', getLanguage()),
             updateAt: ""
         },
         techNanoTubeTechnologyRow: {
-            content1: "Unlock NanoTube Technology to learn the first step about the fusion of Carbon.",
-            content2: "Unlock NanoTube Technology to advance material science, focusing on carbon-based nanotubes.<br><br><span class='green-ready-text'>Prerequisite for Carbon technologies</span>",
+            content1: localize('optionDescTechNanoTubeTechnologyContent1', getLanguage()),
+            content2: localize('optionDescTechNanoTubeTechnologyContent2', getLanguage()),
             updateAt: ""
         },
         techCarbonFusionRow: {
-            content1: "Unlock Carbon Fusion to finalize knowledge about the fusion of Carbon atoms.",
-            content2: "Unlock Carbon Fusion to explore and harness the power of Carbon atom fusion for more efficient energy.<br><br><span class='green-ready-text'>Unlock Sodium and Neon resources</span>",
+            content1: localize('optionDescTechCarbonFusionContent1', getLanguage()),
+            content2: localize('optionDescTechCarbonFusionContent2', getLanguage()),
             updateAt: ""
         },
         techNeonFusionRow: {
-            content1: "Unlock Neon Fusion to explore and harness fusion reactions of Neon.",
-            content2: "Unlock Neon Fusion to investigate and utilize the fusion of Neon atoms for advanced energy solutions.<br><br><span class='green-ready-text'>Unlock Oxygen resource</span>",
+            content1: localize('optionDescTechNeonFusionContent1', getLanguage()),
+            content2: localize('optionDescTechNeonFusionContent2', getLanguage()),
             updateAt: ""
         },
         techOxygenFusionRow: {
-            content1: "Unlock Oxygen Fusion to experiment with fusing Oxygen atoms.",
-            content2: "Unlock Oxygen Fusion to explore the process of Oxygen atom fusion and boost energy efficiency.<br><br><span class='green-ready-text'>Unlock Silicon resource</span>",
+            content1: localize('optionDescTechOxygenFusionContent1', getLanguage()),
+            content2: localize('optionDescTechOxygenFusionContent2', getLanguage()),
             updateAt: ""
         },
         techSiliconFusionRow: {
-            content1: "Unlock Silicon Fusion to experiment fusing Silicon.",
-            content2: "Unlock Silicon Fusion to examine the fusion process of Silicon atoms for advanced applications.<br><br><span class='green-ready-text'>Unlock Iron resource</span>",
+            content1: localize('optionDescTechSiliconFusionContent1', getLanguage()),
+            content2: localize('optionDescTechSiliconFusionContent2', getLanguage()),
             updateAt: ""
         },
         techNeutronCaptureRow: {
-            content1: "Unlock Neutron Capture to collect fusion by-products.",
-            content2: "Unlock Neutron Capture to gather and study by-products from fusion reactions for advanced technologies.<br><br><span class='green-ready-text'>Unlock Titanium resource</span>",
+            content1: localize('optionDescTechNeutronCaptureContent1', getLanguage()),
+            content2: localize('optionDescTechNeutronCaptureContent2', getLanguage()),
             updateAt: ""
         },
         techGlassManufactureRow: {
-            content1: "Unlock Glass Manufacture to produce advanced Glass compounds from Silicon and Oxygen.",
-            content2: "Unlock Glass Manufacture to produce advanced glass compounds from Silicon and Oxygen for various industrial uses.<br><br><span class='green-ready-text'>Create Glass compound</span>",
+            content1: localize('optionDescTechGlassManufactureContent1', getLanguage()),
+            content2: localize('optionDescTechGlassManufactureContent2', getLanguage()),
             updateAt: ""
         },
         techAggregateMixingRow: {
-            content1: "Unlock Aggregate Mixing to produce concrete compounds from Silicon, Sodium and Hydrogen.",
-            content2: "Unlock Aggregate Mixing to produce concrete and construction materials using Silicon, Sodium, and Hydrogen.<br><br><span class='green-ready-text'>Create Concrete compound</span>",
+            content1: localize('optionDescTechAggregateMixingContent1', getLanguage()),
+            content2: localize('optionDescTechAggregateMixingContent2', getLanguage()),
             updateAt: ""
         },        
         techNobleGasCollectionRow: {
-            content1: "Unlock Noble Gas Collection to store rare noble gases.",
-            content2: "Unlock Noble Gas Collection to store and manage rare noble gases, essential for high-end applications.<br><br><span class='green-ready-text'>Prerequisite for Neon Fusion (with Carbon Fusion)</span>",
+            content1: localize("techNobleGasCollectionContent1", getLanguage()),
+            content2: localize("techNobleGasCollectionContent2", getLanguage()),
             updateAt: ""
         },
         techFusionEfficiencyIRow: {
-            content1: "Unlock Fusion Efficiency I to enhance fusion efficiency.",
-            content2: "Unlock Fusion Efficiency I to improve the performance and energy output of fusion reactions.<br><br><span class='green-ready-text'>Fusion Efficiency +20%</span>",
+            content1: localize("techFusionEfficiencyIContent1", getLanguage()),
+            content2: localize("techFusionEfficiencyIContent2", getLanguage()),
             updateAt: ""
         },
         techFusionEfficiencyIIRow: {
-            content1: "Unlock Fusion Efficiency II to further enhance fusion efficiency.",
-            content2: "Unlock Fusion Efficiency II to maximize fusion efficiency, leading to higher energy yields and lower waste.<br><br><span class='green-ready-text'>Fusion Efficiency +20%</span>",
+            content1: localize("techFusionEfficiencyIIContent1", getLanguage()),
+            content2: localize("techFusionEfficiencyIIContent2", getLanguage()),
             updateAt: ""
         },
         techFusionEfficiencyIIIRow: {
-            content1: "Unlock Fusion Efficiency III to realise 100% efficient fusion.",
-            content2: "Unlock Fusion Efficiency III to achieve fully optimized, 100% efficient fusion energy generation.<br><br><span class='green-ready-text'>100% Fusion Efficiency</span>",
+            content1: localize("techFusionEfficiencyIIIContent1", getLanguage()),
+            content2: localize("techFusionEfficiencyIIIContent2", getLanguage()),
             updateAt: ""
         },
         techAtmosphericTelescopesRow: {
-            content1: "Unlock Atmospheric Telescopes to get data about the surrounding stellar neighborhood.",
-            content2: "Unlock Atmospheric Telescopes to gather data and insights about nearby stars and cosmic bodies.<br><br><span class='green-ready-text'>Reveal Star Data</span>",
+            content1: localize("techAtmosphericTelescopesContent1", getLanguage()),
+            content2: localize("techAtmosphericTelescopesContent2", getLanguage()),
             updateAt: ""
         },
         techGiganticTurbinesRow: {
-            content1: "Unlock Gigantic Turbines to allow the building of advanced power generators.",
-            content2: "Unlock Gigantic Turbines to build massive, high-efficiency turbines for advanced power generation.<br><br><span class='green-ready-text'>Prerequisite for Advanced Power Plant</span>",
+            content1: localize("techGiganticTurbinesContent1", getLanguage()),
+            content2: localize("techGiganticTurbinesContent2", getLanguage()),
             updateAt: ""
         },
         techSteelFoundriesRow: {
-            content1: "Unlock Steel Foundries to produce high strength steel alloys from Iron.",
-            content2: "Unlock Steel Foundries to produce high-strength steel alloys from iron, enabling advanced manufacturing and construction.<br><br><span class='green-ready-text'>Unlock Steel compound</span>",
+            content1: localize("techSteelFoundriesContent1", getLanguage()),
+            content2: localize("techSteelFoundriesContent2", getLanguage()),
             updateAt: ""
         },
         techCompoundsRow: {
-            content1: "Unlock Compounds to expand the materials you have access to.",
-            content2: "Unlock Compounds to gain access to new materials and enhance your manufacturing capabilities.<br><br><span class='green-ready-text'>Unlock Compounds Tab</span>",
+            content1: localize("techCompoundsContent1", getLanguage()),
+            content2: localize("techCompoundsContent2", getLanguage()),
             updateAt: ""
         },
         techRocketCompositesRow: {
-            content1: "Unlock Rocket Composites to build rocket components and unlock the Launch Pad tab, and level 3 and 4 AutoBuyers",
-            content2: "Unlock Rocket Composites to build rocket components to mine in space, and level 3 and 4 AutoBuyers.<br><br><span class='green-ready-text'>Unlock Launch Pad Tab</span>",
+            content1: localize("techRocketCompositesContent1", getLanguage()),
+            content2: localize("techRocketCompositesContent2", getLanguage()),
             updateAt: ""
         },
         techAdvancedFuelsRow: {
-            content1: "Unlock Advanced Fuels to fuel your Space Mining vessels.",
-            content2: "Unlock Advanced Fuels to fuel your Space Mining vessels<br><br><span class='green-ready-text'>Create Rocket Fuel</span>",
+            content1: localize("techAdvancedFuelsContent1", getLanguage()),
+            content2: localize("techAdvancedFuelsContent2", getLanguage()),
             updateAt: ""
         },
         techPlanetaryNavigationRow: {
-            content1: "Unlock the ability to travel to Asteroids.",
-            content2: "Unlock the ability to travel to Asteroids.<br><br><span class='green-ready-text'>Travel To Asteroids</span>",
+            content1: localize("techPlanetaryNavigationContent1", getLanguage()),
+            content2: localize("techPlanetaryNavigationContent2", getLanguage()),
             updateAt: ""
         },
         techAdvancedPowerGenerationRow: {
-            content1: "Unlock Advanced Power Generation to boost energy production and reveal Lithium Ion Battery.",
-            content2: "Unlock Advanced Power Generation to increase energy output, powering more complex systems and facilities, and reveal Lithium Ion Battery.<br><br><span class='green-ready-text'>Build Advanced Power Plant</span><br><span class='green-ready-text'>Reveal Lithium Ion Battery</span>",
+            content1: localize("techAdvancedPowerGenerationContent1", getLanguage()),
+            content2: localize("techAdvancedPowerGenerationContent2", getLanguage()),
             updateAt: ""
         },
         techBasicPowerGenerationRow: {
-            content1: "Unlock Basic Power Generation to start producing energy.",
-            content2: "Unlock Basic Power Generation to lay the foundation for generating energy and powering essential systems.<br><br><span class='green-ready-text'>Build Power Plant</span>",
+            content1: localize("techBasicPowerGenerationContent1", getLanguage()),
+            content2: localize("techBasicPowerGenerationContent2", getLanguage()),
             updateAt: ""
         },
         techSolarPowerGenerationRow: {
-            content1: "Unlock the ability to utilize the local star to harness clean, renewable energy.",
-            content2: "Unlock Solar Power Generation to harness renewable solar energy, reducing reliance on non-renewable resources.<br><br><span class='green-ready-text'>Build Solar Power Plant</span>",
+            content1: localize("techSolarPowerGenerationContent1", getLanguage()),
+            content2: localize("techSolarPowerGenerationContent2", getLanguage()),
             updateAt: ""
         },        
         techScienceLaboratoriesRow: {
-            content1: "Unlock Science Laboratories to build huge labs for large scale, dedicated research.",
-            content2: "Unlock Science Laboratories to establish large-scale labs dedicated to conducting cutting-edge research.<br><br><span class='green-ready-text'>Build Science Laboratory</span>",
+            content1: localize("techScienceLaboratoriesContent1", getLanguage()),
+            content2: localize("techScienceLaboratoriesContent2", getLanguage()),
             updateAt: "" 
         },
         techSodiumIonPowerStorageRow: {
-            content1: "Unlock the ability to build a Sodium Ion Battery to store energy that you generate.",
-            content2: "Unlock Sodium-Ion Power Storage to build a Sodium Ion Battery for storing energy generated by your systems.<br><br><span class='green-ready-text'>Build Sodium Ion Battery</span>",
+            content1: localize("techSodiumIonPowerStorageContent1", getLanguage()),
+            content2: localize("techSodiumIonPowerStorageContent2", getLanguage()),
             updateAt: "" 
         }, 
         techOrbitalConstructionRow: {
-            content1: "Unlock Orbital Construction to build starship modules and reveal Stellar Capacitor Array.",
-            content2: "Unlock Orbital Construction to build starship modules and reveal Stellar Capacitor Array..<br><br><span class='green-ready-text'>Unlock Starship Section in InterStellar Tab</span><br><span class='green-ready-text'>Reveal Stellar Capacitor Array</span>",
+            content1: localize("techOrbitalConstructionContent1", getLanguage()),
+            content2: localize("techOrbitalConstructionContent2", getLanguage()),
             updateAt: ""
         },
         techAntimatterEnginesRow: {
-            content1: "Unlock Antimatter Engines to build interstellar propulsion systems.",
-            content2: "Unlock Antimatter Engines to build interstellar propulsion systems.<br><br><span class='green-ready-text'>Build Starship Antimatter Engines</span>",
+            content1: localize("techAntimatterEnginesContent1", getLanguage()),
+            content2: localize("techAntimatterEnginesContent2", getLanguage()),
             updateAt: ""
         },
         techFTLTravelTheoryRow: {
-            content1: "Unlock FTL Travel Theory to research faster-than-light travel.",
-            content2: "Unlock FTL Travel Theory to research faster-than-light travel.<br><br><span class='green-ready-text'>Can Launch Starship</span>",
+            content1: localize("techFTLTravelTheoryContent1", getLanguage()),
+            content2: localize("techFTLTravelTheoryContent2", getLanguage()),
             updateAt: ""
         },
         techLifeSupportSystemsRow: {
-            content1: "Unlock Life Support Systems to sustain life in deep space.",
-            content2: "Unlock Life Support Systems to sustain life in deep space.<br><br><span class='green-ready-text'>Build Starship Habitatation Modules</span>",
+            content1: localize("techLifeSupportSystemsContent1", getLanguage()),
+            content2: localize("techLifeSupportSystemsContent2", getLanguage()),
             updateAt: ""
         },
         techStarshipFleetsRow: {
-            content1: "Unlock Starship Fleets to build and command interstellar armadas.",
-            content2: "Unlock Starship Fleets to build and command interstellar armadas.<br><br><span class='green-ready-text'>Allow building of Fleet Hangar onboard the Star Ship!</span>",
+            content1: localize("techStarshipFleetsContent1", getLanguage()),
+            content2: localize("techStarshipFleetsContent2", getLanguage()),
             updateAt: ""
         },  
         techStellarScannersRow: {
-            content1: "Unlock Stellar Scanners to identify life signatures around Star Systems.",
-            content2: "Unlock Stellar Scanners to identify life signatures around Star Systems.<br><br><span class='green-ready-text'>Allow building of Stellar Scanner onboard the Star Ship!</span>",
+            content1: localize("techStellarScannersContent1", getLanguage()),
+            content2: localize("techStellarScannersContent2", getLanguage()),
             updateAt: ""
         }, 
         techDysonSphereUnderstandingRow: {
-            content1: "Unlock Dyson Sphere Understanding to comprehend the nature of a Dyson Sphere.",
-            content2: "Unlock Dyson Sphere Understanding to learn what a Dyson Sphere is and how it can change the course of your technological development.<br><br><span class='green-ready-text'>???</span>",
+            content1: localize("techDysonSphereUnderstandingContent1", getLanguage()),
+            content2: localize("techDysonSphereUnderstandingContent2", getLanguage()),
             updateAt: ""
         },
         techDysonSphereCapabilitiesRow: {
-            content1: "Unlock Dyson Sphere Capabilities to understand its potential uses and abilities.",
-            content2: "Unlock Dyson Sphere Capabilities to gain insight into the incredible powers and capabilities of a Dyson Sphere.<br><br><span class='green-ready-text'>???</span>",
+            content1: localize("techDysonSphereCapabilitiesContent1", getLanguage()),
+            content2: localize("techDysonSphereCapabilitiesContent2", getLanguage()),
             updateAt: ""
         },
         techDysonSphereDisconnectRow: {
-            content1: "Unlock Dyson Sphere Disconnect to sever its connection from the Miaplacidus System Force Field.",
-            content2: "Unlock Dyson Sphere Disconnect to disconnect the Dyson Sphere from the Miaplacidus System Force Field.<br><br><span class='green-ready-text'>???</span>",
+            content1: localize("techDysonSphereDisconnectContent1", getLanguage()),
+            content2: localize("techDysonSphereDisconnectContent2", getLanguage()),
             updateAt: ""
         },
         techDysonSpherePowerRow: {
-            content1: "Unlock Dyson Sphere Power to harness its energy for your system.",
-            content2: "Unlock Dyson Sphere Power to learn how to tap into the vast energy reserves of the Dyson Sphere, powering your system and beyond.<br><br><span class='green-ready-text'>???</span>",
+            content1: localize("techDysonSpherePowerContent1", getLanguage()),
+            content2: localize("techDysonSpherePowerContent2", getLanguage()),
             updateAt: ""
         },
         techDysonSphereConnectRow: {
-            content1: "Unlock Dyson Sphere Connect to link its power across the galaxy.",
-            content2: "Unlock Dyson Sphere Connect to understand how to distribute the Dyson Sphere's energy across all systems, linking it to the galaxy at large.<br><br><span class='green-ready-text'>???</span>",
+            content1: localize("techDysonSphereConnectContent1", getLanguage()),
+            content2: localize("techDysonSphereConnectContent2", getLanguage()),
             updateAt: ""
         },
         techCelestialProcessingCoreUnderstandingRow: {
-            content1: "Unlock Celestial Processing Core Understanding to comprehend the nature of a Celestial Processing Core.",
-            content2: "Unlock Celestial Processing Core Understanding to learn what a Celestial Processing Core is and how it can revolutionize your technological infrastructure.<br><br><span class='green-ready-text'>???</span>",
+            content1: localize("techCelestialProcessingCoreUnderstandingContent1", getLanguage()),
+            content2: localize("techCelestialProcessingCoreUnderstandingContent2", getLanguage()),
             updateAt: ""
         },
         techCelestialProcessingCoreCapabilitiesRow: {
-            content1: "Unlock Celestial Processing Core Capabilities to understand its potential uses and abilities.",
-            content2: "Unlock Celestial Processing Core Capabilities to gain insight into the immense power and functions of the Celestial Processing Core.<br><br><span class='green-ready-text'>???</span>",
+            content1: localize("techCelestialProcessingCoreCapabilitiesContent1", getLanguage()),
+            content2: localize("techCelestialProcessingCoreCapabilitiesContent2", getLanguage()),
             updateAt: ""
         },
         techCelestialProcessingCoreDisconnectRow: {
-            content1: "Unlock Celestial Processing Core Disconnect to sever its connection from the Miaplacidus System Force Field.",
-            content2: "Unlock Celestial Processing Core Disconnect to disconnect the Celestial Processing Core from the Miaplacidus System Force Field.<br><br><span class='green-ready-text'>???</span>",
+            content1: localize("techCelestialProcessingCoreDisconnectContent1", getLanguage()),
+            content2: localize("techCelestialProcessingCoreDisconnectContent2", getLanguage()),
             updateAt: ""
         },
         techCelestialProcessingCorePowerRow: {
-            content1: "Unlock Celestial Processing Core Power to harness its energy for your system.",
-            content2: "Unlock Celestial Processing Core Power to learn how to tap into the vast power of the Celestial Processing Core, empowering your system.<br><br><span class='green-ready-text'>???</span>",
+            content1: localize("techCelestialProcessingCorePowerContent1", getLanguage()),
+            content2: localize("techCelestialProcessingCorePowerContent2", getLanguage()),
             updateAt: ""
         },
         techCelestialProcessingCoreConnectRow: {
-            content1: "Unlock Celestial Processing Core Connect to distribute its power galaxy-wide.",
-            content2: "Unlock Celestial Processing Core Connect to learn how to distribute the Celestial Processing Core's energy across the galaxy.<br><br><span class='green-ready-text'>???</span>",
+            content1: localize("techCelestialProcessingCoreConnectContent1", getLanguage()),
+            content2: localize("techCelestialProcessingCoreConnectContent2", getLanguage()),
             updateAt: ""
         },
 
         blackHoleChargeProgressRow: {
-            content1: 'Black Hole Charge Progress',
-            content2: '',
+            content1: localize("blackHoleChargeProgressContent1", getLanguage()),
+            content2: "",
             updateAt: ''
         },
         blackHoleTimeWarpProgressRow: {
-            content1: 'BLACK HOLE ACTIVATED',
-            content2: '',
+            content1: localize("blackHoleTimeWarpProgressContent1", getLanguage()),
+            content2: "",
             updateAt: ''
         },
         blackHoleInteractionRow: {
-            content1: 'Here you can research and upgrade your interaction power with the Black Hole',
-            content2: '',
+            content1: localize("blackHoleInteractionContent1", getLanguage()),
+            content2: "",
             updateAt: ''
         },
         blackHoleFeedRow: {
-            content1: 'Here you can feed the Black Hole and increase its power',
-            content2: '',
+            content1: localize("blackHoleFeedContent1", getLanguage()),
+            content2: "",
             updateAt: ''
         },
         blackHoleStatsRow: {
-            content1: 'Here you can see the Black Hole charge and power stats',
-            content2: '',
+            content1: localize("blackHoleStatsContent1", getLanguage()),
+            content2: "",
             updateAt: ''
         },
         blackHoleActivationRow: {
-            content1: 'Activate the Black Hole!',
-            content2: '',
+            content1: localize("blackHoleActivationContent1", getLanguage()),
+            content2: "",
             updateAt: ''
         },
         techPlasmaForgeCapabilitiesRow: {
-            content1: "Unlock Plasma Forge Capabilities to understand its potential uses and abilities.",
-            content2: "Unlock Plasma Forge Capabilities to understand the vast array of functions and capabilities that the Plasma Forge offers.<br><br><span class='green-ready-text'>???</span>",
+            content1: localize("techPlasmaForgeCapabilitiesContent1", getLanguage()),
+            content2: localize("techPlasmaForgeCapabilitiesContent2", getLanguage()),
             updateAt: ""
         },
         techPlasmaForgeDisconnectRow: {
-            content1: "Unlock Plasma Forge Disconnect to sever its connection from the Miaplacidus System Force Field.",
-            content2: "Unlock Plasma Forge Disconnect to disconnect the Plasma Forge from the Miaplacidus System Force Field.<br><br><span class='green-ready-text'>???</span>",
+            content1: localize("techPlasmaForgeDisconnectContent1", getLanguage()),
+            content2: localize("techPlasmaForgeDisconnectContent2", getLanguage()),
             updateAt: ""
         },
         techPlasmaForgePowerRow: {
-            content1: "Unlock Plasma Forge Power to harness its energy for your system.",
-            content2: "Unlock Plasma Forge Power to learn how to utilize the immense energy of the Plasma Forge for powering your system.<br><br><span class='green-ready-text'>???</span>",
+            content1: localize("techPlasmaForgePowerContent1", getLanguage()),
+            content2: localize("techPlasmaForgePowerContent2", getLanguage()),
             updateAt: ""
         },
         techPlasmaForgeConnectRow: {
-            content1: "Unlock Plasma Forge Connect to connect its power across the galaxy.",
-            content2: "Unlock Plasma Forge Connect to learn how to extend the Plasma Forge’s energy across multiple systems, expanding your reach.<br><br><span class='green-ready-text'>???</span>",
+            content1: localize("techPlasmaForgeConnectContent1", getLanguage()),
+            content2: localize("techPlasmaForgeConnectContent2", getLanguage()),
             updateAt: ""
         },
 
         techGalacticMemoryArchiveUnderstandingRow: {
-            content1: "Unlock Galactic Memory Archive Understanding to comprehend the Galactic Memory Archive’s function.",
-            content2: "Unlock Galactic Memory Archive Understanding to understand what the Galactic Memory Archive is and how it holds vital cosmic data.<br><br><span class='green-ready-text'>???</span>",
+            content1: localize("techGalacticMemoryArchiveUnderstandingContent1", getLanguage()),
+            content2: localize("techGalacticMemoryArchiveUnderstandingContent2", getLanguage()),
             updateAt: ""
         },
         techGalacticMemoryArchiveCapabilitiesRow: {
-            content1: "Unlock Galactic Memory Archive Capabilities to understand its potential uses and abilities.",
-            content2: "Unlock Galactic Memory Archive Capabilities to discover the powerful functions and capabilities that the Galactic Memory Archive holds.<br><br><span class='green-ready-text'>???</span>",
+            content1: localize("techGalacticMemoryArchiveCapabilitiesContent1", getLanguage()),
+            content2: localize("techGalacticMemoryArchiveCapabilitiesContent2", getLanguage()),
             updateAt: ""
         },
         techGalacticMemoryArchiveDisconnectRow: {
-            content1: "Unlock Galactic Memory Archive Disconnect to sever its connection from the Miaplacidus System Force Field.",
-            content2: "Unlock Galactic Memory Archive Disconnect to disconnect the Galactic Memory Archive from the Miaplacidus System Force Field.<br><br><span class='green-ready-text'>???</span>",
+            content1: localize("techGalacticMemoryArchiveDisconnectContent1", getLanguage()),
+            content2: localize("techGalacticMemoryArchiveDisconnectContent2", getLanguage()),
             updateAt: ""
         },
         techGalacticMemoryArchivePowerRow: {
-            content1: "Unlock Galactic Memory Archive Power to harness its energy for your system.",
-            content2: "Unlock Galactic Memory Archive Power to tap into the cosmic energy stored in the Galactic Memory Archive for your system’s benefit.<br><br><span class='green-ready-text'>???</span>",
+            content1: localize("techGalacticMemoryArchivePowerContent1", getLanguage()),
+            content2: localize("techGalacticMemoryArchivePowerContent2", getLanguage()),
             updateAt: ""
         },
         techGalacticMemoryArchiveConnectRow: {
-            content1: "Unlock Galactic Memory Archive Connect to connect its power across the galaxy.",
-            content2: "Unlock Galactic Memory Archive Connect to connect the Galactic Memory Archive’s energy across all systems, extending your technological network.<br><br><span class='green-ready-text'>???</span>",
+            content1: localize("techGalacticMemoryArchiveConnectContent1", getLanguage()),
+            content2: localize("techGalacticMemoryArchiveConnectContent2", getLanguage()),
             updateAt: ""
         },      
         techPhilosophySpaceStorageTankResearchRow: {
-            content1: "ABILITY: Unlock Storage Research and base storage increases are not x2 but x5 every time.",
+            content1: localize("techPhilosophySpaceStorageTankResearchContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         techPhilosophyFleetHologramsRow: {
-            content1: "ABILITY: Unlock Fleet Holograms to guarantee vassalization if fleet 3x larger, regardless of leader traits.",
+            content1: localize("techPhilosophyFleetHologramsContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         techPhilosophyVoidSeersRow: {
-            content1: "ABILITY: Unlock Void Seers to gain the ablity to use Space Telescope for scanning Resources and Compounds in the Void.",
+            content1: localize("techPhilosophyVoidSeersContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         techPhilosophyRapidExpansionRow: {
-            content1: "ABILITY: Unlock Rapid Expansion to have a chance of conquering up to 3 extra systems when you conquer 1.",
+            content1: localize("techPhilosophyRapidExpansionContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         techPhilosophyEfficientAssemblyRow: {
-            content1: "Research Efficient Assembly to reduce space building costs by 1%.",
+            content1: localize("techPhilosophyEfficientAssemblyContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         techPhilosophyLaserMiningRow: {
-            content1: "Research Laser Mining to lower the cost of resource autobuyers by 5%.",
+            content1: localize("techPhilosophyLaserMiningContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         techPhilosophyMassCompoundAssemblyRow: {
-            content1: "Research Mass Compound Assembly to reduce compound recipe costs by 5%.",
+            content1: localize("techPhilosophyMassCompoundAssemblyContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         techPhilosophyEnergyDronesRow: {
-            content1: "Research Energy Drones to make energy and research buildings 5% cheaper.",
+            content1: localize("techPhilosophyEnergyDronesContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         techPhilosophyHangarAutomationRow: {
-            content1: "Research Hangar Automation to reduce fleet construction costs by 5%.",
+            content1: localize("techPhilosophyHangarAutomationContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         techPhilosophySyntheticPlatingRow: {
-            content1: "Research Synthetic Plating to improve fleet armor and health by 5%.",
+            content1: localize("techPhilosophySyntheticPlatingContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         techPhilosophyAntimatterEngineMinaturizationRow: {
-            content1: "Research Antimatter Engine Minaturization to boost fleet speed by 5%.",
+            content1: localize("techPhilosophyAntimatterEngineMinaturizationContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         techPhilosophyLaserIntensityResearchRow: {
-            content1: "Research Laser Intensity to increase fleet attack power by 5% on newly built Fleet Ships.",
+            content1: localize("techPhilosophyLaserIntensityResearchContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         techPhilosophyStellarWhispersRow: {
-            content1: "Research Stellar Whispers to improve initial diplomacy with alien species by 1% each purchase.",
+            content1: localize("techPhilosophyStellarWhispersContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         techPhilosophyStellarInsightManifoldRow: {
-            content1: "Research Stellar Insight Manifold to accelerate Star Study speed by 1% each time.",
+            content1: localize("techPhilosophyStellarInsightManifoldContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         techPhilosophyAsteroidDwellersRow: {
-            content1: "Research Asteroid Dwellers to improve Asteroid exploration speed by 1% each time.",
+            content1: localize("techPhilosophyAsteroidDwellersContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         techPhilosophyAscendencyPhilosophyRow: {
-            content1: "Research Ascendency Philosophy to improve base AP gain.",
+            content1: localize("techPhilosophyAscendencyPhilosophyContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         techPhilosophySpaceElevatorRow: {
-            content1: "Research Space Elevator to reduce the cost of Star Ship parts by 5%.",
+            content1: localize("techPhilosophySpaceElevatorContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         techPhilosophyLaunchPadMassProductionRow: {
-            content1: "Research Launch Pad Mass Production to lower Rocket part costs by 5%",
+            content1: localize("techPhilosophyLaunchPadMassProductionContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         techPhilosophyAsteroidAttractorsRow: {
-            content1: "Research Asteroid Attractors to reduce Rocket travel time by 5%.",
+            content1: localize("techPhilosophyAsteroidAttractorsContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         techPhilosophyWarpDriveRow: {
-            content1: "Research Warp Drive to reduce Star Ship travel time by 5%.",
+            content1: localize("techPhilosophyWarpDriveContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },        
         energyPowerPlant1Row: {
-            content1: "This is the first building available to produce energy.",
+            content1: localize("energyPowerPlant1Content1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         energyPowerPlant2Row: {
-            content1: "This building produces clean, renewable energy without using resources, but its efficiency is weather dependant!",
+            content1: localize("energyPowerPlant2Content1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         energyPowerPlant3Row: {
-            content1: "This building produces significantly more power than its earlier iteration, but consumes more resources.",
+            content1: localize("energyPowerPlant3Content1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         energyBattery1Row: {
-            content1: "Store small amount of energy for use if power starts being used faster than it can be generated.",
+            content1: localize("energyBattery1Content1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         energyBattery2Row: {
-            content1: "Store larger amount of energy for use if power starts being used faster than it can be generated.",
+            content1: localize("energyBattery2Content1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         energyBattery3Row: {
-            content1: "Store a huge amount of energy for use if power starts being used faster than it can be generated.",
+            content1: localize("energyBattery3Content1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         antimatterSvgRow: {
-            content1: "Hold down the Antimatter rate bar to increase production!",
+            content1: localize("antimatterSvgContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         spaceBuildLaunchPadRow: {
-            content1: "Build the launch pad to launch built rockets and mine asteroids for antimatter.",
+            content1: localize("spaceBuildLaunchPadContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         spaceBuildTelescopeRow: {
-            content1: "Build the space telescope to search for Asteroids to mine.",
+            content1: localize("spaceBuildTelescopeContent1", getLanguage()),
             content2: "",
             updateAt: "" 
         },
         spaceTelescopeSearchAsteroidRow: {
-            content1: `Search and discover Asteroids - Power: ${Math.floor(getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'energyUseSearchAsteroid']) * getTimerRateRatio())}KW / s`,
+            content1: localize("spaceTelescopeSearchAsteroidContent1", getLanguage()).replace("{power}", Math.floor(getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'energyUseSearchAsteroid']) * getTimerRateRatio())),
             content2: "",
             updateAt: "" 
         },
         spaceTelescopeInvestigateStarRow: {
-            content1: `Study the Stars! - Power: ${Math.floor(getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'energyUseInvestigateStar']) * getTimerRateRatio())}KW / s`,
+            content1: localize("spaceTelescopeInvestigateStarContent1", getLanguage()).replace("{power}", Math.floor(getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'energyUseInvestigateStar']) * getTimerRateRatio())),
             content2: "",
             updateAt: "" 
         },
         spaceTelescopePhilosophyBoostResourcesAndCompoundsRow: {
-            content1: `Target beam at the Void, and pillage its riches! - Power: ${Math.floor(getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'energyUsePhilosophyBoostResourcesAndCompounds']) * getTimerRateRatio())}KW / s`,
+            content1: localize("spaceTelescopePhilosophyBoostContent1", getLanguage()).replace("{power}", Math.floor(getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'energyUsePhilosophyBoostResourcesAndCompounds']) * getTimerRateRatio())),
             content2: "",
             updateAt: "" 
         },
         spaceRocket1TravelRow: {
-            content1: `Select an Asteroid to travel there and begin mining Antimatter`,
+            content1: localize("spaceRocketTravelContent1", getLanguage()),
             content2: "",
             updateAt: "" 
         },
         spaceRocket2TravelRow: {
-            content1: `Select an Asteroid to travel there and begin mining Antimatter`,
+            content1: localize("spaceRocketTravelContent1", getLanguage()),
             content2: "",
             updateAt: "" 
         },
         spaceRocket3TravelRow: {
-            content1: `Select an Asteroid to travel there and begin mining Antimatter`,
+            content1: localize("spaceRocketTravelContent1", getLanguage()),
             content2: "",
             updateAt: "" 
         },
         spaceRocket4TravelRow: {
-            content1: `Select an Asteroid to travel there and begin mining Antimatter`,
+            content1: localize("spaceRocketTravelContent1", getLanguage()),
             content2: "",
             updateAt: "" 
         },
         spaceRocket1AutoBuyerRow: {
-            content1: `Fuel and launch your mining vessel to start mining valuable Antimatter - Power: ${Math.floor(getResourceDataObject('space', ['upgrades', 'rocket1', 'autoBuyer', 'tier1', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize("spaceRocketAutoBuyerContent1", getLanguage()).replace("{power}", Math.floor(getResourceDataObject('space', ['upgrades', 'rocket1', 'autoBuyer', 'tier1', 'energyUse']) * getTimerRateRatio())),
             content2: "",
             updateAt: ""
         },
         spaceRocket2AutoBuyerRow: {
-            content1: `Fuel and launch your mining vessel to start mining valuable Antimatter - Power: ${Math.floor(getResourceDataObject('space', ['upgrades', 'rocket2', 'autoBuyer', 'tier1', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize("spaceRocketAutoBuyerContent1", getLanguage()).replace("{power}", Math.floor(getResourceDataObject('space', ['upgrades', 'rocket2', 'autoBuyer', 'tier1', 'energyUse']) * getTimerRateRatio())),
             content2: "",
             updateAt: ""
         },
         spaceRocket3AutoBuyerRow: {
-            content1: `Fuel and launch your mining vessel to start mining valuable Antimatter - Power: ${Math.floor(getResourceDataObject('space', ['upgrades', 'rocket3', 'autoBuyer', 'tier1', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize("spaceRocketAutoBuyerContent1", getLanguage()).replace("{power}", Math.floor(getResourceDataObject('space', ['upgrades', 'rocket3', 'autoBuyer', 'tier1', 'energyUse']) * getTimerRateRatio())),
             content2: "",
             updateAt: ""
         },
         spaceRocket4AutoBuyerRow: {
-            content1: `Fuel and launch your mining vessel to start mining valuable Antimatter - Power: ${Math.floor(getResourceDataObject('space', ['upgrades', 'rocket4', 'autoBuyer', 'tier1', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize("spaceRocketAutoBuyerContent1", getLanguage()).replace("{power}", Math.floor(getResourceDataObject('space', ['upgrades', 'rocket4', 'autoBuyer', 'tier1', 'energyUse']) * getTimerRateRatio())),
             content2: "",
             updateAt: ""
         },
         spaceStarShipStellarScannerRow: {
-            content1: `Click to Scan the destination Star for any life or threats that may be present.`,
+            content1: localize("spaceStarShipStellarScannerContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         spaceStarShipDestinationReminderRow: {
-            content1: "Select a destination in the Star Map.",
+            content1: localize("spaceStarShipDestinationReminderContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         spaceFleetEnvoyBuildRow: {
-            content1: `A special buildable once craft.  When built, you can send it on a diplomacy mission to gather information about sentient alien lifeforms residing in the discovered System.`,
+            content1: localize("spaceFleetEnvoyBuildContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         spaceFleetScoutBuildRow: {
-            content1: `A cheap, light craft good in large numbers.`,
+            content1: localize("spaceFleetScoutBuildContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         spaceFleetMarauderBuildRow: {
-            content1: `A strong craft, designed for decimating enemy fleets.`,
+            content1: localize("spaceFleetMarauderBuildContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         spaceFleetLandStalkerBuildRow: {
-            content1: `If they don't fly, they fear this awesome machine!`,
+            content1: localize("spaceFleetLandStalkerBuildContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         spaceFleetNavalStraferBuildRow: {
-            content1: `Naval fleets can be devastated in a heartbeat!`,
+            content1: localize("spaceFleetNavalStraferBuildContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         rebirthRow: {
-            content1: "Rebirth to start over at the new System.  This will reset all progress, but you will keep unspent AP and any permanent buffs purchased with it",
+            content1: localize("rebirthContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
@@ -1702,147 +1702,147 @@ export function initialiseDescriptions() {
             updateAt: ""
         },
         galacticMarketItemSelectRow: {
-            content1: "Trade Resources and Compounds.  There is a commission to pay!",
+            content1: localize("galacticMarketItemSelectContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         galacticMarketSellApForCashRow: {
-            content1: "Sell AP for Cash!  Be careful as AP are not easy to come by!",
+            content1: localize("galacticMarketSellApForCashContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         galacticMarketLiquidateForAPRow: {
-            content1: "<span>Liquidate ALL Cash, Resources and Compounds, to AP.  You can only do this once per run so choose your moment wisely!  The Galactic Market Base rate affects this calculation so the value can fluctuate.  <p id=\"info_rebirthLiquidation\" class=\"info-emoji\">ℹ️</p></span>",
-            content2: `<span>Liquidate ALL Cash, Resources and Compounds, to AP.  The Galactic Market Base rate affects this calculation so the value can fluctuate.  <span class="red-disabled-text">Already done this run!</span>  <p id="info_rebirthLiquidation" class="info-emoji">ℹ️</p></span>`,
+            content1: localize("galacticMarketLiquidateForApContent1", getLanguage()),
+            content2: localize("galacticMarketLiquidateForApContent2", getLanguage()),
             updateAt: ""
         },
         galacticCasinoPurchaseCpRow: {
-            content1: "You can buy CP to use in the casino by trading Resources or Compounds.",
+            content1: localize("galacticCasinoPurchaseCpContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         galacticCasinoGame1Row: {
-            content1: "Double or Nothing. Stake CP and spin for a chance to win double your stake.",
+            content1: localize("galacticCasinoGame1Content1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         galacticCasinoGame2Row: {
-            content1: `<span>Wheel Of Fortune. Spend CP to spin the wheel and test your luck -&nbsp;<strong>${getPriceCasinoGame2()}CP</strong>  <p id="info_galacticCasinoWheelOfFortune" class="info-emoji">ℹ️</p></span>`,
+            content1: localize("galacticCasinoGame2Content1", getLanguage()).replace("{price}", getPriceCasinoGame2()),
             content2: "",
             updateAt: ""
         },
         galacticCasinoGame3Row: {
-            content1: `Higher Or Lower. Choose Higher or Lower and cash out for the prize shown at any stage -&nbsp;<strong>${getPriceCasinoGame3()}CP</strong>`,
+            content1: localize("galacticCasinoGame3Content1", getLanguage()).replace("{price}", getPriceCasinoGame3()),
             content2: "",
             updateAt: ""
         },
         galacticCasinoGame4Row: {
-            content1: `Master VoidSeer has numbers in each hand.  If they match, you win the prize you select!  Each prize has a CP prize and a number denoting how many possibilities are per hand, higher is harder!`,
+            content1: localize("galacticCasinoGame4Content1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         settingsCurrencySymbolRow: {
-            content1: "Change the currency symbol displayed in the game.",
+            content1: localize("settingsCurrencySymbolContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         settingsNotationRow: {
-            content1: "Select a notation format for displaying large numbers.",
+            content1: localize("settingsNotationContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         settingsToggleNotificationsRow: {
-            content1: "Enable or disable in-game notifications.",
+            content1: localize("settingsToggleNotificationsContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         settingsThemeRow: {
-            content1: "Choose a visual theme to change the game’s appearance.",
+            content1: localize("settingsThemeContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         diplomacyOptionsRow: {
-            content1: "If available, and Envoy built, click to try to intimidate or improve relations",
+            content1: localize("diplomacyOptionsContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         receptionStatusRow: {
-            content1: "You can communicate with civilized species, unless they are Belligerent towards you.",
+            content1: localize("receptionStatusContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         buffLittleBagOfHydrogenRow: {
-            content1: "On Rebirth, grants enough Hydrogen to immediately buy 1 Tier 1 Hydrogen Auto Buyer.",
+            content1: localize("buffLittleBagOfHydrogenContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         buffNonExhaustiveResourcesRow: {
-            content1: "On Rebirth, grants enough resources to buy 1 Tier 1 Auto Buyer for each Resource (storage will be increased if needed).",
+            content1: localize("buffNonExhaustiveResourcesContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         buffEfficientStorageRow: {
-            content1: "When you upgrade storage capacity of a Resource or Compound, it is doubled an extra time per purchase up to three times!",
+            content1: localize("buffEfficientStorageContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         buffSmartAutoBuyersRow: {
-            content1: "Enhances auto buyers, increasing their efficiency by 50% per purchase.",
+            content1: localize("buffSmartAutoBuyersContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         buffJumpstartResearchRow: {
-            content1: "All Technology worth up to 4200 Research Points is given for free on Rebirth.",
+            content1: localize("buffJumpstartResearchContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         buffOptimizedPowerGridsRow: {
-            content1: "Increases the effectiveness of power grid upgrades by 20%.",
+            content1: localize("buffOptimizedPowerGridsContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         buffCompoundAutomationRow: {
-            content1: "Enable Compound Auto Creation",
+            content1: localize("buffCompoundAutomationContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         buffRoboticResearchAutomationRow: {
-            content1: "Unlock ability to automate tech Research when requisites fulfilled.",
+            content1: localize("buffRoboticResearchAutomationContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         buffFasterAsteroidScanRow: {
-            content1: "Reduces the time taken to perform an Asteroid Search by 25% per purchase.",
+            content1: localize("buffFasterAsteroidScanContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         buffDeeperStarStudyRow: {
-            content1: "Double the range reveal of a star study each purchase.",
+            content1: localize("buffDeeperStarStudyContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         buffAsteroidScannerBoostRow: {
-            content1: "Minimum rarity of asteroids upgraded by 1 - Buy once, minimum Asteroid rarity is Uncommon etc.",
+            content1: localize("buffAsteroidScannerBoostContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         buffRocketFuelOptimizationRow: {
-            content1: "Reduces fuelling time for rockets by 50%",
+            content1: localize("buffRocketFuelOptimizationContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         buffEnhancedMiningRow: {
-            content1: "Improves antimatter extraction efficiency, by 25% per purchase.",
+            content1: localize("buffEnhancedMiningContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         buffQuantumEnginesRow: {
-            content1: "Upgrades starship engines, halving travel time per purchase.",
+            content1: localize("buffQuantumEnginesContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },
         buffAutoSpaceTelescopeRow: {
-            content1: "Enables the Auto Telescope feature, allowing automatic star studying.",
+            content1: localize("buffAutoSpaceTelescopeContent1", getLanguage()),
             content2: "",
             updateAt: ""
         }
@@ -1851,55 +1851,55 @@ export function initialiseDescriptions() {
     newsTickerContent = {
         wackyEffects: [
             {
-                body: "Stretch Me!",
+                body: localize("newsWackyWave", getLanguage()),
                 item: "wave",
-                linkWord: "Stretch Me!",
+                linkWord: localize("newsWackyWave", getLanguage()),
                 linkWord2: "",
                 class: "",
                 id: 1000
             },
             {
-                body: "🕺💃 D.I.S.C.O. 🕺💃",
+                body: localize("newsWackyDisco", getLanguage()),
                 item: "disco",
-                linkWord: "🕺💃 D.I.S.C.O. 🕺💃",
+                linkWord: localize("newsWackyDisco", getLanguage()),
                 linkWord2: "",
                 class: "",
                 id: 1001
             },
             {
-                body: "Boing!",
+                body: localize("newsWackyBounce", getLanguage()),
                 item: "bounce",
-                linkWord: "Boing!",
+                linkWord: localize("newsWackyBounce", getLanguage()),
                 linkWord2: "",
                 class: "",
                 id: 1002
             },
             {
-                body: "There Or Not?",
+                body: localize("newsWackyFade", getLanguage()),
                 item: "fade",
-                linkWord: "There Or Not?",
+                linkWord: localize("newsWackyFade", getLanguage()),
                 linkWord2: "",
                 class: "",
                 id: 1003
             },
             {
-                body: "Bzzzzzzz!",
+                body: localize("newsWackyGlitch", getLanguage()),
                 item: "glitch",
-                linkWord: "Bzzzzzzz!",
+                linkWord: localize("newsWackyGlitch", getLanguage()),
                 linkWord2: "",
                 class: "",
                 id: 1004
             },
             {
-                body: "Wibble Wobble!",
+                body: localize("newsWackyWobble", getLanguage()),
                 item: "wobble",
-                linkWord: "Wibble Wobble!",
+                linkWord: localize("newsWackyWobble", getLanguage()),
                 linkWord2: "",
                 class: "",
                 id: 1005
             },
             {
-                body: "Dont Click This: Boo!",
+                body: localize("newsWackyBoo", getLanguage()),
                 item: "boo",
                 linkWord: "Boo!",
                 linkWord2: "",
@@ -1907,7 +1907,7 @@ export function initialiseDescriptions() {
                 id: 1006
             },
             {
-                body: "Wanna Give FeedBack? Do you like Cosmic Forge? 👍🏽👍🏽👍🏽 Or is it more like 👎🏽👎🏽👎🏽",
+                body: localize("newsWackyFeedback", getLanguage()),
                 item: "feedback",
                 linkWord: "👍🏽👍🏽👍🏽",
                 linkWord2: "👎🏽👎🏽👎🏽",
@@ -1918,299 +1918,299 @@ export function initialiseDescriptions() {
         oneOff: [
             {
                 id : 3000,
-                body: "Double storage capacity of all unlocked resources here!",
+                body: localize("newsOneOffStorageResources", getLanguage()).replace("{here}", localize("hereLinkWord", getLanguage())),
                 type: ["storageMultiplier", 2],
                 condition: "visible",
                 category: ["resources"],
                 item: "all",
-                linkWord: "here"
+                linkWord: localize("hereLinkWord", getLanguage()),
             },
             {
                 id : 3001,
-                body: "Double storage capacity of all unlocked compounds here!",
+                body: localize("newsOneOffStorageCompounds", getLanguage()).replace("{here}", localize("hereLinkWord", getLanguage())),
                 type: ["storageMultiplier", 2],
                 condition: "visible",
                 category: ["compounds"],
                 item: "all",
-                linkWord: "here"
+                linkWord: localize("hereLinkWord", getLanguage()),
             },
             {
                 id : 3002,
-                body: "Double storage capacity of all unlocked resources and compounds here!",
+                body: localize("newsOneOffStorageAll", getLanguage()).replace("{here}", localize("hereLinkWord", getLanguage())),
                 type: ["storageMultiplier", 2],
                 condition: "visible",
                 category: ["resources", "compounds"],
                 item: "all",
-                linkWord: "here"
+                linkWord: localize("hereLinkWord", getLanguage()),
             },
             {
                 id : 3003,
-                body: "Double storage capacity of tier 1 batteries here!",
+                body: localize("newsOneOffStorageBattery1", getLanguage()).replace("{here}", localize("hereLinkWord", getLanguage())),
                 type: ["storageMultiplier", 2],
                 condition: "",
                 category: ["buildings", "batteries"],
                 item: ["energy", "battery1"],
-                linkWord: "here"
+                linkWord: localize("hereLinkWord", getLanguage()),
             },
             {   
                 id : 3004,
-                body: "Double storage capacity of tier 2 batteries here!",
+                body: localize("newsOneOffStorageBattery2", getLanguage()).replace("{here}", localize("hereLinkWord", getLanguage())),
                 type: ["storageMultiplier", 2],
                 condition: "",
                 category: ["buildings", "batteries"],
                 item: ["energy", "battery2"],
-                linkWord: "here"
+                linkWord: localize("hereLinkWord", getLanguage()),
             },
             {
                 id : 3005,
-                body: "Double storage capacity of tier 3 batteries here!",
+                body: localize("newsOneOffStorageBattery3", getLanguage()).replace("{here}", localize("hereLinkWord", getLanguage())),
                 type: ["storageMultiplier", 2],
                 condition: "",
                 category: ["buildings", "batteries"],
                 item: ["energy", "battery3"],
-                linkWord: "here"
+                linkWord: localize("hereLinkWord", getLanguage()),
             },
             {
                 id : 3006,
-                body: "Double output of all basic Power Plants here!",
+                body: localize("newsOneOffOutputPowerPlant1", getLanguage()).replace("{here}", localize("hereLinkWord", getLanguage())),
                 type: ["rateMultiplier", 2],
                 condition: "",
                 category: ["buildings"],
                 item: ["energy", "powerPlant1"],
-                linkWord: "here"
+                linkWord: localize("hereLinkWord", getLanguage()),
             },
             {
                 id : 3007,
-                body: "Double output of all Solar Power Plants here!",
+                body: localize("newsOneOffOutputPowerPlant2", getLanguage()).replace("{here}", localize("hereLinkWord", getLanguage())),
                 type: ["rateMultiplier", 2],
                 condition: "",
                 category: ["buildings"],
                 item: ["energy", "powerPlant2"],
-                linkWord: "here"
+                linkWord: localize("hereLinkWord", getLanguage()),
             },
             {
                 id : 3008,
-                body: "Double output of all Advanced Power Plants here!",
+                body: localize("newsOneOffOutputPowerPlant3", getLanguage()).replace("{here}", localize("hereLinkWord", getLanguage())),
                 type: ["rateMultiplier", 2],
                 condition: "",
                 category: ["buildings"],
                 item: ["energy", "powerPlant3"],
-                linkWord: "here"
+                linkWord: localize("hereLinkWord", getLanguage()),
             },            
             {
                 id : 3009,
-                body: "Double output of Tier 1 Auto Buyers for all unlocked resources here!",
+                body: localize("newsOneOffOutputAutoBuyerResources", getLanguage()).replace("{here}", localize("hereLinkWord", getLanguage())),
                 type: ["rateMultiplier", 2],
                 condition: "",
                 category: ["resources"],
                 item: ["all", "tier1"],
-                linkWord: "here"
+                linkWord: localize("hereLinkWord", getLanguage()),
             },
             {
                 id : 3010,
-                body: "Double output of Tier 1 Auto Buyers for all unlocked compounds here!",
+                body: localize("newsOneOffOutputAutoBuyerCompounds", getLanguage()),
                 type: ["rateMultiplier", 2],
                 condition: "",
                 category: ["compounds"],
                 item: ["all", "tier1"],
-                linkWord: "here"
+                linkWord: localize("hereLinkWord", getLanguage()),
             },
             {
                 id : 3011,
-                body: "Double output of Tier 1 Auto Buyers for all unlocked resources and compounds here!",
+                body: localize("newsOneOffOutputAutoBuyerAll", getLanguage()),
                 type: ["rateMultiplier", 2],
                 condition: "",
                 category: ["resources", "compounds"],
                 item: ["all", "tier1"],
-                linkWord: "here"
+                linkWord: localize("hereLinkWord", getLanguage()),
             },
             {
                 id: 3012,
-                body: "Get 100 free Antimatter here!",
+                body: localize("newsOneOffFreeAntimatter", getLanguage()),
                 type: ["adder", 100],
                 condition: "visible",
                 category: "antimatter",
                 item: "quantity",
-                linkWord: "here"
+                linkWord: localize("hereLinkWord", getLanguage()),
             },            
             {
                 id: 3013,
-                body: `Get ${getPlayerPhilosophy() === 'voidborn' && getStatRun() > 1 ? (1 + calculateAndAddExtraAPFromPhilosophyRepeatable(getRepeatableTechMultipliers('4'))) : 1} free AP here!`,
+                body: localize("newsOneOffFreeAP", getLanguage()).replace("{ap}", getPlayerPhilosophy() === 'voidborn' && getStatRun() > 1 ? (1 + calculateAndAddExtraAPFromPhilosophyRepeatable(getRepeatableTechMultipliers('4'))) : 1),
                 type: ["adder", getPlayerPhilosophy() === 'voidborn' && getStatRun() > 1 ? (1 + calculateAndAddExtraAPFromPhilosophyRepeatable(getRepeatableTechMultipliers('4'))) : 1],
                 condition: "visible",
                 category: "ascendencyPoints",
                 item: "quantity",
-                linkWord: "here"
+                linkWord: localize("hereLinkWord", getLanguage()),
             }                
         ],
         prize: [
             {
-                body: "Click here to get xxx free Hydrogen!",
+                body: localize("newsPrizeHydrogen", getLanguage()).replace("{amount}", "xxx"),
                 type: "giftResource",
                 condition: "visible",
                 category: "resources",
                 item: "hydrogen",
-                linkWord: "here",
+                linkWord: localize("hereLinkWord", getLanguage()),
                 id: 2000
             },
             {
-                body: "Click here to get xxx free Helium!",
+                body: localize("newsPrizeHelium", getLanguage()).replace("{amount}", "xxx"),
                 type: "giftResource",
                 condition: "visible",
                 category: "resources",
                 item: "helium",
-                linkWord: "here",
+                linkWord: localize("hereLinkWord", getLanguage()),
                 id: 2001
             },
             {
-                body: "Click here to get xxx free Carbon!",
+                body: localize("newsPrizeCarbon", getLanguage()).replace("{amount}", "xxx"),
                 type: "giftResource",
                 condition: "visible",
                 category: "resources",
                 item: "carbon",
-                linkWord: "here",
+                linkWord: localize("hereLinkWord", getLanguage()),
                 id: 2002
             },
             {
-                body: "Click here to get xxx free Neon!",
+                body: localize("newsPrizeNeon", getLanguage()).replace("{amount}", "xxx"),
                 type: "giftResource",
                 condition: "visible",
                 category: "resources",
                 item: "neon",
-                linkWord: "here",
+                linkWord: localize("hereLinkWord", getLanguage()),
                 id: 2003
             },
             {
-                body: "Click here to get xxx free Oxygen!",
+                body: localize("newsPrizeOxygen", getLanguage()).replace("{amount}", "xxx"),
                 type: "giftResource",
                 condition: "visible",
                 category: "resources",
                 item: "oxygen",
-                linkWord: "here",
+                linkWord: localize("hereLinkWord", getLanguage()),
                 id: 2004
             },
             {
-                body: "Click here to get xxx free Sodium!",
+                body: localize("newsPrizeSodium", getLanguage()).replace("{amount}", "xxx"),
                 type: "giftResource",
                 condition: "visible",
                 category: "resources",
                 item: "sodium",
-                linkWord: "here",
+                linkWord: localize("hereLinkWord", getLanguage()),
                 id: 2005
             },
             {
-                body: "Click here to get xxx free Silicon!",
+                body: localize("newsPrizeSilicon", getLanguage()).replace("{amount}", "xxx"),
                 type: "giftResource",
                 condition: "visible",
                 category: "resources",
                 item: "silicon",
-                linkWord: "here",
+                linkWord: localize("hereLinkWord", getLanguage()),
                 id: 2006
             },
             {
-                body: "Click here to get xxx free Iron!",
+                body: localize("newsPrizeIron", getLanguage()).replace("{amount}", "xxx"),
                 type: "giftResource",
                 condition: "visible",
                 category: "resources",
                 item: "iron",
-                linkWord: "here",
+                linkWord: localize("hereLinkWord", getLanguage()),
                 id: 2007
             },
             {
-                body: "Click here to get xxx free Diesel!",
+                body: localize("newsPrizeDiesel", getLanguage()).replace("{amount}", "xxx"),
                 type: "giftResource",
                 condition: "visible",
                 category: "compounds",
                 item: "diesel",
-                linkWord: "here",
+                linkWord: localize("hereLinkWord", getLanguage()),
                 id: 2008
             },
             {
-                body: "Click here to get xxx free Glass!",
+                body: localize("newsPrizeGlass", getLanguage()).replace("{amount}", "xxx"),
                 type: "giftResource",
                 condition: "visible",
                 category: "compounds",
                 item: "glass",
-                linkWord: "here",
+                linkWord: localize("hereLinkWord", getLanguage()),
                 id: 2009
             },
             {
-                body: "Click here to get xxx free Steel!",
+                body: localize("newsPrizeSteel", getLanguage()).replace("{amount}", "xxx"),
                 type: "giftResource",
                 condition: "visible",
                 category: "compounds",
                 item: "steel",
-                linkWord: "here",
+                linkWord: localize("hereLinkWord", getLanguage()),
                 id: 2010
             },
             {
-                body: "Click here to get xxx free Concrete!",
+                body: localize("newsPrizeConcrete", getLanguage()).replace("{amount}", "xxx"),
                 type: "giftResource",
                 condition: "visible",
                 category: "compounds",
                 item: "concrete",
-                linkWord: "here",
+                linkWord: localize("hereLinkWord", getLanguage()),
                 id: 2011
             },
             {
-                body: "Click here to get xxx free Titanium!",
+                body: localize("newsPrizeTitanium", getLanguage()).replace("{amount}", "xxx"),
                 type: "giftResource",
                 condition: "visible",
                 category: "compounds",
                 item: "titanium",
-                linkWord: "here",
+                linkWord: localize("hereLinkWord", getLanguage()),
                 id: 2012
             },
             {
-                body: "Click here to get xxx free Water!",
+                body: localize("newsPrizeWater", getLanguage()).replace("{amount}", "xxx"),
                 type: "giftResource",
                 condition: "visible",
                 category: "compounds",
                 item: "water",
-                linkWord: "here",
+                linkWord: localize("hereLinkWord", getLanguage()),
                 id: 2013
             }
         ],
         manuscriptClues: [
             {
                 id: 4000,
-                template: "Scholars whisper that the {STAR} System hums with ancient texts. A closer investigation may reveal their secrets."
+                template: localize("newsManuscriptScholars", getLanguage())
             },
             {
                 id: 4001,
-                template: "Astrometric echoes from {STAR} refuse to align with known models—a thorough scan might uncover what's hidden there."
+                template: localize("newsManuscriptAstrometric", getLanguage())
             },
             {
                 id: 4002,
-                template: "Fragments of a manuscript allege that {STAR} hides directions to a MegaStructure. It would be wise to investigate this claim."
+                template: localize("newsManuscriptFragments", getLanguage())
             },
             {
                 id: 4003,
-                template: "Explorer logs mention faint harmonic resonances pulsing from deep within {STAR}. Such anomalies often precede great discoveries."
+                template: localize("newsManuscriptExplorer", getLanguage())
             },
             {
                 id: 4004,
-                template: "Quantum cartographers argue the sky near {STAR} folds in on itself every few cycles. This phenomenon demands further study."
+                template: localize("newsManuscriptQuantum", getLanguage())
             },
             {
                 id: 4005,
-                template: "An intercepted Guardian dispatch labels {STAR} a 'system of architectural interest'. Their attention suggests something valuable lies within."
+                template: localize("newsManuscriptGuardian", getLanguage())
             },
             {
                 id: 4006,
-                template: "Pilgrims etch warnings about luminous storms that only manifest over {STAR}. Such rare phenomena often guard great treasures."
+                template: localize("newsManuscriptPilgrims", getLanguage())
             },
             {
                 id: 4007,
-                template: "A half-burned parchment lists {STAR} as an ancient meeting place for MegaStructure architects. Their legacy may still linger there."
+                template: localize("newsManuscriptParchment", getLanguage())
             },
             {
                 id: 4008,
-                template: "Astronomers swear {STAR} emits coordinates that describe a MegaStructure System. Deciphering these signals could lead to a major breakthrough."
+                template: localize("newsManuscriptAstronomers", getLanguage())
             },
             {
                 id: 4009,
-                template: "Ancient Manuscripts reported in the {STAR} system. Their contents could prove invaluable to the right explorer."
+                template: localize("newsManuscriptReported", getLanguage())
             }
         ],
         noPrize: [   //push index as id

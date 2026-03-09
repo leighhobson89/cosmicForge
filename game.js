@@ -414,6 +414,7 @@ import {
     setGalacticCasinoUnlocked,
     addToAllTimeRipTelemetryDataEarned,
     getFTypeAntimatterMiningBoostMultiplier,
+    getDebugNewsTickerIntervalMs,
 } from "./constantsAndGlobalVars.js";
 
 import {
@@ -11243,8 +11244,9 @@ function getRandomNewsTickerInterval(min, max) {
 
 export function startNewsTickerTimer() {
     if (getNewsTickerSetting()) {
-        const randomDuration = getRandomNewsTickerInterval(20, 35);
-
+        const debugInterval = getDebugNewsTickerIntervalMs();
+        const randomDuration = debugInterval || getRandomNewsTickerInterval(20, 35);
+        
         if (timerManager.getTimer('newsTicker')) {
             timerManager.removeTimer('newsTicker');
         }

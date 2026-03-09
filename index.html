@@ -1114,6 +1114,27 @@
                     <button id="playEndGameCinematicButton" class="option-button">PLAY</button>
                 </div>
             </div>
+            <div class="debug-row timewarp-row">
+                <div class="debug-label">News Ticker Category:</div>
+                <div class="debug-inputs timewarp-inputs">
+                    <select id="debugNewsTickerCategorySelect" class="debug-select">
+                        <option value="" selected>Random</option>
+                        <option value="oneOff">Always a One Off Prize</option>
+                        <option value="prize">Always a Prize</option>
+                        <option value="wackyEffects">Always Wacky</option>
+                        <option value="feedback">Always Feedback</option>
+                        <option value="manuscriptClue">Always Manuscript Clue</option>
+                    </select>
+                    <select id="debugNewsTickerIntervalSelect" class="debug-select">
+                        <option value="" selected>Default</option>
+                        <option value="20000">20000ms</option>
+                        <option value="10000">10000ms</option>
+                    </select>
+                </div>
+                <div class="timewarp-actions">
+                    <button id="setNewsTickerDebugButton" class="option-button">Set News</button>
+                </div>
+            </div>
         </div>
     </div>
 

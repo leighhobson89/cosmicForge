@@ -222,6 +222,10 @@ import {
     getLastFocusOfflineGainsAppliedAt,
     getGalacticPointsSpent,
     recordRandomEventTriggered,
+    getDebugNewsTickerCategory,
+    setDebugNewsTickerCategory,
+    getDebugNewsTickerIntervalMs,
+    setDebugNewsTickerIntervalMs,
 } from './constantsAndGlobalVars.js';
 import {
     getResourceDataObject,
@@ -10208,8 +10212,10 @@ export async function showNewsTickerMessage(newsTickerContainer) {
     const randomValue = Math.random();
     let category;
 
-
-    if (randomValue < 0.03) {
+    const debugCategory = getDebugNewsTickerCategory();
+    if (debugCategory) {
+        category = debugCategory;
+    } else if (randomValue < 0.03) {
         category = "oneOff";
     } else if (randomValue < 0.13) {
         category = "prize";
@@ -10247,8 +10253,30 @@ export async function showNewsTickerMessage(newsTickerContainer) {
 
         ({ message } = manuscriptClueSelection);
     } else {
-        randomIndex = Math.floor(Math.random() * newsTickerContainer[category].length);
-        message = newsTickerContainer[category][randomIndex];
+        if (category === 'feedback') {
+            const feedbackEntry = newsTickerContainer.wackyEffects?.find(entry => 
+                entry.body && entry.body.includes('Wanna Give FeedBack')
+            );
+            if (feedbackEntry) {
+                message = feedbackEntry;
+                category = 'wackyEffects';
+            } else {
+                showNewsTickerMessage(newsTickerContainer);
+                return;
+            }
+        } else if (category === 'manuscriptClue') {
+            manuscriptClueSelection = getEligibleManuscriptClue(newsTickerContainer);
+            if (manuscriptClueSelection) {
+                ({ message } = manuscriptClueSelection);
+                category = 'manuscriptClues';
+            } else {
+                showNewsTickerMessage(newsTickerContainer);
+                return;
+            }
+        } else {
+            randomIndex = Math.floor(Math.random() * newsTickerContainer[category].length);
+            message = newsTickerContainer[category][randomIndex];
+        }
     }
 
     if (category === 'prize' || category === 'oneOff' || category === 'wackyEffects') {
@@ -14853,6 +14881,20 @@ const playEndGameCinematicButton = document.getElementById('playEndGameCinematic
 playEndGameCinematicButton?.addEventListener('click', () => {
     playWinCinematic2();
     showNotification('Playing End Game Cinematic!', 'info', 3000, 'debug');
+});
+
+const setNewsTickerDebugButton = document.getElementById('setNewsTickerDebugButton');
+const debugNewsTickerCategorySelect = document.getElementById('debugNewsTickerCategorySelect');
+const debugNewsTickerIntervalSelect = document.getElementById('debugNewsTickerIntervalSelect');
+
+setNewsTickerDebugButton?.addEventListener('click', () => {
+    const categoryValue = debugNewsTickerCategorySelect?.value || null;
+    const intervalValue = debugNewsTickerIntervalSelect?.value || null;
+    
+    setDebugNewsTickerCategory(categoryValue);
+    setDebugNewsTickerIntervalMs(intervalValue ? Number(intervalValue) : null);
+    
+    showNotification(`News Ticker set: Category=${categoryValue || 'Random'}, Interval=${intervalValue || 'Default'}`, 'info', 4000, 'debug');
 });
 
 function toggleVariableDebuggerWindow() {

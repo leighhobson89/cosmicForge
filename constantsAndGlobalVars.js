@@ -15,6 +15,8 @@ import { trackAnalyticsEvent } from './analytics.js';
 //DEBUG
 export let debugFlag = false;
 export let debugOptionFlag = false;
+export let debugNewsTickerCategory = null;
+export let debugNewsTickerIntervalMs = null;
 export let stateLoading = false;
 export const debugVisibilityArray = ['settingsNotificationTestRow'];
 let wheelForceSpecial = false;
@@ -2523,6 +2525,30 @@ export function getDebugHoldEnterToGainEnabled() {
 
 export function setDebugHoldEnterToGainEnabled(value) {
     debugHoldEnterToGainEnabled = Boolean(value);
+}
+
+export function getDebugNewsTickerCategory() {
+    return debugNewsTickerCategory;
+}
+
+export function setDebugNewsTickerCategory(value) {
+    const validCategories = ['oneOff', 'prize', 'wackyEffects', 'feedback', 'manuscriptClue', null];
+    if (validCategories.includes(value)) {
+        debugNewsTickerCategory = value;
+    }
+}
+
+export function getDebugNewsTickerIntervalMs() {
+    return debugNewsTickerIntervalMs;
+}
+
+export function setDebugNewsTickerIntervalMs(value) {
+    const parsed = Number(value);
+    if (Number.isFinite(parsed) && parsed >= 1000) {
+        debugNewsTickerIntervalMs = parsed;
+    } else {
+        debugNewsTickerIntervalMs = null;
+    }
 }
 
 export function getIncreaseStorageFactor() {
