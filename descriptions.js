@@ -1,7 +1,8 @@
-import { getGameActiveCountTime, getTimerRateRatio, getSaveName, getRocketUserName, getDestinationStar, getCurrencySymbol, getPlayerPhilosophy, getRepeatableTechMultipliers, getStatRun, getCurrentRunIsMegaStructureRun, getPriceCasinoGame2, getPriceCasinoGame3 } from "./constantsAndGlobalVars.js";
+import { getGameActiveCountTime, getTimerRateRatio, getSaveName, getRocketUserName, getDestinationStar, getCurrencySymbol, getPlayerPhilosophy, getRepeatableTechMultipliers, getStatRun, getCurrentRunIsMegaStructureRun, getPriceCasinoGame2, getPriceCasinoGame3, getLanguage} from "./constantsAndGlobalVars.js";
 import { calculateAndAddExtraAPFromPhilosophyRepeatable, formatNumber } from "./game.js";
 import { getAchievementDataObject, getResourceDataObject, getCosmicRipGalacticPoints } from "./resourceDataObject.js";
 import { capitaliseWordsWithRomanNumerals } from "./utilityFunctions.js";
+import { localize } from "./localization.js";
 
 export let infoTooltipDescriptions;
 export let gameIntroHeader;
@@ -185,58 +186,58 @@ export let cosmicRipStatusMessages;
 export let randomEventTriggerDescriptions;
 
 export function initialiseDescriptions() {
-    gameIntroHeader = 'Welcome to the Cosmic Forge!';
+    gameIntroHeader = localize('gameIntroHeader', getLanguage());
     gameSaveNameCollect = `
-        Welcome Pioneer! Please enter your code name!<br><br>
+        ${localize('gameSaveNameCollect', getLanguage())}<br><br>
         <textarea 
             id="pioneerCodeName"  
             class="save-name save-name-height save-name-modal-width">${getSaveName()}</textarea><br><br>You can load a previous game by changing this name to a previous one.
     `;
-    gameIntroText = 'You wake to dust. Your knowledge knows the path of stars.<br>Start with Hydrogen—spark fusion to forge heavier elements.<br>Build machines that compound creation into momentum.<br>Reach for the stars. Claim systems. Gather ascendency.<br><br>Good luck in your Forging!<br>';
-    onboardingModalHeader = 'NEED A HAND?';
-    onboardingModalText = `Looks like you're starting a new journey.<br>Would you like a short tutorial onboarding to help you get started?<br>You can continue normally either way.<br><br><span class="green-ready-text">This is the only opportunity to access the Onboarding.</span><br><br><span class="green-ready-text">There is an Achievement for completing the Onboarding that will be Lost Forever if you don't complete it!</span>`;
-    launchStarShipWarningHeader = 'WARNING: POINT OF NO RETURN!';
-    launchStarShipWarningText = 'Once your Starship is launched you may not retrieve it this run.<br>So please revise the Star Data section and ensure you really want to select this destination,<br>then please click OK to confirm, or CANCEL to check.';
-    enterWarModeModalHeader = `CONQUEST!`;
-    enterwarModeModalBackOutText = `You are disengaging diplomacy.<br><br>This means you can no longer engage in diplomacy,<br>and must undertake the conquest when ready to try and conquer the new System.`;
-    enterwarModeModalNoBackOutText = `You are now going to start the conquest.<br>Without intelligence you need to prepare your fleet thoroughly, good luck!`;
-    enterWarModeInsultedText = `Your attempts have backfired!<br><br>The enemy is insulted by your bad manners and has cut off<br>all diplomatic ties!`;  
-    enterWarModeSurrenderText = `The enemy has surrendered!<br><br>They recognize your superior strength and have chosen to yield without a fight.<br>You now have full control over the System, and no battle is necessary.`;  
-    enterWarModeNotVassalizedText = `Despite your attempts to vassalize and your good relation,<br>they just prefer being independent, so violence will be the only way to conquer the System!`;
-    enterWarModeScaredText = `The enemy is terrified of your power!<br><br>Diplomacy is closed but their fleet strength is halved due to deserters!`;
-    enterWarModeModalLaughAtProspect = `The enemy laughs at the prospect of your attempts to manipulate them!<br>Their impression of you has fallen!`;
-    enterWarModeModalLaughAndEnterWar = `The enemy laughs at the prospect of your attempts to bully them!<br>They are now going to punish you!<br>War!`;
-    enterWarModeModalImproveToReceptive = `The pitter patter was successful, the enemy is now receptive towards you<br>and their impression improved!`;
-    enterWarModeModalNeutral = `After chatting the enemy remains neutral towards you.`;
-    enterWarModeModalReserved = `The enemy still has a low impression of you and are reserved in their attitude.`;
-    enterWarModeModalPatience = `The enemy negotiator is tired of chatter and has retired to consider their position.`;
-    modalBattleHeaderText = `OUTCOME OF CONQUEST:`;
-    modalBattleWonText = `You have won the battle!<br><br><span class="green-ready-text">Gained X AP!</span>`;
-    modalBattleLostText = `You have lost the battle!<br><br>Your fleet has been destroyed, and must be rebuilt to try again to conquer the System!`;
-    modalBattleNoSentientLifeHeader = `SETTLE NEW SYSTEM!`;
-    modalBattleNoSentientLifeText = `There is no sentient life in this System, so you can settle right away!<br><br><span class="green-ready-text">Gained X AP!</span>`;
-    modalRebirthHeader = `WARNING: REBIRTH!`;
-    modalRebirthText = `You are about to reset your progress and start again at the new System.<br><br>Are you sure you want to do this?<br><br><span class="green-ready-text">You will carry over X AP!</span>`;
-    modalGalacticTabUnlockHeader = `Star System reached!`;
-    modalGalacticTabUnlockText = `As you approach the new System, your scanners detect a faint communication signal...<br><br>"You have shown great innovation, you may now access our Galactic Trading Platform"<br><br><span class="green-ready-text">Galactic Tab Unlocked!</span>`;
-    modalOStarReachedHeader = `TYPE O STAR REACHED`;
-    modalOStarReachedText = `Your Starship has reached orbit of the <span class="o-star-text">X</span> System.<br><br>The star burns with a ferocity you have only ever seen in theory.<br>An O-type sun: rare, impossibly bright, and violently alive.<br><br>The crew falls silent.<br>Even the instruments hesitate before agreeing on the readings.`;
-    modalOTypeStarTechAcquiredHeader = 'O-TYPE STAR TECHNOLOGY ACQUIRED';
-    modalOTypeStarTechAcquiredText = `The conquered enemies of <span class="o-star-text">{STAR}</span> had a special technology that we have obtained!<br><br>It has caused <span class="green-ready-text">{DISPLAY_NAME}</span> to become <span class="green-ready-text">{STRENGTH_BOOST}x</span> more powerful!`;
-    modalFeedbackHeaderText = `SEND FEEDBACK`;
-    modalFeedbackContentTextGood = `Glad to hear it!<br><br>Let us know what you love and if there’s anything you’d like to see more of.<br>Your feedback helps us improve Cosmic Forge!`;
-    modalFeedbackContentTextBad = `Oh no!<br><br>Please let us know what’s not working for you or what you'd like changed.<br>We read everything and really value your thoughts!`;    
-    modalFeedbackThanksHeaderText = `THANK YOU FOR YOUR FEEDBACK!`;
-    modalFeedbackContentThanks = `Your feedback has been received.<br><br>It really helps shape the future of Cosmic Forge!<br>Feel free to check out our Discord<br>(There is an invite in the Contact section of the Settings Tab)`;
-    modalPlayerLeaderPhilosophyHeaderText = `PONDERING THE HEAVENS`;
-    modalPlayerLeaderPhilosophyContentText = `While gazing at the heavens in your Space Telescope, you ponder<br>what the future holds and who you really are.  You decided that<br>as per your forefathers, you have always been a...<br><br>THIS CHOICE AFFECTS YOUR PLAYTHROUGH SO CHOOSE CAREFULLY!</span>`;
-    modalPlayerLeaderIntroHeaderText = `THE AWAKENING`;
-    modalPlayerLeaderIntroContentText1 = `You are a Constructor.<br>Blueprints flow through your veins.<br><span class="green-ready-text">All building costs can be reduced after the first Rebirth, forever.</span><br>Build the future, one module at a time.`;
-    modalPlayerLeaderIntroContentText2 = `You are a Supremacist.<br>Strength is your law, dominance your goal.<br><span class="green-ready-text">Fleet units are cheaper and stronger after the first Rebirth, forever.</span><br><span class="green-ready-text">Enemies are more afraid.</span><br>They will bend or be broken.`;
-    modalPlayerLeaderIntroContentText3 = `You are Voidborn.<br>You were born among the stars, and the void whispers to you.<br><span class="green-ready-text">Star studies are faster and reveal more after the first Rebirth, forever.</span><br><span class="green-ready-text">Asteroids are better.</span><br><span class="green-ready-text">Diplomacy is more favorable.</span><br>The darkness is your ally.`;
-    modalPlayerLeaderIntroContentText4 = `You are an Expansionist.<br>The horizon always calls.<br><span class="green-ready-text">Starships and Rockets much cheaper to build, after the first Rebirth, forever.</span><br><span class="green-ready-text">Rocket and Starships are faster.</span><br>Spread across the galaxy like wildfire.`;
-    hardResetWarningHeader = `DANGER: HARD RESET!`;
-    hardResetWarningText = `You are about to hard reset your game!<br><br>This will erase all progress and achievements!<br><br>Be very careful and only confirm if you are absolutely sure this<br>is what you want, otherwise CANCEL!`;
+    gameIntroText = localize('gameIntroText', getLanguage());
+    onboardingModalHeader = localize('onboardingModalHeader', getLanguage());
+    onboardingModalText = localize('onboardingModalText', getLanguage());
+    launchStarShipWarningHeader = localize('launchStarShipWarningHeader', getLanguage());
+    launchStarShipWarningText = localize('launchStarShipWarningText', getLanguage());
+    enterWarModeModalHeader = localize('enterWarModeModalHeader', getLanguage());
+    enterwarModeModalBackOutText = localize('enterwarModeModalBackOutText', getLanguage());
+    enterwarModeModalNoBackOutText = localize('enterwarModeModalNoBackOutText', getLanguage());
+    enterWarModeInsultedText = localize('enterWarModeInsultedText', getLanguage());
+    enterWarModeSurrenderText = localize('enterWarModeSurrenderText', getLanguage());
+    enterWarModeNotVassalizedText = localize('enterWarModeNotVassalizedText', getLanguage());
+    enterWarModeScaredText = localize('enterWarModeScaredText', getLanguage());
+    enterWarModeModalLaughAtProspect = localize('enterWarModeModalLaughAtProspect', getLanguage());
+    enterWarModeModalLaughAndEnterWar = localize('enterWarModeModalLaughAndEnterWar', getLanguage());
+    enterWarModeModalImproveToReceptive = localize('enterWarModeModalImproveToReceptive', getLanguage());
+    enterWarModeModalNeutral = localize('enterWarModeModalNeutral', getLanguage());
+    enterWarModeModalReserved = localize('enterWarModeModalReserved', getLanguage());
+    enterWarModeModalPatience = localize('enterWarModeModalPatience', getLanguage());
+    modalBattleHeaderText = localize('modalBattleHeaderText', getLanguage());
+    modalBattleWonText = localize('modalBattleWonText', getLanguage());
+    modalBattleLostText = localize('modalBattleLostText', getLanguage());
+    modalBattleNoSentientLifeHeader = localize('modalBattleNoSentientLifeHeader', getLanguage());
+    modalBattleNoSentientLifeText = localize('modalBattleNoSentientLifeText', getLanguage());
+    modalRebirthHeader = localize('modalRebirthHeader', getLanguage());
+    modalRebirthText = localize('modalRebirthText', getLanguage());
+    modalGalacticTabUnlockHeader = localize('modalGalacticTabUnlockHeader', getLanguage());
+    modalGalacticTabUnlockText = localize('modalGalacticTabUnlockText', getLanguage());
+    modalOStarReachedHeader = localize('modalOStarReachedHeader', getLanguage());
+    modalOStarReachedText = localize('modalOStarReachedText', getLanguage());
+    modalOTypeStarTechAcquiredHeader = localize('modalOTypeStarTechAcquiredHeader', getLanguage());
+    modalOTypeStarTechAcquiredText = localize('modalOTypeStarTechAcquiredText', getLanguage());
+    modalFeedbackHeaderText = localize('modalFeedbackHeaderText', getLanguage());
+    modalFeedbackContentTextGood = localize('modalFeedbackContentTextGood', getLanguage());
+    modalFeedbackContentTextBad = localize('modalFeedbackContentTextBad', getLanguage());
+    modalFeedbackThanksHeaderText = localize('modalFeedbackThanksHeaderText', getLanguage());
+    modalFeedbackContentThanks = localize('modalFeedbackContentThanks', getLanguage());
+    modalPlayerLeaderPhilosophyHeaderText = localize('modalPlayerLeaderPhilosophyHeaderText', getLanguage());
+    modalPlayerLeaderPhilosophyContentText = localize('modalPlayerLeaderPhilosophyContentText', getLanguage());
+    modalPlayerLeaderIntroHeaderText = localize('modalPlayerLeaderIntroHeaderText', getLanguage());
+    modalPlayerLeaderIntroContentText1 = localize('modalPlayerLeaderIntroContentText1', getLanguage());
+    modalPlayerLeaderIntroContentText2 = localize('modalPlayerLeaderIntroContentText2', getLanguage());
+    modalPlayerLeaderIntroContentText3 = localize('modalPlayerLeaderIntroContentText3', getLanguage());
+    modalPlayerLeaderIntroContentText4 = localize('modalPlayerLeaderIntroContentText4', getLanguage());
+    hardResetWarningHeader = localize('hardResetWarningHeader', getLanguage());
+    hardResetWarningText = localize('hardResetWarningText', getLanguage());
     modalCompoundsTabUnlockHeader = `COMPOUNDS UNLOCKED!`;
     modalCompoundsTabUnlockText = `Your Scientists have experimented with combining Hydrogen and Carbon Resources,<br>and have discovered Diesel!  With this knowledge, they are sure that<br>more of these Compounds will follow.<br><br><span class="green-ready-text">Compounds Tab Unlocked!</span>`;
     modalSpaceMiningTabUnlockHeader = `SPACE MINING UNLOCKED!`;
@@ -343,163 +344,146 @@ export function initialiseDescriptions() {
     modalEventMinerBrokeDownText = `A critical failure has halted one of your mining rockets.<br><br><span class="red-disabled-text">{rocketName} mining rate is 0 for 15 minutes.</span>`;
     modalEventMinerBrokeDownEndedHeader = 'MINER REPAIRED!';
     modalEventMinerBrokeDownEndedText = `Field repairs complete.<br><br><span class="green-ready-text">{rocketName} has been repaired and is ready to resume mining.</span>`;
-    modalEventSupplyChainDisruptionHeader = 'SUPPLY CHAIN DISRUPTION!';
-    modalEventSupplyChainDisruptionText = `A major logistics disruption has hit your operations.<br><br><span class="warning-orange-text">{itemName} production reduced by -{percentDown}% for 15 minutes.</span>`;
-    modalEventSupplyChainDisruptionEndedHeader = 'SUPPLY CHAINS RESTORED!';
-    modalEventSupplyChainDisruptionEndedText = `Shipments are flowing again.<br><br><span class="green-ready-text">{itemName} production has returned to normal.</span>`;
-    modalEventBlackHoleInstabilityHeader = 'BLACK HOLE INSTABILITY!';
-    modalEventBlackHoleInstabilityText = `A violent fluctuation ripples through the singularity.<br><br><span class="warning-orange-text">Strength and duration will shift every minute for {minutes} minutes.</span>`;
-    modalEventBlackHoleInstabilityEndedHeader = 'BLACK HOLE STABILISED!';
-    modalEventBlackHoleInstabilityEndedText = `The singularity calms and returns to equilibrium.<br><br><span class="green-ready-text">Black Hole strength and duration restored to standard.</span>`;
+    modalEventSupplyChainDisruptionHeader = localize('modalEventSupplyChainDisruptionHeader', getLanguage());
+    modalEventSupplyChainDisruptionText = localize('modalEventSupplyChainDisruptionText', getLanguage());
+    modalEventSupplyChainDisruptionEndedHeader = localize('modalEventSupplyChainDisruptionEndedHeader', getLanguage());
+    modalEventSupplyChainDisruptionEndedText = localize('modalEventSupplyChainDisruptionEndedText', getLanguage());
+    modalEventBlackHoleInstabilityHeader = localize('modalEventBlackHoleInstabilityHeader', getLanguage());
+    modalEventBlackHoleInstabilityText = localize('modalEventBlackHoleInstabilityText', getLanguage());
+    modalEventBlackHoleInstabilityEndedHeader = localize('modalEventBlackHoleInstabilityEndedHeader', getLanguage());
+    modalEventBlackHoleInstabilityEndedText = localize('modalEventBlackHoleInstabilityEndedText', getLanguage());
 
     randomEventTriggerDescriptions = {
-        powerPlantExplosion: 'Destroy 1 random owned power plant',
-        batteryExplosion: 'Destroy 1 highest-tier owned battery',
-        scienceTheft: 'Lose half your research points (rounded up stolen)',
-        researchBreakthrough: 'Double your research points',
-        rocketInstantArrival: 'A travelling rocket instantly arrives',
-        antimatterReaction: 'A mining rocket and its asteroid are destroyed',
-        stockLoss: 'Lose 40-80% of an unlocked resource or compound stock',
-        starshipLostInSpace: 'Starship lost in space (reset starship and fleets)',
-        endlessSummer: 'Sunny weather only for 40-50 minutes',
-        galacticMarketLockdown: 'Disable the Galactic Market for 30 minutes',
-        minerBrokeDown: 'One mining rocket produces 0 antimatter for 15 minutes',
-        supplyChainDisruption: 'One resource or compound produces only 25% for 15 minutes',
-        blackHoleInstability: 'Black Hole fluctuates in strength (and duration) for 15-25 minutes'
+        powerPlantExplosion: localize('randomEventTriggerPowerPlantExplosion', getLanguage()),
+        batteryExplosion: localize('randomEventTriggerBatteryExplosion', getLanguage()),
+        scienceTheft: localize('randomEventTriggerScienceTheft', getLanguage()),
+        researchBreakthrough: localize('randomEventTriggerResearchBreakthrough', getLanguage()),
+        rocketInstantArrival: localize('randomEventTriggerRocketInstantArrival', getLanguage()),
+        antimatterReaction: localize('randomEventTriggerAntimatterReaction', getLanguage()),
+        stockLoss: localize('randomEventTriggerStockLoss', getLanguage()),
+        starshipLostInSpace: localize('randomEventTriggerStarshipLostInSpace', getLanguage()),
+        endlessSummer: localize('randomEventTriggerEndlessSummer', getLanguage()),
+        galacticMarketLockdown: localize('randomEventTriggerGalacticMarketLockdown', getLanguage()),
+        minerBrokeDown: localize('randomEventTriggerMinerBrokeDown', getLanguage()),
+        supplyChainDisruption: localize('randomEventTriggerSupplyChainDisruption', getLanguage()),
+        blackHoleInstability: localize('randomEventTriggerBlackHoleInstability', getLanguage())
     };
 
     cosmicRipStatusMessages = {
-        stabilizerArray: 'Stabiliser Array Built',
-        quantumContainmentField: 'Quantum Containment Field Generated',
-        dimensionalAnchorMatrix: 'Dimensional Anchor Matrix Built',
-        singularityStabilizer: 'Singularity Stabilizer Constructed',
-        realityWeaveRegulator: 'Reality Weave Regulator Built',
-        fullyStabilised: 'Cosmic Rip Fully Stabilised and Secured',
-        objectiveBuildStabilizerArray: 'Build Stabilizer Array',
-        objectiveBuildQuantumContainmentField: 'Build Quantum Containment Field',
-        objectiveBuildDimensionalAnchorMatrix: 'Build Dimensional Anchor Matrix',
-        objectiveBuildSingularityStabilizer: 'Build Singularity Stabilizer',
-        objectiveBuildRealityWeaveRegulator: 'Build Reality Weave Regulator',
-        objectiveCloseCosmicRip: 'Close the Cosmic Rip Forever and Secure your People!',
-        objectiveScanSectors: 'Scan Local Sectors for the Cosmic Rip'
+        stabilizerArray: localize('stabilizerArrayBuilt', getLanguage()),
+        quantumContainmentField: localize('quantumContainmentFieldGenerated', getLanguage()),
+        dimensionalAnchorMatrix: localize('dimensionalAnchorMatrixBuilt', getLanguage()),
+        singularityStabilizer: localize('singularityStabilizerConstructed', getLanguage()),
+        realityWeaveRegulator: localize('realityWeaveRegulatorBuilt', getLanguage()),
+        fullyStabilised: localize('cosmicRipFullyStabilised', getLanguage()),
+        objectiveBuildStabilizerArray: localize('objectiveBuildStabilizerArray', getLanguage()),
+        objectiveBuildQuantumContainmentField: localize('objectiveBuildQuantumContainmentField', getLanguage()),
+        objectiveBuildDimensionalAnchorMatrix: localize('objectiveBuildDimensionalAnchorMatrix', getLanguage()),
+        objectiveBuildSingularityStabilizer: localize('objectiveBuildSingularityStabilizer', getLanguage()),
+        objectiveBuildRealityWeaveRegulator: localize('objectiveBuildRealityWeaveRegulator', getLanguage()),
+        objectiveCloseCosmicRip: localize('objectiveCloseCosmicRip', getLanguage()),
+        objectiveScanSectors: localize('objectiveScanSectors', getLanguage())
     };
 
     miaplacidusEndgameStoryPopups = [
         {
-            header: 'MIAPLACIDUS',
-            content: 'The void falls silent as your fleets break the last wardens.<br>' +
-                'The great force field is gone, and the sky finally opens.<br>' +
-                'You step onto soil you once knew only in memory.<br>' +
-                'Spicite banners rise beside Miaplacidean symbols, unbroken.<br>' +
-                'For the first time since exile... you are home.<br>',
-            confirmLabel: 'CONTINUE'
+            header: localize('storyHeaderMiaplacidus', getLanguage()),
+            content: localize('storyContentMiaplacidus', getLanguage()),
+            confirmLabel: localize('confirmLabelContinue', getLanguage())
         },
         {
-            header: 'RECLAMATION',
-            content: 'Miaplacidus is reclaimed. The Wardens are defeated.<br>' +
-                'Your people\'s story is no longer one of loss, but of return.<br>' +
-                'This was the promise at the beginning of your long drift.<br>' +
-                'And now... you have fulfilled it.<br>' +
-                'But a new chapter opens. The hunt for the Cosmic Rip awaits.<br>' +
-                'The war is not over. The Wardens came from somewhere.<br>' +
-                'You must find the breach they used to enter your system.',
-            confirmLabel: 'CONTINUE'
+            header: localize('storyHeaderReclamation', getLanguage()),
+            content: localize('storyContentReclamation', getLanguage()),
+            confirmLabel: localize('confirmLabelContinue', getLanguage())
         },
         {
-            header: 'THE HUNT BEGINS',
-            content: 'Intelligence reports point to a disturbance in the outer reaches.<br>' +
-                'The Wardens did not simply appear - they tore through from somewhere else.<br>' +
-                'Traces of exotic energy linger where the fabric of space was ripped.<br>' +
-                'Your scouts call it the Cosmic Rip - a wound in reality itself.<br>' +
-                'This is your ultimate mission: find it, stabilise it, secure it.',
-            confirmLabel: 'CONTINUE'
+            header: localize('storyHeaderHuntBegins', getLanguage()),
+            content: localize('storyContentHuntBegins', getLanguage()),
+            confirmLabel: localize('confirmLabelContinue', getLanguage())
         },
         {
-            header: 'ONE LAST THING... ',
-            content: 'Now that you have control of your home system, it is time to trace where<br>' + 
-                'the evil AI Wardens entered into your System.<br>' +
-                'The hunt for the Cosmic Rip begins!!<br>' +
-                'It must be stabilised and secured!',
-            confirmLabel: 'LETS FINISH THIS'
+            header: localize('storyHeaderOneLastThing', getLanguage()),
+            content: localize('storyContentOneLastThing', getLanguage()),
+            confirmLabel: localize('confirmLabelLetsFinish', getLanguage())
         }
     ];
 
     headerDescriptions = {
-        'Resources': 'Here you can gain and sell resources. You can also upgrade your storage capacity and automate resource harvesting.  When you discover fusion, you will also handle that here.',
-        'Compounds': 'Here you can create and sell compounds from constituent parts or with advanced machinery.',
-        'Interstellar': 'Here you can explore the galaxy and discover new stars and planets.',
-        'Research': 'In the Research section, you can unlock new technologies to progress through the game, and also get upgrades to farm research points.',
-        'Energy': 'Here you can buy upgrades for generating power which is needed for more advanced buildings.',
-        'Space Mining': 'Here you can build vessels to mine asteroids for valuable Antimatter, enabling you to visit locations in the Star Map, and really start to conquer the galaxy!',
-        'Galactic': 'Here you can exchange your AP for permanent buffs, and reset runs.',
-        'Cosmic Rip': 'I don\'t know how you got here Cosmic Forger, but we are going to settle this...',
-        'Settings': 'Change the game settings to your liking.',
+        'Resources': localize('headerDescResources', getLanguage()),
+        'Compounds': localize('headerDescCompounds', getLanguage()),
+        'Interstellar': localize('headerDescInterstellar', getLanguage()),
+        'Research': localize('headerDescResearch', getLanguage()),
+        'Energy': localize('headerDescEnergy', getLanguage()),
+        'Space Mining': localize('headerDescSpaceMining', getLanguage()),
+        'Galactic': localize('headerDescGalactic', getLanguage()),
+        'Cosmic Rip': localize('headerDescCosmicRip', getLanguage()),
+        'Settings': localize('headerDescSettings', getLanguage()),
         
-        'hydrogen': 'The most basic element known to man, very cheap to produce and has a pretty low value, but anything can be created from it.',
-        'helium': 'Lighter than air this one will make you float away!',
-        'carbon': 'This is the first stable solid element, made from fused Helium.',
-        'neon': 'The first noble gas! Very "bright" of you to discover it!',
-        'oxygen': 'A vital element for most, Oxygen is highly reactive and essential for combustion and respiration.',
-        'sodium': 'A soft, silvery metal.',
-        'silicon': 'The backbone of modern technology, it is a crucial component in electronics and solar panels.',
-        'iron': 'A strong and versatile metal, Iron is the foundation of construction and industry.',
+        'hydrogen': localize('headerDescHydrogen', getLanguage()),
+        'helium': localize('headerDescHelium', getLanguage()),
+        'carbon': localize('headerDescCarbon', getLanguage()),
+        'neon': localize('headerDescNeon', getLanguage()),
+        'oxygen': localize('headerDescOxygen', getLanguage()),
+        'sodium': localize('headerDescSodium', getLanguage()),
+        'silicon': localize('headerDescSilicon', getLanguage()),
+        'iron': localize('headerDescIron', getLanguage()),
 
-        'energy storage': "Any buildings beyond the first level require power to operate, you can store that energy here.",
-        'power plant': "These buildings provide the energy resource, and it is used by advanced buildings, without which they won't operate.",
-        'advanced power plant': "These buildings provide higher amounts of energy for powering a lot of machinery.",
-        'solar power plant': "Solar power plants provide renewable energy without using any resources.",
-        'research': "Here you can buy upgrades to generate research points for unlocking new technology.",
-        'technology': "Here you can unlock new technologies to improve your game, provided you have enough research points!",
-        'tech tree': 'Here you can see a visual representation of technologies and what they provide.  You can zoom with the mouse wheel.',
-        'philosophy': 'Here you can unlock special abilities for your philosophy, and research repeatable techs that improve your game.',
+        'energy storage': localize('headerDescEnergyStorage', getLanguage()),
+        'power plant': localize('headerDescPowerPlant', getLanguage()),
+        'advanced power plant': localize('headerDescAdvancedPowerPlant', getLanguage()),
+        'solar power plant': localize('headerDescSolarPowerPlant', getLanguage()),
+        'research': localize('headerDescResearchUpgrades', getLanguage()),
+        'technology': localize('headerDescTechnology', getLanguage()),
+        'tech tree': localize('headerDescTechTree', getLanguage()),
+        'philosophy': localize('headerDescPhilosophy', getLanguage()),
     
-        'diesel': 'The first compound created by your hands, it is a useful early fuel.',
-        'glass': 'This is reinforced specialist glass and is great for solar applications.',
-        'steel': 'This is reinforced steel, highly durable and used in construction and manufacturing.',
-        'water': 'Water is an essential resource which can be produced, or collected from rain in your reservoir.',
-        'concrete': 'Concrete is a fundamental building material used in construction, offering strength and versatility.',
-        'titanium': 'Titanium is a strong, lightweight, and corrosion-resistant metal, needed for advanced construction.',
+        'diesel': localize('headerDescDiesel', getLanguage()),
+        'glass': localize('headerDescGlass', getLanguage()),
+        'steel': localize('headerDescSteel', getLanguage()),
+        'water': localize('headerDescWater', getLanguage()),
+        'concrete': localize('headerDescConcrete', getLanguage()),
+        'titanium': localize('headerDescTitanium', getLanguage()),
 
-        'star map': "This is a map of the known galaxy.",
-        'star data': "Here you can find information about studied stars.",
-        'star ship': "Here you can build and manage your Star Ship to travel to and scan studied Stars.",
-        'fleet hangar': `Build your fleets to conquer visited Systems - Fleet Strength: <span class="green-ready-text">${getResourceDataObject('fleets', ['attackPower']).toFixed(0)}</span>`,
-        'colonise': `Engage in Diplomacy and War to establish your new colony at <span class="green-ready-text">${capitaliseWordsWithRomanNumerals(getDestinationStar())}</span> - Fleet Power: <span class="green-ready-text">${getResourceDataObject('fleets', ['attackPower']).toFixed(0)}</span>`,
+        'star map': localize('headerDescStarMap', getLanguage()),
+        'star data': localize('headerDescStarData', getLanguage()),
+        'star ship': localize('headerDescStarShip', getLanguage()),
+        'fleet hangar': localize('headerDescFleetHangar', getLanguage()) + `<span class="green-ready-text">${getResourceDataObject('fleets', ['attackPower']).toFixed(0)}</span>`,
+        'colonise': localize('headerDescColonise', getLanguage()) + `<span class="green-ready-text">${capitaliseWordsWithRomanNumerals(getDestinationStar())}</span> - Fleet Power: <span class="green-ready-text">${getResourceDataObject('fleets', ['attackPower']).toFixed(0)}</span>`,
 
-        'mining': "This shows Antimatter being produced, where, and by which Rocket Miner.",
-        'space telescope': "Here you can build a telescope to search for asteroids to mine Antimatter, and to Study The Stars for potential Colonisation trips.",
-        'asteroids': "Here you can see discovered Asteroids and analyse them.",
-        'launch pad': "Build vessels to mine asteroids for valuable Antimatter.",
+        'mining': localize('headerDescMining', getLanguage()),
+        'space telescope': localize('headerDescSpaceTelescope', getLanguage()),
+        'asteroids': localize('headerDescAsteroids', getLanguage()),
+        'launch pad': localize('headerDescLaunchPad', getLanguage()),
 
         'rebirth': getCurrentRunIsMegaStructureRun()
-            ? `Here you can reset the run at your new system, once settled!<br><br><span class="warning-orange-text">MEGASTRUCTURE STARS:  It's Mandatory to Disconnect the MegaStructure before Rebirth!</span>`
-            : `Here you can reset the run at your new system, once settled!`,
+            ? localize('headerDescRebirthMega', getLanguage())
+            : localize('headerDescRebirth', getLanguage()),
 
-        'galactic market': "Here you can make various trades in the Galactic Market.",
-        'galactic casino': "Here you can gamble your hard earned products for instant gratification - ",
-        'ascendency perks': `Here you can spend AP for permanent buffs to speed up your runs! - AP: <span class="green-ready-text">${getResourceDataObject('ascendencyPoints', ['quantity'])}</span>`,
-        'megastructures': "This shows your progress in harnessing the power of MegaStructures, and the slow dismantling of the Miaplacidus Force Field!",
-        'black hole': "This shows the Black Hole time warp feature, once unlocked.",
+        'galactic market': localize('headerDescGalacticMarket', getLanguage()),
+        'galactic casino': localize('headerDescGalacticCasino', getLanguage()),
+        'ascendency perks': localize('headerDescAscendencyPerks', getLanguage()) + `<span class="green-ready-text">${getResourceDataObject('ascendencyPoints', ['quantity'])}</span>`,
+        'megastructures': localize('headerDescMegastructures', getLanguage()),
+        'black hole': localize('headerDescBlackHole', getLanguage()),
 
-        'situation': `Cosmic Rip operations and progression - GP: <span id="cosmicRipGpBalance" class="green-ready-text">${getCosmicRipGalacticPoints()}</span>`,
-        'near space scanner array': `Commission the Near Space Scanner Array, scan sectors to locate distortions, and pinpoint the Cosmic Rip. - GP: <span id="cosmicRipGpBalanceNearSpace" class="green-ready-text">${getCosmicRipGalacticPoints()}</span>`,
-        'cosmic rip': `Investigate and Research how to stabilise and secure the Cosmic Rip once located. - GP: <span id="cosmicRipGpBalanceCosmicRip" class="green-ready-text">${getCosmicRipGalacticPoints()}</span>`,
+        'situation': localize('headerDescSituation', getLanguage()) + `<span id="cosmicRipGpBalance" class="green-ready-text">${getCosmicRipGalacticPoints()}</span>`,
+        'near space scanner array': localize('headerDescNearSpaceScannerArray', getLanguage()) + `<span id="cosmicRipGpBalanceNearSpace" class="green-ready-text">${getCosmicRipGalacticPoints()}</span>`,
+        'cosmic rip': localize('headerDescCosmicRipTab', getLanguage()) + `<span id="cosmicRipGpBalanceCosmicRip" class="green-ready-text">${getCosmicRipGalacticPoints()}</span>`,
 
-        'contact': "Contact Channels for Feedback and Suggestions",
-        'get started': "Learn how to get started in Cosmic Forge.",
-        'story': "Learn about your origins and how you find yourself here.",
-        'concepts - early': "Early game concepts.",
-        'concepts - mid': "Mid game concepts.",
-        'concepts - late': "Late game concepts pre rebirth.",
-        'concepts - end goal': "End game concepts and what to work toward.",
-        'philosophies': "Philosophies and their effects.",
-        'visual': "Change the visual settings of the game.",
-        'game options': "Change the game options to your liking.",
-        'saving / loading': "Save and Load your progress in the game.",
-        'statistics': `Here you can see your progress in the game.`,
-        'achievements': `Here you can see your earned achievements, and their effects.`,
-        'events': 'Here you can see any ongoing or historical events and the effects they have.',
-        'exit game': 'Here you can Exit The Game'
+        'contact': localize('headerDescContact', getLanguage()),
+        'get started': localize('headerDescGetStarted', getLanguage()),
+        'story': localize('headerDescStory', getLanguage()),
+        'concepts - early': localize('headerDescConceptsEarly', getLanguage()),
+        'concepts - mid': localize('headerDescConceptsMid', getLanguage()),
+        'concepts - late': localize('headerDescConceptsLate', getLanguage()),
+        'concepts - end goal': localize('headerDescConceptsEndGoal', getLanguage()),
+        'philosophies': localize('headerDescPhilosophies', getLanguage()),
+        'visual': localize('headerDescVisual', getLanguage()),
+        'game options': localize('headerDescGameOptions', getLanguage()),
+        'saving / loading': localize('headerDescSavingLoading', getLanguage()),
+        'statistics': localize('headerDescStatistics', getLanguage()),
+        'achievements': localize('headerDescAchievements', getLanguage()),
+        'events': localize('headerDescEvents', getLanguage()),
+        'exit game': localize('headerDescExitGame', getLanguage())
     };
 
     infoTooltipDescriptions = {
@@ -2893,13 +2877,7 @@ helpContent = {
         subBody13: "You can accidentally discover a Black Hole, and once researched it can be used to Time Warp, speeding up travel times and Resource collection. It needs to be charged which takes time, but the time can be reduced with upgrades. You can also increase the time it stays active for and the power of it with further upgrades, and once it is unlocked it is available across different runs.",
 
         subHeading14: "O-type Stars",
-        subBody14: "O-type stars are the rarest and most violent stars in the galaxy. Each one you control dramatically and permanently amplifies the power output of a Power Building type (even across runs). Expect hardened defenses when attempting to conquer these systems.",
-
-        subHeading15: "B-type Stars",
-        subBody15: "B-type stars are massive, hot blue stars that supercharge your Auto Buyers. When you're in a B-type star system, all your Resource Auto Buyers gain a fixed bonus rate: Tier 1 gets +2/s, Tier 2 gets +8/s, Tier 3 gets +25/s, and Tier 4 gets +80/s. This bonus applies to all Resources but not Compounds, and only on the B-type system run.",
-
-        subHeading16: "F-type Stars",
-        subBody16: "F-type stars are yellow-white stars that enhance Antimatter Mining operations. When you're in an F-type star system, all your rockets gain a 50% bonus to their Antimatter extraction rate while Mining Asteroids. This bonus applies only during the F-type system run."
+        subBody14: "O-type stars are the rarest and most violent stars in the galaxy. Each one you control dramatically amplifies the power output of a Power Building type. Expect hardened defenses when attempting to conquer these systems."
     },
     'concepts - end goal': {
         subHeading1: "Ancient Manuscripts",

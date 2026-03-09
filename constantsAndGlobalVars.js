@@ -310,6 +310,7 @@ let compoundCreateDropdownRecipeText = {
 
 //GLOBAL VARIABLES
 export let gameState;
+let language = 'en';
 let achievementFlagArray = [];
 let blackHoleDiscoveryProbability = 0;
 let blackHoleDiscovered = false;
@@ -829,6 +830,14 @@ let randomEventTriggerCountsAllTime = {};
 let miaplacidusEndgameStoryShown = false;
 
 //GETTER SETTER METHODS
+export function getLanguage() {
+    return language;
+}
+
+export function setLanguage(value) {
+    language = value;
+}
+
 export function setElements() {
     elements = {
         menu: document.getElementById('menu'),

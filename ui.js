@@ -1,3 +1,4 @@
+import { initLocalization } from './localization.js';
 import {
     setLastFocusOfflineGainsAppliedAt,
     setGalacticPointsSpent,
@@ -2934,9 +2935,8 @@ function buildFuelConsumptionLines(resourceKey, category, timerRatio) {
     return lines.join('');
 }
 
-
+    await initLocalization();
     initialiseDescriptions();
-
 
     const headerText = gameIntroHeader;
     let content = gameSaveNameCollect;

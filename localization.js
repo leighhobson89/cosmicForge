@@ -1,6 +1,14 @@
-
+import { getLanguage, setLanguage } from './constantsAndGlobalVars.js';
 
 let localizationData = {};
+
+function setLocalization(data) {
+    localizationData = data;
+}
+
+function getLocalization() {
+    return localizationData;
+}
 
 async function fetchLocalization() {
     try {
@@ -19,7 +27,12 @@ export async function initLocalization(language) {
 }
 
 function localize(key, language) {
-    const localizedString = getLocalization()[language][key];
+    const data = getLocalization();
+    if (!data || !data[language]) {
+        console.error(`Localization data not loaded or language '${language}' not found`);
+        return key;
+    }
+    const localizedString = data[language][key];
     if (!localizedString) return key;
 
     if (localizedString.includes('${')) {
