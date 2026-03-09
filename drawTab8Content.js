@@ -32,6 +32,7 @@ import {
     setCosmicRipFoundSectorIndexForZoom,
     getCosmicRipFoundSectorIndexForZoom,
     setCosmicRipNearSpaceScannerArrayCanvasEl,
+    setCosmicRipNearSpaceScannerArrayGridOverlayEl,
     setCosmicRipNearSpaceScannerArrayFogOverlayEl,
     setCosmicRipNearSpaceScannerArrayInteractiveOverlayEl,
     setCosmicRipNearSpaceScannerArrayScanLabelOverlayEl,
@@ -497,9 +498,20 @@ export function drawTab8Content(heading, optionContentElement) {
             scanLabelOverlay.appendChild(scanLabel);
         }
 
+        const gridOverlay = document.createElement('canvas');
+        gridOverlay.id = 'cosmicRipNearSpaceScannerArrayGridOverlay';
+        gridOverlay.style.position = 'absolute';
+        gridOverlay.style.left = '0';
+        gridOverlay.style.top = '0';
+        gridOverlay.style.width = '100%';
+        gridOverlay.style.height = '100%';
+        gridOverlay.style.pointerEvents = 'none';
+        gridOverlay.style.zIndex = '10';
+
         telescopeContainer.appendChild(canvas);
         telescopeContainer.appendChild(labelFadeOverlay);
         telescopeContainer.appendChild(fogOverlay);
+        telescopeContainer.appendChild(gridOverlay);
         telescopeContainer.appendChild(overlay);
         telescopeContainer.appendChild(scanLabelOverlay);
         telescopeContainer.appendChild(tooltip);
@@ -610,6 +622,7 @@ export function drawTab8Content(heading, optionContentElement) {
         }
 
         setCosmicRipNearSpaceScannerArrayCanvasEl(canvas);
+        setCosmicRipNearSpaceScannerArrayGridOverlayEl(gridOverlay);
         setCosmicRipNearSpaceScannerArrayFogOverlayEl(fogOverlay);
         setCosmicRipNearSpaceScannerArrayInteractiveOverlayEl(overlay);
         setCosmicRipNearSpaceScannerArrayScanLabelOverlayEl(scanLabelOverlay);
@@ -637,6 +650,20 @@ export function drawTab8Content(heading, optionContentElement) {
             canvas.height = h;
 
             drawSharedSpaceBackdrop(ctx, canvas, { forceBackdropStarBottomRight: true }, 200);
+        };
+
+        const drawGridOverlay = () => {
+            const ctx = gridOverlay.getContext('2d');
+            if (!ctx) return;
+
+            const w = gridOverlay.offsetWidth;
+            const h = gridOverlay.offsetHeight;
+            if (!w || !h) return;
+
+            gridOverlay.width = w;
+            gridOverlay.height = h;
+
+            ctx.clearRect(0, 0, w, h);
 
             const themeElement = document.querySelector('[data-theme]');
             const disabledColor = themeElement
@@ -713,14 +740,14 @@ export function drawTab8Content(heading, optionContentElement) {
 
                 drawRipSprite();
 
-                const idx = Number(getCosmicRipFoundSectorIndexForZoom());
-                const safeIdx = Number.isFinite(idx) ? Math.max(0, Math.min(8, Math.floor(idx))) : 0;
-                const sectorLabel = sectorNames?.[safeIdx] || '';
-
                 ctx.save();
                 ctx.fillStyle = readyColor;
                 ctx.font = 'bold 22px sans-serif';
                 ctx.textBaseline = 'top';
+
+                const idx = Number(getCosmicRipFoundSectorIndexForZoom());
+                const safeIdx = Number.isFinite(idx) ? Math.max(0, Math.min(8, Math.floor(idx))) : 0;
+                const sectorLabel = sectorNames?.[safeIdx] || '';
                 ctx.fillText(String(sectorLabel).toUpperCase(), 14, 12);
 
                 ctx.strokeStyle = borderColor;
@@ -771,12 +798,19 @@ export function drawTab8Content(heading, optionContentElement) {
             ctx.restore();
         };
 
-        setCosmicRipNearSpaceScannerArrayDrawCanvas(drawCanvas);
+        setCosmicRipNearSpaceScannerArrayDrawCanvas(() => {
+            drawCanvas();
+            drawGridOverlay();
+        });
 
         drawCanvas();
+        drawGridOverlay();
         if (!getCosmicRipNearSpaceScannerArrayResizeAttached()) {
             setCosmicRipNearSpaceScannerArrayResizeAttached(true);
-            window.addEventListener('resize', drawCanvas);
+            window.addEventListener('resize', () => {
+                drawCanvas();
+                drawGridOverlay();
+            });
         }
         return;
     }

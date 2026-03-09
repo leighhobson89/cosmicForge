@@ -403,6 +403,7 @@ let cosmicRipNearSpaceScannerArraySectorNames = null;
 let cosmicRipNearSpaceScannerArrayOneSectorState = false;
 let cosmicRipFoundSectorIndexForZoom = 0;
 let cosmicRipNearSpaceScannerArrayCanvasEl = null;
+let cosmicRipNearSpaceScannerArrayGridOverlayEl = null;
 let cosmicRipNearSpaceScannerArrayFogOverlayEl = null;
 let cosmicRipNearSpaceScannerArrayInteractiveOverlayEl = null;
 let cosmicRipNearSpaceScannerArrayScanLabelOverlayEl = null;
@@ -5858,6 +5859,14 @@ export function getCosmicRipNearSpaceScannerArrayCanvasEl() {
 
 export function setCosmicRipNearSpaceScannerArrayCanvasEl(value) {
     cosmicRipNearSpaceScannerArrayCanvasEl = value;
+}
+
+export function getCosmicRipNearSpaceScannerArrayGridOverlayEl() {
+    return cosmicRipNearSpaceScannerArrayGridOverlayEl;
+}
+
+export function setCosmicRipNearSpaceScannerArrayGridOverlayEl(value) {
+    cosmicRipNearSpaceScannerArrayGridOverlayEl = value;
 }
 
 export function getCosmicRipNearSpaceScannerArrayFogOverlayEl() {
