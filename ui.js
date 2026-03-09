@@ -154,6 +154,7 @@ import {
     setRepeatableTechMultipliers,
     getAllRepeatableTechMultipliersObject,
     getPhilosophyAbilityActive,
+    getFTypeAntimatterMiningBoostMultiplier,
     getStarsWithAncientManuscripts,
     getManuscriptCluesShown,
     getFactoryStarsArray,
@@ -2446,6 +2447,16 @@ function buildAntimatterTooltipContent() {
         lines.push(...megaLines);
     }
 
+    const currentStar = getCurrentStarSystem?.();
+    if (currentStar && getStarTypeByName?.(currentStar) === 'F') {
+        const fTypeBoostMultiplier = getFTypeAntimatterMiningBoostMultiplier?.() || 0.5;
+        const totalAntimatterRate = (getResourceDataObject('antimatter', ['rate']) || 0) * timerRatio;
+
+        const fTypeBonusAmount = totalAntimatterRate * (fTypeBoostMultiplier / (1 + fTypeBoostMultiplier));
+        lines.push('<div class="tooltip-spacer">&nbsp;</div>');
+        lines.push('<div><strong>F-Type Star System Bonus</strong></div>');
+        lines.push(`<div><span class="green-ready-text">+${formatProductionRateValue(fTypeBonusAmount)} / s</span></div>`);
+    }
 
     return lines.join('');
 }
@@ -2458,23 +2469,33 @@ function buildAntimatterRocketLines(timerRatio) {
     const buffMultiplier = 1 + ((buffData?.boughtYet ?? 0) * (buffData?.effectCategoryMagnitude ?? 0));
     const boostMultiplier = getIsAntimatterBoostActive?.() ? getBoostRate?.() : 1;
 
+    const currentStar = getCurrentStarSystem?.();
+    const isFTypeStar = currentStar && getStarTypeByName?.(currentStar) === 'F';
+    const fTypeMultiplier = isFTypeStar ? (1 + getFTypeAntimatterMiningBoostMultiplier()) : 1;
 
     const lines = [];
     let total = 0;
-
 
     for (let i = 1; i <= 4; i++) {
         const rocketKey = `rocket${i}`;
         const rocketName = getRocketUserName?.(rocketKey) || `Rocket ${i}`;
         const asteroidName = miningAssignments?.[rocketKey];
         const asteroid = findAsteroidByName(asteroids, asteroidName);
-        const perTick = calculateRocketExtractionPerTick(asteroid, buffMultiplier, boostMultiplier);
+        const basePerTick = calculateRocketExtractionPerTick(asteroid, buffMultiplier, boostMultiplier);
+        const perTick = basePerTick * fTypeMultiplier;
         total += perTick;
         const perSecond = perTick * timerRatio;
         const formatted = formatProductionRateValue(perSecond);
-        lines.push(`<div>${rocketName}: <span class="green-ready-text">${formatted} / s</span></div>`);
+        
+        let fTypeSuffix = '';
+        if (isFTypeStar && basePerTick > 0) {
+            const fTypeBonusPerSecond = (basePerTick * (fTypeMultiplier - 1)) * timerRatio;
+            const formattedBonus = formatProductionRateValue(fTypeBonusPerSecond);
+            fTypeSuffix = ` (inc. <span class="green-ready-text">${formattedBonus}/s</span> Type-F Bonus)`;
+        }
+        
+        lines.push(`<div>${rocketName}: <span class="green-ready-text">${formatted}/s</span>${fTypeSuffix}</div>`);
     }
-
 
     return { lines, total };
 }
@@ -8635,9 +8656,21 @@ function drawLeftSideOfAntimatterSvg(asteroidsArray, rocketData, svgElement, svg
         label.setAttribute("fill", "var(--" + lineClass + ")");
         label.setAttribute("font-size", "14");
         if (rocketInfo && !getIsAntimatterBoostActive()) {
-            label.innerHTML = `${(rocketInfo[3] * (1 + (getBuffEnhancedMiningData().boughtYet * getBuffEnhancedMiningData().effectCategoryMagnitude)) * getTimerRateRatio()).toFixed(2)} / s`;
+            let baseRate = rocketInfo[3] * (1 + (getBuffEnhancedMiningData().boughtYet * getBuffEnhancedMiningData().effectCategoryMagnitude)) * getTimerRateRatio();
+            const currentStar = getCurrentStarSystem?.();
+            if (currentStar && getStarTypeByName?.(currentStar) === 'F') {
+                const fTypeBoostMultiplier = getFTypeAntimatterMiningBoostMultiplier();
+                baseRate *= (1 + fTypeBoostMultiplier);
+            }
+            label.innerHTML = `${baseRate.toFixed(2)} / s`;
         } else if (rocketInfo && getIsAntimatterBoostActive()) {
-            label.innerHTML = `${(rocketInfo[3] * (1 + (getBuffEnhancedMiningData().boughtYet * getBuffEnhancedMiningData().effectCategoryMagnitude)) * getTimerRateRatio() * getBoostRate()).toFixed(2)} / s`;
+            let boostedRate = rocketInfo[3] * (1 + (getBuffEnhancedMiningData().boughtYet * getBuffEnhancedMiningData().effectCategoryMagnitude)) * getTimerRateRatio() * getBoostRate();
+            const currentStar = getCurrentStarSystem?.();
+            if (currentStar && getStarTypeByName?.(currentStar) === 'F') {
+                const fTypeBoostMultiplier = getFTypeAntimatterMiningBoostMultiplier();
+                boostedRate *= (1 + fTypeBoostMultiplier);
+            }
+            label.innerHTML = `${boostedRate.toFixed(2)} / s`;
         } else {
             label.innerHTML = '0 / s';
         }

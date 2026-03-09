@@ -315,6 +315,7 @@ let blackHoleDiscoveryProbability = 0;
 let blackHoleDiscovered = false;
 let oTypePowerPlantStrengthBoost = 8;
 let bTypeAutoBuyerBoostValues = { tier1: 0.02, tier2: 0.08, tier3: 0.25, tier4: 0.8 };
+let fTypeAntimatterMiningBoostMultiplier = 0.5;
 let megaStructureTechsResearched = [];
 let miaplacidusMilestoneLevel = 0;
 let increaseStorageFactor = 2;
@@ -4247,6 +4248,16 @@ export function getBTypeAutoBuyerBoostValues() {
 export function setBTypeAutoBuyerBoostValues(values) {
     if (values && typeof values === 'object') {
         bTypeAutoBuyerBoostValues = { ...bTypeAutoBuyerBoostValues, ...values };
+    }
+}
+
+export function getFTypeAntimatterMiningBoostMultiplier() {
+    return fTypeAntimatterMiningBoostMultiplier;
+}
+
+export function setFTypeAntimatterMiningBoostMultiplier(value) {
+    if (typeof value === 'number') {
+        fTypeAntimatterMiningBoostMultiplier = value;
     }
 }
 

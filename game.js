@@ -413,6 +413,7 @@ import {
     getPriceCasinoGame3,
     setGalacticCasinoUnlocked,
     addToAllTimeRipTelemetryDataEarned,
+    getFTypeAntimatterMiningBoostMultiplier,
 } from "./constantsAndGlobalVars.js";
 
 import {
@@ -6397,6 +6398,12 @@ function updateAntimatterAndDiagram(ticks = 1) {
             let extractionRate = baseExtractionRate;
             extractionRate *= (1 + (getBuffEnhancedMiningData()['boughtYet'] * getBuffEnhancedMiningData()['effectCategoryMagnitude']));
             
+            const currentStar = getCurrentStarSystem?.();
+            if (currentStar && getStarTypeByName?.(currentStar) === 'F') {
+                const fTypeBoostMultiplier = getFTypeAntimatterMiningBoostMultiplier();
+                extractionRate *= (1 + fTypeBoostMultiplier);
+            }
+
             if (getIsAntimatterBoostActive()) {
                 extractionRate *= getBoostRate();
             }
