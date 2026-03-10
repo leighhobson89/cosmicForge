@@ -13,7 +13,7 @@ export let techNotificationMessages;
 export let optionDescriptions;
 export let galacticMarketTooltipDescriptions;
 export let newsTickerContent;
-export let helpContent;
+export let helpContent = null;
 export let statisticsContent = null;
 export let rocketNames;
 export let starNames;
@@ -2738,184 +2738,136 @@ export function initialiseDescriptions() {
             subBody7: "NoData",
         }
     }
-}
 
-helpContent = {
-    'contact': {
-        subHeading1: "Contact Channels",
-        subBody1: "",
-
-        subHeading2: "Discord",
-        subBody2: `https://discord.gg/6bUN6BNtny`,
-
-        subHeading3: "Email",
-        subBody3: "cosmicforge999@gmail.com"
-    },
-    'get started': {
-        subHeading1: "Introduction",
-        subBody1: "Cosmic Forge in a nutshell is an incremental game.  However it is much more than that, and hopefully it will give you hours of gaming pleasure.<br/><br/>When you start the game, it is going to look pretty bleak, which it is, as you have been abandoned on a planet in the Spica system with nothing but a great understanding of the universe, and the ability to harness Hydrogen.  As you gain more of this basic building block, you will be able to sell it and gain some Cash.<br/><br/>Anyway, before going any further, open the Resources Tab, and expand the Gases section, and you will note there is a section called Hydrogen.  Click this and the Resources section will open.  Although it can look overwhelming at first, the concept is pretty simple.  At the top you will see a dropdown which allows you to set an amount of stock to sell, and a sell button.  This sells your Hydrogen for Cash, which you can see at the top left of the screen.<br/><br/>With some Cash in your pocket it is time to set about the goal, which is to ascend to the stars!  Quite a heavy task from a few coins and some Hydrogen atoms, I am sure you will agree, but fear not!<br/><br/>Next if you look below this section, you have a Gain button, that, when clicked adds a Hydrogen atom to your stocks.  You need to store this atom, and thats where the next section comes in.  If you gain so much Hydrogen that your storage is full, then you can trade all but one atom for an increase in storage, although making you gain the Hydrogen again, you can now collect twice as much!<br/><br/>This is great but a bit labour intensive.  To get around this, if you look below, you will see that there is a section allowing you to build a Hydrogen Generator, from now on called an Auto Buyer.  With this Auto Buyer, you can sit back and relax, while the Hydrogen is gained all by itself until the storage is full, which will make life easier for sure.<br/><br/>Now that the pressure is off a bit, next you will note there is a Research Tab, and opening this will give you access to some more information, and more importantly the concept of Research Points!  You can build a Science Kit which will start to generate you Research Points, very slowly at first, but this can grow very quickly.  Use the first batch you generate to open the Technology section and research your first technology, 'Knowledge Sharing'.<br/><br/>Congratulations you have just understood the main concept of Cosmic Forge, which is grinding and buying rewards with the profits.<br/><br/>Eventually you will be able to use this loop to discover new elements and grow those numbers beyond what you ever imagined!<br/><br/>Thanks for reading, now feel free to explore some other topics in the Cosmicopedia to give you some more context!"
-    },
-    'story': {
-        subHeading1: "History",
-        subBody1: "You are Miaplacidean. You once lived on a lush and peaceful world orbiting Beta Carinae, known to your people as Miaplacidus. For eons, your civilization thrived—farming the land, advancing in knowledge, and eventually colonizing your entire star system. Life was good, and there was no need for more. That changed the day a scientist discovered a strange disturbance in the void surrounding your system. Driven by curiosity and sacrifice, he entered it, never to return. Unknown to you at the time, he had crossed into a distant system and revealed your existence to an advanced AI race.\n\nThis AI species followed his path back through the now-permanent portal and launched a devastating invasion. In a matter of days, the Miaplacidus system fell. Most were lost. You and a handful of others narrowly escaped. Boarding an experimental ship equipped with untested warp technology, you fled into the void. But the jump did not go as planned. You were cast far from home, lost consciousness, and drifted through space.\n\nWhen you finally awoke, you found yourself alone in the Spica system—roughly 100 light years from your origin. Your people are gone. Your world is gone. But your story is just beginning.",
-
-        subHeading2: "Today",
-        subBody2: "You landed on a lush, vibrant world in the Spica system. There, you encountered a sentient native species—the Spicites. They welcomed you with curiosity and kindness, inviting you to share meals and learn their ways. Though communication was imperfect, they showed no aggression. Over time, you grew comfortable among them, adapting to their culture and rhythms of life.\n\nThey began to call you Mia'Plac—perhaps a mistranslation of your origin, or maybe a word with deeper meaning in their language. Whatever the case, the name stuck, and so did your place among them. Through wisdom, leadership, and your advanced knowledge, you gained their trust and eventually rose to lead their colony. Now, you oversee the gathering of resources and the advancement of research to guide this growing settlement into the future.\n\nYet, deep within, a fire still burns. You have not forgotten Miaplacidus. You have not forgotten your people. While you build a future here, you dedicate your life to uncovering the truth of what happened—to find a way back, and to set things right.",
-
-        subHeading3: "Future",
-        subBody3: "Equipped with little more than a modest lab, a handful of raw materials, and a spark of hydrogen, you begin your work. The Spicites look to you for guidance, their trust unwavering. Though their world is primitive by your standards, their spirit is strong, and your leadership promises to awaken a new era.\n\nWith your knowledge of advanced science and the secrets of the void, you introduce ideas that accelerate progress far beyond what this colony could have achieved alone. As the first structures rise and research begins, whispers start to circulate—traders speak of distant, hostile systems. They tell of rogue AI, colossal Megastructures, and lifeless worlds turned to ash.\n\nYou listen, and you remember. The invaders. The loss. The betrayal of the stars. These stories only strengthen your resolve. You will lead the Spicites beyond their world, into the stars, and through the void. You will uncover what became of Miaplacidus. And one day, you will return—not in exile, but in strength—to reclaim your home and bring an end to the machine threat once and for all.  You are... The Cosmic Forger, and this is your Forge!",
-    },
-    'concepts - early': {
-        subHeading1: "Resources",
-        subBody1: "Resources are the building blocks of the game. They can be manually gathered, sold, used to buy upgrades, fused to create other Resources, or later on, used in the creation of advanced Compounds.",
-
-        subHeading2: "Manual Gain",
-        subBody2: "The Resources all have a button that when clicked, adds 1 to the quantity of that Resource, while the total quantity is less than the storage limit. This is useful in the early stages of the game as a way to get small amounts of Resources to get things kicked off!",
-
-        subHeading3: "Sell",
-        subBody3: "Using the dropdown to choose a suitable quantity, and then clicking the Sell button, will exchange the chosen quantity of Resource (or later on, Compound) for Cash which can be used towards buying certain upgrades.",
-
-        subHeading4: "Storage",
-        subBody4: "Each Resource and Compound has a Storage limit. If the Storage is full, no more of that Resource can be gained until some are used or Storage is increased. Upgrading Storage uses all but 1 of your stocks of that Resource or Compound.",
-
-        subHeading5: "Auto Buyers",
-        subBody5: "Auto Buyers allow you to automate the collection of Resources once unlocked. They work continuously in the background, freeing you up to focus on other tasks. That is until the Storage is full. Some require Energy to operate.",
-
-        subHeading6: "Research Points",
-        subBody6: "Research Points are gained by Research Upgrades and are used to unlock new technologies.",
-
-        subHeading7: "Research Upgrades",
-        subBody7: "Research Upgrades allow you to generate Research Points, although some require Energy to operate.",
-
-        subHeading8: "Technology",
-        subBody8: "Technology unlocks powerful upgrades and new game mechanics. Most techs have prerequisites and a cost in Research Points.",
-
-        subHeading9: "Compounds",
-        subBody9: "Compounds are more advanced materials that require multiple Resources to create. They are needed for mid to late game mechanics.",
-
-        subHeading10: "Fusion",
-        subBody10: "Fusion is a process that allows you to create Resources from more basic Resources.",
-
-        subHeading11: "News Ticker",
-        subBody11: "The News Ticker displays very important (honestly!) information, and can sometimes yield secret buffs, so keep an eye on it at all times!",
-    },
-    'concepts - mid': {
-        subHeading1: "Energy Generation & Consumption",
-        subBody1: "Energy is needed to power a lot of Upgrades, such as some Auto Buyers, and Research Upgrades, and then Consumed in a lot of later game mechanics, and if this is the case, it will be indicated in the description for the feature. There are Energy Production facilities, and Energy Storage facilities.",
-
-        subHeading2: "Power Buildings",
-        subBody2: "Power Buildings generate Energy, and there are various types. They Consume Fuel while running, which can sometimes be Compounds, and in other cases Solar power.",
-
-        subHeading3: "Batteries",
-        subBody3: "Batteries store excess Energy for use when Generation is insufficient, for example if there are not enough Power Buildings following the purchase of an Upgrade, or if the Fuel is exhausted for a particular Power Building. Upgrading Battery capacity is key to maintaining Energy flow, while expanding Upgrades that consume Energy.",
-
-        subHeading4: "Weather",
-        subBody4: "Weather affects various in-game mechanics, including Energy Production. It can affect the launching of Rockets, and can provide extra Resources through Precipitation. The prevailing Weather, and indeed the Resource provided by Precipitation can vary depending on the Star that is being played (a late game mechanic).",
-
-        subHeading5: "Space Mining",
-        subBody5: "Space Mining allows for the extraction of rare Antimatter from Asteroids.",
-
-        subHeading6: "Events",
-        subBody6: "Random Events can occur as you progress, bringing unexpected opportunities or challenges. They appear without warning and can offer unique rewards, impose temporary setbacks, or unlock new paths. Pay attention to notifications—some Events are fleeting, while others may alter the course of your run if you act wisely. You can track current and historical Events in the Events panel on the Menu tab.",
-
-        subHeading7: "Space Telescope",
-        subBody7: "The Space Telescope is used to scan for Asteroids that can be Mined by your Rocket Miners, and in the Late Game, to Study Stars.  Using the Space Telescope requires a lot of Energy, and it has a high build cost.",
-
-        subHeading8: "Asteroids",
-        subBody8: "Asteroids contain Antimatter. Mining asteroids requires the Construction and Launching of Rocket Miners. Some Asteroids are easy to Travel To and Mine, whereas others require more time. The quantity of Antimatter varies, and so the Asteroids have different classes based on their quality. If you are really lucky, you may even find a Legendary Asteroid and have it named after you!",
-
-        subHeading9: "Launch Pad",
-        subBody9: "The Launch Pad is a prerequisite to building Rocket Miners.  It is an expensive Upgrade, and once built, you can see the number of Rocket Miners you have, and their stages of Construction, or Launch state.",
-
-        subHeading10: "Rocket Miners - Building",
-        subBody10: "You can build up to 4 Rocket Miners using advanced Compounds and a lot of Cash, provided you have built a Launch Pad. They each require a number of modules or Parts to build, which get progressively more expensive.  By default they are named as Rocket 1 etc but can be renamed.",
-
-        subHeading11: "Rocket Miners - Launching & Travelling",
-        subBody11: "Rockets must be Fuelled and Launched. They can Travel To to any Asteroid you have discovered with the Space Telescope, provided they are Fuelled and Launched.  Fuelling requires Power and time, and Launching requires good weather.  Once Launched, you can select a destination for your rocket from the discovered Asteroids dropdown, and then click to Travel To it.",
-
-        subHeading12: "Rocket Miners - Mining",
-        subBody12: "Once a Rocket Miner has travelled to an Asteroid, it will automatically Mine Antimatter from the Asteroid until it is exhausted, and will then return and require Fuelling to be used again.  While at an Asteroid, a Rocket Miner can Mine faster if the Boost option is used, available in the Mining panel."
-    },
-    'concepts - late': {
-        subHeading1: "Star Map",
-        subBody1: "The Star Map provides a view of the known Universe, and although it is discovered relatively early in the Game, it comes in to play much later.  Once you start to Study Stars, you can use this Star Map and the Star Data table to plan out your post Rebirth options.",
-
-        subHeading2: "Antimatter",
-        subBody2: "Antimatter is an advanced Resource used as Starship Fuel, and is a key component in progressing towards Rebirthing and completing the Game.  It is Mined from Asteroids using Rocket Miners.",
-
-        subHeading3: "Starship - Construction",
-        subBody3: "Building a Starship is a major milestone. Starships can travel to distant star systems and permit Rebirthing.",
-
-        subHeading4: "Starship - Travelling",
-        subBody4: "Starships can Travel To Studied Star systems, each offering unique Weather, Resources, and challenges when you rebirth on them for a new run.", 
-
-        subHeading5: "Diplomacy",
-        subBody5: "Most Star Systems contain intelligent alien life. You need to perform a Stellar Scan, and build an Envoy and send it, to initiate this. The Scan gives information about the lifeform in the System, it is not mandatory, but if you don't do this, your only option will be war and without knowing the size of the enemy force!  There are several options when these encounters are made, ranging from Bullying them, to trying to Vassalize them, and if all else fails, Conquerig them!  You can improve or worsen their impression of you which can affect their fleet size.  Leaders have traits that can affect how they respond to you, or in the case of war, can buff or reduce their defense, speed, fleet size etc.",
-
-        subHeading6: "Battle",
-        subBody6: "Not all systems are friendly. Sometimes the only option will be to fight it out to try to conquer it.  You must use the Fleet Hangar screen to build an attack force and initiate a battle.  If you lose, all your fleet will be destroyed but not your Star Ship.  You can rebuild, but it is an expensive process so try and win!.",
-
-        subHeading7: "Ascendency Points (AP)",
-        subBody7: "Ascendency Points (AP) are earned by Travelling To Stars. Simply put, the further away the Star is, the more AP will be granted upon Rebirth. They can be spent in the Galactic Market.  You can also gain them by liquidating all your resources and compounds and cash once per run, and also some colonising methods can double the payout also.", 
-
-        subHeading8: "Rebirth",
-        subBody8: "Rebirth resets progress but conquers a New System.", 
-
-        subHeading9: "Galactic Market",
-        subBody9: "The Galactic market is a major unlock, and arrives after your ship arrives at the new System in the first run.  In it, you can trade Resources, Cash and AP.",
-
-        subHeading10: "Galactic Casino",
-        subBody10: "The Galactic Casino allows you to gamble your hard earned products for instant gratification. Test your luck and risk your resources for potential rewards. Rewards gained are for the current run only, not long-term or multi-run prizes.",
-
-        subHeading11: "Casino Points (CP)",
-        subBody11: "Casino Points (CP) are the currency of the Galactic Casino. You must buy CP using Resources or Compounds, and CP is the only way to play the casino games for the various prizes. CP are reset on rebirth.",
-
-        subHeading12: "Ascendency Perks",
-        subBody12: "You can spend acquired AP on permanent buffs that make future runs easier, and the game more replayable and fun!",
-
-        subHeading13: "Black Hole",
-        subBody13: "You can accidentally discover a Black Hole, and once researched it can be used to Time Warp, speeding up travel times and Resource collection. It needs to be charged which takes time, but the time can be reduced with upgrades. You can also increase the time it stays active for and the power of it with further upgrades, and once it is unlocked it is available across different runs.",
-
-        subHeading14: "O-type Stars",
-        subBody14: "O-type stars are the rarest and most violent stars in the galaxy. Each one you control dramatically amplifies the power output of a Power Building type. Expect hardened defenses when attempting to conquer these systems."
-    },
-    'concepts - end goal': {
-        subHeading1: "Ancient Manuscripts",
-        subBody1: "Ancient Manuscripts point you toward MegaStructure star systems. Clues to their location can sometimes surface in the News Ticker, so keep an eye on it.",
-
-        subHeading2: "Megastructures",
-        subBody2: "MegaStructures are extremely difficult to conquer, and hidden in the Galaxy, but the rewards for doing so are massive. Each one you acquire also contributes directly to the destruction of the Miaplacidus forcefield.",
-
-        subHeading3: "Miaplacidus",
-        subBody3: "Miaplacidus - your Homeland - It is protected by a powerful force field maintained by the machine race. As you dismantle MegaStructures, and connect them to your own cause, that force field will weaken until it eventually collapses, where you will then face the almighty battle of your life to recover your Ancestral homeland.",
-
-        subHeading4: "Cosmic Rip",
-        subBody4: "The Cosmic Rip is a dangerous anomaly threatening the future of your people. Once your forces are strong enough to reclaim Miaplacidus, you must first locate the Rip by scanning local space sectors. After locating it, you will undertake costly studies and constructions to stabilise it. Only once stabilised and secured can you finally close it forever.",
-        
-        subHeading5: "The End Goal",
-        subBody5: "Once the Miaplacidus force field is gone, you can attack the Master AI race, reclaim Miaplacidus, reconquer your homeland, and close the Cosmic Rip, forever securing the future for your People! This is the end goal of the game."
-},
-    'philosophies': {
-    subHeading1: "Philosophies",
-    subBody1: "Philosophies are introduced slowly over the first run.  You are encouraged to select one of four possible paths, each of which is a one off, permanent decision that applies for the rest of the game.  Once a Philosophy is chosen, and you complete the first run, a new option shall appear under the Research Tab where you can research a unique special Ability, and a series of unique Repeatable Techs, fitting for the type of Philosophy you selected.  All these bonuses stay with you throughout the game, even persisting through Rebirths.",
-
-    subHeading2: "Special Ability",
-    subBody2: "Each Philosophy grants a unique special ability. These are extremely powerful and in different ways can make the game a lot more fun, and each one affects different mechanics, so it is wise to think carefully when choosing a Philosophy, as it cannot be changed later, and there can only be one Philosophy path per game.",
-
-    subHeading3: "Repeatable Tech",
-    subBody3: "Each Philosophy grants a series of unique and repeatable Techs.  They offer stacking bonuses that are permanent, and cost Research Points.  Depending on the Philosophy chosen the effects are different, and once a few are purchased, become very powerful indeed.",
-
-    subHeading4: "Constructor",
-    subBody4: "The Constructor Philosophy is centered around cheaper and more efficient upgrading. You gain bonuses to AutoBuyer prices, Storage Capacity, Energy and Research Upgrade prices, and a reduction in the cost of Compound Creation.",
-
-    subHeading5: "Supremacist",
-    subBody5: "The Supremacist Philosophy leans into military power and conquest. Expect tougher, faster, cheaper Fleets, and the ability to force enemies into Vassalization.",
-
-    subHeading6: "VoidBorn",
-    subBody6: "Born of the void, expect bonuses relating to Initial Impressions with Civilizations on foreign Systems, better Asteroid searches and Star studies, opportunities to increase AP gain, and even the ability to Pillage the Void for massive Resource and Compound gains!",
-
-    subHeading7: "Expansionist",
-    subBody7: "Expansionists thrive on colonizing and spreading across the stars. Reduce travel time for Rocket Miners and StarShips and make them cheaper, and also gain the ability to have a chance to convince nearby Systems to cede when you conquer one!"
+    helpContent = {
+        'contact': {
+            subHeading1: localize('helpContactSubHeading1', getLanguage()),
+            subBody1: '',
+            subHeading2: localize('helpContactSubHeading2', getLanguage()),
+            subBody2: `https://discord.gg/6bUN6BNtny`,
+            subHeading3: localize('helpContactSubHeading3', getLanguage()),
+            subBody3: localize('helpContactSubBody3', getLanguage()),
+        },
+        'get started': {
+            subHeading1: localize('helpGetStartedSubHeading1', getLanguage()),
+            subBody1: localize('helpGetStartedSubBody1', getLanguage()),
+        },
+        'story': {
+            subHeading1: localize('helpStorySubHeading1', getLanguage()),
+            subBody1: localize('helpStorySubBody1', getLanguage()),
+            subHeading2: localize('helpStorySubHeading2', getLanguage()),
+            subBody2: localize('helpStorySubBody2', getLanguage()),
+            subHeading3: localize('helpStorySubHeading3', getLanguage()),
+            subBody3: localize('helpStorySubBody3', getLanguage()),
+        },
+        'concepts - early': {
+            subHeading1: localize('helpConceptsEarlySubHeading1', getLanguage()),
+            subBody1: localize('helpConceptsEarlySubBody1', getLanguage()),
+            subHeading2: localize('helpConceptsEarlySubHeading2', getLanguage()),
+            subBody2: localize('helpConceptsEarlySubBody2', getLanguage()),
+            subHeading3: localize('helpConceptsEarlySubHeading3', getLanguage()),
+            subBody3: localize('helpConceptsEarlySubBody3', getLanguage()),
+            subHeading4: localize('helpConceptsEarlySubHeading4', getLanguage()),
+            subBody4: localize('helpConceptsEarlySubBody4', getLanguage()),
+            subHeading5: localize('helpConceptsEarlySubHeading5', getLanguage()),
+            subBody5: localize('helpConceptsEarlySubBody5', getLanguage()),
+            subHeading6: localize('helpConceptsEarlySubHeading6', getLanguage()),
+            subBody6: localize('helpConceptsEarlySubBody6', getLanguage()),
+            subHeading7: localize('helpConceptsEarlySubHeading7', getLanguage()),
+            subBody7: localize('helpConceptsEarlySubBody7', getLanguage()),
+            subHeading8: localize('helpConceptsEarlySubHeading8', getLanguage()),
+            subBody8: localize('helpConceptsEarlySubBody8', getLanguage()),
+            subHeading9: localize('helpConceptsEarlySubHeading9', getLanguage()),
+            subBody9: localize('helpConceptsEarlySubBody9', getLanguage()),
+            subHeading10: localize('helpConceptsEarlySubHeading10', getLanguage()),
+            subBody10: localize('helpConceptsEarlySubBody10', getLanguage()),
+            subHeading11: localize('helpConceptsEarlySubHeading11', getLanguage()),
+            subBody11: localize('helpConceptsEarlySubBody11', getLanguage()),
+        },
+        'concepts - mid': {
+            subHeading1: localize('helpConceptsMidSubHeading1', getLanguage()),
+            subBody1: localize('helpConceptsMidSubBody1', getLanguage()),
+            subHeading2: localize('helpConceptsMidSubHeading2', getLanguage()),
+            subBody2: localize('helpConceptsMidSubBody2', getLanguage()),
+            subHeading3: localize('helpConceptsMidSubHeading3', getLanguage()),
+            subBody3: localize('helpConceptsMidSubBody3', getLanguage()),
+            subHeading4: localize('helpConceptsMidSubHeading4', getLanguage()),
+            subBody4: localize('helpConceptsMidSubBody4', getLanguage()),
+            subHeading5: localize('helpConceptsMidSubHeading5', getLanguage()),
+            subBody5: localize('helpConceptsMidSubBody5', getLanguage()),
+            subHeading6: localize('helpConceptsMidSubHeading6', getLanguage()),
+            subBody6: localize('helpConceptsMidSubBody6', getLanguage()),
+            subHeading7: localize('helpConceptsMidSubHeading7', getLanguage()),
+            subBody7: localize('helpConceptsMidSubBody7', getLanguage()),
+            subHeading8: localize('helpConceptsMidSubHeading8', getLanguage()),
+            subBody8: localize('helpConceptsMidSubBody8', getLanguage()),
+            subHeading9: localize('helpConceptsMidSubHeading9', getLanguage()),
+            subBody9: localize('helpConceptsMidSubBody9', getLanguage()),
+            subHeading10: localize('helpConceptsMidSubHeading10', getLanguage()),
+            subBody10: localize('helpConceptsMidSubBody10', getLanguage()),
+            subHeading11: localize('helpConceptsMidSubHeading11', getLanguage()),
+            subBody11: localize('helpConceptsMidSubBody11', getLanguage()),
+            subHeading12: localize('helpConceptsMidSubHeading12', getLanguage()),
+            subBody12: localize('helpConceptsMidSubBody12', getLanguage()),
+        },
+        'concepts - late': {
+            subHeading1: localize('helpConceptsLateSubHeading1', getLanguage()),
+            subBody1: localize('helpConceptsLateSubBody1', getLanguage()),
+            subHeading2: localize('helpConceptsLateSubHeading2', getLanguage()),
+            subBody2: localize('helpConceptsLateSubBody2', getLanguage()),
+            subHeading3: localize('helpConceptsLateSubHeading3', getLanguage()),
+            subBody3: localize('helpConceptsLateSubBody3', getLanguage()),
+            subHeading4: localize('helpConceptsLateSubHeading4', getLanguage()),
+            subBody4: localize('helpConceptsLateSubBody4', getLanguage()),
+            subHeading5: localize('helpConceptsLateSubHeading5', getLanguage()),
+            subBody5: localize('helpConceptsLateSubBody5', getLanguage()),
+            subHeading6: localize('helpConceptsLateSubHeading6', getLanguage()),
+            subBody6: localize('helpConceptsLateSubBody6', getLanguage()),
+            subHeading7: localize('helpConceptsLateSubHeading7', getLanguage()),
+            subBody7: localize('helpConceptsLateSubBody7', getLanguage()),
+            subHeading8: localize('helpConceptsLateSubHeading8', getLanguage()),
+            subBody8: localize('helpConceptsLateSubBody8', getLanguage()),
+            subHeading9: localize('helpConceptsLateSubHeading9', getLanguage()),
+            subBody9: localize('helpConceptsLateSubBody9', getLanguage()),
+            subHeading10: localize('helpConceptsLateSubHeading10', getLanguage()),
+            subBody10: localize('helpConceptsLateSubBody10', getLanguage()),
+            subHeading11: localize('helpConceptsLateSubHeading11', getLanguage()),
+            subBody11: localize('helpConceptsLateSubBody11', getLanguage()),
+            subHeading12: localize('helpConceptsLateSubHeading12', getLanguage()),
+            subBody12: localize('helpConceptsLateSubBody12', getLanguage()),
+            subHeading13: localize('helpConceptsLateSubHeading13', getLanguage()),
+            subBody13: localize('helpConceptsLateSubBody13', getLanguage()),
+            subHeading14: localize('helpConceptsLateSubHeading14', getLanguage()),
+            subBody14: localize('helpConceptsLateSubBody14', getLanguage()),
+        },
+        'concepts - end goal': {
+            subHeading1: localize('helpConceptsEndGoalSubHeading1', getLanguage()),
+            subBody1: localize('helpConceptsEndGoalSubBody1', getLanguage()),
+            subHeading2: localize('helpConceptsEndGoalSubHeading2', getLanguage()),
+            subBody2: localize('helpConceptsEndGoalSubBody2', getLanguage()),
+            subHeading3: localize('helpConceptsEndGoalSubHeading3', getLanguage()),
+            subBody3: localize('helpConceptsEndGoalSubBody3', getLanguage()),
+            subHeading4: localize('helpConceptsEndGoalSubHeading4', getLanguage()),
+            subBody4: localize('helpConceptsEndGoalSubBody4', getLanguage()),
+            subHeading5: localize('helpConceptsEndGoalSubHeading5', getLanguage()),
+            subBody5: localize('helpConceptsEndGoalSubBody5', getLanguage()),
+        },
+        'philosophies': {
+            subHeading1: localize('helpPhilosophiesSubHeading1', getLanguage()),
+            subBody1: localize('helpPhilosophiesSubBody1', getLanguage()),
+            subHeading2: localize('helpPhilosophiesSubHeading2', getLanguage()),
+            subBody2: localize('helpPhilosophiesSubBody2', getLanguage()),
+            subHeading3: localize('helpPhilosophiesSubHeading3', getLanguage()),
+            subBody3: localize('helpPhilosophiesSubBody3', getLanguage()),
+            subHeading4: localize('helpPhilosophiesSubHeading4', getLanguage()),
+            subBody4: localize('helpPhilosophiesSubBody4', getLanguage()),
+            subHeading5: localize('helpPhilosophiesSubHeading5', getLanguage()),
+            subBody5: localize('helpPhilosophiesSubBody5', getLanguage()),
+            subHeading6: localize('helpPhilosophiesSubHeading6', getLanguage()),
+            subBody6: localize('helpPhilosophiesSubBody6', getLanguage()),
+            subHeading7: localize('helpPhilosophiesSubHeading7', getLanguage()),
+            subBody7: localize('helpPhilosophiesSubBody7', getLanguage()),
+        }
     }
 }
 
