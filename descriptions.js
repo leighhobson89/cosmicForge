@@ -2839,6 +2839,10 @@ export function initialiseDescriptions() {
             subBody13: localize('helpConceptsLateSubBody13', getLanguage()),
             subHeading14: localize('helpConceptsLateSubHeading14', getLanguage()),
             subBody14: localize('helpConceptsLateSubBody14', getLanguage()),
+            subHeading15: localize('helpConceptsLateSubHeading15', getLanguage()),
+            subBody15: localize('helpConceptsLateSubBody15', getLanguage()),
+            subHeading16: localize('helpConceptsLateSubHeading16', getLanguage()),
+            subBody16: localize('helpConceptsLateSubBody16', getLanguage())
         },
         'concepts - end goal': {
             subHeading1: localize('helpConceptsEndGoalSubHeading1', getLanguage()),
