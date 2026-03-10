@@ -3446,8 +3446,15 @@ export function drawMegaStructureTableText() {
     function conditionForId(id) {
         if (id.startsWith('name')) {
             const owned = (getMegaStructuresInPossessionArray() || []).map((item) => String(item).toLowerCase());
-            const name = String(getMegaStructureTableText()[id] || '').toLowerCase();
-            return owned.includes(name);
+            const structureKey = id.replace('name', '');
+            const structureKeyToNameMap = {
+                'DysonSphere': 'dyson sphere',
+                'CelestialProcessingCore': 'celestial processing core',
+                'PlasmaForge': 'plasma forge',
+                'GalacticMemoryArchive': 'galactic memory archive'
+            };
+            const name = structureKeyToNameMap[structureKey];
+            return name && owned.includes(name);
         }
 
         const researched = getMegaStructureTechsResearched();
