@@ -824,7 +824,7 @@ import { playClickSfx, sfxPlayer, weatherAmbienceManager, backgroundAudio } from
 import { timerManager } from './timerManager.js';
 import { timerManagerDelta } from './timerManagerDelta.js';
 
-import { initialiseDescriptions, megaStructureTableText, getStarTypeByName, modalOTypeStarTechAcquiredHeader, modalOTypeStarTechAcquiredText } from './descriptions.js';
+import { initialiseDescriptions, getMegaStructureTableText, getStarTypeByName, modalOTypeStarTechAcquiredHeader, modalOTypeStarTechAcquiredText } from './descriptions.js';
 
 import { drawTab5Content } from './drawTab5Content.js';
 import { handleTechnologyButtonClick } from './drawTab3Content.js';
@@ -3387,7 +3387,7 @@ export function drawMegaStructureTableText() {
     const tableContainer = document.getElementById('tableContainer');
     if (!tableContainer) return;
 
-    for (const [id, text] of Object.entries(megaStructureTableText)) {
+    for (const [id, text] of Object.entries(getMegaStructureTableText())) {
         const el = document.getElementById(id);
         if (el) {
             el.innerHTML = `<span class="red-disabled-text">${text}</span>`;
@@ -3407,7 +3407,7 @@ export function drawMegaStructureTableText() {
             'GalacticMemoryArchive'
         ];
 
-        for (const [id, _] of Object.entries(megaStructureTableText)) {
+        for (const [id, _] of Object.entries(getMegaStructureTableText())) {
             const el = document.getElementById(id);
             if (!el) continue;
 
@@ -3446,7 +3446,7 @@ export function drawMegaStructureTableText() {
     function conditionForId(id) {
         if (id.startsWith('name')) {
             const owned = (getMegaStructuresInPossessionArray() || []).map((item) => String(item).toLowerCase());
-            const name = String(megaStructureTableText[id] || '').toLowerCase();
+            const name = String(getMegaStructureTableText()[id] || '').toLowerCase();
             return owned.includes(name);
         }
 
