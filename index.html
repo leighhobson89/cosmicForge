@@ -315,7 +315,7 @@
                     </div>
                     <div class="row-side-menu d-flex">
                         <div class="row-side-menu-item">
-                            <p class="tab3.option2">Technology</p>
+                            <p id="technologyOption" class="tab3.option2">Technology</p>
                         </div>
                         <div class="row-side-menu-item right-align">
                             <p class="tab3.option2"></p>
@@ -326,7 +326,7 @@
                     </div>
                     <div class="row-side-menu d-flex">
                         <div class="row-side-menu-item">
-                            <p class="tab3.option3">Tech Tree</p>
+                            <p id="techTreeOption" class="tab3.option3">Tech Tree</p>
                         </div>
                         <div class="row-side-menu-item right-align">
                             <p class="tab3.option3"></p>
@@ -337,7 +337,7 @@
                     </div>
                     <div class="row-side-menu d-flex invisible">
                         <div class="row-side-menu-item">
-                            <p id ="philosophyOption" class="tab3.option4">Philosophy</p>
+                            <p id="philosophyOption" class="tab3.option4">Philosophy</p>
                         </div>
                         <div class="row-side-menu-item right-align">
                             <p class="tab3.option4"></p>
@@ -784,8 +784,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    
+                    </div>                    
                 </div>
             </div>
             <div class="container-item-content tab-8">
@@ -867,17 +866,17 @@
                         <div class="collapsible-content open">
                             <div class="row-side-menu d-flex">
                                 <div class="row-side-menu-item">
-                                    <p class="tab9.option10 inset-paragraph">Achievements</p>
+                                    <p id="achievementsOption" class="tab9.option10 inset-paragraph">Achievements</p>
                                 </div>
                             </div>
                             <div class="row-side-menu d-flex">
                                 <div class="row-side-menu-item">
-                                    <p class="tab9.option14 inset-paragraph">Events</p>
+                                    <p id="eventsOption" class="tab9.option14 inset-paragraph">Events</p>
                                 </div>
                             </div>
                             <div class="row-side-menu d-flex">
                                 <div class="row-side-menu-item">
-                                    <p class="tab9.option8 inset-paragraph">Statistics</p>
+                                    <p id="statisticsOption" class="tab9.option8 inset-paragraph">Statistics</p>
                                 </div>
                             </div>
                         </div>
@@ -955,6 +954,21 @@
             <button class="close-btn">×</button>
         </div>
         <div class="debug-content">
+            <div class="debug-row timewarp-row">
+                <div class="debug-label">Language:</div>
+                <div class="debug-inputs timewarp-inputs">
+                    <select id="debugLanguageSelect" class="debug-select">
+                        <option value="en" selected>English</option>
+                        <option value="es">Spanish</option>
+                        <option value="de">German</option>
+                        <option value="it">Italian</option>
+                        <option value="fr">French</option>
+                    </select>
+                </div>
+                <div class="timewarp-actions">
+                    <button id="debugSetLanguageButton" class="option-button">Set</button>
+                </div>
+            </div>
             <div class="debug-row timewarp-row">
                 <div class="debug-label">Timewarp:</div>
                 <div class="debug-inputs timewarp-inputs">

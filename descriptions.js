@@ -14,7 +14,7 @@ export let optionDescriptions;
 export let galacticMarketTooltipDescriptions;
 export let newsTickerContent;
 export let helpContent;
-export let statisticsContent;
+export let statisticsContent = null;
 export let rocketNames;
 export let starNames;
 export let achievementNotifications;
@@ -2416,327 +2416,327 @@ export function initialiseDescriptions() {
             localize('newsNoPrizeHarmonics', getLanguage()),
         ]
     };
-}
 
-statisticsContent = {
-    'overview': {
-        subHeading1: "Time Played ",
-        subBody1: "0",
+    statisticsContent = {
+        'overview': {
+            subHeading1: localize('statsOverviewSubHeading1', getLanguage()),
+            subBody1: "NoData",
 
-        subHeading2: "Pioneer ",
-        subBody2: "Leigh",
+            subHeading2: localize('statsOverviewSubHeading2', getLanguage()),
+            subBody2: "NoData",
 
-        subHeading3: "Current AP ",
-        subBody3: "10000",
+            subHeading3: localize('statsOverviewSubHeading3', getLanguage()),
+            subBody3: "NoData",
 
-        subHeading4: "AP Gain ",
-        subBody4: "10000",
+            subHeading4: localize('statsOverviewSubHeading4', getLanguage()),
+            subBody4: "NoData",
 
-        subHeading5: "Run ",
-        subBody5: "1",
+            subHeading5: localize('statsOverviewSubHeading5', getLanguage()),
+            subBody5: "NoData",
 
-        subHeading6: "Unique News Tickers Seen ",
-        subBody6: "1000",
+            subHeading6: localize('statsOverviewSubHeading6', getLanguage()),
+            subBody6: "NoData",
 
-        subHeading7: "News Ticker Prizes Collected ",
-        subBody7: "10",
+            subHeading7: localize('statsOverviewSubHeading7', getLanguage()),
+            subBody7: "NoData",
 
-        subHeading8: "Theme ",
-        subBody8: "Terminal",
+            subHeading8: localize('statsOverviewSubHeading8', getLanguage()),
+            subBody8: "NoData",
 
-        subHeading9: "Antimatter Mined ",
-        subBody9: "10000",
+            subHeading9: localize('statsOverviewSubHeading9', getLanguage()),
+            subBody9: "NoData",
 
-        subHeading10: "Total Asteroids Discovered ",
-        subBody10: "50",
+            subHeading10: localize('statsOverviewSubHeading10', getLanguage()),
+            subBody10: "NoData",
 
-        subHeading11: "Legendary Asteroids Discovered ",
-        subBody11: "5",
+            subHeading11: localize('statsOverviewSubHeading11', getLanguage()),
+            subBody11: "NoData",
 
-        subHeading12: "Rockets Launched ",
-        subBody12: "156",
+            subHeading12: localize('statsOverviewSubHeading12', getLanguage()),
+            subBody12: "NoData",
 
-        subHeading13: "Star Ships Launched ",
-        subBody13: "3"
-    },
-    'run': {
-        subHeading1: "Run Time",
-        subBody1: "100d 18h 10m 32s",
+            subHeading13: localize('statsOverviewSubHeading13', getLanguage()),
+            subBody13: "NoData"
+        },
+        'run': {
+            subHeading1: localize('statsRunSubHeading1', getLanguage()),
+            subBody1: "NoData",
 
-        subHeading2: "Star System",
-        subBody2: "Spica",
+            subHeading2: localize('statsRunSubHeading2', getLanguage()),
+            subBody2: "NoData",
 
-        subHeading3: "Current Weather",
-        subBody3: "☀",
+            subHeading3: localize('statsRunSubHeading3', getLanguage()),
+            subBody3: "NoData",
 
-        subHeading4: "Cash",
-        subBody4: "10000",
+            subHeading4: localize('statsRunSubHeading4', getLanguage()),
+            subBody4: "NoData",
 
-        subHeading5: "AP Anticipated",
-        subBody5: "3",
+            subHeading5: localize('statsRunSubHeading5', getLanguage()),
+            subBody5: "NoData",
 
-        subHeading6: "Antimatter",
-        subBody6: "10000"
-    },
-    'events': {
-        subHeading1: "Power Plant Explosion",
-        subBody1: "0",
+            subHeading6: localize('statsRunSubHeading6', getLanguage()),
+            subBody6: "NoData"
+        },
+        'events': {
+            subHeading1: localize('statsEventsSubHeading1', getLanguage()),
+            subBody1: "NoData",
 
-        subHeading2: "Battery Explosion",
-        subBody2: "0",
+            subHeading2: localize('statsEventsSubHeading2', getLanguage()),
+            subBody2: "NoData",
 
-        subHeading3: "Science Theft",
-        subBody3: "0",
+            subHeading3: localize('statsEventsSubHeading3', getLanguage()),
+            subBody3: "NoData",
 
-        subHeading4: "Research Breakthrough",
-        subBody4: "0",
+            subHeading4: localize('statsEventsSubHeading4', getLanguage()),
+            subBody4: "NoData",
 
-        subHeading5: "Rocket Instant Arrival",
-        subBody5: "0",
+            subHeading5: localize('statsEventsSubHeading5', getLanguage()),
+            subBody5: "NoData",
 
-        subHeading6: "Starship Lost In Space",
-        subBody6: "0",
+            subHeading6: localize('statsEventsSubHeading6', getLanguage()),
+            subBody6: "NoData",
 
-        subHeading7: "Antimatter Reaction",
-        subBody7: "0",
+            subHeading7: localize('statsEventsSubHeading7', getLanguage()),
+            subBody7: "NoData",
 
-        subHeading8: "Stock Loss",
-        subBody8: "0",
+            subHeading8: localize('statsEventsSubHeading8', getLanguage()),
+            subBody8: "NoData",
 
-        subHeading9: "Galactic Market Lockdown",
-        subBody9: "0",
+            subHeading9: localize('statsEventsSubHeading9', getLanguage()),
+            subBody9: "NoData",
 
-        subHeading10: "Endless Summer",
-        subBody10: "0",
+            subHeading10: localize('statsEventsSubHeading10', getLanguage()),
+            subBody10: "NoData",
 
-        subHeading11: "Miner Broke Down",
-        subBody11: "0",
+            subHeading11: localize('statsEventsSubHeading11', getLanguage()),
+            subBody11: "NoData",
 
-        subHeading12: "Supply Chain Disruption",
-        subBody12: "0",
+            subHeading12: localize('statsEventsSubHeading12', getLanguage()),
+            subBody12: "NoData",
 
-        subHeading13: "Black Hole Instability",
-        subBody13: "0",
-    },
-    'resources': {
-        subHeading1: "Hydrogen ",
-        subBody1: "10000",
+            subHeading13: localize('statsEventsSubHeading13', getLanguage()),
+            subBody13: "NoData",
+        },
+        'resources': {
+            subHeading1: localize('statsResourcesSubHeading1', getLanguage()),
+            subBody1: "NoData",
 
-        subHeading2: "Helium ",
-        subBody2: "10000",
+            subHeading2: localize('statsResourcesSubHeading2', getLanguage()),
+            subBody2: "NoData",
 
-        subHeading3: "Carbon ",
-        subBody3: "10000",
+            subHeading3: localize('statsResourcesSubHeading3', getLanguage()),
+            subBody3: "NoData",
 
-        subHeading4: "Neon ",
-        subBody4: "10000",
+            subHeading4: localize('statsResourcesSubHeading4', getLanguage()),
+            subBody4: "NoData",
 
-        subHeading5: "Oxygen ",
-        subBody5: "10000",
+            subHeading5: localize('statsResourcesSubHeading5', getLanguage()),
+            subBody5: "NoData",
 
-        subHeading6: "Sodium ",
-        subBody6: "10000",
+            subHeading6: localize('statsResourcesSubHeading6', getLanguage()),
+            subBody6: "NoData",
 
-        subHeading7: "Silicon ",
-        subBody7: "10000",
+            subHeading7: localize('statsResourcesSubHeading7', getLanguage()),
+            subBody7: "NoData",
 
-        subHeading8: "Iron ",
-        subBody8: "10000"
-    },
-    'compounds': {
-        subHeading1: "Diesel ",
-        subBody1: "10000",
+            subHeading8: localize('statsResourcesSubHeading8', getLanguage()),
+            subBody8: "NoData"
+        },
+        'compounds': {
+            subHeading1: localize('statsCompoundsSubHeading1', getLanguage()),
+            subBody1: "NoData",
 
-        subHeading2: "Glass ",
-        subBody2: "10000",
+            subHeading2: localize('statsCompoundsSubHeading2', getLanguage()),
+            subBody2: "NoData",
 
-        subHeading3: "Steel ",
-        subBody3: "10000",
+            subHeading3: localize('statsCompoundsSubHeading3', getLanguage()),
+            subBody3: "NoData",
 
-        subHeading4: "Concrete ",
-        subBody4: "10000",
+            subHeading4: localize('statsCompoundsSubHeading4', getLanguage()),
+            subBody4: "NoData",
 
-        subHeading5: "Water ",
-        subBody5: "10000",
+            subHeading5: localize('statsCompoundsSubHeading5', getLanguage()),
+            subBody5: "NoData",
 
-        subHeading6: "Titanium ",
-        subBody6: "10000"
-    },
-    'research': {
-        subHeading1: "Research Points ",
-        subBody1: "10000",
+            subHeading6: localize('statsCompoundsSubHeading6', getLanguage()),
+            subBody6: "NoData"
+        },
+        'research': {
+            subHeading1: localize('statsResearchSubHeading1', getLanguage()),
+            subBody1: "NoData",
 
-        subHeading2: "Science Kits ",
-        subBody2: "10000",
+            subHeading2: localize('statsResearchSubHeading2', getLanguage()),
+            subBody2: "NoData",
 
-        subHeading3: "Science Clubs ",
-        subBody3: "10000",
+            subHeading3: localize('statsResearchSubHeading3', getLanguage()),
+            subBody3: "NoData",
 
-        subHeading4: "Science Labs ",
-        subBody4: "10000",
+            subHeading4: localize('statsResearchSubHeading4', getLanguage()),
+            subBody4: "NoData",
 
-        subHeading5: "Techs Unlocked",
-        subBody5: "0"
-    },
-    'energy': {
-        subHeading1: "Power",
-        subBody1: "ON",
+            subHeading5: localize('statsResearchSubHeading5', getLanguage()),
+            subBody5: "NoData"
+        },
+        'energy': {
+            subHeading1: localize('statsEnergySubHeading1', getLanguage()),
+            subBody1: "NoData",
 
-        subHeading2: "Total Energy",
-        subBody2: "10000 KW",
+            subHeading2: localize('statsEnergySubHeading2', getLanguage()),
+            subBody2: "NoData",
 
-        subHeading3: "Total Production",
-        subBody3: "10000 KW",
+            subHeading3: localize('statsEnergySubHeading3', getLanguage()),
+            subBody3: "NoData",
 
-        subHeading4: "Total Consumption",
-        subBody4: "10000 KW",
+            subHeading4: localize('statsEnergySubHeading4', getLanguage()),
+            subBody4: "NoData",
 
-        subHeading5: "Total Battery Storage",
-        subBody5: "10000 MWh",
+            subHeading5: localize('statsEnergySubHeading5', getLanguage()),
+            subBody5: "NoData",
 
-        subHeading6: "Times Tripped",
-        subBody6: "10000",
+            subHeading6: localize('statsEnergySubHeading6', getLanguage()),
+            subBody6: "NoData",
 
-        subHeading7: "Basic Power Plants",
-        subBody7: "10000",
+            subHeading7: localize('statsEnergySubHeading7', getLanguage()),
+            subBody7: "NoData",
 
-        subHeading8: "Advanced Power Plants",
-        subBody8: "10000",
+            subHeading8: localize('statsEnergySubHeading8', getLanguage()),
+            subBody8: "NoData",
 
-        subHeading9: "Solar Power Plants",
-        subBody9: "10000",
+            subHeading9: localize('statsEnergySubHeading9', getLanguage()),
+            subBody9: "NoData",
 
-        subHeading10: "Sodium Ion Batteries",
-        subBody10: "10000",
+            subHeading10: localize('statsEnergySubHeading10', getLanguage()),
+            subBody10: "NoData",
 
-        subHeading11: "Battery2",
-        subBody11: "10000",
+            subHeading11: localize('statsEnergySubHeading11', getLanguage()),
+            subBody11: "NoData",
 
-        subHeading12: "Battery3",
-        subBody12: "10000"
-    },
-    'spaceMining': {
-        subHeading1: "Space Telescope Built",
-        subBody1: "N/A",
+            subHeading12: localize('statsEnergySubHeading12', getLanguage()),
+            subBody12: "NoData"
+        },
+        'spaceMining': {
+            subHeading1: localize('statsSpaceMiningSubHeading1', getLanguage()),
+            subBody1: "NoData",
 
-        subHeading2: "Launch Pad Built",
-        subBody2: "N/A",
+            subHeading2: localize('statsSpaceMiningSubHeading2', getLanguage()),
+            subBody2: "NoData",
 
-        subHeading3: "Rockets Built",
-        subBody3: "4",
+            subHeading3: localize('statsSpaceMiningSubHeading3', getLanguage()),
+            subBody3: "NoData",
 
-        subHeading4: "Asteroids Discovered",
-        subBody4: "15",
+            subHeading4: localize('statsSpaceMiningSubHeading4', getLanguage()),
+            subBody4: "NoData",
 
-        subHeading5: "Asteroids Mined",
-        subBody5: "10",
-    },
-    'interstellar': {
-        subHeading1: "Star Study Range",
-        subBody1: "N/A",
+            subHeading5: localize('statsSpaceMiningSubHeading5', getLanguage()),
+            subBody5: "NoData",
+        },
+        'interstellar': {
+            subHeading1: localize('statsInterstellarSubHeading1', getLanguage()),
+            subBody1: "NoData",
 
-        subHeading2: "Star Ship Built",
-        subBody2: "N/A",
+            subHeading2: localize('statsInterstellarSubHeading2', getLanguage()),
+            subBody2: "NoData",
 
-        subHeading3: "Star Ship Distance Travelled",
-        subBody3: "0ly",
+            subHeading3: localize('statsInterstellarSubHeading3', getLanguage()),
+            subBody3: "NoData",
 
-        subHeading4: "System Scanned",
-        subBody4: "N/A",
+            subHeading4: localize('statsInterstellarSubHeading4', getLanguage()),
+            subBody4: "NoData",
 
-        subHeading5: "Fleet Attack Strength",
-        subBody5: "10000",
+            subHeading5: localize('statsInterstellarSubHeading5', getLanguage()),
+            subBody5: "NoData",
 
-        subHeading6: "Envoy",
-        subBody6: "8",
+            subHeading6: localize('statsInterstellarSubHeading6', getLanguage()),
+            subBody6: "NoData",
 
-        subHeading7: "Scout",
-        subBody7: "12",
+            subHeading7: localize('statsInterstellarSubHeading7', getLanguage()),
+            subBody7: "NoData",
 
-        subHeading8: "Marauder",
-        subBody8: "8",
+            subHeading8: localize('statsInterstellarSubHeading8', getLanguage()),
+            subBody8: "NoData",
 
-        subHeading9: "Land Stalker",
-        subBody9: "2",
+            subHeading9: localize('statsInterstellarSubHeading9', getLanguage()),
+            subBody9: "NoData",
 
-        subHeading10: "Naval Strafer",
-        subBody10: "2",
+            subHeading10: localize('statsInterstellarSubHeading10', getLanguage()),
+            subBody10: "NoData",
 
-        subHeading11: "Enemy",
-        subBody11: "Xythians",
+            subHeading11: localize('statsInterstellarSubHeading11', getLanguage()),
+            subBody11: "NoData",
 
-        subHeading12: "Enemy Total Defence Overcome",
-        subBody12: "10000",
+            subHeading12: localize('statsInterstellarSubHeading12', getLanguage()),
+            subBody12: "NoData",
 
-        subHeading13: "Enemy Total Defence Remaining",
-        subBody13: "10000",
+            subHeading13: localize('statsInterstellarSubHeading13', getLanguage()),
+            subBody13: "NoData",
 
-        subHeading14: "AP From Star Voyage",
-        subBody14: "1",
+            subHeading14: localize('statsInterstellarSubHeading14', getLanguage()),
+            subBody14: "NoData",
 
-        subHeading15: "Black Hole Discovered",
-        subBody15: "N/A",
+            subHeading15: localize('statsInterstellarSubHeading15', getLanguage()),
+            subBody15: "NoData",
 
-        subHeading16: "Black Hole Always Active",
-        subBody16: "N/A",
+            subHeading16: localize('statsInterstellarSubHeading16', getLanguage()),
+            subBody16: "NoData",
 
-        subHeading17: "Black Hole Strength",
-        subBody17: "N/A",
-    }
-    ,
-    'galactic Casino': {
-        subHeading1: "Casino Points Spent",
-        subBody1: "0",
+            subHeading17: localize('statsInterstellarSubHeading17', getLanguage()),
+            subBody17: "NoData",
+        }
+        ,
+        'galactic Casino': {
+            subHeading1: localize('statsGalacticcasinoSubHeading1', getLanguage()),
+            subBody1: "NoData",
 
-        subHeading2: "Double Or Nothing Played",
-        subBody2: "0",
+            subHeading2: localize('statsGalacticcasinoSubHeading2', getLanguage()),
+            subBody2: "NoData",
 
-        subHeading3: "Double Or Nothing Won",
-        subBody3: "0",
+            subHeading3: localize('statsGalacticcasinoSubHeading3', getLanguage()),
+            subBody3: "NoData",
 
-        subHeading4: "Wheel Of Fortune Played",
-        subBody4: "0",
+            subHeading4: localize('statsGalacticcasinoSubHeading4', getLanguage()),
+            subBody4: "NoData",
 
-        subHeading5: "Wheel Of Fortune Won",
-        subBody5: "0",
+            subHeading5: localize('statsGalacticcasinoSubHeading5', getLanguage()),
+            subBody5: "NoData",
 
-        subHeading6: "Wheel Special Won",
-        subBody6: "0",
+            subHeading6: localize('statsGalacticcasinoSubHeading6', getLanguage()),
+            subBody6: "NoData",
 
-        subHeading7: "Higher/Lower Played",
-        subBody7: "0",
+            subHeading7: localize('statsGalacticcasinoSubHeading7', getLanguage()),
+            subBody7: "NoData",
 
-        subHeading8: "Higher/Lower Won",
-        subBody8: "0",
+            subHeading8: localize('statsGalacticcasinoSubHeading8', getLanguage()),
+            subBody8: "NoData",
 
-        subHeading9: "VoidSeer Played",
-        subBody9: "0",
+            subHeading9: localize('statsGalacticcasinoSubHeading9', getLanguage()),
+            subBody9: "NoData",
 
-        subHeading10: "VoidSeer Won",
-        subBody10: "0",
-    }
-    ,
-    'cosmic Rip Chapter': {
-        subHeading1: "Galactic Points Earned",
-        subBody1: "N/A",
+            subHeading10: localize('statsGalacticcasinoSubHeading10', getLanguage()),
+            subBody10: "NoData",
+        }
+        ,
+        'cosmic Rip Chapter': {
+            subHeading1: localize('statsCosmicripchapterSubHeading1', getLanguage()),
+            subBody1: "NoData",
 
-        subHeading2: "Galactic Points Spent",
-        subBody2: "N/A",
+            subHeading2: localize('statsCosmicripchapterSubHeading2', getLanguage()),
+            subBody2: "NoData",
 
-        subHeading3: "Rip Telemetry Data Gained",
-        subBody3: "N/A",
+            subHeading3: localize('statsCosmicripchapterSubHeading3', getLanguage()),
+            subBody3: "NoData",
 
-        subHeading4: "Cosmic Rip Chapter Unlock",
-        subBody4: "N/A",
+            subHeading4: localize('statsCosmicripchapterSubHeading4', getLanguage()),
+            subBody4: "NoData",
 
-        subHeading5: "Near Space Scanner Array Restored",
-        subBody5: "N/A",
+            subHeading5: localize('statsCosmicripchapterSubHeading5', getLanguage()),
+            subBody5: "NoData",
 
-        subHeading6: "Cosmic Rip Located",
-        subBody6: "N/A",
+            subHeading6: localize('statsCosmicripchapterSubHeading6', getLanguage()),
+            subBody6: "NoData",
 
-        subHeading7: "Cosmic Rip Stabilised",
-        subBody7: "N/A",
+            subHeading7: localize('statsCosmicripchapterSubHeading7', getLanguage()),
+            subBody7: "NoData",
+        }
     }
 }
 
@@ -3962,7 +3962,59 @@ export function getHelpContent(section, type) {
     return [];
 }
 
+export function getStatKeyFromLocalizedName(localizedName) {
+    if (!statisticsContent) return null;
+    
+    const resourceKeys = ['hydrogen', 'helium', 'carbon', 'neon', 'oxygen', 'sodium', 'silicon', 'iron'];
+    const compoundKeys = ['diesel', 'glass', 'steel', 'concrete', 'water', 'titanium'];
+    const researchKeys = ['researchPoints', 'scienceKits', 'scienceClubs', 'scienceLabs', 'techsUnlocked'];
+    const energyKeys = ['power', 'totalEnergy', 'totalProduction', 'totalConsumption', 'totalBatteryStorage', 'timesTripped', 'basicPowerPlants', 'advancedPowerPlants', 'solarPowerPlants', 'sodiumIonBatteries', 'battery2', 'battery3'];
+    const spaceMiningKeys = ['spaceTelescopeBuilt', 'launchPadBuilt', 'rocketsBuilt', 'asteroidsDiscovered', 'asteroidsMined'];
+    const interstellarKeys = ['starStudyRange', 'starShipBuilt', 'starShipDistanceTravelled', 'systemScanned', 'fleetAttackStrength', 'envoy', 'scout', 'marauder', 'landStalker', 'navalStrafer', 'enemy', 'enemyTotalDefenceOvercome', 'enemyTotalDefenceRemaining', 'apFromStarVoyage', 'blackHoleDiscovered', 'blackHoleAlwaysActive', 'blackHoleStrength'];
+    const casinoKeys = ['casinoPointsSpent', 'doubleOrNothingPlayed', 'doubleOrNothingWon', 'wheelOfFortunePlayed', 'wheelOfFortuneWon', 'wheelSpecialWon', 'higherLowerPlayed', 'higherLowerWon', 'voidSeerPlayed', 'voidSeerWon'];
+    const cosmicRipKeys = ['galacticPointsEarned', 'galacticPointsSpent', 'ripTelemetryDataGained', 'cosmicRipChapterUnlock', 'nearSpaceScannerArrayRestored', 'cosmicRipLocated', 'cosmicRipStabilised'];
+    const overviewKeys = ['timePlayed', 'pioneer', 'currentAp', 'apGain', 'run', 'uniqueNewsTickersSeen', 'newsTickerPrizesCollected', 'theme', 'antimatterMined', 'totalAsteroidsDiscovered', 'legendaryAsteroidsDiscovered', 'rocketsLaunched', 'starShipsLaunched'];
+    const runKeys = ['runTime', 'starSystem', 'currentWeather', 'cash', 'apAnticipated', 'antimatter'];
+    const eventsKeys = ['powerPlantExplosion', 'batteryExplosion', 'scienceTheft', 'researchBreakthrough', 'rocketInstantArrival', 'starshipLostInSpace', 'antimatterReaction', 'stockLoss', 'galacticMarketLockdown', 'endlessSummer', 'minerBrokeDown', 'supplyChainDisruption', 'blackHoleInstability'];
+    
+    const allSections = {
+        'resources': resourceKeys,
+        'compounds': compoundKeys,
+        'research': researchKeys,
+        'energy': energyKeys,
+        'spaceMining': spaceMiningKeys,
+        'interstellar': interstellarKeys,
+        'galactic Casino': casinoKeys,
+        'cosmic Rip Chapter': cosmicRipKeys,
+        'overview': overviewKeys,
+        'run': runKeys,
+        'events': eventsKeys
+    };
+    
+    const normalizedName = localizedName.trim().toLowerCase();
+    
+    for (const [section, keys] of Object.entries(allSections)) {
+        const sectionData = statisticsContent[section];
+        if (!sectionData) continue;
+        
+        for (let i = 1; i <= keys.length; i++) {
+            const subHeadingKey = `subHeading${i}`;
+            const subHeadingValue = sectionData[subHeadingKey];
+            
+            if (subHeadingValue && subHeadingValue.trim().toLowerCase() === normalizedName) {
+                return keys[i - 1];
+            }
+        }
+    }
+    
+    return null;
+}
+
 export function getStatisticsContent(type) {
+    if (!statisticsContent) {
+        return [];
+    }
+    
     const mainHeadings = Object.keys(statisticsContent);
 
     if (type === 'mainHeadings') {

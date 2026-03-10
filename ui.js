@@ -1,4 +1,5 @@
 import { initLocalization } from './localization.js';
+import { getStatisticsContent, getStatKeyFromLocalizedName, statisticsContent } from './descriptions.js';
 import {
     setLastFocusOfflineGainsAppliedAt,
     setGalacticPointsSpent,
@@ -226,6 +227,8 @@ import {
     setDebugNewsTickerCategory,
     getDebugNewsTickerIntervalMs,
     setDebugNewsTickerIntervalMs,
+    setLanguage,
+    getLanguage,
 } from './constantsAndGlobalVars.js';
 import {
     getResourceDataObject,
@@ -4330,7 +4333,19 @@ export function createHtmlTableStatistics(id, classList = [], mainHeadings, subH
         `;
 
 
-        const notationHeaders = ['Cash', 'Hydrogen', 'Helium', 'Carbon', 'Neon', 'Oxygen', 'Sodium', 'Silicon', 'Iron', 'Diesel', 'Glass', 'Concrete', 'Steel', 'Water', 'Titanium', 'Research Points'];
+        const notationHeaders = ['cash', 'hydrogen', 'helium', 'carbon', 'neon', 'oxygen', 'sodium', 'silicon', 'iron', 'diesel', 'glass', 'concrete', 'steel', 'water', 'titanium', 'researchPoints'];
+        
+        const localizedNotationHeaders = notationHeaders.map(key => {
+            for (const section of Object.values(statisticsContent || {})) {
+                for (let k = 1; k <= 20; k++) {
+                    const headingValue = section[`subHeading${k}`];
+                    if (headingValue && getStatKeyFromLocalizedName(headingValue.replace(':', '').trim()) === key) {
+                        return headingValue.replace(':', '').trim();
+                    }
+                }
+            }
+            return key;
+        });
 
 
         for (let j = 0; j < subHeadings[i].length; j++) {
@@ -4349,22 +4364,25 @@ export function createHtmlTableStatistics(id, classList = [], mainHeadings, subH
             }
 
             if (i === 0 || i === 1) {
+                const englishKey = getStatKeyFromLocalizedName(header.replace(':', '').trim());
+                const statIdBase = englishKey || toCamelCase(header.replace(':', '').trim());
                 innerTextString += `
-                    <tr>
+                    <tr data-stat-key="${englishKey || ''}">
                         <td class="left-column"><span class="${headerClasses.join(' ')}">${header}</span></td>
                         <td class="middle-column">
-                            <span id="stat_${toCamelCase(header.replace(':', '').trim())}" class="${bodyClasses.join(' ')}">${body}</span>
+                            <span id="stat_${statIdBase}" class="${bodyClasses.join(' ')}">${body}</span>
                         </td>
                         <td class="right-column"></td>
                     </tr>
                 `;
             } else {
-                const statIdBase = toCamelCase(header.replace(':', '').trim());
+                const englishKey = getStatKeyFromLocalizedName(header.replace(':', '').trim());
+                const statIdBase = englishKey || toCamelCase(header.replace(':', '').trim());
 
 
                 if (dualColumnPerRow) {
                     innerTextString += `
-                        <tr>
+                        <tr data-stat-key="${englishKey || ''}">
                             <td class="left-column"><span class="${headerClasses.join(' ')}">${header}</span></td>
                             <td class="middle-column">
                                 <span id="stat_${statIdBase}ThisRun" class="${bodyClasses.join(' ')}">${body}</span>
@@ -4376,7 +4394,7 @@ export function createHtmlTableStatistics(id, classList = [], mainHeadings, subH
                     `;
                 } else {
                     innerTextString += `
-                        <tr>
+                        <tr data-stat-key="${englishKey || ''}">
                             <td class="left-column"><span class="${headerClasses.join(' ')}">${header}</span></td>
                             <td class="middle-column">
                                 ${!isAllTimeHeader ? `<span id="stat_${statIdBase}" class="${bodyClasses.join(' ')}">${body}</span>` : ''}
@@ -14333,6 +14351,94 @@ setRandomEventUiHandlers({
 
 const triggerRandomEventButton = document.getElementById('triggerRandomEventButton');
 const debugRandomEventSelect = document.getElementById('debugRandomEventSelect');
+
+
+const debugLanguageSelect = document.getElementById('debugLanguageSelect');
+const debugSetLanguageButton = document.getElementById('debugSetLanguageButton');
+
+
+if (debugLanguageSelect) {
+    debugLanguageSelect.value = getLanguage?.() ?? 'en';
+}
+
+
+debugSetLanguageButton?.addEventListener('click', async () => {
+    const selected = String(debugLanguageSelect?.value ?? '').trim();
+    if (!selected) {
+        showNotification('Please select a language.', 'info', 2500, 'debug');
+        return;
+    }
+
+    setLanguage(selected);
+
+    await initLocalization();
+    initialiseDescriptions();
+
+    const currentTab = getCurrentTab()[0];
+    const currentPane = getCurrentOptionPane?.() ?? '';
+    const heading = currentPane
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+
+    const headerContentElement = document.getElementById(`headerContentTab${currentTab}`);
+    const descriptionContentElement = document.getElementById(`descriptionContentTab${currentTab}`);
+    
+    if (headerContentElement) {
+        headerContentElement.innerText = heading;
+    }
+    
+    if (descriptionContentElement) {
+        let optionDescription = getHeaderDescriptions([heading.toLowerCase()]);
+        if (currentPane.startsWith('rocket')) {
+            optionDescription = getRocketNames('rocketDescription');
+        } else if (heading.toLowerCase() === 'galactic casino') {
+            optionDescription = `${optionDescription}CP Balance: <strong><span id="galacticCasinoCpBalance">0</span></strong>`;
+        }
+        descriptionContentElement.innerHTML = optionDescription;
+        descriptionContentElement.style.border = `1px dashed var(--container-border-color)`;
+    }
+
+    const optionContentElement = document.getElementById(`optionContentTab${currentTab}`);
+    if (!optionContentElement) {
+        showNotification('Could not find content container to redraw.', 'error', 2500, 'debug');
+        return;
+    }
+
+    optionContentElement.innerHTML = '';
+
+    switch (currentTab) {
+        case 1:
+            drawTab1Content(heading, optionContentElement);
+            break;
+        case 2:
+            drawTab2Content(heading, optionContentElement);
+            break;
+        case 3:
+            drawTab3Content(heading, optionContentElement);
+            break;
+        case 4:
+            drawTab4Content(heading, optionContentElement);
+            break;
+        case 5:
+            drawTab5Content(heading, optionContentElement, false, false);
+            break;
+        case 6:
+            drawTab6Content(heading, optionContentElement);
+            break;
+        case 7:
+            drawTab7Content(heading, optionContentElement);
+            break;
+        case 8:
+            drawTab8Content(heading, optionContentElement);
+            break;
+        case 9:
+            drawTab9Content(heading, optionContentElement);
+            break;
+        default:
+            updateContent(heading, currentTab, 'content');
+    }
+});
 
 
 if (debugRandomEventSelect) {
