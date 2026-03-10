@@ -11,6 +11,7 @@ import { offlineGains, startNewsTickerTimer } from './game.js';
 import { rocketNames, getStarNames, getStarTypeByName } from './descriptions.js';
 import { boostSoundManager } from './audioManager.js';
 import { trackAnalyticsEvent } from './analytics.js';
+import { localize } from './localization.js';
 
 //DEBUG
 export let debugFlag = false;
@@ -3287,7 +3288,7 @@ export function setPowerOnOff(value) {
                 const powerBuildingToggleButtonId = powerBuilding + 'Toggle';
                 if (document.getElementById(powerBuildingToggleButtonId)) {
                     setBuildingTypeOnOff(powerBuilding, false);
-                    document.getElementById(powerBuildingToggleButtonId).textContent = 'Activate';
+                    document.getElementById(powerBuildingToggleButtonId).textContent = localize('activateButton', getLanguage());
                 }
             }
         });
@@ -6901,7 +6902,7 @@ function createVariableDebuggerInlineEditorRow(label) {
     const input = document.createElement('textarea');
     input.classList.add('variable-debugger-inline-editor-input');
     input.value = String(globalThis.__variableDebuggerEditState?.value ?? '');
-    input.placeholder = `Set ${label}...`;
+    input.placeholder = localize('debuggerVariableInlineEditorPlaceholder', getLanguage()).replace('${label}', label);
     input.style.flex = '1';
     input.style.height = '44px';
     input.style.fontSize = '14px';
@@ -6934,7 +6935,7 @@ function createVariableDebuggerInlineEditorRow(label) {
 
     const submit = document.createElement('button');
     submit.classList.add('variable-debugger-inline-editor-button');
-    submit.textContent = 'SUBMIT';
+    submit.textContent = localize('debuggerVariableInlineEditorSubmitButton', getLanguage());
     submit.style.height = '22px';
     submit.style.fontSize = '12px';
     submit.style.cursor = 'pointer';
@@ -6944,7 +6945,7 @@ function createVariableDebuggerInlineEditorRow(label) {
 
     const cancel = document.createElement('button');
     cancel.classList.add('variable-debugger-inline-editor-button');
-    cancel.textContent = 'X';
+    cancel.textContent = localize('debuggerVariableInlineEditorCancelButton', getLanguage());
     cancel.style.height = '22px';
     cancel.style.fontSize = '12px';
     cancel.style.cursor = 'pointer';

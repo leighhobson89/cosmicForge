@@ -1,2 +1,13 @@
 bun run build:all will produce 4 builds a demo and a full game for linux and windows.
 python create_build.py cosmicForge_v1.02 will create a pushable build to my account on itch.io via butler but the manual executable build must be uploaded seperately.
+
+Localize Progress
+-----------------
+
+achievements.js - 100%
+analytics.js - 100%
+audioManager.js - 100%
+casino.js - 100%
+constantsAndGlobalVars.js - 100%
+cosmicRip.js - 100%
+descriptions.js - 100%

@@ -1,4 +1,6 @@
 import { showNotification } from './ui.js';
+import { localize } from './localization.js';
+import { getLanguage } from './constantsAndGlobalVars.js';
 
 import {
     getGalacticCasinoDataObject,
@@ -301,7 +303,7 @@ export function claimCasinoSpecialPrizeByKey(selection, { notify = true } = {}) 
         const current = getGalacticCasinoDataObject('casinoPoints', ['quantity']) ?? 0;
         setGalacticCasinoDataObject(Math.max(0, current + add), 'casinoPoints', ['quantity']);
         if (notify) {
-            showNotification(`Special Prize Claimed! ${Math.floor(add)}CP`, 'info', 3500, 'galacticCasino');
+            showNotification(`${localize('casinoNotificationSpecialPrizeCpVariable', getLanguage())}${Math.floor(add)}CP`, 'info', 3500, 'galacticCasino');
         }
         return { type: 'cp', amount: Math.floor(add) };
     };
@@ -310,7 +312,7 @@ export function claimCasinoSpecialPrizeByKey(selection, { notify = true } = {}) 
         const current = getGalacticCasinoDataObject('casinoPoints', ['quantity']) ?? 0;
         setGalacticCasinoDataObject(Math.max(0, current + 100), 'casinoPoints', ['quantity']);
         if (notify) {
-            showNotification('Special Prize Claimed! 100CP', 'info', 3500, 'galacticCasino');
+            showNotification(localize('casinoNotificationSpecialPrize100Cp', getLanguage()), 'info', 3500, 'galacticCasino');
         }
         return { type: 'cp', amount: 100 };
     }
@@ -320,7 +322,7 @@ export function claimCasinoSpecialPrizeByKey(selection, { notify = true } = {}) 
         const newQty = Math.max(0, current + 100000);
         setResourceDataObject(newQty, 'research', ['quantity']);
         if (notify) {
-            showNotification('Special Prize Claimed! 100,000 Research Points', 'info', 3500, 'galacticCasino');
+            showNotification(localize('casinoNotificationSpecialPrize100kResearch', getLanguage()), 'info', 3500, 'galacticCasino');
         }
         return { type: 'research', amount: 100000 };
     }
@@ -348,7 +350,7 @@ export function claimCasinoSpecialPrizeByKey(selection, { notify = true } = {}) 
             return awardCpFallback(20);
         }
         if (notify) {
-            showNotification(`Special Prize Claimed! ${titleCaseFromKey(stockKey)} doubled`, 'info', 3500, 'galacticCasino');
+            showNotification(`${localize('casinoNotificationSpecialPrizeDoubledPrefix', getLanguage())}${titleCaseFromKey(stockKey)}${localize('casinoNotificationSpecialPrizeDoubledSuffix', getLanguage())}`, 'info', 3500, 'galacticCasino');
         }
         return result;
     }
@@ -357,7 +359,7 @@ export function claimCasinoSpecialPrizeByKey(selection, { notify = true } = {}) 
         const dest = warpStarshipInstantly();
         if (!dest) return null;
         if (notify) {
-            showNotification(`Special Prize Claimed! Starship warped instantly to ${titleCaseFromKey(dest)}`, 'info', 3500, 'galacticCasino');
+            showNotification(`${localize('casinoNotificationSpecialPrizeStarshipWarpedPrefix', getLanguage())}${titleCaseFromKey(dest)}${localize('casinoNotificationSpecialPrizeStarshipWarpedSuffix', getLanguage())}`, 'info', 3500, 'galacticCasino');
         }
         return { type: 'starship_warp', destinationStar: dest };
     }
@@ -366,7 +368,7 @@ export function claimCasinoSpecialPrizeByKey(selection, { notify = true } = {}) 
         const dest = warpStarshipInstantly();
         if (!dest) return null;
         if (notify) {
-            showNotification(`Special Prize Claimed! Starship journey finished to ${titleCaseFromKey(dest)}`, 'info', 3500, 'galacticCasino');
+            showNotification(`${localize('casinoNotificationSpecialPrizeStarshipFinishedPrefix', getLanguage())}${titleCaseFromKey(dest)}${localize('casinoNotificationSpecialPrizeStarshipFinishedSuffix', getLanguage())}`, 'info', 3500, 'galacticCasino');
         }
         return { type: 'finish_starship_journey', destinationStar: dest };
     }
@@ -381,7 +383,7 @@ export function claimCasinoSpecialPrizeByKey(selection, { notify = true } = {}) 
         const displayName = String(result?.name || titleCaseFromKey(rocketKey));
         const prefix = rocketIndex ? `Rocket ${rocketIndex} ${displayName}` : displayName;
         if (notify) {
-            showNotification(`Special Prize Claimed! ${prefix} warped to ${result.warpedTo}`, 'info', 3500, 'galacticCasino');
+            showNotification(`${localize('casinoNotificationSpecialPrizeRocketWarpedPrefix', getLanguage())}${prefix}${localize('casinoNotificationSpecialPrizeRocketWarpedMiddle', getLanguage())}${result.warpedTo}${localize('casinoNotificationSpecialPrizeRocketWarpedSuffix', getLanguage())}`, 'info', 3500, 'galacticCasino');
         }
         return { type: 'rocket_warp', ...result };
     }
@@ -395,7 +397,7 @@ export function claimCasinoSpecialPrizeByKey(selection, { notify = true } = {}) 
         const displayName = String(result?.name || titleCaseFromKey(rocketKey));
         const prefix = rocketIndex ? `Rocket ${rocketIndex} ${displayName}` : displayName;
         if (notify) {
-            showNotification(`Special Prize Claimed! ${prefix} journey finished`, 'info', 3500, 'galacticCasino');
+            showNotification(`${localize('casinoNotificationSpecialPrizeRocketFinishedPrefix', getLanguage())}${prefix}${localize('casinoNotificationSpecialPrizeRocketFinishedSuffix', getLanguage())}`, 'info', 3500, 'galacticCasino');
         }
         return { type: 'finish_rocket_journey', ...result };
     }
@@ -405,7 +407,7 @@ export function claimCasinoSpecialPrizeByKey(selection, { notify = true } = {}) 
         if (!ok) return null;
 
         if (notify) {
-            showNotification('Special Prize Claimed! Space Telescope finished Star Study!', 'info', 3500, 'galacticCasino');
+            showNotification(localize('casinoNotificationSpecialPrizeTelescopeStarStudy', getLanguage()), 'info', 3500, 'galacticCasino');
         }
         return { type: 'telescope_finish_star_study' };
     }
@@ -414,7 +416,7 @@ export function claimCasinoSpecialPrizeByKey(selection, { notify = true } = {}) 
         const name = finishAsteroidSearchInstantly();
         if (!name) return null;
         if (notify) {
-            showNotification('Special Prize Claimed! Space Telescope finished Asteroid Search!', 'info', 3500, 'galacticCasino');
+            showNotification(localize('casinoNotificationSpecialPrizeTelescopeAsteroidSearch', getLanguage()), 'info', 3500, 'galacticCasino');
         }
         return { type: 'telescope_finish_asteroid_search', asteroid: name };
     }
@@ -427,7 +429,7 @@ export function claimCasinoSpecialPrizeByKey(selection, { notify = true } = {}) 
         if (!ok) return null;
 
         if (notify) {
-            showNotification('Special Prize Claimed! Space Telescope finished Pillaging The Void!', 'info', 3500, 'galacticCasino');
+            showNotification(localize('casinoNotificationSpecialPrizeTelescopeVoidPillage', getLanguage()), 'info', 3500, 'galacticCasino');
         }
         return { type: 'telescope_finish_void_pillage' };
     }
@@ -958,12 +960,12 @@ export function playDoubleOrNothing({ stake, spinnerId }) {
     const desiredStake = Number.isFinite(stakeInt) ? Math.max(0, stakeInt) : 0;
 
     if (desiredStake <= 0) {
-        showNotification('Enter a valid stake.', 'info', 2500, 'galacticCasino');
+        showNotification(localize('casinoNotificationEnterValidStake', getLanguage()), 'info', 2500, 'galacticCasino');
         return;
     }
 
     if (desiredStake > currentCp) {
-        showNotification('Not enough CP for that stake.', 'info', 2500, 'galacticCasino');
+        showNotification(localize('casinoNotificationNotEnoughCpStake', getLanguage()), 'info', 2500, 'galacticCasino');
         return;
     }
 
@@ -995,7 +997,7 @@ export function playDoubleOrNothing({ stake, spinnerId }) {
                 checkForAchievements();
                 const cpAfterSpin = getGalacticCasinoDataObject('casinoPoints', ['quantity']) ?? 0;
                 setGalacticCasinoDataObject(Math.max(0, cpAfterSpin + (desiredStake * 2)), 'casinoPoints', ['quantity']);
-                showNotification('WIN! Stake doubled.', 'info', 2500, 'galacticCasino');
+                showNotification(localize('casinoNotificationDoubleOrNothingWin', getLanguage()), 'info', 2500, 'galacticCasino');
 
                 trackAnalyticsEvent('casino_prize_won', {
                     game_id: 'game1_double_or_nothing',
@@ -1003,7 +1005,7 @@ export function playDoubleOrNothing({ stake, spinnerId }) {
                     amount: desiredStake * 2,
                 }, { immediate: true, flushReason: 'casino' });
             } else {
-                showNotification('LOSE! Better luck next time.', 'error', 2500, 'galacticCasino');
+                showNotification(localize('casinoNotificationDoubleOrNothingLose', getLanguage()), 'error', 2500, 'galacticCasino');
             }
         })
 
@@ -1049,11 +1051,11 @@ export function playWheelOfFortune({ wheelId, costCp = 1, durationMs = 5000 } = 
     }
     const specialReady = String(wheelEl.getAttribute('data-special-ready') || 'false') === 'true';
     if (specialReady) {
-        showNotification('Claim your prize before spinning again.', 'info', 2500, 'galacticCasino');
+        showNotification(localize('casinoNotificationClaimPrizeBeforeSpin', getLanguage()), 'info', 2500, 'galacticCasino');
         return Promise.resolve(null);
     }
     if (currentCp < cost) {
-        showNotification('Not enough CP to spin the wheel.', 'info', 2500, 'galacticCasino');
+        showNotification(localize('casinoNotificationNotEnoughCpSpin', getLanguage()), 'info', 2500, 'galacticCasino');
         return Promise.resolve(null);
     }
     const spinning = String(wheelEl.getAttribute('data-spinning') || 'false') === 'true';
@@ -1119,9 +1121,9 @@ export function playWheelOfFortune({ wheelId, costCp = 1, durationMs = 5000 } = 
                 if (selectedIndex === 0) {
                     incrementGalacticCasinoStatBothScopes('game2_wheelWon');
                     wheelEl.setAttribute('data-special-ready', 'true');
-                    showNotification('WIN! Special Prize! - Select a Prize from the dropdown to continue.', 'info', 3500, 'galacticCasino');
+                    showNotification(localize('casinoNotificationWheelSpecialPrizeWin', getLanguage()), 'info', 3500, 'galacticCasino');
                 } else if (selectedIndex % 2 === 1) {
-                    showNotification('LOSE! Better luck next time.', 'error', 2000, 'galacticCasino');
+                    showNotification(localize('casinoNotificationWheelLose', getLanguage()), 'error', 2000, 'galacticCasino');
                 } else {
                     incrementGalacticCasinoStatBothScopes('game2_wheelWon');
                     const prize = awardRegularPrize(cost);
@@ -1153,21 +1155,21 @@ export function playWheelOfFortune({ wheelId, costCp = 1, durationMs = 5000 } = 
                     }
 
                     if (prize?.type === 'resources' || prize?.type === 'compounds') {
-                        showNotification(`WON! ${prize.amount} ${titleCaseFromKey(prize.key)}`, 'info', 3500, 'galacticCasino');
+                        showNotification(`${localize('casinoNotificationWheelWonPrefix', getLanguage())}${prize.amount} ${titleCaseFromKey(prize.key)}`, 'info', 3500, 'galacticCasino');
                     } else if (prize?.type === 'cash') {
-                        showNotification(`WON! ${prize.amount} Cash`, 'info', 3500, 'galacticCasino');
+                        showNotification(`${localize('casinoNotificationWheelWonCashPrefix', getLanguage())}${prize.amount} ${localize('casinoCurrencyCash', getLanguage())}`, 'info', 3500, 'galacticCasino');
                     } else if (prize?.type === 'research') {
-                        showNotification(`WON! ${prize.amount} Research Points`, 'info', 3500, 'galacticCasino');
+                        showNotification(`${localize('casinoNotificationWheelWonResearchPrefix', getLanguage())}${prize.amount} ${localize('casinoCurrencyResearchPoints', getLanguage())}`, 'info', 3500, 'galacticCasino');
                     } else if (prize?.type === 'time') {
                         const label = prize?.timerLabel || 'Timer';
                         const fromS = Number(prize?.oldSeconds ?? 0);
                         const toS = Number(prize?.newSeconds ?? 0);
-                        showNotification(`WON! ${label}: Time reduced from ${fromS}s to ${toS}s`, 'info', 3500, 'galacticCasino');
+                        showNotification(`${localize('casinoNotificationWheelTimeReducedPrefix', getLanguage())}${label}${localize('casinoNotificationWheelTimeReducedMiddle', getLanguage())}${fromS}s ${localize('casinoNotificationWheelTimeReducedTo', getLanguage())} ${toS}s`, 'info', 3500, 'galacticCasino');
                     } else if (prize?.type === 'cp_fallback' || prize?.type === 'cp') {
                         const amount = prize?.amount ?? 0;
-                        showNotification(`WON! ${amount} CP`, 'info', 3500, 'galacticCasino');
+                        showNotification(`${localize('casinoNotificationWheelWonCpPrefix', getLanguage())}${amount} ${localize('casinoCurrencyCp', getLanguage())}`, 'info', 3500, 'galacticCasino');
                     } else {
-                        showNotification('WON!', 'info', 2500, 'galacticCasino');
+                        showNotification(localize('casinoNotificationWheelWonGeneric', getLanguage()), 'info', 2500, 'galacticCasino');
                     }
                 }
 

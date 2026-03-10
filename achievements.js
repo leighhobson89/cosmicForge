@@ -1,8 +1,9 @@
-import { getAchievementFlagArray, getActivatedWackyNewsEffectsArray, getAlreadySeenNewsTickerArray, getCollectedPrecipitationQuantityThisRun, getCompoundCreateDropdownRecipeText, getCurrentOptionPane, getCurrentStarSystem, getGameActiveCountTime, getGalacticPointsSpent, getInfinitePower, getMiningObject, getMultiplierPermanentResources, getStarVisionDistance, getStatRun, getTechUnlockedArray, getUnlockedResourcesArray, setAchievementFlagArray, setCompoundCreateDropdownRecipeText, setGalacticPointsSpent, setMultiplierPermanentCompounds, setMultiplierPermanentResources } from "./constantsAndGlobalVars.js";
+import { getAchievementFlagArray, getActivatedWackyNewsEffectsArray, getAlreadySeenNewsTickerArray, getCollectedPrecipitationQuantityThisRun, getCompoundCreateDropdownRecipeText, getCurrentOptionPane, getCurrentStarSystem, getGameActiveCountTime, getGalacticPointsSpent, getInfinitePower, getMiningObject, getMultiplierPermanentResources, getStarVisionDistance, getStatRun, getTechUnlockedArray, getUnlockedResourcesArray, setAchievementFlagArray, setCompoundCreateDropdownRecipeText, setGalacticPointsSpent, setMultiplierPermanentCompounds, setMultiplierPermanentResources, getLanguage } from "./constantsAndGlobalVars.js";
 import { getAchievementNotification, newsTickerContent, refreshAchievementTooltipDescriptions } from "./descriptions.js";
 import { achievementsData, getAchievementDataObject, getGalacticCasinoDataObject, getResourceDataObject, getStarSystemDataObject, setAchievementDataObject, setResourceDataObject } from "./resourceDataObject.js";
 import { showNotification } from "./ui.js";
 import { trackAnalyticsEvent } from "./analytics.js";
+import { localize } from "./localization.js";
 
 export function resetAchievementsOnRebirth() {
     for (const key in achievementsData) {
@@ -235,13 +236,13 @@ export function addAchievementBonus(achievement) {
                         }
 
                         const resourceShortNames = {
-                            iron: 'Irn',
-                            carbon: 'Crb',
-                            sodium: 'Sod',
-                            neon: 'Neo',
-                            hydrogen: 'Hyd',
-                            oxygen: 'Oxy',
-                            silicon: 'Sil'
+                            iron: localize('resourceShortIron', getLanguage()),
+                            carbon: localize('resourceShortCarbon', getLanguage()),
+                            sodium: localize('resourceShortSodium', getLanguage()),
+                            neon: localize('resourceShortNeon', getLanguage()),
+                            hydrogen: localize('resourceShortHydrogen', getLanguage()),
+                            oxygen: localize('resourceShortOxygen', getLanguage()),
+                            silicon: localize('resourceShortSilicon', getLanguage())
                         };
 
                         const quantitiesToUpdate = {
