@@ -2873,6 +2873,81 @@ export function initialiseDescriptions() {
             subBody7: localize('helpPhilosophiesSubBody7', getLanguage()),
         }
     }
+    
+    achievementTooltipDescriptionTexts = {
+        "collect50Hydrogen": localize('achievementCollect50Hydrogen', getLanguage()),
+        "collect1000Hydrogen": localize('achievementCollect1000Hydrogen', getLanguage()),
+        "collect5000Carbon": localize('achievementCollect5000Carbon', getLanguage()),
+        "collect50000Iron": localize('achievementCollect50000Iron', getLanguage()),
+        "researchTechnology": localize('achievementResearchTechnology', getLanguage()),
+        "researchAllTechnologies": localize('achievementResearchAllTechnologies', getLanguage()),
+        "achieve100FusionEfficiency": localize('achievementAchieve100FusionEfficiency', getLanguage()),
+        "fuseElement": localize('achievementFuseElement', getLanguage()),
+        "gain100Cash": localize('achievementGain100Cash', getLanguage()),
+        "gain10000Cash": localize('achievementGain10000Cash', getLanguage()),
+        "gain100000Cash": localize('achievementGain100000Cash', getLanguage()),
+        "gain1000000Cash": localize('achievementGain1000000Cash', getLanguage()),
+        "buildPowerPlant": localize('achievementBuildPowerPlant', getLanguage()),
+        "tripPower": localize('achievementTripPower', getLanguage()),
+        "buildSolarPowerPlant": localize('achievementBuildSolarPowerPlant', getLanguage()),
+        "collect100Precipitation": localize('achievementCollect100Precipitation', getLanguage()),
+        "unlockCompounds": localize('achievementUnlockCompounds', getLanguage()),
+        "createSteel": localize('achievementCreateSteel', getLanguage()),
+        "createTitanium": localize('achievementCreateTitanium', getLanguage()),
+        "discoverAsteroid": localize('achievementDiscoverAsteroid', getLanguage()),
+        "launchRocket": localize('achievementLaunchRocket', getLanguage()),
+        "mineAllAntimatterAsteroid": localize('achievementMineAllAntimatterAsteroid', getLanguage()),
+        "studyStar": localize('achievementStudyStar', getLanguage()),
+        "studyStarMoreThan5LYAway": localize('achievementStudyStarMoreThan5LYAway', getLanguage()),
+        "studyStarMoreThan20LYAway": localize('achievementStudyStarMoreThan20LYAway', getLanguage()),
+        "launchStarship": localize('achievementLaunchStarship', getLanguage()),
+        "initiateDiplomacyWithAlienRace": localize('achievementInitiateDiplomacyWithAlienRace', getLanguage()),
+        "bullyEnemyIntoSubmission": localize('achievementBullyEnemyIntoSubmission', getLanguage()),
+        "vassalizeEnemy": localize('achievementVassalizeEnemy', getLanguage()),
+        "conquerEnemy": localize('achievementConquerEnemy', getLanguage()),
+        "conquerHiveMindEnemy": localize('achievementConquerHiveMindEnemy', getLanguage()),
+        "conquerBelligerentEnemy": localize('achievementConquerBelligerentEnemy', getLanguage()),
+        "conquerEnemyWithoutScanning": localize('achievementConquerEnemyWithoutScanning', getLanguage()),
+        "settleUnoccupiedSystem": localize('achievementSettleUnoccupiedSystem', getLanguage()),
+        "discoverSystemWithNoLife": localize('achievementDiscoverSystemWithNoLife', getLanguage()),
+        "settleSystem": localize('achievementSettleSystem', getLanguage()),
+        "spendAP": localize('achievementSpendAP', getLanguage()),
+        "performGalacticMarketTransaction": localize('achievementPerformGalacticMarketTransaction', getLanguage()),
+        "liquidateAllAssets": localize('achievementLiquidateAllAssets', getLanguage()),
+        "rebirth": localize('achievementRebirth', getLanguage()),
+        "conquer10StarSystems": localize('achievementConquer10StarSystems', getLanguage()),
+        "conquer50StarSystems": localize('achievementConquer50StarSystems', getLanguage()),
+        "seeAllNewsTickers": localize('achievementSeeAllNewsTickers', getLanguage()),
+        "activateAllWackyNewsTickers": localize('achievementActivateAllWackyNewsTickers', getLanguage()),
+        "collect100TitaniumAsPrecipitation": localize('achievementCollect100TitaniumAsPrecipitation', getLanguage()),
+        "discoverLegendaryAsteroid": localize('achievementDiscoverLegendaryAsteroid', getLanguage()),
+        "have4RocketsMiningAntimatter": localize('achievementHave4RocketsMiningAntimatter', getLanguage()),
+        "studyAllStarsInOneRun": localize('achievementStudyAllStarsInOneRun', getLanguage()),
+        "trade10APForCash": localize('achievementTrade10APForCash', getLanguage()),
+        "have50HoursWithOnePioneer": localize('achievementHave50HoursWithOnePioneer', getLanguage()),
+        "adoptPhilosophy": localize('achievementAdoptPhilosophy', getLanguage()),
+        "discoverBlackHole": localize('achievementDiscoverBlackHole', getLanguage()),
+        "activateBlackHoleOver10x": localize('achievementActivateBlackHoleOver10x', getLanguage()),
+        "findAncientManuscript": localize('achievementFindAncientManuscript', getLanguage()),
+        "conquerMegastructureSystem": localize('achievementConquerMegastructureSystem', getLanguage()),
+        "bringDownMiaplacideanForceField": localize('achievementBringDownMiaplacideanForceField', getLanguage()),
+        "completeGame": localize('achievementCompleteGame', getLanguage()),
+        "completeRunOnMiaplacidus": localize('achievementCompleteRunOnMiaplacidus', getLanguage()),
+        "haveFleetSizeOf50EachShipType": localize('achievementHaveFleetSizeOf50EachShipType', getLanguage()),
+        "tryAllThemes": localize('achievementTryAllThemes', getLanguage()),
+        "buyCasinoPoints": localize('achievementBuyCasinoPoints', getLanguage()),
+        "winAllCasinoGames": localize('achievementWinAllCasinoGames', getLanguage()),
+        "winWheelSpecialPrize": localize('achievementWinWheelSpecialPrize', getLanguage()),
+        "restoreNearSpaceScannerArray": localize('achievementRestoreNearSpaceScannerArray', getLanguage()),
+        "findCosmicRip": localize('achievementFindCosmicRip', getLanguage()),
+        "gain1MTelemetryData": localize('achievementGain1MTelemetryData', getLanguage()),
+        "closeCosmicRip": localize('achievementCloseCosmicRip', getLanguage()),
+        "suffer5NegativeEvents": localize('achievementSuffer5NegativeEvents', getLanguage()),
+        "enjoyEndlessSummer": localize('achievementEnjoyEndlessSummer', getLanguage()),
+        "completeOnboarding": localize('achievementCompleteOnboarding', getLanguage()),      
+    };
+    
+    achievementTooltipDescriptions = generateAchievementTooltipDescriptions();
 }
 
 starNames = [
@@ -2898,15 +2973,14 @@ starNames = [
   ["Sadalsuud", "G"], ["Propus", "M"], ["Botein", "K"], ["Acamar", "A"], ["Anser", "G"]
 ];
 
-document.addEventListener('DOMContentLoaded', function () {
-    achievementTooltipDescriptions = generateAchievementTooltipDescriptions();
-});
-
 export function refreshAchievementTooltipDescriptions() {
     achievementTooltipDescriptions = generateAchievementTooltipDescriptions();
 }
 
 function generateAchievementTooltipDescriptions() {
+    if (typeof achievementTooltipDescriptionTexts === 'undefined') {
+        return {};
+    }
     return {
         "collect50Hydrogen": `
         ${getAchievementTooltipDescriptionTexts('collect50Hydrogen')}<br>
@@ -3624,79 +3698,6 @@ function generateAchievementTooltipDescriptions() {
     };    
 }
 
-achievementTooltipDescriptionTexts = {
-    "collect50Hydrogen": "Collect 50 Hydrogen",
-    "collect1000Hydrogen": "Gather 1000 Hydrogen",
-    "collect5000Carbon": "Accumulate 5000 Carbon",
-    "collect50000Iron": "Collect 50000 Iron",
-    "researchTechnology": "Research a Techology",
-    "researchAllTechnologies": "Research all Technologies",
-    "achieve100FusionEfficiency": "Achieve 100% Fusion Efficiency",
-    "fuseElement": "Fuse an Element",
-    "gain100Cash": "Gain 100 Cash",
-    "gain10000Cash": "Gain 10K Cash",
-    "gain100000Cash": "Gain 100K Cash",
-    "gain1000000Cash": "Gain 1M Cash",
-    "buildPowerPlant": "Build a Power Plant",
-    "tripPower": "Trip the Power",
-    "buildSolarPowerPlant": "Construct a Solar Power Plant",
-    "collect100Precipitation": "Collect 100 Precipitation",
-    "unlockCompounds": "Unlock Compounds",
-    "createSteel": "Create Steel",
-    "createTitanium": "Create Titanium",
-    "discoverAsteroid": "Discover an Asteroid",
-    "launchRocket": "Launch a Rocket",
-    "mineAllAntimatterAsteroid": "Mine all Antimatter from an Asteroid",
-    "studyStar": "Study a Star",
-    "studyStarMoreThan5LYAway": "Study a Star over 5 light-years away",
-    "studyStarMoreThan20LYAway": "Study a Star over 20 light-years away",
-    "launchStarship": "Launch a Starship",
-    "initiateDiplomacyWithAlienRace": "Initiate Diplomacy with an Alien Race",
-    "bullyEnemyIntoSubmission": "Bully an Enemy into Submission",
-    "vassalizeEnemy": "Vassalize an Enemy",
-    "conquerEnemy": "Conquer an Enemy",
-    "conquerHiveMindEnemy": "Defeat a Hive Mind Enemy",
-    "conquerBelligerentEnemy": "Defeat a Belligerent Enemy",
-    "conquerEnemyWithoutScanning": "Conquer an Enemy without Scanning",
-    "settleUnoccupiedSystem": "Settle a System with Unsentient Lifeforms",
-    "discoverSystemWithNoLife": "Discover a System with No Life at all",
-    "settleSystem": "Settle a New System",
-    "spendAP": "Spend Ascendency Points (AP)",
-    "performGalacticMarketTransaction": "Perform a Galactic Market Transaction",
-    "liquidateAllAssets": "Liquidate All Assets",
-    "rebirth": "Rebirth",
-    "conquer10StarSystems": "Conquer 10 Star Systems",
-    "conquer50StarSystems": "Conquer 50 Star Systems",
-    "seeAllNewsTickers": "See All News Tickers",
-    "activateAllWackyNewsTickers": "Activate All Wacky News Tickers",
-    "collect100TitaniumAsPrecipitation": "Collect 100 Titanium as Precipitation",
-    "discoverLegendaryAsteroid": "Discover a Legendary Asteroid",
-    "have4RocketsMiningAntimatter": "Have 4 Rockets Mining Antimatter",
-    "studyAllStarsInOneRun": "Study All Stars in One Run",
-    "trade10APForCash": "Trade 10 AP for Cash",
-    "have50HoursWithOnePioneer": "Log 50 Active Hours with One Pioneer",
-    "adoptPhilosophy": "Adopt a Philosophy",
-    "discoverBlackHole": "Discover a Black Hole",
-    "activateBlackHoleOver10x": "Activate a Black Hole over 10x Time Warp",
-    "findAncientManuscript": "Find an Ancient Manuscript",
-    "conquerMegastructureSystem": "Conquer a Megastructure System",
-    "bringDownMiaplacideanForceField": "Bring down the Miaplacidean Force Field",
-    "completeGame": "Complete the Game",
-    "completeRunOnMiaplacidus": "Complete a Run on Miaplacidus",
-    "haveFleetSizeOf50EachShipType": "Have at least 50 of each Ship Type",
-    "tryAllThemes": "Try All Themes",
-    "buyCasinoPoints": "Buy Some Casino Points",
-    "winAllCasinoGames": "Win A Prize In All Casino Games",
-    "winWheelSpecialPrize": "Win A Wheel Of Fortune Special Prize",
-    "restoreNearSpaceScannerArray": "Restore The Near Space Scanner Array",
-    "findCosmicRip": "Find The Cosmic Rip",
-    "gain1MTelemetryData": "Gain 1M Telemetry Data",
-    "closeCosmicRip": "Close The Cosmic Rip",
-    "suffer5NegativeEvents": "Suffer 5 Negative Instant Events",
-    "enjoyEndlessSummer": "Enjoy An Endless Summer",
-    "completeOnboarding": "Complete The Onboarding"      
-};
-
 achievementNotifications = {
     "collect50HydrogenNotification": "ACHIEVEMENT:\nYou have collected 50 Hydrogen!\n\nREWARD: 10 Cash",
     "collect1000HydrogenNotification": "ACHIEVEMENT:\nYou have collected 1000 Hydrogen!\n\nREWARD: 25 Cash",
@@ -3821,6 +3822,9 @@ export const megaStructureTableText = {
 };
 
 export function getAchievementTooltipDescriptionTexts(achievementKey) {
+    if (typeof achievementTooltipDescriptionTexts === 'undefined') {
+        return undefined;
+    }
     const tooltipDescriptionText = achievementTooltipDescriptionTexts[achievementKey];
     
     if (tooltipDescriptionText) {
