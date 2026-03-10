@@ -1134,7 +1134,15 @@
     "helpPhilosophiesSubBody4": "The Constructor Philosophy is centered around cheaper and more efficient upgrading. You gain bonuses to AutoBuyer prices, Storage Capacity, Energy and Research Upgrade prices, and a reduction in the cost of Compound Creation.",
     "helpPhilosophiesSubBody5": "The Supremacist Philosophy leans into military power and conquest. Expect tougher, faster, cheaper Fleets, and the ability to force enemies into Vassalization.",
     "helpPhilosophiesSubBody6": "Born of the void, expect bonuses relating to Initial Impressions with Civilizations on foreign Systems, better Asteroid searches and Star studies, opportunities to increase AP gain, and even the ability to Pillage the Void for massive Resource and Compound gains!",
-    "helpPhilosophiesSubBody7": "Expansionists thrive on colonizing and spreading across the stars. Reduce travel time for Rocket Miners and StarShips and make them cheaper, and also gain the ability to have a chance to convince nearby Systems to cede when you conquer one!"
+    "helpPhilosophiesSubBody7": "Expansionists thrive on colonizing and spreading across the stars. Reduce travel time for Rocket Miners and StarShips and make them cheaper, and also gain the ability to have a chance to convince nearby Systems to cede when you conquer one!",
+    "reward": "Reward",
+    "resetOnRebirth": "Reset on Rebirth",
+    "yes": "YES",
+    "no": "NO",
+    "status": "Status",
+    "achieved": "ACHIEVED",
+    "notAchieved": "NOT ACHIEVED",
+    "logged": "Logged"
   },
   "es": {
     "newGame": "Nuevo Juego",
@@ -2271,7 +2279,15 @@
     "helpPhilosophiesSubBody4": "La filosofía Constructor se centra en mejoras más baratas y eficientes. Obtienes bonificaciones en los precios de los compradores automáticos, capacidad de almacenamiento, energía y precios de mejoras de investigación, y una reducción en el costo de creación de compuestos.",
     "helpPhilosophiesSubBody5": "La filosofía Supremacista se enfoca en el poder militar y la conquista. Espera flotas más duras, rápidas y económicas, y la capacidad de forzar a los enemigos a la vasallización.",
     "helpPhilosophiesSubBody6": "Nacido del vacío, espera bonificaciones relacionadas con impresiones iniciales con civilizaciones en sistemas extranjeros, mejores búsquedas de asteroides y estudios estelares, oportunidades para aumentar la ganancia de AP e incluso la capacidad de saquear el vacío para obtener enormes recursos y compuestos.",
-    "helpPhilosophiesSubBody7": "Los expansionistas prosperan colonizando y extendiéndose por las estrellas. Reducen el tiempo de viaje para minadores de cohetes y naves estelares y los hacen más baratos, además de obtener la capacidad de convencer a sistemas cercanos de ceder al conquistar uno."
+    "helpPhilosophiesSubBody7": "Los expansionistas prosperan colonizando y extendiéndose por las estrellas. Reducen el tiempo de viaje para minadores de cohetes y naves estelares y los hacen más baratos, además de obtener la capacidad de convencer a sistemas cercanos de ceder al conquistar uno.",
+    "reward": "Recompensa",
+    "resetOnRebirth": "Reiniciar en Renacimiento",
+    "yes": "SÍ",
+    "no": "NO",
+    "status": "Estado",
+    "achieved": "LOGRADO",
+    "notAchieved": "NO LOGRADO",
+    "logged": "Registrado"
   },
   "de": {
     "newGame": "Neues Spiel",
@@ -3408,7 +3424,15 @@
     "helpPhilosophiesSubBody4": "Die Konstrukteur-Philosophie konzentriert sich auf günstigere und effizientere Upgrades. Du erhältst Boni auf Auto-Käufer-Preise, Lagerkapazität, Energie- und Forschungs-Upgrade-Preise sowie eine Reduzierung der Kosten für die Erstellung von Verbindungen.",
     "helpPhilosophiesSubBody5": "Die Supremacist-Philosophie setzt auf militärische Macht und Eroberung. Erwarte stärkere, schnellere und günstigere Flotten sowie die Möglichkeit, Gegner zur Vasallisierung zu zwingen.",
     "helpPhilosophiesSubBody6": "Als VoidBorn erhältst du Boni für erste Eindrücke bei Zivilisationen fremder Systeme, verbesserte Asteroiden- und Sternenforschung, Chancen zur Erhöhung des AP-Gewinns und sogar die Fähigkeit, den Void zu plündern für massive Ressourcen- und Verbindungsgewinne!",
-    "helpPhilosophiesSubBody7": "Expansionisten gedeihen durch Kolonisation und Ausbreitung über die Sterne. Reisezeiten für Raketenminen und Raumschiffe werden reduziert und günstiger, zudem erhältst du die Chance, nahe Systeme bei Eroberung zur Aufgabe zu bewegen."
+    "helpPhilosophiesSubBody7": "Expansionisten gedeihen durch Kolonisation und Ausbreitung über die Sterne. Reisezeiten für Raketenminen und Raumschiffe werden reduziert und günstiger, zudem erhältst du die Chance, nahe Systeme bei Eroberung zur Aufgabe zu bewegen.",
+    "reward": "Belohnung",
+    "resetOnRebirth": "Bei Wiedergeburt zurücksetzen",
+    "yes": "JA",
+    "no": "NEIN",
+    "status": "Status",
+    "achieved": "ERREICHT",
+    "notAchieved": "NICHT ERREICHT",
+    "logged": "Protokolliert"
   },
   "it": {
     "newGame": "Nuovo gioco",
@@ -4545,7 +4569,15 @@
     "helpPhilosophiesSubBody4": "La Filosofia Costruttore è centrata su upgrade più economici ed efficienti. Ottieni bonus sui prezzi degli Auto Buyers, sulla Capacità di Stoccaggio, sui prezzi degli Aggiornamenti di Energia e Ricerca e una riduzione del costo di creazione dei Composti.",
     "helpPhilosophiesSubBody5": "La Filosofia Suprematista punta sul potere militare e sulla conquista. Aspettati flotte più forti, veloci e economiche e la possibilità di costringere i nemici alla Vassallizzazione.",
     "helpPhilosophiesSubBody6": "Nati dal Vuoto, prevedi bonus legati alle Impressioni Iniziali con Civiltà di sistemi stranieri, migliori ricerche di Asteroidi e studi delle stelle, opportunità di aumentare il guadagno di AP e persino la possibilità di saccheggiare il Vuoto per grandi guadagni di Risorse e Composti!",
-    "helpPhilosophiesSubBody7": "Gli Espansionisti prosperano colonizzando e diffondendosi tra le stelle. Riduci i tempi di viaggio per Minatori di Razzi e Astronavi, rendili più economici e acquisisci la possibilità di convincere sistemi vicini a cedere quando ne conquisti uno!"
+    "helpPhilosophiesSubBody7": "Gli Espansionisti prosperano colonizzando e diffondendosi tra le stelle. Riduci i tempi di viaggio per Minatori di Razzi e Astronavi, rendili più economici e acquisisci la possibilità di convincere sistemi vicini a cedere quando ne conquisti uno!",
+    "reward": "Ricompensa",
+    "resetOnRebirth": "Reimposta al Rinascita",
+    "yes": "SÌ",
+    "no": "NO",
+    "status": "Stato",
+    "achieved": "RAGGIUNTO",
+    "notAchieved": "NON RAGGIUNTO",
+    "logged": "Registrato"
   },
   "fr": {
     "newGame": "Nouveau jeu",
@@ -5683,6 +5715,14 @@
     "helpPhilosophiesSubBody4": "La Philosophie Constructeur est centrée sur l'amélioration moins coûteuse et plus efficace. Vous gagnez des bonus sur les prix des Auto Acheteurs, la Capacité de Stockage, les coûts d'Énergie et d'Améliorations de Recherche, et une réduction du coût de création des Composés.",
     "helpPhilosophiesSubBody5": "La Philosophie Suprémaciste privilégie la puissance militaire et la conquête. Attendez-vous à des Flottes plus fortes, plus rapides, moins coûteuses et à la capacité de forcer les ennemis à la Vassalisation.",
     "helpPhilosophiesSubBody6": "Né du Vide, attendez-vous à des bonus concernant les premières impressions avec les Civilisations des systèmes étrangers, de meilleures recherches d'Astéroïdes et études stellaires, des opportunités d'augmenter le gain d'AP, et même la capacité de piller le Vide pour obtenir d'énormes quantités de Ressources et Composés !",
-    "helpPhilosophiesSubBody7": "Les Expansionnistes prospèrent en colonisant et en s'étendant à travers les étoiles. Réduisez le temps de voyage des Miners de Fusée et des Vaisseaux Spatiaux et rendez-les moins coûteux, tout en gagnant la possibilité de convaincre les systèmes voisins de céder lorsqu'un système est conquis !"
+    "helpPhilosophiesSubBody7": "Les Expansionnistes prospèrent en colonisant et en s'étendant à travers les étoiles. Réduisez le temps de voyage des Miners de Fusée et des Vaisseaux Spatiaux et rendez-les moins coûteux, tout en gagnant la possibilité de convaincre les systèmes voisins de céder lorsqu'un système est conquis !",
+    "reward": "Récompense",
+    "resetOnRebirth": "Réinitialiser lors de la Renaissance",
+    "yes": "OUI",
+    "no": "NON",
+    "status": "Statut",
+    "achieved": "ATTEINT",
+    "notAchieved": "NON ATTEINT",
+    "logged": "Enregistré"
   }
 }

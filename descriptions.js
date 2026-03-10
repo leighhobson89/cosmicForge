@@ -2910,499 +2910,499 @@ function generateAchievementTooltipDescriptions() {
     return {
         "collect50Hydrogen": `
         ${getAchievementTooltipDescriptionTexts('collect50Hydrogen')}<br>
-        <span class="green-ready-text">Reward: ${getCurrencySymbol()}10</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: ${getCurrencySymbol()}10</span><br>
         <span class="${getAchievementDataObject('collect50Hydrogen', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('collect50Hydrogen', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('collect50Hydrogen', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('collect50Hydrogen', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('collect50Hydrogen', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('collect50Hydrogen', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "collect1000Hydrogen": `
         ${getAchievementTooltipDescriptionTexts('collect1000Hydrogen')}<br>
-        <span class="green-ready-text">Reward: ${getCurrencySymbol()}25</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: ${getCurrencySymbol()}25</span><br>
         <span class="${getAchievementDataObject('collect1000Hydrogen', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('collect1000Hydrogen', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('collect1000Hydrogen', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('collect1000Hydrogen', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('collect1000Hydrogen', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('collect1000Hydrogen', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "collect5000Carbon": `
         ${getAchievementTooltipDescriptionTexts('collect5000Carbon')}<br>
-        <span class="green-ready-text">Reward: ${getCurrencySymbol()}150</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: ${getCurrencySymbol()}150</span><br>
         <span class="${getAchievementDataObject('collect5000Carbon', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('collect5000Carbon', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('collect5000Carbon', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('collect5000Carbon', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('collect5000Carbon', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('collect5000Carbon', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "collect50000Iron": `
         ${getAchievementTooltipDescriptionTexts('collect50000Iron')}<br>
-        <span class="green-ready-text">Reward: ${getCurrencySymbol()}1800</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: ${getCurrencySymbol()}1800</span><br>
         <span class="${getAchievementDataObject('collect50000Iron', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('collect50000Iron', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('collect50000Iron', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('collect50000Iron', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('collect50000Iron', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('collect50000Iron', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "researchTechnology": `
         ${getAchievementTooltipDescriptionTexts('researchTechnology')}<br>
-        <span class="green-ready-text">Reward: ${getCurrencySymbol()}30</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: ${getCurrencySymbol()}30</span><br>
         <span class="${getAchievementDataObject('researchTechnology', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('researchTechnology', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('researchTechnology', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('researchTechnology', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('researchTechnology', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('researchTechnology', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "researchAllTechnologies": `
         ${getAchievementTooltipDescriptionTexts('researchAllTechnologies')}<br>
-        <span class="green-ready-text">Reward: 1 AP</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: 1 AP</span><br>
         <span class="${getAchievementDataObject('researchAllTechnologies', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('researchAllTechnologies', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('researchAllTechnologies', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('researchAllTechnologies', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('researchAllTechnologies', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('researchAllTechnologies', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "achieve100FusionEfficiency": `
         ${getAchievementTooltipDescriptionTexts('achieve100FusionEfficiency')}<br>
-        <span class="green-ready-text">Reward: ${getCurrencySymbol()}500</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: ${getCurrencySymbol()}500</span><br>
         <span class="${getAchievementDataObject('achieve100FusionEfficiency', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('achieve100FusionEfficiency', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('achieve100FusionEfficiency', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('achieve100FusionEfficiency', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('achieve100FusionEfficiency', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('achieve100FusionEfficiency', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "fuseElement": `
         ${getAchievementTooltipDescriptionTexts('fuseElement')}<br>
-        <span class="green-ready-text">Reward: ${getCurrencySymbol()}40</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: ${getCurrencySymbol()}40</span><br>
         <span class="${getAchievementDataObject('fuseElement', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('fuseElement', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('fuseElement', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('fuseElement', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('fuseElement', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('fuseElement', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "gain100Cash": `
         ${getAchievementTooltipDescriptionTexts('gain100Cash')}<br>
-        <span class="green-ready-text">Reward: x1.1 all Cash Sales</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: x1.1 all Cash Sales</span><br>
         <span class="${getAchievementDataObject('gain100Cash', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('gain100Cash', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('gain100Cash', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('gain100Cash', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('gain100Cash', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('gain100Cash', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "gain10000Cash": `
         ${getAchievementTooltipDescriptionTexts('gain10000Cash')}<br>
-        <span class="green-ready-text">Reward: x1.2 all Cash Sales</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: x1.2 all Cash Sales</span><br>
         <span class="${getAchievementDataObject('gain10000Cash', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('gain10000Cash', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('gain10000Cash', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('gain10000Cash', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('gain10000Cash', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('gain10000Cash', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "gain100000Cash": `
         ${getAchievementTooltipDescriptionTexts('gain100000Cash')}<br>
-        <span class="green-ready-text">Reward: x1.2 all Cash Sales</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: x1.2 all Cash Sales</span><br>
         <span class="${getAchievementDataObject('gain100000Cash', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('gain100000Cash', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('gain100000Cash', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('gain100000Cash', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('gain100000Cash', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('gain100000Cash', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "gain1000000Cash": `
         ${getAchievementTooltipDescriptionTexts('gain1000000Cash')}<br>
-        <span class="green-ready-text">Reward: x1.5 all Cash Sales</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: x1.5 all Cash Sales</span><br>
         <span class="${getAchievementDataObject('gain1000000Cash', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('gain1000000Cash', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('gain1000000Cash', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('gain1000000Cash', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('gain1000000Cash', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('gain1000000Cash', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,    
         "buildPowerPlant": `
         ${getAchievementTooltipDescriptionTexts('buildPowerPlant')}<br>
-        <span class="green-ready-text">Reward: x1.1 all Resource Rates</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: x1.1 all Resource Rates</span><br>
         <span class="${getAchievementDataObject('buildPowerPlant', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('buildPowerPlant', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('buildPowerPlant', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('buildPowerPlant', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('buildPowerPlant', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('buildPowerPlant', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "tripPower": `
         ${getAchievementTooltipDescriptionTexts('tripPower')}<br>
-        <span class="green-ready-text">Reward: x1.1 all Resource Rates</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: x1.1 all Resource Rates</span><br>
         <span class="${getAchievementDataObject('tripPower', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('tripPower', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('tripPower', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('tripPower', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('tripPower', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('tripPower', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "buildSolarPowerPlant": `
         ${getAchievementTooltipDescriptionTexts('buildSolarPowerPlant')}<br>
-        <span class="green-ready-text">Reward: x1.2 all Resource Rates</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: x1.2 all Resource Rates</span><br>
         <span class="${getAchievementDataObject('buildSolarPowerPlant', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('buildSolarPowerPlant', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('buildSolarPowerPlant', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('buildSolarPowerPlant', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('buildSolarPowerPlant', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('buildSolarPowerPlant', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "collect100Precipitation": `
         ${getAchievementTooltipDescriptionTexts('collect100Precipitation')}<br>
-        <span class="green-ready-text">Reward: ${getCurrencySymbol()}1000</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: ${getCurrencySymbol()}1000</span><br>
         <span class="${getAchievementDataObject('collect100Precipitation', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('collect100Precipitation', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('collect100Precipitation', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('collect100Precipitation', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('collect100Precipitation', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('collect100Precipitation', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "unlockCompounds": `
         ${getAchievementTooltipDescriptionTexts('unlockCompounds')}<br>
-        <span class="green-ready-text">Reward: ${getCurrencySymbol()}200</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: ${getCurrencySymbol()}200</span><br>
         <span class="${getAchievementDataObject('unlockCompounds', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('unlockCompounds', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('unlockCompounds', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('unlockCompounds', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('unlockCompounds', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('unlockCompounds', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "createSteel": `
         ${getAchievementTooltipDescriptionTexts('createSteel')}<br>
-        <span class="green-ready-text">Reward: -20% Compound Creation Material Costs</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: -20% Compound Creation Material Costs</span><br>
         <span class="${getAchievementDataObject('createSteel', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('createSteel', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('createSteel', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('createSteel', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('createSteel', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('createSteel', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "createTitanium": `
         ${getAchievementTooltipDescriptionTexts('createTitanium')}<br>
-        <span class="green-ready-text">Reward: -20% Compound Creation Material Costs</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: -20% Compound Creation Material Costs</span><br>
         <span class="${getAchievementDataObject('createTitanium', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('createTitanium', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('createTitanium', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('createTitanium', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('createTitanium', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('createTitanium', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "discoverAsteroid": `
         ${getAchievementTooltipDescriptionTexts('discoverAsteroid')}<br>
-        <span class="green-ready-text">Reward: -5% Compound Creation Material Costs</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: -5% Compound Creation Material Costs</span><br>
         <span class="${getAchievementDataObject('discoverAsteroid', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('discoverAsteroid', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('discoverAsteroid', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('discoverAsteroid', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('discoverAsteroid', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('discoverAsteroid', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "launchRocket": `
         ${getAchievementTooltipDescriptionTexts('launchRocket')}<br>
-        <span class="green-ready-text">Reward: x1.1 all Resource Rates</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: x1.1 all Resource Rates</span><br>
         <span class="${getAchievementDataObject('launchRocket', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('launchRocket', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('launchRocket', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('launchRocket', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('launchRocket', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('launchRocket', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "mineAllAntimatterAsteroid": `
         ${getAchievementTooltipDescriptionTexts('mineAllAntimatterAsteroid')}<br>
-        <span class="green-ready-text">Reward: 150 Antimatter</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: 150 Antimatter</span><br>
         <span class="${getAchievementDataObject('mineAllAntimatterAsteroid', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('mineAllAntimatterAsteroid', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('mineAllAntimatterAsteroid', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('mineAllAntimatterAsteroid', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('mineAllAntimatterAsteroid', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('mineAllAntimatterAsteroid', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "studyStar": `
         ${getAchievementTooltipDescriptionTexts('studyStar')}<br>
-        <span class="green-ready-text">Reward: -5% Compound Creation Material Costs</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: -5% Compound Creation Material Costs</span><br>
         <span class="${getAchievementDataObject('studyStar', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('studyStar', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('studyStar', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('studyStar', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('studyStar', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('studyStar', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "studyStarMoreThan5LYAway": `
         ${getAchievementTooltipDescriptionTexts('studyStarMoreThan5LYAway')}<br>
-        <span class="green-ready-text">Reward: -10% Compound Creation Material Costs</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: -10% Compound Creation Material Costs</span><br>
         <span class="${getAchievementDataObject('studyStarMoreThan5LYAway', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('studyStarMoreThan5LYAway', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('studyStarMoreThan5LYAway', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('studyStarMoreThan5LYAway', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('studyStarMoreThan5LYAway', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('studyStarMoreThan5LYAway', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "studyStarMoreThan20LYAway": `
         ${getAchievementTooltipDescriptionTexts('studyStarMoreThan20LYAway')}<br>
-        <span class="green-ready-text">Reward: -15% Compound Creation Material Costs</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: -15% Compound Creation Material Costs</span><br>
         <span class="${getAchievementDataObject('studyStarMoreThan20LYAway', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('studyStarMoreThan20LYAway', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('studyStarMoreThan20LYAway', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('studyStarMoreThan20LYAway', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('studyStarMoreThan20LYAway', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('studyStarMoreThan20LYAway', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "launchStarship": `
         ${getAchievementTooltipDescriptionTexts('launchStarship')}<br>
-        <span class="green-ready-text">Reward: ${getCurrencySymbol()}10000</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: ${getCurrencySymbol()}10000</span><br>
         <span class="${getAchievementDataObject('launchStarship', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('launchStarship', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('launchStarship', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('launchStarship', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('launchStarship', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('launchStarship', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "initiateDiplomacyWithAlienRace": `
         ${getAchievementTooltipDescriptionTexts('initiateDiplomacyWithAlienRace')}<br>
-        <span class="green-ready-text">Reward: x1.1 all Resource Rates</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: x1.1 all Resource Rates</span><br>
         <span class="${getAchievementDataObject('initiateDiplomacyWithAlienRace', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('initiateDiplomacyWithAlienRace', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('initiateDiplomacyWithAlienRace', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('initiateDiplomacyWithAlienRace', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('initiateDiplomacyWithAlienRace', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('initiateDiplomacyWithAlienRace', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "bullyEnemyIntoSubmission": `
         ${getAchievementTooltipDescriptionTexts('bullyEnemyIntoSubmission')}<br>
-        <span class="green-ready-text">Reward: 1 AP</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: 1 AP</span><br>
         <span class="${getAchievementDataObject('bullyEnemyIntoSubmission', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('bullyEnemyIntoSubmission', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('bullyEnemyIntoSubmission', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('bullyEnemyIntoSubmission', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('bullyEnemyIntoSubmission', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('bullyEnemyIntoSubmission', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "vassalizeEnemy": `
         ${getAchievementTooltipDescriptionTexts('vassalizeEnemy')}<br>
-        <span class="green-ready-text">Reward: 1 AP</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: 1 AP</span><br>
         <span class="${getAchievementDataObject('vassalizeEnemy', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('vassalizeEnemy', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('vassalizeEnemy', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('vassalizeEnemy', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('vassalizeEnemy', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('vassalizeEnemy', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "conquerEnemy": `
         ${getAchievementTooltipDescriptionTexts('conquerEnemy')}<br>
-        <span class="green-ready-text">Reward: 1 AP</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: 1 AP</span><br>
         <span class="${getAchievementDataObject('conquerEnemy', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('conquerEnemy', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('conquerEnemy', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('conquerEnemy', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('conquerEnemy', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('conquerEnemy', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "conquerHiveMindEnemy": `
         ${getAchievementTooltipDescriptionTexts('conquerHiveMindEnemy')}<br>
-        <span class="green-ready-text">Reward: 2 AP</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: 2 AP</span><br>
         <span class="${getAchievementDataObject('conquerHiveMindEnemy', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('conquerHiveMindEnemy', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('conquerHiveMindEnemy', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('conquerHiveMindEnemy', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('conquerHiveMindEnemy', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('conquerHiveMindEnemy', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "conquerBelligerentEnemy": `
         ${getAchievementTooltipDescriptionTexts('conquerBelligerentEnemy')}<br>
-        <span class="green-ready-text">Reward: 3 AP</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: 3 AP</span><br>
         <span class="${getAchievementDataObject('conquerBelligerentEnemy', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('conquerBelligerentEnemy', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('conquerBelligerentEnemy', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('conquerBelligerentEnemy', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('conquerBelligerentEnemy', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('conquerBelligerentEnemy', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "conquerEnemyWithoutScanning": `
         ${getAchievementTooltipDescriptionTexts('conquerEnemyWithoutScanning')}<br>
-        <span class="green-ready-text">Reward: 2 AP</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: 2 AP</span><br>
         <span class="${getAchievementDataObject('conquerEnemyWithoutScanning', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('conquerEnemyWithoutScanning', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('conquerEnemyWithoutScanning', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('conquerEnemyWithoutScanning', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('conquerEnemyWithoutScanning', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('conquerEnemyWithoutScanning', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "settleUnoccupiedSystem": `
         ${getAchievementTooltipDescriptionTexts('settleUnoccupiedSystem')}<br>
-        <span class="green-ready-text">Reward: ${getCurrencySymbol()}50000</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: ${getCurrencySymbol()}50000</span><br>
         <span class="${getAchievementDataObject('settleUnoccupiedSystem', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('settleUnoccupiedSystem', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('settleUnoccupiedSystem', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('settleUnoccupiedSystem', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('settleUnoccupiedSystem', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('settleUnoccupiedSystem', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "discoverSystemWithNoLife": `
         ${getAchievementTooltipDescriptionTexts('discoverSystemWithNoLife')}<br>
-        <span class="green-ready-text">Reward: ${getCurrencySymbol()}75000</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: ${getCurrencySymbol()}75000</span><br>
         <span class="${getAchievementDataObject('discoverSystemWithNoLife', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('discoverSystemWithNoLife', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('discoverSystemWithNoLife', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('discoverSystemWithNoLife', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('discoverSystemWithNoLife', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('discoverSystemWithNoLife', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "settleSystem": `
         ${getAchievementTooltipDescriptionTexts('settleSystem')}<br>
-        <span class="green-ready-text">Reward: Pride!</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: Pride!</span><br>
         <span class="${getAchievementDataObject('settleSystem', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('settleSystem', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('settleSystem', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('settleSystem', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('settleSystem', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('settleSystem', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "spendAP": `
         ${getAchievementTooltipDescriptionTexts('spendAP')}<br>
-        <span class="green-ready-text">Reward: x1.1 all Resource Rates</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: x1.1 all Resource Rates</span><br>
         <span class="${getAchievementDataObject('spendAP', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('spendAP', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('spendAP', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('spendAP', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('spendAP', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('spendAP', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "performGalacticMarketTransaction": `
         ${getAchievementTooltipDescriptionTexts('performGalacticMarketTransaction')}<br>
-        <span class="green-ready-text">Reward: 1 AP</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: 1 AP</span><br>
         <span class="${getAchievementDataObject('performGalacticMarketTransaction', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('performGalacticMarketTransaction', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('performGalacticMarketTransaction', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('performGalacticMarketTransaction', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('performGalacticMarketTransaction', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('performGalacticMarketTransaction', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "liquidateAllAssets": `
         ${getAchievementTooltipDescriptionTexts('liquidateAllAssets')}<br>
-        <span class="green-ready-text">Reward: Pride!</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: Pride!</span><br>
         <span class="${getAchievementDataObject('liquidateAllAssets', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('liquidateAllAssets', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('liquidateAllAssets', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('liquidateAllAssets', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('liquidateAllAssets', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('liquidateAllAssets', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "rebirth": `
         ${getAchievementTooltipDescriptionTexts('rebirth')}<br>
-        <span class="green-ready-text">Reward: Permanent x1.3 all Resource Rates</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: Permanent x1.3 all Resource Rates</span><br>
         <span class="${getAchievementDataObject('rebirth', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('rebirth', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('rebirth', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('rebirth', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('rebirth', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('rebirth', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "conquer10StarSystems": `
         ${getAchievementTooltipDescriptionTexts('conquer10StarSystems')}<br>
-        <span class="green-ready-text">Reward: 10 AP</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: 10 AP</span><br>
         <span class="${getAchievementDataObject('conquer10StarSystems', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('conquer10StarSystems', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('conquer10StarSystems', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('conquer10StarSystems', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('conquer10StarSystems', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('conquer10StarSystems', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "conquer50StarSystems": `
         ${getAchievementTooltipDescriptionTexts('conquer50StarSystems')}<br>
-        <span class="green-ready-text">Reward: 100 AP</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: 100 AP</span><br>
         <span class="${getAchievementDataObject('conquer50StarSystems', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('conquer50StarSystems', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('conquer50StarSystems', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('conquer50StarSystems', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('conquer50StarSystems', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('conquer50StarSystems', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "seeAllNewsTickers": `
         ${getAchievementTooltipDescriptionTexts('seeAllNewsTickers')}<br>
-        <span class="green-ready-text">Reward: Permanent x1.2 all Resource Rates</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: Permanent x1.2 all Resource Rates</span><br>
         <span class="${getAchievementDataObject('seeAllNewsTickers', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('seeAllNewsTickers', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('seeAllNewsTickers', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('seeAllNewsTickers', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('seeAllNewsTickers', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('seeAllNewsTickers', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "activateAllWackyNewsTickers": `
         ${getAchievementTooltipDescriptionTexts('activateAllWackyNewsTickers')}<br>
-        <span class="green-ready-text">Reward: Permanent -20% Compound Creation Material Costs</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: Permanent -20% Compound Creation Material Costs</span><br>
         <span class="${getAchievementDataObject('activateAllWackyNewsTickers', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('activateAllWackyNewsTickers', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('activateAllWackyNewsTickers', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('activateAllWackyNewsTickers', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('activateAllWackyNewsTickers', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('activateAllWackyNewsTickers', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "collect100TitaniumAsPrecipitation": `
         ${getAchievementTooltipDescriptionTexts('collect100TitaniumAsPrecipitation')}<br>
-        <span class="green-ready-text">Reward: 50AP</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: 50AP</span><br>
         <span class="${getAchievementDataObject('collect100TitaniumAsPrecipitation', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('collect100TitaniumAsPrecipitation', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('collect100TitaniumAsPrecipitation', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('collect100TitaniumAsPrecipitation', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('collect100TitaniumAsPrecipitation', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('collect100TitaniumAsPrecipitation', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "discoverLegendaryAsteroid": `
         ${getAchievementTooltipDescriptionTexts('discoverLegendaryAsteroid')}<br>
-        <span class="green-ready-text">Reward: ${getCurrencySymbol()}75000</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: ${getCurrencySymbol()}75000</span><br>
         <span class="${getAchievementDataObject('discoverLegendaryAsteroid', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('discoverLegendaryAsteroid', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('discoverLegendaryAsteroid', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('discoverLegendaryAsteroid', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('discoverLegendaryAsteroid', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('discoverLegendaryAsteroid', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "have4RocketsMiningAntimatter": `
         ${getAchievementTooltipDescriptionTexts('have4RocketsMiningAntimatter')}<br>
-        <span class="green-ready-text">Reward: ${getCurrencySymbol()}100000</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: ${getCurrencySymbol()}100000</span><br>
         <span class="${getAchievementDataObject('have4RocketsMiningAntimatter', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('have4RocketsMiningAntimatter', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('have4RocketsMiningAntimatter', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('have4RocketsMiningAntimatter', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('have4RocketsMiningAntimatter', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('have4RocketsMiningAntimatter', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "studyAllStarsInOneRun": `
         ${getAchievementTooltipDescriptionTexts('studyAllStarsInOneRun')}<br>
-        <span class="green-ready-text">Reward: Pride!</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: Pride!</span><br>
         <span class="${getAchievementDataObject('studyAllStarsInOneRun', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('studyAllStarsInOneRun', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('studyAllStarsInOneRun', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('studyAllStarsInOneRun', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('studyAllStarsInOneRun', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('studyAllStarsInOneRun', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "trade10APForCash": `
         ${getAchievementTooltipDescriptionTexts('trade10APForCash')}<br>
-        <span class="green-ready-text">Reward: 5 AP</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: 5 AP</span><br>
         <span class="${getAchievementDataObject('trade10APForCash', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('trade10APForCash', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('trade10APForCash', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('trade10APForCash', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('trade10APForCash', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('trade10APForCash', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "have50HoursWithOnePioneer": `
         ${getAchievementTooltipDescriptionTexts('have50HoursWithOnePioneer')}<br>
-        <span class="green-ready-text">Reward: 50 AP</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: 50 AP</span><br>
         <span class="green-ready-text">
-        Logged: ${
+        ${localize('logged', getLanguage())}: ${
             (() => {
                 const ms = getGameActiveCountTime()[0];
                 const totalSeconds = Math.floor(ms / 1000);
@@ -3415,210 +3415,210 @@ function generateAchievementTooltipDescriptions() {
         }
         </span><br><br>
         <span class="${getAchievementDataObject('have50HoursWithOnePioneer', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('have50HoursWithOnePioneer', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('have50HoursWithOnePioneer', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `
         ,
         "adoptPhilosophy": `
         ${getAchievementTooltipDescriptionTexts('adoptPhilosophy')}<br>
-        <span class="green-ready-text">Reward: Pride!</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: Pride!</span><br>
         <span class="${getAchievementDataObject('adoptPhilosophy', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('adoptPhilosophy', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('adoptPhilosophy', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('adoptPhilosophy', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('adoptPhilosophy', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('adoptPhilosophy', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "discoverBlackHole": `
         ${getAchievementTooltipDescriptionTexts('discoverBlackHole')}<br>
-        <span class="green-ready-text">Reward: ${getCurrencySymbol()}1000000</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: ${getCurrencySymbol()}1000000</span><br>
         <span class="${getAchievementDataObject('discoverBlackHole', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('discoverBlackHole', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('discoverBlackHole', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('discoverBlackHole', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('discoverBlackHole', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('discoverBlackHole', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "activateBlackHoleOver10x": `
         ${getAchievementTooltipDescriptionTexts('activateBlackHoleOver10x')}<br>
-        <span class="green-ready-text">Reward: x2 all Resource quantities (capped at storage)</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: x2 all Resource quantities (capped at storage)</span><br>
         <span class="${getAchievementDataObject('activateBlackHoleOver10x', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('activateBlackHoleOver10x', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('activateBlackHoleOver10x', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('activateBlackHoleOver10x', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('activateBlackHoleOver10x', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('activateBlackHoleOver10x', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "findAncientManuscript": `
         ${getAchievementTooltipDescriptionTexts('findAncientManuscript')}<br>
-        <span class="green-ready-text">Reward: x2 all Compound quantities (capped at storage)</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: x2 all Compound quantities (capped at storage)</span><br>
         <span class="${getAchievementDataObject('findAncientManuscript', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('findAncientManuscript', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('findAncientManuscript', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('findAncientManuscript', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('findAncientManuscript', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('findAncientManuscript', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "conquerMegastructureSystem": `
         ${getAchievementTooltipDescriptionTexts('conquerMegastructureSystem')}<br>
-        <span class="green-ready-text">Reward: ${getCurrencySymbol()}1000000</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: ${getCurrencySymbol()}1000000</span><br>
         <span class="${getAchievementDataObject('conquerMegastructureSystem', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('conquerMegastructureSystem', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('conquerMegastructureSystem', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('conquerMegastructureSystem', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('conquerMegastructureSystem', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('conquerMegastructureSystem', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "bringDownMiaplacideanForceField": `
         ${getAchievementTooltipDescriptionTexts('bringDownMiaplacideanForceField')}<br>
-        <span class="green-ready-text">Reward: 100 AP</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: 100 AP</span><br>
         <span class="${getAchievementDataObject('bringDownMiaplacideanForceField', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('bringDownMiaplacideanForceField', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('bringDownMiaplacideanForceField', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('bringDownMiaplacideanForceField', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('bringDownMiaplacideanForceField', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('bringDownMiaplacideanForceField', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "completeGame": `
         ${getAchievementTooltipDescriptionTexts('completeGame')}<br>
-        <span class="green-ready-text">Reward: Pride!</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: Pride!</span><br>
         <span class="${getAchievementDataObject('completeGame', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('completeGame', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('completeGame', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('completeGame', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('completeGame', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('completeGame', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "completeRunOnMiaplacidus": `
         ${getAchievementTooltipDescriptionTexts('completeRunOnMiaplacidus')}<br>
-        <span class="green-ready-text">Reward: 1GP</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: 1GP</span><br>
         <span class="${getAchievementDataObject('completeRunOnMiaplacidus', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('completeRunOnMiaplacidus', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('completeRunOnMiaplacidus', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('completeRunOnMiaplacidus', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('completeRunOnMiaplacidus', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('completeRunOnMiaplacidus', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "haveFleetSizeOf50EachShipType": `
         ${getAchievementTooltipDescriptionTexts('haveFleetSizeOf50EachShipType')}<br>
-        <span class="green-ready-text">Reward: 1000000 Titanium (capped at storage)</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: 1000000 Titanium (capped at storage)</span><br>
         <span class="${getAchievementDataObject('haveFleetSizeOf50EachShipType', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('haveFleetSizeOf50EachShipType', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('haveFleetSizeOf50EachShipType', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('haveFleetSizeOf50EachShipType', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('haveFleetSizeOf50EachShipType', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('haveFleetSizeOf50EachShipType', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `
         ,
         "tryAllThemes": `
         ${getAchievementTooltipDescriptionTexts('tryAllThemes')}<br>
-        <span class="green-ready-text">Reward: Pride!</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: Pride!</span><br>
         <span class="${getAchievementDataObject('tryAllThemes', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('tryAllThemes', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('tryAllThemes', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('tryAllThemes', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('tryAllThemes', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('tryAllThemes', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `
         ,
         "buyCasinoPoints": `
         ${getAchievementTooltipDescriptionTexts('buyCasinoPoints')}<br>
-        <span class="green-ready-text">Reward: Pride!</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: Pride!</span><br>
         <span class="${getAchievementDataObject('buyCasinoPoints', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('buyCasinoPoints', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('buyCasinoPoints', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('buyCasinoPoints', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('buyCasinoPoints', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('buyCasinoPoints', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "winAllCasinoGames": `
         ${getAchievementTooltipDescriptionTexts('winAllCasinoGames')}<br>
-        <span class="green-ready-text">Reward: 1GP</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: 1GP</span><br>
         <span class="${getAchievementDataObject('winAllCasinoGames', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('winAllCasinoGames', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('winAllCasinoGames', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('winAllCasinoGames', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('winAllCasinoGames', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('winAllCasinoGames', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "winWheelSpecialPrize": `
         ${getAchievementTooltipDescriptionTexts('winWheelSpecialPrize')}<br>
-        <span class="green-ready-text">Reward: Pride!</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: Pride!</span><br>
         <span class="${getAchievementDataObject('winWheelSpecialPrize', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('winWheelSpecialPrize', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('winWheelSpecialPrize', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('winWheelSpecialPrize', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('winWheelSpecialPrize', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('winWheelSpecialPrize', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "restoreNearSpaceScannerArray": `
         ${getAchievementTooltipDescriptionTexts('restoreNearSpaceScannerArray')}<br>
-        <span class="green-ready-text">Reward: Pride!</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: Pride!</span><br>
         <span class="${getAchievementDataObject('restoreNearSpaceScannerArray', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('restoreNearSpaceScannerArray', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('restoreNearSpaceScannerArray', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('restoreNearSpaceScannerArray', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('restoreNearSpaceScannerArray', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('restoreNearSpaceScannerArray', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "findCosmicRip": `
         ${getAchievementTooltipDescriptionTexts('findCosmicRip')}<br>
-        <span class="green-ready-text">Reward: Pride!</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: Pride!</span><br>
         <span class="${getAchievementDataObject('findCosmicRip', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('findCosmicRip', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('findCosmicRip', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('findCosmicRip', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('findCosmicRip', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('findCosmicRip', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "gain1MTelemetryData": `
         ${getAchievementTooltipDescriptionTexts('gain1MTelemetryData')}<br>
-        <span class="green-ready-text">Reward: Pride!</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: Pride!</span><br>
         <span class="${getAchievementDataObject('gain1MTelemetryData', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('gain1MTelemetryData', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('gain1MTelemetryData', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('gain1MTelemetryData', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('gain1MTelemetryData', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('gain1MTelemetryData', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "closeCosmicRip": `
         ${getAchievementTooltipDescriptionTexts('closeCosmicRip')}<br>
-        <span class="green-ready-text">Reward: Pride!</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: Pride!</span><br>
         <span class="${getAchievementDataObject('closeCosmicRip', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('closeCosmicRip', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('closeCosmicRip', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('closeCosmicRip', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('closeCosmicRip', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('closeCosmicRip', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "suffer5NegativeEvents": `
         ${getAchievementTooltipDescriptionTexts('suffer5NegativeEvents')}<br>
-        <span class="green-ready-text">Reward: Pride!</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: Pride!</span><br>
         <span class="${getAchievementDataObject('suffer5NegativeEvents', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('suffer5NegativeEvents', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('suffer5NegativeEvents', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('suffer5NegativeEvents', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('suffer5NegativeEvents', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('suffer5NegativeEvents', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "enjoyEndlessSummer": `
         ${getAchievementTooltipDescriptionTexts('enjoyEndlessSummer')}<br>
-        <span class="green-ready-text">Reward: Pride!</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: Pride!</span><br>
         <span class="${getAchievementDataObject('enjoyEndlessSummer', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('enjoyEndlessSummer', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('enjoyEndlessSummer', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('enjoyEndlessSummer', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('enjoyEndlessSummer', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('enjoyEndlessSummer', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `,
         "completeOnboarding": `
         ${getAchievementTooltipDescriptionTexts('completeOnboarding')}<br>
-        <span class="green-ready-text">Reward: Pride!</span><br>
+        <span class="green-ready-text">${localize('reward', getLanguage())}: Pride!</span><br>
         <span class="${getAchievementDataObject('completeOnboarding', ['resetOnRebirth']) ? 'green-ready-text' : ''}">
-            Reset on Rebirth: ${getAchievementDataObject('completeOnboarding', ['resetOnRebirth']) ? 'YES' : 'NO'}
+            ${localize('resetOnRebirth', getLanguage())}: ${getAchievementDataObject('completeOnboarding', ['resetOnRebirth']) ? localize('yes', getLanguage()) : localize('no', getLanguage())}
         </span><br><br>
         <span class="${getAchievementDataObject('completeOnboarding', ['active']) ? 'green-ready-text' : ''}">
-            Status: ${getAchievementDataObject('completeOnboarding', ['active']) ? 'ACHIEVED' : 'NOT ACHIEVED'}
+            ${localize('status', getLanguage())}: ${getAchievementDataObject('completeOnboarding', ['active']) ? localize('achieved', getLanguage()) : localize('notAchieved', getLanguage())}
         </span>
         `
     };    
