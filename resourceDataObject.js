@@ -3837,13 +3837,13 @@ function addPermanentCompoundsModifiersBackIn() {
         }
 
         const resourceShortNames = {
-            iron: 'Irn',
-            carbon: 'Crb',
-            sodium: 'Sod',
-            neon: 'Neo',
-            hydrogen: 'Hyd',
-            oxygen: 'Oxy',
-            silicon: 'Sil'
+            iron: localize('resourceShortIron', getLanguage()),
+            carbon: localize('resourceShortCarbon', getLanguage()),
+            sodium: localize('resourceShortSodium', getLanguage()),
+            neon: localize('resourceShortNeon', getLanguage()),
+            hydrogen: localize('resourceShortHydrogen', getLanguage()),
+            oxygen: localize('resourceShortOxygen', getLanguage()),
+            silicon: localize('resourceShortSilicon', getLanguage())
         };
 
         const quantitiesToUpdate = {

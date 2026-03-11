@@ -3488,7 +3488,7 @@ export function createOptionRow(options = {}) {
             description.classList.add('building-purchase');
         }
 
-        description.id = generateElementId(labelText, resourceString, null);
+        description.id = generateElementId(labelId, resourceString, null);
         description.innerHTML = descriptionText;
 
         if (dataConditionCheck) {
@@ -3533,17 +3533,20 @@ export function createOptionRow(options = {}) {
 
 function generateElementId(labelText, resource, optionalIterationParam) {
 
-
     let id = labelText.replace(/:$/, '');
     id = id.replace(/(^\w|[A-Z]|\s+)(\w*)/g, (match, p1, p2, index) => {
         return index === 0 ? p1.toLowerCase() + p2 : p1.toUpperCase() + p2;
     });
 
-
     if (resource !== null) {
         id = resource.toLowerCase() + capitaliseString(id);
+    } else if (id.endsWith('SellRow')) {
+        const resourceName = id.replace('SellRow', '');
+        id = 'sell' + capitaliseString(resourceName);
+    } else if (id.endsWith('CreateRow')) {
+        const compoundName = id.replace('CreateRow', '');
+        id = 'create' + capitaliseString(compoundName);
     }
-
 
     if (optionalIterationParam) {
         id += optionalIterationParam + 'Description';
@@ -3551,19 +3554,15 @@ function generateElementId(labelText, resource, optionalIterationParam) {
         id += 'Description';
     }
 
-
     id = id.replace(/\s+/g, '');
 
-    
     return id;
 }
-
 
 export function createDropdown(id, options, selectedValue, onChange, classes = []) {
     const selectContainer = document.createElement('div');
     selectContainer.classList.add('select-container');
     selectContainer.id = id;
-
 
     if (Array.isArray(classes)) {
         classes.forEach(className => selectContainer.classList.add(className));

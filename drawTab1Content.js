@@ -1,7 +1,8 @@
-import { getLastSellResourceCompoundDropdownOption, setLastSellResourceCompoundDropdownOption, getResourceSalePreview, getTimerRateRatio } from './constantsAndGlobalVars.js';
+import { getLastSellResourceCompoundDropdownOption, setLastSellResourceCompoundDropdownOption, getResourceSalePreview, getTimerRateRatio, getLanguage } from './constantsAndGlobalVars.js';
 import { sellResource, fuseResource, gain, increaseResourceStorage, getBTypeAutoBuyerBoostForTier } from './game.js';
 import { getResourceDataObject, setResourceDataObject } from './resourceDataObject.js';
 import { removeTabAttentionIfNoIndicators, createTextElement, createToggleSwitch, createOptionRow, createDropdown, createButton, disableStorageNotificationActionIfShowing } from './ui.js';
+import { localize } from './localization.js';
 
 export function drawTab1Content(heading, optionContentElement) {
     const optionElement = document.getElementById(heading.toLowerCase().replace(/\s(.)/g, (match, group1) => group1.toUpperCase()).replace(/\s+/g, '') + 'Option');
@@ -23,14 +24,14 @@ export function drawTab1Content(heading, optionContentElement) {
         const hydrogenSellRow = createOptionRow({
             labelId: 'hydrogenSellRow',
             renderNameABs: null,
-            labelText: 'Sell Hydrogen:',
+            labelText: localize('tab1HydrogenSellRowLabel', getLanguage()),
             inputElements: [
                 createDropdown('hydrogenSellSelectQuantity', [
-                    { value: 'all', text: 'All Stock' },
-                    { value: 'threeQuarters', text: '75% Stock' },
-                    { value: 'twoThirds', text: '67% Stock' },
-                    { value: 'half', text: '50% Stock' },
-                    { value: 'oneThird', text: '33% Stock' },
+                    { value: 'all', text: localize('dropdownOptionAllStock', getLanguage()) },
+                    { value: 'threeQuarters', text: localize('dropdownOption75Stock', getLanguage()) },
+                    { value: 'twoThirds', text: localize('dropdownOption67Stock', getLanguage()) },
+                    { value: 'half', text: localize('dropdownOption50Stock', getLanguage()) },
+                    { value: 'oneThird', text: localize('dropdownOption33Stock', getLanguage()) },
                     { value: '100000', text: '100000' },
                     { value: '10000', text: '10000' },
                     { value: '1000', text: '1000' },
@@ -41,7 +42,7 @@ export function drawTab1Content(heading, optionContentElement) {
                     setLastSellResourceCompoundDropdownOption('resources', 'hydrogen', value);
                 }),
                 createButton({
-                    text: 'Sell',
+                    text: localize('buttonSell', getLanguage()),
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'sell'],
                     onClick: () => {
                         sellResource('hydrogen');
@@ -56,7 +57,7 @@ export function drawTab1Content(heading, optionContentElement) {
                     rowCategory: 'resource'
                 }),
                 createButton({
-                    text: 'Fuse',
+                    text: localize('buttonFuse', getLanguage()),
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'fuse'],
                     onClick: (event) => {
                         fuseResource("hydrogen", [
@@ -80,7 +81,7 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: null,
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Auto:`, '', ['autoBuyer-building-quantity']),
+                createTextElement(localize('textAuto', getLanguage()), '', ['autoBuyer-building-quantity']),
                 createToggleSwitch('autoSellToggle', false, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['hydrogen', 'autoSell']);
                 }, ['toggle-switch-spacing']),
@@ -106,10 +107,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const hydrogenGainRow = createOptionRow({
             labelId: 'hydrogenGainRow',
             renderNameABs: null,
-            labelText: 'Gain 1 Hydrogen:',
+            labelText: localize('tab1HydrogenGainRowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: 'Gain',
+                    text: localize('buttonGain', getLanguage()),
                     classNames: ['option-button'],
                     onClick: () => {
                         gain(1, 'hydrogenQuantity', null, false, null, 'hydrogen', 'resources');
@@ -341,14 +342,14 @@ export function drawTab1Content(heading, optionContentElement) {
         const heliumSellRow = createOptionRow({
             labelId: 'heliumSellRow',
             renderNameABs: null,
-            labelText: 'Sell Helium:',
+            labelText: localize('tab1HeliumSellRowLabel', getLanguage()),
             inputElements: [
                 createDropdown('heliumSellSelectQuantity', [
-                    { value: 'all', text: 'All Stock' },
-                    { value: 'threeQuarters', text: '75% Stock' },
-                    { value: 'twoThirds', text: '67% Stock' },
-                    { value: 'half', text: '50% Stock' },
-                    { value: 'oneThird', text: '33% Stock' },
+                    { value: 'all', text: localize('dropdownOptionAllStock', getLanguage()) },
+                    { value: 'threeQuarters', text: localize('dropdownOption75Stock', getLanguage()) },
+                    { value: 'twoThirds', text: localize('dropdownOption67Stock', getLanguage()) },
+                    { value: 'half', text: localize('dropdownOption50Stock', getLanguage()) },
+                    { value: 'oneThird', text: localize('dropdownOption33Stock', getLanguage()) },
                     { value: '100000', text: '100000' },
                     { value: '10000', text: '10000' },
                     { value: '1000', text: '1000' },
@@ -359,7 +360,7 @@ export function drawTab1Content(heading, optionContentElement) {
                     setLastSellResourceCompoundDropdownOption('resources', 'helium', value);
                 }),
                 createButton({
-                    text: 'Sell',
+                    text: localize('buttonSell', getLanguage()),
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'sell'],
                     onClick: () => {
                         sellResource('helium');
@@ -374,7 +375,7 @@ export function drawTab1Content(heading, optionContentElement) {
                     rowCategory: 'resource'
                 }),
                 createButton({
-                    text: 'Fuse',
+                    text: localize('buttonFuse', getLanguage()),
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'fuse'],
                     onClick: (event) => {
                         fuseResource("helium", [
@@ -398,7 +399,7 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: null,
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Auto:`, '', ['autoBuyer-building-quantity']),
+                createTextElement(localize('textAuto', getLanguage()), '', ['autoBuyer-building-quantity']),
                 createToggleSwitch('autoSellToggle', false, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['helium', 'autoSell']);
                 }, ['toggle-switch-spacing']),
@@ -424,10 +425,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const heliumGainRow = createOptionRow({
             labelId: 'heliumGainRow',
             renderNameABs: null,
-            labelText: 'Gain 1 Helium:',
+            labelText: localize('tab1HeliumGainRowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: 'Gain',
+                    text: localize('buttonGain', getLanguage()),
                     classNames: ['option-button'],
                     onClick: () => {
                         gain(1, 'heliumQuantity', null, false, null, 'helium', 'resources');
@@ -660,14 +661,14 @@ export function drawTab1Content(heading, optionContentElement) {
         const carbonSellRow = createOptionRow({
             labelId: 'carbonSellRow',
             renderNameABs: null,
-            labelText: 'Sell Carbon:',
+            labelText: localize('tab1CarbonSellRowLabel', getLanguage()),
             inputElements: [
                 createDropdown('carbonSellSelectQuantity', [
-                    { value: 'all', text: 'All Stock' },
-                    { value: 'threeQuarters', text: '75% Stock' },
-                    { value: 'twoThirds', text: '67% Stock' },
-                    { value: 'half', text: '50% Stock' },
-                    { value: 'oneThird', text: '33% Stock' },
+                    { value: 'all', text: localize('dropdownOptionAllStock', getLanguage()) },
+                    { value: 'threeQuarters', text: localize('dropdownOption75Stock', getLanguage()) },
+                    { value: 'twoThirds', text: localize('dropdownOption67Stock', getLanguage()) },
+                    { value: 'half', text: localize('dropdownOption50Stock', getLanguage()) },
+                    { value: 'oneThird', text: localize('dropdownOption33Stock', getLanguage()) },
                     { value: '100000', text: '100000' },
                     { value: '10000', text: '10000' },
                     { value: '1000', text: '1000' },
@@ -678,7 +679,7 @@ export function drawTab1Content(heading, optionContentElement) {
                     setLastSellResourceCompoundDropdownOption('resources', 'carbon', value);
                 }),
                 createButton({
-                    text: 'Sell',
+                    text: localize('buttonSell', getLanguage()),
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'sell'],
                     onClick: () => {
                         sellResource('carbon');
@@ -693,7 +694,7 @@ export function drawTab1Content(heading, optionContentElement) {
                     rowCategory: 'resource'
                 }),
                 createButton({
-                    text: 'Fuse',
+                    text: localize('buttonFuse', getLanguage()),
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'fuse'],
                     onClick: (event) => {
                         fuseResource("carbon", [
@@ -724,7 +725,7 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: null,
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Auto:`, '', ['autoBuyer-building-quantity']),
+                createTextElement(localize('textAuto', getLanguage()), '', ['autoBuyer-building-quantity']),
                 createToggleSwitch('autoSellToggle', false, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['carbon', 'autoSell']);
                 }, ['toggle-switch-spacing']),
@@ -750,10 +751,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const carbonGainRow = createOptionRow({
             labelId: 'carbonGainRow',
             renderNameABs: null,
-            labelText: 'Gain 1 Carbon:',
+            labelText: localize('tab1CarbonGainRowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: 'Gain',
+                    text: localize('buttonGain', getLanguage()),
                     classNames: ['option-button'],
                     onClick: () => {
                         gain(1, 'carbonQuantity', null, false, null, 'carbon', 'resources');
@@ -986,14 +987,14 @@ export function drawTab1Content(heading, optionContentElement) {
         const neonSellRow = createOptionRow({
             labelId: 'neonSellRow',
             renderNameABs: null,
-            labelText: 'Sell Neon:',
+            labelText: localize('tab1NeonSellRowLabel', getLanguage()),
             inputElements: [
                 createDropdown('neonSellSelectQuantity', [
-                    { value: 'all', text: 'All Stock' },
-                    { value: 'threeQuarters', text: '75% Stock' },
-                    { value: 'twoThirds', text: '67% Stock' },
-                    { value: 'half', text: '50% Stock' },
-                    { value: 'oneThird', text: '33% Stock' },
+                    { value: 'all', text: localize('dropdownOptionAllStock', getLanguage()) },
+                    { value: 'threeQuarters', text: localize('dropdownOption75Stock', getLanguage()) },
+                    { value: 'twoThirds', text: localize('dropdownOption67Stock', getLanguage()) },
+                    { value: 'half', text: localize('dropdownOption50Stock', getLanguage()) },
+                    { value: 'oneThird', text: localize('dropdownOption33Stock', getLanguage()) },
                     { value: '100000', text: '100000' },
                     { value: '10000', text: '10000' },
                     { value: '1000', text: '1000' },
@@ -1004,7 +1005,7 @@ export function drawTab1Content(heading, optionContentElement) {
                     setLastSellResourceCompoundDropdownOption('resources', 'neon', value);
                 }),
                 createButton({
-                    text: 'Sell',
+                    text: localize('buttonSell', getLanguage()),
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'sell'],
                     onClick: () => {
                         sellResource('neon');
@@ -1019,7 +1020,7 @@ export function drawTab1Content(heading, optionContentElement) {
                     rowCategory: 'resource'
                 }),
                 createButton({
-                    text: 'Fuse',
+                    text: localize('buttonFuse', getLanguage()),
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'fuse'],
                     onClick: (event) => {
                         fuseResource("neon", [
@@ -1043,7 +1044,7 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: null,
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Auto:`, '', ['autoBuyer-building-quantity']),
+                createTextElement(localize('textAuto', getLanguage()), '', ['autoBuyer-building-quantity']),
                 createToggleSwitch('autoSellToggle', false, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['neon', 'autoSell']);
                 }, ['toggle-switch-spacing']),
@@ -1069,10 +1070,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const neonGainRow = createOptionRow({
             labelId: 'neonGainRow',
             renderNameABs: null,
-            labelText: 'Gain 1 Neon:',
+            labelText: localize('tab1NeonGainRowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: 'Gain',
+                    text: localize('buttonGain', getLanguage()),
                     classNames: ['option-button'],
                     onClick: () => {
                         gain(1, 'neonQuantity', null, false, null, 'neon', 'resources');
@@ -1305,14 +1306,14 @@ export function drawTab1Content(heading, optionContentElement) {
         const oxygenSellRow = createOptionRow({
             labelId: 'oxygenSellRow',
             renderNameABs: null,
-            labelText: 'Sell Oxygen:',
+            labelText: localize('tab1OxygenSellRowLabel', getLanguage()),
             inputElements: [
                 createDropdown('oxygenSellSelectQuantity', [
-                    { value: 'all', text: 'All Stock' },
-                    { value: 'threeQuarters', text: '75% Stock' },
-                    { value: 'twoThirds', text: '67% Stock' },
-                    { value: 'half', text: '50% Stock' },
-                    { value: 'oneThird', text: '33% Stock' },
+                    { value: 'all', text: localize('dropdownOptionAllStock', getLanguage()) },
+                    { value: 'threeQuarters', text: localize('dropdownOption75Stock', getLanguage()) },
+                    { value: 'twoThirds', text: localize('dropdownOption67Stock', getLanguage()) },
+                    { value: 'half', text: localize('dropdownOption50Stock', getLanguage()) },
+                    { value: 'oneThird', text: localize('dropdownOption33Stock', getLanguage()) },
                     { value: '100000', text: '100000' },
                     { value: '10000', text: '10000' },
                     { value: '1000', text: '1000' },
@@ -1323,7 +1324,7 @@ export function drawTab1Content(heading, optionContentElement) {
                     setLastSellResourceCompoundDropdownOption('resources', 'oxygen', value);
                 }),
                 createButton({
-                    text: 'Sell',
+                    text: localize('buttonSell', getLanguage()),
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'sell'],
                     onClick: () => {
                         sellResource('oxygen');
@@ -1338,7 +1339,7 @@ export function drawTab1Content(heading, optionContentElement) {
                     rowCategory: 'resource'
                 }),
                 createButton({
-                    text: 'Fuse',
+                    text: localize('buttonFuse', getLanguage()),
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'fuse'],
                     onClick: (event) => {
                         fuseResource("oxygen", [
@@ -1362,7 +1363,7 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: null,
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Auto:`, '', ['autoBuyer-building-quantity']),
+                createTextElement(localize('textAuto', getLanguage()), '', ['autoBuyer-building-quantity']),
                 createToggleSwitch('autoSellToggle', false, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['oxygen', 'autoSell']);
                 }, ['toggle-switch-spacing']),
@@ -1388,10 +1389,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const oxygenGainRow = createOptionRow({
             labelId: 'oxygenGainRow',
             renderNameABs: null,
-            labelText: 'Gain 1 Oxygen:',
+            labelText: localize('tab1OxygenGainRowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: 'Gain',
+                    text: localize('buttonGain', getLanguage()),
                     classNames: ['option-button'],
                     onClick: () => {
                         gain(1, 'oxygenQuantity', null, false, null, 'oxygen', 'resources');
@@ -1624,14 +1625,14 @@ export function drawTab1Content(heading, optionContentElement) {
         const sodiumSellRow = createOptionRow({
             labelId: 'sodiumSellRow',
             renderNameABs: null,
-            labelText: 'Sell Sodium:',
+            labelText: localize('tab1SodiumSellRowLabel', getLanguage()),
             inputElements: [
                 createDropdown('sodiumSellSelectQuantity', [
-                    { value: 'all', text: 'All Stock' },
-                    { value: 'threeQuarters', text: '75% Stock' },
-                    { value: 'twoThirds', text: '67% Stock' },
-                    { value: 'half', text: '50% Stock' },
-                    { value: 'oneThird', text: '33% Stock' },
+                    { value: 'all', text: localize('dropdownOptionAllStock', getLanguage()) },
+                    { value: 'threeQuarters', text: localize('dropdownOption75Stock', getLanguage()) },
+                    { value: 'twoThirds', text: localize('dropdownOption67Stock', getLanguage()) },
+                    { value: 'half', text: localize('dropdownOption50Stock', getLanguage()) },
+                    { value: 'oneThird', text: localize('dropdownOption33Stock', getLanguage()) },
                     { value: '100000', text: '100000' },
                     { value: '10000', text: '10000' },
                     { value: '1000', text: '1000' },
@@ -1642,7 +1643,7 @@ export function drawTab1Content(heading, optionContentElement) {
                     setLastSellResourceCompoundDropdownOption('resources', 'sodium', value);
                 }),
                 createButton({
-                    text: 'Sell',
+                    text: localize('buttonSell', getLanguage()),
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'sell'],
                     onClick: () => {
                         sellResource('sodium');
@@ -1656,7 +1657,7 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: null,
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Auto:`, '', ['autoBuyer-building-quantity']),
+                createTextElement(localize('textAuto', getLanguage()), '', ['autoBuyer-building-quantity']),
                 createToggleSwitch('autoSellToggle', false, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['sodium', 'autoSell']);
                 }, ['toggle-switch-spacing']),
@@ -1682,10 +1683,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const sodiumGainRow = createOptionRow({
             labelId: 'sodiumGainRow',
             renderNameABs: null,
-            labelText: 'Gain 1 Sodium:',
+            labelText: localize('tab1SodiumGainRowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: 'Gain',
+                    text: localize('buttonGain', getLanguage()),
                     classNames: ['option-button'],
                     onClick: () => {
                         gain(1, 'sodiumQuantity', null, false, null, 'sodium', 'resources');
@@ -1918,14 +1919,14 @@ export function drawTab1Content(heading, optionContentElement) {
         const siliconSellRow = createOptionRow({
             labelId: 'siliconSellRow',
             renderNameABs: null,
-            labelText: 'Sell Silicon:',
+            labelText: localize('tab1SiliconSellRowLabel', getLanguage()),
             inputElements: [
                 createDropdown('siliconSellSelectQuantity', [
-                    { value: 'all', text: 'All Stock' },
-                    { value: 'threeQuarters', text: '75% Stock' },
-                    { value: 'twoThirds', text: '67% Stock' },
-                    { value: 'half', text: '50% Stock' },
-                    { value: 'oneThird', text: '33% Stock' },
+                    { value: 'all', text: localize('dropdownOptionAllStock', getLanguage()) },
+                    { value: 'threeQuarters', text: localize('dropdownOption75Stock', getLanguage()) },
+                    { value: 'twoThirds', text: localize('dropdownOption67Stock', getLanguage()) },
+                    { value: 'half', text: localize('dropdownOption50Stock', getLanguage()) },
+                    { value: 'oneThird', text: localize('dropdownOption33Stock', getLanguage()) },
                     { value: '100000', text: '100000' },
                     { value: '10000', text: '10000' },
                     { value: '1000', text: '1000' },
@@ -1936,7 +1937,7 @@ export function drawTab1Content(heading, optionContentElement) {
                     setLastSellResourceCompoundDropdownOption('resources', 'silicon', value);
                 }),
                 createButton({
-                    text: 'Sell',
+                    text: localize('buttonSell', getLanguage()),
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'sell'],
                     onClick: () => {
                         sellResource('silicon');
@@ -1951,7 +1952,7 @@ export function drawTab1Content(heading, optionContentElement) {
                     rowCategory: 'resource'
                 }),
                 createButton({
-                    text: 'Fuse',
+                    text: localize('buttonFuse', getLanguage()),
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'fuse'],
                     onClick: (event) => {
                         fuseResource("silicon", [
@@ -1975,7 +1976,7 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: null,
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Auto:`, '', ['autoBuyer-building-quantity']),
+                createTextElement(localize('textAuto', getLanguage()), '', ['autoBuyer-building-quantity']),
                 createToggleSwitch('autoSellToggle', false, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['silicon', 'autoSell']);
                 }, ['toggle-switch-spacing']),
@@ -2001,10 +2002,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const siliconGainRow = createOptionRow({
             labelId: 'siliconGainRow',
             renderNameABs: null,
-            labelText: 'Gain 1 Silicon:',
+            labelText: localize('tab1SiliconGainRowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: 'Gain',
+                    text: localize('buttonGain', getLanguage()),
                     classNames: ['option-button'],
                     onClick: () => {
                         gain(1, 'siliconQuantity', null, false, null, 'silicon', 'resources');
@@ -2237,14 +2238,14 @@ export function drawTab1Content(heading, optionContentElement) {
         const ironSellRow = createOptionRow({
             labelId: 'ironSellRow',
             renderNameABs: null,
-            labelText: 'Sell Iron:',
+            labelText: localize('tab1IronSellRowLabel', getLanguage()),
             inputElements: [
                 createDropdown('ironSellSelectQuantity', [
-                    { value: 'all', text: 'All Stock' },
-                    { value: 'threeQuarters', text: '75% Stock' },
-                    { value: 'twoThirds', text: '67% Stock' },
-                    { value: 'half', text: '50% Stock' },
-                    { value: 'oneThird', text: '33% Stock' },
+                    { value: 'all', text: localize('dropdownOptionAllStock', getLanguage()) },
+                    { value: 'threeQuarters', text: localize('dropdownOption75Stock', getLanguage()) },
+                    { value: 'twoThirds', text: localize('dropdownOption67Stock', getLanguage()) },
+                    { value: 'half', text: localize('dropdownOption50Stock', getLanguage()) },
+                    { value: 'oneThird', text: localize('dropdownOption33Stock', getLanguage()) },
                     { value: '100000', text: '100000' },
                     { value: '10000', text: '10000' },
                     { value: '1000', text: '1000' },
@@ -2255,7 +2256,7 @@ export function drawTab1Content(heading, optionContentElement) {
                     setLastSellResourceCompoundDropdownOption('resources', 'iron', value);
                 }),
                 createButton({
-                    text: 'Sell',
+                    text: localize('buttonSell', getLanguage()),
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'sell'],
                     onClick: () => {
                         sellResource('iron');
@@ -2269,7 +2270,7 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: null,
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Auto:`, '', ['autoBuyer-building-quantity']),
+                createTextElement(localize('textAuto', getLanguage()), '', ['autoBuyer-building-quantity']),
                 createToggleSwitch('autoSellToggle', false, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['iron', 'autoSell']);
                 }, ['toggle-switch-spacing']),
@@ -2295,10 +2296,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const ironGainRow = createOptionRow({
             labelId: 'ironGainRow',
             renderNameABs: null,
-            labelText: 'Gain 1 Iron:',
+            labelText: localize('tab1IronGainRowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: 'Gain',
+                    text: localize('buttonGain', getLanguage()),
                     classNames: ['option-button'],
                     onClick: () => {
                         gain(1, 'ironQuantity', null, false, null, 'iron', 'resources');

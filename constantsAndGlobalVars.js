@@ -2673,19 +2673,19 @@ export function setSaleResourcePreview(resource, amount, fusionTo1, fusionTo2) {
     let calculatedAmount;
 
     switch (amount) {
-        case 'All Stock':
+        case localize('dropdownOptionAllStock', getLanguage()):
             calculatedAmount = Math.floor(resourceQuantity);
             break;
-        case '75% Stock':
+        case localize('dropdownOption75Stock', getLanguage()):
             calculatedAmount = Math.floor(resourceQuantity * 0.75);
             break;
-        case '67% Stock':
+        case localize('dropdownOption67Stock', getLanguage()):
             calculatedAmount = Math.floor(resourceQuantity * 2 / 3);
             break;
-        case '50% Stock':
+        case localize('dropdownOption50Stock', getLanguage()):
             calculatedAmount = Math.floor(resourceQuantity * 0.5);
             break;
-        case '33% Stock':
+        case localize('dropdownOption33Stock', getLanguage()):
             calculatedAmount = Math.floor(resourceQuantity / 3);
             break;
         case '100000':
@@ -2719,19 +2719,19 @@ export function setSaleCompoundPreview(compound, amount) {
     let calculatedAmount;
 
     switch (amount) {
-        case 'All Stock':
+        case localize('dropdownOptionAllStock', getLanguage()):
             calculatedAmount = Math.floor(compoundQuantity);
             break;
-        case '75% Stock':
+        case localize('dropdownOption75Stock', getLanguage()):
             calculatedAmount = Math.floor(compoundQuantity * 0.75);
             break;
-        case '67% Stock':
+        case localize('dropdownOption67Stock', getLanguage()):
             calculatedAmount = Math.floor(compoundQuantity * 2 / 3);
             break;
-        case '50% Stock':
+        case localize('dropdownOption50Stock', getLanguage()):
             calculatedAmount = Math.floor(compoundQuantity * 0.5);
             break;
-        case '33% Stock':
+        case localize('dropdownOption33Stock', getLanguage()):
             calculatedAmount = Math.floor(compoundQuantity / 3);
             break;
         case '100000':
@@ -2802,42 +2802,42 @@ export function setCreateCompoundPreview(compoundToCreate, dropDownString) {
     const availableStorage = Math.max(storageCapacity - currentQuantity, 0);
 
     switch (amount) {
-        case 'Fill To Capacity':
+        case localize('dropdownOptionFillToCapacity', getLanguage()):
             createAmount = Math.min(maxCompoundToCreate, availableStorage);
             constituentPartsQuantityNeeded1 = Math.round(createAmount * constituentPartsRatio1);
             constituentPartsQuantityNeeded2 = Math.round(createAmount * constituentPartsRatio2);
             constituentPartsQuantityNeeded3 = Math.round(createAmount * constituentPartsRatio3);
             constituentPartsQuantityNeeded4 = Math.round(createAmount * constituentPartsRatio4);
             break;
-        case 'Max Possible':
+        case localize('dropdownOptionMaxPossible', getLanguage()):
             createAmount = Math.floor(maxCompoundToCreate * 1);
             constituentPartsQuantityNeeded1 = Math.round(createAmount * constituentPartsRatio1);
             constituentPartsQuantityNeeded2 = Math.round(createAmount * constituentPartsRatio2);
             constituentPartsQuantityNeeded3 = Math.round(createAmount * constituentPartsRatio3);
             constituentPartsQuantityNeeded4 = Math.round(createAmount * constituentPartsRatio4);
             break;
-        case 'Up to 75%':
+        case localize('dropdownOptionUpTo75Percent', getLanguage()):
             createAmount = Math.floor(maxCompoundToCreate * 0.75);
             constituentPartsQuantityNeeded1 = Math.round(createAmount * constituentPartsRatio1);
             constituentPartsQuantityNeeded2 = Math.round(createAmount * constituentPartsRatio2);
             constituentPartsQuantityNeeded3 = Math.round(createAmount * constituentPartsRatio3);
             constituentPartsQuantityNeeded4 = Math.round(createAmount * constituentPartsRatio4);
             break;
-        case 'Up to 67%':
+        case localize('dropdownOptionUpTo67Percent', getLanguage()):
             createAmount = Math.floor(maxCompoundToCreate * (2 / 3));
             constituentPartsQuantityNeeded1 = Math.round(createAmount * constituentPartsRatio1);
             constituentPartsQuantityNeeded2 = Math.round(createAmount * constituentPartsRatio2);
             constituentPartsQuantityNeeded3 = Math.round(createAmount * constituentPartsRatio3);
             constituentPartsQuantityNeeded4 = Math.round(createAmount * constituentPartsRatio4);
             break;
-        case 'Up to 50%':
+        case localize('dropdownOptionUpTo50Percent', getLanguage()):
             createAmount = Math.floor(maxCompoundToCreate * 0.5);
             constituentPartsQuantityNeeded1 = Math.round(createAmount * constituentPartsRatio1);
             constituentPartsQuantityNeeded2 = Math.round(createAmount * constituentPartsRatio2);
             constituentPartsQuantityNeeded3 = Math.round(createAmount * constituentPartsRatio3);
             constituentPartsQuantityNeeded4 = Math.round(createAmount * constituentPartsRatio4);
             break;
-        case 'Up to 33%':
+        case localize('dropdownOptionUpTo33Percent', getLanguage()):
             createAmount = Math.floor(maxCompoundToCreate * (1 / 3));
             constituentPartsQuantityNeeded1 = Math.round(createAmount * constituentPartsRatio1);
             constituentPartsQuantityNeeded2 = Math.round(createAmount * constituentPartsRatio2);
