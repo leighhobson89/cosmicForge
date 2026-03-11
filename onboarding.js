@@ -1010,7 +1010,7 @@ export function onboardingChecks(
             ['spotlight', ['Gain', 0], 'Click the Gain button', 'Resources'],
             ['spotlight', ['hydrogenQuantity', 1], 'Continue clicking Gain until you have 50 Hydrogen', { waitForClick: false }, 'Resources'],
             ['condition', ['hydrogenQuantity', 1], ['resources', 'hydrogen', 'quantity'], 50],
-            ['spotlight', ['Add 2 Hydrogen /s', 0], 'Buy a Hydrogen AutoBuyer', 'Resources'],
+            ['spotlight', ['Add 4 Hydrogen /s', 0], 'Buy a Hydrogen AutoBuyer', 'Resources'],
             ['spotlight', ['tab3', 1], 'Click the Research Tab', { waitForElementTarget: ['Research', 0], waitForElementTimeout: 4000 }, 'Resources'],
             ['spotlight', ['researchOption', 1], 'Click Research', { highlightMode: 'div' }, 'Research'],
             ['spotlight', ['Add 0.5 Research /s', 0], 'Buy 3 Science Kits', { waitForClick: false }, 'Research'],
