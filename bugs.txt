@@ -11,3 +11,4 @@ casino.js - 100%
 constantsAndGlobalVars.js - 100%
 cosmicRip.js - 100%
 descriptions.js - 100%
+drawTab1Content.js - sell row and gain row done and all touched code working across app - added temporary line in 3491 ui.js createOptionRow function to be removed once all localisation done and to be tweaked as we go through the tabs
