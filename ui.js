@@ -3488,7 +3488,8 @@ export function createOptionRow(options = {}) {
             description.classList.add('building-purchase');
         }
 
-        description.id = generateElementId(labelId, resourceString, null);
+        const currentTab = getCurrentTab()[0];
+        description.id = generateElementId((currentTab === 1 || currentTab === 4) ? labelId : labelText, resourceString, null);  //TEMPORARY DURING LOCALISATION WORK
         description.innerHTML = descriptionText;
 
         if (dataConditionCheck) {
