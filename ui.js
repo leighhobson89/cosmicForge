@@ -10712,7 +10712,19 @@ function addOneOffEventListeners() {
     }
 
 
-    oneOffElement.addEventListener('click', function () {
+    if (oneOffElement.dataset.clickListenerAttached === 'true') {
+        return;
+    }
+    oneOffElement.dataset.clickListenerAttached = 'true';
+
+
+    oneOffElement.addEventListener('click', function (event) {
+        if (this.dataset.prizeClaimed === 'true') {
+            return;
+        }
+        this.dataset.prizeClaimed = 'true';
+        event.preventDefault?.();
+        event.stopPropagation?.();
         addToResourceAllTimeStat(1, 'newsTickerPrizesCollected');
         sfxPlayer.playAudio('goodPrize');
         const multiplier = parseFloat(this.getAttribute('data-multiplier'));
@@ -10800,7 +10812,7 @@ function addOneOffEventListeners() {
 
                    
                     if (buyBuildingButtonElement)  {
-                        buyBuildingButtonElement.innerHTML = `Add ${Math.floor(getResourceDataObject('buildings', [item[0], 'upgrades', item[1], 'capacity']) / 1000)} MWh`;
+                        buyBuildingButtonElement.innerHTML = `Add (max) ${Math.floor(getResourceDataObject('buildings', [item[0], 'upgrades', item[1], 'capacity']) / 1000)} MWh`;
                     }
                 }
             });
@@ -10895,7 +10907,21 @@ function addPrizeEventListeners() {
         if (prizeElement.hasAttribute('data-effect-item')) {
             return;
         }
-        prizeElement.addEventListener('click', function () {
+        if (prizeElement.hasAttribute('data-oneoff-id')) {
+            return;
+        }
+        if (prizeElement.dataset.clickListenerAttached === 'true') {
+            return;
+        }
+        prizeElement.dataset.clickListenerAttached = 'true';
+
+        prizeElement.addEventListener('click', function (event) {
+            if (this.dataset.prizeClaimed === 'true') {
+                return;
+            }
+            this.dataset.prizeClaimed = 'true';
+            event.preventDefault?.();
+            event.stopPropagation?.();
             sfxPlayer.playAudio('goodPrize');
             const prizeType = this.getAttribute('data-prize-type');
             const category = this.getAttribute('data-category');
