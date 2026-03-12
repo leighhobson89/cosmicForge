@@ -142,10 +142,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const hydrogenIncreaseStorageRow = createOptionRow({
             labelId: 'hydrogenIncreaseStorageRow',
             renderNameABs: null,
-            labelText: 'Increase Storage:',
+            labelText: localize('tab1IncreaseStorageRowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: 'Increase Storage',
+                    text: localize('buttonIncreaseStorage', getLanguage()),
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         increaseResourceStorage(['hydrogenQuantity'], ['hydrogen'], ['resources']);
@@ -162,7 +162,7 @@ export function drawTab1Content(heading, optionContentElement) {
                     rowCategory: 'resource'
                 }),
             ],
-            descriptionText: `${storagePrice + " " + getResourceDataObject('resources', ['hydrogen', 'nameResource'])}`,
+            descriptionText: `${storagePrice + " " + localize('resourceHydrogen', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'storage',
@@ -179,10 +179,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const hydrogenAutoBuyer1Row = createOptionRow({
             labelId: 'hydrogenAutoBuyer1Row',
             renderNameABs: getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']),
-            labelText: 'Hydrogen Auto Buyer Tier 1:',
+            labelText: localize('tab1HydrogenAutoBuyer1RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Add ${Math.floor((getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier1', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(1) * getTimerRateRatio()))} Hydrogen /s`,
+                    text: `${localize('buttonAddPerSecond', getLanguage()).replace('{rate}', Math.floor((getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier1', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(1) * getTimerRateRatio()))).replace('{resource}', localize('resourceHydrogen', getLanguage()))}`,
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         gain(1, 'hydrogenAB1Quantity', 'autoBuyer', true, 'tier1', 'hydrogen', 'resources')
@@ -196,12 +196,12 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: 'tier1',
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Quantity: ${getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier1', 'quantity'])}`, 'hydrogenAB1Quantity', ['autoBuyer-building-quantity']),
+                createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier1', 'quantity'])}`, 'hydrogenAB1Quantity', ['autoBuyer-building-quantity']),
                 createToggleSwitch('hydrogen1Toggle', true, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier1', 'active']);
                 }, ['toggle-switch-spacing']),
             ],
-            descriptionText: `${autobuyer1Price + " " + getResourceDataObject('resources', ['hydrogen', 'nameResource'])}`,
+            descriptionText: `${autobuyer1Price + " " + localize('resourceHydrogen', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'autoBuyer',
@@ -218,10 +218,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const hydrogenAutoBuyer2Row = createOptionRow({
             labelId: 'hydrogenAutoBuyer2Row',
             renderNameABs: getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']),
-            labelText: 'Hydrogen Auto Buyer Tier 2:',
+            labelText: localize('tab1HydrogenAutoBuyer2RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Add ${Math.floor((getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier2', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(2) * getTimerRateRatio()))} Hydrogen /s`,
+                    text: `${localize('buttonAddPerSecond', getLanguage()).replace('{rate}', Math.floor((getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier2', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(2) * getTimerRateRatio()))).replace('{resource}', localize('resourceHydrogen', getLanguage()))}`,
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         gain(1, 'hydrogenAB2Quantity', 'autoBuyer', true, 'tier2', 'hydrogen', 'resources')
@@ -235,12 +235,12 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: 'tier2',
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Quantity: ${getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier2', 'quantity'])}`, 'hydrogenAB2Quantity', ['autoBuyer-building-quantity']),
+                createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier2', 'quantity'])}`, 'hydrogenAB2Quantity', ['autoBuyer-building-quantity']),
                 createToggleSwitch('hydrogen2Toggle', true, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier2', 'active']);
                 }, ['toggle-switch-spacing']),
             ],
-            descriptionText: `${autobuyer2Price + " " + getResourceDataObject('resources', ['hydrogen', 'nameResource'])}`,
+            descriptionText: `${autobuyer2Price + " " + localize('resourceHydrogen', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'autoBuyer',
@@ -257,10 +257,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const hydrogenAutoBuyer3Row = createOptionRow({
             labelId: 'hydrogenAutoBuyer3Row',
             renderNameABs: getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']),
-            labelText: 'Hydrogen Auto Buyer Tier 3:',
+            labelText: localize('tab1HydrogenAutoBuyer3RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Add ${Math.floor((getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier3', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(3) * getTimerRateRatio()))} Hydrogen /s`,
+                    text: `${localize('buttonAddPerSecond', getLanguage()).replace('{rate}', Math.floor((getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier3', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(3) * getTimerRateRatio()))).replace('{resource}', localize('resourceHydrogen', getLanguage()))}`,
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         gain(1, 'hydrogenAB3Quantity', 'autoBuyer', true, 'tier3', 'hydrogen', 'resources')
@@ -274,12 +274,12 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: 'tier3',
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Quantity: ${getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier3', 'quantity'])}`, 'hydrogenAB3Quantity', ['autoBuyer-building-quantity']),
+                createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier3', 'quantity'])}`, 'hydrogenAB3Quantity', ['autoBuyer-building-quantity']),
                 createToggleSwitch('hydrogen3Toggle', true, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier3', 'active']);
                 }, ['toggle-switch-spacing']),
             ],
-            descriptionText: `${autobuyer3Price + " " + getResourceDataObject('resources', ['hydrogen', 'nameResource'])}`,
+            descriptionText: `${autobuyer3Price + " " + localize('resourceHydrogen', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'autoBuyer',
@@ -296,10 +296,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const hydrogenAutoBuyer4Row = createOptionRow({
             labelId: 'hydrogenAutoBuyer4Row',
             renderNameABs: getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']),
-            labelText: 'Hydrogen Auto Buyer Tier 4:',
+            labelText: localize('tab1HydrogenAutoBuyer4RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Add ${Math.floor((getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier4', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(4) * getTimerRateRatio()))} Hydrogen /s`,
+                    text: `${localize('buttonAddPerSecond', getLanguage()).replace('{rate}', Math.floor((getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier4', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(4) * getTimerRateRatio()))).replace('{resource}', localize('resourceHydrogen', getLanguage()))}`,
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         gain(1, 'hydrogenAB4Quantity', 'autoBuyer', true, 'tier4', 'hydrogen', 'resources')
@@ -313,12 +313,12 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: 'tier4',
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Quantity: ${getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier4', 'quantity'])}`, 'hydrogenAB4Quantity', ['autoBuyer-building-quantity']),
+                createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier4', 'quantity'])}`, 'hydrogenAB4Quantity', ['autoBuyer-building-quantity']),
                 createToggleSwitch('hydrogen4Toggle', true, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier4', 'active']);
                 }, ['toggle-switch-spacing']),
             ],
-            descriptionText: `${autobuyer4Price + " " + getResourceDataObject('resources', ['hydrogen', 'nameResource'])}`,
+            descriptionText: `${autobuyer4Price + " " + localize('resourceHydrogen', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'autoBuyer',
@@ -460,10 +460,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const heliumIncreaseStorageRow = createOptionRow({
             labelId: 'heliumIncreaseStorageRow',
             renderNameABs: null,
-            labelText: 'Increase Storage:',
+            labelText: localize('tab1IncreaseStorageRowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: 'Increase Storage',
+                    text: localize('buttonIncreaseStorage', getLanguage()),
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         increaseResourceStorage(['heliumQuantity'], ['helium'], ['resources']);
@@ -480,7 +480,7 @@ export function drawTab1Content(heading, optionContentElement) {
                     rowCategory: 'resource'
                 }),
             ],
-            descriptionText: `${storagePrice + " " + getResourceDataObject('resources', ['helium', 'nameResource'])}`,
+            descriptionText: `${storagePrice + " " + localize('resourceHelium', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'storage',
@@ -497,10 +497,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const heliumAutoBuyer1Row = createOptionRow({
             labelId: 'heliumAutoBuyer1Row',
             renderNameABs: getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']),
-            labelText: 'Helium Auto Buyer Tier 1:',
+            labelText: localize('tab1HeliumAutoBuyer1RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Add ${Math.floor((getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier1', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(1) * getTimerRateRatio()))} Helium /s`,
+                    text: `${localize('buttonAddPerSecond', getLanguage()).replace('{rate}', Math.floor((getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier1', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(1) * getTimerRateRatio()))).replace('{resource}', localize('resourceHelium', getLanguage()))}`,
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         gain(1, 'heliumAB1Quantity', 'autoBuyer', true, 'tier1', 'helium', 'resources')
@@ -514,12 +514,12 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: 'tier1',
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Quantity: ${getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier1', 'quantity'])}`, 'heliumAB1Quantity', ['autoBuyer-building-quantity']),
+                createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier1', 'quantity'])}`, 'heliumAB1Quantity', ['autoBuyer-building-quantity']),
                 createToggleSwitch('helium1Toggle', true, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['helium', 'upgrades', 'autoBuyer', 'tier1', 'active']);
                 }, ['toggle-switch-spacing']),
             ],
-            descriptionText: `${autobuyer1Price + " " + getResourceDataObject('resources', ['helium', 'nameResource'])}`,
+            descriptionText: `${autobuyer1Price + " " + localize('resourceHelium', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'autoBuyer',
@@ -536,10 +536,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const heliumAutoBuyer2Row = createOptionRow({
             labelId: 'heliumAutoBuyer2Row',
             renderNameABs: getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']),
-            labelText: 'Helium Auto Buyer Tier 2:',
+            labelText: localize('tab1HeliumAutoBuyer2RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Add ${Math.floor((getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier2', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(2) * getTimerRateRatio()))} Helium /s`,
+                    text: `${localize('buttonAddPerSecond', getLanguage()).replace('{rate}', Math.floor((getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier2', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(2) * getTimerRateRatio()))).replace('{resource}', localize('resourceHelium', getLanguage()))}`,
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         gain(1, 'heliumAB2Quantity', 'autoBuyer', true, 'tier2', 'helium', 'resources')
@@ -553,12 +553,12 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: 'tier2',
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Quantity: ${getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier2', 'quantity'])}`, 'heliumAB2Quantity', ['autoBuyer-building-quantity']),
+                createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier2', 'quantity'])}`, 'heliumAB2Quantity', ['autoBuyer-building-quantity']),
                 createToggleSwitch('helium2Toggle', true, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['helium', 'upgrades', 'autoBuyer', 'tier2', 'active']);
                 }, ['toggle-switch-spacing']),
             ],
-            descriptionText: `${autobuyer2Price + " " + getResourceDataObject('resources', ['helium', 'nameResource'])}`,
+            descriptionText: `${autobuyer2Price + " " + localize('resourceHelium', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'autoBuyer',
@@ -575,10 +575,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const heliumAutoBuyer3Row = createOptionRow({
             labelId: 'heliumAutoBuyer3Row',
             renderNameABs: getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']),
-            labelText: 'Helium Auto Buyer Tier 3:',
+            labelText: localize('tab1HeliumAutoBuyer3RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Add ${Math.floor((getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier3', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(3) * getTimerRateRatio()))} Helium /s`,
+                    text: `${localize('buttonAddPerSecond', getLanguage()).replace('{rate}', Math.floor((getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier3', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(3) * getTimerRateRatio()))).replace('{resource}', localize('resourceHelium', getLanguage()))}`,
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         gain(1, 'heliumAB3Quantity', 'autoBuyer', true, 'tier3', 'helium', 'resources')
@@ -592,12 +592,12 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: 'tier3',
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Quantity: ${getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier3', 'quantity'])}`, 'heliumAB3Quantity', ['autoBuyer-building-quantity']),
+                createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier3', 'quantity'])}`, 'heliumAB3Quantity', ['autoBuyer-building-quantity']),
                 createToggleSwitch('helium3Toggle', true, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['helium', 'upgrades', 'autoBuyer', 'tier3', 'active']);
                 }, ['toggle-switch-spacing']),
             ],
-            descriptionText: `${autobuyer3Price + " " + getResourceDataObject('resources', ['helium', 'nameResource'])}`,
+            descriptionText: `${autobuyer3Price + " " + localize('resourceHelium', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'autoBuyer',
@@ -614,10 +614,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const heliumAutoBuyer4Row = createOptionRow({
             labelId: 'heliumAutoBuyer4Row',
             renderNameABs: getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']),
-            labelText: 'Helium Auto Buyer Tier 4:',
+            labelText: localize('tab1HeliumAutoBuyer4RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Add ${Math.floor((getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier4', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(4) * getTimerRateRatio()))} Helium /s`,
+                    text: `${localize('buttonAddPerSecond', getLanguage()).replace('{rate}', Math.floor((getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier4', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(4) * getTimerRateRatio()))).replace('{resource}', localize('resourceHelium', getLanguage()))}`,
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         gain(1, 'heliumAB4Quantity', 'autoBuyer', true, 'tier4', 'helium', 'resources')
@@ -631,12 +631,12 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: 'tier4',
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Quantity: ${getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier4', 'quantity'])}`, 'heliumAB4Quantity', ['autoBuyer-building-quantity']),
+                createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier4', 'quantity'])}`, 'heliumAB4Quantity', ['autoBuyer-building-quantity']),
                 createToggleSwitch('helium4Toggle', true, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['helium', 'upgrades', 'autoBuyer', 'tier4', 'active']);
                 }, ['toggle-switch-spacing']),
             ],
-            descriptionText: `${autobuyer4Price + " " + getResourceDataObject('resources', ['helium', 'nameResource'])}`,
+            descriptionText: `${autobuyer4Price + " " + localize('resourceHelium', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'autoBuyer',
@@ -786,10 +786,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const carbonIncreaseStorageRow = createOptionRow({
             labelId: 'carbonIncreaseStorageRow',
             renderNameABs: null,
-            labelText: 'Increase Storage:',
+            labelText: localize('tab1IncreaseStorageRowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: 'Increase Storage',
+                    text: localize('buttonIncreaseStorage', getLanguage()),
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         increaseResourceStorage(['carbonQuantity'], ['carbon'], ['resources']);
@@ -806,7 +806,7 @@ export function drawTab1Content(heading, optionContentElement) {
                     rowCategory: 'resource'
                 }),
             ],
-            descriptionText: `${storagePrice + " " + getResourceDataObject('resources', ['carbon', 'nameResource'])}`,
+            descriptionText: `${storagePrice + " " + localize('resourceCarbon', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'storage',
@@ -823,10 +823,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const carbonAutoBuyer1Row = createOptionRow({
             labelId: 'carbonAutoBuyer1Row',
             renderNameABs: getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']),
-            labelText: 'Carbon Auto Buyer Tier 1:',
+            labelText: localize('tab1CarbonAutoBuyer1RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Add ${Math.floor((getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier1', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(1) * getTimerRateRatio()))} Carbon /s`,
+                    text: `${localize('buttonAddPerSecond', getLanguage()).replace('{rate}', Math.floor((getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier1', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(1) * getTimerRateRatio()))).replace('{resource}', localize('resourceCarbon', getLanguage()))}`,
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         gain(1, 'carbonAB1Quantity', 'autoBuyer', true, 'tier1', 'carbon', 'resources')
@@ -840,12 +840,12 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: 'tier1',
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Quantity: ${getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier1', 'quantity'])}`, 'carbonAB1Quantity', ['autoBuyer-building-quantity']),
+                createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier1', 'quantity'])}`, 'carbonAB1Quantity', ['autoBuyer-building-quantity']),
                 createToggleSwitch('carbon1Toggle', true, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['carbon', 'upgrades', 'autoBuyer', 'tier1', 'active']);
                 }, ['toggle-switch-spacing']),
             ],
-            descriptionText: `${autobuyer1Price + " " + getResourceDataObject('resources', ['carbon', 'nameResource'])}`,
+            descriptionText: `${autobuyer1Price + " " + localize('resourceCarbon', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'autoBuyer',
@@ -862,10 +862,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const carbonAutoBuyer2Row = createOptionRow({
             labelId: 'carbonAutoBuyer2Row',
             renderNameABs: getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']),
-            labelText: 'Carbon Auto Buyer Tier 2:',
+            labelText: localize('tab1CarbonAutoBuyer2RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Add ${Math.floor((getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier2', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(2) * getTimerRateRatio()))} Carbon /s`,
+                    text: `${localize('buttonAddPerSecond', getLanguage()).replace('{rate}', Math.floor((getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier2', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(2) * getTimerRateRatio()))).replace('{resource}', localize('resourceCarbon', getLanguage()))}`,
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         gain(1, 'carbonAB2Quantity', 'autoBuyer', true, 'tier2', 'carbon', 'resources')
@@ -879,12 +879,12 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: 'tier2',
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Quantity: ${getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier2', 'quantity'])}`, 'carbonAB2Quantity', ['autoBuyer-building-quantity']),
+                createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier2', 'quantity'])}`, 'carbonAB2Quantity', ['autoBuyer-building-quantity']),
                 createToggleSwitch('carbon2Toggle', true, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['carbon', 'upgrades', 'autoBuyer', 'tier2', 'active']);
                 }, ['toggle-switch-spacing']),
             ],
-            descriptionText: `${autobuyer2Price + " " + getResourceDataObject('resources', ['carbon', 'nameResource'])}`,
+            descriptionText: `${autobuyer2Price + " " + localize('resourceCarbon', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'autoBuyer',
@@ -901,10 +901,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const carbonAutoBuyer3Row = createOptionRow({
             labelId: 'carbonAutoBuyer3Row',
             renderNameABs: getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']),
-            labelText: 'Carbon Auto Buyer Tier 3:',
+            labelText: localize('tab1CarbonAutoBuyer3RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Add ${Math.floor((getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier3', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(3) * getTimerRateRatio()))} Carbon /s`,
+                    text: `${localize('buttonAddPerSecond', getLanguage()).replace('{rate}', Math.floor((getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier3', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(3) * getTimerRateRatio()))).replace('{resource}', localize('resourceCarbon', getLanguage()))}`,
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         gain(1, 'carbonAB3Quantity', 'autoBuyer', true, 'tier3', 'carbon', 'resources')
@@ -918,12 +918,12 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: 'tier3',
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Quantity: ${getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier3', 'quantity'])}`, 'carbonAB3Quantity', ['autoBuyer-building-quantity']),
+                createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier3', 'quantity'])}`, 'carbonAB3Quantity', ['autoBuyer-building-quantity']),
                 createToggleSwitch('carbon3Toggle', true, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['carbon', 'upgrades', 'autoBuyer', 'tier3', 'active']);
                 }, ['toggle-switch-spacing']),
             ],
-            descriptionText: `${autobuyer3Price + " " + getResourceDataObject('resources', ['carbon', 'nameResource'])}`,
+            descriptionText: `${autobuyer3Price + " " + localize('resourceCarbon', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'autoBuyer',
@@ -940,10 +940,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const carbonAutoBuyer4Row = createOptionRow({
             labelId: 'carbonAutoBuyer4Row',
             renderNameABs: getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']),
-            labelText: 'Carbon Auto Buyer Tier 4:',
+            labelText: localize('tab1CarbonAutoBuyer4RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Add ${Math.floor((getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier4', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(4) * getTimerRateRatio()))} Carbon /s`,
+                    text: `${localize('buttonAddPerSecond', getLanguage()).replace('{rate}', Math.floor((getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier4', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(4) * getTimerRateRatio()))).replace('{resource}', localize('resourceCarbon', getLanguage()))}`,
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         gain(1, 'carbonAB4Quantity', 'autoBuyer', true, 'tier4', 'carbon', 'resources')
@@ -957,12 +957,12 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: 'tier4',
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Quantity: ${getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier4', 'quantity'])}`, 'carbonAB4Quantity', ['autoBuyer-building-quantity']),
+                createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier4', 'quantity'])}`, 'carbonAB4Quantity', ['autoBuyer-building-quantity']),
                 createToggleSwitch('carbon4Toggle', true, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['carbon', 'upgrades', 'autoBuyer', 'tier4', 'active']);
                 }, ['toggle-switch-spacing']),
             ],
-            descriptionText: `${autobuyer4Price + " " + getResourceDataObject('resources', ['carbon', 'nameResource'])}`,
+            descriptionText: `${autobuyer4Price + " " + localize('resourceCarbon', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'autoBuyer',
@@ -1105,10 +1105,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const neonIncreaseStorageRow = createOptionRow({
             labelId: 'neonIncreaseStorageRow',
             renderNameABs: null,
-            labelText: 'Increase Storage:',
+            labelText: localize('tab1IncreaseStorageRowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: 'Increase Storage',
+                    text: localize('buttonIncreaseStorage', getLanguage()),
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         increaseResourceStorage(['neonQuantity'], ['neon'], ['resources']);
@@ -1125,7 +1125,7 @@ export function drawTab1Content(heading, optionContentElement) {
                     rowCategory: 'resource'
                 }),
             ],
-            descriptionText: `${storagePrice + " " + getResourceDataObject('resources', ['neon', 'nameResource'])}`,
+            descriptionText: `${storagePrice + " " + localize('resourceNeon', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'storage',
@@ -1142,10 +1142,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const neonAutoBuyer1Row = createOptionRow({
             labelId: 'neonAutoBuyer1Row',
             renderNameABs: getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']),
-            labelText: 'Neon Auto Buyer Tier 1:',
+            labelText: localize('tab1NeonAutoBuyer1RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Add ${Math.floor((getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier1', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(1) * getTimerRateRatio()))} Neon /s`,
+                    text: `${localize('buttonAddPerSecond', getLanguage()).replace('{rate}', Math.floor((getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier1', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(1) * getTimerRateRatio()))).replace('{resource}', localize('resourceNeon', getLanguage()))}`,
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         gain(1, 'neonAB1Quantity', 'autoBuyer', true, 'tier1', 'neon', 'resources')
@@ -1159,12 +1159,12 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: 'tier1',
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Quantity: ${getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier1', 'quantity'])}`, 'neonAB1Quantity', ['autoBuyer-building-quantity']),
+                createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier1', 'quantity'])}`, 'neonAB1Quantity', ['autoBuyer-building-quantity']),
                 createToggleSwitch('neon1Toggle', true, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['neon', 'upgrades', 'autoBuyer', 'tier1', 'active']);
                 }, ['toggle-switch-spacing']),
             ],
-            descriptionText: `${autobuyer1Price + " " + getResourceDataObject('resources', ['neon', 'nameResource'])}`,
+            descriptionText: `${autobuyer1Price + " " + localize('resourceNeon', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'autoBuyer',
@@ -1181,10 +1181,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const neonAutoBuyer2Row = createOptionRow({
             labelId: 'neonAutoBuyer2Row',
             renderNameABs: getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']),
-            labelText: 'Neon Auto Buyer Tier 2:',
+            labelText: localize('tab1NeonAutoBuyer2RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Add ${Math.floor((getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier2', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(2) * getTimerRateRatio()))} Neon /s`,
+                    text: `${localize('buttonAddPerSecond', getLanguage()).replace('{rate}', Math.floor((getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier2', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(2) * getTimerRateRatio()))).replace('{resource}', localize('resourceNeon', getLanguage()))}`,
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         gain(1, 'neonAB2Quantity', 'autoBuyer', true, 'tier2', 'neon', 'resources')
@@ -1198,12 +1198,12 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: 'tier2',
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Quantity: ${getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier2', 'quantity'])}`, 'neonAB2Quantity', ['autoBuyer-building-quantity']),
+                createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier2', 'quantity'])}`, 'neonAB2Quantity', ['autoBuyer-building-quantity']),
                 createToggleSwitch('neon2Toggle', true, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['neon', 'upgrades', 'autoBuyer', 'tier2', 'active']);
                 }, ['toggle-switch-spacing']),
             ],
-            descriptionText: `${autobuyer2Price + " " + getResourceDataObject('resources', ['neon', 'nameResource'])}`,
+            descriptionText: `${autobuyer2Price + " " + localize('resourceNeon', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'autoBuyer',
@@ -1220,10 +1220,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const neonAutoBuyer3Row = createOptionRow({
             labelId: 'neonAutoBuyer3Row',
             renderNameABs: getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']),
-            labelText: 'Neon Auto Buyer Tier 3:',
+            labelText: localize('tab1NeonAutoBuyer3RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Add ${Math.floor((getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier3', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(3) * getTimerRateRatio()))} Neon /s`,
+                    text: `${localize('buttonAddPerSecond', getLanguage()).replace('{rate}', Math.floor((getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier3', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(3) * getTimerRateRatio()))).replace('{resource}', localize('resourceNeon', getLanguage()))}`,
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         gain(1, 'neonAB3Quantity', 'autoBuyer', true, 'tier3', 'neon', 'resources')
@@ -1237,12 +1237,12 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: 'tier3',
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Quantity: ${getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier3', 'quantity'])}`, 'neonAB3Quantity', ['autoBuyer-building-quantity']),
+                createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier3', 'quantity'])}`, 'neonAB3Quantity', ['autoBuyer-building-quantity']),
                 createToggleSwitch('neon3Toggle', true, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['neon', 'upgrades', 'autoBuyer', 'tier3', 'active']);
                 }, ['toggle-switch-spacing']),
             ],
-            descriptionText: `${autobuyer3Price + " " + getResourceDataObject('resources', ['neon', 'nameResource'])}`,
+            descriptionText: `${autobuyer3Price + " " + localize('resourceNeon', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'autoBuyer',
@@ -1259,10 +1259,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const neonAutoBuyer4Row = createOptionRow({
             labelId: 'neonAutoBuyer4Row',
             renderNameABs: getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']),
-            labelText: 'Neon Auto Buyer Tier 4:',
+            labelText: localize('tab1NeonAutoBuyer4RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Add ${Math.floor((getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier4', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(4) * getTimerRateRatio()))} Neon /s`,
+                    text: `${localize('buttonAddPerSecond', getLanguage()).replace('{rate}', Math.floor((getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier4', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(4) * getTimerRateRatio()))).replace('{resource}', localize('resourceNeon', getLanguage()))}`,
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         gain(1, 'neonAB4Quantity', 'autoBuyer', true, 'tier4', 'neon', 'resources')
@@ -1276,12 +1276,12 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: 'tier4',
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Quantity: ${getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier4', 'quantity'])}`, 'neonAB4Quantity', ['autoBuyer-building-quantity']),
+                createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier4', 'quantity'])}`, 'neonAB4Quantity', ['autoBuyer-building-quantity']),
                 createToggleSwitch('neon4Toggle', true, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['neon', 'upgrades', 'autoBuyer', 'tier4', 'active']);
                 }, ['toggle-switch-spacing']),
             ],
-            descriptionText: `${autobuyer4Price + " " + getResourceDataObject('resources', ['neon', 'nameResource'])}`,
+            descriptionText: `${autobuyer4Price + " " + localize('resourceNeon', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'autoBuyer',
@@ -1424,10 +1424,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const oxygenIncreaseStorageRow = createOptionRow({
             labelId: 'oxygenIncreaseStorageRow',
             renderNameABs: null,
-            labelText: 'Increase Storage:',
+            labelText: localize('tab1IncreaseStorageRowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: 'Increase Storage',
+                    text: localize('buttonIncreaseStorage', getLanguage()),
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         increaseResourceStorage(['oxygenQuantity'], ['oxygen'], ['resources']);
@@ -1444,7 +1444,7 @@ export function drawTab1Content(heading, optionContentElement) {
                     rowCategory: 'resource'
                 }),
             ],
-            descriptionText: `${storagePrice + " " + getResourceDataObject('resources', ['oxygen', 'nameResource'])}`,
+            descriptionText: `${storagePrice + " " + localize('resourceOxygen', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'storage',
@@ -1461,10 +1461,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const oxygenAutoBuyer1Row = createOptionRow({
             labelId: 'oxygenAutoBuyer1Row',
             renderNameABs: getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']),
-            labelText: 'Oxygen Auto Buyer Tier 1:',
+            labelText: localize('tab1OxygenAutoBuyer1RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Add ${Math.floor((getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier1', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(1) * getTimerRateRatio()))} Oxygen /s`,
+                    text: `${localize('buttonAddPerSecond', getLanguage()).replace('{rate}', Math.floor((getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier1', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(1) * getTimerRateRatio()))).replace('{resource}', localize('resourceOxygen', getLanguage()))}`,
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         gain(1, 'oxygenAB1Quantity', 'autoBuyer', true, 'tier1', 'oxygen', 'resources')
@@ -1478,12 +1478,12 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: 'tier1',
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Quantity: ${getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier1', 'quantity'])}`, 'oxygenAB1Quantity', ['autoBuyer-building-quantity']),
+                createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier1', 'quantity'])}`, 'oxygenAB1Quantity', ['autoBuyer-building-quantity']),
                 createToggleSwitch('oxygen1Toggle', true, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier1', 'active']);
                 }, ['toggle-switch-spacing']),
             ],
-            descriptionText: `${autobuyer1Price + " " + getResourceDataObject('resources', ['oxygen', 'nameResource'])}`,
+            descriptionText: `${autobuyer1Price + " " + localize('resourceOxygen', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'autoBuyer',
@@ -1500,10 +1500,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const oxygenAutoBuyer2Row = createOptionRow({
             labelId: 'oxygenAutoBuyer2Row',
             renderNameABs: getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']),
-            labelText: 'Oxygen Auto Buyer Tier 2:',
+            labelText: localize('tab1OxygenAutoBuyer2RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Add ${Math.floor((getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier2', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(2) * getTimerRateRatio()))} Oxygen /s`,
+                    text: `${localize('buttonAddPerSecond', getLanguage()).replace('{rate}', Math.floor((getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier2', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(2) * getTimerRateRatio()))).replace('{resource}', localize('resourceOxygen', getLanguage()))}`,
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         gain(1, 'oxygenAB2Quantity', 'autoBuyer', true, 'tier2', 'oxygen', 'resources')
@@ -1517,12 +1517,12 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: 'tier2',
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Quantity: ${getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier2', 'quantity'])}`, 'oxygenAB2Quantity', ['autoBuyer-building-quantity']),
+                createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier2', 'quantity'])}`, 'oxygenAB2Quantity', ['autoBuyer-building-quantity']),
                 createToggleSwitch('oxygen2Toggle', true, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier2', 'active']);
                 }, ['toggle-switch-spacing']),
             ],
-            descriptionText: `${autobuyer2Price + " " + getResourceDataObject('resources', ['oxygen', 'nameResource'])}`,
+            descriptionText: `${autobuyer2Price + " " + localize('resourceOxygen', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'autoBuyer',
@@ -1539,10 +1539,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const oxygenAutoBuyer3Row = createOptionRow({
             labelId: 'oxygenAutoBuyer3Row',
             renderNameABs: getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']),
-            labelText: 'Oxygen Auto Buyer Tier 3:',
+            labelText: localize('tab1OxygenAutoBuyer3RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Add ${Math.floor((getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier3', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(3) * getTimerRateRatio()))} Oxygen /s`,
+                    text: `${localize('buttonAddPerSecond', getLanguage()).replace('{rate}', Math.floor((getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier3', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(3) * getTimerRateRatio()))).replace('{resource}', localize('resourceOxygen', getLanguage()))}`,
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         gain(1, 'oxygenAB3Quantity', 'autoBuyer', true, 'tier3', 'oxygen', 'resources')
@@ -1556,12 +1556,12 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: 'tier3',
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Quantity: ${getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier3', 'quantity'])}`, 'oxygenAB3Quantity', ['autoBuyer-building-quantity']),
+                createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier3', 'quantity'])}`, 'oxygenAB3Quantity', ['autoBuyer-building-quantity']),
                 createToggleSwitch('oxygen3Toggle', true, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier3', 'active']);
                 }, ['toggle-switch-spacing']),
             ],
-            descriptionText: `${autobuyer3Price + " " + getResourceDataObject('resources', ['oxygen', 'nameResource'])}`,
+            descriptionText: `${autobuyer3Price + " " + localize('resourceOxygen', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'autoBuyer',
@@ -1578,10 +1578,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const oxygenAutoBuyer4Row = createOptionRow({
             labelId: 'oxygenAutoBuyer4Row',
             renderNameABs: getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']),
-            labelText: 'Oxygen Auto Buyer Tier 4:',
+            labelText: localize('tab1OxygenAutoBuyer4RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Add ${Math.floor((getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier4', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(4) * getTimerRateRatio()))} Oxygen /s`,
+                    text: `${localize('buttonAddPerSecond', getLanguage()).replace('{rate}', Math.floor((getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier4', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(4) * getTimerRateRatio()))).replace('{resource}', localize('resourceOxygen', getLanguage()))}`,
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         gain(1, 'oxygenAB4Quantity', 'autoBuyer', true, 'tier4', 'oxygen', 'resources')
@@ -1595,12 +1595,12 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: 'tier4',
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Quantity: ${getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier4', 'quantity'])}`, 'oxygenAB4Quantity', ['autoBuyer-building-quantity']),
+                createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier4', 'quantity'])}`, 'oxygenAB4Quantity', ['autoBuyer-building-quantity']),
                 createToggleSwitch('oxygen4Toggle', true, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier4', 'active']);
                 }, ['toggle-switch-spacing']),
             ],
-            descriptionText: `${autobuyer4Price + " " + getResourceDataObject('resources', ['oxygen', 'nameResource'])}`,
+            descriptionText: `${autobuyer4Price + " " + localize('resourceOxygen', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'autoBuyer',
@@ -1718,10 +1718,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const sodiumIncreaseStorageRow = createOptionRow({
             labelId: 'sodiumIncreaseStorageRow',
             renderNameABs: null,
-            labelText: 'Increase Storage:',
+            labelText: localize('tab1IncreaseStorageRowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: 'Increase Storage',
+                    text: localize('buttonIncreaseStorage', getLanguage()),
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         increaseResourceStorage(['sodiumQuantity'], ['sodium'], ['resources']);
@@ -1738,7 +1738,7 @@ export function drawTab1Content(heading, optionContentElement) {
                     rowCategory: 'resource'
                 }),
             ],
-            descriptionText: `${storagePrice + " " + getResourceDataObject('resources', ['sodium', 'nameResource'])}`,
+            descriptionText: `${storagePrice + " " + localize('resourceSodium', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'storage',
@@ -1755,10 +1755,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const sodiumAutoBuyer1Row = createOptionRow({
             labelId: 'sodiumAutoBuyer1Row',
             renderNameABs: getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']),
-            labelText: 'Sodium Auto Buyer Tier 1:',
+            labelText: localize('tab1SodiumAutoBuyer1RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Add ${Math.floor((getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier1', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(1) * getTimerRateRatio()))} Sodium /s`,
+                    text: `${localize('buttonAddPerSecond', getLanguage()).replace('{rate}', Math.floor((getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier1', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(1) * getTimerRateRatio()))).replace('{resource}', localize('resourceSodium', getLanguage()))}`,
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         gain(1, 'sodiumAB1Quantity', 'autoBuyer', true, 'tier1', 'sodium', 'resources')
@@ -1772,12 +1772,12 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: 'tier1',
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Quantity: ${getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier1', 'quantity'])}`, 'sodiumAB1Quantity', ['autoBuyer-building-quantity']),
+                createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier1', 'quantity'])}`, 'sodiumAB1Quantity', ['autoBuyer-building-quantity']),
                 createToggleSwitch('sodium1Toggle', true, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['sodium', 'upgrades', 'autoBuyer', 'tier1', 'active']);
                 }, ['toggle-switch-spacing']),
             ],
-            descriptionText: `${autobuyer1Price + " " + getResourceDataObject('resources', ['sodium', 'nameResource'])}`,
+            descriptionText: `${autobuyer1Price + " " + localize('resourceSodium', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'autoBuyer',
@@ -1794,10 +1794,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const sodiumAutoBuyer2Row = createOptionRow({
             labelId: 'sodiumAutoBuyer2Row',
             renderNameABs: getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']),
-            labelText: 'Sodium Auto Buyer Tier 2:',
+            labelText: localize('tab1SodiumAutoBuyer2RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Add ${Math.floor((getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier2', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(2) * getTimerRateRatio()))} Sodium /s`,
+                    text: `${localize('buttonAddPerSecond', getLanguage()).replace('{rate}', Math.floor((getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier2', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(2) * getTimerRateRatio()))).replace('{resource}', localize('resourceSodium', getLanguage()))}`,
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         gain(1, 'sodiumAB2Quantity', 'autoBuyer', true, 'tier2', 'sodium', 'resources')
@@ -1811,12 +1811,12 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: 'tier2',
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Quantity: ${getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier2', 'quantity'])}`, 'sodiumAB2Quantity', ['autoBuyer-building-quantity']),
+                createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier2', 'quantity'])}`, 'sodiumAB2Quantity', ['autoBuyer-building-quantity']),
                 createToggleSwitch('sodium2Toggle', true, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['sodium', 'upgrades', 'autoBuyer', 'tier2', 'active']);
                 }, ['toggle-switch-spacing']),
             ],
-            descriptionText: `${autobuyer2Price + " " + getResourceDataObject('resources', ['sodium', 'nameResource'])}`,
+            descriptionText: `${autobuyer2Price + " " + localize('resourceSodium', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'autoBuyer',
@@ -1833,10 +1833,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const sodiumAutoBuyer3Row = createOptionRow({
             labelId: 'sodiumAutoBuyer3Row',
             renderNameABs: getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']),
-            labelText: 'Sodium Auto Buyer Tier 3:',
+            labelText: localize('tab1SodiumAutoBuyer3RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Add ${Math.floor((getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier3', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(3) * getTimerRateRatio()))} Sodium /s`,
+                    text: `${localize('buttonAddPerSecond', getLanguage()).replace('{rate}', Math.floor((getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier3', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(3) * getTimerRateRatio()))).replace('{resource}', localize('resourceSodium', getLanguage()))}`,
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         gain(1, 'sodiumAB3Quantity', 'autoBuyer', true, 'tier3', 'sodium', 'resources')
@@ -1850,12 +1850,12 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: 'tier3',
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Quantity: ${getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier3', 'quantity'])}`, 'sodiumAB3Quantity', ['autoBuyer-building-quantity']),
+                createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier3', 'quantity'])}`, 'sodiumAB3Quantity', ['autoBuyer-building-quantity']),
                 createToggleSwitch('sodium3Toggle', true, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['sodium', 'upgrades', 'autoBuyer', 'tier3', 'active']);
                 }, ['toggle-switch-spacing']),
             ],
-            descriptionText: `${autobuyer3Price + " " + getResourceDataObject('resources', ['sodium', 'nameResource'])}`,
+            descriptionText: `${autobuyer3Price + " " + localize('resourceSodium', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'autoBuyer',
@@ -1872,10 +1872,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const sodiumAutoBuyer4Row = createOptionRow({
             labelId: 'sodiumAutoBuyer4Row',
             renderNameABs: getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']),
-            labelText: 'Sodium Auto Buyer Tier 4:',
+            labelText: localize('tab1SodiumAutoBuyer4RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Add ${Math.floor((getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier4', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(4) * getTimerRateRatio()))} Sodium /s`,
+                    text: `${localize('buttonAddPerSecond', getLanguage()).replace('{rate}', Math.floor((getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier4', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(4) * getTimerRateRatio()))).replace('{resource}', localize('resourceSodium', getLanguage()))}`,
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         gain(1, 'sodiumAB4Quantity', 'autoBuyer', true, 'tier4', 'sodium', 'resources')
@@ -1889,12 +1889,12 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: 'tier4',
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Quantity: ${getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier4', 'quantity'])}`, 'sodiumAB4Quantity', ['autoBuyer-building-quantity']),
+                createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier4', 'quantity'])}`, 'sodiumAB4Quantity', ['autoBuyer-building-quantity']),
                 createToggleSwitch('sodium4Toggle', true, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['sodium', 'upgrades', 'autoBuyer', 'tier4', 'active']);
                 }, ['toggle-switch-spacing']),
             ],
-            descriptionText: `${autobuyer4Price + " " + getResourceDataObject('resources', ['sodium', 'nameResource'])}`,
+            descriptionText: `${autobuyer4Price + " " + localize('resourceSodium', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'autoBuyer',
@@ -2037,10 +2037,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const siliconIncreaseStorageRow = createOptionRow({
             labelId: 'siliconIncreaseStorageRow',
             renderNameABs: null,
-            labelText: 'Increase Storage:',
+            labelText: localize('tab1IncreaseStorageRowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: 'Increase Storage',
+                    text: localize('buttonIncreaseStorage', getLanguage()),
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         increaseResourceStorage(['siliconQuantity'], ['silicon'], ['resources']);
@@ -2057,7 +2057,7 @@ export function drawTab1Content(heading, optionContentElement) {
                     rowCategory: 'resource'
                 }),
             ],
-            descriptionText: `${storagePrice + " " + getResourceDataObject('resources', ['silicon', 'nameResource'])}`,
+            descriptionText: `${storagePrice + " " + localize('resourceSilicon', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'storage',
@@ -2074,10 +2074,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const siliconAutoBuyer1Row = createOptionRow({
             labelId: 'siliconAutoBuyer1Row',
             renderNameABs: getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']),
-            labelText: 'Silicon Auto Buyer Tier 1:',
+            labelText: localize('tab1SiliconAutoBuyer1RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Add ${Math.floor((getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier1', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(1) * getTimerRateRatio()))} Silicon /s`,
+                    text: `${localize('buttonAddPerSecond', getLanguage()).replace('{rate}', Math.floor((getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier1', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(1) * getTimerRateRatio()))).replace('{resource}', localize('resourceSilicon', getLanguage()))}`,
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         gain(1, 'siliconAB1Quantity', 'autoBuyer', true, 'tier1', 'silicon', 'resources')
@@ -2091,12 +2091,12 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: 'tier1',
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Quantity: ${getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier1', 'quantity'])}`, 'siliconAB1Quantity', ['autoBuyer-building-quantity']),
+                createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier1', 'quantity'])}`, 'siliconAB1Quantity', ['autoBuyer-building-quantity']),
                 createToggleSwitch('silicon1Toggle', true, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['silicon', 'upgrades', 'autoBuyer', 'tier1', 'active']);
                 }, ['toggle-switch-spacing']),
             ],
-            descriptionText: `${autobuyer1Price + " " + getResourceDataObject('resources', ['silicon', 'nameResource'])}`,
+            descriptionText: `${autobuyer1Price + " " + localize('resourceSilicon', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'autoBuyer',
@@ -2113,10 +2113,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const siliconAutoBuyer2Row = createOptionRow({
             labelId: 'siliconAutoBuyer2Row',
             renderNameABs: getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']),
-            labelText: 'Silicon Auto Buyer Tier 2:',
+            labelText: localize('tab1SiliconAutoBuyer2RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Add ${Math.floor((getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier2', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(2) * getTimerRateRatio()))} Silicon /s`,
+                    text: `${localize('buttonAddPerSecond', getLanguage()).replace('{rate}', Math.floor((getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier2', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(2) * getTimerRateRatio()))).replace('{resource}', localize('resourceSilicon', getLanguage()))}`,
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         gain(1, 'siliconAB2Quantity', 'autoBuyer', true, 'tier2', 'silicon', 'resources')
@@ -2130,12 +2130,12 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: 'tier2',
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Quantity: ${getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier2', 'quantity'])}`, 'siliconAB2Quantity', ['autoBuyer-building-quantity']),
+                createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier2', 'quantity'])}`, 'siliconAB2Quantity', ['autoBuyer-building-quantity']),
                 createToggleSwitch('silicon2Toggle', true, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['silicon', 'upgrades', 'autoBuyer', 'tier2', 'active']);
                 }, ['toggle-switch-spacing']),
             ],
-            descriptionText: `${autobuyer2Price + " " + getResourceDataObject('resources', ['silicon', 'nameResource'])}`,
+            descriptionText: `${autobuyer2Price + " " + localize('resourceSilicon', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'autoBuyer',
@@ -2152,10 +2152,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const siliconAutoBuyer3Row = createOptionRow({
             labelId: 'siliconAutoBuyer3Row',
             renderNameABs: getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']),
-            labelText: 'Silicon Auto Buyer Tier 3:',
+            labelText: localize('tab1SiliconAutoBuyer3RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Add ${Math.floor((getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier3', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(3) * getTimerRateRatio()))} Silicon /s`,
+                    text: `${localize('buttonAddPerSecond', getLanguage()).replace('{rate}', Math.floor((getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier3', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(3) * getTimerRateRatio()))).replace('{resource}', localize('resourceSilicon', getLanguage()))}`,
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         gain(1, 'siliconAB3Quantity', 'autoBuyer', true, 'tier3', 'silicon', 'resources')
@@ -2169,12 +2169,12 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: 'tier3',
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Quantity: ${getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier3', 'quantity'])}`, 'siliconAB3Quantity', ['autoBuyer-building-quantity']),
+                createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier3', 'quantity'])}`, 'siliconAB3Quantity', ['autoBuyer-building-quantity']),
                 createToggleSwitch('silicon3Toggle', true, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['silicon', 'upgrades', 'autoBuyer', 'tier3', 'active']);
                 }, ['toggle-switch-spacing']),
             ],
-            descriptionText: `${autobuyer3Price + " " + getResourceDataObject('resources', ['silicon', 'nameResource'])}`,
+            descriptionText: `${autobuyer3Price + " " + localize('resourceSilicon', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'autoBuyer',
@@ -2191,10 +2191,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const siliconAutoBuyer4Row = createOptionRow({
             labelId: 'siliconAutoBuyer4Row',
             renderNameABs: getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']),
-            labelText: 'Silicon Auto Buyer Tier 4:',
+            labelText: localize('tab1SiliconAutoBuyer4RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Add ${Math.floor((getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier4', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(4) * getTimerRateRatio()))} Silicon /s`,
+                    text: `${localize('buttonAddPerSecond', getLanguage()).replace('{rate}', Math.floor((getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier4', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(4) * getTimerRateRatio()))).replace('{resource}', localize('resourceSilicon', getLanguage()))}`,
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         gain(1, 'siliconAB4Quantity', 'autoBuyer', true, 'tier4', 'silicon', 'resources')
@@ -2208,12 +2208,12 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: 'tier4',
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Quantity: ${getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier4', 'quantity'])}`, 'siliconAB4Quantity', ['autoBuyer-building-quantity']),
+                createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier4', 'quantity'])}`, 'siliconAB4Quantity', ['autoBuyer-building-quantity']),
                 createToggleSwitch('silicon4Toggle', true, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['silicon', 'upgrades', 'autoBuyer', 'tier4', 'active']);
                 }, ['toggle-switch-spacing']),
             ],
-            descriptionText: `${autobuyer4Price + " " + getResourceDataObject('resources', ['silicon', 'nameResource'])}`,
+            descriptionText: `${autobuyer4Price + " " + localize('resourceSilicon', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'autoBuyer',
@@ -2331,10 +2331,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const ironIncreaseStorageRow = createOptionRow({
             labelId: 'ironIncreaseStorageRow',
             renderNameABs: null,
-            labelText: 'Increase Storage:',
+            labelText: localize('tab1IncreaseStorageRowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: 'Increase Storage',
+                    text: localize('buttonIncreaseStorage', getLanguage()),
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         increaseResourceStorage(['ironQuantity'], ['iron'], ['resources']);
@@ -2351,7 +2351,7 @@ export function drawTab1Content(heading, optionContentElement) {
                     rowCategory: 'resource'
                 }),
             ],
-            descriptionText: `${storagePrice + " " + getResourceDataObject('resources', ['iron', 'nameResource'])}`,
+            descriptionText: `${storagePrice + " " + localize('resourceIron', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'storage',
@@ -2368,10 +2368,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const ironAutoBuyer1Row = createOptionRow({
             labelId: 'ironAutoBuyer1Row',
             renderNameABs: getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']),
-            labelText: 'Iron Auto Buyer Tier 1:',
+            labelText: localize('tab1IronAutoBuyer1RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Add ${Math.floor((getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier1', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(1) * getTimerRateRatio()))} Iron /s`,
+                    text: `${localize('buttonAddPerSecond', getLanguage()).replace('{rate}', Math.floor((getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier1', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(1) * getTimerRateRatio()))).replace('{resource}', localize('resourceIron', getLanguage()))}`,
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         gain(1, 'ironAB1Quantity', 'autoBuyer', true, 'tier1', 'iron', 'resources')
@@ -2385,12 +2385,12 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: 'tier1',
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Quantity: ${getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier1', 'quantity'])}`, 'ironAB1Quantity', ['autoBuyer-building-quantity']),
+                createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier1', 'quantity'])}`, 'ironAB1Quantity', ['autoBuyer-building-quantity']),
                 createToggleSwitch('iron1Toggle', true, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['iron', 'upgrades', 'autoBuyer', 'tier1', 'active']);
                 }, ['toggle-switch-spacing']),
             ],
-            descriptionText: `${autobuyer1Price + " " + getResourceDataObject('resources', ['iron', 'nameResource'])}`,
+            descriptionText: `${autobuyer1Price + " " + localize('resourceIron', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'autoBuyer',
@@ -2407,10 +2407,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const ironAutoBuyer2Row = createOptionRow({
             labelId: 'ironAutoBuyer2Row',
             renderNameABs: getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']),
-            labelText: 'Iron Auto Buyer Tier 2:',
+            labelText: localize('tab1IronAutoBuyer2RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Add ${Math.floor((getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier2', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(2) * getTimerRateRatio()))} Iron /s`,
+                    text: `${localize('buttonAddPerSecond', getLanguage()).replace('{rate}', Math.floor((getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier2', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(2) * getTimerRateRatio()))).replace('{resource}', localize('resourceIron', getLanguage()))}`,
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         gain(1, 'ironAB2Quantity', 'autoBuyer', true, 'tier2', 'iron', 'resources')
@@ -2424,12 +2424,12 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: 'tier2',
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Quantity: ${getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier2', 'quantity'])}`, 'ironAB2Quantity', ['autoBuyer-building-quantity']),
+                createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier2', 'quantity'])}`, 'ironAB2Quantity', ['autoBuyer-building-quantity']),
                 createToggleSwitch('iron2Toggle', true, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['iron', 'upgrades', 'autoBuyer', 'tier2', 'active']);
                 }, ['toggle-switch-spacing']),
             ],
-            descriptionText: `${autobuyer2Price + " " + getResourceDataObject('resources', ['iron', 'nameResource'])}`,
+            descriptionText: `${autobuyer2Price + " " + localize('resourceIron', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'autoBuyer',
@@ -2446,10 +2446,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const ironAutoBuyer3Row = createOptionRow({
             labelId: 'ironAutoBuyer3Row',
             renderNameABs: getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']),
-            labelText: 'Iron Auto Buyer Tier 3:',
+            labelText: localize('tab1IronAutoBuyer3RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Add ${Math.floor((getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier3', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(3) * getTimerRateRatio()))} Iron /s`,
+                    text: `${localize('buttonAddPerSecond', getLanguage()).replace('{rate}', Math.floor((getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier3', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(3) * getTimerRateRatio()))).replace('{resource}', localize('resourceIron', getLanguage()))}`,
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         gain(1, 'ironAB3Quantity', 'autoBuyer', true, 'tier3', 'iron', 'resources')
@@ -2463,12 +2463,12 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: 'tier3',
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Quantity: ${getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier3', 'quantity'])}`, 'ironAB3Quantity', ['autoBuyer-building-quantity']),
+                createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier3', 'quantity'])}`, 'ironAB3Quantity', ['autoBuyer-building-quantity']),
                 createToggleSwitch('iron3Toggle', true, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['iron', 'upgrades', 'autoBuyer', 'tier3', 'active']);
                 }, ['toggle-switch-spacing']),
             ],
-            descriptionText: `${autobuyer3Price + " " + getResourceDataObject('resources', ['iron', 'nameResource'])}`,
+            descriptionText: `${autobuyer3Price + " " + localize('resourceIron', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'autoBuyer',
@@ -2485,10 +2485,10 @@ export function drawTab1Content(heading, optionContentElement) {
         const ironAutoBuyer4Row = createOptionRow({
             labelId: 'ironAutoBuyer4Row',
             renderNameABs: getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']),
-            labelText: 'Iron Auto Buyer Tier 4:',
+            labelText: localize('tab1IronAutoBuyer4RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Add ${Math.floor((getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier4', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(4) * getTimerRateRatio()))} Iron /s`,
+                    text: `${localize('buttonAddPerSecond', getLanguage()).replace('{rate}', Math.floor((getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier4', 'rate']) * getTimerRateRatio()) + (getBTypeAutoBuyerBoostForTier(4) * getTimerRateRatio()))).replace('{resource}', localize('resourceIron', getLanguage()))}`,
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         gain(1, 'ironAB4Quantity', 'autoBuyer', true, 'tier4', 'iron', 'resources')
@@ -2502,12 +2502,12 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: 'tier4',
                     rowCategory: 'resource'
                 }),
-                createTextElement(`Quantity: ${getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier4', 'quantity'])}`, 'ironAB4Quantity', ['autoBuyer-building-quantity']),
+                createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier4', 'quantity'])}`, 'ironAB4Quantity', ['autoBuyer-building-quantity']),
                 createToggleSwitch('iron4Toggle', true, (isEnabled) => {
                     setResourceDataObject(isEnabled, 'resources', ['iron', 'upgrades', 'autoBuyer', 'tier4', 'active']);
                 }, ['toggle-switch-spacing']),
             ],
-            descriptionText: `${autobuyer4Price + " " + getResourceDataObject('resources', ['iron', 'nameResource'])}`,
+            descriptionText: `${autobuyer4Price + " " + localize('resourceIron', getLanguage())}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'autoBuyer',

@@ -3489,7 +3489,7 @@ export function createOptionRow(options = {}) {
         }
 
         const currentTab = getCurrentTab()[0];
-        description.id = generateElementId((currentTab === 1 || currentTab === 4) ? labelId : labelText, resourceString, null);  //TEMPORARY DURING LOCALISATION WORK
+        description.id = generateElementId(labelText, resourceString, null);  //TEMPORARY DURING LOCALISATION WORK (currentTab === 1 || currentTab === 4) ? labelId : 
         description.innerHTML = descriptionText;
 
         if (dataConditionCheck) {

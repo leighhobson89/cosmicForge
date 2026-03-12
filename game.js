@@ -415,6 +415,7 @@ import {
     addToAllTimeRipTelemetryDataEarned,
     getFTypeAntimatterMiningBoostMultiplier,
     getDebugNewsTickerIntervalMs,
+    getLanguage
 } from "./constantsAndGlobalVars.js";
 
 import {
@@ -427,6 +428,7 @@ import {
     getCosmicRipScanResultsBySectorIndex,
 } from './resourceDataObject.js';
 
+import { localize } from './localization.js';
 import { onboardingChecks } from './onboarding.js';
 
 import {
@@ -5081,8 +5083,17 @@ function updateAllSalePricePreviews() {
             const salePreviewString = getResourceSalePreview(resource);
             let cleanedString = cleanString(salePreviewString);
 
-            const salePreviewElementId = resources[resource]?.salePreviewElement;
-            const salePreviewElement = document.getElementById(salePreviewElementId);
+            const resourcesList = ['hydrogen', 'helium', 'carbon', 'neon', 'oxygen', 'sodium', 'silicon', 'iron'];
+            resourcesList.forEach(res => {
+                const capitalizedRes = capitaliseString(res);
+                const localizedRes = localize('resource' + capitalizedRes, getLanguage());
+                cleanedString = cleanedString.replace(new RegExp(`\\b${capitalizedRes}\\b`, 'g'), localizedRes);
+            });
+
+            const sellRowEl = document.getElementById(`${resource}SellRow`);
+            const salePreviewElement = sellRowEl
+                ? sellRowEl.querySelector('.description-container .notation')
+                : null;
     
             if (salePreviewElement) {
                 salePreviewElement.innerHTML = cleanedString;
@@ -5103,6 +5114,13 @@ function updateAllSalePricePreviews() {
                   
             const salePreviewString = getCompoundSalePreview(compound);
             let cleanedString = cleanString(salePreviewString);
+
+        /*const resourcesList = ['hydrogen', 'helium', 'carbon', 'neon', 'oxygen', 'sodium', 'silicon', 'iron'];
+            resourcesList.forEach(res => {
+                const capitalizedRes = capitaliseString(res);
+                const localizedRes = localize('resource' + capitalizedRes, getLanguage());
+                cleanedString = cleanedString.replace(new RegExp(`\\b${capitalizedRes}\\b`, 'g'), localizedRes);
+            }); ADD COMPMOUND VERSION HERE TO LOCALISE SALE STRING */
 
             const salePreviewElementId = compounds[compound]?.salePreviewElement;
             const salePreviewElement = document.getElementById(salePreviewElementId);
@@ -5559,26 +5577,34 @@ function getAllElements(resourcesArray, compoundsArray) {
 function getAllDynamicDescriptionElements(resourceTierPairs, compoundTierPairs) {
     const elements = {};
 
+    const getRowMainDescriptionLabel = (rowId) => {
+        const rowEl = document.getElementById(rowId);
+        if (!rowEl) return null;
+        return rowEl.querySelector('.description-container .notation');
+    };
+
     resourceTierPairs.forEach(([resourceName, tier]) => {
-        const resourceIncreaseStorageDescElement = document.getElementById(`${resourceName}IncreaseContainerSizeDescription`);
+        const resourceIncreaseStorageDescElement = getRowMainDescriptionLabel(`${resourceName}IncreaseStorageRow`);
         const resourceStoragePrice = getResourceDataObject('resources', [resourceName, 'storageCapacity'] - 1); //to allow power to stay on we leave 1 if upgrading storage
 
-        const resourceAutoBuyerDescElement = document.getElementById(`${resourceName}AutoBuyerTier${tier}Description`);
+        const resourceAutoBuyerDescElement = getRowMainDescriptionLabel(`${resourceName}AutoBuyer${tier}Row`);
         const resourceAutoBuyerPrice = getResourceDataObject('resources', [resourceName, 'upgrades', 'autoBuyer', `tier${tier}`, 'price']);
 
-        elements[`${resourceName}IncreaseStorage`] = { element: resourceIncreaseStorageDescElement, price: resourceStoragePrice, string1: `${capitaliseString(resourceName)}` };
-        elements[`${resourceName}AutoBuyerTier${tier}`] = { element: resourceAutoBuyerDescElement, price: resourceAutoBuyerPrice, string1: `${capitaliseString(resourceName)}` };
+        const localizedResourceName = localize('resource' + capitaliseString(resourceName), getLanguage());
+
+        elements[`${resourceName}IncreaseStorage`] = { element: resourceIncreaseStorageDescElement, price: resourceStoragePrice, string1: `${localizedResourceName}` };
+        elements[`${resourceName}AutoBuyerTier${tier}`] = { element: resourceAutoBuyerDescElement, price: resourceAutoBuyerPrice, string1: `${localizedResourceName}` };
     });
 
     compoundTierPairs.forEach(([compoundName, tier]) => {
-        const compoundIncreaseStorageDescElement = document.getElementById(`${compoundName}IncreaseContainerSizeDescription`);
+        const compoundIncreaseStorageDescElement = getRowMainDescriptionLabel(`${compoundName}IncreaseStorageRow`);
         const compoundStoragePrice = getResourceDataObject('compounds', [compoundName, 'storageCapacity'] - 1); //to allow power to stay on we leave 1 if upgrading storage
 
-        const resourceAutoBuyerDescElement = document.getElementById(`${compoundName}AutoBuyerTier${tier}Description`);
-        const resourceAutoBuyerPrice = getResourceDataObject('compounds', [compoundName, 'upgrades', 'autoBuyer', `tier${tier}`, 'price']);
+        const compoundAutoBuyerDescElement = getRowMainDescriptionLabel(`${compoundName}AutoBuyer${tier}Row`);
+        const compoundAutoBuyerPrice = getResourceDataObject('compounds', [compoundName, 'upgrades', 'autoBuyer', `tier${tier}`, 'price']);
 
         elements[`${compoundName}IncreaseStorage`] = { element: compoundIncreaseStorageDescElement, price: compoundStoragePrice, string1: `${capitaliseString(compoundName)}` };
-        elements[`${compoundName}AutoBuyerTier${tier}`] = { element: resourceAutoBuyerDescElement, price: resourceAutoBuyerPrice, string1: `${capitaliseString(compoundName)}` };
+        elements[`${compoundName}AutoBuyerTier${tier}`] = { element: compoundAutoBuyerDescElement, price: compoundAutoBuyerPrice, string1: `${capitaliseString(compoundName)}` };
     });
 
     const scienceElements = getScienceResourceDescriptionElements();
@@ -6204,7 +6230,7 @@ function updateUIQuantities(allQuantities, allStorages, allElements, allDescript
 
             const element = document.getElementById(item);
             if (element) {
-                element.textContent = `Quantity: ${quantityAutoBuyer}`;
+                element.textContent = `${localize('textQuantity', getLanguage())}: ${quantityAutoBuyer}`;
             }
         }
 
@@ -7455,7 +7481,7 @@ function setPriceForAllPurchases(element, type, resource, scienceUpgradeType, bu
             mainKey = 'resources' //storageCapacity
             price = getResourceDataObject(mainKey, [resource, 'storageCapacity']) - 1;
             if (element.tagName.toLowerCase() !== 'button') {
-                element.textContent = `${price} ${getResourceDataObject(mainKey, [resource, 'nameResource'])}`;
+                element.textContent = `${price} ${localize('resource' + capitaliseString(resource), getLanguage())}`;
             }
         }
     }
