@@ -5375,7 +5375,7 @@ export function generateStarfield(starfieldContainer, numberOfStars = 70, seed =
     const containerTop = containerRect.top;
     const starNames = getStarNames();
     const settledStarsList = getSettledStars();
-    const currentStarSystemLower = getCurrentStarSystem();
+    const currentStarSystemLower = String(getCurrentStarSystem() || '').toLowerCase();
     let currentStar = null;
 
 
@@ -5626,6 +5626,7 @@ export function generateStarfield(starfieldContainer, numberOfStars = 70, seed =
 
         
         if (
+            !isCurrentStarSystem &&
             getFactoryStarsArray().includes(star.name.toLowerCase()) &&
             getStarsWithAncientManuscripts().some(entry => entry[1] === star.name.toLowerCase() && entry[3] === false)
         ) {
@@ -6363,19 +6364,19 @@ export function drawStarConnectionDrawings(fromStar, toStar, isInteresting) {
     }
 
 
-    if (lineElement) {
-        tooltipLayer.appendChild(lineElement);
-    }
-    if (labelElement) {
-        tooltipLayer.appendChild(labelElement);
-    }
-    if (arrowHead) {
-        tooltipLayer.appendChild(arrowHead);
-    }
+    const safeAppend = (node) => {
+        if (!node) return;
+        if (!(node instanceof Node)) return;
+        tooltipLayer.appendChild(node);
+    };
+
+    safeAppend(lineElement);
+    safeAppend(labelElement);
+    safeAppend(arrowHead);
     if (orbitCircle) {
-        tooltipLayer.appendChild(orbitCircle);
+        safeAppend(orbitCircle);
         arrowHead = drawStarShipArrowhead(getFromStarObject(), getToStarObject(), isInteresting, orbitCircle);
-        tooltipLayer.appendChild(arrowHead);
+        safeAppend(arrowHead);
     }
 }
 
