@@ -404,6 +404,139 @@ export function migrateResourceData(saveData, objectType, options = {}) {
 
             saveData.version = 0.978;
         }
+
+        if (saveData.version < 0.979) {
+            if (objectType === 'resourceData') {
+                const resourceNameUpgradeMap = {
+                    solar: {
+                        tier1: { old: 'Solar AB1', new: 'autoBuyerNameSolarAB1' },
+                        tier2: { old: 'Solar AB2', new: 'autoBuyerNameSolarAB2' },
+                        tier3: { old: 'Solar AB3', new: 'autoBuyerNameSolarAB3' },
+                        tier4: { old: 'Solar AB4', new: 'autoBuyerNameSolarAB4' }
+                    },
+                    hydrogen: {
+                        tier1: { old: 'Hydrogen Compressor', new: 'autoBuyerNameHydrogenCompressor' },
+                        tier2: { old: 'Advanced Hydrogen Compressor', new: 'autoBuyerNameHydrogenCompressorAdvanced' },
+                        tier3: { old: 'Industrial Hydrogen Compressor', new: 'autoBuyerNameHydrogenCompressorIndustrial' },
+                        tier4: { old: 'Quantum Hydrogen Compressor', new: 'autoBuyerNameHydrogenCompressorQuantum' }
+                    },
+                    helium: {
+                        tier1: { old: 'Helium Extractor', new: 'autoBuyerNameHeliumExtractor' },
+                        tier2: { old: 'Advanced Helium Extractor', new: 'autoBuyerNameHeliumExtractorAdvanced' },
+                        tier3: { old: 'Industrial Helium Extractor', new: 'autoBuyerNameHeliumExtractorIndustrial' },
+                        tier4: { old: 'Quantum Helium Extractor', new: 'autoBuyerNameHeliumExtractorQuantum' }
+                    },
+                    carbon: {
+                        tier1: { old: 'Burner', new: 'autoBuyerNameCarbonBurner' },
+                        tier2: { old: 'Advanced Carbon Extractor', new: 'autoBuyerNameCarbonExtractorAdvanced' },
+                        tier3: { old: 'Industrial Carbon Extractor', new: 'autoBuyerNameCarbonExtractorIndustrial' },
+                        tier4: { old: 'Quantum Carbon Extractor', new: 'autoBuyerNameCarbonExtractorQuantum' }
+                    },
+                    neon: {
+                        tier1: { old: 'Neon Extractor', new: 'autoBuyerNameNeonExtractor' },
+                        tier2: { old: 'Advanced Neon Extractor', new: 'autoBuyerNameNeonExtractorAdvanced' },
+                        tier3: { old: 'Industrial Neon Extractor', new: 'autoBuyerNameNeonExtractorIndustrial' },
+                        tier4: { old: 'Quantum Neon Extractor', new: 'autoBuyerNameNeonExtractorQuantum' }
+                    },
+                    oxygen: {
+                        tier1: { old: 'Oxygen Extractor', new: 'autoBuyerNameOxygenExtractor' },
+                        tier2: { old: 'Advanced Oxygen Extractor', new: 'autoBuyerNameOxygenExtractorAdvanced' },
+                        tier3: { old: 'Industrial Oxygen Extractor', new: 'autoBuyerNameOxygenExtractorIndustrial' },
+                        tier4: { old: 'Quantum Oxygen Extractor', new: 'autoBuyerNameOxygenExtractorQuantum' }
+                    },
+                    silicon: {
+                        tier1: { old: 'Silicon Extractor', new: 'autoBuyerNameSiliconExtractor' },
+                        tier2: { old: 'Advanced Silicon Extractor', new: 'autoBuyerNameSiliconExtractorAdvanced' },
+                        tier3: { old: 'Industrial Silicon Extractor', new: 'autoBuyerNameSiliconExtractorIndustrial' },
+                        tier4: { old: 'Quantum Silicon Extractor', new: 'autoBuyerNameSiliconExtractorQuantum' }
+                    },
+                    iron: {
+                        tier1: { old: 'Iron Extractor', new: 'autoBuyerNameIronExtractor' },
+                        tier2: { old: 'Advanced Iron Extractor', new: 'autoBuyerNameIronExtractorAdvanced' },
+                        tier3: { old: 'Industrial Iron Extractor', new: 'autoBuyerNameIronExtractorIndustrial' },
+                        tier4: { old: 'Quantum Iron Extractor', new: 'autoBuyerNameIronExtractorQuantum' }
+                    },
+                    sodium: {
+                        tier1: { old: 'Sodium Extractor', new: 'autoBuyerNameSodiumExtractor' },
+                        tier2: { old: 'Advanced Sodium Extractor', new: 'autoBuyerNameSodiumExtractorAdvanced' },
+                        tier3: { old: 'Industrial Sodium Extractor', new: 'autoBuyerNameSodiumExtractorIndustrial' },
+                        tier4: { old: 'Quantum Sodium Extractor', new: 'autoBuyerNameSodiumExtractorQuantum' }
+                    }
+                };
+
+                // Migrate resources
+                if (saveData.resources && typeof saveData.resources === 'object') {
+                    for (const [resourceName, tiers] of Object.entries(resourceNameUpgradeMap)) {
+                        const resource = saveData.resources[resourceName];
+                        if (resource?.upgrades?.autoBuyer) {
+                            for (const [tier, mapping] of Object.entries(tiers)) {
+                                const autoBuyerTier = resource.upgrades.autoBuyer[tier];
+                                if (autoBuyerTier && autoBuyerTier.nameUpgrade === mapping.old) {
+                                    autoBuyerTier.nameUpgrade = mapping.new;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Migrate compound autoBuyer nameUpgrade fields to localization keys
+                const compoundNameUpgradeMap = {
+                    diesel: {
+                        tier1: { old: 'Backyard Extractor', new: 'autoBuyerNameDieselBackyard' },
+                        tier2: { old: 'Advanced Extractor', new: 'autoBuyerNameDieselAdvanced' },
+                        tier3: { old: 'Industrial Extractor', new: 'autoBuyerNameDieselIndustrial' },
+                        tier4: { old: 'Quantum Extractor', new: 'autoBuyerNameDieselQuantum' }
+                    },
+                    glass: {
+                        tier1: { old: 'Workshop Glass Fabricator', new: 'autoBuyerNameGlassWorkshop' },
+                        tier2: { old: 'Small Glass Factory', new: 'autoBuyerNameGlassSmall' },
+                        tier3: { old: 'Medium Glass Factory', new: 'autoBuyerNameGlassMedium' },
+                        tier4: { old: 'Large Glass Factory', new: 'autoBuyerNameGlassLarge' }
+                    },
+                    steel: {
+                        tier1: { old: 'Workshop Steel Fabricator', new: 'autoBuyerNameSteelWorkshop' },
+                        tier2: { old: 'Small Steel Factory', new: 'autoBuyerNameSteelSmall' },
+                        tier3: { old: 'Medium Steel Factory', new: 'autoBuyerNameSteelMedium' },
+                        tier4: { old: 'Large Steel Factory', new: 'autoBuyerNameSteelLarge' }
+                    },
+                    concrete: {
+                        tier1: { old: 'Back Yard Concrete Mixer', new: 'autoBuyerNameConcreteBackyard' },
+                        tier2: { old: 'Small Concrete Factory', new: 'autoBuyerNameConcreteSmall' },
+                        tier3: { old: 'Medium Concrete Factory', new: 'autoBuyerNameConcreteMedium' },
+                        tier4: { old: 'Large Concrete Factory', new: 'autoBuyerNameConcreteLarge' }
+                    },
+                    water: {
+                        tier1: { old: 'Basic Water Pump', new: 'autoBuyerNameWaterBasic' },
+                        tier2: { old: 'Small Water Treatment Plant', new: 'autoBuyerNameWaterSmall' },
+                        tier3: { old: 'Medium Water Treatment Plant', new: 'autoBuyerNameWaterMedium' },
+                        tier4: { old: 'Large Water Treatment Plant', new: 'autoBuyerNameWaterLarge' }
+                    },
+                    titanium: {
+                        tier1: { old: 'Basic Titanium Smelter', new: 'autoBuyerNameTitaniumBasic' },
+                        tier2: { old: 'Small Titanium Factory', new: 'autoBuyerNameTitaniumSmall' },
+                        tier3: { old: 'Medium Titanium Factory', new: 'autoBuyerNameTitaniumMedium' },
+                        tier4: { old: 'Large Titanium Factory', new: 'autoBuyerNameTitaniumLarge' }
+                    }
+                };
+
+                // Migrate compounds
+                if (saveData.compounds && typeof saveData.compounds === 'object') {
+                    for (const [compoundName, tiers] of Object.entries(compoundNameUpgradeMap)) {
+                        const compound = saveData.compounds[compoundName];
+                        if (compound?.upgrades?.autoBuyer) {
+                            for (const [tier, mapping] of Object.entries(tiers)) {
+                                const autoBuyerTier = compound.upgrades.autoBuyer[tier];
+                                if (autoBuyerTier && autoBuyerTier.nameUpgrade === mapping.old) {
+                                    autoBuyerTier.nameUpgrade = mapping.new;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            saveData.version = 0.979;
+        }
     }
     return saveData;
 }

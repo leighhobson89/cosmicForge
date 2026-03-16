@@ -12,4 +12,4 @@ constantsAndGlobalVars.js - 100%
 cosmicRip.js - 100%
 descriptions.js - 100%
 drawTab1Content.js - 100%
-drawTab2Content.js - 
+drawTab4Content.js - 100% but removing temporary fix has rebroken rockets which need fixing, fuelDescription element name something there 

@@ -8,7 +8,7 @@ import { showNotification } from "./ui.js";
 
 export let achievementImageUrls;
 export let resourceData = {
-    version: 0.978, //update this whenever changes are made to the structure
+    version: 0.979, //update this whenever changes are made to the structure
     resources: {
         solar: {
             autoSell: false,
@@ -26,10 +26,10 @@ export let resourceData = {
                 autoBuyer: {
                     currentTierLevel: 1,
                     normalProgression: true,
-                    tier1: { nameUpgrade: 'Solar AB1', screen: 'solar', place: 'solarAutoBuyer1Row', price: 0, rate: 0, quantity: 0, setPrice: 'solarAB1Price', energyUse: 0, active: true },
-                    tier2: { nameUpgrade: 'Solar AB2', screen: 'solar', place: 'solarAutoBuyer2Row', price: 0, rate: 0, quantity: 0, setPrice: 'solarAB2Price', energyUse: 0, active: true },
-                    tier3: { nameUpgrade: 'Solar AB3', screen: 'solar', place: 'solarAutoBuyer3Row', price: 0, rate: 0, quantity: 0, setPrice: 'solarAB3Price', energyUse: 0, active: true },
-                    tier4: { nameUpgrade: 'Solar AB4', screen: 'solar', place: 'solarAutoBuyer4Row', price: 0, rate: 0, quantity: 0, setPrice: 'solarAB4Price', energyUse: 0, active: true }
+                    tier1: { nameUpgrade: 'autoBuyerNameSolarAB1', screen: 'solar', place: 'solarAutoBuyer1Row', price: 0, rate: 0, quantity: 0, setPrice: 'solarAB1Price', energyUse: 0, active: true },
+                    tier2: { nameUpgrade: 'autoBuyerNameSolarAB2', screen: 'solar', place: 'solarAutoBuyer2Row', price: 0, rate: 0, quantity: 0, setPrice: 'solarAB2Price', energyUse: 0, active: true },
+                    tier3: { nameUpgrade: 'autoBuyerNameSolarAB3', screen: 'solar', place: 'solarAutoBuyer3Row', price: 0, rate: 0, quantity: 0, setPrice: 'solarAB3Price', energyUse: 0, active: true },
+                    tier4: { nameUpgrade: 'autoBuyerNameSolarAB4', screen: 'solar', place: 'solarAutoBuyer4Row', price: 0, rate: 0, quantity: 0, setPrice: 'solarAB4Price', energyUse: 0, active: true }
                 },
             },
             canFuseTech: '',
@@ -54,10 +54,10 @@ export let resourceData = {
                 autoBuyer: {
                     currentTierLevel: 1,
                     normalProgression: true,
-                    tier1: { nameUpgrade: 'Hydrogen Compressor', screen: 'hydrogen', place: 'hydrogenAutoBuyer1Row', price: 50, rate: 0.02, quantity: 0, setPrice: 'hydrogenAB1Price', energyUse: 0, active: true },
-                    tier2: { nameUpgrade: 'Advanced Hydrogen Compressor', screen: 'hydrogen', place: 'hydrogenAutoBuyer2Row', price: 400, rate: 0.1, quantity: 0, setPrice: 'hydrogenAB2Price', energyUse: 0.03, active: true },
-                    tier3: { nameUpgrade: 'Industrial Hydrogen Compressor', screen: 'hydrogen', place: 'hydrogenAutoBuyer3Row', price: 2000, rate: 0.5, quantity: 0, setPrice: 'hydrogenAB3Price', energyUse: 0.12, active: true },
-                    tier4: { nameUpgrade: 'Quantum Hydrogen Compressor', screen: 'hydrogen', place: 'hydrogenAutoBuyer4Row', price: 10000, rate: 2.5, quantity: 0, setPrice: 'hydrogenAB4Price', energyUse: 0.6, active: true }                    
+                    tier1: { nameUpgrade: 'autoBuyerNameHydrogenCompressor', screen: 'hydrogen', place: 'hydrogenAutoBuyer1Row', price: 50, rate: 0.02, quantity: 0, setPrice: 'hydrogenAB1Price', energyUse: 0, active: true },
+                    tier2: { nameUpgrade: 'autoBuyerNameHydrogenCompressorAdvanced', screen: 'hydrogen', place: 'hydrogenAutoBuyer2Row', price: 400, rate: 0.1, quantity: 0, setPrice: 'hydrogenAB2Price', energyUse: 0.03, active: true },
+                    tier3: { nameUpgrade: 'autoBuyerNameHydrogenCompressorIndustrial', screen: 'hydrogen', place: 'hydrogenAutoBuyer3Row', price: 2000, rate: 0.5, quantity: 0, setPrice: 'hydrogenAB3Price', energyUse: 0.12, active: true },
+                    tier4: { nameUpgrade: 'autoBuyerNameHydrogenCompressorQuantum', screen: 'hydrogen', place: 'hydrogenAutoBuyer4Row', price: 10000, rate: 2.5, quantity: 0, setPrice: 'hydrogenAB4Price', energyUse: 0.6, active: true }                    
                 },
             },
             canFuseTech: 'hydrogenFusion',
@@ -82,10 +82,10 @@ export let resourceData = {
                 autoBuyer: {
                     currentTierLevel: 1,
                     normalProgression: true,
-                    tier1: { nameUpgrade: 'Helium Extractor', screen: 'helium', place: 'heliumAutoBuyer1Row', price: 75, rate: 0.02, quantity: 0, setPrice: 'heliumAB1Price', energyUse: 0, active: true },
-                    tier2: { nameUpgrade: 'Advanced Helium Extractor', screen: 'helium', place: 'heliumAutoBuyer2Row', price: 600, rate: 0.075, quantity: 0, setPrice: 'heliumAB2Price', energyUse: 0.03, active: true },
-                    tier3: { nameUpgrade: 'Industrial Helium Extractor', screen: 'helium', place: 'heliumAutoBuyer3Row', price: 3000, rate: 0.375, quantity: 0, setPrice: 'heliumAB3Price', energyUse: 0.09, active: true },
-                    tier4: { nameUpgrade: 'Quantum Helium Extractor', screen: 'helium', place: 'heliumAutoBuyer4Row', price: 15000, rate: 1.875, quantity: 0, setPrice: 'heliumAB4Price', energyUse: 0.45, active: true }                    
+                    tier1: { nameUpgrade: 'autoBuyerNameHeliumExtractor', screen: 'helium', place: 'heliumAutoBuyer1Row', price: 75, rate: 0.02, quantity: 0, setPrice: 'heliumAB1Price', energyUse: 0, active: true },
+                    tier2: { nameUpgrade: 'autoBuyerNameHeliumExtractorAdvanced', screen: 'helium', place: 'heliumAutoBuyer2Row', price: 600, rate: 0.075, quantity: 0, setPrice: 'heliumAB2Price', energyUse: 0.03, active: true },
+                    tier3: { nameUpgrade: 'autoBuyerNameHeliumExtractorIndustrial', screen: 'helium', place: 'heliumAutoBuyer3Row', price: 3000, rate: 0.375, quantity: 0, setPrice: 'heliumAB3Price', energyUse: 0.09, active: true },
+                    tier4: { nameUpgrade: 'autoBuyerNameHeliumExtractorQuantum', screen: 'helium', place: 'heliumAutoBuyer4Row', price: 15000, rate: 1.875, quantity: 0, setPrice: 'heliumAB4Price', energyUse: 0.45, active: true }                    
                 }
             },
             canFuseTech: 'heliumFusion',
@@ -110,10 +110,10 @@ export let resourceData = {
                 autoBuyer: {
                     currentTierLevel: 1,
                     normalProgression: true,
-                    tier1: { nameUpgrade: 'Burner', screen: 'carbon', place: 'carbonAutoBuyer1Row', price: 80, rate: 0.02, quantity: 0, setPrice: 'carbonAB1Price', energyUse: 0, active: true },
-                    tier2: { nameUpgrade: 'Advanced Carbon Extractor', screen: 'carbon', place: 'carbonAutoBuyer2Row', price: 640, rate: 0.1, quantity: 0, setPrice: 'carbonAB2Price', energyUse: 0.03, active: true },
-                    tier3: { nameUpgrade: 'Industrial Carbon Extractor', screen: 'carbon', place: 'carbonAutoBuyer3Row', price: 3200, rate: 0.5, quantity: 0, setPrice: 'carbonAB3Price', energyUse: 0.12, active: true },
-                    tier4: { nameUpgrade: 'Quantum Carbon Extractor', screen: 'carbon', place: 'carbonAutoBuyer4Row', price: 16000, rate: 2.5, quantity: 0, setPrice: 'carbonAB4Price', energyUse: 0.6, active: true }                    
+                    tier1: { nameUpgrade: 'autoBuyerNameCarbonBurner', screen: 'carbon', place: 'carbonAutoBuyer1Row', price: 80, rate: 0.02, quantity: 0, setPrice: 'carbonAB1Price', energyUse: 0, active: true },
+                    tier2: { nameUpgrade: 'autoBuyerNameCarbonExtractorAdvanced', screen: 'carbon', place: 'carbonAutoBuyer2Row', price: 640, rate: 0.1, quantity: 0, setPrice: 'carbonAB2Price', energyUse: 0.03, active: true },
+                    tier3: { nameUpgrade: 'autoBuyerNameCarbonExtractorIndustrial', screen: 'carbon', place: 'carbonAutoBuyer3Row', price: 3200, rate: 0.5, quantity: 0, setPrice: 'carbonAB3Price', energyUse: 0.12, active: true },
+                    tier4: { nameUpgrade: 'autoBuyerNameCarbonExtractorQuantum', screen: 'carbon', place: 'carbonAutoBuyer4Row', price: 16000, rate: 2.5, quantity: 0, setPrice: 'carbonAB4Price', energyUse: 0.6, active: true }                    
                 }
             },
             canFuseTech: 'carbonFusion',
@@ -138,10 +138,10 @@ export let resourceData = {
                 autoBuyer: {
                     currentTierLevel: 1,
                     normalProgression: true,
-                    tier1: { nameUpgrade: 'Neon Extractor', screen: 'neon', place: 'neonAutoBuyer1Row', price: 120, rate: 0.02, quantity: 0, setPrice: 'neonAB1Price', energyUse: 0, active: true },
-                    tier2: { nameUpgrade: 'Advanced Neon Extractor', screen: 'neon', place: 'neonAutoBuyer2Row', price: 960, rate: 0.125, quantity: 0, setPrice: 'neonAB2Price', energyUse: 0.03, active: true },
-                    tier3: { nameUpgrade: 'Industrial Neon Extractor', screen: 'neon', place: 'neonAutoBuyer3Row', price: 4800, rate: 0.625, quantity: 0, setPrice: 'neonAB3Price', energyUse: 0.15, active: true },
-                    tier4: { nameUpgrade: 'Quantum Neon Extractor', screen: 'neon', place: 'neonAutoBuyer4Row', price: 24000, rate: 3.125, quantity: 0, setPrice: 'neonAB4Price', energyUse: 0.75, active: true }                    
+                    tier1: { nameUpgrade: 'autoBuyerNameNeonExtractor', screen: 'neon', place: 'neonAutoBuyer1Row', price: 120, rate: 0.02, quantity: 0, setPrice: 'neonAB1Price', energyUse: 0, active: true },
+                    tier2: { nameUpgrade: 'autoBuyerNameNeonExtractorAdvanced', screen: 'neon', place: 'neonAutoBuyer2Row', price: 960, rate: 0.125, quantity: 0, setPrice: 'neonAB2Price', energyUse: 0.03, active: true },
+                    tier3: { nameUpgrade: 'autoBuyerNameNeonExtractorIndustrial', screen: 'neon', place: 'neonAutoBuyer3Row', price: 4800, rate: 0.625, quantity: 0, setPrice: 'neonAB3Price', energyUse: 0.15, active: true },
+                    tier4: { nameUpgrade: 'autoBuyerNameNeonExtractorQuantum', screen: 'neon', place: 'neonAutoBuyer4Row', price: 24000, rate: 3.125, quantity: 0, setPrice: 'neonAB4Price', energyUse: 0.75, active: true }                    
                 }
             },
             canFuseTech: 'neonFusion',
@@ -166,10 +166,10 @@ export let resourceData = {
                 autoBuyer: {
                     currentTierLevel: 1,
                     normalProgression: true,
-                    tier1: { nameUpgrade: 'Oxygen Extractor', screen: 'oxygen', place: 'oxygenAutoBuyer1Row', price: 140, rate: 0.02, quantity: 0, setPrice: 'oxygenAB1Price', energyUse: 0, active: true },
-                    tier2: { nameUpgrade: 'Advanced Oxygen Extractor', screen: 'oxygen', place: 'oxygenAutoBuyer2Row', price: 1120, rate: 0.15, quantity: 0, setPrice: 'oxygenAB2Price', energyUse: 0.03, active: true },
-                    tier3: { nameUpgrade: 'Industrial Oxygen Extractor', screen: 'oxygen', place: 'oxygenAutoBuyer3Row', price: 5600, rate: 0.75, quantity: 0, setPrice: 'oxygenAB3Price', energyUse: 0.18, active: true },
-                    tier4: { nameUpgrade: 'Quantum Oxygen Extractor', screen: 'oxygen', place: 'oxygenAutoBuyer4Row', price: 28000, rate: 3.75, quantity: 0, setPrice: 'oxygenAB4Price', energyUse: 0.9, active: true }
+                    tier1: { nameUpgrade: 'autoBuyerNameOxygenExtractor', screen: 'oxygen', place: 'oxygenAutoBuyer1Row', price: 140, rate: 0.02, quantity: 0, setPrice: 'oxygenAB1Price', energyUse: 0, active: true },
+                    tier2: { nameUpgrade: 'autoBuyerNameOxygenExtractorAdvanced', screen: 'oxygen', place: 'oxygenAutoBuyer2Row', price: 1120, rate: 0.15, quantity: 0, setPrice: 'oxygenAB2Price', energyUse: 0.03, active: true },
+                    tier3: { nameUpgrade: 'autoBuyerNameOxygenExtractorIndustrial', screen: 'oxygen', place: 'oxygenAutoBuyer3Row', price: 5600, rate: 0.75, quantity: 0, setPrice: 'oxygenAB3Price', energyUse: 0.18, active: true },
+                    tier4: { nameUpgrade: 'autoBuyerNameOxygenExtractorQuantum', screen: 'oxygen', place: 'oxygenAutoBuyer4Row', price: 28000, rate: 3.75, quantity: 0, setPrice: 'oxygenAB4Price', energyUse: 0.9, active: true }
                 }
             },
             canFuseTech: 'oxygenFusion',
@@ -194,10 +194,10 @@ export let resourceData = {
                 autoBuyer: {
                     currentTierLevel: 1,
                     normalProgression: true,
-                    tier1: { nameUpgrade: 'Silicon Extractor', screen: 'silicon', place: 'siliconAutoBuyer1Row', price: 200, rate: 0.02, quantity: 0, setPrice: 'siliconAB1Price', energyUse: 0, active: true },
-                    tier2: { nameUpgrade: 'Advanced Silicon Extractor', screen: 'silicon', place: 'siliconAutoBuyer2Row', price: 1600, rate: 0.175, quantity: 0, setPrice: 'siliconAB2Price', energyUse: 0.03, active: true },
-                    tier3: { nameUpgrade: 'Industrial Silicon Extractor', screen: 'silicon', place: 'siliconAutoBuyer3Row', price: 8000, rate: 0.875, quantity: 0, setPrice: 'siliconAB3Price', energyUse: 0.21, active: true },
-                    tier4: { nameUpgrade: 'Quantum Silicon Extractor', screen: 'silicon', place: 'siliconAutoBuyer4Row', price: 40000, rate: 4.375, quantity: 0, setPrice: 'siliconAB4Price', energyUse: 1.05, active: true }                    
+                    tier1: { nameUpgrade: 'autoBuyerNameSiliconExtractor', screen: 'silicon', place: 'siliconAutoBuyer1Row', price: 200, rate: 0.02, quantity: 0, setPrice: 'siliconAB1Price', energyUse: 0, active: true },
+                    tier2: { nameUpgrade: 'autoBuyerNameSiliconExtractorAdvanced', screen: 'silicon', place: 'siliconAutoBuyer2Row', price: 1600, rate: 0.175, quantity: 0, setPrice: 'siliconAB2Price', energyUse: 0.03, active: true },
+                    tier3: { nameUpgrade: 'autoBuyerNameSiliconExtractorIndustrial', screen: 'silicon', place: 'siliconAutoBuyer3Row', price: 8000, rate: 0.875, quantity: 0, setPrice: 'siliconAB3Price', energyUse: 0.21, active: true },
+                    tier4: { nameUpgrade: 'autoBuyerNameSiliconExtractorQuantum', screen: 'silicon', place: 'siliconAutoBuyer4Row', price: 40000, rate: 4.375, quantity: 0, setPrice: 'siliconAB4Price', energyUse: 1.05, active: true }                    
                 }
             },
             canFuseTech: 'siliconFusion',
@@ -222,10 +222,10 @@ export let resourceData = {
                 autoBuyer: {
                     currentTierLevel: 1,
                     normalProgression: true,
-                    tier1: { nameUpgrade: 'Iron Extractor', screen: 'iron', place: 'ironAutoBuyer1Row', price: 250, rate: 0.02, quantity: 0, setPrice: 'ironAB1Price', energyUse: 0, active: true },
-                    tier2: { nameUpgrade: 'Advanced Iron Extractor', screen: 'iron', place: 'ironAutoBuyer2Row', price: 2000, rate: 0.2, quantity: 0, setPrice: 'ironAB2Price', energyUse: 0.03, active: true },
-                    tier3: { nameUpgrade: 'Industrial Iron Extractor', screen: 'iron', place: 'ironAutoBuyer3Row', price: 10000, rate: 1, quantity: 0, setPrice: 'ironAB3Price', energyUse: 0.27, active: true },
-                    tier4: { nameUpgrade: 'Quantum Iron Extractor', screen: 'iron', place: 'ironAutoBuyer4Row', price: 50000, rate: 5, quantity: 0, setPrice: 'ironAB4Price', energyUse: 1.35, active: true }                    
+                    tier1: { nameUpgrade: 'autoBuyerNameIronExtractor', screen: 'iron', place: 'ironAutoBuyer1Row', price: 250, rate: 0.02, quantity: 0, setPrice: 'ironAB1Price', energyUse: 0, active: true },
+                    tier2: { nameUpgrade: 'autoBuyerNameIronExtractorAdvanced', screen: 'iron', place: 'ironAutoBuyer2Row', price: 2000, rate: 0.2, quantity: 0, setPrice: 'ironAB2Price', energyUse: 0.03, active: true },
+                    tier3: { nameUpgrade: 'autoBuyerNameIronExtractorIndustrial', screen: 'iron', place: 'ironAutoBuyer3Row', price: 10000, rate: 1, quantity: 0, setPrice: 'ironAB3Price', energyUse: 0.27, active: true },
+                    tier4: { nameUpgrade: 'autoBuyerNameIronExtractorQuantum', screen: 'iron', place: 'ironAutoBuyer4Row', price: 50000, rate: 5, quantity: 0, setPrice: 'ironAB4Price', energyUse: 1.35, active: true }                    
                 }
             },
             canFuseTech: '',
@@ -250,10 +250,10 @@ export let resourceData = {
                 autoBuyer: {
                     currentTierLevel: 1,
                     normalProgression: true,
-                    tier1: { nameUpgrade: 'Sodium Extractor', screen: 'sodium', place: 'sodiumAutoBuyer1Row', price: 300, rate: 0.02, quantity: 0, setPrice: 'sodiumAB1Price', energyUse: 0, active: true },
-                    tier2: { nameUpgrade: 'Advanced Sodium Extractor', screen: 'sodium', place: 'sodiumAutoBuyer2Row', price: 2400, rate: 0.25, quantity: 0, setPrice: 'sodiumAB2Price', energyUse: 0.03, active: true },
-                    tier3: { nameUpgrade: 'Industrial Sodium Extractor', screen: 'sodium', place: 'sodiumAutoBuyer3Row', price: 12000, rate: 1.25, quantity: 0, setPrice: 'sodiumAB3Price', energyUse: 0.24, active: true },
-                    tier4: { nameUpgrade: 'Quantum Sodium Extractor', screen: 'sodium', place: 'sodiumAutoBuyer4Row', price: 60000, rate: 6.25, quantity: 0, setPrice: 'sodiumAB4Price', energyUse: 1.2, active: true }                    
+                    tier1: { nameUpgrade: 'autoBuyerNameSodiumExtractor', screen: 'sodium', place: 'sodiumAutoBuyer1Row', price: 300, rate: 0.02, quantity: 0, setPrice: 'sodiumAB1Price', energyUse: 0, active: true },
+                    tier2: { nameUpgrade: 'autoBuyerNameSodiumExtractorAdvanced', screen: 'sodium', place: 'sodiumAutoBuyer2Row', price: 2400, rate: 0.25, quantity: 0, setPrice: 'sodiumAB2Price', energyUse: 0.03, active: true },
+                    tier3: { nameUpgrade: 'autoBuyerNameSodiumExtractorIndustrial', screen: 'sodium', place: 'sodiumAutoBuyer3Row', price: 12000, rate: 1.25, quantity: 0, setPrice: 'sodiumAB3Price', energyUse: 0.24, active: true },
+                    tier4: { nameUpgrade: 'autoBuyerNameSodiumExtractorQuantum', screen: 'sodium', place: 'sodiumAutoBuyer4Row', price: 60000, rate: 6.25, quantity: 0, setPrice: 'sodiumAB4Price', energyUse: 1.2, active: true }                    
                 }
             },
             canFuseTech: '',
@@ -281,10 +281,10 @@ export let resourceData = {
                 autoBuyer: {
                     currentTierLevel: 0,
                     normalProgression: true,
-                    tier1: { nameUpgrade: 'Backyard Extractor', screen: 'diesel', place: 'dieselAutoBuyer1Row', price: 1000, rate: 0.02, quantity: 0, setPrice: 'dieselAB1Price', energyUse: 0, active: true },
-                    tier2: { nameUpgrade: 'Advanced Extractor', screen: 'diesel', place: 'dieselAutoBuyer2Row', price: 400000, rate: 0.1, quantity: 0, setPrice: 'dieselAB2Price', energyUse: 0.03, active: true },
-                    tier3: { nameUpgrade: 'Industrial Extractor', screen: 'diesel', place: 'dieselAutoBuyer3Row', price: 2000000, rate: 0.5, quantity: 0, setPrice: 'dieselAB3Price', energyUse: 0.12, active: true },
-                    tier4: { nameUpgrade: 'Quantum Extractor', screen: 'diesel', place: 'dieselAutoBuyer4Row', price: 10000000, rate: 2.5, quantity: 0, setPrice: 'dieselAB4Price', energyUse: 0.6, active: true }
+                    tier1: { nameUpgrade: 'autoBuyerNameDieselBackyard', screen: 'diesel', place: 'dieselAutoBuyer1Row', price: 1000, rate: 0.02, quantity: 0, setPrice: 'dieselAB1Price', energyUse: 0, active: true },
+                    tier2: { nameUpgrade: 'autoBuyerNameDieselAdvanced', screen: 'diesel', place: 'dieselAutoBuyer2Row', price: 400000, rate: 0.1, quantity: 0, setPrice: 'dieselAB2Price', energyUse: 0.03, active: true },
+                    tier3: { nameUpgrade: 'autoBuyerNameDieselIndustrial', screen: 'diesel', place: 'dieselAutoBuyer3Row', price: 2000000, rate: 0.5, quantity: 0, setPrice: 'dieselAB3Price', energyUse: 0.12, active: true },
+                    tier4: { nameUpgrade: 'autoBuyerNameDieselQuantum', screen: 'diesel', place: 'dieselAutoBuyer4Row', price: 10000000, rate: 2.5, quantity: 0, setPrice: 'dieselAB4Price', energyUse: 0.6, active: true }
                 },
             },
             revealedBy: 'hydroCarbons',
@@ -315,10 +315,10 @@ export let resourceData = {
                 autoBuyer: {
                     currentTierLevel: 0,
                     normalProgression: true,
-                    tier1: { nameUpgrade: 'Workshop Glass Fabricator', screen: 'glass', place: 'glassAutoBuyer1Row', price: 70000, rate: 0.02, quantity: 0, setPrice: 'glassAB1Price', energyUse: 0, active: true },
-                    tier2: { nameUpgrade: 'Small Glass Factory', screen: 'glass', place: 'glassAutoBuyer2Row', price: 600000, rate: 0.08, quantity: 0, setPrice: 'glassAB2Price', energyUse: 0.08, active: true },
-                    tier3: { nameUpgrade: 'Medium Glass Factory', screen: 'glass', place: 'glassAutoBuyer3Row', price: 2500000, rate: 0.4, quantity: 0, setPrice: 'glassAB3Price', energyUse: 0.31, active: true },
-                    tier4: { nameUpgrade: 'Large Glass Factory', screen: 'glass', place: 'glassAutoBuyer4Row', price: 1250000, rate: 1.5, quantity: 0, setPrice: 'glassAB4Price', energyUse: 1.5, active: true }
+                    tier1: { nameUpgrade: 'autoBuyerNameGlassWorkshop', screen: 'glass', place: 'glassAutoBuyer1Row', price: 70000, rate: 0.02, quantity: 0, setPrice: 'glassAB1Price', energyUse: 0, active: true },
+                    tier2: { nameUpgrade: 'autoBuyerNameGlassSmall', screen: 'glass', place: 'glassAutoBuyer2Row', price: 600000, rate: 0.08, quantity: 0, setPrice: 'glassAB2Price', energyUse: 0.08, active: true },
+                    tier3: { nameUpgrade: 'autoBuyerNameGlassMedium', screen: 'glass', place: 'glassAutoBuyer3Row', price: 2500000, rate: 0.4, quantity: 0, setPrice: 'glassAB3Price', energyUse: 0.31, active: true },
+                    tier4: { nameUpgrade: 'autoBuyerNameGlassLarge', screen: 'glass', place: 'glassAutoBuyer4Row', price: 1250000, rate: 1.5, quantity: 0, setPrice: 'glassAB4Price', energyUse: 1.5, active: true }
                 },
             },
             revealedBy: 'glassManufacture',
@@ -349,10 +349,10 @@ export let resourceData = {
                 autoBuyer: {
                     currentTierLevel: 0,
                     normalProgression: true,
-                    tier1: { nameUpgrade: 'Workshop Steel Fabricator', screen: 'steel', place: 'steelAutoBuyer1Row', price: 80000, rate: 0.02, quantity: 0, setPrice: 'steelAB1Price', energyUse: 0, active: true },
-                    tier2: { nameUpgrade: 'Small Steel Factory', screen: 'steel', place: 'steelAutoBuyer2Row', price: 700000, rate: 0.1, quantity: 0, setPrice: 'steelAB2Price', energyUse: 0.1, active: true },
-                    tier3: { nameUpgrade: 'Medium Steel Factory', screen: 'steel', place: 'steelAutoBuyer3Row', price: 1500000, rate: 0.5, quantity: 0, setPrice: 'steelAB3Price', energyUse: 0.35, active: true },
-                    tier4: { nameUpgrade: 'Large Steel Factory', screen: 'steel', place: 'steelAutoBuyer4Row', price: 3000000, rate: 2, quantity: 0, setPrice: 'steelAB4Price', energyUse: 1.8, active: true }
+                    tier1: { nameUpgrade: 'autoBuyerNameSteelWorkshop', screen: 'steel', place: 'steelAutoBuyer1Row', price: 80000, rate: 0.02, quantity: 0, setPrice: 'steelAB1Price', energyUse: 0, active: true },
+                    tier2: { nameUpgrade: 'autoBuyerNameSteelSmall', screen: 'steel', place: 'steelAutoBuyer2Row', price: 700000, rate: 0.1, quantity: 0, setPrice: 'steelAB2Price', energyUse: 0.1, active: true },
+                    tier3: { nameUpgrade: 'autoBuyerNameSteelMedium', screen: 'steel', place: 'steelAutoBuyer3Row', price: 1500000, rate: 0.5, quantity: 0, setPrice: 'steelAB3Price', energyUse: 0.35, active: true },
+                    tier4: { nameUpgrade: 'autoBuyerNameSteelLarge', screen: 'steel', place: 'steelAutoBuyer4Row', price: 3000000, rate: 2, quantity: 0, setPrice: 'steelAB4Price', energyUse: 1.8, active: true }
                 },
             },
             revealedBy: 'steelFoundries',
@@ -383,10 +383,10 @@ export let resourceData = {
                 autoBuyer: {
                     currentTierLevel: 0,
                     normalProgression: true,
-                    tier1: { nameUpgrade: 'Back Yard Concrete Mixer', screen: 'concrete', place: 'concreteAutoBuyer1Row', price: 95000, rate: 0.01, quantity: 0, setPrice: 'concreteAB1Price', energyUse: 0, active: true },
-                    tier2: { nameUpgrade: 'Small Concrete Factory', screen: 'concrete', place: 'concreteAutoBuyer2Row', price: 800000, rate: 0.08, quantity: 0, setPrice: 'concreteAB2Price', energyUse: 0.2, active: true },
-                    tier3: { nameUpgrade: 'Medium Concrete Factory', screen: 'concrete', place: 'concreteAutoBuyer3Row', price: 4200000, rate: 0.5, quantity: 0, setPrice: 'concreteAB3Price', energyUse: 0.7, active: true },
-                    tier4: { nameUpgrade: 'Large Concrete Factory', screen: 'concrete', place: 'concreteAutoBuyer4Row', price: 1800000, rate: 2, quantity: 0, setPrice: 'concreteAB4Price', energyUse: 3.6, active: true }
+                    tier1: { nameUpgrade: 'autoBuyerNameConcreteBackyard', screen: 'concrete', place: 'concreteAutoBuyer1Row', price: 95000, rate: 0.01, quantity: 0, setPrice: 'concreteAB1Price', energyUse: 0, active: true },
+                    tier2: { nameUpgrade: 'autoBuyerNameConcreteSmall', screen: 'concrete', place: 'concreteAutoBuyer2Row', price: 800000, rate: 0.08, quantity: 0, setPrice: 'concreteAB2Price', energyUse: 0.2, active: true },
+                    tier3: { nameUpgrade: 'autoBuyerNameConcreteMedium', screen: 'concrete', place: 'concreteAutoBuyer3Row', price: 4200000, rate: 0.5, quantity: 0, setPrice: 'concreteAB3Price', energyUse: 0.7, active: true },
+                    tier4: { nameUpgrade: 'autoBuyerNameConcreteLarge', screen: 'concrete', place: 'concreteAutoBuyer4Row', price: 1800000, rate: 2, quantity: 0, setPrice: 'concreteAB4Price', energyUse: 3.6, active: true }
                 },
             },
             revealedBy: 'aggregateMixing',
@@ -417,10 +417,10 @@ export let resourceData = {
                 autoBuyer: {
                     currentTierLevel: 0,
                     normalProgression: false,
-                    tier1: { nameUpgrade: 'Basic Water Pump', screen: 'water', place: 'waterAutoBuyer1Row', price: 95000, rate: 0.02, quantity: 0, setPrice: 'waterAB1Price', energyUse: 0, active: true },
-                    tier2: { nameUpgrade: 'Small Water Treatment Plant', screen: 'water', place: 'waterAutoBuyer2Row', price: 800000, rate: 0.08, quantity: 0, setPrice: 'waterAB2Price', energyUse: 0.2, active: true },
-                    tier3: { nameUpgrade: 'Medium Water Treatment Plant', screen: 'water', place: 'waterAutoBuyer3Row', price: 4200000, rate: 0.5, quantity: 0, setPrice: 'waterAB3Price', energyUse: 0.7, active: true },
-                    tier4: { nameUpgrade: 'Large Water Treatment Plant', screen: 'water', place: 'waterAutoBuyer4Row', price: 1800000, rate: 2, quantity: 0, setPrice: 'waterAB4Price', energyUse: 3.6, active: true }
+                    tier1: { nameUpgrade: 'autoBuyerNameWaterBasic', screen: 'water', place: 'waterAutoBuyer1Row', price: 95000, rate: 0.02, quantity: 0, setPrice: 'waterAB1Price', energyUse: 0, active: true },
+                    tier2: { nameUpgrade: 'autoBuyerNameWaterSmall', screen: 'water', place: 'waterAutoBuyer2Row', price: 800000, rate: 0.08, quantity: 0, setPrice: 'waterAB2Price', energyUse: 0.2, active: true },
+                    tier3: { nameUpgrade: 'autoBuyerNameWaterMedium', screen: 'water', place: 'waterAutoBuyer3Row', price: 4200000, rate: 0.5, quantity: 0, setPrice: 'waterAB3Price', energyUse: 0.7, active: true },
+                    tier4: { nameUpgrade: 'autoBuyerNameWaterLarge', screen: 'water', place: 'waterAutoBuyer4Row', price: 1800000, rate: 2, quantity: 0, setPrice: 'waterAB4Price', energyUse: 3.6, active: true }
                 },
             },
             revealedBy: 'neonFusion',
@@ -451,10 +451,10 @@ export let resourceData = {
                 autoBuyer: {
                     currentTierLevel: 0,
                     normalProgression: true,
-                    tier1: { nameUpgrade: 'Basic Titanium Smelter', screen: 'titanium', place: 'titaniumAutoBuyer1Row', price: 105000, rate: 0.01, quantity: 0, setPrice: 'titaniumAB1Price', energyUse: 0, active: true },
-                    tier2: { nameUpgrade: 'Small Titanium Factory', screen: 'titanium', place: 'titaniumAutoBuyer2Row', price: 850000, rate: 0.08, quantity: 0, setPrice: 'titaniumAB2Price', energyUse: 0.4, active: true },
-                    tier3: { nameUpgrade: 'Medium Titanium Factory', screen: 'titanium', place: 'titaniumAutoBuyer3Row', price: 4800000, rate: 0.5, quantity: 0, setPrice: 'titaniumAB3Price', energyUse: 1.3, active: true },
-                    tier4: { nameUpgrade: 'Large Titanium Factory', screen: 'titanium', place: 'titaniumAutoBuyer4Row', price: 1880000, rate: 2, quantity: 0, setPrice: 'titaniumAB4Price', energyUse: 5.1, active: true }
+                    tier1: { nameUpgrade: 'autoBuyerNameTitaniumBasic', screen: 'titanium', place: 'titaniumAutoBuyer1Row', price: 105000, rate: 0.01, quantity: 0, setPrice: 'titaniumAB1Price', energyUse: 0, active: true },
+                    tier2: { nameUpgrade: 'autoBuyerNameTitaniumSmall', screen: 'titanium', place: 'titaniumAutoBuyer2Row', price: 850000, rate: 0.08, quantity: 0, setPrice: 'titaniumAB2Price', energyUse: 0.4, active: true },
+                    tier3: { nameUpgrade: 'autoBuyerNameTitaniumMedium', screen: 'titanium', place: 'titaniumAutoBuyer3Row', price: 4800000, rate: 0.5, quantity: 0, setPrice: 'titaniumAB3Price', energyUse: 1.3, active: true },
+                    tier4: { nameUpgrade: 'autoBuyerNameTitaniumLarge', screen: 'titanium', place: 'titaniumAutoBuyer4Row', price: 1880000, rate: 2, quantity: 0, setPrice: 'titaniumAB4Price', energyUse: 5.1, active: true }
                 },
             },
             revealedBy: 'neutronCapture',
@@ -1016,7 +1016,7 @@ export const miaplacidus = {
 
 
 export let starSystems = {
-    version: 0.978,
+    version: 0.979,
     stars: {
         spica: {
             mapSize: 5.504440179536064, //might need to add this to star object when added dynamically for after rebirth
@@ -1035,14 +1035,14 @@ export let starSystems = {
 };
 
 export let oTypePowerPlantBuffs = {
-    version: 0.978,
+    version: 0.979,
     basicPowerPlantStar: { starName: null, settled: false },
     solarPowerPlantStar: { starName: null, settled: false },
     advancedPowerPlantStar: { starName: null, settled: false }
 };
 
 export let galacticCasino = {
-    version: 0.978,
+    version: 0.979,
     settings: {
         baseProbabilityCasino: 0.4,
     },
@@ -1074,7 +1074,7 @@ export let galacticCasino = {
 };
 
 export let galacticMarket = {
-    version: 0.978,
+    version: 0.979,
     resources: {
         hydrogen: { 
             name: "Hydrogen", 
@@ -1180,7 +1180,7 @@ export let galacticMarket = {
 };
 
 export let ascendencyBuffs = {
-    version: 0.978,
+    version: 0.979,
     "littleBagOfHydrogen": {
         name: "Little Bag Of Hydrogen",
         description: "buffLittleBagOfHydrogenRow",
@@ -3882,7 +3882,7 @@ function addPermanentCompoundsModifiersBackIn() {
             });                            
             updatedCompoundText[label] = {
                 value: label,
-                text: `${label} - ${parts.join(', ')}`
+                text: `${localize('compoundCreate' + capitaliseString(label), getLanguage())} - ${parts.join(', ')}`
             };
         }
 

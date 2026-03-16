@@ -178,7 +178,7 @@ export function drawTab1Content(heading, optionContentElement) {
 
         const hydrogenAutoBuyer1Row = createOptionRow({
             labelId: 'hydrogenAutoBuyer1Row',
-            renderNameABs: getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']),
+            renderNameABs: localize(getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']), getLanguage()),
             labelText: localize('tab1HydrogenAutoBuyer1RowLabel', getLanguage()),
             inputElements: [
                 createButton({
@@ -217,7 +217,7 @@ export function drawTab1Content(heading, optionContentElement) {
 
         const hydrogenAutoBuyer2Row = createOptionRow({
             labelId: 'hydrogenAutoBuyer2Row',
-            renderNameABs: getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']),
+            renderNameABs: localize(getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']), getLanguage()),
             labelText: localize('tab1HydrogenAutoBuyer2RowLabel', getLanguage()),
             inputElements: [
                 createButton({
@@ -256,7 +256,7 @@ export function drawTab1Content(heading, optionContentElement) {
 
         const hydrogenAutoBuyer3Row = createOptionRow({
             labelId: 'hydrogenAutoBuyer3Row',
-            renderNameABs: getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']),
+            renderNameABs: localize(getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']), getLanguage()),
             labelText: localize('tab1HydrogenAutoBuyer3RowLabel', getLanguage()),
             inputElements: [
                 createButton({
@@ -295,7 +295,7 @@ export function drawTab1Content(heading, optionContentElement) {
 
         const hydrogenAutoBuyer4Row = createOptionRow({
             labelId: 'hydrogenAutoBuyer4Row',
-            renderNameABs: getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']),
+            renderNameABs: localize(getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']), getLanguage()),
             labelText: localize('tab1HydrogenAutoBuyer4RowLabel', getLanguage()),
             inputElements: [
                 createButton({
@@ -496,7 +496,7 @@ export function drawTab1Content(heading, optionContentElement) {
 
         const heliumAutoBuyer1Row = createOptionRow({
             labelId: 'heliumAutoBuyer1Row',
-            renderNameABs: getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']),
+            renderNameABs: localize(getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']), getLanguage()),
             labelText: localize('tab1HeliumAutoBuyer1RowLabel', getLanguage()),
             inputElements: [
                 createButton({
@@ -535,7 +535,7 @@ export function drawTab1Content(heading, optionContentElement) {
 
         const heliumAutoBuyer2Row = createOptionRow({
             labelId: 'heliumAutoBuyer2Row',
-            renderNameABs: getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']),
+            renderNameABs: localize(getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']), getLanguage()),
             labelText: localize('tab1HeliumAutoBuyer2RowLabel', getLanguage()),
             inputElements: [
                 createButton({
@@ -574,7 +574,7 @@ export function drawTab1Content(heading, optionContentElement) {
 
         const heliumAutoBuyer3Row = createOptionRow({
             labelId: 'heliumAutoBuyer3Row',
-            renderNameABs: getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']),
+            renderNameABs: localize(getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']), getLanguage()),
             labelText: localize('tab1HeliumAutoBuyer3RowLabel', getLanguage()),
             inputElements: [
                 createButton({
@@ -613,7 +613,7 @@ export function drawTab1Content(heading, optionContentElement) {
 
         const heliumAutoBuyer4Row = createOptionRow({
             labelId: 'heliumAutoBuyer4Row',
-            renderNameABs: getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']),
+            renderNameABs: localize(getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']), getLanguage()),
             labelText: localize('tab1HeliumAutoBuyer4RowLabel', getLanguage()),
             inputElements: [
                 createButton({
@@ -822,7 +822,7 @@ export function drawTab1Content(heading, optionContentElement) {
 
         const carbonAutoBuyer1Row = createOptionRow({
             labelId: 'carbonAutoBuyer1Row',
-            renderNameABs: getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']),
+            renderNameABs: localize(getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']), getLanguage()),
             labelText: localize('tab1CarbonAutoBuyer1RowLabel', getLanguage()),
             inputElements: [
                 createButton({
@@ -861,7 +861,7 @@ export function drawTab1Content(heading, optionContentElement) {
 
         const carbonAutoBuyer2Row = createOptionRow({
             labelId: 'carbonAutoBuyer2Row',
-            renderNameABs: getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']),
+            renderNameABs: localize(getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']), getLanguage()),
             labelText: localize('tab1CarbonAutoBuyer2RowLabel', getLanguage()),
             inputElements: [
                 createButton({
@@ -900,7 +900,7 @@ export function drawTab1Content(heading, optionContentElement) {
 
         const carbonAutoBuyer3Row = createOptionRow({
             labelId: 'carbonAutoBuyer3Row',
-            renderNameABs: getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']),
+            renderNameABs: localize(getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']), getLanguage()),
             labelText: localize('tab1CarbonAutoBuyer3RowLabel', getLanguage()),
             inputElements: [
                 createButton({
@@ -939,7 +939,7 @@ export function drawTab1Content(heading, optionContentElement) {
 
         const carbonAutoBuyer4Row = createOptionRow({
             labelId: 'carbonAutoBuyer4Row',
-            renderNameABs: getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']),
+            renderNameABs: localize(getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']), getLanguage()),
             labelText: localize('tab1CarbonAutoBuyer4RowLabel', getLanguage()),
             inputElements: [
                 createButton({
@@ -1141,7 +1141,7 @@ export function drawTab1Content(heading, optionContentElement) {
 
         const neonAutoBuyer1Row = createOptionRow({
             labelId: 'neonAutoBuyer1Row',
-            renderNameABs: getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']),
+            renderNameABs: localize(getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']), getLanguage()),
             labelText: localize('tab1NeonAutoBuyer1RowLabel', getLanguage()),
             inputElements: [
                 createButton({
@@ -1180,7 +1180,7 @@ export function drawTab1Content(heading, optionContentElement) {
 
         const neonAutoBuyer2Row = createOptionRow({
             labelId: 'neonAutoBuyer2Row',
-            renderNameABs: getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']),
+            renderNameABs: localize(getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']), getLanguage()),
             labelText: localize('tab1NeonAutoBuyer2RowLabel', getLanguage()),
             inputElements: [
                 createButton({
@@ -1219,7 +1219,7 @@ export function drawTab1Content(heading, optionContentElement) {
 
         const neonAutoBuyer3Row = createOptionRow({
             labelId: 'neonAutoBuyer3Row',
-            renderNameABs: getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']),
+            renderNameABs: localize(getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']), getLanguage()),
             labelText: localize('tab1NeonAutoBuyer3RowLabel', getLanguage()),
             inputElements: [
                 createButton({
@@ -1258,7 +1258,7 @@ export function drawTab1Content(heading, optionContentElement) {
 
         const neonAutoBuyer4Row = createOptionRow({
             labelId: 'neonAutoBuyer4Row',
-            renderNameABs: getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']),
+            renderNameABs: localize(getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']), getLanguage()),
             labelText: localize('tab1NeonAutoBuyer4RowLabel', getLanguage()),
             inputElements: [
                 createButton({
@@ -1460,7 +1460,7 @@ export function drawTab1Content(heading, optionContentElement) {
 
         const oxygenAutoBuyer1Row = createOptionRow({
             labelId: 'oxygenAutoBuyer1Row',
-            renderNameABs: getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']),
+            renderNameABs: localize(getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']), getLanguage()),
             labelText: localize('tab1OxygenAutoBuyer1RowLabel', getLanguage()),
             inputElements: [
                 createButton({
@@ -1499,7 +1499,7 @@ export function drawTab1Content(heading, optionContentElement) {
 
         const oxygenAutoBuyer2Row = createOptionRow({
             labelId: 'oxygenAutoBuyer2Row',
-            renderNameABs: getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']),
+            renderNameABs: localize(getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']), getLanguage()),
             labelText: localize('tab1OxygenAutoBuyer2RowLabel', getLanguage()),
             inputElements: [
                 createButton({
@@ -1538,7 +1538,7 @@ export function drawTab1Content(heading, optionContentElement) {
 
         const oxygenAutoBuyer3Row = createOptionRow({
             labelId: 'oxygenAutoBuyer3Row',
-            renderNameABs: getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']),
+            renderNameABs: localize(getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']), getLanguage()),
             labelText: localize('tab1OxygenAutoBuyer3RowLabel', getLanguage()),
             inputElements: [
                 createButton({
@@ -1577,7 +1577,7 @@ export function drawTab1Content(heading, optionContentElement) {
 
         const oxygenAutoBuyer4Row = createOptionRow({
             labelId: 'oxygenAutoBuyer4Row',
-            renderNameABs: getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']),
+            renderNameABs: localize(getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']), getLanguage()),
             labelText: localize('tab1OxygenAutoBuyer4RowLabel', getLanguage()),
             inputElements: [
                 createButton({
@@ -1754,7 +1754,7 @@ export function drawTab1Content(heading, optionContentElement) {
 
         const sodiumAutoBuyer1Row = createOptionRow({
             labelId: 'sodiumAutoBuyer1Row',
-            renderNameABs: getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']),
+            renderNameABs: localize(getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']), getLanguage()),
             labelText: localize('tab1SodiumAutoBuyer1RowLabel', getLanguage()),
             inputElements: [
                 createButton({
@@ -1793,7 +1793,7 @@ export function drawTab1Content(heading, optionContentElement) {
 
         const sodiumAutoBuyer2Row = createOptionRow({
             labelId: 'sodiumAutoBuyer2Row',
-            renderNameABs: getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']),
+            renderNameABs: localize(getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']), getLanguage()),
             labelText: localize('tab1SodiumAutoBuyer2RowLabel', getLanguage()),
             inputElements: [
                 createButton({
@@ -1832,7 +1832,7 @@ export function drawTab1Content(heading, optionContentElement) {
 
         const sodiumAutoBuyer3Row = createOptionRow({
             labelId: 'sodiumAutoBuyer3Row',
-            renderNameABs: getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']),
+            renderNameABs: localize(getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']), getLanguage()),
             labelText: localize('tab1SodiumAutoBuyer3RowLabel', getLanguage()),
             inputElements: [
                 createButton({
@@ -1871,7 +1871,7 @@ export function drawTab1Content(heading, optionContentElement) {
 
         const sodiumAutoBuyer4Row = createOptionRow({
             labelId: 'sodiumAutoBuyer4Row',
-            renderNameABs: getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']),
+            renderNameABs: localize(getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']), getLanguage()),
             labelText: localize('tab1SodiumAutoBuyer4RowLabel', getLanguage()),
             inputElements: [
                 createButton({
@@ -2073,7 +2073,7 @@ export function drawTab1Content(heading, optionContentElement) {
 
         const siliconAutoBuyer1Row = createOptionRow({
             labelId: 'siliconAutoBuyer1Row',
-            renderNameABs: getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']),
+            renderNameABs: localize(getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']), getLanguage()),
             labelText: localize('tab1SiliconAutoBuyer1RowLabel', getLanguage()),
             inputElements: [
                 createButton({
@@ -2112,7 +2112,7 @@ export function drawTab1Content(heading, optionContentElement) {
 
         const siliconAutoBuyer2Row = createOptionRow({
             labelId: 'siliconAutoBuyer2Row',
-            renderNameABs: getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']),
+            renderNameABs: localize(getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']), getLanguage()),
             labelText: localize('tab1SiliconAutoBuyer2RowLabel', getLanguage()),
             inputElements: [
                 createButton({
@@ -2151,7 +2151,7 @@ export function drawTab1Content(heading, optionContentElement) {
 
         const siliconAutoBuyer3Row = createOptionRow({
             labelId: 'siliconAutoBuyer3Row',
-            renderNameABs: getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']),
+            renderNameABs: localize(getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']), getLanguage()),
             labelText: localize('tab1SiliconAutoBuyer3RowLabel', getLanguage()),
             inputElements: [
                 createButton({
@@ -2190,7 +2190,7 @@ export function drawTab1Content(heading, optionContentElement) {
 
         const siliconAutoBuyer4Row = createOptionRow({
             labelId: 'siliconAutoBuyer4Row',
-            renderNameABs: getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']),
+            renderNameABs: localize(getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']), getLanguage()),
             labelText: localize('tab1SiliconAutoBuyer4RowLabel', getLanguage()),
             inputElements: [
                 createButton({
@@ -2367,7 +2367,7 @@ export function drawTab1Content(heading, optionContentElement) {
 
         const ironAutoBuyer1Row = createOptionRow({
             labelId: 'ironAutoBuyer1Row',
-            renderNameABs: getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']),
+            renderNameABs: localize(getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier1', 'nameUpgrade']), getLanguage()),
             labelText: localize('tab1IronAutoBuyer1RowLabel', getLanguage()),
             inputElements: [
                 createButton({
@@ -2406,7 +2406,7 @@ export function drawTab1Content(heading, optionContentElement) {
 
         const ironAutoBuyer2Row = createOptionRow({
             labelId: 'ironAutoBuyer2Row',
-            renderNameABs: getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']),
+            renderNameABs: localize(getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier2', 'nameUpgrade']), getLanguage()),
             labelText: localize('tab1IronAutoBuyer2RowLabel', getLanguage()),
             inputElements: [
                 createButton({
@@ -2445,7 +2445,7 @@ export function drawTab1Content(heading, optionContentElement) {
 
         const ironAutoBuyer3Row = createOptionRow({
             labelId: 'ironAutoBuyer3Row',
-            renderNameABs: getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']),
+            renderNameABs: localize(getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier3', 'nameUpgrade']), getLanguage()),
             labelText: localize('tab1IronAutoBuyer3RowLabel', getLanguage()),
             inputElements: [
                 createButton({
@@ -2484,7 +2484,7 @@ export function drawTab1Content(heading, optionContentElement) {
 
         const ironAutoBuyer4Row = createOptionRow({
             labelId: 'ironAutoBuyer4Row',
-            renderNameABs: getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']),
+            renderNameABs: localize(getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier4', 'nameUpgrade']), getLanguage()),
             labelText: localize('tab1IronAutoBuyer4RowLabel', getLanguage()),
             inputElements: [
                 createButton({

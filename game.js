@@ -428,7 +428,7 @@ import {
     getCosmicRipScanResultsBySectorIndex,
 } from './resourceDataObject.js';
 
-import { localize } from './localization.js';
+import { localize, reverseLocalizeForCompounds } from './localization.js';
 import { onboardingChecks } from './onboarding.js';
 
 import {
@@ -4112,7 +4112,7 @@ export function setCompoundRecipePricesAfterRepeatables() {
 
             updatedCompoundText[label] = {
                 value: label,
-                text: `${label} - ${parts.join(', ')}`
+                text: `${localize('compoundCreate' + capitaliseString(label), getLanguage())} - ${parts.join(', ')}`
             };
         }
 
@@ -5047,7 +5047,10 @@ function updateAllCreatePreviews() {
         if (compound === currentScreen) {
             const dropDownElementId = compound + "CreateSelectQuantity";
 
-            setCreateCompoundPreview(currentScreen, document.getElementById(dropDownElementId).querySelector('div.dropdown').innerText);
+            const dropdownEl = document.getElementById(dropDownElementId);
+            const dropdownTextEl = dropdownEl ? dropdownEl.querySelector('span.dropdown-text') : null;
+            const dropDownValue = dropdownTextEl ? dropdownTextEl.getAttribute('data-value') : null;
+            setCreateCompoundPreview(currentScreen, dropDownValue || 'fillToCapacity');
                   
             const createPreviewString = getCompoundCreatePreview(compound);
             let cleanedString = cleanString(createPreviewString);
@@ -5115,15 +5118,17 @@ function updateAllSalePricePreviews() {
             const salePreviewString = getCompoundSalePreview(compound);
             let cleanedString = cleanString(salePreviewString);
 
-        /*const resourcesList = ['hydrogen', 'helium', 'carbon', 'neon', 'oxygen', 'sodium', 'silicon', 'iron'];
-            resourcesList.forEach(res => {
-                const capitalizedRes = capitaliseString(res);
-                const localizedRes = localize('resource' + capitalizedRes, getLanguage());
-                cleanedString = cleanedString.replace(new RegExp(`\\b${capitalizedRes}\\b`, 'g'), localizedRes);
-            }); ADD COMPMOUND VERSION HERE TO LOCALISE SALE STRING */
+            const compoundsList = ['diesel', 'glass', 'steel', 'concrete', 'water', 'titanium'];
+            compoundsList.forEach(comp => {
+                const capitalizedComp = capitaliseString(comp);
+                const localizedComp = localize('compound' + capitalizedComp, getLanguage());
+                cleanedString = cleanedString.replace(new RegExp(`\\b${capitalizedComp}\\b`, 'g'), localizedComp);
+            }); 
 
-            const salePreviewElementId = compounds[compound]?.salePreviewElement;
-            const salePreviewElement = document.getElementById(salePreviewElementId);
+            const sellRowEl = document.getElementById(`${compound}SellRow`);
+            const salePreviewElement = sellRowEl
+                ? sellRowEl.querySelector('.description-container .notation')
+                : null;
     
             if (salePreviewElement) {
                 salePreviewElement.innerHTML = cleanedString;
@@ -5603,8 +5608,10 @@ function getAllDynamicDescriptionElements(resourceTierPairs, compoundTierPairs) 
         const compoundAutoBuyerDescElement = getRowMainDescriptionLabel(`${compoundName}AutoBuyer${tier}Row`);
         const compoundAutoBuyerPrice = getResourceDataObject('compounds', [compoundName, 'upgrades', 'autoBuyer', `tier${tier}`, 'price']);
 
-        elements[`${compoundName}IncreaseStorage`] = { element: compoundIncreaseStorageDescElement, price: compoundStoragePrice, string1: `${capitaliseString(compoundName)}` };
-        elements[`${compoundName}AutoBuyerTier${tier}`] = { element: compoundAutoBuyerDescElement, price: compoundAutoBuyerPrice, string1: `${capitaliseString(compoundName)}` };
+        const localizedCompoundName = localize('compound' + capitaliseString(compoundName), getLanguage());
+
+        elements[`${compoundName}IncreaseStorage`] = { element: compoundIncreaseStorageDescElement, price: compoundStoragePrice, string1: `${localizedCompoundName}` };
+        elements[`${compoundName}AutoBuyerTier${tier}`] = { element: compoundAutoBuyerDescElement, price: compoundAutoBuyerPrice, string1: `${localizedCompoundName}` };
     });
 
     const scienceElements = getScienceResourceDescriptionElements();
@@ -7051,7 +7058,7 @@ function powerOnOrOffChecks(element) {
     }
 }
 
-function compoundCostSellCreateChecks(element) {  //to refactor
+function compoundCostSellCreateChecks(element) {
     let compound = element.dataset.type;
     let compound2;
 
@@ -7076,7 +7083,7 @@ function compoundCostSellCreateChecks(element) {  //to refactor
         quantity = 0;
     }
     let quantity2;
-    compound2 ? quantity2 = getResourceDataObject('compounds', [checkQuantityString2, 'quantity']) : -1;
+    compound2 ? quantity2 = getResourceDataObject('compounds', [reverseLocalizeForCompounds(checkQuantityString2, getLanguage()), 'quantity']) : -1;
 
     if (element.classList.contains('sell') || element.dataset.conditionCheck === 'sellCompound') { //sell
         if (quantity > 0) { 
@@ -7172,8 +7179,8 @@ function compoundCostSellCreateChecks(element) {  //to refactor
         price = getResourceDataObject(mainKey, [compound, 'storageCapacity']) - 1;
         if (element.tagName.toLowerCase() !== 'button') {
             price2 = compound2 ? Math.floor(getResourceDataObject(mainKey, [compound, 'storageCapacity']) * 0.3) : 0;
-            const mainCompoundPriceText = `${price} ${getResourceDataObject(mainKey, [compound, 'nameResource'])}`;
-            const secondaryCompoundPriceText = price2 > 0 ? `, ${price2} ${getResourceDataObject(mainKey, [compound2, 'nameResource'])}` : '';
+            const mainCompoundPriceText = `${price} ${localize('compound' + capitaliseString(compound), getLanguage())}`;
+            const secondaryCompoundPriceText = price2 > 0 ? `, ${price2} ${localize(capitaliseString(compound2), getLanguage())}` : '';
         
             const mainCompoundSpan = document.createElement('span');
             mainCompoundSpan.id = 'mainCompoundPriceText';
@@ -7568,6 +7575,10 @@ function handleTechnologyScreenButtonAndDescriptionStates(element, quantity, tec
 }
 
 function handlePhilosophyTechnologyScreenButtonAndDescriptionStates(element, quantity, techName) {
+    if (!element) {
+        return;
+    }
+
     if (element && quantity >= getResourceDataObject('philosophyRepeatableTechs', [getPlayerPhilosophy(), techName, 'price'])) {
         element.classList.remove('red-disabled-text');
         element.parentElement.parentElement?.querySelector('.description-container label span')?.classList.remove('red-disabled-text');
@@ -7586,9 +7597,9 @@ function handlePhilosophyTechnologyScreenButtonAndDescriptionStates(element, qua
     if (element.tagName.toLowerCase() === 'button') {
         if (quantity >= getResourceDataObject('philosophyRepeatableTechs', [getPlayerPhilosophy(), techName, 'price'])) {
             element.classList.remove('red-disabled-text');
-            element.parentElement.parentElement?.querySelector('.description-container label span').classList.remove('red-disabled-text');
+            element.parentElement.parentElement?.querySelector('.description-container label span')?.classList.remove('red-disabled-text');
             element.classList.add('green-ready-text');
-            element.parentElement.parentElement?.querySelector('.description-container label span').classList.add('green-ready-text');
+            element.parentElement.parentElement?.querySelector('.description-container label span')?.classList.add('green-ready-text');
         }
 
         if (element.classList.contains('special-ability')) {

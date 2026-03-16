@@ -34,7 +34,7 @@ let saveData = null;
 //CONSTANTS
 export const HOMESTAR = 'miaplacidus';
 export const MINIMUM_GAME_VERSION_FOR_SAVES = 0.93;
-export const GAME_VERSION_FOR_SAVES = 0.978;
+export const GAME_VERSION_FOR_SAVES = 0.979;
 export const deferredActions = [];
 
 //NOTIFICATIONS
@@ -224,92 +224,94 @@ export let repeatableTechMultipliers = {
     4: 1
 };
 
-let compoundCreateDropdownRecipeText = {
-    diesel: {
-      fillToCapacity: { value: 'fillToCapacity', text: 'Fill To Capacity' },
-      max: { value: 'max', text: 'Max Possible' },
-      threeQuarters: { value: 'threeQuarters', text: 'Up to 75%' },
-      twoThirds: { value: 'twoThirds', text: 'Up to 67%' },
-      half: { value: 'half', text: 'Up to 50%' },
-      oneThird: { value: 'oneThird', text: 'Up to 33%' },
-      50000: { value: '50000', text: '50000 - 1.3M Hyd, 600K Crb' },
-      5000: { value: '5000', text: '5000 - 130K Hyd, 60K Crb' },
-      500: { value: '500', text: '500 - 13K Hyd, 6K Crb' },
-      50: { value: '50', text: '50 - 1.3K Hyd, 600 Crb' },
-      5: { value: '5', text: '5 - 130 Hyd, 60 Crb' },
-      1: { value: '1', text: '1 - 26 Hyd, 12 Crb' }
-    },
-    glass: {
-      fillToCapacity: { value: 'fillToCapacity', text: 'Fill To Capacity' },
-      max: { value: 'max', text: 'Max Possible' },
-      threeQuarters: { value: 'threeQuarters', text: 'Up to 75%' },
-      twoThirds: { value: 'twoThirds', text: 'Up to 67%' },
-      half: { value: 'half', text: 'Up to 50%' },
-      oneThird: { value: 'oneThird', text: 'Up to 33%' },
-      50000: { value: '50000', text: '50000 - 200K Sil, 100K Oxy, 50K Sod' },
-      5000: { value: '5000', text: '5000 - 20K Sil, 10K Oxy, 5K Sod' },
-      500: { value: '500', text: '500 - 2K Sil, 1K Oxy, 500 Sod' },
-      50: { value: '50', text: '50 - 200 Sil, 100 Oxy, 50 Sod' },
-      5: { value: '5', text: '5 - 20 Sil, 10 Oxy, 5 Sod' },
-      1: { value: '1', text: '1 - 4 Sil, 2 Oxy, 1 Sod' }
-    },
-    steel: {
-      fillToCapacity: { value: 'fillToCapacity', text: 'Fill To Capacity' },
-      max: { value: 'max', text: 'Max Possible' },
-      threeQuarters: { value: 'threeQuarters', text: 'Up to 75%' },
-      twoThirds: { value: 'twoThirds', text: 'Up to 67%' },
-      half: { value: 'half', text: 'Up to 50%' },
-      oneThird: { value: 'oneThird', text: 'Up to 33%' },
-      50000: { value: '50000', text: '50000 - 200K Irn, 50K Crb' },
-      5000: { value: '5000', text: '5000 - 20K Irn, 5K Crb' },
-      500: { value: '500', text: '500 - 2K Irn, 500 Crb' },
-      50: { value: '50', text: '50 - 200 Irn, 50 Crb' },
-      5: { value: '5', text: '5 - 20 Irn, 5 Crb' },
-      1: { value: '1', text: '1 - 4 Irn, 1 Crb' }
-    },
-    concrete: {
-      fillToCapacity: { value: 'fillToCapacity', text: 'Fill To Capacity' },
-      max: { value: 'max', text: 'Max Possible' },
-      threeQuarters: { value: 'threeQuarters', text: 'Up to 75%' },
-      twoThirds: { value: 'twoThirds', text: 'Up to 67%' },
-      half: { value: 'half', text: 'Up to 50%' },
-      oneThird: { value: 'oneThird', text: 'Up to 33%' },
-      50000: { value: '50000', text: '50000 - 250K Sil, 100K Sod, 150K Hyd' },
-      5000: { value: '5000', text: '5000 - 25K Sil, 10K Sod, 15K Hyd' },
-      500: { value: '500', text: '500 - 2.5K Sil, 1K Sod, 1.5K Hyd' },
-      50: { value: '50', text: '50 - 250 Sil, 100 Sod, 150 Hyd' },
-      5: { value: '5', text: '5 - 25 Sil, 10 Sod, 15 Hyd' },
-      1: { value: '1', text: '1 - 5 Sil, 2 Sod, 3 Hyd' }
-    },
-    water: {
-      fillToCapacity: { value: 'fillToCapacity', text: 'Fill To Capacity' },
-      max: { value: 'max', text: 'Max Possible' },
-      threeQuarters: { value: 'threeQuarters', text: 'Up to 75%' },
-      twoThirds: { value: 'twoThirds', text: 'Up to 67%' },
-      half: { value: 'half', text: 'Up to 50%' },
-      oneThird: { value: 'oneThird', text: 'Up to 33%' },
-      50000: { value: '50000', text: '50000 - 1M Hyd, 500K Oxy' },
-      5000: { value: '5000', text: '5000 - 100K Hyd, 50K Oxy' },
-      500: { value: '500', text: '500 - 10K Hyd, 5K Oxy' },
-      50: { value: '50', text: '50 - 1K Hyd, 500 Oxy' },
-      5: { value: '5', text: '5 - 100 Hyd, 50 Oxy' },
-      1: { value: '1', text: '1 - 20 Hyd, 10 Oxy' }
-    },
-    titanium: {
-      fillToCapacity: { value: 'fillToCapacity', text: 'Fill To Capacity' },
-      max: { value: 'max', text: 'Max Possible' },
-      threeQuarters: { value: 'threeQuarters', text: 'Up to 75%' },
-      twoThirds: { value: 'twoThirds', text: 'Up to 67%' },
-      half: { value: 'half', text: 'Up to 50%' },
-      oneThird: { value: 'oneThird', text: 'Up to 33%' },
-      50000: { value: '50000', text: '50000 - 1.1M Irn, 900K Sod, 2M Neo' },
-      5000: { value: '5000', text: '5000 - 110K Irn, 90K Sod, 200K Neo' },
-      500: { value: '500', text: '500 - 11K Irn, 9K Sod, 20K Neo' },
-      50: { value: '50', text: '50 - 1.1K Irn, 900 Sod, 2K Neo' },
-      5: { value: '5', text: '5 - 110 Irn, 90 Sod, 200 Neo' },
-      1: { value: '1', text: '1 - 22 Irn, 18 Sod, 40 Neo' }
-    }
-  };  
+let compoundCreateDropdownRecipeText = () => {
+    return {
+        diesel: {
+          fillToCapacity: { value: 'fillToCapacity', text: localize('compoundCreateFillToCapacity', getLanguage()) },
+          max: { value: 'max', text: localize('compoundCreateMaxPossible', getLanguage()) },
+          threeQuarters: { value: 'threeQuarters', text: localize('compoundCreateUpTo75', getLanguage()) },
+          twoThirds: { value: 'twoThirds', text: localize('compoundCreateUpTo67', getLanguage()) },
+          half: { value: 'half', text: localize('compoundCreateUpTo50', getLanguage()) },
+          oneThird: { value: 'oneThird', text: localize('compoundCreateUpTo33', getLanguage()) },
+          50000: { value: '50000', text: `50000 - 1.3M ${localize('resourceShortHydrogen', getLanguage())}, 600K ${localize('resourceShortCarbon', getLanguage())}` },
+          5000: { value: '5000', text: `5000 - 130K ${localize('resourceShortHydrogen', getLanguage())}, 60K ${localize('resourceShortCarbon', getLanguage())}` },
+          500: { value: '500', text: `500 - 13K ${localize('resourceShortHydrogen', getLanguage())}, 6K ${localize('resourceShortCarbon', getLanguage())}` },
+          50: { value: '50', text: `50 - 1.3K ${localize('resourceShortHydrogen', getLanguage())}, 600 ${localize('resourceShortCarbon', getLanguage())}` },
+          5: { value: '5', text: `5 - 130 ${localize('resourceShortHydrogen', getLanguage())}, 60 ${localize('resourceShortCarbon', getLanguage())}` },
+          1: { value: '1', text: `1 - 26 ${localize('resourceShortHydrogen', getLanguage())}, 12 ${localize('resourceShortCarbon', getLanguage())}` }
+        },
+        glass: {
+          fillToCapacity: { value: 'fillToCapacity', text: localize('compoundCreateFillToCapacity', getLanguage()) },
+          max: { value: 'max', text: localize('compoundCreateMaxPossible', getLanguage()) },
+          threeQuarters: { value: 'threeQuarters', text: localize('compoundCreateUpTo75', getLanguage()) },
+          twoThirds: { value: 'twoThirds', text: localize('compoundCreateUpTo67', getLanguage()) },
+          half: { value: 'half', text: localize('compoundCreateUpTo50', getLanguage()) },
+          oneThird: { value: 'oneThird', text: localize('compoundCreateUpTo33', getLanguage()) },
+          50000: { value: '50000', text: `50000 - 200K ${localize('resourceShortSilicon', getLanguage())}, 100K ${localize('resourceShortOxygen', getLanguage())}, 50K ${localize('resourceShortSodium', getLanguage())}` },
+          5000: { value: '5000', text: `5000 - 20K ${localize('resourceShortSilicon', getLanguage())}, 10K ${localize('resourceShortOxygen', getLanguage())}, 5K ${localize('resourceShortSodium', getLanguage())}` },
+          500: { value: '500', text: `500 - 2K ${localize('resourceShortSilicon', getLanguage())}, 1K ${localize('resourceShortOxygen', getLanguage())}, 500 ${localize('resourceShortSodium', getLanguage())}` },
+          50: { value: '50', text: `50 - 200 ${localize('resourceShortSilicon', getLanguage())}, 100 ${localize('resourceShortOxygen', getLanguage())}, 50 ${localize('resourceShortSodium', getLanguage())}` },
+          5: { value: '5', text: `5 - 20 ${localize('resourceShortSilicon', getLanguage())}, 10 ${localize('resourceShortOxygen', getLanguage())}, 5 ${localize('resourceShortSodium', getLanguage())}` },
+          1: { value: '1', text: `1 - 4 ${localize('resourceShortSilicon', getLanguage())}, 2 ${localize('resourceShortOxygen', getLanguage())}, 1 ${localize('resourceShortSodium', getLanguage())}` }
+        },
+        steel: {
+          fillToCapacity: { value: 'fillToCapacity', text: localize('compoundCreateFillToCapacity', getLanguage()) },
+          max: { value: 'max', text: localize('compoundCreateMaxPossible', getLanguage()) },
+          threeQuarters: { value: 'threeQuarters', text: localize('compoundCreateUpTo75', getLanguage()) },
+          twoThirds: { value: 'twoThirds', text: localize('compoundCreateUpTo67', getLanguage()) },
+          half: { value: 'half', text: localize('compoundCreateUpTo50', getLanguage()) },
+          oneThird: { value: 'oneThird', text: localize('compoundCreateUpTo33', getLanguage()) },
+          50000: { value: '50000', text: `50000 - 200K ${localize('resourceShortIron', getLanguage())}, 50K ${localize('resourceShortCarbon', getLanguage())}` },
+          5000: { value: '5000', text: `5000 - 20K ${localize('resourceShortIron', getLanguage())}, 5K ${localize('resourceShortCarbon', getLanguage())}` },
+          500: { value: '500', text: `500 - 2K ${localize('resourceShortIron', getLanguage())}, 500 ${localize('resourceShortCarbon', getLanguage())}` },
+          50: { value: '50', text: `50 - 200 ${localize('resourceShortIron', getLanguage())}, 50 ${localize('resourceShortCarbon', getLanguage())}` },
+          5: { value: '5', text: `5 - 20 ${localize('resourceShortIron', getLanguage())}, 5 ${localize('resourceShortCarbon', getLanguage())}` },
+          1: { value: '1', text: `1 - 4 ${localize('resourceShortIron', getLanguage())}, 1 ${localize('resourceShortCarbon', getLanguage())}` }
+        },
+        concrete: {
+          fillToCapacity: { value: 'fillToCapacity', text: localize('compoundCreateFillToCapacity', getLanguage()) },
+          max: { value: 'max', text: localize('compoundCreateMaxPossible', getLanguage()) },
+          threeQuarters: { value: 'threeQuarters', text: localize('compoundCreateUpTo75', getLanguage()) },
+          twoThirds: { value: 'twoThirds', text: localize('compoundCreateUpTo67', getLanguage()) },
+          half: { value: 'half', text: localize('compoundCreateUpTo50', getLanguage()) },
+          oneThird: { value: 'oneThird', text: localize('compoundCreateUpTo33', getLanguage()) },
+          50000: { value: '50000', text: `50000 - 250K ${localize('resourceShortSilicon', getLanguage())}, 100K ${localize('resourceShortSodium', getLanguage())}, 150K ${localize('resourceShortHydrogen', getLanguage())}` },
+          5000: { value: '5000', text: `5000 - 25K ${localize('resourceShortSilicon', getLanguage())}, 10K ${localize('resourceShortSodium', getLanguage())}, 15K ${localize('resourceShortHydrogen', getLanguage())}` },
+          500: { value: '500', text: `500 - 2.5K ${localize('resourceShortSilicon', getLanguage())}, 1K ${localize('resourceShortSodium', getLanguage())}, 1.5K ${localize('resourceShortHydrogen', getLanguage())}` },
+          50: { value: '50', text: `50 - 250 ${localize('resourceShortSilicon', getLanguage())}, 100 ${localize('resourceShortSodium', getLanguage())}, 150 ${localize('resourceShortHydrogen', getLanguage())}` },
+          5: { value: '5', text: `5 - 25 ${localize('resourceShortSilicon', getLanguage())}, 10 ${localize('resourceShortSodium', getLanguage())}, 15 ${localize('resourceShortHydrogen', getLanguage())}` },
+          1: { value: '1', text: `1 - 5 ${localize('resourceShortSilicon', getLanguage())}, 2 ${localize('resourceShortSodium', getLanguage())}, 3 ${localize('resourceShortHydrogen', getLanguage())}` }
+        },
+        water: {
+          fillToCapacity: { value: 'fillToCapacity', text: localize('compoundCreateFillToCapacity', getLanguage()) },
+          max: { value: 'max', text: localize('compoundCreateMaxPossible', getLanguage()) },
+          threeQuarters: { value: 'threeQuarters', text: localize('compoundCreateUpTo75', getLanguage()) },
+          twoThirds: { value: 'twoThirds', text: localize('compoundCreateUpTo67', getLanguage()) },
+          half: { value: 'half', text: localize('compoundCreateUpTo50', getLanguage()) },
+          oneThird: { value: 'oneThird', text: localize('compoundCreateUpTo33', getLanguage()) },
+          50000: { value: '50000', text: `50000 - 1M ${localize('resourceShortHydrogen', getLanguage())}, 500K ${localize('resourceShortOxygen', getLanguage())}` },
+          5000: { value: '5000', text: `5000 - 100K ${localize('resourceShortHydrogen', getLanguage())}, 50K ${localize('resourceShortOxygen', getLanguage())}` },
+          500: { value: '500', text: `500 - 10K ${localize('resourceShortHydrogen', getLanguage())}, 5K ${localize('resourceShortOxygen', getLanguage())}` },
+          50: { value: '50', text: `50 - 1K ${localize('resourceShortHydrogen', getLanguage())}, 500 ${localize('resourceShortOxygen', getLanguage())}` },
+          5: { value: '5', text: `5 - 100 ${localize('resourceShortHydrogen', getLanguage())}, 50 ${localize('resourceShortOxygen', getLanguage())}` },
+          1: { value: '1', text: `1 - 20 ${localize('resourceShortHydrogen', getLanguage())}, 10 ${localize('resourceShortOxygen', getLanguage())}` }
+        },
+        titanium: {
+          fillToCapacity: { value: 'fillToCapacity', text: localize('compoundCreateFillToCapacity', getLanguage()) },
+          max: { value: 'max', text: localize('compoundCreateMaxPossible', getLanguage()) },
+          threeQuarters: { value: 'threeQuarters', text: localize('compoundCreateUpTo75', getLanguage()) },
+          twoThirds: { value: 'twoThirds', text: localize('compoundCreateUpTo67', getLanguage()) },
+          half: { value: 'half', text: localize('compoundCreateUpTo50', getLanguage()) },
+          oneThird: { value: 'oneThird', text: localize('compoundCreateUpTo33', getLanguage()) },
+          50000: { value: '50000', text: `50000 - 1.1M ${localize('resourceShortIron', getLanguage())}, 900K ${localize('resourceShortSodium', getLanguage())}, 2M ${localize('resourceShortNeon', getLanguage())}` },
+          5000: { value: '5000', text: `5000 - 110K ${localize('resourceShortIron', getLanguage())}, 90K ${localize('resourceShortSodium', getLanguage())}, 200K ${localize('resourceShortNeon', getLanguage())}` },
+          500: { value: '500', text: `500 - 11K ${localize('resourceShortIron', getLanguage())}, 9K ${localize('resourceShortSodium', getLanguage())}, 20K ${localize('resourceShortNeon', getLanguage())}` },
+          50: { value: '50', text: `50 - 1.1K ${localize('resourceShortIron', getLanguage())}, 900 ${localize('resourceShortSodium', getLanguage())}, 2K ${localize('resourceShortNeon', getLanguage())}` },
+          5: { value: '5', text: `5 - 110 ${localize('resourceShortIron', getLanguage())}, 90 ${localize('resourceShortSodium', getLanguage())}, 200 ${localize('resourceShortNeon', getLanguage())}` },
+          1: { value: '1', text: `1 - 22 ${localize('resourceShortIron', getLanguage())}, 18 ${localize('resourceShortSodium', getLanguage())}, 40 ${localize('resourceShortNeon', getLanguage())}` }
+        }
+      }
+    };
 
 //GLOBAL VARIABLES
 export let gameState;
@@ -2760,9 +2762,7 @@ export function setSaleCompoundPreview(compound, amount) {
 }
 
 export function setCreateCompoundPreview(compoundToCreate, dropDownString) {
-    let amount = /^[A-Za-z]/.test(dropDownString) 
-    ? dropDownString 
-    : dropDownString.split(" ")[0];
+    let amount = dropDownString;
     
     const type1 = getResourceDataObject('compounds', [compoundToCreate, 'createsFrom1'])[1];
     const type2 = getResourceDataObject('compounds', [compoundToCreate, 'createsFrom2'])[1];
@@ -2802,42 +2802,42 @@ export function setCreateCompoundPreview(compoundToCreate, dropDownString) {
     const availableStorage = Math.max(storageCapacity - currentQuantity, 0);
 
     switch (amount) {
-        case localize('dropdownOptionFillToCapacity', getLanguage()):
+        case 'fillToCapacity':
             createAmount = Math.min(maxCompoundToCreate, availableStorage);
             constituentPartsQuantityNeeded1 = Math.round(createAmount * constituentPartsRatio1);
             constituentPartsQuantityNeeded2 = Math.round(createAmount * constituentPartsRatio2);
             constituentPartsQuantityNeeded3 = Math.round(createAmount * constituentPartsRatio3);
             constituentPartsQuantityNeeded4 = Math.round(createAmount * constituentPartsRatio4);
             break;
-        case localize('dropdownOptionMaxPossible', getLanguage()):
+        case 'max':
             createAmount = Math.floor(maxCompoundToCreate * 1);
             constituentPartsQuantityNeeded1 = Math.round(createAmount * constituentPartsRatio1);
             constituentPartsQuantityNeeded2 = Math.round(createAmount * constituentPartsRatio2);
             constituentPartsQuantityNeeded3 = Math.round(createAmount * constituentPartsRatio3);
             constituentPartsQuantityNeeded4 = Math.round(createAmount * constituentPartsRatio4);
             break;
-        case localize('dropdownOptionUpTo75Percent', getLanguage()):
+        case 'threeQuarters':
             createAmount = Math.floor(maxCompoundToCreate * 0.75);
             constituentPartsQuantityNeeded1 = Math.round(createAmount * constituentPartsRatio1);
             constituentPartsQuantityNeeded2 = Math.round(createAmount * constituentPartsRatio2);
             constituentPartsQuantityNeeded3 = Math.round(createAmount * constituentPartsRatio3);
             constituentPartsQuantityNeeded4 = Math.round(createAmount * constituentPartsRatio4);
             break;
-        case localize('dropdownOptionUpTo67Percent', getLanguage()):
+        case 'twoThirds':
             createAmount = Math.floor(maxCompoundToCreate * (2 / 3));
             constituentPartsQuantityNeeded1 = Math.round(createAmount * constituentPartsRatio1);
             constituentPartsQuantityNeeded2 = Math.round(createAmount * constituentPartsRatio2);
             constituentPartsQuantityNeeded3 = Math.round(createAmount * constituentPartsRatio3);
             constituentPartsQuantityNeeded4 = Math.round(createAmount * constituentPartsRatio4);
             break;
-        case localize('dropdownOptionUpTo50Percent', getLanguage()):
+        case 'half':
             createAmount = Math.floor(maxCompoundToCreate * 0.5);
             constituentPartsQuantityNeeded1 = Math.round(createAmount * constituentPartsRatio1);
             constituentPartsQuantityNeeded2 = Math.round(createAmount * constituentPartsRatio2);
             constituentPartsQuantityNeeded3 = Math.round(createAmount * constituentPartsRatio3);
             constituentPartsQuantityNeeded4 = Math.round(createAmount * constituentPartsRatio4);
             break;
-        case localize('dropdownOptionUpTo33Percent', getLanguage()):
+        case 'oneThird':
             createAmount = Math.floor(maxCompoundToCreate * (1 / 3));
             constituentPartsQuantityNeeded1 = Math.round(createAmount * constituentPartsRatio1);
             constituentPartsQuantityNeeded2 = Math.round(createAmount * constituentPartsRatio2);

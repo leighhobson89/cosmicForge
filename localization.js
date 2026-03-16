@@ -61,6 +61,22 @@ function interpolateTemplateLiteral(template) {
     });
 }
 
+function reverseLocalizeForCompounds(localizedValue, language) {
+    const data = getLocalization();
+    if (!data || !data[language]) {
+        return localizedValue;
+    }
+    
+    // Find the key that maps to this localized value, only checking 'compound' keys
+    for (const [key, value] of Object.entries(data[language])) {
+        if (key.startsWith('compound') && value.toLowerCase() === localizedValue.toLowerCase()) {
+            return key.replace('compound', '').toLowerCase();
+        }
+    }
+    return localizedValue;
+}
+
 export {
-    localize
+    localize,
+    reverseLocalizeForCompounds
 };

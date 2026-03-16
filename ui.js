@@ -3489,7 +3489,7 @@ export function createOptionRow(options = {}) {
         }
 
         const currentTab = getCurrentTab()[0];
-        description.id = generateElementId(labelText, resourceString, null);  //TEMPORARY DURING LOCALISATION WORK (currentTab === 1 || currentTab === 4) ? labelId : 
+        description.id = generateElementId(labelId, resourceString, null); 
         description.innerHTML = descriptionText;
 
         if (dataConditionCheck) {
@@ -3581,6 +3581,7 @@ export function createDropdown(id, options, selectedValue, onChange, classes = [
 
     const defaultOption = options.find(option => option.value === selectedValue);
     dropdownText.innerHTML = defaultOption ? defaultOption.text : 'Select an option';
+    dropdownText.setAttribute('data-value', defaultOption ? defaultOption.value : '');
 
 
     dropdown.appendChild(dropdownText);
@@ -3603,6 +3604,7 @@ export function createDropdown(id, options, selectedValue, onChange, classes = [
             const value = event.currentTarget.getAttribute('data-value');
             const selectedOption = options.find(option => option.value == value);
             dropdownText.innerHTML = selectedOption ? selectedOption.text : 'Select an option';
+            dropdownText.setAttribute('data-value', selectedOption ? selectedOption.value : '');
             if (getCurrentOptionPane().startsWith('rocket')) {
                 setCurrentDestinationDropdownText(dropdownText.innerHTML);
             }
