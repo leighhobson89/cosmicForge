@@ -258,9 +258,9 @@ describe("launchAndOnboard", () => {
         await step({
           page,
           text: "Buy a Hydrogen AutoBuyer",
-          targetLocator: page.getByRole("button", { name: "Add 2 Hydrogen /s" }),
+          targetLocator: page.getByRole("button", { name: "Add 4 Hydrogen /s" }),
           action: async () => {
-            await page.getByRole("button", { name: "Add 2 Hydrogen /s" }).click();
+            await page.getByRole("button", { name: "Add 4 Hydrogen /s" }).click();
           }
         });
 

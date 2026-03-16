@@ -5055,6 +5055,20 @@ function updateAllCreatePreviews() {
             const createPreviewString = getCompoundCreatePreview(compound);
             let cleanedString = cleanString(createPreviewString);
 
+            const resourcesList = ['hydrogen', 'helium', 'carbon', 'neon', 'oxygen', 'sodium', 'silicon', 'iron'];
+            resourcesList.forEach(res => {
+                const capitalizedRes = capitaliseString(res);
+                const localizedRes = localize('resource' + capitalizedRes, getLanguage());
+                cleanedString = cleanedString.replace(new RegExp(`\\b${capitalizedRes}\\b`, 'g'), localizedRes);
+            });
+
+            const compoundsList = ['diesel', 'glass', 'steel', 'concrete', 'water', 'titanium'];
+            compoundsList.forEach(comp => {
+                const capitalizedComp = capitaliseString(comp);
+                const localizedComp = localize('compound' + capitalizedComp, getLanguage());
+                cleanedString = cleanedString.replace(new RegExp(`\\b${capitalizedComp}\\b`, 'g'), localizedComp);
+            });
+
             const createPreviewElementId = compounds[compound]?.createPreviewElement;
             const createPreviewElement = document.getElementById(createPreviewElementId);
     

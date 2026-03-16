@@ -1,4 +1,4 @@
-import { initLocalization } from './localization.js';
+import { initLocalization, localize } from './localization.js';
 import { getStatisticsContent, getStatKeyFromLocalizedName, statisticsContent } from './descriptions.js';
 import {
     setLastFocusOfflineGainsAppliedAt,
@@ -1710,6 +1710,98 @@ export function applyCustomPointerSetting() {
 }
 
 
+export function initialiseStaticButtonLabels() {
+    // Sell All buttons
+    const sellAllResourcesButton = document.getElementById('sellAllResourcesButton');
+    if (sellAllResourcesButton) {
+        sellAllResourcesButton.innerText = localize('buttonSellAll', getLanguage());
+    }
+
+    const sellAllCompoundsButton = document.getElementById('sellAllCompoundsButton');
+    if (sellAllCompoundsButton) {
+        sellAllCompoundsButton.innerText = localize('buttonSellAll', getLanguage());
+    }
+
+    // Tab headers
+    const tab1Intro = document.getElementById('tab1Intro');
+    if (tab1Intro) {
+        tab1Intro.innerText = localize('tabHeaderResources', getLanguage());
+    }
+
+    const tab4Intro = document.getElementById('tab4Intro');
+    if (tab4Intro) {
+        tab4Intro.innerText = localize('tabHeaderCompounds', getLanguage());
+    }
+
+    // Tab headers (Resources, Compounds already handled above)
+    const tab2Intro = document.getElementById('tab2Intro');
+    if (tab2Intro) {
+        tab2Intro.innerText = localize('tabHeaderEnergy', getLanguage());
+    }
+
+    const tab3Intro = document.getElementById('tab3Intro');
+    if (tab3Intro) {
+        tab3Intro.innerText = localize('tabHeaderResearch', getLanguage());
+    }
+
+    const tab5Intro = document.getElementById('tab5Intro');
+    if (tab5Intro) {
+        tab5Intro.innerText = localize('tabHeaderInterstellar', getLanguage());
+    }
+
+    const tab6Intro = document.getElementById('tab6Intro');
+    if (tab6Intro) {
+        tab6Intro.innerText = localize('tabHeaderSpaceMining', getLanguage());
+    }
+
+    const tab7Intro = document.getElementById('tab7Intro');
+    if (tab7Intro) {
+        tab7Intro.innerText = localize('tabHeaderGalactic', getLanguage());
+    }
+
+    const tab8Intro = document.getElementById('tab8Intro');
+    if (tab8Intro) {
+        tab8Intro.innerText = localize('tabHeaderCosmicRip', getLanguage());
+    }
+
+    const tab9Intro = document.getElementById('tab9Intro');
+    if (tab9Intro) {
+        tab9Intro.innerText = localize('tabHeaderSettings', getLanguage());
+    }
+
+    // Category headers (Gases, Liquids, Solids)
+    const categoryTexts = document.querySelectorAll('.main-category-text');
+    categoryTexts.forEach(el => {
+        const text = el.innerText;
+        if (text === 'Gases' || text === 'Gas' || text === 'Gase') {
+            el.innerText = localize('categoryGases', getLanguage());
+        } else if (text === 'Liquids' || text === 'Liquidi' || text === 'Líquidos') {
+            el.innerText = localize('categoryLiquids', getLanguage());
+        } else if (text === 'Solids' || text === 'Solidi' || text === 'Sólidos' || text === 'Feststoffe') {
+            el.innerText = localize('categorySolids', getLanguage());
+        }
+    });
+
+    // Resource option labels
+    const resourceIds = ['hydrogen', 'helium', 'carbon', 'neon', 'oxygen', 'sodium', 'silicon', 'iron'];
+    resourceIds.forEach(resource => {
+        const el = document.getElementById(`${resource}Option`);
+        if (el) {
+            el.innerText = localize(`resource${resource.charAt(0).toUpperCase() + resource.slice(1)}`, getLanguage());
+        }
+    });
+
+    // Compound option labels
+    const compoundIds = ['diesel', 'glass', 'concrete', 'steel', 'water', 'titanium'];
+    compoundIds.forEach(compound => {
+        const el = document.getElementById(`${compound}Option`);
+        if (el) {
+            el.innerText = localize(`compound${compound.charAt(0).toUpperCase() + compound.slice(1)}`, getLanguage());
+        }
+    });
+}
+
+
 document.addEventListener('DOMContentLoaded', async () => {
     setElements();
     setupStatTooltips();
@@ -1743,17 +1835,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     adjustGalacticSidebarWidths();
     applyCustomPointerSetting();
 
-
     setGameState(getGameVisibleActive());
 
-
     generateRandomPioneerName();
-
 
     if (localStorage.getItem('saveName')) {
         setSaveName(localStorage.getItem('saveName'));
     }
-
 
     initAnalytics({
         defaultEnabled: true,
@@ -2944,6 +3032,7 @@ function buildFuelConsumptionLines(resourceKey, category, timerRatio) {
 
     await initLocalization();
     initialiseDescriptions();
+    initialiseStaticButtonLabels();
 
     const headerText = gameIntroHeader;
     let content = gameSaveNameCollect;
@@ -3175,6 +3264,82 @@ function buildPowerPlantStatusLines() {
 
 
 
+// Mapping from English headings to localization keys
+const headingToLocalizationKey = {
+    // Tab 1 - Resources
+    'Hydrogen': 'resourceHydrogen',
+    'Helium': 'resourceHelium',
+    'Carbon': 'resourceCarbon',
+    'Neon': 'resourceNeon',
+    'Oxygen': 'resourceOxygen',
+    'Sodium': 'resourceSodium',
+    'Silicon': 'resourceSilicon',
+    'Iron': 'resourceIron',
+    // Tab 2 - Energy
+    'Energy Storage': 'headerDescEnergyStorage',
+    'Power Plant': 'headerDescPowerPlant',
+    'Advanced Power Plant': 'headerDescAdvancedPowerPlant',
+    'Solar Power Plant': 'headerDescSolarPowerPlant',
+    // Tab 3 - Research
+    'Research': 'tabHeaderResearch',
+    'Technology': 'headerDescTechnology',
+    'Tech Tree': 'headerDescTechTree',
+    'Philosophy': 'headerDescPhilosophy',
+    // Tab 4 - Compounds
+    'Diesel': 'compoundDiesel',
+    'Glass': 'compoundGlass',
+    'Steel': 'compoundSteel',
+    'Concrete': 'compoundConcrete',
+    'Water': 'compoundWater',
+    'Titanium': 'compoundTitanium',
+    // Tab 5 - Interstellar
+    'Star Map': 'headerDescStarMap',
+    'Star Data': 'headerDescStarData',
+    'Star Ship': 'headerDescStarShip',
+    'Fleet Hangar': 'headerDescFleetHangar',
+    'Colonise': 'headerDescColonise',
+    // Tab 6 - Space Mining
+    'Space Telescope': 'headerDescSpaceTelescope',
+    'Asteroids': 'headerDescAsteroids',
+    'Launch Pad': 'headerDescLaunchPad',
+    'Mining': 'headerDescMining',
+    // Tab 7 - Galactic
+    'Galactic Market': 'headerDescGalacticMarket',
+    'Galactic Casino': 'headerDescGalacticCasino',
+    'Ascendency Perks': 'headerDescAscendencyPerks',
+    'Megastructures': 'headerDescMegastructures',
+    'Black Hole': 'headerDescBlackHole',
+    'Rebirth': 'headerDescRebirth',
+    // Tab 8 - Cosmic Rip
+    'Situation': 'headerDescSituation',
+    'Near Space Scanner Array': 'headerDescNearSpaceScannerArray',
+    'Cosmic Rip': 'headerDescCosmicRipTab',
+    // Tab 9 - Settings
+    'Contact': 'headerDescContact',
+    'Get Started': 'headerDescGetStarted',
+    'Story': 'headerDescStory',
+    'Concepts - Early': 'headerDescConceptsEarly',
+    'Concepts - Mid': 'headerDescConceptsMid',
+    'Concepts - Late': 'headerDescConceptsLate',
+    'Concepts - End Goal': 'headerDescConceptsEndGoal',
+    'Philosophies': 'headerDescPhilosophies',
+    'Visual': 'headerDescVisual',
+    'Game Options': 'headerDescGameOptions',
+    'Saving / Loading': 'headerDescSavingLoading',
+    'Statistics': 'headerDescStatistics',
+    'Achievements': 'headerDescAchievements',
+    'Events': 'headerDescEvents',
+    'Exit Game': 'headerDescExitGame'
+};
+
+function getLocalizedHeading(heading) {
+    const key = headingToLocalizationKey[heading];
+    if (key) {
+        return localize(key, getLanguage());
+    }
+    return heading;
+}
+
 export function updateContent(heading, tab, type) {
     if (getSuppressUiClickSfx()) {
         setSuppressUiClickSfx(false);
@@ -3194,13 +3359,14 @@ export function updateContent(heading, tab, type) {
     headerContentElement = document.getElementById(`headerContentTab${tabNumber}`);
     optionContentElement = document.getElementById(`optionContentTab${tabNumber}`);
 
-
-    headerContentElement.innerText = heading;
+    // Get localized heading
+    const localizedHeading = getLocalizedHeading(heading);
+    headerContentElement.innerText = localizedHeading;
 
 
     if (heading.includes('⚠️') || heading.includes('🌀')) {
-        heading = heading.replace(/\s*[⚠️🌀]/g, '').trim();
-        headerContentElement.innerText = heading;
+        const cleanHeading = localizedHeading.replace(/\s*[⚠️🌀]/g, '').trim();
+        headerContentElement.innerText = cleanHeading;
     }
 
 
@@ -9199,6 +9365,31 @@ function setupNativeTechTreeZoom(container, stage) {
 }
 
 
+function localizeTabLabels() {
+    const tabs = document.querySelectorAll('.tab');
+    
+    const tabNameToLocalizationKey = {
+        'Resources': 'tabHeaderResources',
+        'Energy': 'tabHeaderEnergy',
+        'Research': 'tabHeaderResearch',
+        'Compounds': 'tabHeaderCompounds',
+        'Interstellar': 'tabHeaderInterstellar',
+        'Space Mining': 'tabHeaderSpaceMining',
+        'Galactic': 'tabHeaderGalactic',
+        'Cosmic Rip': 'tabHeaderCosmicRip',
+        '☰': 'tabHeaderSettings'
+    };
+    
+    tabs.forEach(tab => {
+        const tabName = tab.getAttribute('data-name') ?? '';
+        const localizationKey = tabNameToLocalizationKey[tabName];
+        if (localizationKey) {
+            tab.textContent = localize(localizationKey, getLanguage());
+        }
+    });
+}
+
+
 export function showTabsUponUnlock() {
     const cosmicRipEnabled = typeof window !== 'undefined' && window.__COSMIC_RIP_ENABLED__ === true;
     if (!cosmicRipEnabled) {
@@ -9214,6 +9405,18 @@ export function showTabsUponUnlock() {
 
     const shouldApplyDemoLock = getDemoBuild();
 
+    // Map data-name to localization keys
+    const tabNameToLocalizationKey = {
+        'Resources': 'tabHeaderResources',
+        'Energy': 'tabHeaderEnergy',
+        'Research': 'tabHeaderResearch',
+        'Compounds': 'tabHeaderCompounds',
+        'Interstellar': 'tabHeaderInterstellar',
+        'Space Mining': 'tabHeaderSpaceMining',
+        'Galactic': 'tabHeaderGalactic',
+        'Cosmic Rip': 'tabHeaderCosmicRip',
+        '☰': 'tabHeaderSettings'
+    };
 
     tabs.forEach(tab => {
         const tabTech = tab.getAttribute('data-tab') ?? '';
@@ -9224,7 +9427,14 @@ export function showTabsUponUnlock() {
             if (!getBattleTriggeredByPlayer()) {
                 tab.classList.remove('tab-not-yet');
             }
-            tab.textContent = tabName;
+            
+            // Use localized name if available
+            const localizationKey = tabNameToLocalizationKey[tabName];
+            if (localizationKey) {
+                tab.textContent = localize(localizationKey, getLanguage());
+            } else {
+                tab.textContent = tabName;
+            }
 
 
             if (shouldApplyDemoLock && tab.id === 'tab7') {
@@ -9259,6 +9469,12 @@ export function showTabsUponUnlock() {
             tab.classList.add('tab-not-yet');
             tab.textContent = '???';
             removeAttentionIndicator(tab);
+        } else {
+            // Always-visible tabs (empty data-tab) - localize them too
+            const localizationKey = tabNameToLocalizationKey[tabName];
+            if (localizationKey) {
+                tab.textContent = localize(localizationKey, getLanguage());
+            }
         }
     });
 }
@@ -10834,7 +11050,7 @@ function addOneOffEventListeners() {
                         if (getCurrentOptionPane() === element) {
                             const buyBuildingButtonElement = document.querySelector(`#${element}AutoBuyer${item[1].replace(/^\D+/g, '')}Row .option-row-main .input-container button[data-auto-buyer-tier="${item[1]}`);
                             if (buyBuildingButtonElement) {
-                                buyBuildingButtonElement.innerHTML = `Add ${newRate * getTimerRateRatio()} ${capitaliseString(element)} /s`;
+                                buyBuildingButtonElement.innerHTML = `${localize('textAdd', getLanguage())} ${newRate * getTimerRateRatio()} ${capitaliseString(element)} ${localize('textPerSecond', getLanguage())}`;
                             }
                         }
                     });
@@ -10856,7 +11072,7 @@ function addOneOffEventListeners() {
 
         
                     if (buyBuildingButtonElement) {
-                        buyBuildingButtonElement.innerHTML = `Add ${Math.floor(newRateOfBuilding * getTimerRateRatio())} KW /s`;
+                        buyBuildingButtonElement.innerHTML = `${localize('textAdd', getLanguage())} ${Math.floor(newRateOfBuilding * getTimerRateRatio())} KW ${localize('textPerSecond', getLanguage())}`;
                     }
 
 
@@ -12833,38 +13049,53 @@ function renderBattleExplosions(ctx, now) {
 
     export function resetTabsOnRebirth() {
         const cosmicRipEnabled = typeof window !== 'undefined' && window.__COSMIC_RIP_ENABLED__ === true;
+
+        const tabNameToLocalizationKey = {
+            'Resources': 'tabHeaderResources',
+            'Energy': 'tabHeaderEnergy',
+            'Research': 'tabHeaderResearch',
+            'Compounds': 'tabHeaderCompounds',
+            'Interstellar': 'tabHeaderInterstellar',
+            'Space Mining': 'tabHeaderSpaceMining',
+            'Galactic': 'tabHeaderGalactic',
+            'Cosmic Rip': 'tabHeaderCosmicRip',
+            '☰': 'tabHeaderSettings'
+        };
+        
         const tabData = [
-            { id: "tab1", classes: ["tab", "selected"], dataTab: "", dataName: "Resources", text: "Resources" },
-            { id: "tab2", classes: ["tab", "tab-not-yet"], dataTab: "basicPowerGeneration", dataName: "Energy", text: "???" },
-            { id: "tab3", classes: ["tab"], dataTab: "", dataName: "Research", text: "Research" },
-            { id: "tab4", classes: ["tab", "tab-not-yet"], dataTab: "compounds", dataName: "Compounds", text: "???" },
-            { id: "tab5", classes: ["tab", "tab-not-yet"], dataTab: "stellarCartography", dataName: "Interstellar", text: "???" },
-            { id: "tab6", classes: ["tab", "tab-not-yet"], dataTab: "atmosphericTelescopes", dataName: "Space Mining", text: "???" },
-            { id: "tab7", classes: ["tab", "tab-not-yet"], dataTab: "apAwardedThisRun", dataName: "Galactic", text: "???" },
+            { id: "tab1", classes: ["tab", "selected"], dataTab: "", dataName: "Resources" },
+            { id: "tab2", classes: ["tab", "tab-not-yet"], dataTab: "basicPowerGeneration", dataName: "Energy" },
+            { id: "tab3", classes: ["tab"], dataTab: "", dataName: "Research" },
+            { id: "tab4", classes: ["tab", "tab-not-yet"], dataTab: "compounds", dataName: "Compounds" },
+            { id: "tab5", classes: ["tab", "tab-not-yet"], dataTab: "stellarCartography", dataName: "Interstellar" },
+            { id: "tab6", classes: ["tab", "tab-not-yet"], dataTab: "atmosphericTelescopes", dataName: "Space Mining" },
+            { id: "tab7", classes: ["tab", "tab-not-yet"], dataTab: "apAwardedThisRun", dataName: "Galactic" },
             {
                 id: "tab8",
                 classes: cosmicRipEnabled ? ["tab", "tab-not-yet"] : ["tab"],
                 dataTab: cosmicRipEnabled ? "cosmicRip" : "",
-                dataName: cosmicRipEnabled ? "Cosmic Rip" : "☰",
-                text: cosmicRipEnabled ? "???" : "☰"
+                dataName: cosmicRipEnabled ? "Cosmic Rip" : "☰"
             },
-            { id: "tab9", classes: ["tab"], dataTab: "", dataName: "☰", text: "☰" }
+            { id: "tab9", classes: ["tab"], dataTab: "", dataName: "☰" }
         ];
 
-        
         tabData.forEach(tab => {
             const element = document.getElementById(tab.id);
             if (element) {
                 element.className = tab.classes.join(" ");
                 element.setAttribute("data-tab", tab.dataTab);
                 element.setAttribute("data-name", tab.dataName);
-                element.textContent = tab.text;
+                
+                const localizationKey = tabNameToLocalizationKey[tab.dataName];
+                if (localizationKey) {
+                    element.textContent = localize(localizationKey, getLanguage());
+                } else {
+                    element.textContent = tab.dataName;
+                }
             }
         });
     }
 
-
-    //reset classes on rebirth
     export function resetTab1ClassesRebirth() {
         const collapsibles = document.querySelectorAll('.tab-1 .collapsible');
         collapsibles.forEach(collapsible => {
@@ -12881,14 +13112,12 @@ function renderBattleExplosions(ctx, now) {
             solidsCollapsible.classList.add('invisible');
             solidsCollapsible.classList.remove('open');
 
-
             const solidsHeader = solidsCollapsible.querySelector('.collapsible-header');
             const solidsContent = solidsCollapsible.querySelector('.collapsible-content');
             solidsHeader?.classList.remove('active');
             solidsContent?.classList.remove('open');
         }
 
-    
         const collapsibleHeaders = document.querySelectorAll('.tab-1 .collapsible-header');
         collapsibleHeaders.forEach(header => {
             if (header.closest('#solids')) {
@@ -12897,7 +13126,6 @@ function renderBattleExplosions(ctx, now) {
             header.classList.add('active');
         });
 
-    
         const collapsibleContents = document.querySelectorAll('.tab-1 .collapsible-content');
         collapsibleContents.forEach(content => {
             if (content.closest('#solids')) {
@@ -12905,7 +13133,6 @@ function renderBattleExplosions(ctx, now) {
             }
             content.classList.add('open');
         });
-
 
         if (solidsCollapsible) {
             const solidsHeader = solidsCollapsible.querySelector('.collapsible-header');
@@ -12916,7 +13143,6 @@ function renderBattleExplosions(ctx, now) {
             solidsContent?.classList.remove('open');
         }
 
-    
         const rowSideMenuItems = document.querySelectorAll('.tab-1 .row-side-menu');
         rowSideMenuItems.forEach(row => {
             if (row.classList.contains('invisible')) {
@@ -12926,7 +13152,6 @@ function renderBattleExplosions(ctx, now) {
             }
         });
 
-    
         const invisibleElements = document.querySelectorAll('.tab-1 .row-side-menu');
         invisibleElements.forEach(element => {
             if (element.querySelector('.invisible')) {
@@ -12936,34 +13161,26 @@ function renderBattleExplosions(ctx, now) {
             }
         });
 
-    
         const hydrogenRow = document.getElementById('hydrogenOption').closest('.row-side-menu');
         hydrogenRow.classList.remove('invisible');
 
-    
         const heliumRow = document.getElementById('heliumOption').closest('.row-side-menu');
         heliumRow.classList.add('invisible');
 
-    
         const neonRow = document.getElementById('neonOption').closest('.row-side-menu');
         neonRow.classList.add('invisible');
 
-    
         const oxygenRow = document.getElementById('oxygenOption').closest('.row-side-menu');
         oxygenRow.classList.add('invisible');
 
-    
         const carbonRow = document.getElementById('carbonOption').closest('.row-side-menu');
         carbonRow.classList.add('invisible');
 
-    
         const siliconRow = document.getElementById('siliconOption').closest('.row-side-menu');
         siliconRow.classList.add('invisible');
 
-    
         const sodiumRow = document.getElementById('sodiumOption').closest('.row-side-menu');
         sodiumRow.classList.add('invisible');
-
     
         const ironRow = document.getElementById('ironOption').closest('.row-side-menu');
         ironRow.classList.add('invisible');
@@ -14402,6 +14619,7 @@ debugSetLanguageButton?.addEventListener('click', async () => {
 
     await initLocalization();
     initialiseDescriptions();
+    initialiseStaticButtonLabels();
 
     const currentTab = getCurrentTab()[0];
     const currentPane = getCurrentOptionPane?.() ?? '';

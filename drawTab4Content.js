@@ -183,7 +183,7 @@ export function drawTab4Content(heading, optionContentElement) {
                 labelText: localize('tab4DieselAutoBuyer1RowLabel', getLanguage()),
                 inputElements: [
                     createButton({
-                        text: `Add ${Math.floor(getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier1', 'rate']) * getTimerRateRatio())} Diesel /s`,
+                        text: `${localize('textAdd', getLanguage())} ${Math.floor(getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier1', 'rate']) * getTimerRateRatio())} ${localize('compoundDiesel', getLanguage())} ${localize('textPerSecond', getLanguage())}`,
                         classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check'],
                         onClick: () => {
                             gain(1, 'dieselAB1Quantity', 'autoBuyer', true, 'tier1', 'diesel', 'compounds')
