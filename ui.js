@@ -1799,6 +1799,117 @@ export function initialiseStaticButtonLabels() {
             el.innerText = localize(`compound${compound.charAt(0).toUpperCase() + compound.slice(1)}`, getLanguage());
         }
     });
+
+    // Tab 2 - Energy option labels
+    const tab2OptionIds = [
+        { id: 'energyStorageOption', key: 'headerMainEnergyStorage' },
+        { id: 'powerPlantOption', key: 'headerMainPowerPlant' },
+        { id: 'advancedPowerPlantOption', key: 'headerMainAdvancedPowerPlant' },
+        { id: 'solarPowerPlantOption', key: 'headerMainSolarPowerPlant' }
+    ];
+    tab2OptionIds.forEach(({ id, key }) => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.innerText = localize(key, getLanguage());
+        }
+    });
+
+    // Tab 3 - Research option labels
+    const tab3OptionIds = [
+        { id: 'researchOption', key: 'headerMainResearch' },
+        { id: 'technologyOption', key: 'headerMainTechnology' },
+        { id: 'techTreeOption', key: 'headerMainTechTree' },
+        { id: 'philosophyOption', key: 'headerMainPhilosophy' }
+    ];
+    tab3OptionIds.forEach(({ id, key }) => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.innerText = localize(key, getLanguage());
+        }
+    });
+
+    // Tab 5 - Interstellar option labels
+    const tab5OptionIds = [
+        { id: 'starMapOption', key: 'headerMainStarMap' },
+        { id: 'starDataOption', key: 'headerMainStarData' },
+        { id: 'starShipOption', key: 'headerMainStarShip' },
+        { id: 'fleetHangarOption', key: 'headerMainFleetHangar' },
+        { id: 'coloniseOption', key: 'headerMainColonise' }
+    ];
+    tab5OptionIds.forEach(({ id, key }) => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.innerText = localize(key, getLanguage());
+        }
+    });
+
+    // Tab 6 - Space Mining option labels
+    const tab6OptionIds = [
+        { id: 'spaceTelescopeOption', key: 'headerMainSpaceTelescope' },
+        { id: 'asteroidsOption', key: 'headerMainAsteroids' },
+        { id: 'launchPadOption', key: 'headerMainLaunchPad' },
+        { id: 'miningOption', key: 'headerMainMining' }
+    ];
+    tab6OptionIds.forEach(({ id, key }) => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.innerText = localize(key, getLanguage());
+        }
+    });
+
+    // Tab 7 - Galactic option labels
+    const tab7OptionIds = [
+        { id: 'galacticMarketOption', key: 'headerMainGalacticMarket' },
+        { id: 'galacticCasinoOption', key: 'headerMainGalacticCasino' },
+        { id: 'ascendencyPerksOption', key: 'headerMainAscendencyPerks' },
+        { id: 'megastructuresOption', key: 'headerMainMegastructures' },
+        { id: 'blackHoleOption', key: 'headerMainBlackHole' },
+        { id: 'rebirthOption', key: 'headerMainRebirth' }
+    ];
+    tab7OptionIds.forEach(({ id, key }) => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.innerText = localize(key, getLanguage());
+        }
+    });
+
+    // Tab 8 - Cosmic Rip option labels
+    const tab8OptionIds = [
+        { id: 'situationOption', key: 'headerMainSituation' },
+        { id: 'nearSpaceScannerArrayOption', key: 'headerMainNearSpaceScannerArray' },
+        { id: 'cosmicRipOption', key: 'headerMainCosmicRipTab' }
+    ];
+    tab8OptionIds.forEach(({ id, key }) => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.innerText = localize(key, getLanguage());
+        }
+    });
+
+    // Tab 9 - Settings option labels
+    const tab9OptionIds = [
+        { id: 'contactOption', key: 'headerMainContact' },
+        { id: 'getStartedOption', key: 'headerMainGetStarted' },
+        { id: 'storyOption', key: 'headerMainStory' },
+        { id: 'conceptsEarlyOption', key: 'headerMainConceptsEarly' },
+        { id: 'conceptsMidOption', key: 'headerMainConceptsMid' },
+        { id: 'conceptsLateOption', key: 'headerMainConceptsLate' },
+        { id: 'conceptsEndGoalOption', key: 'headerMainConceptsEndGoal' },
+        { id: 'philosophiesOption', key: 'headerMainPhilosophies' },
+        { id: 'visualOption', key: 'headerMainVisual' },
+        { id: 'gameOptionsOption', key: 'headerMainGameOptions' },
+        { id: 'savingLoadingOption', key: 'headerMainSavingLoading' },
+        { id: 'statisticsOption', key: 'headerMainStatistics' },
+        { id: 'achievementsOption', key: 'headerMainAchievements' },
+        { id: 'eventsOption', key: 'headerMainEvents' },
+        { id: 'exitGameOption', key: 'headerMainExitGame' }
+    ];
+    tab9OptionIds.forEach(({ id, key }) => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.innerText = localize(key, getLanguage());
+        }
+    });
 }
 
 
@@ -3276,60 +3387,60 @@ const headingToLocalizationKey = {
     'Silicon': 'resourceSilicon',
     'Iron': 'resourceIron',
     // Tab 2 - Energy
-    'Energy Storage': 'headerDescEnergyStorage',
-    'Power Plant': 'headerDescPowerPlant',
-    'Advanced Power Plant': 'headerDescAdvancedPowerPlant',
-    'Solar Power Plant': 'headerDescSolarPowerPlant',
+    'Energy Storage': 'headerMainEnergyStorage',
+    'Power Plant': 'headerMainPowerPlant',
+    'Advanced Power Plant': 'headerMainAdvancedPowerPlant',
+    'Solar Power Plant': 'headerMainSolarPowerPlant',
     // Tab 3 - Research
-    'Research': 'tabHeaderResearch',
-    'Technology': 'headerDescTechnology',
-    'Tech Tree': 'headerDescTechTree',
-    'Philosophy': 'headerDescPhilosophy',
+    'Research': 'headerMainResearch',
+    'Technology': 'headerMainTechnology',
+    'Tech Tree': 'headerMainTechTree',
+    'Philosophy': 'headerMainPhilosophy',
     // Tab 4 - Compounds
-    'Diesel': 'compoundDiesel',
-    'Glass': 'compoundGlass',
-    'Steel': 'compoundSteel',
-    'Concrete': 'compoundConcrete',
-    'Water': 'compoundWater',
-    'Titanium': 'compoundTitanium',
+    'Diesel': 'headerMainDiesel',
+    'Glass': 'headerMainGlass',
+    'Steel': 'headerMainSteel',
+    'Concrete': 'headerMainConcrete',
+    'Water': 'headerMainWater',
+    'Titanium': 'headerMainTitanium',
     // Tab 5 - Interstellar
-    'Star Map': 'headerDescStarMap',
-    'Star Data': 'headerDescStarData',
-    'Star Ship': 'headerDescStarShip',
-    'Fleet Hangar': 'headerDescFleetHangar',
-    'Colonise': 'headerDescColonise',
+    'Star Map': 'headerMainStarMap',
+    'Star Data': 'headerMainStarData',
+    'Star Ship': 'headerMainStarShip',
+    'Fleet Hangar': 'headerMainFleetHangar',
+    'Colonise': 'headerMainColonise',
     // Tab 6 - Space Mining
-    'Space Telescope': 'headerDescSpaceTelescope',
-    'Asteroids': 'headerDescAsteroids',
-    'Launch Pad': 'headerDescLaunchPad',
-    'Mining': 'headerDescMining',
+    'Space Telescope': 'headerMainSpaceTelescope',
+    'Asteroids': 'headerMainAsteroids',
+    'Launch Pad': 'headerMainLaunchPad',
+    'Mining': 'headerMainMining',
     // Tab 7 - Galactic
-    'Galactic Market': 'headerDescGalacticMarket',
-    'Galactic Casino': 'headerDescGalacticCasino',
-    'Ascendency Perks': 'headerDescAscendencyPerks',
-    'Megastructures': 'headerDescMegastructures',
-    'Black Hole': 'headerDescBlackHole',
-    'Rebirth': 'headerDescRebirth',
+    'Galactic Market': 'headerMainGalacticMarket',
+    'Galactic Casino': 'headerMainGalacticCasino',
+    'Ascendency Perks': 'headerMainAscendencyPerks',
+    'Megastructures': 'headerMainMegastructures',
+    'Black Hole': 'headerMainBlackHole',
+    'Rebirth': 'headerMainRebirth',
     // Tab 8 - Cosmic Rip
-    'Situation': 'headerDescSituation',
-    'Near Space Scanner Array': 'headerDescNearSpaceScannerArray',
-    'Cosmic Rip': 'headerDescCosmicRipTab',
+    'Situation': 'headerMainSituation',
+    'Near Space Scanner Array': 'headerMainNearSpaceScannerArray',
+    'Cosmic Rip': 'headerMainCosmicRipTab',
     // Tab 9 - Settings
-    'Contact': 'headerDescContact',
-    'Get Started': 'headerDescGetStarted',
-    'Story': 'headerDescStory',
-    'Concepts - Early': 'headerDescConceptsEarly',
-    'Concepts - Mid': 'headerDescConceptsMid',
-    'Concepts - Late': 'headerDescConceptsLate',
-    'Concepts - End Goal': 'headerDescConceptsEndGoal',
-    'Philosophies': 'headerDescPhilosophies',
-    'Visual': 'headerDescVisual',
-    'Game Options': 'headerDescGameOptions',
-    'Saving / Loading': 'headerDescSavingLoading',
-    'Statistics': 'headerDescStatistics',
-    'Achievements': 'headerDescAchievements',
-    'Events': 'headerDescEvents',
-    'Exit Game': 'headerDescExitGame'
+    'Contact': 'headerMainContact',
+    'Get Started': 'headerMainGetStarted',
+    'Story': 'headerMainStory',
+    'Concepts - Early': 'headerMainConceptsEarly',
+    'Concepts - Mid': 'headerMainConceptsMid',
+    'Concepts - Late': 'headerMainConceptsLate',
+    'Concepts - End Goal': 'headerMainConceptsEndGoal',
+    'Philosophies': 'headerMainPhilosophies',
+    'Visual': 'headerMainVisual',
+    'Game Options': 'headerMainGameOptions',
+    'Saving / Loading': 'headerMainSavingLoading',
+    'Statistics': 'headerMainStatistics',
+    'Achievements': 'headerMainAchievements',
+    'Events': 'headerMainEvents',
+    'Exit Game': 'headerMainExitGame'
 };
 
 function getLocalizedHeading(heading) {
@@ -9454,7 +9565,7 @@ export function showTabsUponUnlock() {
                 optionElements.forEach(el => {
                     const grandparent = el.parentElement?.parentElement;
                     const isVisible = !grandparent?.classList.contains('invisible');
-                    const normalizedElName = normalizeTabName(el.textContent);
+                    const normalizedElName = optionPaneKeyFromOptionElement(el);
                     const isFirstAccess = !firstAccessArray.includes(normalizedElName);
 
             
@@ -9485,6 +9596,46 @@ function normalizeTabName(tabName) {
         .replace(/\s*[⚠️🌀]/g, '')
         .toLowerCase()
         .trimEnd();
+}
+
+
+function optionPaneKeyFromOptionElement(optionEl) {
+    const id = String(optionEl?.id ?? '');
+    if (!id.endsWith('Option')) {
+        return '';
+    }
+
+
+    // Some sidebar option ids are legacy shorthand and don't match the option pane key.
+    // Map them explicitly so attention indicators don't break under localization.
+    const legacyIdToOptionPaneKey = {
+        energyOption: 'energy storage',
+        ascendencyOption: 'ascendency perks',
+    };
+    if (legacyIdToOptionPaneKey[id]) {
+        return legacyIdToOptionPaneKey[id];
+    }
+
+
+    const powerPlantMatch = id.match(/^powerPlant(\d+)Option$/);
+    if (powerPlantMatch) {
+        const plantNo = Number(powerPlantMatch[1]);
+        if (plantNo === 1) return 'power plant';
+        if (plantNo === 2) return 'solar power plant';
+        if (plantNo === 3) return 'advanced power plant';
+    }
+
+
+    const base = id.slice(0, -'Option'.length);
+    if (!base) {
+        return '';
+    }
+
+    return base
+        .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+        .replace(/\s+/g, ' ')
+        .toLowerCase()
+        .trim();
 }
 
 

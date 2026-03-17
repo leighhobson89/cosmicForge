@@ -4584,7 +4584,7 @@ function checkAndRevealNewBuildings(type) {
             }
             break;
         case 'philosophy':
-            element = [...document.querySelectorAll('p[class*="tab3"]')].find(el => el.innerHTML.includes('Philosophy'));
+            element = [...document.querySelectorAll('p[class*="tab3"]')].find(el => el.innerHTML.includes(localize('headerMainPhilosophy', getLanguage())));
             if (getStatRun() > 1 && getPlayerPhilosophy() !== null) {
                 element?.parentElement?.parentElement?.classList.remove('invisible');
             } else {

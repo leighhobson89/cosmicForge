@@ -1,4 +1,4 @@
-import { getCompoundCreateDropdownRecipeText, getLastSellResourceCompoundDropdownOption, setLastSellResourceCompoundDropdownOption, getImageUrls, getTimerRateRatio, getCompoundSalePreview, getCompoundCreatePreview, setCreateCompoundPreview, setAchievementFlagArray, getCurrencySymbol, getLanguage } from './constantsAndGlobalVars.js';
+import { getCompoundCreateDropdownRecipeText, getLastSellResourceCompoundDropdownOption, setLastSellResourceCompoundDropdownOption, getImageUrls, getTimerRateRatio, getCompoundSalePreview, getCompoundCreatePreview, setCreateCompoundPreview, setAchievementFlagArray, getCurrencySymbol, getLanguage, getCurrentOptionPane } from './constantsAndGlobalVars.js';
 
 import { increaseResourceStorage, createCompound, sellCompound, gain, addToResourceAllTimeStat } from './game.js';
 
@@ -7,6 +7,7 @@ import { removeTabAttentionIfNoIndicators, createTextElement, createToggleSwitch
 import { localize } from './localization.js';
 
 export function drawTab4Content(heading, optionContentElement) {
+
     const handleCompoundCreate = (compound) => {
         const beforeQuantity = getResourceDataObject('compounds', [compound, 'quantity']) || 0;
         createCompound(compound);
@@ -18,7 +19,7 @@ export function drawTab4Content(heading, optionContentElement) {
         }
     };
 
-    const optionElement = document.getElementById(heading.toLowerCase().replace(/\s(.)/g, (match, group1) => group1.toUpperCase()).replace(/\s+/g, '') + 'Option');
+    const optionElement = document.getElementById(getCurrentOptionPane().toLowerCase().replace(/\s(.)/g, (match, group1) => group1.toUpperCase()).replace(/\s+/g, '') + 'Option');
         if (optionElement) {
             const warningIcon = optionElement.querySelector('span.attention-indicator');
             if (warningIcon && warningIcon.innerHTML.includes('⚠️')) {

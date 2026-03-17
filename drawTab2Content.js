@@ -1,4 +1,4 @@
-import { getImageUrls, getTimerRateRatio, getCurrencySymbol, getBuildingTypeOnOff, setPowerOnOff, getCurrentStarSystemWeatherEfficiency, getInfinitePower, getDemoBuild } from './constantsAndGlobalVars.js';
+import { getImageUrls, getTimerRateRatio, getCurrencySymbol, getBuildingTypeOnOff, setPowerOnOff, getCurrentStarSystemWeatherEfficiency, getInfinitePower, getDemoBuild, getCurrentOptionPane } from './constantsAndGlobalVars.js';
 import { sellBuilding, toggleBuildingTypeOnOff, addOrRemoveUsedPerSecForFuelRate, setEnergyCapacity, gain, startUpdateTimersAndRates, addBuildingPotentialRate, addToResourceAllTimeStat, getOTypePowerPlantBoostMultiplierForCurrentSystem } from './game.js';
 import { setResourceDataObject, getResourceDataObject } from './resourceDataObject.js';
 import { removeTabAttentionIfNoIndicators, switchBatteryStatBarWhenBatteryBought, createTextElement, createOptionRow, createButton } from './ui.js';
@@ -6,7 +6,7 @@ import { capitaliseString } from './utilityFunctions.js';
 import { sfxPlayer, playClickSfx } from './audioManager.js';
 
 export function drawTab2Content(heading, optionContentElement) {
-    const optionElement = document.getElementById(heading.toLowerCase().replace(/\s(.)/g, (match, group1) => group1.toUpperCase()).replace(/\s+/g, '') + 'Option');
+    const optionElement = document.getElementById(getCurrentOptionPane().toLowerCase().replace(/\s(.)/g, (match, group1) => group1.toUpperCase()).replace(/\s+/g, '') + 'Option');
     if (optionElement) {
         const warningIcon = optionElement.querySelector('span.attention-indicator');
         if (warningIcon && warningIcon.innerHTML.includes('⚠️')) {

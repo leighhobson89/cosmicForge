@@ -1,4 +1,4 @@
-import { getCurrentlyPillagingVoid, getTimeLeftUntilPillageVoidTimerFinishes, getTimeLeftUntilStarInvestigationTimerFinishes, getCurrentlyInvestigatingStar, getRocketUserName, setRocketUserName, setRocketDirection, getRocketDirection, getDestinationAsteroid, deferredActions, getSortAsteroidMethod, getAsteroidArray, setCheckRocketFuellingStatus, getCurrencySymbol, setRocketsFuellerStartedArray, getLaunchedRockets, getRocketsFuellerStartedArray, getCurrentlySearchingAsteroid, getTimeLeftUntilAsteroidScannerTimerFinishes, setDestinationAsteroid, getMiningObject, setAsteroidArray, getCurrentStarSystemWeatherEfficiency, getPlayerPhilosophy, getPhilosophyAbilityActive, getStatRun, getDemoBuild, setCurrentDestinationDropdownText } from './constantsAndGlobalVars.js';
+import { getCurrentlyPillagingVoid, getTimeLeftUntilPillageVoidTimerFinishes, getTimeLeftUntilStarInvestigationTimerFinishes, getCurrentlyInvestigatingStar, getRocketUserName, setRocketUserName, setRocketDirection, getRocketDirection, getDestinationAsteroid, deferredActions, getSortAsteroidMethod, getAsteroidArray, setCheckRocketFuellingStatus, getCurrencySymbol, setRocketsFuellerStartedArray, getLaunchedRockets, getRocketsFuellerStartedArray, getCurrentlySearchingAsteroid, getTimeLeftUntilAsteroidScannerTimerFinishes, setDestinationAsteroid, getMiningObject, setAsteroidArray, getCurrentStarSystemWeatherEfficiency, getPlayerPhilosophy, getPhilosophyAbilityActive, getStatRun, getDemoBuild, setCurrentDestinationDropdownText, getCurrentOptionPane } from './constantsAndGlobalVars.js';
 
 
 
@@ -10,13 +10,11 @@ import { timerManagerDelta } from './timerManagerDelta.js';
 
 
 
-import { removeTabAttentionIfNoIndicators, createSvgElement, createDropdown, createToggleSwitch, handleSortAsteroidClick, sortAsteroidTable, switchFuelGaugeWhenFuellerBought, createTextElement, createOptionRow, createButton, setupInfoTooltips,showNotification, renameRocket } from './ui.js';
+import { removeTabAttentionIfNoIndicators, createSvgElement, createDropdown, createToggleSwitch, handleSortAsteroidClick, sortAsteroidTable, switchFuelGaugeWhenFuellerBought, createTextElement, createOptionRow, createButton, setupInfoTooltips, showNotification, renameRocket } from './ui.js';
 
 import { capitaliseString } from './utilityFunctions.js';
 
-import { sfxPlayer } from './audioManager.js'
-
-
+import { sfxPlayer } from './audioManager.js';
 
 import { trackAnalyticsEvent } from './analytics.js';
 
@@ -24,7 +22,7 @@ import { trackAnalyticsEvent } from './analytics.js';
 
 export function drawTab6Content(heading, optionContentElement) {
 
-    const optionElement = document.getElementById(heading.toLowerCase().replace(/\s(.)/g, (match, group1) => group1.toUpperCase()).replace(/\s+/g, '') + 'Option');
+    const optionElement = document.getElementById(getCurrentOptionPane().toLowerCase().replace(/\s(.)/g, (match, group1) => group1.toUpperCase()).replace(/\s+/g, '') + 'Option');
 
     if (optionElement) {
 

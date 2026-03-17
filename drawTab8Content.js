@@ -57,6 +57,9 @@ import {
     getCosmicRipNearSpaceScannerArrayResizeAttached,
     getCosmicRipTechTimeLeftUntilResearchFinishes,
     getCosmicRipTechResearchDurations,
+    getCosmicRipRipFoundUiSequenceStarted,
+    setCosmicRipRipFoundUiSequenceStarted,
+    getCurrentOptionPane,
 } from './constantsAndGlobalVars.js';
 
 import {
@@ -71,6 +74,13 @@ import { getResourceDataObject } from './resourceDataObject.js';
 import { gain } from './game.js';
 
 export function drawTab8Content(heading, optionContentElement) {
+    const optionElement = document.getElementById(getCurrentOptionPane().toLowerCase().replace(/\s(.)/g, (match, group1) => group1.toUpperCase()).replace(/\s+/g, '') + 'Option');
+    if (optionElement) {
+        const warningIcon = optionElement.querySelector('span.attention-indicator');
+        if (warningIcon && warningIcon.innerHTML.includes('⚠️')) {
+            warningIcon.remove();
+        }
+    }
     if (heading === 'Situation') {
         const headerRow = document.getElementById('headerContentTab8');
         if (headerRow) {

@@ -41,6 +41,7 @@ import {
     getBlackHoleAlwaysOn,
     setGalacticCasinoPurchaseItem,
     getCurrentTheme,
+    getCurrentOptionPane,
     getPlayerPhilosophy,
     getUnlockedResourcesArray,
     getUnlockedCompoundsArray,
@@ -85,8 +86,7 @@ import { modalRebirthText, modalRebirthHeader, getStarNames, getStarTypeByName, 
 import { timerManagerDelta } from './timerManagerDelta.js';
 
 export function drawTab7Content(heading, optionContentElement) {
-    const safeHeading = typeof heading === 'string' ? heading : '';
-    const optionElement = document.getElementById(safeHeading.toLowerCase().replace(/\s(.)/g, (match, group1) => group1.toUpperCase()).replace(/\s+/g, '') + 'Option');
+    const optionElement = document.getElementById(getCurrentOptionPane().toLowerCase().replace(/\s(.)/g, (match, group1) => group1.toUpperCase()).replace(/\s+/g, '') + 'Option');
     if (optionElement) {
         const warningIcon = optionElement.querySelector('span.attention-indicator');
         if (warningIcon && warningIcon.innerHTML.includes('⚠️')) {
