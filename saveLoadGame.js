@@ -19,7 +19,7 @@ import {
     getDemoBuild,
 } from './constantsAndGlobalVars.js';
 
-import { setAchievementIconImageUrls } from './resourceDataObject.js';
+import { setAchievementIconImageUrls, getResourceDataObject } from './resourceDataObject.js';
 
 import { showNotification } from './ui.js';
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
@@ -187,7 +187,8 @@ export async function saveGameToCloud(gameData, type) {
                     'region': getUserPlatform(),
                     'hostSource': getHostSource(),
                     'feedback': getFeedbackGiven(),
-                    'feedback_content': getFeedbackContent()
+                    'feedback_content': getFeedbackContent(),
+                    'saveVersion': getResourceDataObject('version')
                 })
                 .eq('pioneer_name', userId);
 
@@ -208,7 +209,8 @@ export async function saveGameToCloud(gameData, type) {
                     region: getUserPlatform(),
                     hostSource: getHostSource(),
                     feedback: getFeedbackGiven(),
-                    feedback_content: getFeedbackContent()
+                    feedback_content: getFeedbackContent(),
+                    saveVersion: getResourceDataObject('version')
                 }]);
 
             if (insertError) {
