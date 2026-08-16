@@ -59,16 +59,17 @@
     "build:linux:full": "node tools/build-stamp.mjs linux full",
     "build:linux:demo": "node tools/build-stamp.mjs linux demo",
     "build:all": "node tools/build-all.mjs",
-    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js",
-    "test:smoke": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js tests",
-    "test:playwright": "playwright test",
-    "test:allure": "npm run test && npm run test:playwright && allure generate allure-results --clean -o allure-report",
-    "test:autobuyer": "npm test -- tests/autobuyer.test.js"
+    "test": "node tests/run-e2e.mjs",
+    "test:e2e": "node tests/run-e2e.mjs",
+    "test:e2e:list": "node tests/run-e2e.mjs --list",
+    "test:e2e:report": "node -e \"import('node:child_process').then(c=>c.exec(process.platform==='win32'?'start test-reports\\\\e2e\\\\index.html':'open test-reports/e2e/index.html'))\"",
+    "test:playwright": "playwright test"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.0",
     "@types/bun": "latest",
     "@types/electron": "latest",
+    "@types/jest": "^29.5.14",
     "allure-commandline": "^2.36.0",
     "allure-playwright": "^3.4.5",
     "debug": "^4.3.4",

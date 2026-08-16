@@ -1,0 +1,823 @@
+{
+  "$comment": "Source of truth for the Cosmic Forge E2E test taxonomy. Edit this file, then run `node tests/docs/generate-report.cjs` to regenerate the reports and folder structure. status: red = no coverage, amber = partial/smoke only, green = comprehensive.",
+  "statusLegend": {
+    "red": "No automated coverage. A regression here ships unnoticed.",
+    "amber": "Partial coverage — a smoke test proves the path exists, but branches, failure modes and edge cases are unverified.",
+    "green": "Comprehensive coverage — happy path, branches, boundaries and failure modes all asserted."
+  },
+  "groups": [
+    {
+      "id": "foundation",
+      "title": "Foundation",
+      "blurb": "Boot, persistence and the machinery every other area depends on. A failure here is total, not partial."
+    },
+    {
+      "id": "economy",
+      "title": "Core Economy",
+      "blurb": "The minute-to-minute loop: extract, craft, power, research. Where players spend most of their time."
+    },
+    {
+      "id": "space",
+      "title": "Space Operations",
+      "blurb": "Mid-game expansion off-planet — asteroids, rockets, antimatter and the telescope."
+    },
+    {
+      "id": "interstellar",
+      "title": "Interstellar",
+      "blurb": "Travel, conquest and settlement. The most stateful and branch-heavy part of the game."
+    },
+    {
+      "id": "meta",
+      "title": "Meta Progression",
+      "blurb": "Cross-run systems. Bugs here destroy player progress permanently, which makes them the highest-consequence area in the game."
+    },
+    {
+      "id": "endgame",
+      "title": "Endgame",
+      "blurb": "Late systems reached by few players but heavily interlinked with everything before them."
+    },
+    {
+      "id": "simulation",
+      "title": "Simulation & Ambience",
+      "blurb": "Background systems that modify the economy or the presentation without direct player input."
+    },
+    {
+      "id": "presentation",
+      "title": "Presentation & Shell",
+      "blurb": "Navigation, tutorial, formatting and build variants. Highly visible, cheap to test, currently untested."
+    }
+  ],
+  "areas": [
+    {
+      "id": "app-boot",
+      "title": "Application Boot",
+      "group": "foundation",
+      "status": "green",
+      "risk": "high",
+      "legacy": [
+        "launch-app.test.js"
+      ],
+      "summary": "The game reaches a playable state from a cold start, in both browser and Electron shells.",
+      "tests": [
+        "Cold boot reaches the start modal with no uncaught console errors",
+        "All five CDN dependencies resolve, and the game still boots when they do not (currently it will not — assert the failure explicitly so the vendoring fix is provable)",
+        "buildFlags are honoured: demo vs full, cosmic rip on/off, debugger gated correctly",
+        "gameLoop starts and continues running across at least several seconds of frames",
+        "Module-level top-level await in ui.js completes before first paint",
+        "No raw localization keys visible anywhere on the first screen"
+      ],
+      "specCount": 11
+    },
+    {
+      "id": "save-load-local",
+      "title": "Local Save & Load",
+      "group": "foundation",
+      "status": "red",
+      "risk": "high",
+      "legacy": [],
+      "summary": "Export/import of save strings, autosave scheduling, and round-trip fidelity of every persisted field.",
+      "tests": [
+        "Export produces a string that imports back to an identical game state (full round-trip deep-equal)",
+        "Autosave fires on the configured frequency and respects the autosave toggle",
+        "Autosave is suppressed during battle and during time warp (unless black hole always-on)",
+        "Import rejects malformed, truncated and empty strings without corrupting live state",
+        "Import from file and paste-from-clipboard paths both work",
+        "Save on entering the save/load pane happens exactly once per visit",
+        "Demo build does not autosave"
+      ]
+    },
+    {
+      "id": "save-load-cloud",
+      "title": "Cloud Save & Load",
+      "group": "foundation",
+      "status": "amber",
+      "risk": "high",
+      "legacy": [
+        "autobuyer.test.js",
+        "earlyLoop.test.js",
+        "energyMid.test.js",
+        "researchTech.test.js",
+        "spaceAntimatter.test.js"
+      ],
+      "summary": "Supabase-backed saves keyed on pioneer name. Legacy tests use this as a fixture mechanism but never test it as a feature.",
+      "tests": [
+        "Save to cloud then load in a fresh session restores identical state",
+        "Pioneer name collision is handled predictably",
+        "Destroying a cloud save moves it to the graveyard row and frees the name for reuse",
+        "Network failure during save surfaces an error and does not lose the local state",
+        "Load of a nonexistent pioneer name gives a clear message rather than a silent failure",
+        "Region, hostSource and feedback columns are populated correctly"
+      ]
+    },
+    {
+      "id": "save-migration",
+      "title": "Save Migration",
+      "group": "foundation",
+      "status": "red",
+      "risk": "high",
+      "legacy": [],
+      "summary": "The patches.js version ladder that upgrades old saves. The best-engineered code in the project and entirely untested.",
+      "tests": [
+        "A save at each historical version migrates cleanly to current",
+        "Migration is idempotent — running it twice changes nothing the second time",
+        "Version below minimum is clamped, version above current is left alone",
+        "The blackHoleNerfPatched flag prevents double-application of the power rescale",
+        "Autobuyer display-name to localization-key migration converts every old name (this one guards the entire localization release for returning players)",
+        "A save with missing or malformed sections migrates without throwing"
+      ]
+    },
+    {
+      "id": "localization",
+      "title": "Localization",
+      "group": "foundation",
+      "status": "red",
+      "risk": "high",
+      "legacy": [],
+      "summary": "Language resolution, switching, persistence and full-catalogue integrity across five languages.",
+      "tests": [
+        "Boot resolves language in the correct order: explicit > stored > navigator > English",
+        "Chosen language persists across a full restart",
+        "Switching language redraws every tab, not only the active one",
+        "No raw localization key (camelCase identifier) is ever visible on screen, in any language, on any tab",
+        "validateLocalization.cjs passes — run it as an assertion, not just a manual script",
+        "Dynamically constructed keys resolve: resource*, compound*, autoBuyerName*",
+        "German playthrough produces no clipped or overflowing panels",
+        "An unsupported or corrupt stored language falls back without breaking boot"
+      ]
+    },
+    {
+      "id": "settings",
+      "title": "Settings & Preferences",
+      "group": "foundation",
+      "status": "red",
+      "risk": "medium",
+      "legacy": [],
+      "summary": "Themes, audio toggles, autosave frequency, pointer style, notation preference and their persistence.",
+      "tests": [
+        "Every theme applies and persists across reload",
+        "Audio toggles mute/unmute background music and SFX independently",
+        "Autosave frequency change takes effect on the next cycle",
+        "Custom pointer setting applies",
+        "Collapsible panel open/closed states persist",
+        "Settings survive a save/load round trip"
+      ]
+    },
+    {
+      "id": "resources",
+      "title": "Resources",
+      "group": "economy",
+      "status": "amber",
+      "risk": "high",
+      "legacy": [
+        "earlyLoop.test.js"
+      ],
+      "summary": "The eight base resources: manual extraction, tiered buildings, storage caps and selling.",
+      "tests": [
+        "Each of the eight resources extracts manually and accrues correctly",
+        "Each of four building tiers increases rate by the documented amount",
+        "Storage cap is enforced — quantity never exceeds capacity",
+        "Sell and sell-all produce the correct cash at the current price",
+        "Price scaling on repeat purchase matches the cost multiplier",
+        "Resources reveal in the UI only once their unlock condition is met",
+        "Rate displays match actual accrual over a sampled interval"
+      ]
+    },
+    {
+      "id": "compounds",
+      "title": "Compounds & Crafting",
+      "group": "economy",
+      "status": "green",
+      "risk": "high",
+      "legacy": [],
+      "summary": "The six compounds, their ingredient recipes, crafting rates and sale values.",
+      "tests": [
+        "Each compound consumes the correct ingredients in the correct ratio",
+        "Crafting halts when an ingredient is exhausted and resumes when resupplied",
+        "Create previews match what is actually produced",
+        "Sale price previews match realised cash",
+        "Compound storage caps enforced",
+        "Reverse name lookup resolves correctly in every language (guards the hot-path lookup)"
+      ],
+      "specCount": 11
+    },
+    {
+      "id": "autobuyers",
+      "title": "Auto Buyers",
+      "group": "economy",
+      "status": "green",
+      "risk": "high",
+      "legacy": [
+        "autobuyer.test.js"
+      ],
+      "summary": "Automation for all resources and compounds across four tiers, with per-buyer toggles.",
+      "tests": [
+        "Every resource and compound autobuyer can be purchased at every tier",
+        "Toggling a buyer off halts its contribution immediately",
+        "Combined rate equals the sum of active buyers within tolerance",
+        "Energy consumption scales with active buyer count",
+        "Buyers stop when input resources or power are unavailable",
+        "Autobuyer names display localized in all five languages",
+        "Purchased quantities and toggle states survive save/load"
+      ],
+      "specCount": 10
+    },
+    {
+      "id": "energy",
+      "title": "Energy & Power Grid",
+      "group": "economy",
+      "status": "amber",
+      "risk": "high",
+      "legacy": [
+        "energyMid.test.js"
+      ],
+      "summary": "Power plants, fuel consumption, storage, grid capacity and the consequences of a deficit.",
+      "tests": [
+        "Each power plant type generates its rated output",
+        "Fuel is consumed at the documented rate and generation stops when fuel runs out",
+        "Battery storage charges and discharges correctly",
+        "Consumption exceeding generation triggers the deficit behaviour (not a silent stall)",
+        "Power All button correctly toggles the whole grid",
+        "Per-building on/off toggles are independent and persist",
+        "Solar output responds to star type"
+      ]
+    },
+    {
+      "id": "research",
+      "title": "Research",
+      "group": "economy",
+      "status": "amber",
+      "risk": "high",
+      "legacy": [
+        "researchTech.test.js"
+      ],
+      "summary": "Research point generation, research buildings and the research autobuyer.",
+      "tests": [
+        "Research accrues at the displayed rate",
+        "Research buildings increase the rate as documented",
+        "Research autobuyer appears at the right gate and purchases correctly",
+        "Research is spent correctly on tech purchase and cannot go negative",
+        "Rate responds to power availability"
+      ]
+    },
+    {
+      "id": "technology",
+      "title": "Tech Tree",
+      "group": "economy",
+      "status": "amber",
+      "risk": "high",
+      "legacy": [
+        "researchTech.test.js"
+      ],
+      "summary": "Tech prerequisites, unlock effects, repeatable techs and the tree's deferred rendering.",
+      "tests": [
+        "Every tech unlocks only when its prerequisites are met",
+        "Each tech applies its stated effect on purchase",
+        "Repeatable techs scale cost and effect correctly across many purchases",
+        "Tech unlock notifications fire once and are localized",
+        "The 150-frame deferred tree re-render completes and produces correct ordering",
+        "Unlocked tech state survives save/load and is correctly restored on rebirth"
+      ]
+    },
+    {
+      "id": "space-mining",
+      "title": "Space Mining & Asteroids",
+      "group": "space",
+      "status": "red",
+      "risk": "medium",
+      "legacy": [],
+      "summary": "Asteroid discovery, mining rockets, extraction rates and star-type bonuses.",
+      "tests": [
+        "Asteroid search finds asteroids and populates their composition",
+        "Mining rockets can be assigned, launched and recalled",
+        "Extraction rate matches the displayed value, including the Type F star 50% bonus",
+        "Asteroid depletion ends mining and frees the rocket",
+        "Multiple concurrent mining operations do not interfere",
+        "Mining state survives save/load mid-operation"
+      ]
+    },
+    {
+      "id": "rockets",
+      "title": "Rockets & Launch Pad",
+      "group": "space",
+      "status": "red",
+      "risk": "medium",
+      "legacy": [],
+      "summary": "Rocket construction, fuelling, naming and launch lifecycle.",
+      "tests": [
+        "Rocket build consumes correct materials and completes on schedule",
+        "Fuelling consumes the right fuel type and rate",
+        "Rocket renaming persists and displays everywhere",
+        "Launch requires sufficient fuel and blocks otherwise",
+        "In-flight rockets resume correctly after save/load",
+        "Casino rocket-warp prize correctly fast-forwards a rocket"
+      ]
+    },
+    {
+      "id": "antimatter",
+      "title": "Antimatter",
+      "group": "space",
+      "status": "green",
+      "risk": "medium",
+      "legacy": [
+        "spaceAntimatter.test.js"
+      ],
+      "summary": "Antimatter unlock gate, generation via the delta timer, and the antimatter diagram.",
+      "tests": [
+        "Antimatter unlocks at the correct gate and the mining option becomes visible",
+        "Generation accumulates via the delta accumulator without drift over a long window",
+        "The diagram updates in step with quantity",
+        "Time warp multiplies antimatter accrual correctly",
+        "Accumulator leftover is preserved across save/load (no lost or duplicated ticks)"
+      ],
+      "specCount": 12
+    },
+    {
+      "id": "space-telescope",
+      "title": "Space Telescope",
+      "group": "space",
+      "status": "red",
+      "risk": "medium",
+      "legacy": [],
+      "summary": "The three telescope actions — star study, asteroid search, void pillage — and their auto-repeat.",
+      "tests": [
+        "Each of the three actions starts, runs its timer and delivers its reward",
+        "Actions are blocked when power is insufficient",
+        "Auto-telescope repeats the selected action indefinitely",
+        "Voidborn philosophy improves study speed and yield as documented",
+        "Casino prizes that instantly finish a telescope action work for all three",
+        "Timer state survives save/load mid-action"
+      ]
+    },
+    {
+      "id": "star-map",
+      "title": "Star Map & Star Data",
+      "group": "interstellar",
+      "status": "red",
+      "risk": "medium",
+      "legacy": [],
+      "summary": "Galaxy map rendering, star selection, study results and the star data panel.",
+      "tests": [
+        "Map renders all stars with correct types and positions",
+        "Selecting a star populates the data panel",
+        "Unstudied stars show unknown values; studied stars reveal them progressively",
+        "Stellar Scanner presence changes what can be determined",
+        "Destination selection gates on study completeness"
+      ]
+    },
+    {
+      "id": "star-types",
+      "title": "Star Type Bonuses",
+      "group": "interstellar",
+      "status": "red",
+      "risk": "medium",
+      "legacy": [],
+      "summary": "Per-star-type passive bonuses — the most recently changed area of the game and entirely uncovered.",
+      "tests": [
+        "Type B grants the resource autobuyer bonus at the documented magnitude",
+        "Type F grants the 50% asteroid extraction bonus",
+        "Type O grants its technology and is correctly gated",
+        "Each remaining star type applies its own bonus and no others",
+        "Bonuses apply on arrival and are removed when leaving the system",
+        "Bonuses stack correctly with philosophy and ascendency effects"
+      ]
+    },
+    {
+      "id": "starship",
+      "title": "Starship",
+      "group": "interstellar",
+      "status": "red",
+      "risk": "high",
+      "legacy": [],
+      "summary": "Starship construction, fitting, fuelling and interstellar travel to a chosen destination.",
+      "tests": [
+        "Starship build consumes correct materials and reports completion",
+        "Component fitting (including Stellar Scanner) applies its effects",
+        "Launch is blocked without a valid destination and sufficient fuel",
+        "Travel timer runs to completion and triggers arrival",
+        "Arrival at an O-type star fires the correct modal and grants the tech",
+        "Expansionist philosophy speed and cost effects apply",
+        "Travel survives save/load mid-flight"
+      ]
+    },
+    {
+      "id": "fleet-hangar",
+      "title": "Fleet Hangar",
+      "group": "interstellar",
+      "status": "red",
+      "risk": "high",
+      "legacy": [],
+      "summary": "Fleet construction, ship classes and the aggregate strength calculation that feeds battle.",
+      "tests": [
+        "Each ship class builds with correct cost and build time",
+        "Fleet strength aggregates correctly across mixed compositions",
+        "Supremacist philosophy cost and strength modifiers apply",
+        "Ascendency fleet buffs (armor, speed, attack) apply and stack correctly",
+        "Attack power buffs apply only to newly built ships, as documented",
+        "Fleet composition survives save/load"
+      ]
+    },
+    {
+      "id": "diplomacy",
+      "title": "Diplomacy",
+      "group": "interstellar",
+      "status": "red",
+      "risk": "high",
+      "legacy": [],
+      "summary": "Impression mechanics and every negotiation outcome branch before conquest.",
+      "tests": [
+        "Each diplomacy action shifts impression in the documented direction",
+        "All outcome branches reachable and correct: surrender, vassalize, insulted, scared, laugh, neutral, reserved, patience",
+        "Disengaging diplomacy permanently closes it for that system",
+        "Voidborn philosophy improves diplomatic outcomes",
+        "Fleet-strength ratio correctly enables guaranteed vassalization where the ascendency perk is owned",
+        "Diplomacy state survives save/load"
+      ]
+    },
+    {
+      "id": "battle",
+      "title": "Battle & Conquest",
+      "group": "interstellar",
+      "status": "green",
+      "risk": "high",
+      "legacy": [],
+      "summary": "Combat resolution, win/loss consequences and the AP award. High branch count, zero coverage.",
+      "tests": [
+        "Battle resolves deterministically given fixed fleet strengths",
+        "Victory grants the correct AP and unlocks settlement",
+        "Defeat destroys the fleet and leaves the system conquerable again",
+        "Systems with no sentient life skip battle and settle directly",
+        "Autosave is correctly suppressed while a battle is ongoing",
+        "Battle outcome modals display correct localized text and substituted values"
+      ],
+      "specCount": 13
+    },
+    {
+      "id": "colonise",
+      "title": "Colonisation",
+      "group": "interstellar",
+      "status": "green",
+      "risk": "high",
+      "legacy": [],
+      "summary": "Settling a conquered system and the state transition into the new run context.",
+      "tests": [
+        "Settlement adds the system to settled stars",
+        "Settled count correctly drives cosmic rip galactic points",
+        "Galactic tab unlocks on first qualifying settlement",
+        "New system's star type bonuses take effect immediately",
+        "Settlement is idempotent — a system cannot be settled twice"
+      ],
+      "specCount": 11
+    },
+    {
+      "id": "galactic-market",
+      "title": "Galactic Market",
+      "group": "meta",
+      "status": "red",
+      "risk": "medium",
+      "legacy": [],
+      "summary": "AP-denominated trading, stock pricing and the demo-build lockdown.",
+      "tests": [
+        "Buy and sell adjust AP and holdings correctly",
+        "Prices move as designed and previews match execution",
+        "Insufficient AP blocks purchase cleanly",
+        "Demo build lockdown UI applies and blocks interaction",
+        "Casino stock-doubling prize applies to the correct stock",
+        "Holdings survive save/load and rebirth as designed"
+      ]
+    },
+    {
+      "id": "ascendency",
+      "title": "Ascendency Points & Perks",
+      "group": "meta",
+      "status": "green",
+      "risk": "high",
+      "legacy": [],
+      "summary": "The AP economy and permanent perk purchases. Errors here permanently corrupt cross-run progress.",
+      "tests": [
+        "AP awarded on conquest and settlement matches the documented formula",
+        "Each perk applies its stated effect and cannot be bought twice",
+        "AP spend is atomic — a failed purchase refunds fully",
+        "AP cannot go negative under any sequence of purchases",
+        "Perks persist across rebirth (they are the point of rebirth)",
+        "Buff stacking with philosophies and star types produces documented totals"
+      ],
+      "specCount": 12
+    },
+    {
+      "id": "galactic-casino",
+      "title": "Galactic Casino",
+      "group": "meta",
+      "status": "red",
+      "risk": "medium",
+      "legacy": [],
+      "summary": "CP economy and three risk games with a shared prize architecture.",
+      "tests": [
+        "CP purchase cost scales as designed (including the cpBaseCost migration)",
+        "Game 1 Double or Nothing resolves both outcomes and settles CP correctly",
+        "Game 2 Wheel of Fortune awards each special prize type",
+        "Game 3 Higher or Lower awards correct tier prizes",
+        "Invalid and unaffordable stakes are rejected with a localized message",
+        "Every timer-finishing prize (rocket, starship, telescope x3) applies to the right target",
+        "Casino statistics track correctly"
+      ]
+    },
+    {
+      "id": "rebirth",
+      "title": "Rebirth",
+      "group": "meta",
+      "status": "red",
+      "risk": "high",
+      "legacy": [],
+      "summary": "The prestige reset. The single most destructive operation in the game if it misbehaves.",
+      "tests": [
+        "Rebirth resets exactly the intended state and nothing more",
+        "AP carryover matches the amount shown in the warning modal",
+        "Achievements, perks and philosophy survive rebirth",
+        "Run counter increments and statRun-gated content behaves correctly on run 1 vs later",
+        "Cancelling the rebirth modal changes nothing",
+        "Post-rebirth state is immediately playable with no stale UI"
+      ]
+    },
+    {
+      "id": "philosophies",
+      "title": "Philosophies",
+      "group": "meta",
+      "status": "red",
+      "risk": "high",
+      "legacy": [],
+      "summary": "The four permanent player paths chosen once and affecting the whole account thereafter.",
+      "tests": [
+        "The choice modal appears at the correct trigger and only once",
+        "Each of Constructor, Supremacist, Voidborn, Expansionist applies its full documented effect set",
+        "Effects activate only after the first rebirth, as documented",
+        "The choice is irreversible and survives save/load and rebirth",
+        "Philosophy modifiers stack correctly with ascendency perks and star types"
+      ]
+    },
+    {
+      "id": "achievements",
+      "title": "Achievements",
+      "group": "meta",
+      "status": "green",
+      "risk": "low",
+      "legacy": [],
+      "summary": "Unlock conditions, notifications, icons and tooltip descriptions across the full achievement set.",
+      "tests": [
+        "Each achievement fires exactly once when its condition is met",
+        "No achievement fires prematurely on a fresh save",
+        "Notifications are localized and show the correct icon",
+        "Tooltip descriptions refresh with live values",
+        "Achievement state survives rebirth and save/load",
+        "The achievement flag array does not grow unbounded"
+      ],
+      "specCount": 9
+    },
+    {
+      "id": "black-hole",
+      "title": "Black Hole Time Warp",
+      "group": "endgame",
+      "status": "green",
+      "risk": "high",
+      "legacy": [],
+      "summary": "Time multiplication affecting every rate in the game — the widest blast radius of any system.",
+      "tests": [
+        "Warp multiplier applies uniformly to all timers and rates",
+        "Always-on mode holds the multiplier at black hole power and clears end timestamps",
+        "Timed warp expires correctly and restores multiplier 1",
+        "Multiplier is forced to 1 when the window is hidden or unfocused",
+        "Autosave is deferred during warp unless always-on",
+        "Black hole power purchases scale correctly post-nerf-migration",
+        "No accumulator drift or double-counting across a long warp"
+      ],
+      "specCount": 12
+    },
+    {
+      "id": "megastructures",
+      "title": "Megastructures",
+      "group": "endgame",
+      "status": "amber",
+      "risk": "medium",
+      "legacy": [
+        "captureMegaStructureTest.test.js"
+      ],
+      "summary": "Ancient manuscripts, megastructure construction and the endgame force field.",
+      "tests": [
+        "Manuscripts are discoverable and accumulate",
+        "Each megastructure gates on the right manuscript count and resources",
+        "Construction progresses and completes correctly",
+        "Force field activates and applies its endgame effect",
+        "Megastructure run flag alters behaviour as documented",
+        "Progress survives save/load"
+      ]
+    },
+    {
+      "id": "cosmic-rip",
+      "title": "Cosmic Rip",
+      "group": "endgame",
+      "status": "red",
+      "risk": "medium",
+      "legacy": [],
+      "summary": "Sector scanning, the near-space scanner array and the galactic point economy.",
+      "tests": [
+        "Cosmic rip location seeds deterministically and only once",
+        "Scanner array restoration costs the correct GP and enables scanning",
+        "Each sector scan resolves and reveals or eliminates the rip",
+        "Galactic points derive correctly from settled stars minus spent",
+        "GP cannot go negative",
+        "The __COSMIC_RIP_ENABLED__ build flag correctly hides the whole feature",
+        "Cosmic rip tech tree monitors independently of the main tree"
+      ]
+    },
+    {
+      "id": "weather",
+      "title": "Weather",
+      "group": "simulation",
+      "status": "red",
+      "risk": "low",
+      "legacy": [],
+      "summary": "Per-system weather states, their efficiency modifiers and the precipitation resource path.",
+      "tests": [
+        "Each weather state applies its documented efficiency modifier",
+        "Rain adds precipitation resource at the correct rate",
+        "Volcano state behaves as designed",
+        "Weather effects stop and clear when the state no longer qualifies",
+        "Weather ambience audio follows the state",
+        "Weather is per-system and resets on travel"
+      ]
+    },
+    {
+      "id": "random-events",
+      "title": "Random Events",
+      "group": "simulation",
+      "status": "red",
+      "risk": "medium",
+      "legacy": [],
+      "summary": "Instant and timed events, their probability model, effects and history tracking.",
+      "tests": [
+        "Every instant event triggers and applies its effect exactly once",
+        "Every timed effect applies, persists for its duration and cleanly expires",
+        "Probability decays after a trigger and the cycle window stays within bounds",
+        "Negative events are correctly classified and communicated",
+        "Event history records accurately and does not grow unbounded",
+        "Supply chain disruption picks a valid candidate",
+        "Black hole instability shift applies correctly",
+        "Active timed effects survive save/load with correct remaining time"
+      ]
+    },
+    {
+      "id": "news-ticker",
+      "title": "News Ticker",
+      "group": "simulation",
+      "status": "red",
+      "risk": "low",
+      "legacy": [],
+      "summary": "Rotating flavour content by category and interval.",
+      "tests": [
+        "Ticker cycles at the configured interval",
+        "Each category produces only its own content",
+        "Content is localized in all five languages",
+        "Ticker does not leak timers when the tab changes"
+      ]
+    },
+    {
+      "id": "audio",
+      "title": "Audio",
+      "group": "simulation",
+      "status": "green",
+      "risk": "low",
+      "legacy": [],
+      "summary": "Background music, ambience and SFX, and their interaction with settings.",
+      "tests": [
+        "Background audio starts and loops",
+        "Weather ambience follows the weather state",
+        "Click SFX fire on interactive elements",
+        "Mute toggles take effect immediately and persist",
+        "Audio does not resume when muted after a tab change"
+      ],
+      "specCount": 13
+    },
+    {
+      "id": "statistics",
+      "title": "Statistics",
+      "group": "simulation",
+      "status": "red",
+      "risk": "low",
+      "legacy": [],
+      "summary": "Tracked lifetime and per-run statistics, including casino, cosmic rip and event stats.",
+      "tests": [
+        "Each tracked statistic increments on the right trigger",
+        "Per-run statistics reset on rebirth; lifetime statistics do not",
+        "Elapsed active game time excludes inactive periods",
+        "Statistics display formats correctly under every notation setting",
+        "Statistics survive save/load"
+      ]
+    },
+    {
+      "id": "notation",
+      "title": "Number Notation",
+      "group": "presentation",
+      "status": "red",
+      "risk": "medium",
+      "legacy": [],
+      "summary": "Formatting of every displayed number across notation modes — touches every screen in the game.",
+      "tests": [
+        "Each notation type formats correctly across magnitudes from 1 to 1e300",
+        "Switching notation immediately reformats all visible values",
+        "Specialised formatters (sell-fuse-money, building-purchase) produce correct output",
+        "Negative, zero and fractional values format sanely",
+        "Notation preference persists",
+        "No NaN or Infinity ever reaches the DOM"
+      ]
+    },
+    {
+      "id": "ui-navigation",
+      "title": "UI Navigation",
+      "group": "presentation",
+      "status": "amber",
+      "risk": "medium",
+      "legacy": [
+        "launch-app.test.js"
+      ],
+      "summary": "Tabs, side-menu panes, hotkeys, tab ordering, collapsibles and tooltips.",
+      "tests": [
+        "All nine tabs open and render their default pane",
+        "Every side-menu option opens its pane without error",
+        "Tab hotkeys map to the right tabs and update when tab order changes",
+        "Tabs appear only once unlocked, in the correct order",
+        "Collapsible sections toggle and persist state",
+        "Tooltips appear with correct localized content",
+        "Attention indicators highlight the right tabs and clear when addressed"
+      ]
+    },
+    {
+      "id": "onboarding",
+      "title": "Onboarding & Tutorial",
+      "group": "presentation",
+      "status": "amber",
+      "risk": "high",
+      "legacy": [
+        "launchAndOnboard.test.js"
+      ],
+      "summary": "The guided first-run tutorial. Every new player's first experience, and largely still hardcoded English.",
+      "tests": [
+        "The full tutorial runs start to finish without a dead end",
+        "Each step's condition correctly gates progression",
+        "Callouts and overlays anchor to the right elements",
+        "Leaving the required tab prompts a return and recovers correctly",
+        "Onboarding can be exited early and the game remains playable",
+        "Completion sets the flag and never re-triggers",
+        "All tutorial text is localized in all five languages"
+      ]
+    },
+    {
+      "id": "cosmicopedia",
+      "title": "Cosmicopedia & Help",
+      "group": "presentation",
+      "status": "red",
+      "risk": "low",
+      "legacy": [],
+      "summary": "In-game help: concepts by game stage, story, philosophies and contact sections.",
+      "tests": [
+        "Every help section opens and renders content",
+        "Concept sections (early, mid, late, end goal) show the right material",
+        "Story and philosophy pages render fully",
+        "All help content is localized",
+        "Discord and contact links are present and well-formed"
+      ]
+    },
+    {
+      "id": "demo-build",
+      "title": "Demo Build Lockdowns",
+      "group": "presentation",
+      "status": "red",
+      "risk": "high",
+      "legacy": [],
+      "summary": "Feature gating for the demo variant. A leak here gives away the full game.",
+      "tests": [
+        "Demo build blocks the galactic market and interstellar sidebar",
+        "Demo build disables autosave and cloud save",
+        "Demo tooltips explain each lockdown",
+        "Debugger and cheats are unreachable in a demo build",
+        "A full build has none of the lockdowns applied",
+        "build-stamp.mjs produces the flags each variant expects (guards the current build-script bypass)"
+      ]
+    },
+    {
+      "id": "performance",
+      "title": "Performance & Frame Budget",
+      "group": "presentation",
+      "status": "red",
+      "risk": "high",
+      "legacy": [],
+      "summary": "Frame-loop cost and long-session stability. Not a feature, but the area most likely to degrade silently as content grows.",
+      "tests": [
+        "Frame time stays within budget on a late-game save with many elements",
+        "No unbounded growth in DOM node count or listener count over a long session",
+        "The compound reverse-lookup does not scale with catalogue size (guards the O(n) hot-path finding)",
+        "Timers do not drift measurably over an extended window",
+        "Memory does not grow monotonically across repeated tab switches",
+        "gameLoop continues running after every state transition (guards the rAF-inside-conditional finding)"
+      ]
+    }
+  ]
+}

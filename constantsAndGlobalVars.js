@@ -315,7 +315,7 @@ let compoundCreateDropdownRecipeText = () => {
 
 //GLOBAL VARIABLES
 export let gameState;
-let language = 'es';
+let language = 'en';
 let achievementFlagArray = [];
 let blackHoleDiscoveryProbability = 0;
 let blackHoleDiscovered = false;

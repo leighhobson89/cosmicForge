@@ -1,5 +1,6 @@
-import { getCurrentOptionPane, getCurrentTheme, setAutoSaveToggle, getAutoSaveToggle, getAutoSaveFrequency, setAutoSaveFrequency, getSaveData, setSaveData, getCurrencySymbol, setCurrencySymbol, getNotationType, setNotationType, setNotificationsToggle, getNotificationsToggle, getSaveName, getWeatherEffectSetting, setWeatherEffectSetting, setNewsTickerSetting, getNewsTickerSetting, setSaveExportCloudFlag, getBackgroundAudio, setBackgroundAudio, getSfx, setSfx, setWasAutoSaveToggled, setMouseParticleTrailEnabled, getMouseParticleTrailEnabled, setCustomPointerEnabled, getCustomPointerEnabled, getOnboardingMode, getDemoBuild } from './constantsAndGlobalVars.js';
-import { createButton, createTextFieldArea, createOptionRow, createDropdown, createToggleSwitch, createHtmlTableAchievementsGrid, createHtmlTableStatistics, createHtmlTextAreaProse, toggleGameFullScreen, selectTheme, callPopupModal, showHideModal, showNotification, applyCustomPointerSetting, setElementPointerEvents, fadeInStartupOverlay, setupAchievementTooltip } from './ui.js';
+import { getCurrentOptionPane, getCurrentTheme, setAutoSaveToggle, getAutoSaveToggle, getAutoSaveFrequency, setAutoSaveFrequency, getSaveData, setSaveData, getCurrencySymbol, setCurrencySymbol, getNotationType, setNotationType, setNotificationsToggle, getNotificationsToggle, getSaveName, getWeatherEffectSetting, setWeatherEffectSetting, setNewsTickerSetting, getNewsTickerSetting, setSaveExportCloudFlag, getBackgroundAudio, setBackgroundAudio, getSfx, setSfx, setWasAutoSaveToggled, setMouseParticleTrailEnabled, getMouseParticleTrailEnabled, setCustomPointerEnabled, getCustomPointerEnabled, getOnboardingMode, getDemoBuild, getLanguage } from './constantsAndGlobalVars.js';
+import { createButton, createTextFieldArea, createOptionRow, createDropdown, createToggleSwitch, createHtmlTableAchievementsGrid, createHtmlTableStatistics, createHtmlTextAreaProse, toggleGameFullScreen, selectTheme, callPopupModal, showHideModal, showNotification, applyCustomPointerSetting, setElementPointerEvents, fadeInStartupOverlay, setupAchievementTooltip, relocalizeAll } from './ui.js';
+import { localize } from './localization.js';
 import { importSaveStringFileFromComputer, downloadSaveStringToComputer, initializeAutoSave, saveGame, saveGameToCloud, loadGameFromCloud, copySaveStringToClipBoard, loadGame, destroySaveGameOnCloud } from './saveLoadGame.js';
 import { hardResetWarningHeader, hardResetWarningText, getStatisticsContent, getHelpContent } from './descriptions.js';
 import { setAchievementIconImageUrls, getAchievementPositionData } from './resourceDataObject.js';
@@ -420,6 +421,40 @@ export function drawTab9Content(heading, optionContentElement) {
             hideMainDescriptionRow: false
         });
         optionContentElement.appendChild(toggleGameFullScreenRow);
+
+        const settingsLanguageRow = createOptionRow({
+            labelId: 'settingsLanguageRow',
+            renderNameABs: null,
+            labelText: localize('settingsLanguageRowLabel', getLanguage()),
+            inputElements: [
+                createDropdown('languageSelect', [
+                    { value: 'en', text: 'English' },
+                    { value: 'es', text: 'Español' },
+                    { value: 'de', text: 'Deutsch' },
+                    { value: 'it', text: 'Italiano' },
+                    { value: 'fr', text: 'Français' },
+                ], getLanguage(), (value) => {
+                    // relocalizeAll redraws this very pane, so it must be the last
+                    // thing that touches the current DOM subtree.
+                    relocalizeAll(value);
+                }),
+            ],
+            descriptionText: localize('settingsLanguageRowDescription', getLanguage()),
+            resourcePriceObject: null,
+            dataConditionCheck: null,
+            objectSectionArgument1: null,
+            objectSectionArgument2: null,
+            quantityArgument: null,
+            autoBuyerTier: null,
+            startInvisibleValue: false,
+            resourceString: null,
+            optionalIterationParam: null,
+            rowCategory: null,
+            noDescriptionContainer: false,
+            specialInputContainerClasses: null,
+            hideMainDescriptionRow: false
+        });
+        optionContentElement.appendChild(settingsLanguageRow);
 
         const newsTickerToggleRow = createOptionRow({
             labelId: 'newsTickerToggleRow',

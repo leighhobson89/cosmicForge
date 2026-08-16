@@ -5,6 +5,11 @@ icons
 builds
 html-report
 tools/analytics-dashboard/persistentJSON.json
+test-reports
+test-results
+playwright-report
+allure-results
+allure-report
 analytics.bat
 analytics.ps1
 buildFlags.js

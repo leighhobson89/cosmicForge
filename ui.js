@@ -14759,18 +14759,17 @@ if (debugLanguageSelect) {
 }
 
 
-debugSetLanguageButton?.addEventListener('click', async () => {
-    const selected = String(debugLanguageSelect?.value ?? '').trim();
-    if (!selected) {
-        showNotification('Please select a language.', 'info', 2500, 'debug');
-        return;
-    }
+// Single entry point for changing language at runtime. Both the Settings
+// dropdown and the debug panel route through here so the redraw sequence is
+// defined in exactly one place.
+export async function relocalizeAll(language) {
+    // initLocalization owns setting and persisting the language: an explicit
+    // selection takes priority over the stored/browser fallbacks inside it.
+    const resolved = await initLocalization(language);
 
-    setLanguage(selected);
-
-    await initLocalization();
     initialiseDescriptions();
     initialiseStaticButtonLabels();
+    updateTabHotkeys();
 
     const currentTab = getCurrentTab()[0];
     const currentPane = getCurrentOptionPane?.() ?? '';
@@ -14781,11 +14780,11 @@ debugSetLanguageButton?.addEventListener('click', async () => {
 
     const headerContentElement = document.getElementById(`headerContentTab${currentTab}`);
     const descriptionContentElement = document.getElementById(`descriptionContentTab${currentTab}`);
-    
+
     if (headerContentElement) {
         headerContentElement.innerText = heading;
     }
-    
+
     if (descriptionContentElement) {
         let optionDescription = getHeaderDescriptions([heading.toLowerCase()]);
         if (currentPane.startsWith('rocket')) {
@@ -14799,8 +14798,7 @@ debugSetLanguageButton?.addEventListener('click', async () => {
 
     const optionContentElement = document.getElementById(`optionContentTab${currentTab}`);
     if (!optionContentElement) {
-        showNotification('Could not find content container to redraw.', 'error', 2500, 'debug');
-        return;
+        return { resolved, redrew: false };
     }
 
     optionContentElement.innerHTML = '';
@@ -14835,6 +14833,21 @@ debugSetLanguageButton?.addEventListener('click', async () => {
             break;
         default:
             updateContent(heading, currentTab, 'content');
+    }
+
+    return { resolved, redrew: true };
+}
+
+debugSetLanguageButton?.addEventListener('click', async () => {
+    const selected = String(debugLanguageSelect?.value ?? '').trim();
+    if (!selected) {
+        showNotification('Please select a language.', 'info', 2500, 'debug');
+        return;
+    }
+
+    const { redrew } = await relocalizeAll(selected);
+    if (!redrew) {
+        showNotification('Could not find content container to redraw.', 'error', 2500, 'debug');
     }
 });
 

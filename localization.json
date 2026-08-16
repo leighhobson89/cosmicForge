@@ -1623,7 +1623,9 @@
     "headerMainStatistics": "Statistics",
     "headerMainAchievements": "Achievements",
     "headerMainEvents": "Events",
-    "headerMainExitGame": "Exit Game"
+    "headerMainExitGame": "Exit Game",
+    "settingsLanguageRowLabel": "Language:",
+    "settingsLanguageRowDescription": "Change the language of the game."
   },
   "es": {
     "newGame": "Nuevo Juego",
@@ -3249,7 +3251,9 @@
     "headerMainStatistics": "Estadísticas",
     "headerMainAchievements": "Logros",
     "headerMainEvents": "Eventos",
-    "headerMainExitGame": "Salir del Juego"
+    "headerMainExitGame": "Salir del Juego",
+    "settingsLanguageRowLabel": "Idioma:",
+    "settingsLanguageRowDescription": "Cambia el idioma del juego."
   },
   "de": {
     "newGame": "Neues Spiel",
@@ -4875,7 +4879,9 @@
     "headerMainStatistics": "Statistiken",
     "headerMainAchievements": "Erfolge",
     "headerMainEvents": "Ereignisse",
-    "headerMainExitGame": "Spiel Beenden"
+    "headerMainExitGame": "Spiel Beenden",
+    "settingsLanguageRowLabel": "Sprache:",
+    "settingsLanguageRowDescription": "Ändere die Sprache des Spiels."
   },
   "it": {
     "newGame": "Nuovo gioco",
@@ -6501,7 +6507,9 @@
     "headerMainStatistics": "Statistiche",
     "headerMainAchievements": "Traguardi",
     "headerMainEvents": "Eventi",
-    "headerMainExitGame": "Esci dal Gioco"
+    "headerMainExitGame": "Esci dal Gioco",
+    "settingsLanguageRowLabel": "Lingua:",
+    "settingsLanguageRowDescription": "Cambia la lingua del gioco."
   },
   "fr": {
     "newGame": "Nouveau jeu",
@@ -8127,6 +8135,8 @@
     "headerMainStatistics": "Statistiques",
     "headerMainAchievements": "Succès",
     "headerMainEvents": "Événements",
-    "headerMainExitGame": "Quitter le Jeu"
+    "headerMainExitGame": "Quitter le Jeu",
+    "settingsLanguageRowLabel": "Langue :",
+    "settingsLanguageRowDescription": "Changer la langue du jeu."
   }
 }

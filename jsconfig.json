@@ -19,7 +19,8 @@
     "noImplicitAny": false,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "noPropertyAccessFromIndexSignature": false
+    "noPropertyAccessFromIndexSignature": false,
+    "types": ["jest", "node"]
   },
   "include": ["**/*.js", "**/*.cjs", "**/*.mjs"],
   "exclude": ["node_modules", "builds", "tools", ".git"]
