@@ -428,7 +428,7 @@ import {
     getCosmicRipScanResultsBySectorIndex,
 } from './resourceDataObject.js';
 
-import { localize, reverseLocalizeForCompounds } from './localization.js';
+import { localize } from './localization.js';
 import { onboardingChecks } from './onboarding.js';
 
 import {
@@ -7072,6 +7072,18 @@ function powerOnOrOffChecks(element) {
     }
 }
 
+// argumentCheckQuantity2 holds an internal compound key whenever the parsed
+// description word matched one, and the raw parsed word when it did not. Only
+// the former can be localized; the latter is shown as-is, which is what the
+// previous localize(capitaliseString(...)) call effectively did for a value that
+// was not a key.
+function displayNameForCompoundKey(compoundKey) {
+    if (!compoundKey) return '';
+    return getResourceDataObject('compounds', [compoundKey])
+        ? localize('compound' + capitaliseString(compoundKey), getLanguage())
+        : capitaliseString(compoundKey);
+}
+
 function compoundCostSellCreateChecks(element) {
     let compound = element.dataset.type;
     let compound2;
@@ -7097,7 +7109,10 @@ function compoundCostSellCreateChecks(element) {
         quantity = 0;
     }
     let quantity2;
-    compound2 ? quantity2 = getResourceDataObject('compounds', [reverseLocalizeForCompounds(checkQuantityString2, getLanguage()), 'quantity']) : -1;
+    // argumentCheckQuantity2 already holds the internal compound key — ui.js
+    // resolves it once when the row is built. Reverse-mapping it here scanned
+    // the whole language table on every frame.
+    compound2 ? quantity2 = getResourceDataObject('compounds', [checkQuantityString2, 'quantity']) : -1;
 
     if (element.classList.contains('sell') || element.dataset.conditionCheck === 'sellCompound') { //sell
         if (quantity > 0) { 
@@ -7194,7 +7209,7 @@ function compoundCostSellCreateChecks(element) {
         if (element.tagName.toLowerCase() !== 'button') {
             price2 = compound2 ? Math.floor(getResourceDataObject(mainKey, [compound, 'storageCapacity']) * 0.3) : 0;
             const mainCompoundPriceText = `${price} ${localize('compound' + capitaliseString(compound), getLanguage())}`;
-            const secondaryCompoundPriceText = price2 > 0 ? `, ${price2} ${localize(capitaliseString(compound2), getLanguage())}` : '';
+            const secondaryCompoundPriceText = price2 > 0 ? `, ${price2} ${displayNameForCompoundKey(compound2)}` : '';
         
             const mainCompoundSpan = document.createElement('span');
             mainCompoundSpan.id = 'mainCompoundPriceText';

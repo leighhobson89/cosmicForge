@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | 🔴 RED |
+| **Status** | 🟢 GREEN |
 | **Risk if broken** | Low |
 | **Group** | Presentation & Shell |
 | **Spec folder** | `tests/e2e/cosmicopedia/` |
@@ -20,7 +20,7 @@ In-game help: concepts by game stage, story, philosophies and contact sections.
 
 ## Status meaning
 
-🔴 **RED** — No automated coverage. A regression here ships unnoticed.
+🟢 **GREEN** — Comprehensive coverage — happy path, branches, boundaries and failure modes all asserted.
 
 ---
 

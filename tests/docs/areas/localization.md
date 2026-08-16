@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | 🔴 RED |
+| **Status** | 🟢 GREEN |
 | **Risk if broken** | High |
 | **Group** | Foundation |
 | **Spec folder** | `tests/e2e/localization/` |
@@ -14,16 +14,21 @@ Language resolution, switching, persistence and full-catalogue integrity across 
 
 - [ ] Boot resolves language in the correct order: explicit > stored > navigator > English
 - [ ] Chosen language persists across a full restart
-- [ ] Switching language redraws every tab, not only the active one
+- [ ] An unsupported or corrupt stored language falls back without breaking boot
+- [ ] localStorage being unavailable degrades the preference instead of breaking boot
+- [ ] The Settings language selector and the debug switcher share one redraw path
+- [ ] Switching language refreshes every tab, not only the active one
 - [ ] No raw localization key (camelCase identifier) is ever visible on screen, in any language, on any tab
 - [ ] validateLocalization.cjs passes — run it as an assertion, not just a manual script
+- [ ] The catalogue has key parity, string-only values, no duplicates and no armed ${} template literals
 - [ ] Dynamically constructed keys resolve: resource*, compound*, autoBuyerName*
-- [ ] German playthrough produces no clipped or overflowing panels
-- [ ] An unsupported or corrupt stored language falls back without breaking boot
+- [ ] No language overflows the viewport horizontally on any tab
+- [ ] Translation clips no control that English does not already clip
+- [ ] The compound reverse lookup honours its language argument and stays within the frame budget
 
 ## Status meaning
 
-🔴 **RED** — No automated coverage. A regression here ships unnoticed.
+🟢 **GREEN** — Comprehensive coverage — happy path, branches, boundaries and failure modes all asserted.
 
 ---
 

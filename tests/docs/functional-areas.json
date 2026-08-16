@@ -130,20 +130,26 @@
       "id": "localization",
       "title": "Localization",
       "group": "foundation",
-      "status": "red",
+      "status": "green",
       "risk": "high",
       "legacy": [],
       "summary": "Language resolution, switching, persistence and full-catalogue integrity across five languages.",
       "tests": [
         "Boot resolves language in the correct order: explicit > stored > navigator > English",
         "Chosen language persists across a full restart",
-        "Switching language redraws every tab, not only the active one",
+        "An unsupported or corrupt stored language falls back without breaking boot",
+        "localStorage being unavailable degrades the preference instead of breaking boot",
+        "The Settings language selector and the debug switcher share one redraw path",
+        "Switching language refreshes every tab, not only the active one",
         "No raw localization key (camelCase identifier) is ever visible on screen, in any language, on any tab",
         "validateLocalization.cjs passes — run it as an assertion, not just a manual script",
+        "The catalogue has key parity, string-only values, no duplicates and no armed ${} template literals",
         "Dynamically constructed keys resolve: resource*, compound*, autoBuyerName*",
-        "German playthrough produces no clipped or overflowing panels",
-        "An unsupported or corrupt stored language falls back without breaking boot"
-      ]
+        "No language overflows the viewport horizontally on any tab",
+        "Translation clips no control that English does not already clip",
+        "The compound reverse lookup honours its language argument and stays within the frame budget"
+      ],
+      "specCount": 67
     },
     {
       "id": "settings",
@@ -225,12 +231,13 @@
       "id": "energy",
       "title": "Energy & Power Grid",
       "group": "economy",
-      "status": "amber",
+      "status": "green",
       "risk": "high",
       "legacy": [
         "energyMid.test.js"
       ],
       "summary": "Power plants, fuel consumption, storage, grid capacity and the consequences of a deficit.",
+      "specCount": 15,
       "tests": [
         "Each power plant type generates its rated output",
         "Fuel is consumed at the documented rate and generation stops when fuel runs out",
@@ -420,10 +427,11 @@
       "id": "diplomacy",
       "title": "Diplomacy",
       "group": "interstellar",
-      "status": "red",
+      "status": "green",
       "risk": "high",
       "legacy": [],
       "summary": "Impression mechanics and every negotiation outcome branch before conquest.",
+      "specCount": 12,
       "tests": [
         "Each diplomacy action shifts impression in the documented direction",
         "All outcome branches reachable and correct: surrender, vassalize, insulted, scared, laugh, neutral, reserved, patience",
@@ -614,10 +622,11 @@
       "id": "cosmic-rip",
       "title": "Cosmic Rip",
       "group": "endgame",
-      "status": "red",
+      "status": "green",
       "risk": "medium",
       "legacy": [],
       "summary": "Sector scanning, the near-space scanner array and the galactic point economy.",
+      "specCount": 13,
       "tests": [
         "Cosmic rip location seeds deterministically and only once",
         "Scanner array restoration costs the correct GP and enables scanning",
@@ -773,10 +782,11 @@
       "id": "cosmicopedia",
       "title": "Cosmicopedia & Help",
       "group": "presentation",
-      "status": "red",
+      "status": "green",
       "risk": "low",
       "legacy": [],
       "summary": "In-game help: concepts by game stage, story, philosophies and contact sections.",
+      "specCount": 6,
       "tests": [
         "Every help section opens and renders content",
         "Concept sections (early, mid, late, end goal) show the right material",
@@ -789,10 +799,11 @@
       "id": "demo-build",
       "title": "Demo Build Lockdowns",
       "group": "presentation",
-      "status": "red",
+      "status": "green",
       "risk": "high",
       "legacy": [],
       "summary": "Feature gating for the demo variant. A leak here gives away the full game.",
+      "specCount": 13,
       "tests": [
         "Demo build blocks the galactic market and interstellar sidebar",
         "Demo build disables autosave and cloud save",

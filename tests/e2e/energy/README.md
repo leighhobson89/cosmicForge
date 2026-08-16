@@ -1,6 +1,6 @@
 # e2e / energy
 
-**Energy & Power Grid** — 🟠 AMBER
+**Energy & Power Grid** — 🟢 GREEN
 
 Power plants, fuel consumption, storage, grid capacity and the consequences of a deficit.
 

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | 🔴 RED |
+| **Status** | 🟢 GREEN |
 | **Risk if broken** | Medium |
 | **Group** | Endgame |
 | **Spec folder** | `tests/e2e/cosmic-rip/` |
@@ -22,7 +22,7 @@ Sector scanning, the near-space scanner array and the galactic point economy.
 
 ## Status meaning
 
-🔴 **RED** — No automated coverage. A regression here ships unnoticed.
+🟢 **GREEN** — Comprehensive coverage — happy path, branches, boundaries and failure modes all asserted.
 
 ---
 

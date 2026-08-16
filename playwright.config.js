@@ -31,7 +31,12 @@ export default defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
-    actionTimeout: 15_000
+    actionTimeout: 15_000,
+    // tests/run-e2e.mjs sets this when --slow is passed, to slow down each
+    // Playwright action so a headed run is easier to watch.
+    launchOptions: process.env.E2E_SLOWMO
+      ? { slowMo: Number(process.env.E2E_SLOWMO) }
+      : {}
   },
 
   projects: [

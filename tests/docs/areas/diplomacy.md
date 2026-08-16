@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | 🔴 RED |
+| **Status** | 🟢 GREEN |
 | **Risk if broken** | High |
 | **Group** | Interstellar |
 | **Spec folder** | `tests/e2e/diplomacy/` |
@@ -21,7 +21,7 @@ Impression mechanics and every negotiation outcome branch before conquest.
 
 ## Status meaning
 
-🔴 **RED** — No automated coverage. A regression here ships unnoticed.
+🟢 **GREEN** — Comprehensive coverage — happy path, branches, boundaries and failure modes all asserted.
 
 ---
 

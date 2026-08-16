@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | 🟠 AMBER |
+| **Status** | 🟢 GREEN |
 | **Risk if broken** | High |
 | **Group** | Core Economy |
 | **Spec folder** | `tests/e2e/energy/` |
@@ -22,7 +22,7 @@ Power plants, fuel consumption, storage, grid capacity and the consequences of a
 
 ## Status meaning
 
-🟠 **AMBER** — Partial coverage — a smoke test proves the path exists, but branches, failure modes and edge cases are unverified.
+🟢 **GREEN** — Comprehensive coverage — happy path, branches, boundaries and failure modes all asserted.
 
 ---
 

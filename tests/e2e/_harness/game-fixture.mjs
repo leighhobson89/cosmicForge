@@ -87,7 +87,9 @@ class GameHarness {
         loc: await import('/localization.js'),
         desc: await import('/descriptions.js'),
         timers: await import('/timerManagerDelta.js'),
-        ui: await import('/ui.js')
+        ui: await import('/ui.js'),
+        rip: await import('/cosmicRip.js'),
+        saveLoad: await import('/saveLoadGame.js')
       };
     });
   }

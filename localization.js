@@ -6,6 +6,11 @@ const LANGUAGE_STORAGE_KEY = 'cosmicForgeLanguage';
 
 let localizationData = {};
 
+// Reverse index of translated compound name -> internal compound key, built per
+// language on first use. `reverseLocalizeForCompounds` is reached from the frame
+// loop, so it must not walk the catalogue on every call.
+let compoundReverseIndex = new Map();
+
 export function getSupportedLanguages() {
     return [...SUPPORTED_LANGUAGES];
 }
@@ -69,6 +74,9 @@ function resolveLanguage(requested) {
 
 function setLocalization(data) {
     localizationData = data;
+    // The catalogue is re-fetched on every initLocalization call, so any index
+    // built from the previous copy is stale by definition.
+    compoundReverseIndex = new Map();
 }
 
 function getLocalization() {
@@ -138,19 +146,40 @@ function interpolateTemplateLiteral(template) {
     });
 }
 
-function reverseLocalizeForCompounds(localizedValue, language) {
+// Build the translated-name -> internal-key map for one language, once. Cached
+// until the catalogue is replaced. Keyed by language rather than by "whatever is
+// active", because callers pass the language they want explicitly.
+function getCompoundReverseIndex(language) {
+    const cached = compoundReverseIndex.get(language);
+    if (cached) return cached;
+
     const data = getLocalization();
-    if (!data || !data[language]) {
-        return localizedValue;
-    }
-    
-    // Find the key that maps to this localized value, only checking 'compound' keys
-    for (const [key, value] of Object.entries(data[language])) {
-        if (key.startsWith('compound') && value.toLowerCase() === localizedValue.toLowerCase()) {
-            return key.replace('compound', '').toLowerCase();
+    const table = data && data[language];
+    if (!table) return null;
+
+    const index = new Map();
+    for (const [key, value] of Object.entries(table)) {
+        if (!key.startsWith('compound') || typeof value !== 'string') continue;
+        const name = value.toLowerCase();
+        // First declaration wins, matching the linear scan this replaced, which
+        // returned on its first match in insertion order.
+        if (!index.has(name)) {
+            index.set(name, key.slice('compound'.length).toLowerCase());
         }
     }
-    return localizedValue;
+
+    compoundReverseIndex.set(language, index);
+    return index;
+}
+
+function reverseLocalizeForCompounds(localizedValue, language) {
+    if (typeof localizedValue !== 'string') return localizedValue;
+
+    const index = getCompoundReverseIndex(language);
+    if (!index) return localizedValue;
+
+    const resolved = index.get(localizedValue.toLowerCase());
+    return resolved === undefined ? localizedValue : resolved;
 }
 
 export {

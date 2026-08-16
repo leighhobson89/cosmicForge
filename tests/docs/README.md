@@ -1,71 +1,86 @@
 # Test Documentation
 
-Analysis and planning for the Cosmic Forge test suite. **No specs have been written yet** — this
-is the structure and the plan they will be written into.
+Planning, reporting and how-to for the Cosmic Forge E2E test suite.
 
 ## Start here
 
-- **[coverage-report.md](coverage-report.md)** — every functional area, its traffic-light status,
-  risk rating and existing coverage. This is the report to read first.
-- **[areas/](areas/)** — one detailed test plan per functional area, with a checklist of what
-  should be tested.
+- **[running-tests.md](running-tests.md)** — how to run the suite: everything, one
+  folder, headed or headless.
+- **[coverage-report.md](coverage-report.md)** — every functional area, its
+  traffic-light status, risk rating and spec count. Read this to see what's
+  covered and what isn't.
+- **[areas/](areas/)** — one detailed test plan per functional area, with a
+  checklist of what should be tested.
+- **[known-issues.md](known-issues.md)** — live game bugs the suite found, with
+  root cause and the harness workaround in place until each is fixed.
 
-## How this is maintained
+## Current state
 
-Everything in `areas/` and `coverage-report.md` is **generated**. The source of truth is a single
-file:
+16 of 43 functional areas have specs and are green — **240 cases, all passing**:
+`achievements`, `antimatter`, `app-boot`, `ascendency`, `audio`, `autobuyers`,
+`battle`, `black-hole`, `colonise`, `compounds`, `cosmic-rip`, `cosmicopedia`,
+`demo-build`, `diplomacy`, `energy`, `localization`. The remaining areas are
+tracked in [coverage-report.md](coverage-report.md) as red (no coverage) or amber
+(partial legacy coverage only).
+
+`localization` is the one green area covering a feature that is still only half
+built. Its specs deliberately mix absolute assertions with *ratchets* — recorded
+baselines that may fall but must never rise — so the outstanding localization
+work can land incrementally without losing ground. The feature's own roadmap and
+the current ratchet values live in
+[`docs/localization/status.md`](../../docs/localization/status.md).
+
+## How the coverage plan is maintained
+
+Everything in `areas/` and `coverage-report.md` is **generated**. The source of
+truth is a single file:
 
 ```
 tests/docs/functional-areas.json
 ```
 
-To change an area's status, risk, summary or test list, edit that file and regenerate:
+To change an area's status, risk, summary or test list, edit that file and
+regenerate:
 
 ```bash
 node tests/docs/generate-report.cjs
 ```
 
-The generator creates any missing `tests/e2e/<area>/` folders and rewrites the markdown. It never
-touches spec files you have written.
+The generator creates any missing `tests/e2e/<area>/` folders and rewrites the
+markdown. It never touches spec files you have written.
 
-Keeping the traffic lights in a data file rather than hand-maintained prose is deliberate: the
-status of 43 areas will change continuously as specs land, and a hand-edited table goes stale
-within a week.
+Keeping the traffic lights in a data file rather than hand-maintained prose is
+deliberate: the status of 43 areas changes continuously as specs land, and a
+hand-edited table goes stale within a week. When an area's specs are written and
+passing, update its `status` and `specCount` in `functional-areas.json` and
+regenerate.
 
 ## Folder layout
 
 ```
 tests/
-  docs/                     this folder — planning and reporting only
+  docs/                     this folder — planning, reporting, how-to
     functional-areas.json     source of truth, edit this
     generate-report.cjs       regenerates the reports and folders
     coverage-report.md        generated summary
+    running-tests.md          how to run the suite
+    known-issues.md           live bugs the suite found
     areas/<area>.md           generated per-area test plan
-  e2e/<area>/               spec folder per functional area (43 of them)
-  legacy/                   pre-existing smoke tests — retained, still running
-  setup.js                  jest setup, referenced by jest.config.js
+  e2e/
+    _harness/                 shared Playwright fixture, static server
+    <area>/                   spec folder per functional area
+  run-e2e.mjs                 per-area runner + summary report builder
 ```
 
-## Conventions for specs
+## Writing specs
 
-- One folder per functional area, named exactly as in `functional-areas.json`.
-- Spec files named `<scenario>.spec.js` — several small specs per area beats one large one, so a
-  failure names the behaviour that broke.
-- Fixtures (cloud-loaded saves at a known progression point) are the established pattern in
-  `tests/legacy/cloudLoadUtils.js`. Reuse that approach rather than driving the game from zero.
-- Assert on **behaviour and values**, not on DOM structure, wherever a value is available. The
-  legacy tests get this right: they sample production rates over an interval and assert within a
-  tolerance rather than pinning exact numbers.
-
-## About the legacy tests
-
-The eight suites in `tests/legacy/` still run and still pass through the same jest config — they
-were moved, not disabled. They are classified as **amber** coverage for the areas they touch,
-because they prove a path exists without asserting much about branches, boundaries or failure
-modes.
-
-They should be treated as a source of technique rather than a coverage baseline. Once an area has
-real specs under `tests/e2e/`, the corresponding legacy suite can be retired.
+Full conventions, the shared `game` fixture API, and — most importantly — how to
+use the game's own debug tooling for scenario setup, are documented in
+**[`../e2e/README.md`](../e2e/README.md)**. Read that before writing a new area's
+specs; it covers real pitfalls already hit (localization keys resolve through
+`descriptions.js`, not `localization.json`; don't assert on the live
+`timerManagerDelta` while `gameLoop` is driving it; use the debug menu instead of
+hand-seeding state wherever it covers the scenario).
 
 ## Status definitions
 

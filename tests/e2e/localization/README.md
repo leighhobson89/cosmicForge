@@ -1,6 +1,6 @@
 # e2e / localization
 
-**Localization** — 🔴 RED
+**Localization** — 🟢 GREEN
 
 Language resolution, switching, persistence and full-catalogue integrity across five languages.
 

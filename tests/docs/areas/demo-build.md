@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | 🔴 RED |
+| **Status** | 🟢 GREEN |
 | **Risk if broken** | High |
 | **Group** | Presentation & Shell |
 | **Spec folder** | `tests/e2e/demo-build/` |
@@ -21,7 +21,7 @@ Feature gating for the demo variant. A leak here gives away the full game.
 
 ## Status meaning
 
-🔴 **RED** — No automated coverage. A regression here ships unnoticed.
+🟢 **GREEN** — Comprehensive coverage — happy path, branches, boundaries and failure modes all asserted.
 
 ---
 

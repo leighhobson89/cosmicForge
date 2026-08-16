@@ -1,0 +1,342 @@
+/**
+ * Area: Localization
+ * Plan: tests/docs/areas/localization.md
+ * Feature status: docs/localization/status.md
+ *
+ * Integrity of `localization.json` itself. These specs need no browser — the
+ * catalogue is a data file, and asserting against it directly is both faster and
+ * far more precise than inferring the same facts from rendered text.
+ *
+ * The localization feature is only half built, so several assertions here are
+ * deliberately written as *ratchets* against a recorded baseline rather than as
+ * absolutes. A ratchet fails when the situation gets worse and quietly tolerates
+ * it getting better, which is what a half-finished feature actually needs: it
+ * stops regressions without demanding the remaining work be done first. Each one
+ * names the status.md item it belongs to, so tightening the number is part of
+ * closing that item.
+ */
+import { test, expect } from '@playwright/test';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
+
+const HERE = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = path.resolve(HERE, '..', '..', '..');
+const CATALOGUE_PATH = path.join(ROOT, 'localization.json');
+
+const require = createRequire(import.meta.url);
+
+const LANGUAGES = ['en', 'es', 'de', 'it', 'fr'];
+const REFERENCE = 'en';
+
+const RAW = fs.readFileSync(CATALOGUE_PATH, 'utf8');
+const CATALOGUE = JSON.parse(RAW);
+
+/**
+ * The three keys that are intentionally empty in every language: casino special
+ * prize notifications whose suffix is supplied at runtime. Asserted as an exact
+ * set so a *fourth* empty value — an untranslated string someone forgot — fails.
+ * status.md item 7 wants the checker to reject empty values outright; until then
+ * this pins the sanctioned exceptions.
+ */
+const SANCTIONED_EMPTY_KEYS = [
+  'casinoNotificationSpecialPrizeRocketWarpedSuffix',
+  'casinoNotificationSpecialPrizeStarshipFinishedSuffix',
+  'casinoNotificationSpecialPrizeStarshipWarpedSuffix'
+];
+
+/**
+ * Ratchet for status.md item 8 (translation quality). Values byte-identical to
+ * English per language. Many are legitimately identical — proper nouns, star
+ * names, chemical symbols — so the number cannot go to zero, but it must never
+ * grow: a new identical value is almost always an untranslated placeholder.
+ */
+const IDENTICAL_TO_ENGLISH_CEILING = { es: 35, de: 41, it: 37, fr: 44 };
+
+/**
+ * Ratchet for status.md item 7 (harden the key checker). Keys that never appear
+ * as a quoted string literal anywhere in the shipped source. Every one of these
+ * is currently explained — built by concatenation at runtime, or wired through
+ * `index.html` element ids — but the number must not grow, because an unwired
+ * key is a string that will never reach a player.
+ */
+const UNREFERENCED_KEY_CEILING = 21;
+
+/**
+ * Keys with a known unbalanced HTML tag, allowlisted so the sweep below can stay
+ * strict about everything else. See tests/docs/known-issues.md #9 — this one is a
+ * stray `</span>` with no opening tag, left behind when the string was extracted
+ * out of a hardcoded literal. Browsers discard an unmatched close tag, so it is
+ * currently harmless; removing it from all five languages closes the entry, and
+ * this allowlist does not need to be emptied for that to pass.
+ */
+const KNOWN_UNBALANCED_KEYS = ['modalPlayerLeaderPhilosophyContentText'];
+
+/** Source files the shipped game actually loads. Excludes builds/dist/tests. */
+function shippedSourceFiles() {
+  return fs
+    .readdirSync(ROOT)
+    .filter((f) => f.endsWith('.js') || f.endsWith('.html'))
+    .map((f) => path.join(ROOT, f));
+}
+
+function allShippedSource() {
+  return shippedSourceFiles()
+    .map((f) => fs.readFileSync(f, 'utf8'))
+    .join('\n');
+}
+
+test.describe('Localization — catalogue integrity', () => {
+  test('every supported language section exists and is populated', async () => {
+    const shape = LANGUAGES.map((lang) => ({
+      lang,
+      present: Boolean(CATALOGUE[lang]),
+      keys: CATALOGUE[lang] ? Object.keys(CATALOGUE[lang]).length : 0
+    }));
+
+    expect(shape.filter((s) => !s.present)).toEqual([]);
+    expect(shape.filter((s) => s.keys < 1000)).toEqual([]);
+  });
+
+  test('validateLocalization.cjs passes as an assertion, not just a script', async () => {
+    // The plan calls for the project's own checker to run in CI rather than by
+    // hand. It logs to stdout and returns a boolean; we assert the boolean.
+    const { checkLocalizationConsistency, LANGUAGES: checkerLanguages } =
+      require(path.join(ROOT, 'validateLocalization.cjs'));
+
+    // The checker must cover the same language set the game supports, or a
+    // passing run proves less than it appears to.
+    expect([...checkerLanguages].sort()).toEqual([...LANGUAGES].sort());
+    expect(checkLocalizationConsistency()).toBe(true);
+  });
+
+  test('all five languages have byte-identical key sets', async () => {
+    // Duplicates validateLocalization.cjs deliberately: this reports the actual
+    // differing keys in the failure message, which the script only prints.
+    const referenceKeys = new Set(Object.keys(CATALOGUE[REFERENCE]));
+    const differences = [];
+
+    for (const lang of LANGUAGES) {
+      if (lang === REFERENCE) continue;
+      const keys = new Set(Object.keys(CATALOGUE[lang]));
+      for (const key of referenceKeys) if (!keys.has(key)) differences.push(`${lang}: missing ${key}`);
+      for (const key of keys) if (!referenceKeys.has(key)) differences.push(`${lang}: extra ${key}`);
+    }
+
+    expect(differences).toEqual([]);
+  });
+
+  test('every value in every language is a string', async () => {
+    // localize() calls .replace() and .includes() on whatever it finds, so a
+    // number, null or nested object is a TypeError at render time.
+    const bad = [];
+    for (const lang of LANGUAGES) {
+      for (const [key, value] of Object.entries(CATALOGUE[lang])) {
+        if (typeof value !== 'string') bad.push(`${lang}:${key} is ${value === null ? 'null' : typeof value}`);
+      }
+    }
+    expect(bad).toEqual([]);
+  });
+
+  test('only the sanctioned keys are empty, in every language', async () => {
+    const unexpected = [];
+    for (const lang of LANGUAGES) {
+      const empty = Object.entries(CATALOGUE[lang])
+        .filter(([, value]) => String(value).trim() === '')
+        .map(([key]) => key)
+        .sort();
+
+      for (const key of empty) {
+        if (!SANCTIONED_EMPTY_KEYS.includes(key)) unexpected.push(`${lang}:${key}`);
+      }
+      // The sanctioned three must also still be present in every language, so a
+      // deletion in one language cannot silently drift the set.
+      for (const key of SANCTIONED_EMPTY_KEYS) {
+        if (!(key in CATALOGUE[lang])) unexpected.push(`${lang}:${key} missing entirely`);
+      }
+    }
+    expect(unexpected).toEqual([]);
+  });
+
+  test('no value contains a template literal, keeping the eval() path dead', async () => {
+    // status.md item 6: localize() runs eval() on any value containing `${…}`.
+    // Nothing uses it today, which is the only reason the path is safe. This
+    // spec fails the moment a translator re-arms it.
+    const armed = [];
+    for (const lang of LANGUAGES) {
+      for (const [key, value] of Object.entries(CATALOGUE[lang])) {
+        if (String(value).includes('${')) armed.push(`${lang}:${key}`);
+      }
+    }
+    expect(armed).toEqual([]);
+  });
+
+  test('every key is a plain camelCase identifier', async () => {
+    // The "no raw key on screen" sweep identifies leaked keys by their shape.
+    // That detection is only sound while every key actually has that shape.
+    const malformed = Object.keys(CATALOGUE[REFERENCE]).filter((k) => !/^[A-Za-z][A-Za-z0-9_]*$/.test(k));
+    expect(malformed).toEqual([]);
+  });
+
+  test('the raw file declares each key exactly once per language', async () => {
+    // JSON.parse silently keeps the last of a duplicated key, so parity checks
+    // cannot see a duplicate at all. Count declarations in the raw text instead.
+    const duplicates = [];
+
+    for (const lang of LANGUAGES) {
+      const start = RAW.indexOf(`"${lang}": {`);
+      expect(start, `language block "${lang}" not found in raw JSON`).toBeGreaterThan(-1);
+
+      // Walk braces from the opening one to find this language's block exactly.
+      const open = RAW.indexOf('{', start);
+      let depth = 0;
+      let end = open;
+      for (let i = open; i < RAW.length; i++) {
+        if (RAW[i] === '{') depth++;
+        else if (RAW[i] === '}') {
+          depth--;
+          if (depth === 0) { end = i; break; }
+        }
+      }
+
+      const block = RAW.slice(open, end);
+      const seen = new Map();
+      for (const match of block.matchAll(/^\s*"([A-Za-z][A-Za-z0-9_]*)"\s*:/gm)) {
+        seen.set(match[1], (seen.get(match[1]) ?? 0) + 1);
+      }
+      for (const [key, count] of seen) {
+        if (count > 1) duplicates.push(`${lang}:${key} declared ${count} times`);
+      }
+
+      // Sanity: the walk must have found the whole block, not a fragment.
+      expect(seen.size, `raw scan of "${lang}" found too few keys`)
+        .toBe(Object.keys(CATALOGUE[lang]).length);
+    }
+
+    expect(duplicates).toEqual([]);
+  });
+
+  test('every key referenced literally in shipped source exists in the catalogue', async () => {
+    // A missing key does not throw: localize() returns the key itself, so the
+    // player sees `headerMainDiesel` on screen. This is the direction that must
+    // stay at absolute zero.
+    const source = allShippedSource();
+    const missing = [];
+    const referenced = new Set();
+
+    // Only match `localize('key')` / `localize("key", lang)` — a literal
+    // followed by `+` is a concatenation prefix, not a whole key.
+    for (const match of source.matchAll(/localize\(\s*['"]([A-Za-z0-9_]+)['"]\s*[,)]/g)) {
+      referenced.add(match[1]);
+      if (!(match[1] in CATALOGUE[REFERENCE])) missing.push(match[1]);
+    }
+
+    expect(referenced.size).toBeGreaterThan(1000);
+    expect([...new Set(missing)]).toEqual([]);
+  });
+
+  test('unreferenced keys do not grow beyond the recorded baseline', async () => {
+    // status.md item 7. Counted against *any* quoted string literal in shipped
+    // source, not just direct localize() calls, so keys passed through option
+    // maps and id lookups count as referenced.
+    const source = allShippedSource();
+    const literals = new Set();
+    for (const match of source.matchAll(/['"`]([A-Za-z][A-Za-z0-9_]*)['"`]/g)) literals.add(match[1]);
+
+    const unreferenced = Object.keys(CATALOGUE[REFERENCE]).filter((k) => !literals.has(k));
+
+    expect(
+      unreferenced.length,
+      `unreferenced keys grew to ${unreferenced.length}: ${unreferenced.join(', ')}`
+    ).toBeLessThanOrEqual(UNREFERENCED_KEY_CEILING);
+  });
+
+  test('untranslated values do not grow beyond the recorded baseline', async () => {
+    // status.md item 8. Ceiling per language; a native-reader pass should lower
+    // these numbers, and nothing should ever raise them.
+    const growth = [];
+    for (const lang of LANGUAGES) {
+      if (lang === REFERENCE) continue;
+      const identical = Object.keys(CATALOGUE[REFERENCE])
+        .filter((k) => CATALOGUE[lang][k] === CATALOGUE[REFERENCE][k]);
+
+      if (identical.length > IDENTICAL_TO_ENGLISH_CEILING[lang]) {
+        growth.push(`${lang}: ${identical.length} identical to English (ceiling ${IDENTICAL_TO_ENGLISH_CEILING[lang]})`);
+      }
+    }
+    expect(growth).toEqual([]);
+  });
+
+  test('dynamically constructed keys resolve for every resource and compound', async () => {
+    // ui.js builds `resource${Name}` and `compound${Name}` by concatenation, so
+    // the parity checker cannot see them. If one is missing, that row renders
+    // its internal key as a label — in one language only, if the gap is partial.
+    const resources = ['hydrogen', 'helium', 'carbon', 'neon', 'oxygen', 'sodium', 'silicon', 'iron'];
+    const compounds = ['diesel', 'glass', 'concrete', 'steel', 'water', 'titanium'];
+    const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+    const missing = [];
+    for (const lang of LANGUAGES) {
+      for (const key of [...resources.map((r) => `resource${cap(r)}`), ...compounds.map((c) => `compound${cap(c)}`)]) {
+        const value = CATALOGUE[lang][key];
+        if (!value || !String(value).trim()) missing.push(`${lang}:${key}`);
+      }
+    }
+    expect(missing).toEqual([]);
+  });
+
+  test('every autoBuyerName key referenced through the migration map exists', async () => {
+    // Auto-buyer labels resolve through the rename map in patches.js, so the
+    // key that ends up at localize() may not appear anywhere as a literal.
+    const patches = fs.readFileSync(path.join(ROOT, 'patches.js'), 'utf8');
+    const names = new Set();
+    for (const match of patches.matchAll(/['"]([a-z][A-Za-z0-9]*(?:AB\d|Advanced|Industrial|Quantum|Compressor|Extractor|Burner|Collector|Harvester|Pump|Drill))['"]/g)) {
+      names.add(match[1]);
+    }
+
+    const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+    const missing = [];
+    for (const name of names) {
+      const key = `autoBuyerName${cap(name)}`;
+      // Only assert on names the catalogue is actually expected to carry: a
+      // name present in English must be present in all five.
+      if (!(key in CATALOGUE[REFERENCE])) continue;
+      for (const lang of LANGUAGES) {
+        if (!CATALOGUE[lang][key] || !String(CATALOGUE[lang][key]).trim()) missing.push(`${lang}:${key}`);
+      }
+    }
+    expect(missing).toEqual([]);
+  });
+
+  test('the autoBuyerName family is complete across all five languages', async () => {
+    const englishAutoBuyerKeys = Object.keys(CATALOGUE[REFERENCE]).filter((k) => k.startsWith('autoBuyerName'));
+    expect(englishAutoBuyerKeys.length).toBeGreaterThan(20);
+
+    const missing = [];
+    for (const lang of LANGUAGES) {
+      for (const key of englishAutoBuyerKeys) {
+        if (!CATALOGUE[lang][key] || !String(CATALOGUE[lang][key]).trim()) missing.push(`${lang}:${key}`);
+      }
+    }
+    expect(missing).toEqual([]);
+  });
+
+  test('no value carries an unbalanced HTML tag that would break a panel', async () => {
+    // Values go through innerHTML in several places. An unclosed <strong> or
+    // <span> from a translator swallows the rest of the panel.
+    const unbalanced = [];
+    for (const lang of LANGUAGES) {
+      for (const [key, value] of Object.entries(CATALOGUE[lang])) {
+        if (KNOWN_UNBALANCED_KEYS.includes(key)) continue;
+        const text = String(value);
+        for (const tag of ['strong', 'span', 'em', 'b', 'i', 'div']) {
+          const open = (text.match(new RegExp(`<${tag}(\\s[^>]*)?>`, 'gi')) || []).length;
+          const close = (text.match(new RegExp(`</${tag}>`, 'gi')) || []).length;
+          if (open !== close) unbalanced.push(`${lang}:${key} <${tag}> ${open} open / ${close} close`);
+        }
+      }
+    }
+    expect(unbalanced).toEqual([]);
+  });
+});

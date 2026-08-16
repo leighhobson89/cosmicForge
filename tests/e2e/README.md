@@ -4,13 +4,13 @@ Playwright-based end-to-end suite, one folder per functional area.
 
 ## Running
 
+Full guide, including headed mode and running a single area:
+**[`tests/docs/running-tests.md`](../docs/running-tests.md)**.
+
 ```bash
-npm run test:e2e                  # every area, one HTML report each
-npm run test:e2e:list             # which areas currently have specs
-node tests/run-e2e.mjs audio      # a single area
-node tests/run-e2e.mjs audio app-boot
-npx playwright test tests/e2e/audio --headed   # watch it run
-npx playwright test tests/e2e/audio --debug    # step through
+node tests/run-e2e.mjs            # everything, headless, full report
+node tests/run-e2e.mjs audio      # one area
+node tests/run-e2e.mjs --headed   # everything, headed
 ```
 
 ## Reports

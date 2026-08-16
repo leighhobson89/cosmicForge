@@ -1,4 +1,4 @@
-import { initLocalization, localize } from './localization.js';
+import { initLocalization, localize, reverseLocalizeForCompounds } from './localization.js';
 import { getStatisticsContent, getStatKeyFromLocalizedName, statisticsContent } from './descriptions.js';
 import {
     setLastFocusOfflineGainsAppliedAt,
@@ -3781,8 +3781,18 @@ export function createOptionRow(options = {}) {
                 description.dataset.argumentCheckQuantity = quantityArgument;
                 description.dataset.type = objectSectionArgument1;
             } else {
-                const quantityArgument2 = descriptionText && descriptionText.includes(',') && objectSectionArgument1 && objectSectionArgument1.includes('storage')
+                // The secondary cost is parsed out of already-translated
+                // description text, so what comes back is a display name.
+                // Resolve it to its internal compound key here, once per row
+                // build, instead of reverse-mapping it inside
+                // compoundCostSellCreateChecks on every frame. The stored key is
+                // language-independent, so the row also stays correct if it
+                // outlives a language change.
+                const parsedSecondCompound = descriptionText && descriptionText.includes(',') && objectSectionArgument1 && objectSectionArgument1.includes('storage')
                     ? descriptionText.split(',').pop().trim().split(' ').pop().toLowerCase()
+                    : '';
+                const quantityArgument2 = parsedSecondCompound
+                    ? reverseLocalizeForCompounds(parsedSecondCompound, getLanguage())
                     : '';
 
                 description.dataset.conditionCheck = dataConditionCheck;

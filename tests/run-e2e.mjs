@@ -6,9 +6,14 @@
  * self-contained HTML report, then writes an index page linking them all together
  * with pass/fail totals.
  *
- *   node tests/run-e2e.mjs                 run every area that has specs
- *   node tests/run-e2e.mjs audio app-boot  run only the named areas
- *   node tests/run-e2e.mjs --list          show which areas have specs
+ *   node tests/run-e2e.mjs                          run every area that has specs
+ *   node tests/run-e2e.mjs audio app-boot           run only the named areas
+ *   node tests/run-e2e.mjs --headed                 run headed (visible browser)
+ *   node tests/run-e2e.mjs audio -- -g "some title"  extra args after -- go straight to
+ *                                                     `playwright test` for each area run
+ *   node tests/run-e2e.mjs --list                   show which areas have specs
+ *
+ * Full usage guide: tests/docs/running-tests.md
  *
  * Reports:
  *   test-reports/e2e/<area>/index.html   per-area Playwright HTML report
@@ -37,28 +42,33 @@ function discoverAreas() {
     .sort();
 }
 
-function runArea(area) {
+function runArea(area, { headed = false, slow = false, extraArgs = [] } = {}) {
   const started = Date.now();
-  process.stdout.write(`\n=== ${area} ===\n`);
+  process.stdout.write(`\n=== ${area}${headed ? ' (headed)' : ''} ===\n`);
 
   // Reporters are configured in playwright.config.js and keyed off E2E_AREA, so
   // they write into this area's own folder. Passing --reporter here would
   // override that and send JSON to stdout instead of results.json.
-  const result = spawnSync(
-    process.execPath,
-    [path.join(ROOT, 'node_modules', '@playwright', 'test', 'cli.js'),
-      'test', `tests/e2e/${area}`],
-    {
-      cwd: ROOT,
-      stdio: 'inherit',
-      env: {
-        ...process.env,
-        E2E_AREA: area,
-        HEADLESS: '1',
-        PLAYWRIGHT_HTML_OPEN: 'never'
-      }
+  const cliArgs = [
+    path.join(ROOT, 'node_modules', '@playwright', 'test', 'cli.js'),
+    'test', `tests/e2e/${area}`,
+    // Headed runs open a real browser window per worker, so force a single
+    // worker to keep windows from stacking on top of each other.
+    ...(headed ? ['--headed', '--workers=1'] : []),
+    ...extraArgs
+  ];
+
+  const result = spawnSync(process.execPath, cliArgs, {
+    cwd: ROOT,
+    stdio: 'inherit',
+    env: {
+      ...process.env,
+      E2E_AREA: area,
+      PLAYWRIGHT_HTML_OPEN: 'never',
+      // Read by playwright.config.js to set launchOptions.slowMo.
+      ...(slow ? { E2E_SLOWMO: '500' } : {})
     }
-  );
+  });
 
   const durationMs = Date.now() - started;
   const jsonPath = path.join(REPORT_ROOT, area, 'results.json');
@@ -208,7 +218,17 @@ if (args.includes('--list')) {
   process.exit(0);
 }
 
-const requested = args.filter((a) => !a.startsWith('--'));
+// Everything after a literal `--` is forwarded verbatim to `playwright test`
+// for each area run (e.g. `-g "some title"`, `--debug`) — the standard
+// separator convention, needed because flags like -g take a value that does
+// not itself start with '-' and so cannot be told apart from an area name.
+const sepIndex = args.indexOf('--');
+const ownArgs = sepIndex === -1 ? args : args.slice(0, sepIndex);
+const extraArgs = sepIndex === -1 ? [] : args.slice(sepIndex + 1);
+
+const headed = ownArgs.includes('--headed');
+const slow = ownArgs.includes('--slow');
+const requested = ownArgs.filter((a) => a !== '--headed' && a !== '--slow' && a !== '--list');
 const areas = requested.length ? requested : available;
 
 const unknown = areas.filter((a) => !available.includes(a));
@@ -218,7 +238,7 @@ if (unknown.length) {
   process.exit(1);
 }
 
-const results = areas.map(runArea);
+const results = areas.map((area) => runArea(area, { headed, slow, extraArgs }));
 writeIndex(results);
 
 const totalFailed = results.reduce((n, r) => n + r.failed, 0);
