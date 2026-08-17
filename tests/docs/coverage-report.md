@@ -6,12 +6,12 @@ _Generated from `functional-areas.json`. Re-run `node tests/docs/generate-report
 
 | | Areas | Share |
 |---|---:|---:|
-| 🔴 Red — no coverage | 11 | 26% |
-| 🟠 Amber — partial / smoke only | 6 | 14% |
-| 🟢 Green — comprehensive | 26 | 60% |
+| 🔴 Red — no coverage | 10 | 23% |
+| 🟠 Amber — partial / smoke only | 3 | 7% |
+| 🟢 Green — comprehensive | 30 | 70% |
 | **Total functional areas** | **43** | |
 
-297 individual test cases are identified across all areas. **473 Playwright specs are implemented and passing** across 28 areas. The 6 amber areas have partial coverage only — a legacy smoke test that proves a path exists, or a focused spec file written alongside a bug fix — so their branches, boundaries and failure modes are still largely unverified.
+330 individual test cases are identified across all areas. **552 Playwright specs are implemented and passing** across 31 areas. The 3 amber areas have partial coverage only — a legacy smoke test that proves a path exists, or a focused spec file written alongside a bug fix — so their branches, boundaries and failure modes are still largely unverified.
 
 Run them with `npm run test:e2e` (all areas) or `node tests/run-e2e.mjs <area>`. Each area writes its own HTML report to `test-reports/e2e/<area>/index.html`, with a summary index at `test-reports/e2e/index.html`.
 
@@ -46,11 +46,11 @@ The minute-to-minute loop: extract, craft, power, research. Where players spend 
 
 | Status | Area | Risk | Planned | Specs | Existing coverage |
 |:--:|---|:--:|--:|--:|---|
-| 🟠 | [Resources](areas/resources.md) | High | 7 | — | earlyLoop.test.js |
+| 🟢 | [Resources](areas/resources.md) | High | 15 | **19** | earlyLoop.test.js |
 | 🟢 | [Compounds & Crafting](areas/compounds.md) | High | 6 | **11** | — |
 | 🟢 | [Auto Buyers](areas/autobuyers.md) | High | 7 | **10** | autobuyer.test.js |
 | 🟢 | [Energy & Power Grid](areas/energy.md) | High | 7 | **15** | energyMid.test.js |
-| 🟠 | [Research](areas/research.md) | High | 5 | — | researchTech.test.js |
+| 🟢 | [Research](areas/research.md) | High | 12 | **15** | researchTech.test.js |
 | 🟠 | [Tech Tree](areas/technology.md) | High | 6 | — | researchTech.test.js |
 
 ### Space Operations
@@ -60,7 +60,7 @@ Mid-game expansion off-planet — asteroids, rockets, antimatter and the telesco
 | Status | Area | Risk | Planned | Specs | Existing coverage |
 |:--:|---|:--:|--:|--:|---|
 | 🔴 | [Space Mining & Asteroids](areas/space-mining.md) | Medium | 6 | — | — |
-| 🔴 | [Rockets & Launch Pad](areas/rockets.md) | Medium | 6 | — | — |
+| 🟢 | [Rockets & Launch Pad](areas/rockets.md) | Medium | 15 | **20** | — |
 | 🟢 | [Antimatter](areas/antimatter.md) | Medium | 5 | **12** | spaceAntimatter.test.js |
 | 🔴 | [Space Telescope](areas/space-telescope.md) | Medium | 6 | — | — |
 
@@ -76,7 +76,7 @@ Travel, conquest and settlement. The most stateful and branch-heavy part of the 
 | 🟢 | [Fleet Hangar](areas/fleet-hangar.md) | High | 9 | **14** | — |
 | 🟢 | [Diplomacy](areas/diplomacy.md) | High | 6 | **12** | — |
 | 🟢 | [Battle & Conquest](areas/battle.md) | High | 6 | **13** | — |
-| 🟢 | [Colonisation](areas/colonise.md) | High | 5 | **11** | — |
+| 🟢 | [Colonisation](areas/colonise.md) | High | 8 | **19** | — |
 
 ### Meta Progression
 
@@ -87,9 +87,9 @@ Cross-run systems. Bugs here destroy player progress permanently, which makes th
 | 🟢 | [Galactic Market](areas/galactic-market.md) | Medium | 7 | **17** | — |
 | 🟢 | [Ascendency Points & Perks](areas/ascendency.md) | High | 6 | **12** | — |
 | 🟢 | [Galactic Casino](areas/galactic-casino.md) | Medium | 8 | **46** | — |
-| 🟠 | [Rebirth](areas/rebirth.md) | High | 12 | **10** | — |
-| 🟢 | [Philosophies](areas/philosophies.md) | High | 7 | **19** | — |
-| 🟢 | [Achievements](areas/achievements.md) | Low | 6 | **9** | — |
+| 🟢 | [Rebirth](areas/rebirth.md) | High | 14 | **22** | — |
+| 🟢 | [Philosophies](areas/philosophies.md) | High | 9 | **21** | — |
+| 🟢 | [Achievements](areas/achievements.md) | Low | 8 | **12** | — |
 
 ### Endgame
 

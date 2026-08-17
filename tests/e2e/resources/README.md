@@ -1,8 +1,8 @@
 # e2e / resources
 
-**Resources** — 🟠 AMBER
+**Resources** — 🟢 GREEN
 
-The eight base resources: manual extraction, tiered buildings, storage caps and selling.
+The eight extractable base resources plus solar: accrual, four autobuyer tiers, storage caps and selling.
 
 Specs for this area go in this folder, named `<scenario>.spec.js`.
 

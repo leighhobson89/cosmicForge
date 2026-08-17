@@ -333,44 +333,11 @@ class GameHarness {
    * developer triggers from the debug menu, so it keeps tests off bespoke setup.
    */
   async prepareRunForStarshipLaunch({ settleMs = 2500 } = {}) {
-    await this.ensureCompoundRecipeTextInitialised();
     await this.debugClick('prepareRunForStarshipLaunchButton');
     // The handler is async and chains ~9 clicks with internal sleeps.
     await this.page.waitForTimeout(settleMs);
     await this.debugClick('unlockAllTabsButton').catch(() => {});
     await this.page.waitForTimeout(300);
-  }
-
-  /**
-   * Works around a live game bug (see tests/docs/known-issues.md).
-   *
-   * `compoundCreateDropdownRecipeText` is declared as an arrow function and is
-   * only replaced with a real object inside `resetAllVariablesOnRebirth()`, which
-   * only runs from `rebirth()`. On run 1 it is therefore still a function, so
-   * `getCompoundCreateDropdownRecipeText(key)` returns undefined.
-   *
-   * `addAchievementBonus` dereferences that result without a guard for any
-   * achievement giving a `createCostCompounds` multiplier — `discoverAsteroid` is
-   * one. The resulting TypeError is thrown inside `checkForAchievements()` within
-   * `gameLoop()`, *before* its trailing `requestAnimationFrame(gameLoop)`, so the
-   * frame loop dies permanently and the game silently freezes.
-   *
-   * Seeding the structure here is exactly what a rebirth would have done, and
-   * keeps that bug from masking the behaviour each spec is actually testing.
-   */
-  async ensureCompoundRecipeTextInitialised() {
-    await this.withMods((m) => {
-      const compounds = Object.keys(m.rdo.getResourceDataObject('compounds') || {})
-        .filter((k) => k !== 'version');
-      const optionKeys = ['fillToCapacity', 'max', 'threeQuarters', 'twoThirds', 'half', 'oneThird'];
-
-      for (const compound of compounds) {
-        if (m.cg.getCompoundCreateDropdownRecipeText(compound)) continue;
-        const seeded = {};
-        for (const key of optionKeys) seeded[key] = { value: key, text: key };
-        m.cg.setCompoundCreateDropdownRecipeText(compound, seeded);
-      }
-    });
   }
 
   /** Trigger the debug time warp at a given duration/multiplier. */

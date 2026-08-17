@@ -24,6 +24,48 @@ import { test, expect } from '../_harness/game-fixture.mjs';
 
 const PHILOSOPHIES = ['constructor', 'supremacist', 'voidborn', 'expansionist'];
 
+const LANGUAGES = ['en', 'es', 'de', 'it', 'fr'];
+
+/** The four modal buttons, in the order the choice modal assigns the paths. */
+const PHILOSOPHY_BUTTON_IDS = ['#modalConfirm', '#modalCancel', '#modalExtraChoice1', '#modalExtraChoice2'];
+
+/**
+ * Raise the real philosophy choice modal.
+ *
+ * The modal is only ever built inside `startInvestigateStarTimer`'s completion
+ * branch, so reaching it through the game's own code — rather than calling
+ * `callPopupModal` with labels of our own — is the only way to prove that what
+ * `game.js` passes as the four labels is what the player sees. The timer is a
+ * repeating `timerManagerDelta` timer that counts `adjustment[0]` down, so
+ * seeding a short remainder and advancing the delta timers fires it in
+ * milliseconds instead of the usual forty minutes.
+ *
+ * Returns the four rendered button labels.
+ */
+async function openPhilosophyModal(game) {
+  await game.withMods((m) => {
+    // The modal gate is `!getPlayerPhilosophy()`. The countdown pauses unless
+    // the telescope has power, and `canContinue` is re-derived from
+    // `getPowerOnOff()` every frame, so setting the flag directly is not enough
+    // — the power itself has to be on, and neither of the two competing
+    // telescope actions may be running.
+    m.cg.setPlayerPhilosophy(undefined);
+    m.cg.setPowerOnOff(true);
+    m.cg.setCurrentlySearchingAsteroid(false);
+    m.cg.setCurrentlyPillagingVoid(false);
+    m.cg.setStarInvestigationTimerCanContinue(true);
+    m.game.startInvestigateStarTimer([400]);
+  });
+
+  // The timer is repeating with `durationMs: 0`, so the live frame loop drives
+  // it with real deltas. Waiting is the honest way to run it down.
+  await game.page.locator('#modalExtraChoice2').waitFor({ state: 'visible', timeout: 15000 });
+
+  return Promise.all(
+    PHILOSOPHY_BUTTON_IDS.map((id) => game.page.locator(id).innerText().then((t) => t.trim()))
+  );
+}
+
 const SPECIAL_ABILITIES = {
   constructor: 'spaceStorageTankResearch',
   supremacist: 'fleetHolograms',
@@ -184,32 +226,97 @@ test.describe('Philosophies — choosing one', () => {
     expect(copy.header.length).toBeGreaterThan(0);
     expect(typeof copy.content).toBe('string');
     expect(copy.content.length).toBeGreaterThan(0);
-    // The four paths are named by the modal's *button labels*, not its body
-    // copy, and those labels are hardcoded English literals in game.js — there
-    // is no catalogue key for them. See known-issues.md #13; this pins the
-    // current behaviour so the gap is visible rather than assumed closed.
+    // The paths are named by the modal's *button labels*, not its body copy, so
+    // the body legitimately does not mention them. The labels themselves are
+    // asserted by the two specs below.
     for (const philosophy of PHILOSOPHIES) {
       expect(copy.content.toLowerCase()).not.toContain(philosophy);
     }
   });
 
-  test('the four philosophy button labels have no catalogue entry, so they cannot translate', async ({ game }) => {
+  test('every philosophy name resolves from the catalogue in all five languages', async ({ game }) => {
     await game.boot();
 
-    // Regression guard for known-issues.md #13. If a key is ever added for these
-    // labels this test fails, which is the prompt to wire it into the modal and
-    // delete this spec.
-    const missing = await game.withMods((m, philosophies) => philosophies.filter((philosophy) => {
-      const candidates = [
-        `philosophyName${philosophy.charAt(0).toUpperCase()}${philosophy.slice(1)}`,
-        `buttonPhilosophy${philosophy.charAt(0).toUpperCase()}${philosophy.slice(1)}`,
-        `modalPhilosophy${philosophy.charAt(0).toUpperCase()}${philosophy.slice(1)}Label`
-      ];
-      // localize() returns the key itself when there is no catalogue entry.
-      return candidates.every((key) => m.loc.localize(key, 'en') === key);
-    }), PHILOSOPHIES);
+    // known-issues.md #13: these four labels used to be hardcoded English
+    // literals in game.js with no catalogue key behind them at all. The names
+    // now live in the catalogue, so the decision about how they read in each
+    // language lives in one place.
+    const problems = await game.withMods((m, config) => {
+      const { philosophies, languages } = config;
+      const issues = [];
 
-    expect(missing).toEqual(PHILOSOPHIES);
+      for (const language of languages) {
+        for (const philosophy of philosophies) {
+          const key = `philosophyName${philosophy.charAt(0).toUpperCase()}${philosophy.slice(1)}`;
+          const value = m.loc.localize(key, language);
+          // localize() hands back the key itself when the entry is missing.
+          if (!value || value === key) {
+            issues.push(`${language}/${key}: unresolved`);
+          } else if (!value.trim()) {
+            issues.push(`${language}/${key}: blank`);
+          }
+        }
+      }
+      return issues;
+    }, { philosophies: PHILOSOPHIES, languages: LANGUAGES });
+
+    expect(problems).toEqual([]);
+  });
+
+  test('the modal renders the localized philosophy names, not English literals', async ({ game }) => {
+    // French is the check language because all four names differ from their
+    // English form there, so an untranslated label cannot pass by coincidence.
+    // German would not do: "Expansionist" is the same word in both languages.
+    await game.boot({ language: 'fr' });
+
+    const labels = await game.withMods((m, philosophies) => {
+      const french = {};
+      const english = {};
+      for (const philosophy of philosophies) {
+        const key = `philosophyName${philosophy.charAt(0).toUpperCase()}${philosophy.slice(1)}`;
+        french[philosophy] = m.loc.localize(key, 'fr');
+        english[philosophy] = m.loc.localize(key, 'en');
+      }
+      return { french, english };
+    }, PHILOSOPHIES);
+
+    // Guard the guard: if a French value were ever set equal to its English
+    // form this spec would silently stop proving anything.
+    for (const philosophy of PHILOSOPHIES) {
+      expect(
+        labels.french[philosophy],
+        `${philosophy} must differ between fr and en for this spec to be meaningful`
+      ).not.toBe(labels.english[philosophy]);
+    }
+
+    const rendered = await openPhilosophyModal(game);
+    expect(rendered.sort()).toEqual(Object.values(labels.french).sort());
+  });
+
+  test('no philosophy button clips its translated label in any language', async ({ game }) => {
+    // The class of bug known-issues.md #7 covered: a label that only fits in
+    // English. These four names are the longest strings on the modal, and
+    // several translations are half again as long as the English.
+    const clipped = [];
+
+    for (const language of LANGUAGES) {
+      await game.boot({ language });
+      await openPhilosophyModal(game);
+
+      const overflows = await game.page.evaluate((ids) =>
+        ids
+          .map((id) => document.querySelector(id))
+          .filter((b) => b && b.offsetParent !== null)
+          // scrollWidth exceeding clientWidth is text the box cannot show. One
+          // pixel of slack absorbs sub-pixel rounding at fractional zoom.
+          .filter((b) => b.scrollWidth > b.clientWidth + 1)
+          .map((b) => ({ id: b.id, text: b.innerText.trim(), content: b.scrollWidth, box: b.clientWidth })),
+      PHILOSOPHY_BUTTON_IDS);
+
+      overflows.forEach((o) => clipped.push({ language, ...o }));
+    }
+
+    expect(clipped).toEqual([]);
   });
 
   test('each choice has its own localized confirmation notification in all five languages', async ({ game }) => {

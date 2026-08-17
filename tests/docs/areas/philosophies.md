@@ -19,6 +19,8 @@ The four permanent player paths chosen once and affecting the whole account ther
 - [ ] The Supremacist ability guarantees vassalization where other paths must roll
 - [ ] The choice survives save/load, and the debug scenario defaults run 1 to Voidborn
 - [ ] The four choice-button labels are hardcoded English (known-issues #13)
+- [ ] Every philosophy name resolves from the catalogue in all five languages
+- [ ] The modal renders localized names and no button clips its translated label
 
 ## Status meaning
 

@@ -110,14 +110,12 @@ const CONSTRUCTED_FAMILY_SIZES = {
 };
 
 /**
- * Keys with a known unbalanced HTML tag, allowlisted so the sweep below can stay
- * strict about everything else. See tests/docs/known-issues.md #9 — this one is a
- * stray `</span>` with no opening tag, left behind when the string was extracted
- * out of a hardcoded literal. Browsers discard an unmatched close tag, so it is
- * currently harmless; removing it from all five languages closes the entry, and
- * this allowlist does not need to be emptied for that to pass.
+ * Keys allowed to carry an unbalanced HTML tag. **Empty, deliberately** — see
+ * tests/docs/known-issues.md #9, which was the last entry here. Keeping the list
+ * empty is itself the assertion: any key whose markup does not balance is a
+ * regression to fix in the catalogue, not an item to add below.
  */
-const KNOWN_UNBALANCED_KEYS = ['modalPlayerLeaderPhilosophyContentText'];
+const KNOWN_UNBALANCED_KEYS = [];
 
 /** Source files the shipped game actually loads. Excludes builds/dist/tests. */
 function shippedSourceFiles() {

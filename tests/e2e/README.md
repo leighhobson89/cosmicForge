@@ -202,6 +202,26 @@ game is actively producing will drift between them and mask the change under
 test — this is what makes the `stockLoss` assertion in `random-events` exact
 rather than approximate.
 
+**Stage state relative to the game's own limits, not to a flat number.** Setting
+every resource to the same quantity looks tidy and is wrong: `helium`'s storage
+cap is 120, so a staged 137 is silently clamped and the assertion that follows
+compares against a figure the game already overwrote. Read the cap and stage a
+fraction of it.
+
+**Reach a modal through the code that raises it.** Calling `callPopupModal` with
+labels of the spec's own proves only that the modal renders strings. The
+philosophy specs drive `startInvestigateStarTimer` with a short remainder
+instead, so what `game.js` passes as the four button labels is what gets
+asserted. The same applies to any handler-built UI: build it the way the game
+does, or the wiring between the two goes untested.
+
+**Pick the check language so a bug cannot pass by coincidence.** Asserting that
+a German label differs from its English form proves nothing for
+"Expansionist" — the word is identical in both. French was chosen for the
+philosophy-name specs because all four names differ there, and the spec asserts
+that they differ *before* comparing against the rendered modal, so it fails loudly
+if a future catalogue edit makes it vacuous.
+
 ### Measuring performance
 
 `tests/e2e/performance/` opens a CDP session for the counters that matter:
@@ -220,11 +240,26 @@ the shape of heap growth, not its direction** — caches make the heap creep up
 and then flatten, so a leak is distinguished by the second half of a run growing
 as much as the first, not by the series rising at all.
 
-**Known live bugs are worked around in the harness, not hidden.** See
-[`tests/docs/known-issues.md`](../docs/known-issues.md). Notably,
-`ensureCompoundRecipeTextInitialised()` exists because discovering an asteroid on
-run 1 currently kills the frame loop permanently; without it that crash would mask
-every later assertion in the spec.
+**A live bug must make the test fail. Never work around one.** This is the
+suite's governing rule. Do not weaken an assertion so a buggy path passes, do not
+add a harness helper whose job is to paper over a crash, and do not "pin both
+ends" of known-broken behaviour so the spec goes green either way. All three
+produce a suite that reports on itself rather than on the game.
+
+When a spec fails, first establish whether the game or the assumption is wrong —
+several first-draft assertions here have failed against perfectly intentional
+design, and tech prices dipping below their own prerequisite is one of them. If
+the assumption was wrong, withdraw it and say why in a comment. If the *game* is
+wrong, raise it with the maintainer with the evidence and a proposed source fix,
+and leave the spec failing until it is decided. Recording the defect in
+[`tests/docs/known-issues.md`](../docs/known-issues.md) is worth doing, but it is
+not a substitute for the failure: documenting a bug and then making the test pass
+anyway is the exact pattern this rule exists to prevent.
+
+The harness carries no bug workarounds today.
+`ensureCompoundRecipeTextInitialised()` used to seed state around known-issues #1
+and has been deleted now that the game initialises the table itself — leaving it
+in would have hidden a re-regression.
 
 ## Layout
 

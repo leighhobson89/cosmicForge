@@ -1,8 +1,8 @@
 # e2e / research
 
-**Research** — 🟠 AMBER
+**Research** — 🟢 GREEN
 
-Research point generation, research buildings and the research autobuyer.
+Research point generation, the three research buildings, and how research is spent on the tech tree.
 
 Specs for this area go in this folder, named `<scenario>.spec.js`.
 

@@ -16,12 +16,27 @@ Planning, reporting and how-to for the Cosmic Forge E2E test suite.
 
 ## Current state
 
-16 of 43 functional areas have specs and are green — **257 cases, all passing**:
-`achievements`, `antimatter`, `app-boot`, `ascendency`, `audio`, `autobuyers`,
-`battle`, `black-hole`, `colonise`, `compounds`, `cosmic-rip`, `cosmicopedia`,
-`demo-build`, `diplomacy`, `energy`, `localization`. The remaining areas are
-tracked in [coverage-report.md](coverage-report.md) as red (no coverage) or amber
-(partial legacy coverage only).
+30 of 43 functional areas are green — **552 specs, all passing**: `achievements`,
+`antimatter`, `app-boot`, `ascendency`, `audio`, `autobuyers`, `battle`,
+`black-hole`, `colonise`, `compounds`, `cosmic-rip`, `cosmicopedia`,
+`demo-build`, `diplomacy`, `energy`, `fleet-hangar`, `galactic-casino`,
+`galactic-market`, `localization`, `megastructures`, `news-ticker`, `notation`,
+`onboarding`, `performance`, `philosophies`, `random-events`, `rebirth`,
+`research`, `resources`, `rockets`.
+
+Three areas are amber — `save-load-cloud`, `technology` and `ui-navigation` —
+meaning partial coverage only: a legacy smoke test proving a path exists, or a
+focused spec file written alongside a bug fix rather than a sweep of the area.
+The remaining ten are red. The highest-risk gaps are `save-load-local`,
+`save-migration` and `starship`; all are tracked in
+[coverage-report.md](coverage-report.md).
+
+**A live bug is expected to make the suite fail.** Specs are written against the
+behaviour the game should have, not the behaviour it currently has, and defects
+found this way are fixed in the source rather than absorbed by the test. Fifteen
+have been found and fourteen fixed so far; see
+[known-issues.md](known-issues.md), where each closed entry names the regression
+spec that now guards it.
 
 `localization` is the one green area covering a feature that is still only half
 built. Its specs deliberately mix absolute assertions with *ratchets* — recorded

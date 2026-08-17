@@ -11123,10 +11123,10 @@ export function startInvestigateStarTimer(adjustment) {
                             showHideModal();
                             removeModalButtonTooltips();
                         },
-                        confirmLabel: 'CONSTRUCTOR',
-                        cancelLabel: 'SUPREMACIST',
-                        extra1Label: 'VOIDBORN',
-                        extra2Label: 'EXPANSIONIST',
+                        confirmLabel: localize('philosophyNameConstructor', getLanguage()),
+                        cancelLabel: localize('philosophyNameSupremacist', getLanguage()),
+                        extra1Label: localize('philosophyNameVoidborn', getLanguage()),
+                        extra2Label: localize('philosophyNameExpansionist', getLanguage()),
                         setupToolTips: true
                     });
                 }
@@ -12766,8 +12766,14 @@ export function updateRocketDescription() {
 export function launchRocket(rocket) {
     setAchievementFlagArray('launchRocket', 'add');
     setLaunchedRockets(rocket, 'add');
-    document.getElementById(`space${capitaliseString(rocket)}AutoBuyerRow`).classList.add('invisible');
     showNotification(localize('notificationRocketLaunched', getLanguage()).replace('{rocketName}', getRocketUserName(rocket)), 'info', 3000, 'rocket');
+
+    // The fuel autobuyer row only exists while this rocket's option pane is the
+    // one on screen, because drawTab6Content builds it per pane. Hiding it is
+    // presentation, so it comes last and is guarded: the launch itself and the
+    // player's confirmation of it must not depend on which pane is open.
+    const autoBuyerRow = document.getElementById(`space${capitaliseString(rocket)}AutoBuyerRow`);
+    autoBuyerRow?.classList.add('invisible');
 }
 
 export function toggleAllPower() {

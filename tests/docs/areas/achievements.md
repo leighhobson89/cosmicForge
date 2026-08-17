@@ -18,6 +18,8 @@ Unlock conditions, notifications, icons and tooltip descriptions across the full
 - [ ] Tooltip descriptions refresh with live values
 - [ ] Achievement state survives rebirth and save/load
 - [ ] The achievement flag array does not grow unbounded
+- [ ] Discovering an asteroid on run 1 does not stop the frame loop
+- [ ] The compound recipe table is a real object before any rebirth
 
 ## Status meaning
 

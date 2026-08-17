@@ -1,8 +1,8 @@
 # e2e / rockets
 
-**Rockets & Launch Pad** — 🔴 RED
+**Rockets & Launch Pad** — 🟢 GREEN
 
-Rocket construction, fuelling, naming and launch lifecycle.
+Rocket construction, fuelling, naming and the launch lifecycle across all four rockets.
 
 Specs for this area go in this folder, named `<scenario>.spec.js`.
 

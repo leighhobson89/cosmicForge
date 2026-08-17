@@ -182,21 +182,30 @@
       "id": "resources",
       "title": "Resources",
       "group": "economy",
-      "status": "amber",
+      "status": "green",
       "risk": "high",
       "legacy": [
         "earlyLoop.test.js"
       ],
-      "summary": "The eight base resources: manual extraction, tiered buildings, storage caps and selling.",
+      "summary": "The eight extractable base resources plus solar: accrual, four autobuyer tiers, storage caps and selling.",
       "tests": [
-        "Each of the eight resources extracts manually and accrues correctly",
-        "Each of four building tiers increases rate by the documented amount",
-        "Storage cap is enforced — quantity never exceeds capacity",
-        "Sell and sell-all produce the correct cash at the current price",
-        "Price scaling on repeat purchase matches the cost multiplier",
-        "Resources reveal in the UI only once their unlock condition is met",
-        "Rate displays match actual accrual over a sampled interval"
-      ]
+        "Every resource declares the fields the frame loop reads",
+        "Every resource has four autobuyer tiers with a rate, price and DOM anchor",
+        "Each tier extracts faster and costs more than the one below it",
+        "Production never carries a resource past its storage cap, for any resource or all at once",
+        "A resource sitting exactly at capacity gains nothing further",
+        "The accrual rate is the sum of rate × quantity across every active tier",
+        "An inactive tier contributes nothing",
+        "Production stops entirely when the power is off",
+        "A stocked, powered resource actually accrues over a sampled interval",
+        "Selling all unlocked resources pays exactly quantity × saleValue and zeroes the stock",
+        "Selling ignores resources the player has not unlocked",
+        "Selling with nothing in stock changes neither cash nor stock",
+        "Solar has no sale value and so cannot be sold",
+        "Every resource name resolves to real copy in all five languages",
+        "Quantities, caps and tier purchases survive a save/load round trip"
+      ],
+      "specCount": 19
     },
     {
       "id": "compounds",
@@ -262,19 +271,27 @@
       "id": "research",
       "title": "Research",
       "group": "economy",
-      "status": "amber",
+      "status": "green",
       "risk": "high",
       "legacy": [
         "researchTech.test.js"
       ],
-      "summary": "Research point generation, research buildings and the research autobuyer.",
+      "summary": "Research point generation, the three research buildings, and how research is spent on the tech tree.",
       "tests": [
-        "Research accrues at the displayed rate",
-        "Research buildings increase the rate as documented",
-        "Research autobuyer appears at the right gate and purchases correctly",
-        "Research is spent correctly on tech purchase and cannot go negative",
-        "Rate responds to power availability"
-      ]
+        "All three research buildings exist with the documented rate, price and energy cost",
+        "Each building is both dearer and faster than the one below it",
+        "The rate is the sum of rate × quantity across every active building",
+        "The Science Lab stops contributing when the power is off, but the Kit and Club do not",
+        "Research accrues over a sampled interval when powered, and does not move with no buildings",
+        "The displayed rate is a real formatted number, never NaN or a raw key",
+        "Buying a tech deducts exactly its price, and research never goes negative",
+        "Every tech declares a positive price and a unique render position",
+        "Every tech prerequisite names a tech that exists",
+        "The research autobuyer starts inactive and disabled",
+        "Research quantity and building counts survive serialisation",
+        "Granting every tech through the debug menu leaves the console clean"
+      ],
+      "specCount": 15
     },
     {
       "id": "technology",
@@ -316,18 +333,28 @@
       "id": "rockets",
       "title": "Rockets & Launch Pad",
       "group": "space",
-      "status": "red",
+      "status": "green",
       "risk": "medium",
       "legacy": [],
-      "summary": "Rocket construction, fuelling, naming and launch lifecycle.",
+      "summary": "Rocket construction, fuelling, naming and the launch lifecycle across all four rockets.",
       "tests": [
-        "Rocket build consumes correct materials and completes on schedule",
-        "Fuelling consumes the right fuel type and rate",
-        "Rocket renaming persists and displays everywhere",
-        "Launch requires sufficient fuel and blocks otherwise",
-        "In-flight rockets resume correctly after save/load",
-        "Casino rocket-warp prize correctly fast-forwards a rocket"
-      ]
+        "All four rockets exist with parts, price and a fuel requirement",
+        "Every rocket is paid for in three real compounds",
+        "Later rockets need more parts than earlier ones",
+        "Every rocket has a fuel autobuyer with a rate, price and energy cost",
+        "No rocket is built, fuelling or launched on a fresh game",
+        "getFuelLevel reports the exact percentage loaded and clamps to 0..100",
+        "Every rocket reports a full tank at its own capacity, not a shared one",
+        "The debug chain builds the launch pad, scanner and all four rockets to completion",
+        "Launching records the rocket, sets the achievement flag and announces it by the player’s name for it",
+        "Launching succeeds regardless of which option pane is open",
+        "Each rocket launches independently of the others",
+        "A renamed rocket keeps its name, renaming one does not rename another, and names survive serialisation",
+        "Resetting a rocket for its next journey empties its tank",
+        "The rocket direction flag round-trips per rocket",
+        "Launch notifications resolve from the catalogue in all five languages with a {rocketName} placeholder"
+      ],
+      "specCount": 20
     },
     {
       "id": "antimatter",
@@ -486,9 +513,12 @@
         "Settled count correctly drives cosmic rip galactic points",
         "Galactic tab unlocks on first qualifying settlement",
         "New system's star type bonuses take effect immediately",
-        "Settlement is idempotent — a system cannot be settled twice"
+        "Settlement is idempotent — a system cannot be settled twice",
+        "Settling the same star twice, or under different casing, awards only one galactic point",
+        "Blank and non-string values are refused rather than counted",
+        "A save carrying duplicate settled stars is normalised on restore"
       ],
-      "specCount": 11
+      "specCount": 19
     },
     {
       "id": "galactic-market",
@@ -551,7 +581,7 @@
       "id": "rebirth",
       "title": "Rebirth",
       "group": "meta",
-      "status": "amber",
+      "status": "green",
       "risk": "high",
       "legacy": [],
       "summary": "The prestige reset. The single most destructive operation in the game if it misbehaves.",
@@ -561,15 +591,17 @@
         "A refused rebirth leaves the run byte-for-byte unchanged and writes nothing to the console",
         "The refusal is reported to the player through the catalogue, in the active language",
         "The rebirth button is genuinely disabled — not merely coloured red — until a rebirth is both earned and completable",
-        "Rebirth resets exactly the intended state and nothing more",
-        "AP carryover matches the amount shown in the warning modal",
-        "Achievements, perks and philosophy survive rebirth",
-        "Run counter increments and statRun-gated content behaves correctly on run 1 vs later",
+        "The run counter increments by exactly one",
+        "Resources and compounds are emptied back to their starting stock",
+        "The destination record is consumed, so a second rebirth without a fresh scan is refused",
+        "Ascendency points carry over and are never reduced",
+        "Achievements, perks and the chosen philosophy survive the reset",
+        "Settled stars accumulate rather than resetting, since galactic points derive from that list",
         "Cancelling the rebirth modal changes nothing, and confirming it performs the rebirth",
         "Closing the cosmic rip does not block a later rebirth",
-        "Post-rebirth state is immediately playable with no stale UI"
+        "The frame loop, resource production and the current tab are all live immediately afterwards"
       ],
-      "specCount": 10
+      "specCount": 22
     },
     {
       "id": "philosophies",
@@ -586,9 +618,11 @@
         "The Voidborn AP bonus applies only from run 2, as documented",
         "The Supremacist ability guarantees vassalization where other paths must roll",
         "The choice survives save/load, and the debug scenario defaults run 1 to Voidborn",
-        "The four choice-button labels are hardcoded English (known-issues #13)"
+        "The four choice-button labels are hardcoded English (known-issues #13)",
+        "Every philosophy name resolves from the catalogue in all five languages",
+        "The modal renders localized names and no button clips its translated label"
       ],
-      "specCount": 19
+      "specCount": 21
     },
     {
       "id": "achievements",
@@ -604,9 +638,11 @@
         "Notifications are localized and show the correct icon",
         "Tooltip descriptions refresh with live values",
         "Achievement state survives rebirth and save/load",
-        "The achievement flag array does not grow unbounded"
+        "The achievement flag array does not grow unbounded",
+        "Discovering an asteroid on run 1 does not stop the frame loop",
+        "The compound recipe table is a real object before any rebirth"
       ],
-      "specCount": 9
+      "specCount": 12
     },
     {
       "id": "black-hole",

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | 🟠 AMBER |
+| **Status** | 🟢 GREEN |
 | **Risk if broken** | High |
 | **Group** | Meta Progression |
 | **Spec folder** | `tests/e2e/rebirth/` |
@@ -17,17 +17,19 @@ The prestige reset. The single most destructive operation in the game if it misb
 - [ ] A refused rebirth leaves the run byte-for-byte unchanged and writes nothing to the console
 - [ ] The refusal is reported to the player through the catalogue, in the active language
 - [ ] The rebirth button is genuinely disabled — not merely coloured red — until a rebirth is both earned and completable
-- [ ] Rebirth resets exactly the intended state and nothing more
-- [ ] AP carryover matches the amount shown in the warning modal
-- [ ] Achievements, perks and philosophy survive rebirth
-- [ ] Run counter increments and statRun-gated content behaves correctly on run 1 vs later
+- [ ] The run counter increments by exactly one
+- [ ] Resources and compounds are emptied back to their starting stock
+- [ ] The destination record is consumed, so a second rebirth without a fresh scan is refused
+- [ ] Ascendency points carry over and are never reduced
+- [ ] Achievements, perks and the chosen philosophy survive the reset
+- [ ] Settled stars accumulate rather than resetting, since galactic points derive from that list
 - [ ] Cancelling the rebirth modal changes nothing, and confirming it performs the rebirth
 - [ ] Closing the cosmic rip does not block a later rebirth
-- [ ] Post-rebirth state is immediately playable with no stale UI
+- [ ] The frame loop, resource production and the current tab are all live immediately afterwards
 
 ## Status meaning
 
-🟠 **AMBER** — Partial coverage — a smoke test proves the path exists, but branches, failure modes and edge cases are unverified.
+🟢 **GREEN** — Comprehensive coverage — happy path, branches, boundaries and failure modes all asserted.
 
 ---
 

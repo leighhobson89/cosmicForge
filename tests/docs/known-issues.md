@@ -1,14 +1,18 @@
 # Known Issues Found by the E2E Suite
 
 Live defects discovered while building the test suite. Each is reproducible.
-Entries marked ✅ FIXED have been resolved and carry a regression spec; the rest
-are worked around in the harness so they do not mask unrelated failures.
+Entries marked ✅ FIXED have been resolved and carry a regression spec.
+
+**Open entries are not worked around.** A live bug makes the tests that meet it
+fail, by design — a suite that routes around its own findings is not measuring
+anything. Where an entry below still describes a harness workaround, that is a
+record of how it used to be handled and is removed as the entry is closed.
 
 ---
 
-## 1. Discovering an asteroid permanently freezes the game on run 1
+## 1. Discovering an asteroid permanently freezes the game on run 1 — ✅ FIXED
 
-**Severity: critical — silent, unrecoverable freeze during normal play.**
+**Severity was: critical — silent, unrecoverable freeze during normal play.**
 
 ### Reproduction
 
@@ -73,40 +77,79 @@ Any one of these stops the freeze; doing all three is better:
 `addAchievementBonus` also iterates `getResourceDataObject('compounds')` with a
 `for...in`, which includes the `version` key alongside real compounds.
 
-### Harness workaround
+### Resolution
 
-`GameHarness.ensureCompoundRecipeTextInitialised()` seeds the structure before any
-scenario setup runs. Remove it once this is fixed, and add a regression spec:
+Closed by the first of the three suggested fixes, in `constantsAndGlobalVars.js`:
+`compoundCreateDropdownRecipeText` is now `null` until
+`ensureCompoundCreateDropdownRecipeText()` builds it on first read, and every
+accessor goes through that. A run-1 read therefore returns a real table rather
+than a function, so `addAchievementBonus` has an object to walk and the frame
+loop survives.
 
-```js
-test('discovering an asteroid does not stop the frame loop', async ({ game }) => {
-  await game.boot();
-  await game.debugClick('add10AsteroidsButton');
-  const a = await game.withMods((m) => m.cg.getGameActiveCountTime());
-  await game.page.waitForTimeout(1000);
-  const b = await game.withMods((m) => m.cg.getGameActiveCountTime());
-  expect(JSON.stringify(b)).not.toBe(JSON.stringify(a));
-  expect(game.significantErrors()).toEqual([]);
-});
-```
+The harness workaround, `GameHarness.ensureCompoundRecipeTextInitialised()`, has
+been **deleted** — it was seeding state the game now initialises itself, and
+leaving it in place would have hidden a re-regression.
+
+Note the other two suggested fixes were not taken: `addAchievementBonus` still
+dereferences the table unguarded, and `gameLoop` still re-arms
+`requestAnimationFrame` only at the end of its body. Any future throw inside
+`checkForAchievements` will therefore still end the frame loop permanently. That
+is worth closing on its own merits, and is why the regression cover below asserts
+frame-loop liveness rather than just the table's type.
+
+Covered by `tests/e2e/achievements/run1-frame-loop.spec.js` (3 specs): the table
+is a real object on run 1, discovering an asteroid leaves the frame loop
+advancing with a clean console, and the achievement that triggered the freeze
+still grants. The run counter is asserted to be 1 first, so the spec cannot
+quietly pass by running after a rebirth.
 
 ---
 
-## 2. `setSettledStars()` is an unguarded push
+## 2. `setSettledStars()` is an unguarded push — ✅ FIXED
 
-**Severity: low — latent.**
+**Severity was: low — latent, but the blast radius was permanent upgrades.**
 
-`constantsAndGlobalVars.js:5854` is simply `settledStars.push(value)`. It does not
-deduplicate and does not normalise case, while the gating logic elsewhere compares
-lowercase names and galactic points are derived from `settledStars.length`.
+`setSettledStars` was simply `settledStars.push(value)`: no deduplication, no
+case normalisation, no type check. Galactic points are `settledStars.length - 1`
+and galactic points buy permanent upgrades, so anything reaching that list
+awarded a point that nothing downstream could tell from an earned one.
 
-Callers currently lowercase before calling (`game.js:15136`), so this is not a live
-bug — but a single caller that forgets would silently inflate galactic points and
-AP with no validation to catch it. Worth normalising and deduplicating inside the
-setter.
+Callers lowercased before calling (`game.js:15136`), so no live path inflated the
+count — but that was a convention rather than a guarantee, and the tell was that
+**every** read site lowercased defensively before comparing. Fifteen or so call
+sites each worked around the same missing invariant separately.
 
-The colonise specs assert the invariants that must hold on the real list rather
-than on the setter, so they will keep passing if this is tightened.
+### Resolution
+
+The invariant now lives in one place. `setSettledStars` normalises (trim +
+lowercase), rejects non-strings and blanks, refuses duplicates, and returns
+whether the list actually grew:
+
+```js
+export function setSettledStars(value) {
+    const name = normaliseSettledStarName(value);
+    if (name === null) return false;
+    if (settledStars.some((existing) => normaliseSettledStarName(existing) === name)) return false;
+    settledStars.push(name);
+    return true;
+}
+```
+
+The save-restore path was fixed with it. `restoreGameStatus` assigned
+`gameState.settledStars` directly and so bypassed the setter entirely, meaning a
+save written before this change could carry duplicates and keep paying out on
+every load. It now runs through `normaliseSettledStarsList`, which applies the
+same rules and falls back to the starting system if nothing survives.
+
+The defensive lowercasing at the read sites was left in place: it is harmless,
+and removing fifteen call sites' worth of it is a separate change with its own
+risk.
+
+Covered by `tests/e2e/colonise/settled-stars.spec.js` (8 specs): duplicates,
+casing variants, surrounding whitespace, blanks and non-strings are each refused
+without moving the count; the stored form is normalised; galactic points track
+distinct systems only; and a list rebuilt from a duplicate-carrying save
+collapses to `['spica', 'vega']`.
 
 ---
 
@@ -440,19 +483,22 @@ behaviour and would fail if one were added.
 
 ---
 
-## 9. Stray `</span>` in `modalPlayerLeaderPhilosophyContentText`
+## 9. Stray `</span>` in `modalPlayerLeaderPhilosophyContentText` — ✅ FIXED
 
-**Severity: low — cosmetic.**
+**Severity was: low — cosmetic.**
 
-All five languages end this value with a `</span>` that has no opening tag,
+All five languages ended this value with a `</span>` that had no opening tag,
 left behind when the string was extracted out of a hardcoded literal. The value
-is rendered through `innerHTML` in the philosophy-choice modal
-(`game.js:10956`); browsers discard an unmatched closing tag, so nothing is
-visibly broken today.
+is rendered through `innerHTML` in the philosophy-choice modal; browsers discard
+an unmatched closing tag, so nothing was visibly broken.
 
-Removing the four characters from each of the five values closes it. The
-catalogue-integrity spec allowlists this one key and fails on any other
-unbalanced tag; the allowlist does not need to be emptied when the fix lands.
+### Resolution
+
+The seven stray characters are removed from all five values in
+`localization.json`. `KNOWN_UNBALANCED_KEYS` in
+`tests/e2e/localization/catalogue-integrity.spec.js` is now **empty**, and
+keeping it empty is itself the assertion: any key whose markup does not balance
+is a regression to fix in the catalogue rather than an entry to add to a list.
 
 ---
 
@@ -635,9 +681,10 @@ path still asserts that a forced clue names the manuscript's star.
 
 ---
 
-## 13. The philosophy choice modal's four buttons are hardcoded English
+## 13. The philosophy choice modal's four buttons are hardcoded English — ✅ FIXED
 
-**Severity: low — cosmetic, but on the one screen that makes a permanent choice.**
+**Severity was: low — cosmetic, but on the one screen that makes a permanent
+choice.**
 
 ### Reproduction
 
@@ -667,17 +714,129 @@ This is the same class of gap as the `data-loc` sweep in
 [`docs/localization/status.md`](../../docs/localization/status.md) item 5 —
 a statically-authored label with no key behind it.
 
-### Suggested fix
+### Resolution
 
-Add four keys (`philosophyNameConstructor` and so on) across the five language
-files and swap the literals for `localize(...)` calls. Whether the four names
-should translate at all or stay as proper nouns is a content decision, which is
-why this is reported rather than fixed here — but either way the labels should
-come from the catalogue so the decision lives in one place.
+Four keys — `philosophyNameConstructor`, `philosophyNameSupremacist`,
+`philosophyNameVoidborn`, `philosophyNameExpansionist` — were added to all five
+language sections, and `game.js` now passes `localize(...)` for each of the four
+labels instead of a literal. The names are genuinely translated rather than
+routed through the catalogue in English:
+
+| Key | en | es | de | it | fr |
+|---|---|---|---|---|---|
+| Constructor | CONSTRUCTOR | CONSTRUCTOR | KONSTRUKTEUR | COSTRUTTORE | CONSTRUCTEUR |
+| Supremacist | SUPREMACIST | SUPREMACISTA | SUPREMATIST | SUPREMATISTA | SUPRÉMACISTE |
+| Voidborn | VOIDBORN | NACIDO DEL VACÍO | LEERGEBOREN | NATO DAL VUOTO | NÉ DU VIDE |
+| Expansionist | EXPANSIONIST | EXPANSIONISTA | EXPANSIONIST | ESPANSIONISTA | EXPANSIONNISTE |
+
+`LEERGEBOREN` and `NACIDO DEL VACÍO` are coinages for a term the source language
+invented, and are the two most worth a native reviewer's eye.
 
 ### Coverage
 
-`tests/e2e/philosophies/philosophies.spec.js` pins the current state from both
-ends: the modal body does *not* name the four paths, and no catalogue key exists
-for them under any of the obvious names. Adding a key fails the second spec,
-which is the prompt to wire it into the modal and delete that spec.
+`tests/e2e/philosophies/philosophies.spec.js`:
+
+- every name resolves from the catalogue in all five languages;
+- the **real** modal — raised through `startInvestigateStarTimer` rather than by
+  calling `callPopupModal` with labels of the spec's own — renders the French
+  names, French being the only language where all four differ from English, so
+  an untranslated label cannot pass by coincidence. German would not do:
+  "Expansionist" is the same word in both;
+- no button clips its label in any language, which is the failure mode
+  known-issues #7 covered and the one these longer strings could have
+  reintroduced.
+
+---
+
+## 14. `launchRocket()` mutates state, then dereferences a possibly-absent element — ✅ FIXED
+
+**Severity was: low in practice, but the ordering was the real fault.**
+
+### Reproduction
+
+Call `launchRocket('rocket1')` while any option pane other than that rocket's is
+open — which is every pane, on a fresh game, until the player navigates to it.
+
+```
+TypeError: Cannot read properties of null (reading 'classList')
+    at launchRocket (game.js:12769)
+```
+
+### Cause
+
+```js
+export function launchRocket(rocket) {
+    setAchievementFlagArray('launchRocket', 'add');
+    setLaunchedRockets(rocket, 'add');
+    document.getElementById(`space${capitaliseString(rocket)}AutoBuyerRow`).classList.add('invisible');
+    showNotification(…);   // never reached
+}
+```
+
+The fuel autobuyer row is built per pane by `drawTab6Content.js:1404`, so it
+exists only while that rocket's pane is the one on screen. The lookup is
+unguarded, and it sits **after** both state mutations and **before** the
+notification. So a throw leaves the rocket recorded as launched and the
+achievement flag set, while the player is never told it happened.
+
+The only caller is the launch button on that very row (`drawTab6Content.js:1456`),
+so a player cannot reach this today — the row must exist for the button to be
+clickable. It is the ordering that makes it worth fixing rather than the
+reachability: a presentation detail was placed where it could abort a completed
+state change.
+
+### Resolution
+
+The notification now fires before the DOM work, and the lookup is optional-chained:
+
+```js
+const autoBuyerRow = document.getElementById(`space${capitaliseString(rocket)}AutoBuyerRow`);
+autoBuyerRow?.classList.add('invisible');
+```
+
+Covered by `tests/e2e/rockets/rockets.spec.js`, which launches from a state with
+no pane open — four specs failed on this before the fix.
+
+---
+
+## 15. Two pairs of techs shared a tech-tree render position — ✅ FIXED
+
+**Severity was: low — ambiguous ordering, not a visual collision.**
+
+### Reproduction
+
+Inspect `idForRenderPosition` across `resourceDataObject.js`'s `techs` table.
+
+| Path | Slot | Techs |
+|---|--:|---|
+| 1 | 70 | `oxygenFusion`, `compounds` |
+| 4 | 700 | `glassManufacture`, `atmosphericTelescopes` |
+
+### Cause
+
+`sortRowsByRenderPosition` (`game.js:11732`) uses the value as a **sort key**,
+offsetting it by ±10000 for researched and affordable rows. Two techs sharing a
+value do not draw on top of each other; their relative order simply falls back
+to whatever order the sort received them in. `Array.prototype.sort` is stable,
+so the result is deterministic today — but it is decided by declaration order
+rather than by design, and it would change if the table were ever reordered.
+
+### Resolution
+
+`compounds` moved to 75 and `atmosphericTelescopes` to 750. Both sit between
+their neighbours, so the rendered order is unchanged apart from the tie being
+broken deliberately. `tests/e2e/research/research.spec.js` now asserts that no
+two techs share a render position, which catches the next one at the point it is
+introduced.
+
+### Related, and deliberately *not* changed
+
+Three techs cost less than their own prerequisite — `carbonFusion` (4300) after
+Noble Gas Collection (4500), `planetaryNavigation` (29000) after Rocket
+Composites (34000), and `hydroCarbons` (3800) after Basic Power Generation
+(4200). This is intended: a tech gated behind an expensive prerequisite may
+legitimately be cheap, and the game never promises monotonic pricing. The spec
+that assumed otherwise was withdrawn and replaced with one asserting that every
+prerequisite names a tech that actually exists — an invariant the game does rely
+on, since a mistyped prerequisite would leave its dependent permanently
+unreachable.

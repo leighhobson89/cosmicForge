@@ -2,27 +2,35 @@
 
 | | |
 |---|---|
-| **Status** | 🟠 AMBER |
+| **Status** | 🟢 GREEN |
 | **Risk if broken** | High |
 | **Group** | Core Economy |
 | **Spec folder** | `tests/e2e/resources/` |
 | **Existing coverage** | `tests/legacy/earlyLoop.test.js` |
 
-The eight base resources: manual extraction, tiered buildings, storage caps and selling.
+The eight extractable base resources plus solar: accrual, four autobuyer tiers, storage caps and selling.
 
 ## What should be tested
 
-- [ ] Each of the eight resources extracts manually and accrues correctly
-- [ ] Each of four building tiers increases rate by the documented amount
-- [ ] Storage cap is enforced — quantity never exceeds capacity
-- [ ] Sell and sell-all produce the correct cash at the current price
-- [ ] Price scaling on repeat purchase matches the cost multiplier
-- [ ] Resources reveal in the UI only once their unlock condition is met
-- [ ] Rate displays match actual accrual over a sampled interval
+- [ ] Every resource declares the fields the frame loop reads
+- [ ] Every resource has four autobuyer tiers with a rate, price and DOM anchor
+- [ ] Each tier extracts faster and costs more than the one below it
+- [ ] Production never carries a resource past its storage cap, for any resource or all at once
+- [ ] A resource sitting exactly at capacity gains nothing further
+- [ ] The accrual rate is the sum of rate × quantity across every active tier
+- [ ] An inactive tier contributes nothing
+- [ ] Production stops entirely when the power is off
+- [ ] A stocked, powered resource actually accrues over a sampled interval
+- [ ] Selling all unlocked resources pays exactly quantity × saleValue and zeroes the stock
+- [ ] Selling ignores resources the player has not unlocked
+- [ ] Selling with nothing in stock changes neither cash nor stock
+- [ ] Solar has no sale value and so cannot be sold
+- [ ] Every resource name resolves to real copy in all five languages
+- [ ] Quantities, caps and tier purchases survive a save/load round trip
 
 ## Status meaning
 
-🟠 **AMBER** — Partial coverage — a smoke test proves the path exists, but branches, failure modes and edge cases are unverified.
+🟢 **GREEN** — Comprehensive coverage — happy path, branches, boundaries and failure modes all asserted.
 
 ---
 

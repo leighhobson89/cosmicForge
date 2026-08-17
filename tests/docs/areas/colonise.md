@@ -17,6 +17,9 @@ Settling a conquered system and the state transition into the new run context.
 - [ ] Galactic tab unlocks on first qualifying settlement
 - [ ] New system's star type bonuses take effect immediately
 - [ ] Settlement is idempotent — a system cannot be settled twice
+- [ ] Settling the same star twice, or under different casing, awards only one galactic point
+- [ ] Blank and non-string values are refused rather than counted
+- [ ] A save carrying duplicate settled stars is normalised on restore
 
 ## Status meaning
 
