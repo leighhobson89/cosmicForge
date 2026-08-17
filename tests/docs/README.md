@@ -16,7 +16,7 @@ Planning, reporting and how-to for the Cosmic Forge E2E test suite.
 
 ## Current state
 
-16 of 43 functional areas have specs and are green — **240 cases, all passing**:
+16 of 43 functional areas have specs and are green — **257 cases, all passing**:
 `achievements`, `antimatter`, `app-boot`, `ascendency`, `audio`, `autobuyers`,
 `battle`, `black-hole`, `colonise`, `compounds`, `cosmic-rip`, `cosmicopedia`,
 `demo-build`, `diplomacy`, `energy`, `localization`. The remaining areas are

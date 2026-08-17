@@ -7,7 +7,9 @@ import { trackAnalyticsEvent } from './analytics.js';
 import { modalMegaStructureTechDysonSphere1Header, modalMegaStructureTechDysonSphere1Text, modalMegaStructureTechDysonSphere2Header, modalMegaStructureTechDysonSphere2Text, modalMegaStructureTechDysonSphere3Header, modalMegaStructureTechDysonSphere3Text, modalMegaStructureTechDysonSphere4Header, modalMegaStructureTechDysonSphere4Text, modalMegaStructureTechDysonSphere5Header, modalMegaStructureTechDysonSphere5Text, modalMegaStructureTechCelestialProcessingCore1Header, modalMegaStructureTechCelestialProcessingCore1Text, modalMegaStructureTechCelestialProcessingCore2Header, modalMegaStructureTechCelestialProcessingCore2Text, modalMegaStructureTechCelestialProcessingCore3Header, modalMegaStructureTechCelestialProcessingCore3Text, modalMegaStructureTechCelestialProcessingCore4Header, modalMegaStructureTechCelestialProcessingCore4Text, modalMegaStructureTechCelestialProcessingCore5Header, modalMegaStructureTechCelestialProcessingCore5Text, modalMegaStructureTechPlasmaForge1Header, modalMegaStructureTechPlasmaForge1Text, modalMegaStructureTechPlasmaForge2Header, modalMegaStructureTechPlasmaForge2Text, modalMegaStructureTechPlasmaForge3Header, modalMegaStructureTechPlasmaForge3Text, modalMegaStructureTechPlasmaForge4Header, modalMegaStructureTechPlasmaForge4Text, modalMegaStructureTechPlasmaForge5Header, modalMegaStructureTechPlasmaForge5Text, modalMegaStructureTechGalacticMemoryArchive1Header, modalMegaStructureTechGalacticMemoryArchive1Text, modalMegaStructureTechGalacticMemoryArchive2Header, modalMegaStructureTechGalacticMemoryArchive2Text, modalMegaStructureTechGalacticMemoryArchive3Header, modalMegaStructureTechGalacticMemoryArchive3Text, modalMegaStructureTechGalacticMemoryArchive4Header, modalMegaStructureTechGalacticMemoryArchive4Text, modalMegaStructureTechGalacticMemoryArchive5Header, modalMegaStructureTechGalacticMemoryArchive5Text, modalNanoBrokersUnlockHeader, modalNanoBrokersUnlockText, modalRocketCompositesTabUnlockHeader, modalRocketCompositesTabUnlockText, modalQuantumComputingTabUnlockHeader, modalQuantumComputingTabUnlockText, modalScienceLabsTabUnlockHeader, modalScienceLabsTabUnlockText, modalKnowledgeSharingTabUnlockHeader, modalKnowledgeSharingTabUnlockText, modalInterstellarTabUnlockHeader, modalInterstellarTabUnlockText, modalEnergyTabUnlockHeader, modalEnergyTabUnlockText, modalSpaceMiningTabUnlockText, modalSpaceMiningTabUnlockHeader, modalCompoundsTabUnlockHeader, modalCompoundsTabUnlockText, techNotificationMessages } from './descriptions.js';
 
 export function drawTab3Content(heading, optionContentElement) {
-    const optionElement = document.getElementById(getCurrentOptionPane().toLowerCase().replace(/\s(.)/g, (match, group1) => group1.toUpperCase()).replace(/\s+/g, '') + 'Option');
+    // getCurrentOptionPane() is null until the player opens their first pane,
+    // and relocalizeAll() can reach this before that has happened.
+    const optionElement = document.getElementById((getCurrentOptionPane() ?? '').toLowerCase().replace(/\s(.)/g, (match, group1) => group1.toUpperCase()).replace(/\s+/g, '') + 'Option');
     if (optionElement) {
         const warningIcon = optionElement.querySelector('span.attention-indicator');
         if (warningIcon && warningIcon.innerHTML.includes('⚠️')) {
@@ -61,7 +63,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 labelText: 'Science Kit:',
                 inputElements: [
                     createButton({
-                        text: `Add ${getResourceDataObject('research', ['upgrades', 'scienceKit', 'rate']) * getTimerRateRatio()} Research /s`,
+                        text: localize('buttonAddPerSecond', getLanguage()).replace('{rate}', getResourceDataObject('research', ['upgrades', 'scienceKit', 'rate']) * getTimerRateRatio()).replace('{resource}', localize('headerMainResearch', getLanguage())),
                         classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                         onClick: () => {
                             gain(1, 'scienceKitQuantity', 'scienceKit', false, null, 'scienceUpgrade', 'resources');
@@ -107,7 +109,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 labelText: 'Open Science Club:',
                 inputElements: [
                     createButton({
-                        text: `Add ${getResourceDataObject('research', ['upgrades', 'scienceClub', 'rate']) * getTimerRateRatio()} Research /s`,
+                        text: localize('buttonAddPerSecond', getLanguage()).replace('{rate}', getResourceDataObject('research', ['upgrades', 'scienceClub', 'rate']) * getTimerRateRatio()).replace('{resource}', localize('headerMainResearch', getLanguage())),
                         classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
                         onClick: () => {
                             gain(1, 'scienceClubQuantity', 'scienceClub', false, null, 'scienceUpgrade', 'resources');
@@ -153,7 +155,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 labelText: 'Open Science Lab:',
                 inputElements: [
                     createButton({
-                        text: `Add ${getResourceDataObject('research', ['upgrades', 'scienceLab', 'rate']) * getTimerRateRatio()} Research /s`,
+                        text: localize('buttonAddPerSecond', getLanguage()).replace('{rate}', getResourceDataObject('research', ['upgrades', 'scienceLab', 'rate']) * getTimerRateRatio()).replace('{resource}', localize('headerMainResearch', getLanguage())),
                         classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', ...demoExtraClasses],
                         onClick: () => {
                             gain(1, 'scienceLabQuantity', 'scienceLab', false, null, 'scienceUpgrade', 'resources');
@@ -203,7 +205,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Knowledge Sharing:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => { handleTechnologyButtonClick('knowledgeSharing', event); },
                             dataConditionCheck: 'techUnlock',
@@ -235,7 +237,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Fusion Theory:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => { handleTechnologyButtonClick('fusionTheory', event); },
                             dataConditionCheck: 'techUnlock',
@@ -267,7 +269,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Hydrogen Fusion:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => { handleTechnologyButtonClick('hydrogenFusion', event); },
                             dataConditionCheck: 'techUnlock',
@@ -299,7 +301,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Helium Fusion:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => { handleTechnologyButtonClick('heliumFusion', event); },
                             dataConditionCheck: 'techUnlock',
@@ -331,7 +333,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Carbon Fusion:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => { handleTechnologyButtonClick('carbonFusion', event); },
                             dataConditionCheck: 'techUnlock',
@@ -363,7 +365,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Neon Fusion:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => { handleTechnologyButtonClick('neonFusion', event); },
                             dataConditionCheck: 'techUnlock',
@@ -395,7 +397,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Oxygen Fusion:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => { handleTechnologyButtonClick('oxygenFusion', event); },
                             dataConditionCheck: 'techUnlock',
@@ -427,7 +429,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Silicon Fusion:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => { handleTechnologyButtonClick('siliconFusion', event); },
                             dataConditionCheck: 'techUnlock',
@@ -459,7 +461,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Noble Gas Collection:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => { handleTechnologyButtonClick('nobleGasCollection', event); },
                             dataConditionCheck: 'techUnlock',
@@ -491,7 +493,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Glass Manufacture:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => { handleTechnologyButtonClick('glassManufacture', event); },
                             dataConditionCheck: 'techUnlock',
@@ -523,7 +525,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Aggregate Mixing:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => { handleTechnologyButtonClick('aggregateMixing', event); },
                             dataConditionCheck: 'techUnlock',
@@ -555,7 +557,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Neutron Capture:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => { handleTechnologyButtonClick('neutronCapture', event); },
                             dataConditionCheck: 'techUnlock',
@@ -587,7 +589,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Quantum Computing:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => { handleTechnologyButtonClick('quantumComputing', event); },
                             dataConditionCheck: 'techUnlock',
@@ -619,7 +621,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Science Laboratories:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => { handleTechnologyButtonClick('scienceLaboratories', event); },
                             dataConditionCheck: 'techUnlock',
@@ -651,7 +653,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'HydroCarbons:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => { handleTechnologyButtonClick('hydroCarbons', event); },
                             dataConditionCheck: 'techUnlock',
@@ -683,7 +685,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Nano Tube Technology:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => { handleTechnologyButtonClick('nanoTubeTechnology', event); },
                             dataConditionCheck: 'techUnlock',
@@ -715,7 +717,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Nano Brokers:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => { handleTechnologyButtonClick('nanoBrokers', event); },
                             dataConditionCheck: 'techUnlock',
@@ -747,7 +749,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Stellar Cartography:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => { handleTechnologyButtonClick('stellarCartography', event); },
                             dataConditionCheck: 'techUnlock',
@@ -779,7 +781,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Basic Power Generation:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => { handleTechnologyButtonClick('basicPowerGeneration', event); },
                             dataConditionCheck: 'techUnlock',
@@ -811,7 +813,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Sodium Ion Power Storage:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => { handleTechnologyButtonClick('sodiumIonPowerStorage', event); },
                             dataConditionCheck: 'techUnlock',
@@ -843,7 +845,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Advanced Power Generation:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => { handleTechnologyButtonClick('advancedPowerGeneration', event); },
                             dataConditionCheck: 'techUnlock',
@@ -875,7 +877,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Solar Power Generation:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => { handleTechnologyButtonClick('solarPowerGeneration', event); },
                             dataConditionCheck: 'techUnlock',
@@ -907,7 +909,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Rocket Composites:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => {
                                 handleTechnologyButtonClick('rocketComposites', event);
@@ -941,7 +943,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Advanced Fuels:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => {
                                 handleTechnologyButtonClick('advancedFuels', event);
@@ -975,7 +977,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Planetary Navigation:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => {
                                 handleTechnologyButtonClick('planetaryNavigation', event);
@@ -1009,7 +1011,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Compounds:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => {
                                 handleTechnologyButtonClick('compounds', event);
@@ -1043,7 +1045,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Steel Foundries:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => {
                                 handleTechnologyButtonClick('steelFoundries', event);
@@ -1077,7 +1079,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Gigantic Turbines:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => {
                                 handleTechnologyButtonClick('giganticTurbines', event);
@@ -1111,7 +1113,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Atmospheric Telescopes:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => {
                                 handleTechnologyButtonClick('atmosphericTelescopes', event);
@@ -1145,7 +1147,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Fusion Efficiency I:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => {
                                 handleTechnologyButtonClick('fusionEfficiencyI', event);
@@ -1179,7 +1181,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Fusion Efficiency II:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => {
                                 handleTechnologyButtonClick('fusionEfficiencyII', event);
@@ -1213,7 +1215,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Fusion Efficiency III:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => {
                                 handleTechnologyButtonClick('fusionEfficiencyIII', event);
@@ -1249,7 +1251,7 @@ export function drawTab3Content(heading, optionContentElement) {
                         (() => {
                             const extraClasses = getDemoBuild() ? ['electron-purple-demo-button'] : [];
                             return createButton({
-                                text: `Research`,
+                                text: localize('buttonResearch', getLanguage()),
                                 classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock', ...extraClasses],
                                 onClick: (event) => {
                                     handleTechnologyButtonClick('orbitalConstruction', event);
@@ -1284,7 +1286,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Antimatter Engines:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => {
                                 handleTechnologyButtonClick('antimatterEngines', event);
@@ -1318,7 +1320,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'FTL Travel Theory:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => {
                                 handleTechnologyButtonClick('FTLTravelTheory', event);
@@ -1352,7 +1354,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Life Support Systems:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => {
                                 handleTechnologyButtonClick('lifeSupportSystems', event);
@@ -1386,7 +1388,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Starship Fleets:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => {
                                 handleTechnologyButtonClick('starshipFleets', event);
@@ -1420,7 +1422,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Stellar Scanners:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => {
                                 handleTechnologyButtonClick('stellarScanners', event);
@@ -1458,7 +1460,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Dyson Sphere Understanding',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => {
                                 gain('dysonSphereUnderstanding', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
@@ -1516,7 +1518,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Dyson Sphere Capabilities',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => {
                                 gain('dysonSphereCapabilities', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
@@ -1574,7 +1576,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Dyson Sphere Disconnect',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => {
                                 gain('dysonSphereDisconnect', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
@@ -1632,7 +1634,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Dyson Sphere Power',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => {
                                 gain('dysonSpherePower', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
@@ -1690,7 +1692,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Dyson Sphere Connect',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => {
                                 gain('dysonSphereConnect', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
@@ -1748,7 +1750,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Celestial Processing Core Understanding',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => {
                                 gain('celestialProcessingCoreUnderstanding', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
@@ -1806,7 +1808,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Celestial Processing Core Capabilities',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => {
                                 gain('celestialProcessingCoreCapabilities', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
@@ -1864,7 +1866,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Celestial Processing Core Disconnect',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => {
                                 gain('celestialProcessingCoreDisconnect', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
@@ -1922,7 +1924,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Celestial Processing Core Power',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => {
                                 gain('celestialProcessingCorePower', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
@@ -1980,7 +1982,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Celestial Processing Core Connect',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => {
                                 gain('celestialProcessingCoreConnect', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
@@ -2038,7 +2040,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Plasma Forge Understanding',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => {
                                 gain('plasmaForgeUnderstanding', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
@@ -2096,7 +2098,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Plasma Forge Capabilities',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => {
                                 gain('plasmaForgeCapabilities', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
@@ -2154,7 +2156,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Plasma Forge Disconnect',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => {
                                 gain('plasmaForgeDisconnect', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
@@ -2212,7 +2214,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Plasma Forge Power',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => {
                                 gain('plasmaForgePower', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
@@ -2270,7 +2272,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Plasma Forge Connect',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => {
                                 gain('plasmaForgeConnect', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
@@ -2328,7 +2330,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Galactic Memory Archive Understanding',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => {
                                 gain('galacticMemoryArchiveUnderstanding', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
@@ -2386,7 +2388,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Galactic Memory Archive Capabilities',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => {
                                 gain('galacticMemoryArchiveCapabilities', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
@@ -2444,7 +2446,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Galactic Memory Archive Disconnect',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => {
                                 gain('galacticMemoryArchiveDisconnect', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
@@ -2502,7 +2504,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Galactic Memory Archive Power',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => {
                                 gain('galacticMemoryArchivePower', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
@@ -2560,7 +2562,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Galactic Memory Archive Connect',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
                             onClick: (event) => {
                                 gain('galacticMemoryArchiveConnect', null, 'techUnlock', 'techUnlock', false, 'techs', 'resources');
@@ -2726,7 +2728,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Efficient Assembly:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'],
                             onClick: (event) => {
                                 gain('efficientAssembly', 'efficientAssembly', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
@@ -2769,7 +2771,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Laser Mining:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'],
                             onClick: (event) => {
                                 gain('laserMining', 'laserMining', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
@@ -2813,7 +2815,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Mass Compound Assembly:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'],
                             onClick: (event) => {
                                 gain('massCompoundAssembly', 'massCompoundAssembly', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
@@ -2857,7 +2859,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Energy Drones:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'],
                             onClick: (event) => {
                                 gain('energyDrones', 'energyDrones', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
@@ -2939,7 +2941,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Hangar Automation:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'],
                             onClick: (event) => {
                                 gain('hangarAutomation', 'hangarAutomation', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
@@ -2983,7 +2985,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Synthetic Plating:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'],
                             onClick: (event) => {
                                 gain('syntheticPlating', 'syntheticPlating', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
@@ -3027,7 +3029,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Antimatter Engine Minaturization:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'],
                             onClick: (event) => {
                                 gain('antimatterEngineMinaturization', 'antimatterEngineMinaturization', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
@@ -3071,7 +3073,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Laser Intensity Research:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'],
                             onClick: (event) => {
                                 gain('laserIntensityResearch', 'laserIntensityResearch', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
@@ -3153,7 +3155,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Stellar Whispers:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'],
                             onClick: (event) => {
                                 gain('stellarWhispers', 'stellarWhispers', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
@@ -3197,7 +3199,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Stellar Insight Manifold:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'],
                             onClick: (event) => {
                                 gain('stellarInsightManifold', 'stellarInsightManifold', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
@@ -3241,7 +3243,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Asteroid Dwellers:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'],
                             onClick: (event) => {
                                 gain('asteroidDwellers', 'asteroidDwellers', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
@@ -3285,7 +3287,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Ascendency Philosophy:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'],
                             onClick: (event) => {
                                 gain('ascendencyPhilosophy', 'ascendencyPhilosophy', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
@@ -3366,7 +3368,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Space Elevator:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'],
                             onClick: (event) => {
                                 gain('spaceElevator', 'spaceElevator', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
@@ -3410,7 +3412,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Launch Pad Mass Production:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'],
                             onClick: (event) => {
                                 gain('launchPadMassProduction', 'launchPadMassProduction', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
@@ -3456,7 +3458,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Asteroid Attractors:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'],
                             onClick: (event) => {
                                 gain('asteroidAttractors', 'asteroidAttractors', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
@@ -3502,7 +3504,7 @@ export function drawTab3Content(heading, optionContentElement) {
                     labelText: 'Warp Drive:',
                     inputElements: [
                         createButton({
-                            text: `Research`,
+                            text: localize('buttonResearch', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock'],
                             onClick: (event) => {
                                 gain('warpDrive', 'warpDrive', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');

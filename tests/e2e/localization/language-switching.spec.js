@@ -308,29 +308,82 @@ test.describe('Localization — runtime language switching', () => {
     expect(germanDescription).not.toBe(englishDescription);
   });
 
-  test('the first switch out of English translates the Gases / Liquids / Solids headers', async ({ game, page }) => {
-    // `initialiseStaticButtonLabels` relocalizes these three headers by matching
-    // their *current text* against a hardcoded list of previously-seen
-    // translations, rather than remembering which key each element came from.
-    // The list covers the English forms, so the first switch out of a clean
-    // English session works — which is exactly and only what this asserts.
+  test('the category headers follow every one of the twenty language transitions', async ({ game, page }) => {
+    // These three headers used to be relocalized by matching their *current
+    // text* against a hardcoded list of previously-seen translations, so any
+    // form missing from that list stranded the header permanently: after one
+    // visit to German "Flüssigkeiten" never changed again, and after one visit
+    // to French all three were stuck. A sweep of all twenty ordered pairs left
+    // 43 stranded headers.
     //
-    // It does not cover every form, so a header set to an unlisted translation
-    // is stranded there for the rest of the session: after one visit to German,
-    // "Flüssigkeiten" never changes again, and after one visit to French all
-    // three are stuck. That is tests/docs/known-issues.md #6, which carries the
-    // full transition matrix — asserting it here would mean asserting a bug, so
-    // this spec performs a single switch from the state boot left behind.
+    // They are now keyed by `data-loc` on the element, so text has nothing to do
+    // with it. Walking every ordered pair is the regression guard for that.
+    test.setTimeout(180_000);
+    await openHydrogenPane(game);
+
+    const stranded = [];
+    for (const from of LANGUAGE_OPTIONS) {
+      for (const to of LANGUAGE_OPTIONS) {
+        if (from.value === to.value) continue;
+
+        await game.withMods((m, l) => m.ui.relocalizeAll(l), from.value);
+        await game.withMods((m, l) => m.ui.relocalizeAll(l), to.value);
+        await page.waitForTimeout(100);
+
+        const headers = await page.evaluate(() =>
+          Array.from(document.querySelectorAll('.main-category-text')).map((el) => el.innerText.trim()));
+
+        const expected = await game.withMods((m, lang) => ({
+          gases: m.loc.localize('categoryGases', lang),
+          liquids: m.loc.localize('categoryLiquids', lang),
+          solids: m.loc.localize('categorySolids', lang)
+        }), to.value);
+
+        for (const wanted of Object.values(expected)) {
+          if (!headers.includes(wanted)) {
+            stranded.push(`${from.value} -> ${to.value}: expected "${wanted}", saw [${headers.join(', ')}]`);
+          }
+        }
+      }
+    }
+
+    expect(stranded).toEqual([]);
+  });
+
+  test('every side-menu label in the static shell is translated', async ({ game, page }) => {
+    // Around twenty ids in the old hand-written relocalization block did not
+    // match index.html, so those labels silently stayed in English forever —
+    // every tab-9 entry among them. The `data-loc` sweep is only worth anything
+    // if it actually reaches them, so this asserts the rendered text against the
+    // catalogue for every annotated element.
     await openHydrogenPane(game);
     await game.withMods((m) => m.ui.relocalizeAll('de'));
-    await page.waitForTimeout(200);
+    await page.waitForTimeout(300);
 
-    const headers = await page.evaluate(() =>
-      Array.from(document.querySelectorAll('.main-category-text')).map((el) => el.innerText.trim()));
+    const mismatches = await page.evaluate(async () => {
+      const { localize } = await import('/localization.js');
+      const { getLanguage } = await import('/constantsAndGlobalVars.js');
+      const bad = [];
+      document.querySelectorAll('[data-loc]').forEach((el) => {
+        const expected = localize(el.dataset.loc, getLanguage());
+        const actual = (el.innerText || '').trim();
+        if (actual !== expected.trim()) bad.push(`${el.dataset.loc}: "${actual}" != "${expected}"`);
+      });
+      return bad;
+    });
 
-    expect(headers).toContain('Gase');
-    expect(headers).toContain('Flüssigkeiten');
-    expect(headers).toContain('Feststoffe');
+    expect(mismatches).toEqual([]);
+
+    // And a concrete spot check on labels the old block never reached at all.
+    const spotChecks = await page.evaluate(() => ({
+      contact: document.getElementById('tab9ContactDevOption')?.innerText?.trim(),
+      energyStorage: document.getElementById('energyOption')?.innerText?.trim(),
+      ascendency: document.getElementById('ascendencyOption')?.innerText?.trim()
+    }));
+
+    expect(spotChecks.contact).toBe('Kontakt');
+    expect(spotChecks.energyStorage).toBe('Energiespeicher');
+    expect(spotChecks.ascendency).toBe('Aufstiegsboni');
   });
 
   test('switching language produces no raw keys and no console errors', async ({ game, page }) => {

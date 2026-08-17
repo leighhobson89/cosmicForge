@@ -329,22 +329,30 @@ test.describe('Localization — compound cost rows keep the internal key', () =>
       if (row.secondary !== SECONDARY_KEY) {
         problems.push(`${row.language}: secondary key was "${row.secondary}" (expected "${SECONDARY_KEY}")`);
       }
-      // The primary compound name is still rendered translated in every
-      // language, so the internal key did not leak into the label.
-      const primaryName = CATALOGUE[row.language].compoundWater;
-      if (!row.rowText.includes(primaryName)) {
-        problems.push(`${row.language}: row "${row.rowText}" missing "${primaryName}"`);
+      // Both compound names are still rendered translated, so the internal key
+      // did not leak into the label — and the secondary cost is still there at
+      // all, which it would not be if the display path could no longer resolve
+      // an internal key back to a name.
+      //
+      // The secondary half of this assertion also covers the frame loop actually
+      // reaching this row: `checkStatusAndSetTextClasses` gates on
+      // `getCurrentTab()[1].includes('Compounds')`, so it only holds in every
+      // language because the stored tab identity is the canonical English name.
+      for (const key of ['compoundWater', 'compoundConcrete']) {
+        const expectedName = CATALOGUE[row.language][key];
+        if (!row.rowText.includes(expectedName)) {
+          problems.push(`${row.language}: row "${row.rowText}" missing "${expectedName}"`);
+        }
+      }
+
+      // The misplaced-paren bug in `getAllDynamicDescriptionElements` handed the
+      // whole compounds object to the price formatter, so the row read
+      // "[object Object] Wasser". It was invisible in English only because the
+      // frame loop overwrote the row a moment later.
+      if (row.rowText.includes('[object')) {
+        problems.push(`${row.language}: row rendered an object: "${row.rowText}"`);
       }
     }
-
-    // The secondary cost is only asserted in English. Outside English the frame
-    // loop never reaches this row at all, because `checkStatusAndSetTextClasses`
-    // gates on `getCurrentTab()[1].includes('Compounds')` and the stored tab name
-    // is the *translated* one — see tests/docs/known-issues.md #3. This assertion
-    // proves the display path resolves an internal key back to a translated name;
-    // it will extend to all five languages once that gate is fixed.
-    const english = observed.find((row) => row.language === 'en');
-    expect(english.rowText).toContain(CATALOGUE.en.compoundConcrete);
 
     expect(problems).toEqual([]);
     expect(game.significantErrors()).toEqual([]);

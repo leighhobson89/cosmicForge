@@ -1,7 +1,8 @@
 # Known Issues Found by the E2E Suite
 
-Live defects discovered while building the test suite. Each is reproducible and
-currently worked around in the harness so it does not mask unrelated failures.
+Live defects discovered while building the test suite. Each is reproducible.
+Entries marked ✅ FIXED have been resolved and carry a regression spec; the rest
+are worked around in the harness so they do not mask unrelated failures.
 
 ---
 
@@ -109,10 +110,10 @@ than on the setter, so they will keep passing if this is tightened.
 
 ---
 
-## 3. Every frame-loop tab gate breaks outside English
+## 3. Every frame-loop tab gate breaks outside English — ✅ FIXED
 
-**Severity: critical — large parts of the UI stop updating in four of the five
-shipped languages.**
+**Severity was: critical — large parts of the UI stopped updating in four of the
+five shipped languages.**
 
 ### Reproduction
 
@@ -171,12 +172,35 @@ setCurrentTab([dynamicIndex, tab.getAttribute('data-name') ?? tab.textContent]);
 rendered text and should be left alone. After the change, audit the 19 gates for
 any that were relying on the localized value.
 
-### Regression spec to add once fixed
+### Resolution
 
-`tests/e2e/localization/compound-reverse-lookup.spec.js` already measures this
-row in all five languages; its secondary-cost assertion is currently scoped to
-English with a comment pointing here. Widening that assertion to `LANGUAGES` is
-the regression test.
+Fixed in `ui.js`: the tab click handler now identifies the tab by its canonical
+`data-name`, passing `???` through unchanged so `manageTabSpecificUi` keeps its
+locked-tab marker. `highlightActiveTab` still receives the rendered text, which
+is what it compares against.
+
+Two symptoms went with it, both reported from play:
+
+- **`[object Object]` on the Compounds → Water storage row.** This had a second,
+  independent cause: `getAllDynamicDescriptionElements()` in `game.js` had a
+  misplaced closing parenthesis —
+  `getResourceDataObject('compounds', [name, 'storageCapacity'] - 1)` rather than
+  `getResourceDataObject('compounds', [name, 'storageCapacity']) - 1`. The array
+  minus one is `NaN`, `NaN` is falsy, so the sub-key walk was skipped and the
+  whole compounds object came back as the price. English never showed it because
+  the frame loop overwrote the row a moment later — which is precisely what this
+  gate had stopped doing everywhere else. Both are fixed.
+- **`undefined` on a tab's intro page.** The first time a tab is opened,
+  `updateContent(..., 'intro')` looks the tab up in `headerDescriptions` and in
+  the ASCII-art table, both keyed by the English name. Outside English both
+  missed, and assigning an undefined lookup to `innerHTML` renders the literal
+  word "undefined" — for the description *and* the artwork, on every tab. The
+  nine tab names were added to `headingToLocalizationKey` so the heading is still
+  displayed translated, and both lookups now fall back to `''`.
+
+Regression specs: `tests/e2e/localization/tab-intro.spec.js` (identity, the `???`
+marker, the rendered label) and the secondary-cost assertion in
+`compound-reverse-lookup.spec.js`, now widened to all five languages.
 
 ---
 
@@ -211,9 +235,9 @@ disable storage wholesale.
 
 ---
 
-## 5. `relocalizeAll()` throws when no pane has been opened yet
+## 5. `relocalizeAll()` throws when no pane has been opened yet — ✅ FIXED
 
-**Severity: medium — latent; not reachable through the Settings selector.**
+**Severity was: medium — latent; not reachable through the Settings selector.**
 
 ### Reproduction
 
@@ -242,20 +266,18 @@ reach the null. The Settings selector is itself inside a pane (`game options`),
 which is why players cannot hit it today — but the debug switcher can, and the
 throw is swallowed by the click handler, leaving the redraw half-applied.
 
-### Suggested fix
+### Resolution
 
-`const pane = getCurrentOptionPane() ?? '';` at the top of each
-`drawTabNContent()`, or resolve it once in `relocalizeAll` and pass it down.
-
-### Harness workaround
-
-Every spec that calls `relocalizeAll` directly opens a pane first.
+Fixed: all eight `drawTabNContent()` functions now read
+`(getCurrentOptionPane() ?? '').toLowerCase()`. The specs no longer need to open
+a pane before calling `relocalizeAll`, though most still do because that is what
+a real language change looks like.
 
 ---
 
-## 6. Category headers relocalize by text matching and get permanently stranded
+## 6. Category headers relocalize by text matching and get permanently stranded — ✅ FIXED
 
-**Severity: medium — visible stale text on the Resources tab.**
+**Severity was: medium — visible stale text on the Resources tab.**
 
 ### Reproduction
 
@@ -307,17 +329,24 @@ document.querySelectorAll('.main-category-text').forEach(el => {
 That also removes the need to extend a hardcoded list every time a language is
 added.
 
-### Regression spec to add once fixed
+### Resolution
 
-`tests/e2e/localization/language-switching.spec.js` currently asserts only the
-first switch out of English. Replace it with a walk over all 20 ordered language
-pairs, asserting the expected form after each.
+Fixed by the `data-loc` mechanism described under
+[`docs/localization/status.md`](../../docs/localization/status.md) item 5: every
+statically-authored label in `index.html` names its own catalogue key, and
+`initialiseStaticButtonLabels()` is a single sweep over those elements. Text
+matching is gone, so the whole class of problem is gone with it.
+
+`tests/e2e/localization/language-switching.spec.js` walks all twenty ordered
+language pairs and asserts the expected form after each.
 
 ---
 
-## 7. `Sell All` buttons clip their translated label
+## 7. Five controls clip their translated label
 
 **Severity: low — cosmetic, but present in four of five languages.**
+
+### `Sell All`
 
 `#sellAllResourcesButton` (Resources) and `#sellAllCompoundsButton` (Compounds)
 are laid out at a fixed 81px. English fits; every other language overflows:
@@ -328,13 +357,29 @@ are laid out at a fixed 81px. English fits; every other language overflows:
 | es / it / fr | 103 | 81 |
 | de | 135 | 81 |
 
-This is the first concrete instance of `docs/localization/status.md` item 9
-(layout under translation). `#activateGridButton` also clips, but it clips in
-English too, so it is a pre-existing layout bug rather than a translation one.
+### Tab 2's side menu
 
-`tests/e2e/localization/translated-ui.spec.js` allowlists exactly these two ids
-and fails on any *other* control that a translation clips, measured as a diff
-against the English layout of the same tab.
+`#energyOption`, `#powerPlant2Option` and `#powerPlant3Option` overflow the fixed
+side-menu width in German and, for the first of them, Spanish —
+"Energiespeicher", "Solarkraftwerk", "Fortschrittliches Kraftwerk".
+
+These are new to the list only because they now translate at all. They were among
+the ~20 labels the old relocalization block looked up under ids that do not exist
+in `index.html` (`energyStorageOption` for what is really `energyOption`, and so
+on), so they rendered in English in every language and always fitted. Fixing the
+wiring exposed the layout.
+
+### Not translation's fault
+
+`#activateGridButton` also clips, but it clips in English too, so it is a
+pre-existing layout bug rather than a translation one — which is why the spec
+measures clipping as a diff against the English layout of the same tab rather
+than in absolute terms.
+
+`tests/e2e/localization/translated-ui.spec.js` allowlists exactly these five ids
+and fails on any *other* control that a translation clips. This is the concrete
+worklist for `docs/localization/status.md` item 9; fixing one means deleting it
+from that allowlist.
 
 ---
 

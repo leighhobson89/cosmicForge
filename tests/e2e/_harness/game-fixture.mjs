@@ -48,11 +48,14 @@ class GameHarness {
 
     await page.waitForSelector('#tab1', { timeout: 60000 });
 
-    // Decline onboarding so the tutorial overlay does not intercept pointer events.
+    // Decline onboarding so the tutorial overlay does not intercept pointer
+    // events. The label is localized, so match against every shipped form of
+    // "no" rather than the English one — a boot in German would otherwise leave
+    // the tutorial running and swallow every subsequent click.
     const cancel = page.locator('#modalCancel');
     if (await cancel.isVisible({ timeout: 3000 }).catch(() => false)) {
-      const text = (await cancel.textContent())?.trim();
-      if (text === 'NO') await cancel.click();
+      const text = (await cancel.textContent())?.trim().toUpperCase();
+      if (['NO', 'NEIN', 'NON'].includes(text)) await cancel.click();
     }
 
     await this.waitForOverlayClear();

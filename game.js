@@ -4640,7 +4640,7 @@ function updateStats() {
 
 function updateAP() {
     const statLabelElement = document.getElementById('stat6').closest('.stat-cell').querySelector('.stat-label');
-    statLabelElement.innerHTML = 'AP:';
+    statLabelElement.innerHTML = localize('statLabelAscendencyPoints', getLanguage());
     if (getAscendencyPoints() > 0) {
         document.getElementById('stat6').innerHTML = `<span class="green-ready-text">${getAscendencyPoints()}</span>`;
     } else {
@@ -4651,7 +4651,7 @@ function updateAP() {
 function updateAntimatterStat() {
     const statLabelElement = document.getElementById('stat5').closest('.stat-cell').querySelector('.stat-label');
     if (getAntimatterUnlocked() || getStatRun() >= 2) {
-        statLabelElement.innerHTML = 'Antimatter:';
+        statLabelElement.innerHTML = localize('statLabelAntimatter', getLanguage());
         const antimatterTotalQuantity = Math.floor(getResourceDataObject('antimatter', ['quantity']));
         const antimatterValueClass = antimatterTotalQuantity > 0 ? 'green-ready-text' : 'red-disabled-text';
         document.getElementById('stat5').innerHTML = `<span class="${antimatterValueClass}">${antimatterTotalQuantity}</span>`;
@@ -5604,7 +5604,7 @@ function getAllDynamicDescriptionElements(resourceTierPairs, compoundTierPairs) 
 
     resourceTierPairs.forEach(([resourceName, tier]) => {
         const resourceIncreaseStorageDescElement = getRowMainDescriptionLabel(`${resourceName}IncreaseStorageRow`);
-        const resourceStoragePrice = getResourceDataObject('resources', [resourceName, 'storageCapacity'] - 1); //to allow power to stay on we leave 1 if upgrading storage
+        const resourceStoragePrice = getResourceDataObject('resources', [resourceName, 'storageCapacity']) - 1; //to allow power to stay on we leave 1 if upgrading storage
 
         const resourceAutoBuyerDescElement = getRowMainDescriptionLabel(`${resourceName}AutoBuyer${tier}Row`);
         const resourceAutoBuyerPrice = getResourceDataObject('resources', [resourceName, 'upgrades', 'autoBuyer', `tier${tier}`, 'price']);
@@ -5617,7 +5617,7 @@ function getAllDynamicDescriptionElements(resourceTierPairs, compoundTierPairs) 
 
     compoundTierPairs.forEach(([compoundName, tier]) => {
         const compoundIncreaseStorageDescElement = getRowMainDescriptionLabel(`${compoundName}IncreaseStorageRow`);
-        const compoundStoragePrice = getResourceDataObject('compounds', [compoundName, 'storageCapacity'] - 1); //to allow power to stay on we leave 1 if upgrading storage
+        const compoundStoragePrice = getResourceDataObject('compounds', [compoundName, 'storageCapacity']) - 1; //to allow power to stay on we leave 1 if upgrading storage
 
         const compoundAutoBuyerDescElement = getRowMainDescriptionLabel(`${compoundName}AutoBuyer${tier}Row`);
         const compoundAutoBuyerPrice = getResourceDataObject('compounds', [compoundName, 'upgrades', 'autoBuyer', `tier${tier}`, 'price']);
@@ -12745,13 +12745,13 @@ function handlePowerAllButtonState() {
         powerAllButton.classList.remove('activate-grid-disabled-border');
 
         if (getInfinitePower()) {
-            powerAllButton.textContent = 'Dyson Sphere';
+            powerAllButton.textContent = localize('megaStructureTTNameDysonSphere', getLanguage());
             powerAllButton.classList.add('power-on-fill-state');
         } else if (anyPlantActive) {
-            powerAllButton.textContent = 'Power Off';
+            powerAllButton.textContent = localize('buttonPowerOff', getLanguage());
             powerAllButton.classList.add('power-on-fill-state');
         } else {
-            powerAllButton.textContent = 'Power On';
+            powerAllButton.textContent = localize('buttonPowerOn', getLanguage());
             powerAllButton.classList.remove('power-on-fill-state');
         }
 

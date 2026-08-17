@@ -50,9 +50,17 @@ const SANCTIONED_EMPTY_KEYS = [
  * Ratchet for status.md item 8 (translation quality). Values byte-identical to
  * English per language. Many are legitimately identical — proper nouns, star
  * names, chemical symbols — so the number cannot go to zero, but it must never
- * grow: a new identical value is almost always an untranslated placeholder.
+ * grow without a reason recorded here: an identical value is usually an
+ * untranslated placeholder.
+ *
+ * Raised once, when the index.html and onboarding strings were extracted. Every
+ * addition is a word that is genuinely the same in that language:
+ *   es 35 -> 37   "AP:" (statLabelAscendencyPoints), "NO" (buttonNo)
+ *   de 41 -> 42   "AP:"
+ *   it 37 -> 39   "AP:", "NO"
+ *   fr 44 -> 45   "Options" (categoryOptions)
  */
-const IDENTICAL_TO_ENGLISH_CEILING = { es: 35, de: 41, it: 37, fr: 44 };
+const IDENTICAL_TO_ENGLISH_CEILING = { es: 37, de: 42, it: 39, fr: 45 };
 
 /**
  * Ratchet for status.md item 7 (harden the key checker). Keys that never appear

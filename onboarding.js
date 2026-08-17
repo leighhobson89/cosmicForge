@@ -3,8 +3,11 @@ import {
     setOnboardingMode,
     getCurrentTab,
     getCurrentTheme,
-    getTechUnlockedArray
+    getTechUnlockedArray,
+    getLanguage
 } from './constantsAndGlobalVars.js';
+
+import { localize } from './localization.js';
 
 import { setAchievementFlagArray } from './constantsAndGlobalVars.js';
 
@@ -59,8 +62,8 @@ export async function promptOnboardingIfNeeded({ callPopupModalv2, showHideModal
             },
             onExtra1: null,
             onExtra2: null,
-            confirmLabel: 'YES',
-            cancelLabel: 'NO',
+            confirmLabel: localize('buttonYes', getLanguage()),
+            cancelLabel: localize('buttonNo', getLanguage()),
             extra1Label: null,
             extra2Label: null,
             setupToolTips: false
@@ -89,7 +92,7 @@ function ensureOnboardingExitButton() {
     const button = document.getElementById('onboardingExitButton') || document.createElement('button');
     button.id = 'onboardingExitButton';
     button.type = 'button';
-    button.textContent = 'Exit Onboarding';
+    button.textContent = localize('onboardingExitButton', getLanguage());
     button.className = 'option-button onboarding-exit-button';
 
     if (!button.dataset.onboardingExitHandlerAttached) {
@@ -591,6 +594,60 @@ function getHighlightTargetWithRect(element) {
     return { target: null, rect: null };
 }
 
+/**
+ * Onboarding steps address some targets by the text the player can see rather
+ * than by id (mode 0). Those needles are authored in English, so once the UI is
+ * translated none of them match and the tutorial stalls on the first step.
+ *
+ * This maps each authored needle to the catalogue key the UI renders it from,
+ * so the step table stays readable in English while matching happens in whatever
+ * language is active. A needle with no entry is searched for as written, which
+ * is correct for the handful that are ids or language-independent.
+ */
+const ONBOARDING_NEEDLE_KEYS = {
+    'Hydrogen': 'resourceHydrogen',
+    'Gain': 'buttonGain',
+    'Increase storage': 'buttonIncreaseStorage',
+    'Research': 'headerMainResearch',
+    'RESEARCH': 'buttonResearch',
+    'Technology': 'headerMainTechnology',
+    'Tech Tree': 'headerMainTechTree',
+    'Visual': 'headerMainVisual',
+    'Game Options': 'headerMainGameOptions',
+    'Cosmicopedia': 'cosmicopedia',
+    'Get Started': 'headerMainGetStarted',
+    'Story': 'headerMainStory',
+    'Concepts - Early': 'headerMainConceptsEarly',
+    'Concepts - Mid': 'headerMainConceptsMid',
+    'Concepts - Late': 'headerMainConceptsLate'
+};
+
+/**
+ * Auto-buyer buttons are built from the `buttonAddPerSecond` template, so their
+ * needles have to be rebuilt the same way rather than looked up whole.
+ */
+const ONBOARDING_RATE_NEEDLES = {
+    'Add 4 Hydrogen /s': { rate: '4', resourceKey: 'resourceHydrogen' },
+    'Add 0.5 Research /s': { rate: '0.5', resourceKey: 'headerMainResearch' },
+    'Add 8 Research /s': { rate: '8', resourceKey: 'headerMainResearch' }
+};
+
+function localizeOnboardingNeedle(needle) {
+    const key = ONBOARDING_NEEDLE_KEYS[needle];
+    if (key) {
+        return localize(key, getLanguage());
+    }
+
+    const rate = ONBOARDING_RATE_NEEDLES[needle];
+    if (rate) {
+        return localize('buttonAddPerSecond', getLanguage())
+            .replace('{rate}', rate.rate)
+            .replace('{resource}', localize(rate.resourceKey, getLanguage()));
+    }
+
+    return needle;
+}
+
 function resolveOnboardingTargetElement(identifier) {
     if (identifier === null || identifier === undefined) {
         return null;
@@ -619,7 +676,9 @@ function resolveOnboardingTargetElement(identifier) {
         }
     }
 
-    const needle = asString.toLowerCase();
+    // Everything below matches on rendered text, so the authored English needle
+    // has to be translated into whatever the player is actually looking at.
+    const needle = localizeOnboardingNeedle(asString).toLowerCase();
 
     const buttonCandidates = Array.from(document.querySelectorAll('button, a, [role="button"], input[type="button"], input[type="submit"]'));
     for (const candidate of buttonCandidates) {
@@ -1006,54 +1065,54 @@ export function onboardingChecks(
 
     if (!onboardingSteps) {
         setOnboardingSteps([
-            ['spotlight', ['Hydrogen', 0], 'Click the Hydrogen Option', { highlightMode: 'div' }, 'Resources'],
-            ['spotlight', ['Gain', 0], 'Click the Gain button', 'Resources'],
-            ['spotlight', ['hydrogenQuantity', 1], 'Continue clicking Gain until you have 50 Hydrogen', { waitForClick: false }, 'Resources'],
+            ['spotlight', ['Hydrogen', 0], localize('onboardingStepClickHydrogenOption', getLanguage()), { highlightMode: 'div' }, 'Resources'],
+            ['spotlight', ['Gain', 0], localize('onboardingStepClickGainButton', getLanguage()), 'Resources'],
+            ['spotlight', ['hydrogenQuantity', 1], localize('onboardingStepKeepClickingGain', getLanguage()), { waitForClick: false }, 'Resources'],
             ['condition', ['hydrogenQuantity', 1], ['resources', 'hydrogen', 'quantity'], 50],
-            ['spotlight', ['Add 4 Hydrogen /s', 0], 'Buy a Hydrogen AutoBuyer', 'Resources'],
-            ['spotlight', ['tab3', 1], 'Click the Research Tab', { waitForElementTarget: ['Research', 0], waitForElementTimeout: 4000 }, 'Resources'],
-            ['spotlight', ['researchOption', 1], 'Click Research', { highlightMode: 'div' }, 'Research'],
-            ['spotlight', ['Add 0.5 Research /s', 0], 'Buy 3 Science Kits', { waitForClick: false }, 'Research'],
+            ['spotlight', ['Add 4 Hydrogen /s', 0], localize('onboardingStepBuyHydrogenAutoBuyer', getLanguage()), 'Resources'],
+            ['spotlight', ['tab3', 1], localize('onboardingStepClickResearchTab', getLanguage()), { waitForElementTarget: ['Research', 0], waitForElementTimeout: 4000 }, 'Resources'],
+            ['spotlight', ['researchOption', 1], localize('onboardingStepClickResearch', getLanguage()), { highlightMode: 'div' }, 'Research'],
+            ['spotlight', ['Add 0.5 Research /s', 0], localize('onboardingStepBuyThreeScienceKits', getLanguage()), { waitForClick: false }, 'Research'],
             ['condition', ['Add 0.5 Research /s', 0], ['research', 'upgrades', 'scienceKit', 'quantity'], 3],
-            ['spotlight', ['scienceKitToggle', 1], 'Turn off the Science Kit toggle', { waitForClick: false }, 'Research'],
+            ['spotlight', ['scienceKitToggle', 1], localize('onboardingStepTurnOffScienceKit', getLanguage()), { waitForClick: false }, 'Research'],
             ['condition', ['scienceKitToggle', 1], ['computed', 'researchRatePerTick'], 0, 'eq'],
-            ['timedSpotlight', ['researchRate', 1], 'You can switch on and off many items in the game and when off they wont produce*but wont consume energy', 4000, 'Research'],
-            ['spotlight', ['scienceKitToggle', 1], 'Turn the Science Kit toggle back on', { waitForClick: false }, 'Research'],
+            ['timedSpotlight', ['researchRate', 1], localize('onboardingStepTogglesExplained', getLanguage()), 4000, 'Research'],
+            ['spotlight', ['scienceKitToggle', 1], localize('onboardingStepTurnOnScienceKit', getLanguage()), { waitForClick: false }, 'Research'],
             ['condition', ['scienceKitToggle', 1], ['computed', 'researchRatePerTick'], 0, 'gt'],
-            ['spotlight', ['tab1', 1], 'Return to the Resources Tab', { waitForElementTarget: ['Hydrogen', 0], waitForElementTimeout: 4000 }, 'Research'],
-            ['timedSpotlight', ['hydrogenQuantity', 1], 'Eventually your storage will fill up*and you will need to expand it.', 4000, 'Resources'],
-            ['spotlight', ['Increase storage', 0], 'Click the Increase Storage Button when storage full.', 'Resources'],
-            ['timedSpotlight', ['hydrogenQuantity', 1], 'It cost you all your Hydrogen but now you can store double.', 3000, 'Resources'],
-            ['timedSpotlight', ['Gain', 0], 'Feel free to click Gain to help your Auto Buyer along.', 3000, 'Resources'],
+            ['spotlight', ['tab1', 1], localize('onboardingStepReturnToResourcesTab', getLanguage()), { waitForElementTarget: ['Hydrogen', 0], waitForElementTimeout: 4000 }, 'Research'],
+            ['timedSpotlight', ['hydrogenQuantity', 1], localize('onboardingStepStorageFillsUp', getLanguage()), 4000, 'Resources'],
+            ['spotlight', ['Increase storage', 0], localize('onboardingStepClickIncreaseStorage', getLanguage()), 'Resources'],
+            ['timedSpotlight', ['hydrogenQuantity', 1], localize('onboardingStepStorageDoubled', getLanguage()), 3000, 'Resources'],
+            ['timedSpotlight', ['Gain', 0], localize('onboardingStepHelpAutoBuyerAlong', getLanguage()), 3000, 'Resources'],
             ['condition', ['hydrogenQuantity', 1], ['resources', 'hydrogen', 'quantity'], 300],
-            ['spotlight', ['hydrogenSellButton', 1], 'Click the Sell Button.', 'Resources'],
-            ['timedSpotlight', ['cashStat', 1], 'Your Cash is shown here.', 3000, 'Resources'],
-            ['spotlight', ['tab3', 1], "Let's return to the Research Tab", 'Resources'],
-            ['spotlight', ['Technology', 0], 'Click Technology', 'Research'],
-            ['timedSpotlight', ['Technology', 0], 'Here you can see and select technologies to Research.', 3000, 'Research'],
-            ['spotlight', ['Tech Tree', 0], 'Click Tech Tree', 'Research'],
-            ['timedSpotlight', ['Tech Tree', 0], 'Here you see a graphical representation of techs. * It will grow out as you continue progression in the game.', 4000, 'Research'],
-            ['spotlight', ['Technology', 0], 'Return to the Technology Option', 'Research'],
-            ['spotlight', ['RESEARCH', 0], 'When you have 150 Research, click Research on Knowledge Sharing', { waitForClick: false }, 'Research'],
+            ['spotlight', ['hydrogenSellButton', 1], localize('onboardingStepClickSellButton', getLanguage()), 'Resources'],
+            ['timedSpotlight', ['cashStat', 1], localize('onboardingStepCashShownHere', getLanguage()), 3000, 'Resources'],
+            ['spotlight', ['tab3', 1], localize('onboardingStepReturnToResearchTab', getLanguage()), 'Resources'],
+            ['spotlight', ['Technology', 0], localize('onboardingStepClickTechnology', getLanguage()), 'Research'],
+            ['timedSpotlight', ['Technology', 0], localize('onboardingStepTechnologyExplained', getLanguage()), 3000, 'Research'],
+            ['spotlight', ['Tech Tree', 0], localize('onboardingStepClickTechTree', getLanguage()), 'Research'],
+            ['timedSpotlight', ['Tech Tree', 0], localize('onboardingStepTechTreeExplained', getLanguage()), 4000, 'Research'],
+            ['spotlight', ['Technology', 0], localize('onboardingStepReturnToTechnology', getLanguage()), 'Research'],
+            ['spotlight', ['RESEARCH', 0], localize('onboardingStepResearchKnowledgeSharing', getLanguage()), { waitForClick: false }, 'Research'],
             ['condition', ['RESEARCH', 0], ['computed', 'techUnlocked'], 'knowledgeSharing', 'contains'],
-            ['spotlight', ['researchOption', 1], 'Click Research', { waitForClick: false }, 'Research'],
-            ['timedSpotlight', ['Add 8 Research /s', 0], 'Once you save up more Cash you can buy a Science Club * You will Research much faster!', 4000, 'Research'],
-            ['spotlight', ['tab9', 1], 'Next we will take a look at the Settings Tab.', 'Research'],
-            ['spotlight', ['Visual', 0], 'While we are here, lets change the look and feel.', 'Settings'],
-            ['timedSpotlight', ['themeSelect', 1], 'In this menu you can customise the look and feel of the game.*Scroll down to find Themes.', 4000, 'Settings'],
-            ['spotlight', ['themeSelect', 1], 'Click the Dropdown', 'Settings'],
-            ['spotlight', ['themeSelect', 1], 'Select Dark', 'Settings'],
+            ['spotlight', ['researchOption', 1], localize('onboardingStepClickResearch', getLanguage()), { waitForClick: false }, 'Research'],
+            ['timedSpotlight', ['Add 8 Research /s', 0], localize('onboardingStepScienceClubHint', getLanguage()), 4000, 'Research'],
+            ['spotlight', ['tab9', 1], localize('onboardingStepLookAtSettingsTab', getLanguage()), 'Research'],
+            ['spotlight', ['Visual', 0], localize('onboardingStepChangeLookAndFeel', getLanguage()), 'Settings'],
+            ['timedSpotlight', ['themeSelect', 1], localize('onboardingStepVisualMenuExplained', getLanguage()), 4000, 'Settings'],
+            ['spotlight', ['themeSelect', 1], localize('onboardingStepClickDropdown', getLanguage()), 'Settings'],
+            ['spotlight', ['themeSelect', 1], localize('onboardingStepSelectDark', getLanguage()), 'Settings'],
             ['condition', ['themeSelect', 1], ['computed', 'currentTheme'], 'dark', 'eq'],
-            ['spotlight', ['Game Options', 0], 'Now Click Game Options', 'Settings'],
-            ['spotlight', ['backGroundAudioToggle', 1], 'Click the Background Ambience Option toggle switch', 'Settings'],
-            ['timedSpotlight', ['backGroundAudioToggle', 1], 'There, some ambience!* Now I will show you the help file * so you can learn more about the game and really enjoy it!', 4000, 'Settings'],
-            ['spotlight', ['Cosmicopedia', 0], 'Click Cosmicopedia', 'Settings'],
-            ['timedSpotlight', ['Get Started', 0], 'Get Started will go over the steps you performed in*this tutorial', 4000, 'Settings'],
-            ['timedSpotlight', ['Story', 0], 'Story gives you the background and lore around the game', 4000, 'Settings'],
-            ['spotlight', ['Concepts - Early', 0], "Click 'Concepts - Early'", 'Settings'],
-            ['spotlight', ['Concepts - Mid', 0], "When you are done Click 'Concepts - Mid Game'", 'Settings'],
-            ['spotlight', ['Concepts - Late', 0], "When you are done Click 'Concepts - Late'", 'Settings'],
-            ['timedSpotlight', ['Concepts - Late', 0], "That's it — have fun exploring and forging!", 4000, 'Settings'],
+            ['spotlight', ['Game Options', 0], localize('onboardingStepClickGameOptions', getLanguage()), 'Settings'],
+            ['spotlight', ['backGroundAudioToggle', 1], localize('onboardingStepClickAmbienceToggle', getLanguage()), 'Settings'],
+            ['timedSpotlight', ['backGroundAudioToggle', 1], localize('onboardingStepAmbienceAndHelp', getLanguage()), 4000, 'Settings'],
+            ['spotlight', ['Cosmicopedia', 0], localize('onboardingStepClickCosmicopedia', getLanguage()), 'Settings'],
+            ['timedSpotlight', ['Get Started', 0], localize('onboardingStepGetStartedExplained', getLanguage()), 4000, 'Settings'],
+            ['timedSpotlight', ['Story', 0], localize('onboardingStepStoryExplained', getLanguage()), 4000, 'Settings'],
+            ['spotlight', ['Concepts - Early', 0], localize('onboardingStepClickConceptsEarly', getLanguage()), 'Settings'],
+            ['spotlight', ['Concepts - Mid', 0], localize('onboardingStepClickConceptsMid', getLanguage()), 'Settings'],
+            ['spotlight', ['Concepts - Late', 0], localize('onboardingStepClickConceptsLate', getLanguage()), 'Settings'],
+            ['timedSpotlight', ['Concepts - Late', 0], localize('onboardingStepFinished', getLanguage()), 4000, 'Settings'],
         ]);
     }
 
@@ -1070,8 +1129,8 @@ export function onboardingChecks(
 
         if (typeof callPopupModalv2 === 'function') {
             callPopupModalv2({
-                header: 'ONBOARDING COMPLETE',
-                content: 'Onboarding is over.',
+                header: localize('onboardingCompleteHeader', getLanguage()),
+                content: localize('onboardingCompleteText', getLanguage()),
                 showConfirm: true,
                 showCancel: false,
                 showExtra1: false,
@@ -1085,7 +1144,7 @@ export function onboardingChecks(
                 onCancel: null,
                 onExtra1: null,
                 onExtra2: null,
-                confirmLabel: 'CONTINUE',
+                confirmLabel: localize('buttonContinue', getLanguage()),
                 cancelLabel: null,
                 extra1Label: null,
                 extra2Label: null,

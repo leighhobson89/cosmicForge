@@ -43,7 +43,10 @@ const TAB_HEADERS = [
   { id: 'tab6Intro', key: 'tabHeaderSpaceMining' },
   { id: 'tab7Intro', key: 'tabHeaderGalactic' },
   { id: 'tab8Intro', key: 'tabHeaderCosmicRip' },
-  { id: 'tab9Intro', key: 'tabHeaderSettings' }
+  // The tab *button* for settings is the ☰ glyph (`tabHeaderSettings`), but the
+  // sidebar heading is a word. It used to render the glyph, because both were
+  // wired to the same key.
+  { id: 'tab9Intro', key: 'headerMainSettings' }
 ];
 
 /**
@@ -57,7 +60,20 @@ const TAB_HEADERS = [
  * the language-relative diff this spec performs never attributes it to
  * translation.
  */
-const KNOWN_TRANSLATION_OVERFLOW = ['sellAllResourcesButton', 'sellAllCompoundsButton'];
+const KNOWN_TRANSLATION_OVERFLOW = [
+  'sellAllResourcesButton',
+  'sellAllCompoundsButton',
+  // Tab 2's side menu. These three only started clipping once they began
+  // translating at all: the old relocalization block looked them up under ids
+  // that do not exist in index.html (`energyStorageOption` rather than
+  // `energyOption`, and so on), so they rendered in English in every language
+  // and always fitted. German is the worst case — "Energiespeicher",
+  // "Solarkraftwerk" and "Fortschrittliches Kraftwerk" all overflow the fixed
+  // side-menu width.
+  'energyOption',
+  'powerPlant2Option',
+  'powerPlant3Option'
+];
 
 const capitalise = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 

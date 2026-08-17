@@ -6,21 +6,21 @@ Status as of HEAD `275f034` + in-session fixes. Five languages: **en, es, de, it
 
 | | Items | Share |
 |---|---:|---:|
-| 🟢 Done | 4 | 40% |
-| 🟠 Partial | 0 | 0% |
-| 🔴 Not started | 6 | 60% |
+| 🟢 Done | 5 | 50% |
+| 🟠 Partial | 1 | 10% |
+| 🔴 Not started | 4 | 40% |
 | **Total tracked items** | **10** | |
 
-The catalogue itself is in good shape — **1,626 keys × 5 languages, complete parity, zero keys
+The catalogue itself is in good shape — **1,686 keys × 5 languages, complete parity, zero keys
 referenced in code that are missing from the JSON**. What remains is finishing and wiring, tracked
 as the 10 items below.
 
-The area now has **67 automated specs** in `tests/e2e/localization/`, covering catalogue integrity,
-the resolution chain, runtime switching, the reverse lookup, and a five-language sweep of every tab
-at a late-game state. Several of the open items below are held in place by *ratchets* in those
-specs — a recorded baseline that may fall but must never rise — so the remaining work can be done
-incrementally without losing ground. See [Test coverage](#test-coverage) at the foot of this
-document.
+The area now has **84 automated specs** in `tests/e2e/localization/`, covering catalogue integrity,
+the resolution chain, runtime switching, tab identity and intro pages, the reverse lookup, the
+extraction backlog, and a five-language sweep of every tab at a late-game state. Several of the open
+items below are held in place by *ratchets* in those specs — a recorded baseline that may fall but
+must never rise — so the remaining work can be done incrementally without losing ground. See
+[Test coverage](#test-coverage) at the foot of this document.
 
 ## Status at a glance
 
@@ -30,17 +30,12 @@ document.
 | 2 | [Compound reverse-lookup performance](#2-compound-reverse-lookup-performance) | 🟢 Done | — |
 | 3 | [Player-facing language selector](#3-player-facing-language-selector) | 🟢 Done | — |
 | 4 | [Full redraw on language change](#4-full-redraw-on-language-change) | 🟢 Done | — |
-| 5 | [Extract remaining hardcoded strings](#5-extract-remaining-hardcoded-strings-478) | 🔴 Not started | Medium — ~478 strings never translate |
+| 5 | [Extract remaining hardcoded strings](#5-extract-remaining-hardcoded-strings) | 🟠 Partial | Medium — the static shell and tutorial are done; ~360 literals remain in JS |
 | 6 | [Remove eval() from interpolation](#6-remove-eval-from-interpolation-path) | 🔴 Not started | Medium — latent code-injection surface |
 | 7 | [Harden the key checker](#7-harden-the-key-checker) | 🔴 Not started | Medium — can't safely prune dead keys |
 | 8 | [Translation quality pass](#8-translation-quality-pass) | 🔴 Not started | Low — a handful of possibly-untranslated values |
 | 9 | [Layout under translation](#9-layout-under-translation) | 🔴 Not started | Medium — German runs 20–35% longer than English |
-| 10 | [Frame-loop tab gates compare English names](#10-frame-loop-tab-gates-compare-english-names) | 🔴 Not started | **Critical — large parts of the UI stop updating outside English** |
-
-> **Item 10 is now the highest-priority remaining item**, ahead of everything else on this list. It
-> was found while building the test suite and is a regression introduced by the localization work:
-> translating the tab labels silently disables ~19 per-frame gates that still compare against the
-> English names.
+| 10 | [Frame-loop tab gates compare English names](#10-frame-loop-tab-gates-compare-english-names) | 🟢 Done | — |
 
 ---
 
@@ -165,21 +160,70 @@ modals / the news ticker are not re-rendered mid-flight. Worth a tab-by-tab pass
 
 ---
 
-## 5. Extract remaining hardcoded strings (~478)
+## 5. Extract remaining hardcoded strings
 
-**🔴 Not started**
+**🟠 Partial — priority 1 is done, plus part of priority 2**
 
-~400 prose literals in JS plus ~78 visible text nodes in `index.html` (heuristic count, includes
-some internal logging, but spot checks confirm plenty of genuine player-facing copy).
+60 keys were added (1,626 → 1,686), covering the whole of the original priority 1 and the
+mechanical half of priority 2.
+
+### Done
+
+**`index.html` — the static shell, 83 elements.** Every statically-authored player-facing label now
+carries a `data-loc="<key>"` attribute, and `initialiseStaticButtonLabels()` is a single sweep over
+those elements. That replaced ~200 lines of hand-written id-to-key blocks and fixed two bugs with
+them:
+
+- **~20 of those ids did not exist in `index.html`** — `energyStorageOption` for what is actually
+  `energyOption`, `contactOption` for `tab9ContactDevOption`, and *every* tab-9 entry — so those
+  side-menu labels were never translated in any language. Three of the tab-9 entries
+  (`Visual`, `Game Options`, `Saving / Loading`) had no id at all.
+- **The category headers relocalized by text matching**, which stranded them permanently. That is
+  closed; see item 9's note and `tests/docs/known-issues.md` #6.
+
+New keys: the five stat-bar labels, `categoryAchievementsAndStats`, `categoryOptions`,
+`headerMainPower`, `headerMainSettings`, `modalStartFullScreenLabel`.
+
+`tab9Intro` also now reads *Settings* / *Einstellungen* rather than the ☰ glyph — it was pointed at
+`tabHeaderSettings`, which is the tab *button's* label.
+
+**`onboarding.js` — the whole tutorial.** 40 instruction strings, the exit button, the completion
+modal and the YES/NO prompt labels.
+
+The step table addresses some targets by the text the player can see rather than by id. Those
+needles are authored in English, so a translated build stalled the tutorial on its first step.
+`localizeOnboardingNeedle()` now maps each authored needle to the catalogue key the UI renders it
+from — including the three auto-buyer buttons, which are rebuilt from the `buttonAddPerSecond`
+template. The step table stays readable in English; matching happens in the active language.
+
+**`drawTab3Content.js` — 77 button labels.** The 74 identical `Research` buttons (new key
+`buttonResearch`) and the three `Add N Research /s` science upgrades, which now reuse the existing
+`buttonAddPerSecond` template rather than composing the string inline.
+
+**`game.js` — 5 frame-loop labels.** The power-grid button's three states
+(`Power On` / `Power Off` / `Dyson Sphere`), the AP stat label and the antimatter stat label. These
+are written by the frame loop, so they stayed English while everything around them translated.
+
+### Remaining
+
+Roughly 360 prose literals, by file:
 
 | Priority | Files | Approx | Why |
 |---|---|--:|---|
-| 1 | `onboarding.js`, `index.html` | ~105 | Every new player sees these first |
-| 2 | `events.js`, `drawTab3/7/9Content.js` | ~92 | Random event outcomes, ability-unlock notifications |
-| 3 | `game.js`, `ui.js` | ~130 | Fleet/diplomacy panels, scan results, dropdown labels |
-| 4 | `saveLoadGame.js` | ~38 | Cloud save status and error messages |
-| 5 | `resourceDataObject.js` | ~52 | Check display names vs internal keys first |
-| — | `constantsAndGlobalVars.js` | ~35 | Debugger tooltips — fine to leave in English |
+| 1 | `ui.js` | ~86 | Fleet and diplomacy panels, scan results, dropdown labels, notifications |
+| 2 | `game.js` | ~45 | Battle and colonisation outcomes, travel status |
+| 3 | `drawTab3Content.js` | ~35 | **Tech display names** — 74 of them; needs a `techName*` key family |
+| 4 | `resourceDataObject.js` | ~32 | Check display names vs internal keys first |
+| 5 | `drawTab9Content.js` | ~27 | Settings rows and their descriptions |
+| 6 | `drawTab6Content.js` | ~24 | Rocket and asteroid panels |
+| 7 | `drawTab7Content.js` | ~19 | Market, casino and rebirth panels |
+| 8 | `drawTab5/8Content.js` | ~26 | Star map, fleet hangar, cosmic rip |
+| 9 | `patches.js`, `saveLoadGame.js`, `events.js` | ~25 | Migration notices, cloud-save status, event outcomes |
+| — | `constantsAndGlobalVars.js` | ~28 | Debugger tooltips — fine to leave in English |
+
+The tech names are the single biggest block and the only one that is not mechanical: 74 names ×
+4 languages is real translation work, and they are worth doing as one deliberate pass rather than
+piecemeal.
 
 ---
 
@@ -245,9 +289,19 @@ The automated sweep gives a starting point and a floor. Across all five language
 tabs, at a late-game state:
 
 - **No tab overflows the viewport horizontally** in any language. That is asserted absolutely.
-- Exactly **two** controls are clipped by their translated label and are not clipped in English:
-  `#sellAllResourcesButton` and `#sellAllCompoundsButton`, both laid out at a fixed 81px against
-  103px of content in es/it/fr and 135px in de. See `tests/docs/known-issues.md` #7.
+- **Five** controls are clipped by their translated label and are not clipped in English:
+  - `#sellAllResourcesButton` and `#sellAllCompoundsButton`, both laid out at a fixed 81px against
+    103px of content in es/it/fr and 135px in de.
+  - `#energyOption`, `#powerPlant2Option` and `#powerPlant3Option` in tab 2's side menu. These are
+    new to the list only because they now translate at all — they were among the ~20 labels the old
+    relocalization block looked up under ids that do not exist, so they rendered in English and
+    always fitted. "Energiespeicher", "Solarkraftwerk" and "Fortschrittliches Kraftwerk" all
+    overflow the fixed side-menu width.
+
+  See `tests/docs/known-issues.md` #7.
+
+The category-header stranding described under item 5 is closed: those headers are now keyed by
+`data-loc`, and a walk over all twenty ordered language pairs passes.
 
 `tests/e2e/localization/translated-ui.spec.js` measures clipping as a diff against the English
 layout of the same tab, so pre-existing layout bugs cancel out and only translation-caused overflow
@@ -261,31 +315,48 @@ absolute positioning and truncated modals still need a human pass.
 
 ## 10. Frame-loop tab gates compare English names
 
-**🔴 Not started — highest priority remaining item**
+**🟢 Done**
 
-`setCurrentTab` stores the tab's rendered text (`ui.js:10521`), and `localizeTabLabels()` /
-`showTabsUponUnlock()` translate that text. At least **19 call sites** then gate per-frame work on
+`setCurrentTab` stored the tab's *rendered* text (`ui.js:10521`), and `localizeTabLabels()` /
+`showTabsUponUnlock()` translate that text. At least **19 call sites** then gated per-frame work on
 the English name — `getCurrentTab()[1].includes('Compounds')`, `…includes('Resources')`,
 `…includes('Energy')`, `…includes('Space Mining')`, `…includes('Interstellar')`,
-`…includes('Galactic')` — so all of them are false in Spanish, German, Italian and French.
+`…includes('Galactic')` — so every one of them was false in Spanish, German, Italian and French.
 
-The visible result is that price formatting, affordability colouring, star map updates and market
-and casino refreshes silently stop outside English. Reproduce it on **Compounds → Water**: in
-English the cost row reads `999.9M Water, 300.0M Concrete` and updates every frame; in German it
-freezes on the raw draw output with the secondary cost missing entirely.
+Two visible symptoms, both reported from play:
 
-This is a regression introduced by the localization work, and it is larger in blast radius than
-anything else left on this list.
+- **`[object Object]` on the Compounds → Water storage row.** Price formatting, affordability
+  colouring and the secondary Concrete cost all stopped updating outside English, leaving the row
+  frozen on whatever the initial draw wrote.
+- **`undefined` on a tab's intro page.** The first time a tab is opened, `updateContent(..., 'intro')`
+  looks the tab up in `headerDescriptions` and in the ASCII-art table, both keyed by the English
+  name. Outside English both missed, and assigning an undefined lookup to `innerHTML` renders the
+  literal word "undefined" — for the description *and* the artwork, on every tab.
 
-The fix is small — store the canonical name the DOM already carries:
+**Fixed:**
 
-```js
-setCurrentTab([dynamicIndex, tab.getAttribute('data-name') ?? tab.textContent]);
-```
+- `ui.js` — the tab click handler identifies the tab by its canonical `data-name` and stores that.
+  `???` is passed through unchanged, because it is a locked-tab state marker that
+  `manageTabSpecificUi` tests for, not a name. `highlightActiveTab` still receives the rendered
+  text, which is what it actually compares against.
+- `ui.js` — the nine tab names were added to `headingToLocalizationKey`, so the intro heading is
+  still *displayed* translated even though identity is now canonical. `updateContent`'s intro
+  branch also guards both lookups with `?? ''`, so a future miss renders nothing rather than the
+  word "undefined".
+- A new key, `headerMainSettings`, gives tab 9 an intro heading; it previously shared
+  `tabHeaderSettings` with the tab button and rendered the ☰ glyph as a heading.
 
-— followed by an audit of the 19 gates for any that intentionally wanted the localized value. Full
-write-up, call-site list and regression-spec plan in
-[`tests/docs/known-issues.md`](../../tests/docs/known-issues.md) #3.
+The `[object Object]` had a second, independent cause, fixed at the same time: `game.js`
+`getAllDynamicDescriptionElements()` had a misplaced closing parenthesis —
+`getResourceDataObject('compounds', [name, 'storageCapacity'] - 1)` instead of
+`getResourceDataObject('compounds', [name, 'storageCapacity']) - 1`. The array minus one is `NaN`,
+`NaN` is falsy, so `getResourceDataObject` skipped its sub-key walk and returned the entire
+compounds object as the price. English never showed it because the frame loop overwrote the row a
+moment later — which is exactly what the tab gate had stopped doing in other languages.
+
+Guarded by `tests/e2e/localization/tab-intro.spec.js`: every tab's intro page in all five
+languages, the stored identity, the preserved `???` marker, and that the rendered label stays
+translated.
 
 ---
 
@@ -294,36 +365,42 @@ write-up, call-site list and regression-spec plan in
 1. ~~Language resolution and persistence~~ 🟢
 2. ~~Player-facing selector + `relocalizeAll()`~~ 🟢 (items 3 and 4)
 3. ~~Compound reverse-lookup performance~~ 🟢 (item 2)
-4. **Frame-loop tab gates (item 10)** — largest blast radius, smallest fix
-5. Extract remaining strings by visibility priority (item 5)
-6. Remove the `eval()` (item 6)
-7. Harden the checker and wire it into the build (item 7)
-8. Translation quality pass, then the German layout pass (items 8–9)
+4. ~~Frame-loop tab gates~~ 🟢 (item 10)
+5. ~~Static shell, tutorial, tech buttons~~ 🟢 (item 5, first half)
+6. **Tech display names** — the largest remaining block, and the only one that is real translation
+   work rather than mechanical extraction (item 5)
+7. The rest of item 5, in the file order listed above
+8. Remove the `eval()` (item 6)
+9. Harden the checker and wire it into the build (item 7)
+10. Translation quality pass, then the German layout pass (items 8–9)
 
 ## Test coverage
 
-67 specs in `tests/e2e/localization/`, all passing. Run them with
+84 specs in `tests/e2e/localization/`, all passing. Run them with
 `node tests/run-e2e.mjs localization`.
 
 | File | Specs | Covers |
 |---|--:|---|
 | `catalogue-integrity.spec.js` | 15 | Parity, value types, empty values, duplicate keys, dead `eval()` path, referenced vs. unreferenced keys, unbalanced HTML. No browser needed. |
 | `language-resolution.spec.js` | 19 | The full resolution chain against real browser locales, regional tag normalisation, corrupt and unsupported values, persistence across restart, storage failure. |
-| `language-switching.spec.js` | 14 | The Settings selector, the debug switcher, `relocalizeAll` return contract, round trips, category headers. |
+| `language-switching.spec.js` | 15 | The Settings selector, the debug switcher, `relocalizeAll` return contract, round trips, all twenty category-header transitions, the `data-loc` sweep. |
 | `compound-reverse-lookup.spec.js` | 12 | Item 2 — the behavioural contract, the frame budget, and the stored internal key. |
+| `tab-intro.spec.js` | 8 | Item 10 — every tab's intro page in all five languages, canonical tab identity, the `???` marker. |
+| `hardcoded-strings.spec.js` | 8 | Item 5 — the `data-loc` annotations, the tutorial, the needle map, and the extraction ratchet. |
 | `translated-ui.spec.js` | 7 | Five languages × nine tabs at a late-game state: raw-key leaks, viewport overflow, translation-caused clipping, constructed keys, frame-loop survival. |
 
 ### Ratchets
 
-Four assertions are deliberately baselines rather than absolutes, so the remaining items can be
-closed incrementally. Each may fall; none may rise.
+Five assertions are deliberately baselines rather than absolutes, so the remaining items can be
+closed incrementally. Each may fall; none may rise without a reason recorded in the spec.
 
 | Ratchet | Baseline | Item |
 |---|--:|---|
-| Values identical to English | es 35, de 41, it 37, fr 44 | 8 |
+| Values identical to English | es 37, de 42, it 39, fr 45 | 8 |
 | Keys not referenced anywhere in shipped source | 21 | 7 |
 | Sanctioned empty values | 3 (the casino suffix keys) | 7 |
-| Controls clipped by translation but not by English | 2 (the `Sell All` buttons) | 9 |
+| Unannotated visible text in `index.html` | 74 (debug windows and modal placeholders) | 5 |
+| Controls clipped by translation but not by English | 5 | 9 |
 
 ## Related
 

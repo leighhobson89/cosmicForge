@@ -1711,203 +1711,27 @@ export function applyCustomPointerSetting() {
 
 
 export function initialiseStaticButtonLabels() {
-    // Sell All buttons
-    const sellAllResourcesButton = document.getElementById('sellAllResourcesButton');
-    if (sellAllResourcesButton) {
-        sellAllResourcesButton.innerText = localize('buttonSellAll', getLanguage());
-    }
-
-    const sellAllCompoundsButton = document.getElementById('sellAllCompoundsButton');
-    if (sellAllCompoundsButton) {
-        sellAllCompoundsButton.innerText = localize('buttonSellAll', getLanguage());
-    }
-
-    // Tab headers
-    const tab1Intro = document.getElementById('tab1Intro');
-    if (tab1Intro) {
-        tab1Intro.innerText = localize('tabHeaderResources', getLanguage());
-    }
-
-    const tab4Intro = document.getElementById('tab4Intro');
-    if (tab4Intro) {
-        tab4Intro.innerText = localize('tabHeaderCompounds', getLanguage());
-    }
-
-    // Tab headers (Resources, Compounds already handled above)
-    const tab2Intro = document.getElementById('tab2Intro');
-    if (tab2Intro) {
-        tab2Intro.innerText = localize('tabHeaderEnergy', getLanguage());
-    }
-
-    const tab3Intro = document.getElementById('tab3Intro');
-    if (tab3Intro) {
-        tab3Intro.innerText = localize('tabHeaderResearch', getLanguage());
-    }
-
-    const tab5Intro = document.getElementById('tab5Intro');
-    if (tab5Intro) {
-        tab5Intro.innerText = localize('tabHeaderInterstellar', getLanguage());
-    }
-
-    const tab6Intro = document.getElementById('tab6Intro');
-    if (tab6Intro) {
-        tab6Intro.innerText = localize('tabHeaderSpaceMining', getLanguage());
-    }
-
-    const tab7Intro = document.getElementById('tab7Intro');
-    if (tab7Intro) {
-        tab7Intro.innerText = localize('tabHeaderGalactic', getLanguage());
-    }
-
-    const tab8Intro = document.getElementById('tab8Intro');
-    if (tab8Intro) {
-        tab8Intro.innerText = localize('tabHeaderCosmicRip', getLanguage());
-    }
-
-    const tab9Intro = document.getElementById('tab9Intro');
-    if (tab9Intro) {
-        tab9Intro.innerText = localize('tabHeaderSettings', getLanguage());
-    }
-
-    // Category headers (Gases, Liquids, Solids)
-    const categoryTexts = document.querySelectorAll('.main-category-text');
-    categoryTexts.forEach(el => {
-        const text = el.innerText;
-        if (text === 'Gases' || text === 'Gas' || text === 'Gase') {
-            el.innerText = localize('categoryGases', getLanguage());
-        } else if (text === 'Liquids' || text === 'Liquidi' || text === 'Líquidos') {
-            el.innerText = localize('categoryLiquids', getLanguage());
-        } else if (text === 'Solids' || text === 'Solidi' || text === 'Sólidos' || text === 'Feststoffe') {
-            el.innerText = localize('categorySolids', getLanguage());
-        }
-    });
-
-    // Resource option labels
-    const resourceIds = ['hydrogen', 'helium', 'carbon', 'neon', 'oxygen', 'sodium', 'silicon', 'iron'];
-    resourceIds.forEach(resource => {
-        const el = document.getElementById(`${resource}Option`);
-        if (el) {
-            el.innerText = localize(`resource${resource.charAt(0).toUpperCase() + resource.slice(1)}`, getLanguage());
-        }
-    });
-
-    // Compound option labels
-    const compoundIds = ['diesel', 'glass', 'concrete', 'steel', 'water', 'titanium'];
-    compoundIds.forEach(compound => {
-        const el = document.getElementById(`${compound}Option`);
-        if (el) {
-            el.innerText = localize(`compound${compound.charAt(0).toUpperCase() + compound.slice(1)}`, getLanguage());
-        }
-    });
-
-    // Tab 2 - Energy option labels
-    const tab2OptionIds = [
-        { id: 'energyStorageOption', key: 'headerMainEnergyStorage' },
-        { id: 'powerPlantOption', key: 'headerMainPowerPlant' },
-        { id: 'advancedPowerPlantOption', key: 'headerMainAdvancedPowerPlant' },
-        { id: 'solarPowerPlantOption', key: 'headerMainSolarPowerPlant' }
-    ];
-    tab2OptionIds.forEach(({ id, key }) => {
-        const el = document.getElementById(id);
-        if (el) {
-            el.innerText = localize(key, getLanguage());
-        }
-    });
-
-    // Tab 3 - Research option labels
-    const tab3OptionIds = [
-        { id: 'researchOption', key: 'headerMainResearch' },
-        { id: 'technologyOption', key: 'headerMainTechnology' },
-        { id: 'techTreeOption', key: 'headerMainTechTree' },
-        { id: 'philosophyOption', key: 'headerMainPhilosophy' }
-    ];
-    tab3OptionIds.forEach(({ id, key }) => {
-        const el = document.getElementById(id);
-        if (el) {
-            el.innerText = localize(key, getLanguage());
-        }
-    });
-
-    // Tab 5 - Interstellar option labels
-    const tab5OptionIds = [
-        { id: 'starMapOption', key: 'headerMainStarMap' },
-        { id: 'starDataOption', key: 'headerMainStarData' },
-        { id: 'starShipOption', key: 'headerMainStarShip' },
-        { id: 'fleetHangarOption', key: 'headerMainFleetHangar' },
-        { id: 'coloniseOption', key: 'headerMainColonise' }
-    ];
-    tab5OptionIds.forEach(({ id, key }) => {
-        const el = document.getElementById(id);
-        if (el) {
-            el.innerText = localize(key, getLanguage());
-        }
-    });
-
-    // Tab 6 - Space Mining option labels
-    const tab6OptionIds = [
-        { id: 'spaceTelescopeOption', key: 'headerMainSpaceTelescope' },
-        { id: 'asteroidsOption', key: 'headerMainAsteroids' },
-        { id: 'launchPadOption', key: 'headerMainLaunchPad' },
-        { id: 'miningOption', key: 'headerMainMining' }
-    ];
-    tab6OptionIds.forEach(({ id, key }) => {
-        const el = document.getElementById(id);
-        if (el) {
-            el.innerText = localize(key, getLanguage());
-        }
-    });
-
-    // Tab 7 - Galactic option labels
-    const tab7OptionIds = [
-        { id: 'galacticMarketOption', key: 'headerMainGalacticMarket' },
-        { id: 'galacticCasinoOption', key: 'headerMainGalacticCasino' },
-        { id: 'ascendencyPerksOption', key: 'headerMainAscendencyPerks' },
-        { id: 'megastructuresOption', key: 'headerMainMegastructures' },
-        { id: 'blackHoleOption', key: 'headerMainBlackHole' },
-        { id: 'rebirthOption', key: 'headerMainRebirth' }
-    ];
-    tab7OptionIds.forEach(({ id, key }) => {
-        const el = document.getElementById(id);
-        if (el) {
-            el.innerText = localize(key, getLanguage());
-        }
-    });
-
-    // Tab 8 - Cosmic Rip option labels
-    const tab8OptionIds = [
-        { id: 'situationOption', key: 'headerMainSituation' },
-        { id: 'nearSpaceScannerArrayOption', key: 'headerMainNearSpaceScannerArray' },
-        { id: 'cosmicRipOption', key: 'headerMainCosmicRipTab' }
-    ];
-    tab8OptionIds.forEach(({ id, key }) => {
-        const el = document.getElementById(id);
-        if (el) {
-            el.innerText = localize(key, getLanguage());
-        }
-    });
-
-    // Tab 9 - Settings option labels
-    const tab9OptionIds = [
-        { id: 'contactOption', key: 'headerMainContact' },
-        { id: 'getStartedOption', key: 'headerMainGetStarted' },
-        { id: 'storyOption', key: 'headerMainStory' },
-        { id: 'conceptsEarlyOption', key: 'headerMainConceptsEarly' },
-        { id: 'conceptsMidOption', key: 'headerMainConceptsMid' },
-        { id: 'conceptsLateOption', key: 'headerMainConceptsLate' },
-        { id: 'conceptsEndGoalOption', key: 'headerMainConceptsEndGoal' },
-        { id: 'philosophiesOption', key: 'headerMainPhilosophies' },
-        { id: 'visualOption', key: 'headerMainVisual' },
-        { id: 'gameOptionsOption', key: 'headerMainGameOptions' },
-        { id: 'savingLoadingOption', key: 'headerMainSavingLoading' },
-        { id: 'statisticsOption', key: 'headerMainStatistics' },
-        { id: 'achievementsOption', key: 'headerMainAchievements' },
-        { id: 'eventsOption', key: 'headerMainEvents' },
-        { id: 'exitGameOption', key: 'headerMainExitGame' }
-    ];
-    tab9OptionIds.forEach(({ id, key }) => {
-        const el = document.getElementById(id);
-        if (el) {
-            el.innerText = localize(key, getLanguage());
+    // Every statically-authored label in index.html carries a `data-loc`
+    // attribute naming the catalogue key it renders from, so relocalizing the
+    // static shell is one pass over those elements.
+    //
+    // This replaced ~200 lines of hand-written id-to-key blocks. Two classes of
+    // bug went with them:
+    //
+    //  - Around twenty ids in those blocks did not match index.html at all
+    //    (`energyStorageOption` vs `energyOption`, `contactOption` vs
+    //    `tab9ContactDevOption`, and every other tab-9 entry), so those labels
+    //    were never translated in any language.
+    //  - The Gases / Liquids / Solids headers were relocalized by matching their
+    //    *current text* against a hardcoded list of previously-seen
+    //    translations. Any form missing from that list stranded the header
+    //    permanently: once German had been visited, "Flüssigkeiten" never
+    //    changed again. Keying off the element rather than its text removes the
+    //    whole class of problem.
+    document.querySelectorAll('[data-loc]').forEach(element => {
+        const key = element.dataset.loc;
+        if (key) {
+            element.innerText = localize(key, getLanguage());
         }
     });
 }
@@ -3377,6 +3201,17 @@ function buildPowerPlantStatusLines() {
 
 // Mapping from English headings to localization keys
 const headingToLocalizationKey = {
+    // Tab bar. These are the canonical `data-name` values, used as the heading
+    // when a tab's intro page is shown. 'Research' and 'Cosmic Rip' are both a
+    // tab name and a pane name; their headerMain* entries below carry the same
+    // text, so they are not duplicated here.
+    'Resources': 'tabHeaderResources',
+    'Energy': 'tabHeaderEnergy',
+    'Compounds': 'tabHeaderCompounds',
+    'Interstellar': 'tabHeaderInterstellar',
+    'Space Mining': 'tabHeaderSpaceMining',
+    'Galactic': 'tabHeaderGalactic',
+    'Settings': 'headerMainSettings',
     // Tab 1 - Resources
     'Hydrogen': 'resourceHydrogen',
     'Helium': 'resourceHelium',
@@ -3487,10 +3322,14 @@ export function updateContent(heading, tab, type) {
     optionContentElement.innerHTML = '';
 
        
-    if (type === 'intro') {      
-        optionDescription = getHeaderDescriptions([heading]);
+    if (type === 'intro') {
+        // Both lookups are keyed by the canonical English tab name, which is why
+        // the caller passes `data-name` rather than the rendered label. The `?? ''`
+        // guards are belt-and-braces: assigning an undefined lookup to innerHTML
+        // renders the literal string "undefined" on the intro page.
+        optionDescription = getHeaderDescriptions(heading);
         optionDescriptionElement = optionDescriptionElements[tabNumber - 1];
-        optionDescriptionElement.innerHTML = optionDescription;
+        optionDescriptionElement.innerHTML = optionDescription ?? '';
         optionDescriptionElement.style.border = `1px dashed var(--container-border-color)`;
 
 
@@ -3500,7 +3339,7 @@ export function updateContent(heading, tab, type) {
 
 
         const asciiKey = heading.toLowerCase();
-        asciiContainer.innerHTML = asciiArt[asciiKey];
+        asciiContainer.innerHTML = asciiArt[asciiKey] ?? '';
 
     
         optionContentElement.appendChild(asciiContainer);
@@ -10517,13 +10356,26 @@ function initializeTabEventListeners() {
 
                 const dynamicIndex = parseInt(tab.id.replace('tab', ''), 10);
 
-    
-                setCurrentTab([dynamicIndex, document.getElementById('tab' + dynamicIndex).textContent]);
+                // Identify the tab by its canonical English `data-name`, not by its
+                // rendered label. The label is translated and carries attention
+                // indicators, while everything downstream keys off the English name:
+                // ~19 frame-loop gates (`getCurrentTab()[1].includes('Compounds')`),
+                // the headerDescriptions table, and the intro ASCII art lookup. Using
+                // the label meant all of those silently missed outside English.
+                //
+                // `???` is preserved as-is: it is a locked-tab state marker rather
+                // than a name, and `manageTabSpecificUi` tests for it.
+                const renderedLabel = document.getElementById('tab' + dynamicIndex).textContent;
+                const tabName = renderedLabel.trim() === '???'
+                    ? renderedLabel.trim()
+                    : (tab.getAttribute('data-name') ?? renderedLabel);
+
+                setCurrentTab([dynamicIndex, tabName]);
                 highlightActiveTab(tab.textContent);
                 setGameState(getGameVisibleActive());
 
-    
-                let content = tab.textContent;
+
+                let content = tabName;
                 if (content === '☰') {
                     content = 'Settings';
                 }
@@ -15349,6 +15201,9 @@ unlockAllTabsButton.addEventListener('click', () => {
             tab.textContent = tab.getAttribute('data-name');
         }
     });
+
+    // data-name is the canonical English name; put the translated label back.
+    localizeTabLabels();
 
 
     const techsToUnlock = [

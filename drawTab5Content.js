@@ -31,7 +31,9 @@ function getWeatherDisplayData(weatherTendency, weather) {
 }
 
 export async function drawTab5Content(heading, optionContentElement, starDestinationInfoRedraw, diplomacyRedraw) {
-    const optionElement = document.getElementById(getCurrentOptionPane().toLowerCase().replace(/\s(.)/g, (match, group1) => group1.toUpperCase()).replace(/\s+/g, '') + 'Option');
+    // getCurrentOptionPane() is null until the player opens their first pane,
+    // and relocalizeAll() can reach this before that has happened.
+    const optionElement = document.getElementById((getCurrentOptionPane() ?? '').toLowerCase().replace(/\s(.)/g, (match, group1) => group1.toUpperCase()).replace(/\s+/g, '') + 'Option');
     if (optionElement) {
         const warningIcon = optionElement.querySelector('span.attention-indicator');
         if (warningIcon && warningIcon.innerHTML.includes('⚠️')) {

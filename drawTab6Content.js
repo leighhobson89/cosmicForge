@@ -22,7 +22,9 @@ import { trackAnalyticsEvent } from './analytics.js';
 
 export function drawTab6Content(heading, optionContentElement) {
 
-    const optionElement = document.getElementById(getCurrentOptionPane().toLowerCase().replace(/\s(.)/g, (match, group1) => group1.toUpperCase()).replace(/\s+/g, '') + 'Option');
+    // getCurrentOptionPane() is null until the player opens their first pane,
+    // and relocalizeAll() can reach this before that has happened.
+    const optionElement = document.getElementById((getCurrentOptionPane() ?? '').toLowerCase().replace(/\s(.)/g, (match, group1) => group1.toUpperCase()).replace(/\s+/g, '') + 'Option');
 
     if (optionElement) {
 

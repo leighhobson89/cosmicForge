@@ -24,19 +24,19 @@
     <!-- Stats Container -->
     <div id="statsContainer" class="stats-container d-flex flex-wrap justify-content-around fixed-top">
         <div class="stat-cell">
-            <span class="stat-label">Cash:</span>
+            <span class="stat-label" data-loc="statLabelCash">Cash:</span>
             <span class="stat-value notation" id="cashStat">0</span>
         </div>
         <div class="stat-cell">
-            <span class="stat-label">Energy:</span>
+            <span class="stat-label" data-loc="statLabelEnergy">Energy:</span>
             <span class="stat-value energy-check notation" id="stat2">0</span>
         </div>
         <div class="stat-cell">
-            <span class="stat-label">Powered:</span>
+            <span class="stat-label" data-loc="statLabelPowered">Powered:</span>
             <span class="stat-value powered-check" id="stat3">N/A</span>
         </div>
         <div class="stat-cell">
-            <span class="stat-label">Battery:</span>
+            <span class="stat-label" data-loc="statLabelBattery">Battery:</span>
             <span class="stat-value" id="stat4">
                 <span id="batteryNo" class="red-disabled-text">NO</span>
                 <div id="batteryBarContainer" class="progress-bar-container stat-value4 notation invisible"></div>
@@ -81,20 +81,20 @@
         <div id="tab1ContainerGroup" class="tab-1-container-group tab-1">
             <div class="container-item-menu tab-1">
                 <div class="container-item-menu-header tab-1 sidebar-intro-header d-flex justify-content-between align-items-center">
-                    <h4 id="tab1Intro" style="width: 80%;">Resources</h4>
-                    <button id="sellAllResourcesButton" class="option-button red-disabled-text">Sell All</button>
+                    <h4 id="tab1Intro" data-loc="tabHeaderResources" style="width: 80%;">Resources</h4>
+                    <button id="sellAllResourcesButton" data-loc="buttonSellAll" class="option-button red-disabled-text">Sell All</button>
                 </div>
                 <div class="container-item-menu-body tab-1">
                     <!-- Outer Collapsible for Gases -->
                     <div id="gas" class="collapsible open">
                         <div class="collapsible-header main-category-header active">
-                            <span class="main-category-text">Gases</span>
+                            <span class="main-category-text" data-loc="categoryGases">Gases</span>
                             <span class="collapsible-arrow">▼</span>
                         </div>
                         <div class="collapsible-content open">
                             <div class="row-side-menu d-flex">
                                 <div class="row-side-menu-item">
-                                    <p id="hydrogenOption" class="tab1.option1 inset-paragraph">Hydrogen</p>
+                                    <p id="hydrogenOption" data-loc="resourceHydrogen" class="tab1.option1 inset-paragraph">Hydrogen</p>
                                 </div>
                                 <div class="row-side-menu-item right-align">
                                     <p id="hydrogenRate" class="tab1.option1 notation">0 / s</p>
@@ -105,7 +105,7 @@
                             </div>
                             <div class="row-side-menu d-flex invisible">
                                 <div class="row-side-menu-item">
-                                    <p id="heliumOption" class="tab1.option2 inset-paragraph">Helium</p>
+                                    <p id="heliumOption" data-loc="resourceHelium" class="tab1.option2 inset-paragraph">Helium</p>
                                 </div>
                                 <div class="row-side-menu-item right-align">
                                     <p id="heliumRate" class="tab1.option2 notation">0 / s</p>
@@ -116,7 +116,7 @@
                             </div>
                             <div class="row-side-menu d-flex invisible">
                                 <div class="row-side-menu-item">
-                                    <p id="neonOption" class="tab1.option4 inset-paragraph">Neon</p>
+                                    <p id="neonOption" data-loc="resourceNeon" class="tab1.option4 inset-paragraph">Neon</p>
                                 </div>
                                 <div class="row-side-menu-item right-align">
                                     <p id="neonRate" class="tab1.option4 notation">0 / s</p>
@@ -127,7 +127,7 @@
                             </div>
                             <div class="row-side-menu d-flex invisible">
                                 <div class="row-side-menu-item">
-                                    <p id="oxygenOption" class="tab1.option5 inset-paragraph">Oxygen</p>
+                                    <p id="oxygenOption" data-loc="resourceOxygen" class="tab1.option5 inset-paragraph">Oxygen</p>
                                 </div>
                                 <div class="row-side-menu-item right-align">
                                     <p id="oxygenRate" class="tab1.option5 notation">0 / s</p>
@@ -141,13 +141,13 @@
         
                     <div id="solids" class="collapsible open invisible">
                         <div class="collapsible-header main-category-header active">
-                            <span class="main-category-text">Solids</span>
+                            <span class="main-category-text" data-loc="categorySolids">Solids</span>
                             <span class="collapsible-arrow">▼</span>
                         </div>
                         <div class="collapsible-content open">
                             <div class="row-side-menu d-flex invisible">
                                 <div class="row-side-menu-item">
-                                    <p id="carbonOption" class="tab1.option3 inset-paragraph">Carbon</p>
+                                    <p id="carbonOption" data-loc="resourceCarbon" class="tab1.option3 inset-paragraph">Carbon</p>
                                 </div>
                                 <div class="row-side-menu-item right-align">
                                     <p id="carbonRate" class="tab1.option3 notation">0 / s</p>
@@ -158,7 +158,7 @@
                             </div>
                             <div class="row-side-menu d-flex invisible">
                                 <div class="row-side-menu-item">
-                                    <p id="siliconOption" class="tab1.option7 inset-paragraph">Silicon</p>
+                                    <p id="siliconOption" data-loc="resourceSilicon" class="tab1.option7 inset-paragraph">Silicon</p>
                                 </div>
                                 <div class="row-side-menu-item right-align">
                                     <p id="siliconRate" class="tab1.option7 notation">0 / s</p>
@@ -169,7 +169,7 @@
                             </div>
                             <div class="row-side-menu d-flex invisible">
                                 <div class="row-side-menu-item">
-                                    <p id="sodiumOption" class="tab1.option6 inset-paragraph">Sodium</p>
+                                    <p id="sodiumOption" data-loc="resourceSodium" class="tab1.option6 inset-paragraph">Sodium</p>
                                 </div>
                                 <div class="row-side-menu-item right-align">
                                     <p id="sodiumRate" class="tab1.option6 notation">0 / s</p>
@@ -180,7 +180,7 @@
                             </div>
                             <div class="row-side-menu d-flex invisible">
                                 <div class="row-side-menu-item">
-                                    <p id="ironOption" class="tab1.option8 inset-paragraph">Iron</p>
+                                    <p id="ironOption" data-loc="resourceIron" class="tab1.option8 inset-paragraph">Iron</p>
                                 </div>
                                 <div class="row-side-menu-item right-align">
                                     <p id="ironRate" class="tab1.option8 notation">0 / s</p>
@@ -213,19 +213,19 @@
         <div id="tab2ContainerGroup" class="tab-2-container-group tab-2">
             <div class="container-item-menu tab-2">
                 <div class="container-item-menu-header tab-2">
-                    <h4 id="tab2Intro">Energy</h4>
+                    <h4 id="tab2Intro" data-loc="tabHeaderEnergy">Energy</h4>
                 </div>
                 <div class="container-item-menu-body tab-2">
                     <!-- Outer Collapsible for Energy -->
                     <div id="energyBuildings" class="collapsible open">
                         <div class="collapsible-header active">
-                            <span class="main-category-text">Energy</span>
+                            <span class="main-category-text" data-loc="tabHeaderEnergy">Energy</span>
                             <span class="collapsible-arrow">▼</span>
                         </div>
                         <div class="collapsible-content open">
                             <div class="row-side-menu d-flex">
                                 <div class="row-side-menu-item">
-                                    <p id="energyOption" class="tab2.option1 inset-paragraph">Energy Storage</p>
+                                    <p id="energyOption" data-loc="headerMainEnergyStorage" class="tab2.option1 inset-paragraph">Energy Storage</p>
                                 </div>
                                 <div class="row-side-menu-item right-align">
                                     <p id="energyRate" class="tab2.option1 notation energy-check">0 KW / s</p>
@@ -236,7 +236,7 @@
                             </div>
                             <div class="row-side-menu d-flex invisible">
                                 <div class="row-side-menu-item">
-                                    <p id="powerPlant1Option" class="tab2.option2 inset-paragraph">Power Plant</p>
+                                    <p id="powerPlant1Option" data-loc="headerMainPowerPlant" class="tab2.option2 inset-paragraph">Power Plant</p>
                                 </div>
                                 <div class="row-side-menu-item right-align">
                                     <p id="powerPlant1Rate" class="tab2.option2 notation">0 KW / s</p>
@@ -247,7 +247,7 @@
                             </div>
                             <div class="row-side-menu d-flex invisible">
                                 <div class="row-side-menu-item">
-                                    <p id="powerPlant2Option" class="tab2.option3 inset-paragraph">Solar Power Plant</p>
+                                    <p id="powerPlant2Option" data-loc="headerMainSolarPowerPlant" class="tab2.option3 inset-paragraph">Solar Power Plant</p>
                                 </div>
                                 <div class="row-side-menu-item right-align">
                                     <p id="powerPlant2Rate" class="tab2.option3 notation">0 KW / s</p>
@@ -258,7 +258,7 @@
                             </div>
                             <div class="row-side-menu d-flex invisible">
                                 <div class="row-side-menu-item">
-                                    <p id="powerPlant3Option" class="tab2.option4 inset-paragraph">Advanced Power Plant</p>
+                                    <p id="powerPlant3Option" data-loc="headerMainAdvancedPowerPlant" class="tab2.option4 inset-paragraph">Advanced Power Plant</p>
                                 </div>
                                 <div class="row-side-menu-item right-align">
                                     <p id="powerPlant3Rate" class="tab2.option4 notation">0 KW / s</p>
@@ -273,8 +273,8 @@
             </div>
         
             <div id="energyConsumptionStats" class="container-item-central tab-2 invisible">
-                <h4 class="container-item-menu-header">Power</h4>
-                <button id="activateGridButton" class="option-button">Power On</button>
+                <h4 class="container-item-menu-header" data-loc="headerMainPower">Power</h4>
+                <button id="activateGridButton" data-loc="buttonPowerOn" class="option-button">Power On</button>
                 <div id="powerGenerationConsumptionContainer" class="power-generation-consumption-container">
                     <canvas id="powerGenerationConsumptionChart" class="power-generation-consumption-chart"></canvas>
                 </div>
@@ -299,12 +299,12 @@
         <div id="tab3ContainerGroup" class="tab-3-container-group tab-3">
             <div class="container-item-menu tab-3">
                 <div class="container-item-menu-header tab-3">
-                    <h4 id="tab3Intro">Research</h4>
+                    <h4 id="tab3Intro" data-loc="tabHeaderResearch">Research</h4>
                 </div>
                 <div class="container-item-menu-body tab-3">
                     <div class="row-side-menu d-flex">
                         <div class="row-side-menu-item">
-                            <p id="researchOption" class="tab3.option1">Research</p>
+                            <p id="researchOption" data-loc="headerMainResearch" class="tab3.option1">Research</p>
                         </div>
                         <div class="row-side-menu-item right-align">
                             <p id="researchRate" class="tab3.option1 notation">0 / s</p>
@@ -315,7 +315,7 @@
                     </div>
                     <div class="row-side-menu d-flex">
                         <div class="row-side-menu-item">
-                            <p id="technologyOption" class="tab3.option2">Technology</p>
+                            <p id="technologyOption" data-loc="headerMainTechnology" class="tab3.option2">Technology</p>
                         </div>
                         <div class="row-side-menu-item right-align">
                             <p class="tab3.option2"></p>
@@ -326,7 +326,7 @@
                     </div>
                     <div class="row-side-menu d-flex">
                         <div class="row-side-menu-item">
-                            <p id="techTreeOption" class="tab3.option3">Tech Tree</p>
+                            <p id="techTreeOption" data-loc="headerMainTechTree" class="tab3.option3">Tech Tree</p>
                         </div>
                         <div class="row-side-menu-item right-align">
                             <p class="tab3.option3"></p>
@@ -337,7 +337,7 @@
                     </div>
                     <div class="row-side-menu d-flex invisible">
                         <div class="row-side-menu-item">
-                            <p id="philosophyOption" class="tab3.option4">Philosophy</p>
+                            <p id="philosophyOption" data-loc="headerMainPhilosophy" class="tab3.option4">Philosophy</p>
                         </div>
                         <div class="row-side-menu-item right-align">
                             <p class="tab3.option4"></p>
@@ -367,20 +367,20 @@
         <div id="tab4ContainerGroup" class="tab-4-container-group tab-4">
             <div class="container-item-menu tab-4">
                 <div class="container-item-menu-header tab-4 sidebar-intro-header d-flex justify-content-between align-items-center">
-                    <h4 id="tab4Intro" style="width: 80%;">Compounds</h4>
-                    <button id="sellAllCompoundsButton" class="option-button red-disabled-text">Sell All</button>
+                    <h4 id="tab4Intro" data-loc="tabHeaderCompounds" style="width: 80%;">Compounds</h4>
+                    <button id="sellAllCompoundsButton" data-loc="buttonSellAll" class="option-button red-disabled-text">Sell All</button>
                 </div>
                 <div class="container-item-menu-body tab-4">
                     <!-- Outer Collapsible for Compounds -->
                     <div id="liquidCompounds" class="collapsible open invisible">
                         <div class="collapsible-header main-category-header active">
-                            <span class="main-category-text">Liquids</span>
+                            <span class="main-category-text" data-loc="categoryLiquids">Liquids</span>
                             <span class="collapsible-arrow">▼</span>
                         </div>
                         <div class="collapsible-content open">
                             <div class="row-side-menu d-flex invisible">
                                 <div class="row-side-menu-item">
-                                    <p id="dieselOption" class="tab4.option1 inset-paragraph">Diesel</p>
+                                    <p id="dieselOption" data-loc="compoundDiesel" class="tab4.option1 inset-paragraph">Diesel</p>
                                 </div>
                                 <div class="row-side-menu-item right-align">
                                     <p id="dieselRate" class="tab4.option1 notation">0 / s</p>
@@ -391,7 +391,7 @@
                             </div>
                             <div class="row-side-menu d-flex invisible">
                                 <div class="row-side-menu-item">
-                                    <p id="waterOption" class="tab4.option5 inset-paragraph">Water</p>
+                                    <p id="waterOption" data-loc="compoundWater" class="tab4.option5 inset-paragraph">Water</p>
                                 </div>
                                 <div class="row-side-menu-item right-align">
                                     <p id="waterRate" class="tab4.option5 notation">0 / s</p>
@@ -406,13 +406,13 @@
                     <!-- Solids Compounds -->
                     <div id="solidCompounds" class="collapsible open invisible">
                         <div class="collapsible-header main-category-header active">
-                            <span class="main-category-text">Solids</span>
+                            <span class="main-category-text" data-loc="categorySolids">Solids</span>
                             <span class="collapsible-arrow">▼</span>
                         </div>
                         <div class="collapsible-content open">
                             <div class="row-side-menu d-flex invisible">
                                 <div class="row-side-menu-item">
-                                    <p id="glassOption" class="tab4.option2 inset-paragraph">Glass</p>
+                                    <p id="glassOption" data-loc="compoundGlass" class="tab4.option2 inset-paragraph">Glass</p>
                                 </div>
                                 <div class="row-side-menu-item right-align">
                                     <p id="glassRate" class="tab4.option2 notation">0 / s</p>
@@ -423,7 +423,7 @@
                             </div>
                             <div class="row-side-menu d-flex invisible">
                                 <div class="row-side-menu-item">
-                                    <p id="concreteOption" class="tab4.option4 inset-paragraph">Concrete</p>
+                                    <p id="concreteOption" data-loc="compoundConcrete" class="tab4.option4 inset-paragraph">Concrete</p>
                                 </div>
                                 <div class="row-side-menu-item right-align">
                                     <p id="concreteRate" class="tab4.option4 notation">0 / s</p>
@@ -434,7 +434,7 @@
                             </div>
                             <div class="row-side-menu d-flex invisible">
                                 <div class="row-side-menu-item">
-                                    <p id="steelOption" class="tab4.option3 inset-paragraph">Steel</p>
+                                    <p id="steelOption" data-loc="compoundSteel" class="tab4.option3 inset-paragraph">Steel</p>
                                 </div>
                                 <div class="row-side-menu-item right-align">
                                     <p id="steelRate" class="tab4.option3 notation">0 / s</p>
@@ -445,7 +445,7 @@
                             </div>
                             <div class="row-side-menu d-flex invisible">
                                 <div class="row-side-menu-item">
-                                    <p id="titaniumOption" class="tab4.option6 inset-paragraph">Titanium</p>
+                                    <p id="titaniumOption" data-loc="compoundTitanium" class="tab4.option6 inset-paragraph">Titanium</p>
                                 </div>
                                 <div class="row-side-menu-item right-align">
                                     <p id="titaniumRate" class="tab4.option6 notation">0 / s</p>
@@ -477,12 +477,12 @@
         <div id="tab5ContainerGroup" class="tab-5-container-group tab-5">
             <div class="container-item-menu tab-5">
                 <div class="container-item-menu-header tab-5">
-                    <h4 id="tab5Intro">Interstellar</h4>
+                    <h4 id="tab5Intro" data-loc="tabHeaderInterstellar">Interstellar</h4>
                 </div>
                 <div class="container-item-menu-body tab-5">
                     <div class="row-side-menu d-flex">
                         <div class="row-side-menu-item">
-                            <p id="starMapOption" class="tab5.option1">Star Map</p>
+                            <p id="starMapOption" data-loc="headerMainStarMap" class="tab5.option1">Star Map</p>
                         </div>
                         <div class="row-side-menu-item right-align">
                             <p id="starMap2Option2" class="tab5.option1"></p>
@@ -493,7 +493,7 @@
                     </div>
                     <div class="row-side-menu d-flex invisible">
                         <div class="row-side-menu-item">
-                            <p id="starDataOption" class="tab5.option2">Star Data</p>
+                            <p id="starDataOption" data-loc="headerMainStarData" class="tab5.option2">Star Data</p>
                         </div>
                         <div class="row-side-menu-item right-align">
                             <p id="starDataOption2" class="tab5.option2"></p>
@@ -504,7 +504,7 @@
                     </div>
                     <div class="row-side-menu d-flex invisible">
                         <div class="row-side-menu-item">
-                            <p id="starShipOption" class="tab5.option3">Star Ship</p>
+                            <p id="starShipOption" data-loc="headerMainStarShip" class="tab5.option3">Star Ship</p>
                         </div>
                         <div class="row-side-menu-item right-align">
                             <p id="starShipOption2" class="tab5.option3"></p>
@@ -515,7 +515,7 @@
                     </div>
                     <div class="row-side-menu d-flex invisible">
                         <div class="row-side-menu-item">
-                            <p id="fleetHangarOption" class="tab5.option4">Fleet Hangar</p>
+                            <p id="fleetHangarOption" data-loc="headerMainFleetHangar" class="tab5.option4">Fleet Hangar</p>
                         </div>
                         <div class="row-side-menu-item right-align">
                             <p id="fleetHangarOption2" class="tab5.option4"></p>
@@ -526,7 +526,7 @@
                     </div>
                     <div class="row-side-menu d-flex invisible">
                         <div class="row-side-menu-item">
-                            <p id="coloniseOption" class="tab5.option5">Colonise</p>
+                            <p id="coloniseOption" data-loc="headerMainColonise" class="tab5.option5">Colonise</p>
                         </div>
                         <div class="row-side-menu-item right-align">
                             <p id="coloniseOption2" class="tab5.option5"></p>
@@ -556,12 +556,12 @@
         <div id="tab6ContainerGroup" class="tab-6-container-group tab-6">
             <div class="container-item-menu tab-6">
                 <div class="container-item-menu-header tab-6">
-                    <h4 id="tab6Intro">Space Mining</h4>
+                    <h4 id="tab6Intro" data-loc="tabHeaderSpaceMining">Space Mining</h4>
                 </div>
                 <div class="container-item-menu-body tab-6">
                     <div class="row-side-menu d-flex invisible">
                         <div class="row-side-menu-item">
-                            <p id="miningOption" class="tab6.option8">Mining</p>
+                            <p id="miningOption" data-loc="headerMainMining" class="tab6.option8">Mining</p>
                         </div>
                         <div class="row-side-menu-item right-align">
                             <p id="miningRate" class="tab6.option8"></p>
@@ -572,7 +572,7 @@
                     </div>
                     <div class="row-side-menu d-flex">
                         <div class="row-side-menu-item">
-                            <p id="spaceTelescopeOption" class="tab6.option6">Space Telescope</p>
+                            <p id="spaceTelescopeOption" data-loc="headerMainSpaceTelescope" class="tab6.option6">Space Telescope</p>
                         </div>
                         <div class="row-side-menu-item right-align">
                             <p id="spaceTelescopeOption2" class="tab6.option6 notation"></p>
@@ -583,7 +583,7 @@
                     </div>
                     <div class="row-side-menu d-flex invisible">
                         <div class="row-side-menu-item">
-                            <p id="asteroidsOption" class="tab6.option7">Asteroids</p>
+                            <p id="asteroidsOption" data-loc="headerMainAsteroids" class="tab6.option7">Asteroids</p>
                         </div>
                         <div class="row-side-menu-item right-align">
                             <p id="asteroidsOption2" class="tab6.option7 notation"></p>
@@ -594,7 +594,7 @@
                     </div>
                     <div class="row-side-menu d-flex invisible">
                         <div class="row-side-menu-item">
-                            <p id="launchPadOption" class="tab6.option1">Launch Pad</p>
+                            <p id="launchPadOption" data-loc="headerMainLaunchPad" class="tab6.option1">Launch Pad</p>
                         </div>
                         <div class="row-side-menu-item right-align">
                             <p id="launchPadOption2" class="tab6.option1 notation"></p>
@@ -666,12 +666,12 @@
         <div id="tab7ContainerGroup" class="tab-7-container-group tab-7">
             <div class="container-item-menu tab-7">
                 <div class="container-item-menu-header tab-7">
-                    <h4 id="tab7Intro">Galactic</h4>
+                    <h4 id="tab7Intro" data-loc="tabHeaderGalactic">Galactic</h4>
                 </div>
                 <div class="container-item-menu-body tab-7">
                     <div class="row-side-menu d-flex">
                         <div class="row-side-menu-item">
-                            <p id="rebirthOption" class="tab7.option1">Rebirth</p>
+                            <p id="rebirthOption" data-loc="headerMainRebirth" class="tab7.option1">Rebirth</p>
                         </div>
                         <div class="row-side-menu-item right-align">
                             <p id="rebirthOption2" class="tab7.option1"></p>
@@ -682,7 +682,7 @@
                     </div>
                     <div class="row-side-menu d-flex">
                         <div class="row-side-menu-item">
-                            <p id="galacticMarketOption" class="tab7.option2">Galactic Market</p>
+                            <p id="galacticMarketOption" data-loc="headerMainGalacticMarket" class="tab7.option2">Galactic Market</p>
                         </div>
                         <div class="row-side-menu-item right-align">
                             <p id="galacticMarketOption2" class="tab7.option2"></p>
@@ -693,7 +693,7 @@
                     </div>
                     <div class="row-side-menu d-flex invisible">
                         <div class="row-side-menu-item">
-                            <p id="galacticCasinoOption" class="tab7.option6">Galactic Casino</p>
+                            <p id="galacticCasinoOption" data-loc="headerMainGalacticCasino" class="tab7.option6">Galactic Casino</p>
                         </div>
                         <div class="row-side-menu-item right-align">
                             <p id="galacticCasinoOption2" class="tab7.option6"></p>
@@ -704,7 +704,7 @@
                     </div>
                     <div class="row-side-menu d-flex invisible">
                         <div class="row-side-menu-item">
-                            <p id="ascendencyOption" class="tab7.option3">Ascendency Perks</p>
+                            <p id="ascendencyOption" data-loc="headerMainAscendencyPerks" class="tab7.option3">Ascendency Perks</p>
                         </div>
                         <div class="row-side-menu-item right-align">
                             <p id="ascendencyOption2" class="tab7.option3"></p>
@@ -715,7 +715,7 @@
                     </div>
                     <div class="row-side-menu d-flex invisible">
                         <div class="row-side-menu-item">
-                            <p id="megastructuresOption" class="tab7.option4">Megastructures</p>
+                            <p id="megastructuresOption" data-loc="headerMainMegastructures" class="tab7.option4">Megastructures</p>
                         </div>
                         <div class="row-side-menu-item right-align">
                             <p id="megastructuresOption2" class="tab7.option4"></p>
@@ -726,7 +726,7 @@
                     </div>
                     <div class="row-side-menu d-flex invisible">
                         <div class="row-side-menu-item">
-                            <p id="blackholeOption" class="tab7.option5">Black Hole</p>
+                            <p id="blackholeOption" data-loc="headerMainBlackHole" class="tab7.option5">Black Hole</p>
                         </div>
                         <div class="row-side-menu-item right-align">
                             <p id="blackholeOption2" class="tab7.option5">Time 1x</p>
@@ -754,22 +754,22 @@
         <div id="tab8ContainerGroup" class="tab-8-container-group tab-8">
             <div class="container-item-menu tab-8">
                 <div class="container-item-menu-header tab-8">
-                    <h4 id="tab8Intro">Cosmic Rip</h4>
+                    <h4 id="tab8Intro" data-loc="tabHeaderCosmicRip">Cosmic Rip</h4>
                 </div>
                 <div class="container-item-menu-body tab-8">
                     <div id="cosmicRipOptions" class="collapsible open">
                         <div class="collapsible-header main-category-header active">
-                            <span class="main-category-text">Cosmic Rip</span>
+                            <span class="main-category-text" data-loc="tabHeaderCosmicRip">Cosmic Rip</span>
                         </div>
                         <div class="collapsible-content open">
                             <div class="row-side-menu d-flex">
                                 <div class="row-side-menu-item">
-                                    <p id="cosmicRipSituationOption" class="tab8.option1 inset-paragraph">Situation</p>
+                                    <p id="cosmicRipSituationOption" data-loc="headerMainSituation" class="tab8.option1 inset-paragraph">Situation</p>
                                 </div>
                             </div>
                             <div id="cosmicRipNearSpaceScannerArrayRow" class="row-side-menu d-flex invisible">
                                 <div class="row-side-menu-item">
-                                    <p id="cosmicRipNearSpaceScannerArrayOption" class="tab8.option2 inset-paragraph">Near Space Scanner Array</p>
+                                    <p id="cosmicRipNearSpaceScannerArrayOption" data-loc="headerMainNearSpaceScannerArray" class="tab8.option2 inset-paragraph">Near Space Scanner Array</p>
                                 </div>
                                 <div class="row-side-menu-item right-align">
                                     <p id="cosmicRipTelemetryRate" class="tab8.option2 notation">0 / s</p>
@@ -780,7 +780,7 @@
                             </div>
                             <div id="cosmicRipCosmicRipRow" class="row-side-menu d-flex invisible">
                                 <div class="row-side-menu-item">
-                                    <p id="cosmicRipCosmicRipOption" class="tab8.option3 inset-paragraph">Cosmic Rip</p>
+                                    <p id="cosmicRipCosmicRipOption" data-loc="headerMainCosmicRipTab" class="tab8.option3 inset-paragraph">Cosmic Rip</p>
                                 </div>
                             </div>
                         </div>
@@ -804,55 +804,55 @@
         <div id="tab9ContainerGroup" class="tab-9-container-group tab-9">
             <div class="container-item-menu tab-9">
                 <div class="container-item-menu-header tab-9">
-                    <h4 id="tab9Intro">Settings</h4>
+                    <h4 id="tab9Intro" data-loc="headerMainSettings">Settings</h4>
                 </div>
                 <div class="container-item-menu-body tab-9">
                     <!-- Cosmicopedia Collapsible -->
                     <div id="tab9Cosmicopedia" class="collapsible">
                         <div class="collapsible-header main-category-header">
-                            <span class="main-category-text">Cosmicopedia</span>
+                            <span class="main-category-text" data-loc="cosmicopedia">Cosmicopedia</span>
                             <span class="collapsible-arrow">▼</span>
                         </div>
                         <div class="collapsible-content">
                             <div class="row-side-menu d-flex">
                                 <div class="row-side-menu-item">
 
-                                    <p id="tab9ContactDevOption" class="tab9.option9 inset-paragraph">Contact</p>
+                                    <p id="tab9ContactDevOption" data-loc="headerMainContact" class="tab9.option9 inset-paragraph">Contact</p>
                                 </div>
                             </div>
                             <div class="row-side-menu d-flex">
                                 <div class="row-side-menu-item">
-                                    <p id="tab9GetStartedOption" class="tab9.option4 inset-paragraph">Get Started</p>
+                                    <p id="tab9GetStartedOption" data-loc="headerMainGetStarted" class="tab9.option4 inset-paragraph">Get Started</p>
                                 </div>
                             </div>
                             <div class="row-side-menu d-flex">
                                 <div class="row-side-menu-item">
-                                    <p id="tab9StoryOption" class="tab9.option12 inset-paragraph">Story</p>
+                                    <p id="tab9StoryOption" data-loc="headerMainStory" class="tab9.option12 inset-paragraph">Story</p>
                                 </div>
                             </div>
                             <div class="row-side-menu d-flex">
                                 <div class="row-side-menu-item">
-                                    <p id="tab9ConceptsEarlyOption" class="tab9.option5 inset-paragraph">Concepts - Early</p>
+                                    <p id="tab9ConceptsEarlyOption" data-loc="headerMainConceptsEarly" class="tab9.option5 inset-paragraph">Concepts - Early</p>
                                 </div>
                             </div>
                             <div class="row-side-menu d-flex">
                                 <div class="row-side-menu-item">
-                                    <p id="tab9ConceptsMidOption" class="tab9.option6 inset-paragraph">Concepts - Mid</p>
+                                    <p id="tab9ConceptsMidOption" data-loc="headerMainConceptsMid" class="tab9.option6 inset-paragraph">Concepts - Mid</p>
                                 </div>
                             </div>
                             <div class="row-side-menu d-flex">
                                 <div class="row-side-menu-item">
-                                    <p id="tab9ConceptsLateOption" class="tab9.option7 inset-paragraph">Concepts - Late</p>
+                                    <p id="tab9ConceptsLateOption" data-loc="headerMainConceptsLate" class="tab9.option7 inset-paragraph">Concepts - Late</p>
                                 </div>
                             </div>
                             <div class="row-side-menu d-flex">
                                 <div class="row-side-menu-item">
-                                    <p id="tab9ConceptsEndGoalOption" class="tab9.option13 inset-paragraph">Concepts - End Goal</p>
+                                    <p id="tab9ConceptsEndGoalOption" data-loc="headerMainConceptsEndGoal" class="tab9.option13 inset-paragraph">Concepts - End Goal</p>
                                 </div>
                             </div>
                             <div class="row-side-menu d-flex">
                                 <div class="row-side-menu-item">
-                                    <p id="tab9PhilosophiesOption" class="tab9.option11 inset-paragraph">Philosophies</p>
+                                    <p id="tab9PhilosophiesOption" data-loc="headerMainPhilosophies" class="tab9.option11 inset-paragraph">Philosophies</p>
                                 </div>
                             </div>
                         </div>
@@ -860,23 +860,23 @@
 
                     <div id="tab9AchievementsAndStats" class="collapsible open">
                         <div class="collapsible-header main-category-header active">
-                            <span class="main-category-text">Achievements &amp; Stats</span>
+                            <span class="main-category-text" data-loc="categoryAchievementsAndStats">Achievements &amp; Stats</span>
                             <span class="collapsible-arrow">▼</span>
                         </div>
                         <div class="collapsible-content open">
                             <div class="row-side-menu d-flex">
                                 <div class="row-side-menu-item">
-                                    <p id="achievementsOption" class="tab9.option10 inset-paragraph">Achievements</p>
+                                    <p id="achievementsOption" data-loc="headerMainAchievements" class="tab9.option10 inset-paragraph">Achievements</p>
                                 </div>
                             </div>
                             <div class="row-side-menu d-flex">
                                 <div class="row-side-menu-item">
-                                    <p id="eventsOption" class="tab9.option14 inset-paragraph">Events</p>
+                                    <p id="eventsOption" data-loc="headerMainEvents" class="tab9.option14 inset-paragraph">Events</p>
                                 </div>
                             </div>
                             <div class="row-side-menu d-flex">
                                 <div class="row-side-menu-item">
-                                    <p id="statisticsOption" class="tab9.option8 inset-paragraph">Statistics</p>
+                                    <p id="statisticsOption" data-loc="headerMainStatistics" class="tab9.option8 inset-paragraph">Statistics</p>
                                 </div>
                             </div>
                         </div>
@@ -884,28 +884,28 @@
 
                     <div id="tab9Options" class="collapsible open">
                         <div class="collapsible-header main-category-header active">
-                            <span class="main-category-text">Options</span>
+                            <span class="main-category-text" data-loc="categoryOptions">Options</span>
                             <span class="collapsible-arrow">▼</span>
                         </div>
                         <div class="collapsible-content open">
                             <div class="row-side-menu d-flex">
                                 <div class="row-side-menu-item">
-                                    <p class="tab9.option1 inset-paragraph">Visual</p>
+                                    <p class="tab9.option1 inset-paragraph" data-loc="headerMainVisual">Visual</p>
                                 </div>
                             </div>
                             <div class="row-side-menu d-flex">
                                 <div class="row-side-menu-item">
-                                    <p class="tab9.option3 inset-paragraph">Game Options</p>
+                                    <p class="tab9.option3 inset-paragraph" data-loc="headerMainGameOptions">Game Options</p>
                                 </div>
                             </div>
                             <div class="row-side-menu d-flex">
                                 <div class="row-side-menu-item">
-                                    <p class="tab9.option2 inset-paragraph">Saving / Loading</p>
+                                    <p class="tab9.option2 inset-paragraph" data-loc="headerMainSavingLoading">Saving / Loading</p>
                                 </div>
                             </div>
                             <div class="row-side-menu d-flex invisible">
                                 <div class="row-side-menu-item">
-                                    <p id="tab9ExitGameOption" class="tab9.option15 inset-paragraph">Exit Game</p>
+                                    <p id="tab9ExitGameOption" data-loc="headerMainExitGame" class="tab9.option15 inset-paragraph">Exit Game</p>
                                 </div>
                             </div>
                         </div>
@@ -939,7 +939,7 @@
             <p>Some text in the Modal..</p>
             <div class="fullScreenContainer">
                 <div class="fullScreenCheckBox" id="fullScreenCheckBox" tabindex="0"></div>
-                <label class="fullScreenLabel">Start game full screen</label>
+                <label class="fullScreenLabel" data-loc="modalStartFullScreenLabel">Start game full screen</label>
             </div>  
             <button id="modalExtraChoice1" class="option-button launch-modal-button-width invisible">EXTRA 1</button>  
             <button id="modalExtraChoice2" class="option-button launch-modal-button-width invisible">EXTRA 2</button>    
