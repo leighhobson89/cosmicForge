@@ -5,7 +5,7 @@ import { getFactoryStarsArray, getSettledStars, setInFormation, setRedrawBattleD
 
 import { getMaxFleetShip, getFleetShips, copyStarDataToDestinationStarField, getResourceDataObject, getStarShipParts, getStarShipPartsNeededInTotalPerModule, getStarSystemDataObject, setStarSystemDataObject } from './resourceDataObject.js';
 import { capitaliseString, capitaliseWordsWithRomanNumerals } from './utilityFunctions.js';
-import { updateDiplomacySituation, calculateModifiedAttitude, increaseAttackAndDefensePower, generateDestinationStarData, gain, getAscendencyPointsWithRepeatableBonus } from './game.js';
+import { updateDiplomacySituation, calculateModifiedAttitude, increaseAttackAndDefensePower, generateDestinationStarData, gain, getAscendencyPointsWithRepeatableBonus, GENERATED_ANOMALY_CATALOGUE } from './game.js';
 import { localize, localizeMaterialName } from './localization.js';
 import { getLanguage } from './constantsAndGlobalVars.js';
 
@@ -38,12 +38,14 @@ const ATTITUDE_KEYS = {
     Scared: 'attitudeScared'
 };
 
-// The two fixed anomalies on the Miaplacidus system are authored in
-// `resourceDataObject.js` as plain strings; generated anomalies are objects and
-// take the branch below this map.
+// The fixed anomalies are authored as plain strings rather than objects: two on
+// the Miaplacidus system in `resourceDataObject.js`, and `Stalwart`, which
+// `generateAnomalies` returns for any hard-mode destination. Generated anomalies
+// are objects and take the branch below this map.
 const ANOMALY_KEYS = {
     'Broken Force Field': 'anomalyBrokenForceField',
-    'AI Master Race': 'anomalyAiMasterRace'
+    'AI Master Race': 'anomalyAiMasterRace',
+    Stalwart: 'anomalyStalwart'
 };
 
 const localizeFromMap = (map, value) => (map[value] ? localize(map[value], getLanguage()) : value);
@@ -56,7 +58,46 @@ const localizeAnomalyName = (value) => localizeFromMap(ANOMALY_KEYS, value);
 // canonical English value, so the display resolves from the key and the stored
 // value stays the one the battle code branches on.
 const localizeKeyed = (key, fallback) => (key ? localize(key, getLanguage()) : fallback);
-const localizeTraitName = (trait) => localizeKeyed(trait?.[2], trait?.[0]);
+
+// Traits held in a save written before the key slot existed only have two
+// entries, so the canonical English value has to resolve a key of its own or
+// those rows stay English forever.
+const TRAIT_NAME_KEYS = {
+    Aggressive: 'traitNameAggressive',
+    Diplomatic: 'traitNameDiplomatic',
+    Terrans: 'traitNameTerrans',
+    Aquatic: 'traitNameAquatic',
+    Aerialians: 'traitNameAerialians',
+    Armored: 'traitNameArmored',
+    'Hive Mind': 'traitNameHiveMind',
+    'Power Siphon': 'traitNamePowerSiphon',
+    Hypercharge: 'traitNameHypercharge',
+    Mechanized: 'traitNameMechanized',
+    'N/A': 'textNotApplicable'
+};
+
+const localizeTraitName = (trait) => localizeKeyed(trait?.[2] ?? TRAIT_NAME_KEYS[trait?.[0]], trait?.[0]);
+
+// The same problem for generated anomalies: one rolled before the key slots
+// existed is stored with only its English `name` and `effect`. Both maps are
+// built from the generator's own catalogue so there is a single source of truth
+// for which English string belongs to which key. They are built on first use
+// rather than at module scope, because this module and `game.js` import each
+// other and the catalogue is still in its temporal dead zone at load time.
+let generatedAnomalyKeyMaps = null;
+const getGeneratedAnomalyKeyMaps = () => {
+    if (!generatedAnomalyKeyMaps) {
+        const catalogue = GENERATED_ANOMALY_CATALOGUE || [];
+        generatedAnomalyKeyMaps = {
+            names: Object.fromEntries(catalogue.map((a) => [a.name, a.nameKey])),
+            effects: Object.fromEntries(catalogue.map((a) => [a.effect, a.effectKey]))
+        };
+    }
+    return generatedAnomalyKeyMaps;
+};
+
+const localizeGeneratedAnomalyName = (anomaly) => localizeKeyed(anomaly?.nameKey ?? getGeneratedAnomalyKeyMaps().names[anomaly?.name], anomaly?.name);
+const localizeGeneratedAnomalyEffect = (anomaly) => localizeKeyed(anomaly?.effectKey ?? getGeneratedAnomalyKeyMaps().effects[anomaly?.effect], anomaly?.effect);
 
 // Precipitation is a compound key plus the section it lives in.
 // Stars stubbed in for settled systems carry the literal 'Unknown' rather than a
@@ -1193,7 +1234,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                     return `<span>${localize('textNotApplicable', getLanguage())}</span>`;
                 }
 
-                return `${localizeKeyed(a?.nameKey, a?.name)}: <span class="${a?.class}">${localizeKeyed(a?.effectKey, a?.effect)}</span>`;
+                return `${localizeGeneratedAnomalyName(a)}: <span class="${a?.class}">${localizeGeneratedAnomalyEffect(a)}</span>`;
             }).join('<br/>');
         }
         

@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 
 function usage() {
   console.error('Usage: node tools/build-stamp.mjs <win|linux> <demo|full>');
@@ -54,6 +55,20 @@ function readVariableDebuggerAndCheatsFlag() {
 
 function writePackageJson(obj) {
   fs.writeFileSync(repoRootPackageJsonPath, JSON.stringify(obj, null, 2) + '\n', 'utf8');
+}
+
+// Packaging a catalogue with a missing or unreachable key ships a raw key to a
+// player in a language the developer does not read, so the check gates the build
+// rather than merely reporting after the fact.
+const localizationCheck = spawnSync(process.execPath, ['validateLocalization.cjs'], {
+  cwd: fileURLToPath(new URL('..', import.meta.url)),
+  stdio: 'inherit',
+  shell: false,
+});
+
+if (localizationCheck.status !== 0) {
+  console.error('\nBuild aborted: the localization catalogue did not pass validateLocalization.cjs.');
+  process.exit(localizationCheck.status ?? 1);
 }
 
 try {

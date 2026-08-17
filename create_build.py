@@ -331,14 +331,42 @@ def upload_directory_ftp(local_dir, ftp_password):
 # MAIN
 # ----------------------------
 
+def check_localization(project_root):
+    """Gate the build on the localization catalogue.
+
+    A missing or unreachable key does not throw at runtime: localize() returns
+    the key itself, so the player sees `headerMainDiesel` on screen — and only
+    in a language the developer is unlikely to be playing in. Catching it here
+    is the last point before the build is published.
+    """
+    logging.info("Validating localization catalogue...")
+    result = subprocess.run(
+        ["node", "validateLocalization.cjs"],
+        cwd=project_root,
+    )
+    if result.returncode != 0:
+        raise SystemExit(
+            "Build aborted: the localization catalogue did not pass validateLocalization.cjs."
+        )
+
+
 def main():
     parser = argparse.ArgumentParser(description="Create and deploy a build.")
     parser.add_argument("build_name", type=str)
+    parser.add_argument(
+        "--skip-localization-check",
+        action="store_true",
+        help="Package without validating the localization catalogue first.",
+    )
     args = parser.parse_args()
 
     zip_file_name = f"cosmicForge_Build_{args.build_name}.zip"
 
     project_root = os.getcwd()
+
+    if not args.skip_localization_check:
+        check_localization(project_root)
+
     temp_dir = os.path.join(project_root, "temp_build")
     os.makedirs(temp_dir, exist_ok=True)
 

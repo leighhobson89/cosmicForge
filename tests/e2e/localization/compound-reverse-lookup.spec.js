@@ -116,24 +116,26 @@ test.describe('Localization — compound reverse lookup', () => {
     expect(results.symbol).toBe('$');
   });
 
-  test('a bare quantity collides with the compoundCreateQty family', async ({ game }) => {
-    // Documented current behaviour, not desired behaviour. Every key starting
-    // `compound` is eligible, which includes `compoundCreateQty500` — whose
-    // English value is the string "500". The live caller feeds this function the
-    // last whitespace-separated word of a description line, so a line ending in
-    // a bare number resolves to a data-object path that does not exist.
+  test('a bare quantity no longer collides with the compoundCreateQty family', async ({ game }) => {
+    // Every key starting `compound` is eligible for the reverse lookup, which
+    // used to include `compoundCreateQty500` — whose English value was the bare
+    // string "500". The live caller feeds this function the last
+    // whitespace-separated word of a description line, so a line ending in a
+    // number resolved to a data-object path that does not exist.
     //
-    // Harmless today because the only lines that reach it end in a compound
-    // name. Pinned here so that changing the lookup's shape cannot alter it by
-    // accident, and so that fixing it is a deliberate, visible change.
+    // Closed by status.md item 7: the hardened checker showed the whole
+    // `compoundCreateQty*` family was unreachable — the recipe-text builder
+    // composes those strings inline and never asks for the keys — so all seven
+    // were deleted. Nothing narrowed the lookup, so this stays pinned: a future
+    // `compound*` key whose value is a bare number would re-open it.
     // See tests/docs/known-issues.md #8.
     const results = await game.withMods((m) => ({
       fiveHundred: m.loc.reverseLocalizeForCompounds('500', 'en'),
       one: m.loc.reverseLocalizeForCompounds('1', 'en')
     }));
 
-    expect(results.fiveHundred).toBe('createqty500');
-    expect(results.one).toBe('createqty1');
+    expect(results.fiveHundred).toBe('500');
+    expect(results.one).toBe('1');
   });
 
   test('a non-compound catalogue value never resolves to a compound key', async ({ game }) => {

@@ -556,7 +556,7 @@ function handleCosmicRipTechnologyScreenButtonAndDescriptionStates(element, tele
 
     if (getCosmicRipTechUnlockedArray().includes(techName)) {
         if (element.tagName.toLowerCase() === 'button') {
-            element.textContent = 'Researched';
+            element.textContent = localize('textResearchedState', getLanguage());
         }
         element.classList.remove('red-disabled-text');
         element.classList.add('green-ready-text');
@@ -636,7 +636,7 @@ function handleCosmicRipTechnologyScreenButtonAndDescriptionStates(element, tele
     if (getCosmicRipTechUnlockedArray().includes(techName)) {
         element.classList.remove('red-disabled-text');
         element.classList.add('green-ready-text');
-        element.textContent = 'Researched';
+        element.textContent = localize('textResearchedState', getLanguage());
         setElementPointerEvents(element, 'none');
         setTechRenderChange(true);
     }
@@ -1887,13 +1887,13 @@ function cosmicRipChecks() {
             if (progressBarContainer) progressBarContainer.classList.add('invisible');
             if (researchButton) {
                 researchButton.classList.remove('invisible');
-                researchButton.textContent = 'Researched';
+                researchButton.textContent = localize('textResearchedState', getLanguage());
                 researchButton.classList.remove('red-disabled-text');
                 researchButton.classList.add('green-ready-text');
                 researchButton.style.pointerEvents = 'none';
             }
             if (descriptionEl) {
-                descriptionEl.textContent = 'Researched';
+                descriptionEl.textContent = localize('textResearchedState', getLanguage());
                 descriptionEl.classList.add('green-ready-text');
             }
         }
@@ -5599,14 +5599,19 @@ function getAllElements(resourcesArray, compoundsArray) {
     return allElements;
 }
 
+// A row's cost label cannot be reached by its own id: `createOptionRow` gives the
+// row's flavour-text container the same `<labelId>Description` id that
+// `generateElementId` gives the cost label, and the flavour container comes first
+// in document order, so `getElementById` always returns the wrong one. Every cost
+// label is therefore addressed through its row, which is uniquely `labelId`.
+const getRowMainDescriptionLabel = (rowId) => {
+    const rowEl = document.getElementById(rowId);
+    if (!rowEl) return null;
+    return rowEl.querySelector('.description-container .notation');
+};
+
 function getAllDynamicDescriptionElements(resourceTierPairs, compoundTierPairs) {
     const elements = {};
-
-    const getRowMainDescriptionLabel = (rowId) => {
-        const rowEl = document.getElementById(rowId);
-        if (!rowEl) return null;
-        return rowEl.querySelector('.description-container .notation');
-    };
 
     resourceTierPairs.forEach(([resourceName, tier]) => {
         const resourceIncreaseStorageDescElement = getRowMainDescriptionLabel(`${resourceName}IncreaseStorageRow`);
@@ -5662,70 +5667,70 @@ function getPhilosophyTechElements() {
         
         switch(getPlayerPhilosophy()) {
             case 'constructor':
-                abilityRow = document.getElementById('spaceStorageTankResearchDescription');
+                abilityRow = getRowMainDescriptionLabel('techPhilosophySpaceStorageTankResearchRow');
                 abilityPrice = getResourceDataObject('philosophyRepeatableTechs', ['constructor', 'spaceStorageTankResearch', 'price']);
         
-                repeatable1Row = document.getElementById('efficientAssemblyDescription');
+                repeatable1Row = getRowMainDescriptionLabel('techPhilosophyEfficientAssemblyRow');
                 repeatable1RowPrice = getResourceDataObject('philosophyRepeatableTechs', ['constructor', 'efficientAssembly', 'price']);
         
-                repeatable2Row = document.getElementById('laserMiningDescription');
+                repeatable2Row = getRowMainDescriptionLabel('techPhilosophyLaserMiningRow');
                 repeatable2RowPrice = getResourceDataObject('philosophyRepeatableTechs', ['constructor', 'laserMining', 'price']);
         
-                repeatable3Row = document.getElementById('massCompoundAssemblyDescription');
+                repeatable3Row = getRowMainDescriptionLabel('techPhilosophyMassCompoundAssemblyRow');
                 repeatable3RowPrice = getResourceDataObject('philosophyRepeatableTechs', ['constructor', 'massCompoundAssembly', 'price']);
         
-                repeatable4Row = document.getElementById('energyDronesDescription');
+                repeatable4Row = getRowMainDescriptionLabel('techPhilosophyEnergyDronesRow');
                 repeatable4RowPrice = getResourceDataObject('philosophyRepeatableTechs', ['constructor', 'energyDrones', 'price']);
                 break;
         
             case 'supremacist':
-                abilityRow = document.getElementById('fleetHologramsDescription');
+                abilityRow = getRowMainDescriptionLabel('techPhilosophyFleetHologramsRow');
                 abilityPrice = getResourceDataObject('philosophyRepeatableTechs', ['supremacist', 'fleetHolograms', 'price']);
         
-                repeatable1Row = document.getElementById('hangarAutomationDescription');
+                repeatable1Row = getRowMainDescriptionLabel('techPhilosophyHangarAutomationRow');
                 repeatable1RowPrice = getResourceDataObject('philosophyRepeatableTechs', ['supremacist', 'hangarAutomation', 'price']);
         
-                repeatable2Row = document.getElementById('syntheticPlatingDescription');
+                repeatable2Row = getRowMainDescriptionLabel('techPhilosophySyntheticPlatingRow');
                 repeatable2RowPrice = getResourceDataObject('philosophyRepeatableTechs', ['supremacist', 'syntheticPlating', 'price']);
         
-                repeatable3Row = document.getElementById('antimatterEngineMinaturizationDescription');
+                repeatable3Row = getRowMainDescriptionLabel('techPhilosophyAntimatterEngineMinaturizationRow');
                 repeatable3RowPrice = getResourceDataObject('philosophyRepeatableTechs', ['supremacist', 'antimatterEngineMinaturization', 'price']);
         
-                repeatable4Row = document.getElementById('laserIntensityResearchDescription');
+                repeatable4Row = getRowMainDescriptionLabel('techPhilosophyLaserIntensityResearchRow');
                 repeatable4RowPrice = getResourceDataObject('philosophyRepeatableTechs', ['supremacist', 'laserIntensityResearch', 'price']);
                 break;
         
             case 'voidborn':
-                abilityRow = document.getElementById('voidSeersDescription');
+                abilityRow = getRowMainDescriptionLabel('techPhilosophyVoidSeersRow');
                 abilityPrice = getResourceDataObject('philosophyRepeatableTechs', ['voidborn', 'voidSeers', 'price']);
         
-                repeatable1Row = document.getElementById('stellarWhispersDescription');
+                repeatable1Row = getRowMainDescriptionLabel('techPhilosophyStellarWhispersRow');
                 repeatable1RowPrice = getResourceDataObject('philosophyRepeatableTechs', ['voidborn', 'stellarWhispers', 'price']);
         
-                repeatable2Row = document.getElementById('stellarInsightManifoldDescription');
+                repeatable2Row = getRowMainDescriptionLabel('techPhilosophyStellarInsightManifoldRow');
                 repeatable2RowPrice = getResourceDataObject('philosophyRepeatableTechs', ['voidborn', 'stellarInsightManifold', 'price']);
         
-                repeatable3Row = document.getElementById('asteroidDwellersDescription');
+                repeatable3Row = getRowMainDescriptionLabel('techPhilosophyAsteroidDwellersRow');
                 repeatable3RowPrice = getResourceDataObject('philosophyRepeatableTechs', ['voidborn', 'asteroidDwellers', 'price']);
         
-                repeatable4Row = document.getElementById('ascendencyPhilosophyDescription');
+                repeatable4Row = getRowMainDescriptionLabel('techPhilosophyAscendencyPhilosophyRow');
                 repeatable4RowPrice = getResourceDataObject('philosophyRepeatableTechs', ['voidborn', 'ascendencyPhilosophy', 'price']);
                 break;
         
             case 'expansionist':
-                abilityRow = document.getElementById('rapidExpansionDescription');
+                abilityRow = getRowMainDescriptionLabel('techPhilosophyRapidExpansionRow');
                 abilityPrice = getResourceDataObject('philosophyRepeatableTechs', ['expansionist', 'rapidExpansion', 'price']);
         
-                repeatable1Row = document.getElementById('spaceElevatorDescription');
+                repeatable1Row = getRowMainDescriptionLabel('techPhilosophySpaceElevatorRow');
                 repeatable1RowPrice = getResourceDataObject('philosophyRepeatableTechs', ['expansionist', 'spaceElevator', 'price']);
         
-                repeatable2Row = document.getElementById('launchPadMassProductionDescription');
+                repeatable2Row = getRowMainDescriptionLabel('techPhilosophyLaunchPadMassProductionRow');
                 repeatable2RowPrice = getResourceDataObject('philosophyRepeatableTechs', ['expansionist', 'launchPadMassProduction', 'price']);
         
-                repeatable3Row = document.getElementById('asteroidAttractorsDescription');
+                repeatable3Row = getRowMainDescriptionLabel('techPhilosophyAsteroidAttractorsRow');
                 repeatable3RowPrice = getResourceDataObject('philosophyRepeatableTechs', ['expansionist', 'asteroidAttractors', 'price']);
         
-                repeatable4Row = document.getElementById('warpDriveDescription');
+                repeatable4Row = getRowMainDescriptionLabel('techPhilosophyWarpDriveRow');
                 repeatable4RowPrice = getResourceDataObject('philosophyRepeatableTechs', ['expansionist', 'warpDrive', 'price']);
                 break;
         }        
@@ -5749,58 +5754,58 @@ function getPhilosophyTechElements() {
             abilityBuy: {
                 element: abilityDescElement,
                 price: abilityPriceAmount,
-                string1: 'Research'
+                string1: localize('textResearchPointsSuffix', getLanguage())
             },
             repeatable1Buy: {
                 element: repeatable1DescElement,
                 price: repeatable1PriceAmount,
-                string1: 'Research'
+                string1: localize('textResearchPointsSuffix', getLanguage())
             },
             repeatable2Buy: {
                 element: repeatable2DescElement,
                 price: repeatable2PriceAmount,
-                string1: 'Research'
+                string1: localize('textResearchPointsSuffix', getLanguage())
             },
             repeatable3Buy: {
                 element: repeatable3DescElement,
                 price: repeatable3PriceAmount,
-                string1: 'Research'
+                string1: localize('textResearchPointsSuffix', getLanguage())
             },
             repeatable4Buy: {
                 element: repeatable4DescElement,
                 price: repeatable4PriceAmount,
-                string1: 'Research'
+                string1: localize('textResearchPointsSuffix', getLanguage())
             }
         };        
     }
 }
 
 function getFleetResourceDescriptionElements() {
-    const fleetEnvoyDescElement = document.getElementById('envoyDescription');
+    const fleetEnvoyDescElement = getRowMainDescriptionLabel('spaceFleetEnvoyBuildRow');
     const fleetEnvoyPrice = getResourceDataObject('space', ['upgrades', 'fleetEnvoy', 'price']);
     const fleetEnvoyResource1Price = getResourceDataObject('space', ['upgrades', 'fleetEnvoy', 'resource1Price'])[0];
     const fleetEnvoyResource2Price = getResourceDataObject('space', ['upgrades', 'fleetEnvoy', 'resource2Price'])[0];
     const fleetEnvoyResource3Price = getResourceDataObject('space', ['upgrades', 'fleetEnvoy', 'resource3Price'])[0];
 
-    const fleetScoutDescElement = document.getElementById('scoutDescription');
+    const fleetScoutDescElement = getRowMainDescriptionLabel('spaceFleetScoutBuildRow');
     const fleetScoutPrice = getResourceDataObject('space', ['upgrades', 'fleetScout', 'price']);
     const fleetScoutResource1Price = getResourceDataObject('space', ['upgrades', 'fleetScout', 'resource1Price'])[0];
     const fleetScoutResource2Price = getResourceDataObject('space', ['upgrades', 'fleetScout', 'resource2Price'])[0];
     const fleetScoutResource3Price = getResourceDataObject('space', ['upgrades', 'fleetScout', 'resource3Price'])[0];
 
-    const fleetMarauderDescElement = document.getElementById('marauderDescription');
+    const fleetMarauderDescElement = getRowMainDescriptionLabel('spaceFleetMarauderBuildRow');
     const fleetMarauderPrice = getResourceDataObject('space', ['upgrades', 'fleetMarauder', 'price']);
     const fleetMarauderResource1Price = getResourceDataObject('space', ['upgrades', 'fleetMarauder', 'resource1Price'])[0];
     const fleetMarauderResource2Price = getResourceDataObject('space', ['upgrades', 'fleetMarauder', 'resource2Price'])[0];
     const fleetMarauderResource3Price = getResourceDataObject('space', ['upgrades', 'fleetMarauder', 'resource3Price'])[0];
 
-    const fleetLandStalkerDescElement = document.getElementById('landStalkerDescription');
+    const fleetLandStalkerDescElement = getRowMainDescriptionLabel('spaceFleetLandStalkerBuildRow');
     const fleetLandStalkerPrice = getResourceDataObject('space', ['upgrades', 'fleetLandStalker', 'price']);
     const fleetLandStalkerResource1Price = getResourceDataObject('space', ['upgrades', 'fleetLandStalker', 'resource1Price'])[0];
     const fleetLandStalkerResource2Price = getResourceDataObject('space', ['upgrades', 'fleetLandStalker', 'resource2Price'])[0];
     const fleetLandStalkerResource3Price = getResourceDataObject('space', ['upgrades', 'fleetLandStalker', 'resource3Price'])[0];
 
-    const fleetNavalStraferDescElement = document.getElementById('navalStraferDescription');
+    const fleetNavalStraferDescElement = getRowMainDescriptionLabel('spaceFleetNavalStraferBuildRow');
     const fleetNavalStraferPrice = getResourceDataObject('space', ['upgrades', 'fleetNavalStrafer', 'price']);
     const fleetNavalStraferResource1Price = getResourceDataObject('space', ['upgrades', 'fleetNavalStrafer', 'resource1Price'])[0];
     const fleetNavalStraferResource2Price = getResourceDataObject('space', ['upgrades', 'fleetNavalStrafer', 'resource2Price'])[0];
@@ -5814,9 +5819,9 @@ function getFleetResourceDescriptionElements() {
             resource2Price: fleetEnvoyResource2Price,
             resource3Price: fleetEnvoyResource3Price,
             string1: getCurrencySymbol(),
-            string2: capitaliseString(getResourceDataObject('space', ['upgrades', 'fleetEnvoy', 'resource1Price'])[1]),
-            string3: capitaliseString(getResourceDataObject('space', ['upgrades', 'fleetEnvoy', 'resource2Price'])[1]),
-            string4: capitaliseString(getResourceDataObject('space', ['upgrades', 'fleetEnvoy', 'resource3Price'])[1])
+            string2: spaceUpgradePriceName('fleetEnvoy', 1),
+            string3: spaceUpgradePriceName('fleetEnvoy', 2),
+            string4: spaceUpgradePriceName('fleetEnvoy', 3)
         },
         fleetScoutBuy: { 
             element: fleetScoutDescElement,
@@ -5825,9 +5830,9 @@ function getFleetResourceDescriptionElements() {
             resource2Price: fleetScoutResource2Price,
             resource3Price: fleetScoutResource3Price,
             string1: getCurrencySymbol(),
-            string2: capitaliseString(getResourceDataObject('space', ['upgrades', 'fleetScout', 'resource1Price'])[1]),
-            string3: capitaliseString(getResourceDataObject('space', ['upgrades', 'fleetScout', 'resource2Price'])[1]),
-            string4: capitaliseString(getResourceDataObject('space', ['upgrades', 'fleetScout', 'resource3Price'])[1])
+            string2: spaceUpgradePriceName('fleetScout', 1),
+            string3: spaceUpgradePriceName('fleetScout', 2),
+            string4: spaceUpgradePriceName('fleetScout', 3)
         },
         fleetMarauderBuy: { 
             element: fleetMarauderDescElement,
@@ -5836,9 +5841,9 @@ function getFleetResourceDescriptionElements() {
             resource2Price: fleetMarauderResource2Price,
             resource3Price: fleetMarauderResource3Price,
             string1: getCurrencySymbol(),
-            string2: capitaliseString(getResourceDataObject('space', ['upgrades', 'fleetMarauder', 'resource1Price'])[1]),
-            string3: capitaliseString(getResourceDataObject('space', ['upgrades', 'fleetMarauder', 'resource2Price'])[1]),
-            string4: capitaliseString(getResourceDataObject('space', ['upgrades', 'fleetMarauder', 'resource3Price'])[1])
+            string2: spaceUpgradePriceName('fleetMarauder', 1),
+            string3: spaceUpgradePriceName('fleetMarauder', 2),
+            string4: spaceUpgradePriceName('fleetMarauder', 3)
         },
         fleetLandStalkerBuy: { 
             element: fleetLandStalkerDescElement,
@@ -5847,9 +5852,9 @@ function getFleetResourceDescriptionElements() {
             resource2Price: fleetLandStalkerResource2Price,
             resource3Price: fleetLandStalkerResource3Price,
             string1: getCurrencySymbol(),
-            string2: capitaliseString(getResourceDataObject('space', ['upgrades', 'fleetLandStalker', 'resource1Price'])[1]),
-            string3: capitaliseString(getResourceDataObject('space', ['upgrades', 'fleetLandStalker', 'resource2Price'])[1]),
-            string4: capitaliseString(getResourceDataObject('space', ['upgrades', 'fleetLandStalker', 'resource3Price'])[1])
+            string2: spaceUpgradePriceName('fleetLandStalker', 1),
+            string3: spaceUpgradePriceName('fleetLandStalker', 2),
+            string4: spaceUpgradePriceName('fleetLandStalker', 3)
         },
         fleetNavalStraferBuy: { 
             element: fleetNavalStraferDescElement,
@@ -5858,27 +5863,27 @@ function getFleetResourceDescriptionElements() {
             resource2Price: fleetNavalStraferResource2Price,
             resource3Price: fleetNavalStraferResource3Price,
             string1: getCurrencySymbol(),
-            string2: capitaliseString(getResourceDataObject('space', ['upgrades', 'fleetNavalStrafer', 'resource1Price'])[1]),
-            string3: capitaliseString(getResourceDataObject('space', ['upgrades', 'fleetNavalStrafer', 'resource2Price'])[1]),
-            string4: capitaliseString(getResourceDataObject('space', ['upgrades', 'fleetNavalStrafer', 'resource3Price'])[1])
+            string2: spaceUpgradePriceName('fleetNavalStrafer', 1),
+            string3: spaceUpgradePriceName('fleetNavalStrafer', 2),
+            string4: spaceUpgradePriceName('fleetNavalStrafer', 3)
         }
     };
 }
 
 function getScienceResourceDescriptionElements() {
-    const scienceKitBuyDescElement = document.getElementById('scienceKitDescription');
+    const scienceKitBuyDescElement = getRowMainDescriptionLabel('researchScienceKitRow');
     const scienceKitBuyPrice = getResourceDataObject('research', ['upgrades', 'scienceKit', 'price']);
     const scienceKitBuyResource1Price = getResourceDataObject('research', ['upgrades', 'scienceKit', 'resource1Price'])[0];
     const scienceKitBuyResource2Price = getResourceDataObject('research', ['upgrades', 'scienceKit', 'resource2Price'])[0];
     const scienceKitBuyResource3Price = getResourceDataObject('research', ['upgrades', 'scienceKit', 'resource3Price'])[0];
 
-    const scienceClubBuyDescElement = document.getElementById('openScienceClubDescription');
+    const scienceClubBuyDescElement = getRowMainDescriptionLabel('researchScienceClubRow');
     const scienceClubBuyPrice = getResourceDataObject('research', ['upgrades', 'scienceClub', 'price']);
     const scienceClubBuyResource1Price = getResourceDataObject('research', ['upgrades', 'scienceClub', 'resource1Price'])[0];
     const scienceClubBuyResource2Price = getResourceDataObject('research', ['upgrades', 'scienceClub', 'resource2Price'])[0];
     const scienceClubBuyResource3Price = getResourceDataObject('research', ['upgrades', 'scienceClub', 'resource3Price'])[0];
 
-    const scienceLabBuyDescElement = document.getElementById('openScienceLabDescription');
+    const scienceLabBuyDescElement = getRowMainDescriptionLabel('researchScienceLabRow');
     const scienceLabBuyPrice = getResourceDataObject('research', ['upgrades', 'scienceLab', 'price']);
     const scienceLabBuyResource1Price = getResourceDataObject('research', ['upgrades', 'scienceLab', 'resource1Price'])[0];
     const scienceLabBuyResource2Price = getResourceDataObject('research', ['upgrades', 'scienceLab', 'resource2Price'])[0];
@@ -5892,9 +5897,9 @@ function getScienceResourceDescriptionElements() {
             resource2Price: scienceKitBuyResource2Price, 
             resource3Price: scienceKitBuyResource3Price, 
             string1: getCurrencySymbol(),
-            string2: capitaliseString(getResourceDataObject('research', ['upgrades', 'scienceKit', 'resource1Price'])[1]),
-            string3: capitaliseString(getResourceDataObject('research', ['upgrades', 'scienceKit', 'resource2Price'])[1]),
-            string4: capitaliseString(getResourceDataObject('research', ['upgrades', 'scienceKit', 'resource3Price'])[1])
+            string2: scienceUpgradePriceName('scienceKit', 1),
+            string3: scienceUpgradePriceName('scienceKit', 2),
+            string4: scienceUpgradePriceName('scienceKit', 3)
         },
         scienceClubBuy: { 
             element: scienceClubBuyDescElement, 
@@ -5903,9 +5908,9 @@ function getScienceResourceDescriptionElements() {
             resource2Price: scienceClubBuyResource2Price, 
             resource3Price: scienceClubBuyResource3Price, 
             string1: getCurrencySymbol(),
-            string2: capitaliseString(getResourceDataObject('research', ['upgrades', 'scienceClub', 'resource1Price'])[1]),
-            string3: capitaliseString(getResourceDataObject('research', ['upgrades', 'scienceClub', 'resource2Price'])[1]),
-            string4: capitaliseString(getResourceDataObject('research', ['upgrades', 'scienceClub', 'resource3Price'])[1])
+            string2: scienceUpgradePriceName('scienceClub', 1),
+            string3: scienceUpgradePriceName('scienceClub', 2),
+            string4: scienceUpgradePriceName('scienceClub', 3)
         },
         scienceLabBuy: { 
             element: scienceLabBuyDescElement, 
@@ -5914,9 +5919,9 @@ function getScienceResourceDescriptionElements() {
             resource2Price: scienceLabBuyResource2Price, 
             resource3Price: scienceLabBuyResource3Price, 
             string1: getCurrencySymbol(),
-            string2: capitaliseString(getResourceDataObject('research', ['upgrades', 'scienceLab', 'resource1Price'])[1]),
-            string3: capitaliseString(getResourceDataObject('research', ['upgrades', 'scienceLab', 'resource2Price'])[1]),
-            string4: capitaliseString(getResourceDataObject('research', ['upgrades', 'scienceLab', 'resource3Price'])[1])
+            string2: scienceUpgradePriceName('scienceLab', 1),
+            string3: scienceUpgradePriceName('scienceLab', 2),
+            string4: scienceUpgradePriceName('scienceLab', 3)
         }
     };
 }
@@ -5929,38 +5934,51 @@ function energyUpgradePriceName(upgrade, slot) {
     return localizeMaterialName(price[1], price[2], getLanguage());
 }
 
+// The same applies to every other cost line the frame loop rewrites: the space
+// upgrades (star ship modules, fleet ships, the telescope, the launch pad and
+// the four rocket miners) and the three science buildings.
+function spaceUpgradePriceName(upgrade, slot) {
+    const price = getResourceDataObject('space', ['upgrades', upgrade, `resource${slot}Price`]);
+    return localizeMaterialName(price[1], price[2], getLanguage());
+}
+
+function scienceUpgradePriceName(upgrade, slot) {
+    const price = getResourceDataObject('research', ['upgrades', upgrade, `resource${slot}Price`]);
+    return localizeMaterialName(price[1], price[2], getLanguage());
+}
+
 function getBuildingResourceDescriptionElements() {
-    const battery1BuyDescElement = document.getElementById('sodiumIonBatteryDescription');
+    const battery1BuyDescElement = getRowMainDescriptionLabel('energyBattery1Row');
     const battery1BuyPrice = getResourceDataObject('buildings', ['energy', 'upgrades', 'battery1', 'price']);
     const battery1BuyResource1Price = getResourceDataObject('buildings', ['energy', 'upgrades', 'battery1', 'resource1Price'])[0];
     const battery1BuyResource2Price = getResourceDataObject('buildings', ['energy', 'upgrades', 'battery1', 'resource2Price'])[0];
     const battery1BuyResource3Price = getResourceDataObject('buildings', ['energy', 'upgrades', 'battery1', 'resource3Price'])[0];
 
-    const battery2BuyDescElement = document.getElementById('lithiumIonBatteryDescription');
+    const battery2BuyDescElement = getRowMainDescriptionLabel('energyBattery2Row');
     const battery2BuyPrice = getResourceDataObject('buildings', ['energy', 'upgrades', 'battery2', 'price']);
     const battery2BuyResource1Price = getResourceDataObject('buildings', ['energy', 'upgrades', 'battery2', 'resource1Price'])[0];
     const battery2BuyResource2Price = getResourceDataObject('buildings', ['energy', 'upgrades', 'battery2', 'resource2Price'])[0];
     const battery2BuyResource3Price = getResourceDataObject('buildings', ['energy', 'upgrades', 'battery2', 'resource3Price'])[0];
 
-    const battery3BuyDescElement = document.getElementById('stellarCapacitorArrayDescription');
+    const battery3BuyDescElement = getRowMainDescriptionLabel('energyBattery3Row');
     const battery3BuyPrice = getResourceDataObject('buildings', ['energy', 'upgrades', 'battery3', 'price']);
     const battery3BuyResource1Price = getResourceDataObject('buildings', ['energy', 'upgrades', 'battery3', 'resource1Price'])[0];
     const battery3BuyResource2Price = getResourceDataObject('buildings', ['energy', 'upgrades', 'battery3', 'resource2Price'])[0];
     const battery3BuyResource3Price = getResourceDataObject('buildings', ['energy', 'upgrades', 'battery3', 'resource3Price'])[0];
 
-    const powerPlant1BuyDescElement = document.getElementById('powerPlantDescription');
+    const powerPlant1BuyDescElement = getRowMainDescriptionLabel('energyPowerPlant1Row');
     const powerPlant1BuyPrice = getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'price']);
     const powerPlant1BuyResource1Price = getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'resource1Price'])[0];
     const powerPlant1BuyResource2Price = getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'resource2Price'])[0];
     const powerPlant1BuyResource3Price = getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'resource3Price'])[0];
 
-    const powerPlant2BuyDescElement = document.getElementById('solarPowerPlantDescription');
+    const powerPlant2BuyDescElement = getRowMainDescriptionLabel('energyPowerPlant2Row');
     const powerPlant2BuyPrice = getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'price']);
     const powerPlant2BuyResource1Price = getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'resource1Price'])[0];
     const powerPlant2BuyResource2Price = getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'resource2Price'])[0];
     const powerPlant2BuyResource3Price = getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'resource3Price'])[0];
 
-    const powerPlant3BuyDescElement = document.getElementById('advancedPowerPlantDescription');
+    const powerPlant3BuyDescElement = getRowMainDescriptionLabel('energyPowerPlant3Row');
     const powerPlant3BuyPrice = getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant3', 'price']);
     const powerPlant3BuyResource1Price = getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant3', 'resource1Price'])[0];
     const powerPlant3BuyResource2Price = getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant3', 'resource2Price'])[0];
@@ -6037,31 +6055,31 @@ function getBuildingResourceDescriptionElements() {
 }
 
 function getStarShipResourceDescriptionElements() {
-    const ssStructuralBuyDescElement = document.getElementById('structuralDescription');
+    const ssStructuralBuyDescElement = getRowMainDescriptionLabel('spaceSsStructuralBuildRow');
     const ssStructuralBuyPrice = getResourceDataObject('space', ['upgrades', 'ssStructural', 'price']);
     const ssStructuralBuyResource1Price = getResourceDataObject('space', ['upgrades', 'ssStructural', 'resource1Price'])[0];
     const ssStructuralBuyResource2Price = getResourceDataObject('space', ['upgrades', 'ssStructural', 'resource2Price'])[0];
     const ssStructuralBuyResource3Price = getResourceDataObject('space', ['upgrades', 'ssStructural', 'resource3Price'])[0];
 
-    const ssLifeSupportBuyDescElement = document.getElementById('lifeSupportModuleDescription');
+    const ssLifeSupportBuyDescElement = getRowMainDescriptionLabel('spaceSsLifeSupportBuildRow');
     const ssLifeSupportBuyPrice = getResourceDataObject('space', ['upgrades', 'ssLifeSupport', 'price']);
     const ssLifeSupportBuyResource1Price = getResourceDataObject('space', ['upgrades', 'ssLifeSupport', 'resource1Price'])[0];
     const ssLifeSupportBuyResource2Price = getResourceDataObject('space', ['upgrades', 'ssLifeSupport', 'resource2Price'])[0];
     const ssLifeSupportBuyResource3Price = getResourceDataObject('space', ['upgrades', 'ssLifeSupport', 'resource3Price'])[0];
 
-    const ssAntimatterEngineBuyDescElement = document.getElementById('antimatterEngineDescription');
+    const ssAntimatterEngineBuyDescElement = getRowMainDescriptionLabel('spaceSsAntimatterEngineBuildRow');
     const ssAntimatterEngineBuyPrice = getResourceDataObject('space', ['upgrades', 'ssAntimatterEngine', 'price']);
     const ssAntimatterEngineBuyResource1Price = getResourceDataObject('space', ['upgrades', 'ssAntimatterEngine', 'resource1Price'])[0];
     const ssAntimatterEngineBuyResource2Price = getResourceDataObject('space', ['upgrades', 'ssAntimatterEngine', 'resource2Price'])[0];
     const ssAntimatterEngineBuyResource3Price = getResourceDataObject('space', ['upgrades', 'ssAntimatterEngine', 'resource3Price'])[0];
 
-    const ssFleetHangarBuyDescElement = document.getElementById('fleetHangarDescription');
+    const ssFleetHangarBuyDescElement = getRowMainDescriptionLabel('spaceSsFleetHangarBuildRow');
     const ssFleetHangarBuyPrice = getResourceDataObject('space', ['upgrades', 'ssFleetHangar', 'price']);
     const ssFleetHangarBuyResource1Price = getResourceDataObject('space', ['upgrades', 'ssFleetHangar', 'resource1Price'])[0];
     const ssFleetHangarBuyResource2Price = getResourceDataObject('space', ['upgrades', 'ssFleetHangar', 'resource2Price'])[0];
     const ssFleetHangarBuyResource3Price = getResourceDataObject('space', ['upgrades', 'ssFleetHangar', 'resource3Price'])[0];
     
-    const ssStellarScannerBuyDescElement = document.getElementById('stellarScannerDescription');
+    const ssStellarScannerBuyDescElement = getRowMainDescriptionLabel('spaceSsStellarScannerBuildRow');
     const ssStellarScannerBuyPrice = getResourceDataObject('space', ['upgrades', 'ssStellarScanner', 'price']);
     const ssStellarScannerBuyResource1Price = getResourceDataObject('space', ['upgrades', 'ssStellarScanner', 'resource1Price'])[0];
     const ssStellarScannerBuyResource2Price = getResourceDataObject('space', ['upgrades', 'ssStellarScanner', 'resource2Price'])[0];
@@ -6074,9 +6092,9 @@ function getStarShipResourceDescriptionElements() {
             resource2Price: ssStructuralBuyResource2Price,
             resource3Price: ssStructuralBuyResource3Price,
             string1: getCurrencySymbol(),
-            string2: capitaliseString(getResourceDataObject('space', ['upgrades', 'ssStructural', 'resource1Price'])[1]),
-            string3: capitaliseString(getResourceDataObject('space', ['upgrades', 'ssStructural', 'resource2Price'])[1]),
-            string4: capitaliseString(getResourceDataObject('space', ['upgrades', 'ssStructural', 'resource3Price'])[1])
+            string2: spaceUpgradePriceName('ssStructural', 1),
+            string3: spaceUpgradePriceName('ssStructural', 2),
+            string4: spaceUpgradePriceName('ssStructural', 3)
         },
         ssLifeSupportBuy: { 
             element: ssLifeSupportBuyDescElement,
@@ -6085,9 +6103,9 @@ function getStarShipResourceDescriptionElements() {
             resource2Price: ssLifeSupportBuyResource2Price,
             resource3Price: ssLifeSupportBuyResource3Price,
             string1: getCurrencySymbol(),
-            string2: capitaliseString(getResourceDataObject('space', ['upgrades', 'ssLifeSupport', 'resource1Price'])[1]),
-            string3: capitaliseString(getResourceDataObject('space', ['upgrades', 'ssLifeSupport', 'resource2Price'])[1]),
-            string4: capitaliseString(getResourceDataObject('space', ['upgrades', 'ssLifeSupport', 'resource3Price'])[1])
+            string2: spaceUpgradePriceName('ssLifeSupport', 1),
+            string3: spaceUpgradePriceName('ssLifeSupport', 2),
+            string4: spaceUpgradePriceName('ssLifeSupport', 3)
         },
         ssAntimatterEngineBuy: { 
             element: ssAntimatterEngineBuyDescElement,
@@ -6096,9 +6114,9 @@ function getStarShipResourceDescriptionElements() {
             resource2Price: ssAntimatterEngineBuyResource2Price,
             resource3Price: ssAntimatterEngineBuyResource3Price,
             string1: getCurrencySymbol(),
-            string2: capitaliseString(getResourceDataObject('space', ['upgrades', 'ssAntimatterEngine', 'resource1Price'])[1]),
-            string3: capitaliseString(getResourceDataObject('space', ['upgrades', 'ssAntimatterEngine', 'resource2Price'])[1]),
-            string4: capitaliseString(getResourceDataObject('space', ['upgrades', 'ssAntimatterEngine', 'resource3Price'])[1])
+            string2: spaceUpgradePriceName('ssAntimatterEngine', 1),
+            string3: spaceUpgradePriceName('ssAntimatterEngine', 2),
+            string4: spaceUpgradePriceName('ssAntimatterEngine', 3)
         },
         ssFleetHangarBuy: { 
             element: ssFleetHangarBuyDescElement,
@@ -6107,9 +6125,9 @@ function getStarShipResourceDescriptionElements() {
             resource2Price: ssFleetHangarBuyResource2Price,
             resource3Price: ssFleetHangarBuyResource3Price,
             string1: getCurrencySymbol(),
-            string2: capitaliseString(getResourceDataObject('space', ['upgrades', 'ssFleetHangar', 'resource1Price'])[1]),
-            string3: capitaliseString(getResourceDataObject('space', ['upgrades', 'ssFleetHangar', 'resource2Price'])[1]),
-            string4: capitaliseString(getResourceDataObject('space', ['upgrades', 'ssFleetHangar', 'resource3Price'])[1])
+            string2: spaceUpgradePriceName('ssFleetHangar', 1),
+            string3: spaceUpgradePriceName('ssFleetHangar', 2),
+            string4: spaceUpgradePriceName('ssFleetHangar', 3)
         },
         ssStellarScannerBuy: { 
             element: ssStellarScannerBuyDescElement,
@@ -6118,45 +6136,45 @@ function getStarShipResourceDescriptionElements() {
             resource2Price: ssStellarScannerBuyResource2Price,
             resource3Price: ssStellarScannerBuyResource3Price,
             string1: getCurrencySymbol(),
-            string2: capitaliseString(getResourceDataObject('space', ['upgrades', 'ssStellarScanner', 'resource1Price'])[1]),
-            string3: capitaliseString(getResourceDataObject('space', ['upgrades', 'ssStellarScanner', 'resource2Price'])[1]),
-            string4: capitaliseString(getResourceDataObject('space', ['upgrades', 'ssStellarScanner', 'resource3Price'])[1])
+            string2: spaceUpgradePriceName('ssStellarScanner', 1),
+            string3: spaceUpgradePriceName('ssStellarScanner', 2),
+            string4: spaceUpgradePriceName('ssStellarScanner', 3)
         }
     };
 }
 
 function getSpaceMiningResourceDescriptionElements() {
-    const spaceTelescopeBuyDescElement = document.getElementById('spaceTelescopeDescription');
+    const spaceTelescopeBuyDescElement = getRowMainDescriptionLabel('spaceBuildTelescopeRow');
     const spaceTelescopeBuyPrice = getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'price']);
     const spaceTelescopeBuyResource1Price = getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'resource1Price'])[0];
     const spaceTelescopeBuyResource2Price = getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'resource2Price'])[0];
     const spaceTelescopeBuyResource3Price = getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'resource3Price'])[0];
 
-    const launchPadBuyDescElement = document.getElementById('launchPadDescription');
+    const launchPadBuyDescElement = getRowMainDescriptionLabel('spaceBuildLaunchPadRow');
     const launchPadBuyPrice = getResourceDataObject('space', ['upgrades', 'launchPad', 'price']);
     const launchPadBuyResource1Price = getResourceDataObject('space', ['upgrades', 'launchPad', 'resource1Price'])[0];
     const launchPadBuyResource2Price = getResourceDataObject('space', ['upgrades', 'launchPad', 'resource2Price'])[0];
     const launchPadBuyResource3Price = getResourceDataObject('space', ['upgrades', 'launchPad', 'resource3Price'])[0];
 
-    const rocket1BuyDescElement = document.getElementById('rocketMiner1Description');
+    const rocket1BuyDescElement = getRowMainDescriptionLabel('spaceRocket1BuildRow');
     const rocket1BuyPrice = getResourceDataObject('space', ['upgrades', 'rocket1', 'price']);
     const rocket1BuyResource1Price = getResourceDataObject('space', ['upgrades', 'rocket1', 'resource1Price'])[0];
     const rocket1BuyResource2Price = getResourceDataObject('space', ['upgrades', 'rocket1', 'resource2Price'])[0];
     const rocket1BuyResource3Price = getResourceDataObject('space', ['upgrades', 'rocket1', 'resource3Price'])[0];
 
-    const rocket2BuyDescElement = document.getElementById('rocketMiner2Description');
+    const rocket2BuyDescElement = getRowMainDescriptionLabel('spaceRocket2BuildRow');
     const rocket2BuyPrice = getResourceDataObject('space', ['upgrades', 'rocket2', 'price']);
     const rocket2BuyResource1Price = getResourceDataObject('space', ['upgrades', 'rocket2', 'resource1Price'])[0];
     const rocket2BuyResource2Price = getResourceDataObject('space', ['upgrades', 'rocket2', 'resource2Price'])[0];
     const rocket2BuyResource3Price = getResourceDataObject('space', ['upgrades', 'rocket2', 'resource3Price'])[0];
 
-    const rocket3BuyDescElement = document.getElementById('rocketMiner3Description');
+    const rocket3BuyDescElement = getRowMainDescriptionLabel('spaceRocket3BuildRow');
     const rocket3BuyPrice = getResourceDataObject('space', ['upgrades', 'rocket3', 'price']);
     const rocket3BuyResource1Price = getResourceDataObject('space', ['upgrades', 'rocket3', 'resource1Price'])[0];
     const rocket3BuyResource2Price = getResourceDataObject('space', ['upgrades', 'rocket3', 'resource2Price'])[0];
     const rocket3BuyResource3Price = getResourceDataObject('space', ['upgrades', 'rocket3', 'resource3Price'])[0];
 
-    const rocket4BuyDescElement = document.getElementById('rocketMiner4Description');
+    const rocket4BuyDescElement = getRowMainDescriptionLabel('spaceRocket4BuildRow');
     const rocket4BuyPrice = getResourceDataObject('space', ['upgrades', 'rocket4', 'price']);
     const rocket4BuyResource1Price = getResourceDataObject('space', ['upgrades', 'rocket4', 'resource1Price'])[0];
     const rocket4BuyResource2Price = getResourceDataObject('space', ['upgrades', 'rocket4', 'resource2Price'])[0];
@@ -6170,9 +6188,9 @@ function getSpaceMiningResourceDescriptionElements() {
             resource2Price: spaceTelescopeBuyResource2Price, 
             resource3Price: spaceTelescopeBuyResource3Price, 
             string1: getCurrencySymbol(),
-            string2: capitaliseString(getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'resource1Price'])[1]), 
-            string3: capitaliseString(getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'resource2Price'])[1]), 
-            string4: capitaliseString(getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'resource3Price'])[1]) 
+            string2: spaceUpgradePriceName('spaceTelescope', 1), 
+            string3: spaceUpgradePriceName('spaceTelescope', 2), 
+            string4: spaceUpgradePriceName('spaceTelescope', 3) 
         },
         launchPadBuy: { 
             element: launchPadBuyDescElement, 
@@ -6181,9 +6199,9 @@ function getSpaceMiningResourceDescriptionElements() {
             resource2Price: launchPadBuyResource2Price, 
             resource3Price: launchPadBuyResource3Price, 
             string1: getCurrencySymbol(),
-            string2: capitaliseString(getResourceDataObject('space', ['upgrades', 'launchPad', 'resource1Price'])[1]), 
-            string3: capitaliseString(getResourceDataObject('space', ['upgrades', 'launchPad', 'resource2Price'])[1]), 
-            string4: capitaliseString(getResourceDataObject('space', ['upgrades', 'launchPad', 'resource3Price'])[1]) 
+            string2: spaceUpgradePriceName('launchPad', 1), 
+            string3: spaceUpgradePriceName('launchPad', 2), 
+            string4: spaceUpgradePriceName('launchPad', 3) 
         },
         rocket1Buy: { 
             element: rocket1BuyDescElement,
@@ -6192,9 +6210,9 @@ function getSpaceMiningResourceDescriptionElements() {
             resource2Price: rocket1BuyResource2Price,
             resource3Price: rocket1BuyResource3Price,
             string1: getCurrencySymbol(),
-            string2: capitaliseString(getResourceDataObject('space', ['upgrades', 'rocket1', 'resource1Price'])[1]),
-            string3: capitaliseString(getResourceDataObject('space', ['upgrades', 'rocket1', 'resource2Price'])[1]),
-            string4: capitaliseString(getResourceDataObject('space', ['upgrades', 'rocket1', 'resource3Price'])[1])
+            string2: spaceUpgradePriceName('rocket1', 1),
+            string3: spaceUpgradePriceName('rocket1', 2),
+            string4: spaceUpgradePriceName('rocket1', 3)
         },
         rocket2Buy: { 
             element: rocket2BuyDescElement,
@@ -6203,9 +6221,9 @@ function getSpaceMiningResourceDescriptionElements() {
             resource2Price: rocket2BuyResource2Price,
             resource3Price: rocket2BuyResource3Price,
             string1: getCurrencySymbol(),
-            string2: capitaliseString(getResourceDataObject('space', ['upgrades', 'rocket2', 'resource1Price'])[1]),
-            string3: capitaliseString(getResourceDataObject('space', ['upgrades', 'rocket2', 'resource2Price'])[1]),
-            string4: capitaliseString(getResourceDataObject('space', ['upgrades', 'rocket2', 'resource3Price'])[1])
+            string2: spaceUpgradePriceName('rocket2', 1),
+            string3: spaceUpgradePriceName('rocket2', 2),
+            string4: spaceUpgradePriceName('rocket2', 3)
         },
         rocket3Buy: { 
             element: rocket3BuyDescElement,
@@ -6214,9 +6232,9 @@ function getSpaceMiningResourceDescriptionElements() {
             resource2Price: rocket3BuyResource2Price,
             resource3Price: rocket3BuyResource3Price,
             string1: getCurrencySymbol(),
-            string2: capitaliseString(getResourceDataObject('space', ['upgrades', 'rocket3', 'resource1Price'])[1]),
-            string3: capitaliseString(getResourceDataObject('space', ['upgrades', 'rocket3', 'resource2Price'])[1]),
-            string4: capitaliseString(getResourceDataObject('space', ['upgrades', 'rocket3', 'resource3Price'])[1])
+            string2: spaceUpgradePriceName('rocket3', 1),
+            string3: spaceUpgradePriceName('rocket3', 2),
+            string4: spaceUpgradePriceName('rocket3', 3)
         },
         rocket4Buy: { 
             element: rocket4BuyDescElement,
@@ -6225,9 +6243,9 @@ function getSpaceMiningResourceDescriptionElements() {
             resource2Price: rocket4BuyResource2Price,
             resource3Price: rocket4BuyResource3Price,
             string1: getCurrencySymbol(),
-            string2: capitaliseString(getResourceDataObject('space', ['upgrades', 'rocket4', 'resource1Price'])[1]),
-            string3: capitaliseString(getResourceDataObject('space', ['upgrades', 'rocket4', 'resource2Price'])[1]),
-            string4: capitaliseString(getResourceDataObject('space', ['upgrades', 'rocket4', 'resource3Price'])[1])
+            string2: spaceUpgradePriceName('rocket4', 1),
+            string3: spaceUpgradePriceName('rocket4', 2),
+            string4: spaceUpgradePriceName('rocket4', 3)
         }
     };       
 }
@@ -7654,7 +7672,10 @@ function handleTechnologyScreenButtonAndDescriptionStates(element, quantity, tec
         }
         element.classList.remove('red-disabled-text');
         element.classList.add('green-ready-text');
-        element.textContent = 'Researched';
+        element.textContent = localize('textResearchedState', getLanguage());
+        //the researched state rides on the dataset flag rather than on the rendered word, so
+        //sortRowsByRenderPosition still recognises it once the label is translated
+        element.dataset.researched = 'true';
         setElementPointerEvents(element, 'none');
         setTechRenderChange(true);
     }
@@ -8058,7 +8079,7 @@ function checkStatusAndSetTextClasses(element) {
     if (!element) {
         return;
     }
-    if (element.id === 'spaceStorageTankResearchDescription' || element.id === 'fleetHologramsDescription' || element.id === 'voidSeersDescription' || element.id === 'rapidExpansionDescription') {
+    if (element.id === 'techPhilosophySpaceStorageTankResearchRowDescription' || element.id === 'techPhilosophyFleetHologramsRowDescription' || element.id === 'techPhilosophyVoidSeersRowDescription' || element.id === 'techPhilosophyRapidExpansionRowDescription') {
         // The marker cannot be an English text comparison: this element is
         // rewritten every frame, so the state rides on a dataset flag and the
         // legacy English form is still accepted for elements drawn before it.
@@ -9472,7 +9493,7 @@ export function setSellFuseCreateTextDescriptionClassesBasedOnButtonStates(eleme
         accompanyingLabel.classList.remove('red-disabled-text');
         accompanyingLabel.classList.add('unlocked-tech');
         accompanyingLabel.classList.add('green-ready-text');
-        accompanyingLabel.textContent = 'Researched';
+        accompanyingLabel.textContent = localize('textResearchedState', getLanguage());
     }  else if (type === 'fuse') {
         if (getCurrentOptionPane() === 'iron' || getCurrentOptionPane() === 'sodium') {
             return;
@@ -11231,13 +11252,13 @@ export function startCosmicRipTechResearchTimer(techName, adjustment = [0, 'norm
                 }
                 if (researchButton) {
                 researchButton.classList.remove('invisible');
-                researchButton.textContent = 'Researched';
+                researchButton.textContent = localize('textResearchedState', getLanguage());
                 researchButton.classList.remove('red-disabled-text');
                 researchButton.classList.add('green-ready-text');
                 setElementPointerEvents(researchButton, 'none');
                 }
                 if (descriptionEl) {
-                descriptionEl.textContent = 'Researched';
+                descriptionEl.textContent = localize('textResearchedState', getLanguage());
                 }
 
                 const finalTimeLefts = getCosmicRipTechTimeLeftUntilResearchFinishes() || {};
@@ -11698,7 +11719,7 @@ function sortRowsByRenderPosition(rows, mainKey) {
 
         if (mainKey === 'techs') {
             const researchButton = item.row.querySelector('.input-container button');
-            if (researchButton.textContent === "Researched" && currentPos < 10000) {
+            if (researchButton.dataset.researched === 'true' && currentPos < 10000) {
                 adjustedPositions.push({
                     ...item,
                     adjustedPos: currentPos + 10000
@@ -13950,6 +13971,23 @@ function generateEnemyFleets(threatLevel, population, lifeformTraits) {
     return { ...fleetDistribution, fleetPower };
 }
 
+// The catalogue is exported so the display side can rebuild a name-to-key and an
+// effect-to-key map from it. Anomalies rolled before the key slots existed are
+// stored in the save with only their English `name` and `effect`, and those are
+// the only handle a legacy save leaves behind.
+export const GENERATED_ANOMALY_CATALOGUE = [
+    { name: "Electromagnetic Surge", nameKey: "anomalyNameElectromagneticSurge", effect: "Enemy defense -20%", effectKey: "anomalyEffectEnemyDefenseDown", value: -20, type: "enemy-defense-debuff", counter: "enemy-defense-buff", target: "enemy", class: "green-ready-text" },
+    { name: "Fortified Magnetic Field", nameKey: "anomalyNameFortifiedMagneticField", effect: "Enemy defense +20%", effectKey: "anomalyEffectEnemyDefenseUp", value: 20, type: "enemy-defense-buff", counter: "enemy-defense-debuff", target: "enemy", class: "red-disabled-text" },
+    { name: "Plasma Instability", nameKey: "anomalyNamePlasmaInstability", effect: "Player attack power +15%", effectKey: "anomalyEffectPlayerAttackUp", value: 15, type: "player-attack-buff", counter: "player-attack-debuff", target: "player", class: "green-ready-text" },
+    { name: "Energy Dampening Field", nameKey: "anomalyNameEnergyDampeningField", effect: "Player attack -15%", effectKey: "anomalyEffectPlayerAttackDown", value: -15, type: "player-attack-debuff", counter: "player-attack-buff", target: "player", class: "red-disabled-text" },
+    { name: "Atmospheric Disturbance", nameKey: "anomalyNameAtmosphericDisturbance", effect: "Enemy air fleets -30%", effectKey: "anomalyEffectEnemyAirDown", value: -30, type: "air-debuff", counter: "air-buff", target: "enemy", class: "green-ready-text" },
+    { name: "High-Altitude Jet Streams", nameKey: "anomalyNameHighAltitudeJetStreams", effect: "Enemy air fleets +20%", effectKey: "anomalyEffectEnemyAirUp", value: 20, type: "air-buff", counter: "air-debuff", target: "enemy", class: "red-disabled-text" },
+    { name: "Seismic Instability", nameKey: "anomalyNameSeismicInstability", effect: "Enemy land fleets -30%", effectKey: "anomalyEffectEnemyLandDown", value: -30, type: "land-debuff", counter: "land-buff", target: "enemy", class: "green-ready-text" },
+    { name: "Tectonic Shift", nameKey: "anomalyNameTectonicShift", effect: "Enemy land fleets +20%", effectKey: "anomalyEffectEnemyLandUp", value: 20, type: "land-buff", counter: "land-debuff", target: "enemy", class: "red-disabled-text" },
+    { name: "Deep Ocean Currents", nameKey: "anomalyNameDeepOceanCurrents", effect: "Enemy sea fleets -30%", effectKey: "anomalyEffectEnemySeaDown", value: -30, type: "sea-debuff", counter: "sea-buff", target: "enemy", class: "green-ready-text" },
+    { name: "Dark Matter Flux", nameKey: "anomalyNameDarkMatterFlux", effect: "Enemy sea fleets +20%", effectKey: "anomalyEffectEnemySeaUp", value: 20, type: "sea-buff", counter: "sea-debuff", target: "enemy", class: "red-disabled-text" }
+];
+
 function generateAnomalies(defenseRating, enemyFleets) {
     if (isHardModeDestinationStar()) {
         return [
@@ -13966,20 +14004,8 @@ function generateAnomalies(defenseRating, enemyFleets) {
         ];
     }
 
-    const possibleAnomalies = [
-        { name: "Electromagnetic Surge", nameKey: "anomalyNameElectromagneticSurge", effect: "Enemy defense -20%", effectKey: "anomalyEffectEnemyDefenseDown", value: -20, type: "enemy-defense-debuff", counter: "enemy-defense-buff", target: "enemy", class: "green-ready-text" },
-        { name: "Fortified Magnetic Field", nameKey: "anomalyNameFortifiedMagneticField", effect: "Enemy defense +20%", effectKey: "anomalyEffectEnemyDefenseUp", value: 20, type: "enemy-defense-buff", counter: "enemy-defense-debuff", target: "enemy", class: "red-disabled-text" },
-        { name: "Plasma Instability", nameKey: "anomalyNamePlasmaInstability", effect: "Player attack power +15%", effectKey: "anomalyEffectPlayerAttackUp", value: 15, type: "player-attack-buff", counter: "player-attack-debuff", target: "player", class: "green-ready-text" },
-        { name: "Energy Dampening Field", nameKey: "anomalyNameEnergyDampeningField", effect: "Player attack -15%", effectKey: "anomalyEffectPlayerAttackDown", value: -15, type: "player-attack-debuff", counter: "player-attack-buff", target: "player", class: "red-disabled-text" },
-        { name: "Atmospheric Disturbance", nameKey: "anomalyNameAtmosphericDisturbance", effect: "Enemy air fleets -30%", effectKey: "anomalyEffectEnemyAirDown", value: -30, type: "air-debuff", counter: "air-buff", target: "enemy", class: "green-ready-text" },
-        { name: "High-Altitude Jet Streams", nameKey: "anomalyNameHighAltitudeJetStreams", effect: "Enemy air fleets +20%", effectKey: "anomalyEffectEnemyAirUp", value: 20, type: "air-buff", counter: "air-debuff", target: "enemy", class: "red-disabled-text" },
-        { name: "Seismic Instability", nameKey: "anomalyNameSeismicInstability", effect: "Enemy land fleets -30%", effectKey: "anomalyEffectEnemyLandDown", value: -30, type: "land-debuff", counter: "land-buff", target: "enemy", class: "green-ready-text" },
-        { name: "Tectonic Shift", nameKey: "anomalyNameTectonicShift", effect: "Enemy land fleets +20%", effectKey: "anomalyEffectEnemyLandUp", value: 20, type: "land-buff", counter: "land-debuff", target: "enemy", class: "red-disabled-text" },
-        { name: "Deep Ocean Currents", nameKey: "anomalyNameDeepOceanCurrents", effect: "Enemy sea fleets -30%", effectKey: "anomalyEffectEnemySeaDown", value: -30, type: "sea-debuff", counter: "sea-buff", target: "enemy", class: "green-ready-text" },
-        { name: "Dark Matter Flux", nameKey: "anomalyNameDarkMatterFlux", effect: "Enemy sea fleets +20%", effectKey: "anomalyEffectEnemySeaUp", value: 20, type: "sea-buff", counter: "sea-debuff", target: "enemy", class: "red-disabled-text" }
-    ];
 
-    const shuffled = possibleAnomalies.sort(() => Math.random() - 0.5);
+    const shuffled = [...GENERATED_ANOMALY_CATALOGUE].sort(() => Math.random() - 0.5);
     let selectedAnomalies = [];
     let modifiedDefense = defenseRating;
     let modifiedEnemyFleets = { ...enemyFleets };

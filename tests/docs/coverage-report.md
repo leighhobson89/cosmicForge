@@ -11,7 +11,7 @@ _Generated from `functional-areas.json`. Re-run `node tests/docs/generate-report
 | 🟢 Green — comprehensive | 16 | 37% |
 | **Total functional areas** | **43** | |
 
-273 individual test cases are identified across all areas. **257 Playwright specs are implemented and passing** across 16 areas. The 7 amber areas are covered only by legacy smoke tests, which prove a path exists but assert almost nothing about branches, boundaries or failure modes.
+277 individual test cases are identified across all areas. **264 Playwright specs are implemented and passing** across 16 areas. The 7 amber areas are covered only by legacy smoke tests, which prove a path exists but assert almost nothing about branches, boundaries or failure modes.
 
 Run them with `npm run test:e2e` (all areas) or `node tests/run-e2e.mjs <area>`. Each area writes its own HTML report to `test-reports/e2e/<area>/index.html`, with a summary index at `test-reports/e2e/index.html`.
 
@@ -41,7 +41,7 @@ Boot, persistence and the machinery every other area depends on. A failure here 
 | 🔴 | [Local Save & Load](areas/save-load-local.md) | High | 7 | — | — |
 | 🟠 | [Cloud Save & Load](areas/save-load-cloud.md) | High | 6 | — | autobuyer.test.js, earlyLoop.test.js, energyMid.test.js, researchTech.test.js, spaceAntimatter.test.js |
 | 🔴 | [Save Migration](areas/save-migration.md) | High | 6 | — | — |
-| 🟢 | [Localization](areas/localization.md) | High | 19 | **84** | — |
+| 🟢 | [Localization](areas/localization.md) | High | 23 | **91** | — |
 | 🔴 | [Settings & Preferences](areas/settings.md) | Medium | 6 | — | — |
 
 ### Core Economy

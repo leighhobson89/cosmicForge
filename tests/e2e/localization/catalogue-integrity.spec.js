@@ -90,29 +90,24 @@ const SANCTIONED_EMPTY_KEYS = [
 const IDENTICAL_TO_ENGLISH_CEILING = { es: 50, de: 66, it: 50, fr: 79 };
 
 /**
- * Ratchet for status.md item 7 (harden the key checker). Keys that never appear
- * as a quoted string literal anywhere in the shipped source. Every one of these
- * is currently explained — built by concatenation at runtime, or wired through
- * `index.html` element ids — but the number must not grow, because an unwired
- * key is a string that will never reach a player.
+ * status.md item 7 used to be a ratchet here: a count of keys that appear as no
+ * quoted literal in shipped source, allowed to fall but never rise. It peaked at
+ * 59, and the whole reason it could not go to zero was that the checker could not
+ * see keys built by concatenation, so 39 live keys were indistinguishable from 20
+ * dead ones and none could be pruned safely.
  *
- * Raised from 21 to 46 by the drawTab*Content extraction. The 25 additions are
- * all built by concatenation at the call site, so no literal for them exists:
- *   starShipModule* / fleetShip*   built from the module or ship id in
- *                                  drawTab5Content (`'starShipModule' + id.slice(2)`)
- *   buffName*                      built from the ascendency buff key in
- *                                  drawTab7Content
- *   resourceSolar                  reached through localizeMaterialName, which
- *                                  concatenates the section prefix and the key
- *
- * Raised from 46 to 59 by the support-file extraction. The 13 additions are the
- * `eventName*` family, one per random event, built from the canonical event id
- * by `eventDisplayName()` in events.js and `localizedEventName()` in ui.js
- * (`'eventName' + id[0].toUpperCase() + id.slice(1)`), so no literal exists for
- * any of them. They are what lets the tab 9 events tables render an event name
- * that follows a language change instead of the English name stored in history.
+ * `validateLocalization.cjs` now resolves the five constructed families from the
+ * same source the game builds them from, which told the two groups apart. The 20
+ * dead keys were deleted and the ratchet became the absolute below: nothing may
+ * be unreachable at all. A new constructed family means teaching the checker that
+ * family, not raising a number.
  */
-const UNREFERENCED_KEY_CEILING = 59;
+const CONSTRUCTED_FAMILY_SIZES = {
+  'starShipModule*': 5,
+  'fleetShip*': 5,
+  'buffName*': 15,
+  'eventName*': 13
+};
 
 /**
  * Keys with a known unbalanced HTML tag, allowlisted so the sweep below can stay
@@ -287,20 +282,58 @@ test.describe('Localization — catalogue integrity', () => {
     expect([...new Set(missing)]).toEqual([]);
   });
 
-  test('unreferenced keys do not grow beyond the recorded baseline', async () => {
-    // status.md item 7. Counted against *any* quoted string literal in shipped
-    // source, not just direct localize() calls, so keys passed through option
-    // maps and id lookups count as referenced.
-    const source = allShippedSource();
-    const literals = new Set();
-    for (const match of source.matchAll(/['"`]([A-Za-z][A-Za-z0-9_]*)['"`]/g)) literals.add(match[1]);
+  test('no key in the catalogue is unreachable from shipped source', async () => {
+    // status.md item 7, now an absolute rather than a ratchet. A key nothing can
+    // reach is a string that will never render; the checker resolves the five
+    // constructed families itself, so a key it still cannot account for is dead.
+    const { auditKeyReferences } = require(path.join(ROOT, 'validateLocalization.cjs'));
+    const audit = auditKeyReferences();
 
-    const unreferenced = Object.keys(CATALOGUE[REFERENCE]).filter((k) => !literals.has(k));
+    expect(audit.unreferenced, 'keys nothing in shipped source can reach').toEqual([]);
+    expect(audit.orphanedByFamily, 'keys shaped like a constructed family that it cannot build').toEqual([]);
+  });
 
-    expect(
-      unreferenced.length,
-      `unreferenced keys grew to ${unreferenced.length}: ${unreferenced.join(', ')}`
-    ).toBeLessThanOrEqual(UNREFERENCED_KEY_CEILING);
+  test('every key the source asks for exists, including the constructed ones', async () => {
+    // The other direction, and the one a player actually sees: a key the source
+    // builds but the catalogue lacks renders as the key itself.
+    const { auditKeyReferences } = require(path.join(ROOT, 'validateLocalization.cjs'));
+    const audit = auditKeyReferences();
+
+    expect(audit.missing, 'keys the source asks for that the catalogue has not got').toEqual([]);
+  });
+
+  test('the checker resolves each constructed key family from source', async () => {
+    // The families are the whole basis on which "unreachable" is judged. If one
+    // silently resolved to nothing — a renamed declaration, a changed literal
+    // shape — every key it covers would be reported as dead and invite deletion.
+    const { resolveConstructedKeys } = require(path.join(ROOT, 'validateLocalization.cjs'));
+    const { families } = resolveConstructedKeys();
+
+    const sizes = Object.fromEntries(families.map((f) => [f.name, f.keys.length]));
+    for (const [name, expected] of Object.entries(CONSTRUCTED_FAMILY_SIZES)) {
+      expect(sizes[name], `family ${name} resolved ${sizes[name]} keys`).toBe(expected);
+    }
+
+    // The material-name family grows with the data files, so it is asserted as a
+    // floor rather than an exact count — but it must never resolve to nothing.
+    const materials = families.find((f) => f.name.startsWith('resource* / compound*'));
+    expect(materials.keys.length).toBeGreaterThanOrEqual(15);
+    expect(materials.keys).toContain('resourceSolar');
+  });
+
+  test('validateLocalization.cjs rejects an empty value that is not sanctioned', async () => {
+    // status.md item 7 also asked the checker to fail on empty values outright,
+    // with the casino suffixes as the only exceptions.
+    const { checkEmptyValues, SANCTIONED_EMPTY_KEYS: checkerSanctioned } =
+      require(path.join(ROOT, 'validateLocalization.cjs'));
+
+    expect([...checkerSanctioned].sort()).toEqual([...SANCTIONED_EMPTY_KEYS].sort());
+    expect(checkEmptyValues().ok).toBe(true);
+
+    // A doctored catalogue must fail, or the check proves nothing.
+    const doctored = JSON.parse(RAW);
+    doctored.de[Object.keys(doctored.de)[0]] = '   ';
+    expect(checkEmptyValues(doctored).ok).toBe(false);
   });
 
   test('untranslated values do not grow beyond the recorded baseline', async () => {

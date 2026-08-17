@@ -991,9 +991,9 @@ export const miaplacidus = {
     name: 'Miaplacidus',
     lifeDetected: true,
     lifeformTraits: [
-        ['Aggressive', 'red-disabled-text'],
-        ['Mechanized', ''],
-        ['Armored', 'red-disabled-text']
+        ['Aggressive', 'red-disabled-text', 'traitNameAggressive'],
+        ['Mechanized', '', 'traitNameMechanized'],
+        ['Armored', 'red-disabled-text', 'traitNameArmored']
     ],
     civilizationLevel: 'Robotic',
     populationEstimate: 95000000,

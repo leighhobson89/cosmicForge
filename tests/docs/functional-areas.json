@@ -153,9 +153,13 @@
         "Translation clips no control that English does not already clip",
         "The compound reverse lookup honours its language argument and stays within the frame budget",
         "Event history rows render their name from the canonical event id, not the name stored in the save",
-        "Nothing calls localize() before initLocalization() has fetched the catalogue"
+        "Nothing calls localize() before initLocalization() has fetched the catalogue",
+        "Every constructed key family resolves from source, so no catalogue key is unreachable and none the source asks for is missing",
+        "No catalogue value is empty except the three sanctioned casino suffixes",
+        "Purchase-row cost labels resolve to the label rather than the flavour-text container that shares their id",
+        "Cost labels are rewritten into priced spans, so the notation formatter reaches them and their material names follow a language change"
       ],
-      "specCount": 84
+      "specCount": 91
     },
     {
       "id": "settings",

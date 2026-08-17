@@ -383,7 +383,7 @@ from that allowlist.
 
 ---
 
-## 8. `reverseLocalizeForCompounds` collides with the `compoundCreateQty` family
+## 8. `reverseLocalizeForCompounds` collides with the `compoundCreateQty` family — ✅ FIXED
 
 **Severity: low — latent.**
 
@@ -403,9 +403,24 @@ description does that, which is why this is latent.
 Narrowing the eligible keys to the six real compounds — or better, tagging
 compound *name* keys distinctly from other `compound*` keys — closes it.
 
-The behaviour is pinned by a spec in
-`tests/e2e/localization/compound-reverse-lookup.spec.js` so that reshaping the
-lookup cannot change it by accident.
+### Resolution
+
+Closed from the other end, by status.md item 7. The hardened
+`validateLocalization.cjs` resolves every constructed key family from source and
+so could finally tell a live key from a dead one; the whole `compoundCreateQty*`
+family turned out to be unreachable — `buildCompoundCreateDropdownRecipeText()`
+composes those option labels inline and never asks for the keys — so all seven
+were deleted along with `compoundRecipePattern`. With no `compound*` key left
+whose value is a bare number, the collision has nothing to collide with:
+
+```js
+reverseLocalizeForCompounds('500', 'en')  // -> '500'
+```
+
+Note that the *lookup* was not narrowed, so the class of bug is still reachable:
+a future `compound*` key whose value is a bare number would re-open it. The spec
+in `tests/e2e/localization/compound-reverse-lookup.spec.js` now pins the fixed
+behaviour and would fail if one were added.
 
 ---
 
