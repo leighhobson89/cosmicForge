@@ -122,28 +122,7 @@ function localize(key, language) {
 
     localizedString = localizedString.replace(/\n/g, '<br>');
 
-    if (localizedString.includes('${')) {
-        try {
-            return interpolateTemplateLiteral(localizedString);
-        } catch (e) {
-            console.error(`Error evaluating template literal in localized string for key '${key}':`, e);
-            return localizedString;
-        }
-    } else {
-        return localizedString;
-    }
-}
-
-function interpolateTemplateLiteral(template) {
-    return template.replace(/\${(.*?)}/g, (match, expression) => {
-        try {
-            const value = eval(expression);
-            return String(value);
-        } catch (e) {
-            console.error(`Error evaluating expression '${expression}' in template literal:`, e);
-            return match;
-        }
-    });
+    return localizedString;
 }
 
 // Build the translated-name -> internal-key map for one language, once. Cached

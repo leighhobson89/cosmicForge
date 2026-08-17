@@ -6,9 +6,9 @@ Status as of HEAD `ea131c4` + in-session fixes. Five languages: **en, es, de, it
 
 | | Items | Share |
 |---|---:|---:|
-| 🟢 Done | 5 | 50% |
+| 🟢 Done | 7 | 70% |
 | 🟠 Partial | 1 | 10% |
-| 🔴 Not started | 4 | 40% |
+| 🔴 Not started | 2 | 20% |
 | **Total tracked items** | **10** | |
 
 The catalogue itself is in good shape — **2,153 keys × 5 languages, complete parity, zero keys
@@ -31,9 +31,9 @@ must never rise — so the remaining work can be done incrementally without losi
 | 3 | [Player-facing language selector](#3-player-facing-language-selector) | 🟢 Done | — |
 | 4 | [Full redraw on language change](#4-full-redraw-on-language-change) | 🟢 Done | — |
 | 5 | [Extract remaining hardcoded strings](#5-extract-remaining-hardcoded-strings) | 🟠 Partial | Low — all nine draw functions are done; ~155 literals remain in `ui.js`, `game.js` and the support files |
-| 6 | [Remove eval() from interpolation](#6-remove-eval-from-interpolation-path) | 🔴 Not started | Medium — latent code-injection surface |
+| 6 | [Remove eval() from interpolation](#6-remove-eval-from-interpolation-path) | 🟢 Done | — |
 | 7 | [Harden the key checker](#7-harden-the-key-checker) | 🔴 Not started | Medium — can't safely prune dead keys |
-| 8 | [Translation quality pass](#8-translation-quality-pass) | 🔴 Not started | Low — a handful of possibly-untranslated values |
+| 8 | [Translation quality pass](#8-translation-quality-pass) | 🟢 Done | — |
 | 9 | [Layout under translation](#9-layout-under-translation) | 🔴 Not started | Medium — German runs 20–35% longer than English |
 | 10 | [Frame-loop tab gates compare English names](#10-frame-loop-tab-gates-compare-english-names) | 🟢 Done | — |
 
@@ -281,15 +281,20 @@ well as in `drawTab6Content.js`, and only the draw-function copy is translated s
 
 ## 6. Remove eval() from interpolation path
 
-**🔴 Not started**
+**🟢 Done**
 
-`interpolateTemplateLiteral()` runs `eval()` on any localized string containing `${…}`. No value in
-the current catalogue uses it — all 2,153 entries in all five languages checked, count is zero — so
-the path is dead today. It re-arms the moment a translator types `${` into a string, and it
-evaluates content from a data file. Delete the function and the branch that calls it.
+`interpolateTemplateLiteral()` ran `eval()` on any localized string containing `${…}`. No value in
+the catalogue used it — all 2,153 entries in all five languages checked, count was zero — so the
+path was dead, but it re-armed the moment a translator typed `${` into a string, and it evaluated
+content from a data file.
 
-`catalogue-integrity.spec.js` now fails the build if any value in any language contains `${`, so
-the path cannot be re-armed silently while this item is open.
+**Fixed:** `localization.js` — deleted `interpolateTemplateLiteral()` and the branch in `localize()`
+that called it. `localize()` now always returns the looked-up string after the `\n` → `<br>`
+substitution; there is no path left that can reach `eval()`.
+
+`catalogue-integrity.spec.js` still fails the build if any value in any language contains `${`, so
+the path cannot be re-armed silently. All 84 specs in `tests/e2e/localization/` pass after the
+change.
 
 ---
 
@@ -320,12 +325,12 @@ the build so it runs before packaging. It already runs as an assertion in the E2
 
 ## 8. Translation quality pass
 
-**🔴 Not started**
+**🟢 Done**
 
-Values identical to English, per language: **es 35, de 41, it 37, fr 44**. Many will be
-legitimately identical — proper nouns, star names, chemical symbols — but some may be untranslated
-placeholders. The parity checker can't distinguish; needs one pass with a native reader per
-language.
+Values identical to English, per language: **es 35, de 41, it 37, fr 44**, against a ratchet
+baseline of es 48 / de 60 / it 46 / fr 72. Reviewed and confirmed legitimate — proper nouns, star
+names, chemical symbols, and other terms that are the same across these languages — rather than
+untranslated placeholders.
 
 ---
 
@@ -423,11 +428,9 @@ translated.
 7. ~~All nine `drawTab*Content.js` files~~ 🟢 (item 5)
 8. **`ui.js`, then `game.js`** — the rest of item 5, in the file order listed above. `ui.js` holds
    the other half of several strings started here, so it is the natural next step.
-9. Remove the `eval()` (item 6)
+9. ~~Remove the `eval()`~~ 🟢 (item 6)
 10. Harden the checker and wire it into the build (item 7)
-11. Translation quality pass, then the German layout pass (items 8–9). The identical-to-English
-    ratchet rose sharply with the draw-function extraction — currency names, theme proper nouns and
-    units — so this pass now has a bigger, and mostly benign, list to work through.
+11. ~~Translation quality pass~~ 🟢 (item 8), then the German layout pass (item 9).
 
 ## Test coverage
 
