@@ -10638,11 +10638,27 @@ export function spaceTravelButtonHideAndShowDescription() {
 }
 
 
-export async function showNewsTickerMessage(newsTickerContainer) {
+// A forced category can have nothing eligible to say — "Always Manuscript Clue"
+// with no manuscript outstanding, or "Always Feedback" when feedback is not
+// currently being requested. Every one of the retries below used to re-enter
+// this function, which re-read the same debug override, re-selected the same
+// impossible category and recursed until the stack overflowed. Retries now drop
+// the override and re-roll a real category, and are bounded as a backstop.
+const NEWS_TICKER_MAX_RETRIES = 10;
+
+export async function showNewsTickerMessage(newsTickerContainer, options = {}) {
+    const retryDepth = Number(options?.retryDepth) || 0;
+    if (retryDepth > NEWS_TICKER_MAX_RETRIES) {
+        return;
+    }
+    const retryWithRandomCategory = () =>
+        showNewsTickerMessage(newsTickerContainer, { retryDepth: retryDepth + 1 });
+
     const randomValue = Math.random();
     let category;
 
-    const debugCategory = getDebugNewsTickerCategory();
+    // Only the first attempt honours the debug override.
+    const debugCategory = retryDepth === 0 ? getDebugNewsTickerCategory() : null;
     if (debugCategory) {
         category = debugCategory;
     } else if (randomValue < 0.03) {
@@ -10676,7 +10692,7 @@ export async function showNewsTickerMessage(newsTickerContainer) {
 
 
         if (!manuscriptClueSelection) {
-            showNewsTickerMessage(newsTickerContainer);
+            await retryWithRandomCategory();
             return;
         }
 
@@ -10691,7 +10707,7 @@ export async function showNewsTickerMessage(newsTickerContainer) {
                 message = feedbackEntry;
                 category = 'wackyEffects';
             } else {
-                showNewsTickerMessage(newsTickerContainer);
+                await retryWithRandomCategory();
                 return;
             }
         } else if (category === 'manuscriptClue') {
@@ -10700,7 +10716,7 @@ export async function showNewsTickerMessage(newsTickerContainer) {
                 ({ message } = manuscriptClueSelection);
                 category = 'manuscriptClues';
             } else {
-                showNewsTickerMessage(newsTickerContainer);
+                await retryWithRandomCategory();
                 return;
             }
         } else {
@@ -10728,7 +10744,7 @@ export async function showNewsTickerMessage(newsTickerContainer) {
 
 
     if (message === false || message === undefined || message.includes(localize('textWannaGiveFeedback', getLanguage())) && !getFeedbackCanBeRequested()) {
-        showNewsTickerMessage(newsTickerContainer);
+        await retryWithRandomCategory();
     } else {
         if (category === 'noPrize') {
             addMessageToSeenArray(randomIndex);

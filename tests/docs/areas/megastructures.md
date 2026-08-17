@@ -2,26 +2,27 @@
 
 | | |
 |---|---|
-| **Status** | 🟠 AMBER |
+| **Status** | 🟢 GREEN |
 | **Risk if broken** | Medium |
 | **Group** | Endgame |
 | **Spec folder** | `tests/e2e/megastructures/` |
 | **Existing coverage** | `tests/legacy/captureMegaStructureTest.test.js` |
 
-Ancient manuscripts, megastructure construction and the endgame force field.
+Ancient manuscripts, megastructure capture and the Miaplacidean force field.
 
 ## What should be tested
 
-- [ ] Manuscripts are discoverable and accumulate
-- [ ] Each megastructure gates on the right manuscript count and resources
-- [ ] Construction progresses and completes correctly
-- [ ] Force field activates and applies its endgame effect
-- [ ] Megastructure run flag alters behaviour as documented
+- [ ] Manuscripts are discoverable at the documented vision thresholds and cap at four
+- [ ] Manuscript stars never repeat and never fall on Miaplacidus, a settled star, the home system or an O-type
+- [ ] Activating a factory star marks its manuscript reported and registers the star
+- [ ] Each megastructure gates on a five-stage prerequisite chain with rising prices
+- [ ] Each stage applies its documented bonus: batteries, power plants, autobuyer rates, storage and infinite power
+- [ ] Stage 3 of every structure lowers the force field one level and permanently unlocks antimatter
 - [ ] Progress survives save/load
 
 ## Status meaning
 
-🟠 **AMBER** — Partial coverage — a smoke test proves the path exists, but branches, failure modes and edge cases are unverified.
+🟢 **GREEN** — Comprehensive coverage — happy path, branches, boundaries and failure modes all asserted.
 
 ---
 

@@ -1,6 +1,6 @@
 # e2e / notation
 
-**Number Notation** — 🔴 RED
+**Number Notation** — 🟢 GREEN
 
 Formatting of every displayed number across notation modes — touches every screen in the game.
 

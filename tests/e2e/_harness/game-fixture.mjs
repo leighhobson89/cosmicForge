@@ -33,8 +33,20 @@ class GameHarness {
    * non-Electron + non-demo + cheats-enabled gate. Using it means the debug
    * tooling is reachable regardless of how buildFlags.js is currently set.
    */
-  async boot({ pioneer = `Test1981_e2e_${Date.now()}_${Math.floor(Math.random() * 1e6)}` } = {}) {
+  async boot({
+    pioneer = `Test1981_e2e_${Date.now()}_${Math.floor(Math.random() * 1e6)}`,
+    acceptOnboarding = false,
+    language = null
+  } = {}) {
     const { page } = this;
+
+    // The language is read from localStorage before the first frame is drawn, so
+    // it has to be seeded ahead of the navigation to be picked up for boot text.
+    if (language) {
+      await page.addInitScript((lang) => {
+        try { window.localStorage.setItem('cosmicForgeLanguage', lang); } catch { /* storage blocked */ }
+      }, language);
+    }
 
     await page.goto('/', { waitUntil: 'domcontentloaded' });
 
@@ -52,16 +64,39 @@ class GameHarness {
     // events. The label is localized, so match against every shipped form of
     // "no" rather than the English one — a boot in German would otherwise leave
     // the tutorial running and swallow every subsequent click.
+    //
+    // The onboarding specs pass acceptOnboarding to take the other branch, which
+    // is the only way to reach the tutorial through its real prompt.
+    // The onboarding prompt is identified by its *cancel* button reading "no" in
+    // some language. #modalConfirm is reused by the two earlier boot modals and
+    // is already on screen, so waiting on that would click the wrong dialog.
+    //
+    // This has to be waitFor, not isVisible: `locator.isVisible()` resolves
+    // against the current DOM and does not wait, whatever timeout is passed, so
+    // an immediate check races the prompt that appears once loadGameFromCloud()
+    // has settled and often misses it.
     const cancel = page.locator('#modalCancel');
-    if (await cancel.isVisible({ timeout: 3000 }).catch(() => false)) {
+    let promptShown = await cancel
+      .waitFor({ state: 'visible', timeout: 10000 })
+      .then(() => true)
+      .catch(() => false);
+
+    if (promptShown) {
       const text = (await cancel.textContent())?.trim().toUpperCase();
-      if (['NO', 'NEIN', 'NON'].includes(text)) await cancel.click();
+      promptShown = ['NO', 'NEIN', 'NON'].includes(text);
     }
 
-    await this.waitForOverlayClear();
+    if (promptShown) {
+      await page.click(acceptOnboarding ? '#modalConfirm' : '#modalCancel');
+    } else if (acceptOnboarding) {
+      throw new Error('Onboarding prompt did not appear, so it could not be accepted');
+    }
+
+    if (!acceptOnboarding) await this.waitForOverlayClear();
     await this.exposeModules();
 
     this.pioneer = pioneer;
+    this.language = language;
     return this;
   }
 
@@ -90,9 +125,15 @@ class GameHarness {
         loc: await import('/localization.js'),
         desc: await import('/descriptions.js'),
         timers: await import('/timerManagerDelta.js'),
+        // The non-delta timerManager schedules wall-clock work such as the news
+        // ticker, and is a different instance from `timers` above.
+        clockTimers: await import('/timerManager.js'),
         ui: await import('/ui.js'),
         rip: await import('/cosmicRip.js'),
-        saveLoad: await import('/saveLoadGame.js')
+        saveLoad: await import('/saveLoadGame.js'),
+        casino: await import('/casino.js'),
+        onboarding: await import('/onboarding.js'),
+        events: await import('/events.js')
       };
     });
   }
@@ -190,6 +231,67 @@ class GameHarness {
     await this.page.waitForTimeout(150);
     return this.page.evaluate(() =>
       document.getElementById('variableDebuggerWindow')?.style.display === 'block');
+  }
+
+  /**
+   * Set a variable through the real variable-debugger UI (Numpad *).
+   *
+   * Drives the same path a developer uses: search for the variable, click its
+   * value to open the inline editor, type the new value, submit.
+   *
+   * Two things force the shape of this helper. First, `populateVariableDebugger()`
+   * rebuilds every row on every frame while the window is open, so a resolved
+   * element handle is detached before a normal Playwright click can land — the
+   * click therefore goes to a screen coordinate, where whichever freshly built
+   * row occupies that spot carries the same handler. Second, the click must be a
+   * real one rather than a dispatched PointerEvent, because the handlers call
+   * `setPointerCapture(e.pointerId)`, which throws NotFoundError for a synthetic
+   * pointer id and would abort the handler before it opened the editor.
+   *
+   * The inline editor row itself is deliberately preserved across repaints by
+   * the game (so typing is possible at all), so it can be driven normally.
+   */
+  async setDebugVariable(label, value) {
+    const { page } = this;
+
+    const alreadyOpen = await page.evaluate(() =>
+      document.getElementById('variableDebuggerWindow')?.style.display === 'block');
+    if (!alreadyOpen) {
+      const opened = await this.openVariableDebugger();
+      if (!opened) throw new Error('Variable debugger did not open');
+    }
+
+    // Use the debugger's own search bar to bring the row into view; the
+    // scrolling container is an ancestor of the rebuilt rows, so the scroll
+    // position survives the repaint.
+    await page.fill('#variableDebuggerSearch', label);
+    await page.waitForTimeout(250);
+
+    // The value is the last child of the row; take its centre as a coordinate.
+    const point = await page.evaluate((label) => {
+      const row = document.querySelector(`[data-variable-debugger-label="${label}"]`);
+      const valueEl = row?.lastElementChild;
+      if (!valueEl) return null;
+      const r = valueEl.getBoundingClientRect();
+      if (r.width === 0 || r.height === 0) return null;
+      return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
+    }, label);
+    if (!point) throw new Error(`Variable debugger row not visible: ${label}`);
+
+    await page.mouse.click(point.x, point.y);
+
+    const editor = page.locator('.variable-debugger-inline-editor-row').first();
+    await editor.waitFor({ state: 'visible', timeout: 15000 });
+    await editor.locator('textarea').fill(String(value));
+    await editor.locator('button.variable-debugger-inline-editor-button').first().click();
+    await page.waitForTimeout(200);
+  }
+
+  /** Close the variable debugger if it is open, so it stops repainting each frame. */
+  async closeVariableDebugger() {
+    const open = await this.page.evaluate(() =>
+      document.getElementById('variableDebuggerWindow')?.style.display === 'block');
+    if (open) await this.openVariableDebugger();
   }
 
   /**

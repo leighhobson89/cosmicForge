@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | 🔴 RED |
+| **Status** | 🟢 GREEN |
 | **Risk if broken** | Medium |
 | **Group** | Presentation & Shell |
 | **Spec folder** | `tests/e2e/notation/` |
@@ -12,16 +12,17 @@ Formatting of every displayed number across notation modes — touches every scr
 
 ## What should be tested
 
-- [ ] Each notation type formats correctly across magnitudes from 1 to 1e300
+- [ ] The condensed formatter picks the right suffix at every magnitude from 1 to 1e300, and truncates rather than rounds
 - [ ] Switching notation immediately reformats all visible values
-- [ ] Specialised formatters (sell-fuse-money, building-purchase) produce correct output
-- [ ] Negative, zero and fractional values format sanely
-- [ ] Notation preference persists
-- [ ] No NaN or Infinity ever reaches the DOM
+- [ ] The production-rate formatter keeps the sign and scales its precision
+- [ ] Negative, zero and unparseable values format sanely
+- [ ] Notation preference persists across save/load
+- [ ] No NaN, Infinity or undefined ever reaches the DOM in either mode
+- [ ] Formatting is idempotent, so the per-frame reformat cannot compound its own output
 
 ## Status meaning
 
-🔴 **RED** — No automated coverage. A regression here ships unnoticed.
+🟢 **GREEN** — Comprehensive coverage — happy path, branches, boundaries and failure modes all asserted.
 
 ---
 

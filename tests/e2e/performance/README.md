@@ -1,6 +1,6 @@
 # e2e / performance
 
-**Performance & Frame Budget** — 🔴 RED
+**Performance & Frame Budget** — 🟢 GREEN
 
 Frame-loop cost and long-session stability. Not a feature, but the area most likely to degrade silently as content grows.
 

@@ -1,8 +1,8 @@
 # e2e / onboarding
 
-**Onboarding & Tutorial** — 🟠 AMBER
+**Onboarding & Tutorial** — 🟢 GREEN
 
-The guided first-run tutorial. Every new player's first experience, and largely still hardcoded English.
+The guided first-run tutorial. Every new player’s first experience, and fully localized.
 
 Specs for this area go in this folder, named `<scenario>.spec.js`.
 

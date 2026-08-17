@@ -108,7 +108,7 @@ _Generated from \`functional-areas.json\`. Re-run \`node tests/docs/generate-rep
 | 🟢 Green — comprehensive | ${counts.green} | ${pct(counts.green)} |
 | **Total functional areas** | **${total}** | |
 
-${totalChecks} individual test cases are identified across all areas. **${totalSpecs} Playwright specs are implemented and passing** across ${implemented.length} area${implemented.length === 1 ? '' : 's'}. The ${counts.amber} amber areas are covered only by legacy smoke tests, which prove a path exists but assert almost nothing about branches, boundaries or failure modes.
+${totalChecks} individual test cases are identified across all areas. **${totalSpecs} Playwright specs are implemented and passing** across ${implemented.length} area${implemented.length === 1 ? '' : 's'}. The ${counts.amber} amber areas have partial coverage only — a legacy smoke test that proves a path exists, or a focused spec file written alongside a bug fix — so their branches, boundaries and failure modes are still largely unverified.
 
 Run them with \`npm run test:e2e\` (all areas) or \`node tests/run-e2e.mjs <area>\`. Each area writes its own HTML report to \`test-reports/e2e/<area>/index.html\`, with a summary index at \`test-reports/e2e/index.html\`.
 

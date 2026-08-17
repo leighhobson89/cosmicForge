@@ -6,27 +6,24 @@ _Generated from `functional-areas.json`. Re-run `node tests/docs/generate-report
 
 | | Areas | Share |
 |---|---:|---:|
-| 🔴 Red — no coverage | 19 | 44% |
-| 🟠 Amber — partial / smoke only | 8 | 19% |
-| 🟢 Green — comprehensive | 16 | 37% |
+| 🔴 Red — no coverage | 11 | 26% |
+| 🟠 Amber — partial / smoke only | 6 | 14% |
+| 🟢 Green — comprehensive | 26 | 60% |
 | **Total functional areas** | **43** | |
 
-287 individual test cases are identified across all areas. **286 Playwright specs are implemented and passing** across 18 areas. The 8 amber areas are covered only by legacy smoke tests, which prove a path exists but assert almost nothing about branches, boundaries or failure modes.
+297 individual test cases are identified across all areas. **473 Playwright specs are implemented and passing** across 28 areas. The 6 amber areas have partial coverage only — a legacy smoke test that proves a path exists, or a focused spec file written alongside a bug fix — so their branches, boundaries and failure modes are still largely unverified.
 
 Run them with `npm run test:e2e` (all areas) or `node tests/run-e2e.mjs <area>`. Each area writes its own HTML report to `test-reports/e2e/<area>/index.html`, with a summary index at `test-reports/e2e/index.html`.
 
 ## Highest priority — high risk, zero coverage
 
-These 6 areas would each cause serious, often unrecoverable player harm if they regressed, and none has any automated test today.
+These 3 areas would each cause serious, often unrecoverable player harm if they regressed, and none has any automated test today.
 
 | Area | Group | Why it matters |
 |---|---|---|
 | [Local Save & Load](areas/save-load-local.md) | Foundation | Export/import of save strings, autosave scheduling, and round-trip fidelity of every persisted field. |
 | [Save Migration](areas/save-migration.md) | Foundation | The patches.js version ladder that upgrades old saves. The best-engineered code in the project and entirely untested. |
 | [Starship](areas/starship.md) | Interstellar | Starship construction, fitting, fuelling and interstellar travel to a chosen destination. |
-| [Fleet Hangar](areas/fleet-hangar.md) | Interstellar | Fleet construction, ship classes and the aggregate strength calculation that feeds battle. |
-| [Philosophies](areas/philosophies.md) | Meta Progression | The four permanent player paths chosen once and affecting the whole account thereafter. |
-| [Performance & Frame Budget](areas/performance.md) | Presentation & Shell | Frame-loop cost and long-session stability. Not a feature, but the area most likely to degrade silently as content grows. |
 
 ## All areas by group
 
@@ -76,7 +73,7 @@ Travel, conquest and settlement. The most stateful and branch-heavy part of the 
 | 🔴 | [Star Map & Star Data](areas/star-map.md) | Medium | 5 | — | — |
 | 🔴 | [Star Type Bonuses](areas/star-types.md) | Medium | 6 | — | — |
 | 🔴 | [Starship](areas/starship.md) | High | 7 | — | — |
-| 🔴 | [Fleet Hangar](areas/fleet-hangar.md) | High | 6 | — | — |
+| 🟢 | [Fleet Hangar](areas/fleet-hangar.md) | High | 9 | **14** | — |
 | 🟢 | [Diplomacy](areas/diplomacy.md) | High | 6 | **12** | — |
 | 🟢 | [Battle & Conquest](areas/battle.md) | High | 6 | **13** | — |
 | 🟢 | [Colonisation](areas/colonise.md) | High | 5 | **11** | — |
@@ -87,11 +84,11 @@ Cross-run systems. Bugs here destroy player progress permanently, which makes th
 
 | Status | Area | Risk | Planned | Specs | Existing coverage |
 |:--:|---|:--:|--:|--:|---|
-| 🔴 | [Galactic Market](areas/galactic-market.md) | Medium | 6 | — | — |
+| 🟢 | [Galactic Market](areas/galactic-market.md) | Medium | 7 | **17** | — |
 | 🟢 | [Ascendency Points & Perks](areas/ascendency.md) | High | 6 | **12** | — |
-| 🔴 | [Galactic Casino](areas/galactic-casino.md) | Medium | 7 | — | — |
+| 🟢 | [Galactic Casino](areas/galactic-casino.md) | Medium | 8 | **46** | — |
 | 🟠 | [Rebirth](areas/rebirth.md) | High | 12 | **10** | — |
-| 🔴 | [Philosophies](areas/philosophies.md) | High | 5 | — | — |
+| 🟢 | [Philosophies](areas/philosophies.md) | High | 7 | **19** | — |
 | 🟢 | [Achievements](areas/achievements.md) | Low | 6 | **9** | — |
 
 ### Endgame
@@ -101,7 +98,7 @@ Late systems reached by few players but heavily interlinked with everything befo
 | Status | Area | Risk | Planned | Specs | Existing coverage |
 |:--:|---|:--:|--:|--:|---|
 | 🟢 | [Black Hole Time Warp](areas/black-hole.md) | High | 7 | **12** | — |
-| 🟠 | [Megastructures](areas/megastructures.md) | Medium | 6 | — | captureMegaStructureTest.test.js |
+| 🟢 | [Megastructures](areas/megastructures.md) | Medium | 7 | **18** | captureMegaStructureTest.test.js |
 | 🟢 | [Cosmic Rip](areas/cosmic-rip.md) | Medium | 7 | **13** | — |
 
 ### Simulation & Ambience
@@ -111,8 +108,8 @@ Background systems that modify the economy or the presentation without direct pl
 | Status | Area | Risk | Planned | Specs | Existing coverage |
 |:--:|---|:--:|--:|--:|---|
 | 🔴 | [Weather](areas/weather.md) | Low | 6 | — | — |
-| 🔴 | [Random Events](areas/random-events.md) | Medium | 8 | — | — |
-| 🔴 | [News Ticker](areas/news-ticker.md) | Low | 4 | — | — |
+| 🟢 | [Random Events](areas/random-events.md) | Medium | 8 | **21** | — |
+| 🟢 | [News Ticker](areas/news-ticker.md) | Low | 4 | **18** | — |
 | 🟢 | [Audio](areas/audio.md) | Low | 5 | **13** | — |
 | 🔴 | [Statistics](areas/statistics.md) | Low | 5 | — | — |
 
@@ -122,12 +119,12 @@ Navigation, tutorial, formatting and build variants. Highly visible, cheap to te
 
 | Status | Area | Risk | Planned | Specs | Existing coverage |
 |:--:|---|:--:|--:|--:|---|
-| 🔴 | [Number Notation](areas/notation.md) | Medium | 6 | — | — |
+| 🟢 | [Number Notation](areas/notation.md) | Medium | 7 | **11** | — |
 | 🟠 | [UI Navigation](areas/ui-navigation.md) | Medium | 11 | **12** | launch-app.test.js |
-| 🟠 | [Onboarding & Tutorial](areas/onboarding.md) | High | 7 | — | launchAndOnboard.test.js |
+| 🟢 | [Onboarding & Tutorial](areas/onboarding.md) | High | 7 | **13** | launchAndOnboard.test.js |
 | 🟢 | [Cosmicopedia & Help](areas/cosmicopedia.md) | Low | 5 | **6** | — |
 | 🟢 | [Demo Build Lockdowns](areas/demo-build.md) | High | 6 | **13** | — |
-| 🔴 | [Performance & Frame Budget](areas/performance.md) | High | 6 | — | — |
+| 🟢 | [Performance & Frame Budget](areas/performance.md) | High | 7 | **10** | — |
 
 ## Status legend
 

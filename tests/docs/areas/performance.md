@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | 🔴 RED |
+| **Status** | 🟢 GREEN |
 | **Risk if broken** | High |
 | **Group** | Presentation & Shell |
 | **Spec folder** | `tests/e2e/performance/` |
@@ -12,16 +12,17 @@ Frame-loop cost and long-session stability. Not a feature, but the area most lik
 
 ## What should be tested
 
-- [ ] Frame time stays within budget on a late-game save with many elements
-- [ ] No unbounded growth in DOM node count or listener count over a long session
-- [ ] The compound reverse-lookup does not scale with catalogue size (guards the O(n) hot-path finding)
-- [ ] Timers do not drift measurably over an extended window
-- [ ] Memory does not grow monotonically across repeated tab switches
+- [ ] Frame time stays within budget on a late-game run
+- [ ] Event listeners and DOM nodes do not accumulate across repeated tab cycles or a long idle window
+- [ ] Heap growth decelerates rather than accruing per cycle, measured after a forced GC
+- [ ] Notification containers are pooled per classification rather than per message
+- [ ] The compound reverse-lookup stays cheap enough for the frame loop (guards the O(n) hot-path finding)
+- [ ] Delta timers do not drift measurably over an extended window
 - [ ] gameLoop continues running after every state transition (guards the rAF-inside-conditional finding)
 
 ## Status meaning
 
-🔴 **RED** — No automated coverage. A regression here ships unnoticed.
+🟢 **GREEN** — Comprehensive coverage — happy path, branches, boundaries and failure modes all asserted.
 
 ---
 

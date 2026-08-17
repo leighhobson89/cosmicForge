@@ -562,3 +562,122 @@ Covered by `tests/e2e/ui-navigation/attention-indicators.spec.js` (12 specs),
 which drives the real click path over every reachable option row on all eight
 content tabs rather than checking a list of ids — so a future row whose id does
 not match its pane name is caught rather than silently joining the backlog.
+
+---
+
+## 12. Forcing a news-ticker category with no eligible content recurses until the stack overflows — ✅ FIXED
+
+**Severity was: low — debug-only, but it took the page down.**
+
+### Reproduction
+
+1. Open the debug menu (**Numpad -**) and set **News Ticker Category** to
+   *Always Manuscript Clue*.
+2. Trigger a ticker message before any ancient manuscript has been discovered —
+   which is the state of every fresh run.
+
+```
+PAGEERROR: Maximum call stack size exceeded
+```
+
+### Cause
+
+`showNewsTickerMessage()` (`ui.js:10641`) resolves the category once at the top:
+
+```js
+const debugCategory = getDebugNewsTickerCategory();
+if (debugCategory) category = debugCategory;
+```
+
+and then, when the chosen category yields nothing, retries by calling itself:
+
+```js
+} else if (category === 'manuscriptClue') {
+    manuscriptClueSelection = getEligibleManuscriptClue(newsTickerContainer);
+    if (manuscriptClueSelection) { … } else {
+        showNewsTickerMessage(newsTickerContainer);   // same forced category
+        return;
+    }
+}
+```
+
+The retry re-reads the same debug override, so it takes the identical branch and
+recurses without bound. There is no random re-roll to escape through, and the
+call is not on a timer, so the whole chain runs synchronously until the stack is
+exhausted. `feedback` has the same shape: if `getFeedbackCanBeRequested()` is
+false, the retry re-selects `feedback` forever.
+
+Three retry sites share the fault — the `manuscriptClue` branch, the `feedback`
+branch, and the trailing `if (message === false || message === undefined …)`
+fallback.
+
+### Resolution
+
+Fixed in `ui.js`. `showNewsTickerMessage` now takes an options bag carrying a
+`retryDepth`, and the three retry sites call a local `retryWithRandomCategory()`
+instead of re-entering blind:
+
+```js
+const debugCategory = retryDepth === 0 ? getDebugNewsTickerCategory() : null;
+```
+
+Only the first attempt honours the override, so a retry re-rolls a real category
+and always has content to show. `NEWS_TICKER_MAX_RETRIES` (10) bounds the chain
+as a backstop for any future branch that can fail repeatedly — the reachable
+case, an exhausted `oneOff` pool, needs one or two retries at most. The retries
+are also `await`ed now, which they were not before; previously the outer promise
+resolved before the replacement message had been chosen.
+
+Covered by `tests/e2e/news-ticker/news-ticker.spec.js`: a forced `manuscriptClue`
+with no manuscript outstanding and a forced `feedback` when feedback is not being
+requested both render a message and leave the console clean, and the positive
+path still asserts that a forced clue names the manuscript's star.
+
+---
+
+## 13. The philosophy choice modal's four buttons are hardcoded English
+
+**Severity: low — cosmetic, but on the one screen that makes a permanent choice.**
+
+### Reproduction
+
+Play in any language other than English and complete the star study that offers
+the philosophy choice. The modal's body copy is translated; its four buttons
+read `CONSTRUCTOR`, `SUPREMACIST`, `VOIDBORN`, `EXPANSIONIST` in every language.
+
+### Cause
+
+`game.js` passes the labels as literals rather than catalogue lookups:
+
+```js
+confirmLabel: 'CONSTRUCTOR',
+cancelLabel:  'SUPREMACIST',
+extra1Label:  'VOIDBORN',
+extra2Label:  'EXPANSIONIST',
+```
+
+Everything else about the modal is localized — `modalPlayerLeaderPhilosophyHeaderText`,
+`modalPlayerLeaderPhilosophyContentText`, and the four
+`notificationPhilosophy*` confirmations that follow the choice all resolve
+through the catalogue in all five languages. Only the button labels were missed,
+and there is no key for them: searching the catalogue for a philosophy *name*
+returns descriptions and tech content but nothing that renders as a bare label.
+
+This is the same class of gap as the `data-loc` sweep in
+[`docs/localization/status.md`](../../docs/localization/status.md) item 5 —
+a statically-authored label with no key behind it.
+
+### Suggested fix
+
+Add four keys (`philosophyNameConstructor` and so on) across the five language
+files and swap the literals for `localize(...)` calls. Whether the four names
+should translate at all or stay as proper nouns is a content decision, which is
+why this is reported rather than fixed here — but either way the labels should
+come from the catalogue so the decision lives in one place.
+
+### Coverage
+
+`tests/e2e/philosophies/philosophies.spec.js` pins the current state from both
+ends: the modal body does *not* name the four paths, and no catalogue key exists
+for them under any of the obvious names. Adding a key fails the second spec,
+which is the prompt to wire it into the modal and delete that spec.

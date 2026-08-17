@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | 🔴 RED |
+| **Status** | 🟢 GREEN |
 | **Risk if broken** | High |
 | **Group** | Meta Progression |
 | **Spec folder** | `tests/e2e/philosophies/` |
@@ -12,15 +12,17 @@ The four permanent player paths chosen once and affecting the whole account ther
 
 ## What should be tested
 
-- [ ] The choice modal appears at the correct trigger and only once
-- [ ] Each of Constructor, Supremacist, Voidborn, Expansionist applies its full documented effect set
-- [ ] Effects activate only after the first rebirth, as documented
-- [ ] The choice is irreversible and survives save/load and rebirth
-- [ ] Philosophy modifiers stack correctly with ascendency perks and star types
+- [ ] The choice modal appears at the correct trigger and only while no philosophy is set
+- [ ] All four paths carry one special ability and four non-overlapping repeatables
+- [ ] Each of Constructor, Supremacist, Voidborn, Expansionist applies its own documented effect set and no other path’s
+- [ ] The Voidborn AP bonus applies only from run 2, as documented
+- [ ] The Supremacist ability guarantees vassalization where other paths must roll
+- [ ] The choice survives save/load, and the debug scenario defaults run 1 to Voidborn
+- [ ] The four choice-button labels are hardcoded English (known-issues #13)
 
 ## Status meaning
 
-🔴 **RED** — No automated coverage. A regression here ships unnoticed.
+🟢 **GREEN** — Comprehensive coverage — happy path, branches, boundaries and failure modes all asserted.
 
 ---
 

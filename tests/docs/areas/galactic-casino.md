@@ -2,27 +2,28 @@
 
 | | |
 |---|---|
-| **Status** | 🔴 RED |
+| **Status** | 🟢 GREEN |
 | **Risk if broken** | Medium |
 | **Group** | Meta Progression |
 | **Spec folder** | `tests/e2e/galactic-casino/` |
 | **Existing coverage** | _none_ |
 
-CP economy and three risk games with a shared prize architecture.
+CP economy and four risk games with a shared special-prize architecture.
 
 ## What should be tested
 
-- [ ] CP purchase cost scales as designed (including the cpBaseCost migration)
+- [ ] CP purchase cost scales as designed, and the sub-0.93 cpBaseCost patch is pinned as unreachable
 - [ ] Game 1 Double or Nothing resolves both outcomes and settles CP correctly
-- [ ] Game 2 Wheel of Fortune awards each special prize type
-- [ ] Game 3 Higher or Lower awards correct tier prizes
+- [ ] Game 2 Wheel of Fortune reaches its special, losing and regular-prize segments
+- [ ] Game 3 Higher or Lower awards correct tier prizes and ends on a wrong guess
+- [ ] Game 4 Visiting Void Seer charges its prize cost and pays out on a match
 - [ ] Invalid and unaffordable stakes are rejected with a localized message
-- [ ] Every timer-finishing prize (rocket, starship, telescope x3) applies to the right target
-- [ ] Casino statistics track correctly
+- [ ] Every special prize applies to the right target, including the five timer-finishing prizes
+- [ ] Casino statistics track plays, wins and CP spend in both scopes
 
 ## Status meaning
 
-🔴 **RED** — No automated coverage. A regression here ships unnoticed.
+🟢 **GREEN** — Comprehensive coverage — happy path, branches, boundaries and failure modes all asserted.
 
 ---
 

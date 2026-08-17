@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | 🔴 RED |
+| **Status** | 🟢 GREEN |
 | **Risk if broken** | High |
 | **Group** | Interstellar |
 | **Spec folder** | `tests/e2e/fleet-hangar/` |
@@ -12,16 +12,19 @@ Fleet construction, ship classes and the aggregate strength calculation that fee
 
 ## What should be tested
 
-- [ ] Each ship class builds with correct cost and build time
+- [ ] Each ship class builds with the correct cash and material cost
 - [ ] Fleet strength aggregates correctly across mixed compositions
-- [ ] Supremacist philosophy cost and strength modifiers apply
-- [ ] Ascendency fleet buffs (armor, speed, attack) apply and stack correctly
+- [ ] Only the combat classes join attack and defense; the envoy is capped at one and contributes nothing
+- [ ] Losing a unit in battle removes it and its strength from the aggregate
+- [ ] Supremacist hangar automation cuts every fleet cost by 5% and leaves other space upgrades alone
+- [ ] Supremacist laser intensity, engine miniaturization and synthetic plating raise attack, speed and unit health by 5% each
 - [ ] Attack power buffs apply only to newly built ships, as documented
+- [ ] Building a ship flags the fleet as changed for diplomacy
 - [ ] Fleet composition survives save/load
 
 ## Status meaning
 
-🔴 **RED** — No automated coverage. A regression here ships unnoticed.
+🟢 **GREEN** — Comprehensive coverage — happy path, branches, boundaries and failure modes all asserted.
 
 ---
 

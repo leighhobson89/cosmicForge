@@ -1,8 +1,8 @@
 # e2e / galactic-casino
 
-**Galactic Casino** — 🔴 RED
+**Galactic Casino** — 🟢 GREEN
 
-CP economy and three risk games with a shared prize architecture.
+CP economy and four risk games with a shared special-prize architecture.
 
 Specs for this area go in this folder, named `<scenario>.spec.js`.
 

@@ -2,27 +2,27 @@
 
 | | |
 |---|---|
-| **Status** | 🟠 AMBER |
+| **Status** | 🟢 GREEN |
 | **Risk if broken** | High |
 | **Group** | Presentation & Shell |
 | **Spec folder** | `tests/e2e/onboarding/` |
 | **Existing coverage** | `tests/legacy/launchAndOnboard.test.js` |
 
-The guided first-run tutorial. Every new player's first experience, and largely still hardcoded English.
+The guided first-run tutorial. Every new player’s first experience, and fully localized.
 
 ## What should be tested
 
-- [ ] The full tutorial runs start to finish without a dead end
-- [ ] Each step's condition correctly gates progression
-- [ ] Callouts and overlays anchor to the right elements
+- [ ] The prompt is offered on a fresh pioneer, and Yes starts the tutorial while No leaves it off
+- [ ] Each step’s condition correctly gates progression
+- [ ] Callouts and overlays anchor to the element the step names
 - [ ] Leaving the required tab prompts a return and recovers correctly
 - [ ] Onboarding can be exited early and the game remains playable
-- [ ] Completion sets the flag and never re-triggers
-- [ ] All tutorial text is localized in all five languages
+- [ ] Re-enabling the tutorial restarts it from the first step
+- [ ] All tutorial text is localized in all five languages, and the tutorial runs end to end in a second language
 
 ## Status meaning
 
-🟠 **AMBER** — Partial coverage — a smoke test proves the path exists, but branches, failure modes and edge cases are unverified.
+🟢 **GREEN** — Comprehensive coverage — happy path, branches, boundaries and failure modes all asserted.
 
 ---
 

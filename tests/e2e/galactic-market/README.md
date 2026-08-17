@@ -1,8 +1,8 @@
 # e2e / galactic-market
 
-**Galactic Market** — 🔴 RED
+**Galactic Market** — 🟢 GREEN
 
-AP-denominated trading, stock pricing and the demo-build lockdown.
+Material-for-material trading, bias-driven pricing, AP liquidation and the lockdown event.
 
 Specs for this area go in this folder, named `<scenario>.spec.js`.
 

@@ -1,8 +1,8 @@
 # e2e / megastructures
 
-**Megastructures** — 🟠 AMBER
+**Megastructures** — 🟢 GREEN
 
-Ancient manuscripts, megastructure construction and the endgame force field.
+Ancient manuscripts, megastructure capture and the Miaplacidean force field.
 
 Specs for this area go in this folder, named `<scenario>.spec.js`.
 

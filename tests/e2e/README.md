@@ -47,7 +47,7 @@ test.describe('My Area', () => {
 
 | Method | Purpose |
 |---|---|
-| `boot({ pioneer })` | Fresh game, onboarding declined, modules exposed |
+| `boot({ pioneer, acceptOnboarding, language })` | Fresh game, onboarding declined (or accepted), modules exposed |
 | `withMods(fn, arg)` | Run `fn(mods, arg)` in page context with the game's real modules bound |
 | `openTab(n)` | Click tab `n` |
 | `openPane(label)` | Reveal and open a side-menu pane by its visible label |
@@ -66,6 +66,8 @@ two debug surfaces, and the harness drives both:
 | `openVariableDebugger()` | Opens `#variableDebuggerWindow` via **Numpad \*** |
 | `debugClick(id, {times})` | Click any debug-menu button by id |
 | `debugSelect(id, value)` | Set a debug `<select>` |
+| `setDebugVariable(label, value)` | Edit a variable through the variable debugger's own search, inline editor and submit button |
+| `closeVariableDebugger()` | Close it again so it stops repainting every frame |
 | `debugTimeWarp({durationMs, multiplier})` | Trigger the debug time warp |
 | `prepareRunForStarshipLaunch()` | The game's full late-game scenario chain |
 
@@ -73,6 +75,13 @@ two debug surfaces, and the harness drives both:
 own sanctioned test backdoor — both hotkey handlers accept it as an alternative to
 the non-Electron + non-demo + cheats-enabled gate, so debug tooling works
 regardless of how `buildFlags.js` is currently set.
+
+`boot({ acceptOnboarding: true })` takes the Yes branch of the real tutorial
+prompt instead of declining it; `boot({ language: 'de' })` seeds the stored
+language before navigation, so the whole boot — including the onboarding prompt
+— renders in that language. The prompt is recognised by its *cancel* button
+reading some form of "no", because `#modalConfirm` is reused by the two earlier
+boot modals and is already on screen.
 
 `prepareRunForStarshipLaunch()` runs the game's own chain and yields: $1B cash,
 1B of every resource and compound, all 39 techs, launch pad + scanner + all
@@ -85,11 +94,47 @@ Useful individual buttons: `give1BButton`, `give1MAllResourcesAndCompounds`,
 `buildLaunchPadScannerAndAllRocketsButton`, `gain10000AntimatterButton`,
 `add100ApButton`, `addFleetsAndEnvoyButton`, `buildStarshipDebugButton`,
 `unlockAllTabsButton`, `add10000CpButton`, `resetGpSpentButton`,
-`clearWeatherButton`, `triggerRandomEventButton`.
+`clearWeatherButton`, `triggerRandomEventButton`, `setNewsTickerDebugButton`.
+
+Selects worth knowing: `debugRandomEventSelect` (pair with
+`triggerRandomEventButton` to fire one named random event, e.g.
+`galacticMarketLockdown`), and `debugNewsTickerCategorySelect` /
+`debugNewsTickerIntervalSelect` (pair with `setNewsTickerDebugButton`).
+
+### Forcing an outcome with `setDebugVariable`
+
+The variable debugger is the only way to reach several deliberately random
+outcomes. The casino specs lean on three of them:
+
+| Variable | Effect |
+|---|---|
+| `wheelForceSpecial` | Wheel of Fortune always lands segment 0, the special prize |
+| `casinoGame4AlwaysWin` | Higher or Lower never loses — note the name is one ahead of the game number used everywhere else |
+| `casinoGame5VoidSeerAlwaysMatch` | The Void Seer's two reels always match |
+
+`setDebugVariable` drives the real editor, and its shape is dictated by two
+things worth knowing before writing your own:
+
+- **`populateVariableDebugger()` rebuilds every row on every frame** while the
+  window is open, so a resolved element handle is detached before a normal
+  Playwright click lands. The helper clicks a *screen coordinate* instead, where
+  whichever freshly built row occupies that spot carries the same handler. It
+  uses the debugger's own search bar to scroll the row into view first, because
+  the scrolling container is an ancestor of the rebuilt rows and so keeps its
+  scroll position.
+- **The click has to be a real one.** The row handlers call
+  `setPointerCapture(e.pointerId)`, which throws `NotFoundError` for a synthetic
+  pointer id and aborts the handler before it opens the editor — so a dispatched
+  `PointerEvent` silently does nothing.
+
+Call `closeVariableDebugger()` when done; leaving it open costs a full DOM
+rebuild every frame for the rest of the test.
 
 Modules available inside `withMods`: `cg` (constantsAndGlobalVars), `rdo`
 (resourceDataObject), `game`, `ach` (achievements), `audio`, `loc` (localization),
-`desc` (descriptions), `timers` (timerManagerDelta), `ui`.
+`desc` (descriptions), `timers` (timerManagerDelta), `clockTimers` (timerManager —
+the wall-clock manager behind the news ticker, a different instance from
+`timers`), `ui`, `rip` (cosmicRip), `saveLoad`, `casino`, `onboarding`, `events`.
 
 ## Conventions learned the hard way
 
@@ -121,6 +166,59 @@ changing either.
 **Reach for the debug menu before writing setup code.** Anything the debug window
 can do, it should do — that exercises the real wiring and keeps specs short. Only
 seed state directly via `withMods` when no debug action covers it.
+
+**Several getters hand back the live array, and their setters only push.**
+`getStarsWithAncientManuscripts()`, `getUnlockedResourcesArray()` and
+`getUnlockedCompoundsArray()` all return the real object, while the matching
+`set…` functions append rather than replace. To clear one, drain it in place
+(`arr.length = 0`) and refill afterwards. `setFactoryStarsArray` and
+`setMegaStructureTechsResearched` take an explicit `override` second argument
+instead.
+
+**Values rendered through the notation formatter cannot be compared exactly.**
+Any element carrying the `notation` class is rewritten to `54.3K`, `300.0K` and
+so on, so a summary line is not a precise figure. Assert against the underlying
+data object, or against a raw input field, and use the displayed value only to
+prove that a *preview matches execution* — which is what the market specs do.
+
+**Notifications are queued per classification and shown one at a time.** A
+message triggered while an earlier one from the same classification is still on
+screen appears up to 3.5s later, so reading the notification list immediately
+after an action returns the *previous* message. Poll for the expected text
+rather than snapshotting once, and match anywhere in the visible set rather than
+at a fixed position.
+
+**`locator.isVisible()` does not wait, whatever timeout you pass it.** It
+answers against the DOM as it stands. Anything that appears after an async step
+— the onboarding prompt, which waits on `loadGameFromCloud()` — needs
+`waitFor({ state: 'visible' })`. `boot()` raced this for a long time and
+intermittently left the tutorial prompt on screen.
+
+**Read-modify-read against live game state belongs in one `withMods` call.**
+The frame loop cannot interleave with a synchronous block, so snapshotting,
+triggering and re-snapshotting inside a single evaluation removes production
+ticks from the measurement. Split across three round trips, a resource that the
+game is actively producing will drift between them and mask the change under
+test — this is what makes the `stockLoss` assertion in `random-events` exact
+rather than approximate.
+
+### Measuring performance
+
+`tests/e2e/performance/` opens a CDP session for the counters that matter:
+
+```js
+const client = await game.page.context().newCDPSession(game.page);
+await client.send('Performance.enable');
+const { metrics } = await client.send('Performance.getMetrics'); // Nodes, JSEventListeners, JSHeapUsedSize, Documents
+await client.send('HeapProfiler.collectGarbage');                // force a GC before a heap reading
+```
+
+Two rules make those assertions meaningful. **Baseline after a warm-up cycle,
+not at boot** — the first pass over the UI legitimately builds every pane's
+rows, so growth is only evidence of a leak once that has happened. And **assert
+the shape of heap growth, not its direction** — caches make the heap creep up
+and then flatten, so a leak is distinguished by the second half of a run growing
+as much as the first, not by the series rising at all.
 
 **Known live bugs are worked around in the harness, not hidden.** See
 [`tests/docs/known-issues.md`](../docs/known-issues.md). Notably,

@@ -420,18 +420,22 @@
       "id": "fleet-hangar",
       "title": "Fleet Hangar",
       "group": "interstellar",
-      "status": "red",
+      "status": "green",
       "risk": "high",
       "legacy": [],
       "summary": "Fleet construction, ship classes and the aggregate strength calculation that feeds battle.",
       "tests": [
-        "Each ship class builds with correct cost and build time",
+        "Each ship class builds with the correct cash and material cost",
         "Fleet strength aggregates correctly across mixed compositions",
-        "Supremacist philosophy cost and strength modifiers apply",
-        "Ascendency fleet buffs (armor, speed, attack) apply and stack correctly",
+        "Only the combat classes join attack and defense; the envoy is capped at one and contributes nothing",
+        "Losing a unit in battle removes it and its strength from the aggregate",
+        "Supremacist hangar automation cuts every fleet cost by 5% and leaves other space upgrades alone",
+        "Supremacist laser intensity, engine miniaturization and synthetic plating raise attack, speed and unit health by 5% each",
         "Attack power buffs apply only to newly built ships, as documented",
+        "Building a ship flags the fleet as changed for diplomacy",
         "Fleet composition survives save/load"
-      ]
+      ],
+      "specCount": 14
     },
     {
       "id": "diplomacy",
@@ -490,18 +494,20 @@
       "id": "galactic-market",
       "title": "Galactic Market",
       "group": "meta",
-      "status": "red",
+      "status": "green",
       "risk": "medium",
       "legacy": [],
-      "summary": "AP-denominated trading, stock pricing and the demo-build lockdown.",
+      "summary": "Material-for-material trading, bias-driven pricing, AP liquidation and the lockdown event.",
       "tests": [
-        "Buy and sell adjust AP and holdings correctly",
-        "Prices move as designed and previews match execution",
-        "Insufficient AP blocks purchase cleanly",
-        "Demo build lockdown UI applies and blocks interaction",
-        "Casino stock-doubling prize applies to the correct stock",
-        "Holdings survive save/load and rebirth as designed"
-      ]
+        "Trades move exactly the quantities the summary previewed",
+        "Prices move as designed: bias shifts in proportion to trade volume and commission climbs 6-13 points per trade to a cap of 80",
+        "Quantity selection is gated, clamped to holdings and reset after a trade",
+        "A material cannot be traded for itself",
+        "Selling AP for cash and liquidating the run both settle correctly",
+        "A Galactic Market lockdown greys the side-menu row and blocks the pane",
+        "Holdings, bias and commission survive save/load"
+      ],
+      "specCount": 17
     },
     {
       "id": "ascendency",
@@ -525,19 +531,21 @@
       "id": "galactic-casino",
       "title": "Galactic Casino",
       "group": "meta",
-      "status": "red",
+      "status": "green",
       "risk": "medium",
       "legacy": [],
-      "summary": "CP economy and three risk games with a shared prize architecture.",
+      "summary": "CP economy and four risk games with a shared special-prize architecture.",
       "tests": [
-        "CP purchase cost scales as designed (including the cpBaseCost migration)",
+        "CP purchase cost scales as designed, and the sub-0.93 cpBaseCost patch is pinned as unreachable",
         "Game 1 Double or Nothing resolves both outcomes and settles CP correctly",
-        "Game 2 Wheel of Fortune awards each special prize type",
-        "Game 3 Higher or Lower awards correct tier prizes",
+        "Game 2 Wheel of Fortune reaches its special, losing and regular-prize segments",
+        "Game 3 Higher or Lower awards correct tier prizes and ends on a wrong guess",
+        "Game 4 Visiting Void Seer charges its prize cost and pays out on a match",
         "Invalid and unaffordable stakes are rejected with a localized message",
-        "Every timer-finishing prize (rocket, starship, telescope x3) applies to the right target",
-        "Casino statistics track correctly"
-      ]
+        "Every special prize applies to the right target, including the five timer-finishing prizes",
+        "Casino statistics track plays, wins and CP spend in both scopes"
+      ],
+      "specCount": 46
     },
     {
       "id": "rebirth",
@@ -567,17 +575,20 @@
       "id": "philosophies",
       "title": "Philosophies",
       "group": "meta",
-      "status": "red",
+      "status": "green",
       "risk": "high",
       "legacy": [],
       "summary": "The four permanent player paths chosen once and affecting the whole account thereafter.",
       "tests": [
-        "The choice modal appears at the correct trigger and only once",
-        "Each of Constructor, Supremacist, Voidborn, Expansionist applies its full documented effect set",
-        "Effects activate only after the first rebirth, as documented",
-        "The choice is irreversible and survives save/load and rebirth",
-        "Philosophy modifiers stack correctly with ascendency perks and star types"
-      ]
+        "The choice modal appears at the correct trigger and only while no philosophy is set",
+        "All four paths carry one special ability and four non-overlapping repeatables",
+        "Each of Constructor, Supremacist, Voidborn, Expansionist applies its own documented effect set and no other path’s",
+        "The Voidborn AP bonus applies only from run 2, as documented",
+        "The Supremacist ability guarantees vassalization where other paths must roll",
+        "The choice survives save/load, and the debug scenario defaults run 1 to Voidborn",
+        "The four choice-button labels are hardcoded English (known-issues #13)"
+      ],
+      "specCount": 19
     },
     {
       "id": "achievements",
@@ -620,20 +631,22 @@
       "id": "megastructures",
       "title": "Megastructures",
       "group": "endgame",
-      "status": "amber",
+      "status": "green",
       "risk": "medium",
       "legacy": [
         "captureMegaStructureTest.test.js"
       ],
-      "summary": "Ancient manuscripts, megastructure construction and the endgame force field.",
+      "summary": "Ancient manuscripts, megastructure capture and the Miaplacidean force field.",
       "tests": [
-        "Manuscripts are discoverable and accumulate",
-        "Each megastructure gates on the right manuscript count and resources",
-        "Construction progresses and completes correctly",
-        "Force field activates and applies its endgame effect",
-        "Megastructure run flag alters behaviour as documented",
+        "Manuscripts are discoverable at the documented vision thresholds and cap at four",
+        "Manuscript stars never repeat and never fall on Miaplacidus, a settled star, the home system or an O-type",
+        "Activating a factory star marks its manuscript reported and registers the star",
+        "Each megastructure gates on a five-stage prerequisite chain with rising prices",
+        "Each stage applies its documented bonus: batteries, power plants, autobuyer rates, storage and infinite power",
+        "Stage 3 of every structure lowers the force field one level and permanently unlocks antimatter",
         "Progress survives save/load"
-      ]
+      ],
+      "specCount": 18
     },
     {
       "id": "cosmic-rip",
@@ -675,35 +688,37 @@
       "id": "random-events",
       "title": "Random Events",
       "group": "simulation",
-      "status": "red",
+      "status": "green",
       "risk": "medium",
       "legacy": [],
       "summary": "Instant and timed events, their probability model, effects and history tracking.",
       "tests": [
-        "Every instant event triggers and applies its effect exactly once",
-        "Every timed effect applies, persists for its duration and cleanly expires",
-        "Probability decays after a trigger and the cycle window stays within bounds",
-        "Negative events are correctly classified and communicated",
-        "Event history records accurately and does not grow unbounded",
-        "Supply chain disruption picks a valid candidate",
-        "Black hole instability shift applies correctly",
-        "Active timed effects survive save/load with correct remaining time"
-      ]
+        "Every event is registered, uniquely named, localized and offered by the debug menu",
+        "Every instant event applies its effect exactly once and is recorded in history",
+        "Every timed effect applies, counts down, cannot restart while running and cleanly expires",
+        "Probability decays by 0.9 per trigger and never falls below the 0.01 floor",
+        "Events with unmet preconditions refuse to fire, and an unknown id is refused without throwing",
+        "Supply chain disruption only fires once an autobuyer exists and targets one the player owns",
+        "Stock loss removes 40-80% of exactly one held stock",
+        "Event history is capped, ordered newest first, and active timed effects survive save/load with their remaining time"
+      ],
+      "specCount": 21
     },
     {
       "id": "news-ticker",
       "title": "News Ticker",
       "group": "simulation",
-      "status": "red",
+      "status": "green",
       "risk": "low",
       "legacy": [],
       "summary": "Rotating flavour content by category and interval.",
       "tests": [
-        "Ticker cycles at the configured interval",
+        "Ticker cycles at the configured interval and replaces rather than stacks its timer",
         "Each category produces only its own content",
-        "Content is localized in all five languages",
-        "Ticker does not leak timers when the tab changes"
-      ]
+        "Content is localized in all five languages and rebuilt on a language change",
+        "Ticker does not leak timers when the setting is toggled"
+      ],
+      "specCount": 18
     },
     {
       "id": "audio",
@@ -742,18 +757,20 @@
       "id": "notation",
       "title": "Number Notation",
       "group": "presentation",
-      "status": "red",
+      "status": "green",
       "risk": "medium",
       "legacy": [],
       "summary": "Formatting of every displayed number across notation modes — touches every screen in the game.",
       "tests": [
-        "Each notation type formats correctly across magnitudes from 1 to 1e300",
+        "The condensed formatter picks the right suffix at every magnitude from 1 to 1e300, and truncates rather than rounds",
         "Switching notation immediately reformats all visible values",
-        "Specialised formatters (sell-fuse-money, building-purchase) produce correct output",
-        "Negative, zero and fractional values format sanely",
-        "Notation preference persists",
-        "No NaN or Infinity ever reaches the DOM"
-      ]
+        "The production-rate formatter keeps the sign and scales its precision",
+        "Negative, zero and unparseable values format sanely",
+        "Notation preference persists across save/load",
+        "No NaN, Infinity or undefined ever reaches the DOM in either mode",
+        "Formatting is idempotent, so the per-frame reformat cannot compound its own output"
+      ],
+      "specCount": 11
     },
     {
       "id": "ui-navigation",
@@ -784,21 +801,22 @@
       "id": "onboarding",
       "title": "Onboarding & Tutorial",
       "group": "presentation",
-      "status": "amber",
+      "status": "green",
       "risk": "high",
       "legacy": [
         "launchAndOnboard.test.js"
       ],
-      "summary": "The guided first-run tutorial. Every new player's first experience, and largely still hardcoded English.",
+      "summary": "The guided first-run tutorial. Every new player’s first experience, and fully localized.",
       "tests": [
-        "The full tutorial runs start to finish without a dead end",
-        "Each step's condition correctly gates progression",
-        "Callouts and overlays anchor to the right elements",
+        "The prompt is offered on a fresh pioneer, and Yes starts the tutorial while No leaves it off",
+        "Each step’s condition correctly gates progression",
+        "Callouts and overlays anchor to the element the step names",
         "Leaving the required tab prompts a return and recovers correctly",
         "Onboarding can be exited early and the game remains playable",
-        "Completion sets the flag and never re-triggers",
-        "All tutorial text is localized in all five languages"
-      ]
+        "Re-enabling the tutorial restarts it from the first step",
+        "All tutorial text is localized in all five languages, and the tutorial runs end to end in a second language"
+      ],
+      "specCount": 13
     },
     {
       "id": "cosmicopedia",
@@ -839,18 +857,20 @@
       "id": "performance",
       "title": "Performance & Frame Budget",
       "group": "presentation",
-      "status": "red",
+      "status": "green",
       "risk": "high",
       "legacy": [],
       "summary": "Frame-loop cost and long-session stability. Not a feature, but the area most likely to degrade silently as content grows.",
       "tests": [
-        "Frame time stays within budget on a late-game save with many elements",
-        "No unbounded growth in DOM node count or listener count over a long session",
-        "The compound reverse-lookup does not scale with catalogue size (guards the O(n) hot-path finding)",
-        "Timers do not drift measurably over an extended window",
-        "Memory does not grow monotonically across repeated tab switches",
+        "Frame time stays within budget on a late-game run",
+        "Event listeners and DOM nodes do not accumulate across repeated tab cycles or a long idle window",
+        "Heap growth decelerates rather than accruing per cycle, measured after a forced GC",
+        "Notification containers are pooled per classification rather than per message",
+        "The compound reverse-lookup stays cheap enough for the frame loop (guards the O(n) hot-path finding)",
+        "Delta timers do not drift measurably over an extended window",
         "gameLoop continues running after every state transition (guards the rAF-inside-conditional finding)"
-      ]
+      ],
+      "specCount": 10
     }
   ]
 }

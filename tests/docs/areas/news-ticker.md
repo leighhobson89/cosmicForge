@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | 🔴 RED |
+| **Status** | 🟢 GREEN |
 | **Risk if broken** | Low |
 | **Group** | Simulation & Ambience |
 | **Spec folder** | `tests/e2e/news-ticker/` |
@@ -12,14 +12,14 @@ Rotating flavour content by category and interval.
 
 ## What should be tested
 
-- [ ] Ticker cycles at the configured interval
+- [ ] Ticker cycles at the configured interval and replaces rather than stacks its timer
 - [ ] Each category produces only its own content
-- [ ] Content is localized in all five languages
-- [ ] Ticker does not leak timers when the tab changes
+- [ ] Content is localized in all five languages and rebuilt on a language change
+- [ ] Ticker does not leak timers when the setting is toggled
 
 ## Status meaning
 
-🔴 **RED** — No automated coverage. A regression here ships unnoticed.
+🟢 **GREEN** — Comprehensive coverage — happy path, branches, boundaries and failure modes all asserted.
 
 ---
 

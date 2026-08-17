@@ -1,0 +1,512 @@
+/**
+ * Area: Philosophies
+ * Plan: tests/docs/areas/philosophies.md
+ *
+ * The choice is offered exactly once, from the star-study timer's completion
+ * handler, and only while `getPlayerPhilosophy()` is still unset — so the modal
+ * is the gate, and the four buttons map onto the four paths:
+ *
+ *   Confirm → constructor    Cancel → supremacist
+ *   Extra1  → voidborn       Extra2 → expansionist
+ *
+ * Each philosophy then owns a branch of `philosophyRepeatableTechs`: one
+ * non-repeatable special ability at index 0, and four repeatables whose effects
+ * are applied by the `set…AfterRepeatables()` family. Those effect functions are
+ * shared with other areas — the Supremacist fleet ones are asserted in detail by
+ * the fleet-hangar specs — so what is pinned here is the structure common to all
+ * four paths, each path's own effects, and the once-only irreversibility.
+ *
+ * Note `setDefaultPhilosophyForRun1IfUnset()` in the debug tooling assigns
+ * voidborn on run 1, so any spec that cares about an *unset* philosophy must
+ * avoid `prepareRunForStarshipLaunch()`.
+ */
+import { test, expect } from '../_harness/game-fixture.mjs';
+
+const PHILOSOPHIES = ['constructor', 'supremacist', 'voidborn', 'expansionist'];
+
+const SPECIAL_ABILITIES = {
+  constructor: 'spaceStorageTankResearch',
+  supremacist: 'fleetHolograms',
+  voidborn: 'voidSeers',
+  expansionist: 'rapidExpansion'
+};
+
+test.describe('Philosophies — catalogue and structure', () => {
+  test.beforeEach(async ({ game }) => {
+    await game.boot();
+  });
+
+  test('all four paths exist with one special ability and four repeatables each', async ({ game }) => {
+    const problems = await game.withMods((m, config) => {
+      const { philosophies, abilities } = config;
+      const data = m.rdo.getResourceDataObject('philosophyRepeatableTechs');
+      const issues = [];
+
+      const paths = Object.keys(data || {});
+      if (paths.length !== philosophies.length) {
+        issues.push(`expected ${philosophies.length} paths, found ${paths.join(', ')}`);
+      }
+
+      for (const philosophy of philosophies) {
+        const branch = data?.[philosophy];
+        if (!branch) { issues.push(`${philosophy}: missing`); continue; }
+
+        const techs = Object.entries(branch);
+        if (techs.length !== 5) issues.push(`${philosophy}: has ${techs.length} techs, expected 5`);
+
+        const ability = branch[abilities[philosophy]];
+        if (!ability) {
+          issues.push(`${philosophy}: special ability ${abilities[philosophy]} missing`);
+        } else {
+          if (ability.repeatable !== false) issues.push(`${philosophy}: special ability should not be repeatable`);
+          if (ability.affects !== 'specialAbility') issues.push(`${philosophy}: special ability affects ${ability.affects}`);
+          if (ability.idWithinCategory !== 0) issues.push(`${philosophy}: special ability is not index 0`);
+        }
+
+        const indices = techs.map(([, tech]) => tech.idWithinCategory).sort((a, b) => a - b);
+        if (JSON.stringify(indices) !== JSON.stringify([0, 1, 2, 3, 4])) {
+          issues.push(`${philosophy}: indices are ${indices.join(',')}`);
+        }
+
+        for (const [key, tech] of techs) {
+          if (tech.philosophy !== philosophy) issues.push(`${philosophy}.${key}: tagged ${tech.philosophy}`);
+          if (!(Number.isFinite(tech.price) && tech.price > 0)) issues.push(`${philosophy}.${key}: bad price`);
+          if (typeof tech.setPrice !== 'string' || !tech.setPrice) issues.push(`${philosophy}.${key}: no setPrice key`);
+          if (typeof tech.affects !== 'string' || !tech.affects) issues.push(`${philosophy}.${key}: no affects tag`);
+        }
+      }
+      return issues;
+    }, { philosophies: PHILOSOPHIES, abilities: SPECIAL_ABILITIES });
+
+    expect(problems).toEqual([]);
+  });
+
+  test('the special ability costs far more than any repeatable on the same path', async ({ game }) => {
+    const prices = await game.withMods((m, config) => {
+      const { philosophies, abilities } = config;
+      const data = m.rdo.getResourceDataObject('philosophyRepeatableTechs');
+      return Object.fromEntries(philosophies.map((philosophy) => {
+        const branch = data[philosophy];
+        const abilityPrice = branch[abilities[philosophy]].price;
+        const repeatablePrices = Object.entries(branch)
+          .filter(([key]) => key !== abilities[philosophy])
+          .map(([, tech]) => tech.price);
+        return [philosophy, { abilityPrice, repeatablePrices }];
+      }));
+    }, { philosophies: PHILOSOPHIES, abilities: SPECIAL_ABILITIES });
+
+    for (const philosophy of PHILOSOPHIES) {
+      const { abilityPrice, repeatablePrices } = prices[philosophy];
+      expect(abilityPrice, `${philosophy} ability price`).toBe(500000);
+      for (const price of repeatablePrices) {
+        expect(price, `${philosophy} repeatable price`).toBe(10000);
+        expect(abilityPrice).toBeGreaterThan(price);
+      }
+    }
+  });
+
+  test('every path affects a distinct set of systems', async ({ game }) => {
+    const affects = await game.withMods((m, philosophies) => {
+      const data = m.rdo.getResourceDataObject('philosophyRepeatableTechs');
+      return Object.fromEntries(philosophies.map((philosophy) => [
+        philosophy,
+        Object.values(data[philosophy]).map((tech) => tech.affects).filter((a) => a !== 'specialAbility')
+      ]));
+    }, PHILOSOPHIES);
+
+    // The four repeatables of a path must not duplicate one another, and the
+    // paths must not overlap — that is what makes the choice meaningful.
+    const seen = new Map();
+    for (const philosophy of PHILOSOPHIES) {
+      expect(affects[philosophy].length, philosophy).toBe(4);
+      expect(new Set(affects[philosophy]).size, `${philosophy} has duplicate effects`).toBe(4);
+      for (const effect of affects[philosophy]) {
+        expect(seen.has(effect), `${effect} is claimed by both ${seen.get(effect)} and ${philosophy}`).toBe(false);
+        seen.set(effect, philosophy);
+      }
+    }
+
+    expect(affects.constructor).toEqual(['space', 'resources', 'compounds', 'buildings']);
+    expect(affects.supremacist).toEqual(['fleetCosts', 'fleetHealth', 'fleetSpeed', 'fleetAttackPower']);
+    expect(affects.voidborn).toEqual(['initialImpression', 'starStudy', 'asteroidSearch', 'ascendencyPoints']);
+    expect(affects.expansionist).toEqual(['starshipPartsCost', 'rocketPartsCost', 'rocketTravelTime', 'starshipTravelTime']);
+  });
+});
+
+test.describe('Philosophies — choosing one', () => {
+  test('a fresh run starts with no philosophy chosen', async ({ game }) => {
+    await game.boot();
+    const philosophy = await game.withMods((m) => m.cg.getPlayerPhilosophy());
+    // Falsy in whichever form the game left it — the modal gate is `!philosophy`.
+    expect(philosophy).toBeFalsy();
+  });
+
+  test('each of the four choices is reachable and records the philosophy', async ({ game }) => {
+    await game.boot();
+
+    const result = await game.withMods((m, philosophies) => {
+      const outcomes = {};
+      for (const philosophy of philosophies) {
+        m.cg.setPlayerPhilosophy(philosophy);
+        outcomes[philosophy] = m.cg.getPlayerPhilosophy();
+      }
+      return outcomes;
+    }, PHILOSOPHIES);
+
+    for (const philosophy of PHILOSOPHIES) {
+      expect(result[philosophy]).toBe(philosophy);
+    }
+  });
+
+  test('the choice modal offers all four paths and only appears while none is set', async ({ game }) => {
+    await game.boot();
+
+    // The modal is raised from the star-study completion handler, gated on
+    // `!getPlayerPhilosophy()`. Assert the gate rather than re-running a
+    // 40-minute study timer.
+    const gate = await game.withMods((m) => {
+      const unset = !m.cg.getPlayerPhilosophy();
+      m.cg.setPlayerPhilosophy('voidborn');
+      const set = !m.cg.getPlayerPhilosophy();
+      m.cg.setPlayerPhilosophy(undefined);
+      return { unset, set };
+    });
+
+    expect(gate.unset).toBe(true);
+    // Once chosen, the same completion handler no longer offers the choice.
+    expect(gate.set).toBe(false);
+
+    const copy = await game.withMods((m) => ({
+      header: m.desc.modalPlayerLeaderPhilosophyHeaderText,
+      content: m.desc.modalPlayerLeaderPhilosophyContentText
+    }));
+    expect(typeof copy.header).toBe('string');
+    expect(copy.header.length).toBeGreaterThan(0);
+    expect(typeof copy.content).toBe('string');
+    expect(copy.content.length).toBeGreaterThan(0);
+    // The four paths are named by the modal's *button labels*, not its body
+    // copy, and those labels are hardcoded English literals in game.js — there
+    // is no catalogue key for them. See known-issues.md #13; this pins the
+    // current behaviour so the gap is visible rather than assumed closed.
+    for (const philosophy of PHILOSOPHIES) {
+      expect(copy.content.toLowerCase()).not.toContain(philosophy);
+    }
+  });
+
+  test('the four philosophy button labels have no catalogue entry, so they cannot translate', async ({ game }) => {
+    await game.boot();
+
+    // Regression guard for known-issues.md #13. If a key is ever added for these
+    // labels this test fails, which is the prompt to wire it into the modal and
+    // delete this spec.
+    const missing = await game.withMods((m, philosophies) => philosophies.filter((philosophy) => {
+      const candidates = [
+        `philosophyName${philosophy.charAt(0).toUpperCase()}${philosophy.slice(1)}`,
+        `buttonPhilosophy${philosophy.charAt(0).toUpperCase()}${philosophy.slice(1)}`,
+        `modalPhilosophy${philosophy.charAt(0).toUpperCase()}${philosophy.slice(1)}Label`
+      ];
+      // localize() returns the key itself when there is no catalogue entry.
+      return candidates.every((key) => m.loc.localize(key, 'en') === key);
+    }), PHILOSOPHIES);
+
+    expect(missing).toEqual(PHILOSOPHIES);
+  });
+
+  test('each choice has its own localized confirmation notification in all five languages', async ({ game }) => {
+    await game.boot();
+
+    const problems = await game.withMods(async (m, config) => {
+      const { philosophies, languages } = config;
+      const original = m.cg.getLanguage();
+      const issues = [];
+
+      for (const language of languages) {
+        await m.loc.initLocalization(language);
+        const seen = new Set();
+        for (const philosophy of philosophies) {
+          const key = `notificationPhilosophy${philosophy.charAt(0).toUpperCase()}${philosophy.slice(1)}`;
+          const value = m.loc.localize(key, language);
+          if (!value || value === key || !String(value).trim()) {
+            issues.push(`${language}:${key}: missing`);
+            continue;
+          }
+          if (seen.has(value)) issues.push(`${language}:${key}: duplicates another philosophy's message`);
+          seen.add(value);
+        }
+      }
+
+      await m.loc.initLocalization(original);
+      m.desc.initialiseDescriptions();
+      return issues;
+    }, { philosophies: PHILOSOPHIES, languages: ['en', 'es', 'de', 'it', 'fr'] });
+
+    expect(problems).toEqual([]);
+  });
+
+  test('the debug scenario assigns voidborn on run 1 when none was chosen', async ({ game }) => {
+    await game.boot();
+    expect(await game.withMods((m) => m.cg.getPlayerPhilosophy())).toBeFalsy();
+
+    await game.prepareRunForStarshipLaunch();
+
+    const state = await game.withMods((m) => ({
+      philosophy: m.cg.getPlayerPhilosophy(),
+      run: m.cg.getStatRun()
+    }));
+
+    expect(state.run).toBe(1);
+    // setDefaultPhilosophyForRun1IfUnset() — without it the debug scenario would
+    // leave every philosophy-gated path unreachable.
+    expect(state.philosophy).toBe('voidborn');
+  });
+
+  test('the philosophy and its ability flag survive a save/load round trip', async ({ game }) => {
+    await game.boot();
+
+    const result = await game.withMods((m) => {
+      m.cg.setPlayerPhilosophy('expansionist');
+      m.cg.setPhilosophyAbilityActive(true);
+      m.cg.setRepeatableTechMultipliers('3', 4);
+
+      const saved = JSON.parse(JSON.stringify(m.cg.captureGameStatusForSaving('initialise')));
+      return {
+        philosophy: saved.philosophy,
+        abilityActive: saved.flags?.philosophyAbilityActive,
+        multipliers: saved.repeatableTechMultipliers,
+        liveMultiplier: m.cg.getRepeatableTechMultipliers('3')
+      };
+    });
+
+    expect(result.philosophy).toBe('expansionist');
+    expect(result.abilityActive).toBe(true);
+    expect(result.liveMultiplier).toBe(4);
+    expect(result.multipliers?.['3']).toBe(4);
+  });
+});
+
+test.describe('Philosophies — effects', () => {
+  test.beforeEach(async ({ game }) => {
+    await game.boot();
+    await game.prepareRunForStarshipLaunch();
+  });
+
+  test('Constructor repeatables cut autobuyer, compound recipe and building prices', async ({ game }) => {
+    const result = await game.withMods((m) => {
+      const read = () => ({
+        autobuyer: m.rdo.getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier1', 'price']),
+        building: m.rdo.getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'price']),
+        research: m.rdo.getResourceDataObject('research', ['upgrades', 'scienceKit', 'price'])
+      });
+
+      const before = read();
+      m.game.setResourceAutobuyerPricesAfterRepeatables();
+      const afterAutobuyer = read();
+      m.game.setEnergyAndResearchBuildingPricesAfterRepeatables();
+      return { before, afterAutobuyer, afterBuildings: read() };
+    });
+
+    // Every price repeatable is a 5% reduction, applied multiplicatively.
+    expect(result.afterAutobuyer.autobuyer).toBeCloseTo(result.before.autobuyer * 0.95, 6);
+    // The autobuyer pass must not touch buildings, and vice versa.
+    expect(result.afterAutobuyer.building).toBe(result.before.building);
+    expect(result.afterBuildings.building).toBeCloseTo(result.before.building * 0.95, 6);
+    expect(result.afterBuildings.research).toBeCloseTo(result.before.research * 0.95, 6);
+  });
+
+  test('Voidborn repeatables raise initial impression and shorten telescope work', async ({ game }) => {
+    const result = await game.withMods((m) => {
+      const impressionBefore = m.cg.getInitialImpression();
+      const starStudyBefore = m.cg.getBaseInvestigateStarTimerDuration();
+      const asteroidBefore = m.cg.getBaseSearchAsteroidTimerDuration();
+
+      m.game.setInitialImpressionBaseAfterRepeatables();
+      m.game.setStarStudyEfficiencyAfterRepeatables();
+      m.game.setAsteroidSearchEfficiencyAfterRepeatables();
+
+      return {
+        impressionBefore,
+        impressionAfter: m.cg.getInitialImpression(),
+        starStudyBefore,
+        starStudyAfter: m.cg.getBaseInvestigateStarTimerDuration(),
+        asteroidBefore,
+        asteroidAfter: m.cg.getBaseSearchAsteroidTimerDuration()
+      };
+    });
+
+    // Impression is a flat +1; the two telescope timers are a 1% reduction each.
+    expect(result.impressionAfter).toBe(result.impressionBefore + 1);
+    expect(result.starStudyAfter).toBeCloseTo(result.starStudyBefore * 0.99, 6);
+    expect(result.asteroidAfter).toBeCloseTo(result.asteroidBefore * 0.99, 6);
+  });
+
+  test('Expansionist repeatables cut rocket and starship part costs', async ({ game }) => {
+    const result = await game.withMods((m) => {
+      // The two passes are scoped by key prefix: "ss" for starship modules and
+      // "rocket" for rockets, which is why each must leave the other untouched.
+      const read = () => ({
+        starshipPart: m.rdo.getResourceDataObject('space', ['upgrades', 'ssStructural', 'price']),
+        rocketPart: m.rdo.getResourceDataObject('space', ['upgrades', 'rocket1', 'price'])
+      });
+
+      const before = read();
+      m.game.setStarshipPartPricesAfterRepeatables();
+      const afterStarship = read();
+      m.game.setRocketPartPricesAfterRepeatables();
+      return { before, afterStarship, afterRocket: read() };
+    });
+
+    expect(result.afterStarship.starshipPart).toBeCloseTo(result.before.starshipPart * 0.95, 6);
+    expect(result.afterStarship.rocketPart).toBe(result.before.rocketPart);
+    expect(result.afterRocket.rocketPart).toBeCloseTo(result.before.rocketPart * 0.95, 6);
+  });
+
+  test('Supremacist repeatables are the fleet ones, and they leave other paths alone', async ({ game }) => {
+    const result = await game.withMods((m) => {
+      const read = () => ({
+        fleetPrice: m.rdo.getResourceDataObject('space', ['upgrades', 'fleetScout', 'price']),
+        fleetAttack: m.rdo.getResourceDataObject('space', ['upgrades', 'fleetScout', 'baseAttackStrength']),
+        unitHealth: m.cg.getPlayerStartingUnitHealth(),
+        impression: m.cg.getInitialImpression(),
+        rocketPart: m.rdo.getResourceDataObject('space', ['upgrades', 'rocket1', 'price'])
+      });
+
+      const before = read();
+      m.game.setFleetPricesAfterRepeatables();
+      m.game.setFleetAttackDamageAfterRepeatables();
+      m.game.setFleetArmorBuffsAfterRepeatables();
+      return { before, after: read() };
+    });
+
+    expect(result.after.fleetPrice).toBeCloseTo(result.before.fleetPrice * 0.95, 6);
+    expect(result.after.fleetAttack).toBeCloseTo(result.before.fleetAttack * 1.05, 6);
+    expect(result.after.unitHealth).toBeCloseTo(result.before.unitHealth * 1.05, 6);
+    // Nothing belonging to another philosophy may move.
+    expect(result.after.impression).toBe(result.before.impression);
+    expect(result.after.rocketPart).toBe(result.before.rocketPart);
+  });
+
+  test('the Voidborn AP bonus only applies from run 2 onwards', async ({ game }) => {
+    const result = await game.withMods((m) => {
+      const originalPhilosophy = m.cg.getPlayerPhilosophy();
+
+      m.cg.setPlayerPhilosophy('voidborn');
+      const asVoidbornRun1 = m.game.getAscendencyPointsWithRepeatableBonus(10);
+
+      m.cg.setPlayerPhilosophy('constructor');
+      const asConstructor = m.game.getAscendencyPointsWithRepeatableBonus(10);
+
+      m.cg.setPlayerPhilosophy(originalPhilosophy);
+      return { asVoidbornRun1, asConstructor, run: m.cg.getStatRun() };
+    });
+
+    expect(result.run).toBe(1);
+    // getAscendencyPointsWithRepeatableBonus gates on voidborn *and* run > 1, so
+    // on run 1 the base value is returned untouched for every philosophy.
+    expect(result.asVoidbornRun1).toBe(10);
+    expect(result.asConstructor).toBe(10);
+  });
+
+  test('the Supremacist ability guarantees vassalization where other paths must roll for it', async ({ game }) => {
+    const result = await game.withMods((m) => {
+      const starData = (() => {
+        for (let i = 0; i < 40; i++) {
+          m.cg.setDestinationStar('sirius');
+          m.game.generateDestinationStarData();
+          const data = m.rdo.getStarSystemDataObject('stars', ['destinationStar']);
+          const enemySum = data.enemyFleets.air + data.enemyFleets.land + data.enemyFleets.sea;
+          if (data.civilizationLevel !== 'None' && data.civilizationLevel !== 'Unsentient' && enemySum > 0) return data;
+        }
+        return null;
+      })();
+
+      const originalPhilosophy = m.cg.getPlayerPhilosophy();
+      const originalAbility = m.cg.getPhilosophyAbilityActive();
+
+      m.cg.setPlayerPhilosophy('supremacist');
+      m.cg.setPhilosophyAbilityActive(true);
+      const guaranteed = [];
+      for (let i = 0; i < 10; i++) {
+        m.rdo.setStarSystemDataObject('Neutral', 'stars', ['destinationStar', 'attitude']);
+        m.game.updateDiplomacySituation('vassalize', starData);
+        guaranteed.push(m.rdo.getStarSystemDataObject('stars', ['destinationStar', 'attitude']));
+      }
+
+      // The same ability flag on another path must not carry the exemption.
+      m.cg.setPlayerPhilosophy('constructor');
+      const withoutSupremacist = [];
+      for (let i = 0; i < 30; i++) {
+        m.rdo.setStarSystemDataObject('Neutral', 'stars', ['destinationStar', 'attitude']);
+        m.game.updateDiplomacySituation('vassalize', starData);
+        withoutSupremacist.push(m.rdo.getStarSystemDataObject('stars', ['destinationStar', 'attitude']));
+      }
+
+      m.cg.setPlayerPhilosophy(originalPhilosophy);
+      m.cg.setPhilosophyAbilityActive(originalAbility);
+      return { guaranteed, withoutSupremacist };
+    });
+
+    expect(result.guaranteed).toEqual(Array(10).fill('Surrendered'));
+    // Without the supremacist exemption the 75% roll must produce both outcomes.
+    expect(result.withoutSupremacist).toContain('Surrendered');
+    expect(result.withoutSupremacist).toContain('Neutral');
+  });
+
+  test('the Voidborn philosophy is what unlocks the void-pillage casino prize', async ({ game }) => {
+    const result = await game.withMods((m, philosophies) => {
+      const original = m.cg.getPlayerPhilosophy();
+      const outcomes = {};
+
+      for (const philosophy of philosophies) {
+        m.cg.setPlayerPhilosophy(philosophy);
+        m.cg.setCurrentlyPillagingVoid(true);
+        m.cg.setTimeLeftUntilPillageVoidTimerFinishes(120000);
+        outcomes[philosophy] = m.casino.claimCasinoSpecialPrizeByKey(
+          'special_telescope_finish_void_pillage', { notify: false });
+      }
+
+      m.cg.setCurrentlyPillagingVoid(false);
+      m.cg.setPlayerPhilosophy(original);
+      return outcomes;
+    }, PHILOSOPHIES);
+
+    expect(result.voidborn).toEqual({ type: 'telescope_finish_void_pillage' });
+    for (const philosophy of ['constructor', 'supremacist', 'expansionist']) {
+      expect(result[philosophy], `${philosophy} should not reach the void prize`).toBeNull();
+    }
+  });
+
+  test('repeatable multipliers accumulate per slot and are readable individually', async ({ game }) => {
+    const result = await game.withMods((m) => {
+      const before = m.cg.getAllRepeatableTechMultipliersObject();
+      const snapshot = JSON.parse(JSON.stringify(before));
+
+      m.cg.setRepeatableTechMultipliers('1', 3);
+      m.cg.setRepeatableTechMultipliers('4', 7);
+
+      const after = {
+        one: m.cg.getRepeatableTechMultipliers('1'),
+        four: m.cg.getRepeatableTechMultipliers('4'),
+        all: JSON.parse(JSON.stringify(m.cg.getAllRepeatableTechMultipliersObject()))
+      };
+
+      for (const [key, value] of Object.entries(snapshot)) m.cg.setRepeatableTechMultipliers(key, value);
+      return { snapshot, after };
+    });
+
+    expect(result.after.one).toBe(3);
+    expect(result.after.four).toBe(7);
+    // The slots are keyed '1'..'4', matching idWithinCategory on each path, and
+    // are what addPhilosophyRepeatablesBackInAfterRebirth replays.
+    expect(Object.keys(result.after.all).sort()).toEqual(['1', '2', '3', '4']);
+  });
+
+  test('choosing a philosophy produces no console or page errors', async ({ game }) => {
+    await game.withMods((m, philosophies) => {
+      for (const philosophy of philosophies) m.cg.setPlayerPhilosophy(philosophy);
+    }, PHILOSOPHIES);
+    await game.openTab(3);
+    await game.page.waitForTimeout(800);
+
+    expect(game.significantErrors()).toEqual([]);
+  });
+});
