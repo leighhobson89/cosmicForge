@@ -543,18 +543,25 @@
       "id": "rebirth",
       "title": "Rebirth",
       "group": "meta",
-      "status": "red",
+      "status": "amber",
       "risk": "high",
       "legacy": [],
       "summary": "The prestige reset. The single most destructive operation in the game if it misbehaves.",
       "tests": [
+        "Rebirth refuses a state it cannot complete rather than throwing part-way through the reset",
+        "A rebirth with a scanned destination completes, increments the run and rebuilds the star system around it",
+        "A refused rebirth leaves the run byte-for-byte unchanged and writes nothing to the console",
+        "The refusal is reported to the player through the catalogue, in the active language",
+        "The rebirth button is genuinely disabled — not merely coloured red — until a rebirth is both earned and completable",
         "Rebirth resets exactly the intended state and nothing more",
         "AP carryover matches the amount shown in the warning modal",
         "Achievements, perks and philosophy survive rebirth",
         "Run counter increments and statRun-gated content behaves correctly on run 1 vs later",
-        "Cancelling the rebirth modal changes nothing",
+        "Cancelling the rebirth modal changes nothing, and confirming it performs the rebirth",
+        "Closing the cosmic rip does not block a later rebirth",
         "Post-rebirth state is immediately playable with no stale UI"
-      ]
+      ],
+      "specCount": 10
     },
     {
       "id": "philosophies",
@@ -765,8 +772,13 @@
         "Tabs appear only once unlocked, in the correct order",
         "Collapsible sections toggle and persist state",
         "Tooltips appear with correct localized content",
-        "Attention indicators highlight the right tabs and clear when addressed"
-      ]
+        "Attention indicators highlight the right tabs and clear when addressed",
+        "Every option row on every tab clears its attention marker when opened, driven through the real click path rather than a list of ids",
+        "The tab badge clears once no option row on that tab still carries a marker",
+        "The black hole 🌀 state marker is left alone by the novelty sweep",
+        "The marker is positioned out of the layout flow, so a translated label keeps the full width of its control"
+      ],
+      "specCount": 12
     },
     {
       "id": "onboarding",

@@ -1,4 +1,4 @@
-import { createButton, createOptionRow, createTextElement, setButtonState, showNotification, drawSharedSpaceBackdrop, callPopupModal, showHideModal, playWinCinematic2, setupInfoTooltips } from './ui.js';
+import { createButton, createOptionRow, createTextElement, removeTabAttentionIfNoIndicators, setButtonState, showNotification, drawSharedSpaceBackdrop, callPopupModal, showHideModal, playWinCinematic2, setupInfoTooltips } from './ui.js';
 import {
     modalCosmicRipLocatedHeader,
     modalCosmicRipLocatedText,
@@ -59,7 +59,6 @@ import {
     getCosmicRipTechResearchDurations,
     getCosmicRipRipFoundUiSequenceStarted,
     setCosmicRipRipFoundUiSequenceStarted,
-    getCurrentOptionPane,
 } from './constantsAndGlobalVars.js';
 
 import {
@@ -98,15 +97,12 @@ const cosmicRipUpgradePriceName = (upgrade, slot) => {
 };
 
 export function drawTab8Content(heading, optionContentElement) {
-    // getCurrentOptionPane() is null until the player opens their first pane,
-    // and relocalizeAll() can reach this before that has happened.
-    const optionElement = document.getElementById((getCurrentOptionPane() ?? '').toLowerCase().replace(/\s(.)/g, (match, group1) => group1.toUpperCase()).replace(/\s+/g, '') + 'Option');
-    if (optionElement) {
-        const warningIcon = optionElement.querySelector('span.attention-indicator');
-        if (warningIcon && warningIcon.innerHTML.includes('⚠️')) {
-            warningIcon.remove();
-        }
-    }
+    // The row's own marker is cleared by the click that opened this pane — see
+    // clearOptionRowAttentionIndicator in ui.js. This tab was also the only one
+    // with no tab-badge sweep at all, so tab 8 kept its badge after every option
+    // had been visited.
+    removeTabAttentionIfNoIndicators('tab8');
+
     if (heading === 'Situation') {
         const headerRow = document.getElementById('headerContentTab8');
         if (headerRow) {

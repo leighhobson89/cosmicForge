@@ -1,4 +1,4 @@
-import { getImageUrls, getTimerRateRatio, getCurrencySymbol, getBuildingTypeOnOff, setPowerOnOff, getCurrentStarSystemWeatherEfficiency, getInfinitePower, getDemoBuild, getCurrentOptionPane, getLanguage } from './constantsAndGlobalVars.js';
+import { getImageUrls, getTimerRateRatio, getCurrencySymbol, getBuildingTypeOnOff, setPowerOnOff, getCurrentStarSystemWeatherEfficiency, getInfinitePower, getDemoBuild, getLanguage } from './constantsAndGlobalVars.js';
 import { localize, localizeMaterialName } from './localization.js';
 import { sellBuilding, toggleBuildingTypeOnOff, addOrRemoveUsedPerSecForFuelRate, setEnergyCapacity, gain, startUpdateTimersAndRates, addBuildingPotentialRate, addToResourceAllTimeStat, getOTypePowerPlantBoostMultiplierForCurrentSystem } from './game.js';
 import { setResourceDataObject, getResourceDataObject } from './resourceDataObject.js';
@@ -18,15 +18,8 @@ const energyUpgradeFuelName = (upgrade) => {
 };
 
 export function drawTab2Content(heading, optionContentElement) {
-    // getCurrentOptionPane() is null until the player opens their first pane,
-    // and relocalizeAll() can reach this before that has happened.
-    const optionElement = document.getElementById((getCurrentOptionPane() ?? '').toLowerCase().replace(/\s(.)/g, (match, group1) => group1.toUpperCase()).replace(/\s+/g, '') + 'Option');
-    if (optionElement) {
-        const warningIcon = optionElement.querySelector('span.attention-indicator');
-        if (warningIcon && warningIcon.innerHTML.includes('⚠️')) {
-            warningIcon.remove();
-        }
-    }
+    // The row's own marker is cleared by the click that opened this pane — see
+    // clearOptionRowAttentionIndicator in ui.js.
     removeTabAttentionIfNoIndicators('tab2');
     
     let toggleButtonText;

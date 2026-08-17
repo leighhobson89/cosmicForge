@@ -1,4 +1,4 @@
-import { getCurrentlyPillagingVoid, getTimeLeftUntilPillageVoidTimerFinishes, getTimeLeftUntilStarInvestigationTimerFinishes, getCurrentlyInvestigatingStar, getRocketUserName, setRocketUserName, setRocketDirection, getRocketDirection, getDestinationAsteroid, deferredActions, getSortAsteroidMethod, getAsteroidArray, setCheckRocketFuellingStatus, getCurrencySymbol, setRocketsFuellerStartedArray, getLaunchedRockets, getRocketsFuellerStartedArray, getCurrentlySearchingAsteroid, getTimeLeftUntilAsteroidScannerTimerFinishes, setDestinationAsteroid, getMiningObject, setAsteroidArray, getCurrentStarSystemWeatherEfficiency, getPlayerPhilosophy, getPhilosophyAbilityActive, getStatRun, getDemoBuild, setCurrentDestinationDropdownText, getCurrentOptionPane } from './constantsAndGlobalVars.js';
+import { getCurrentlyPillagingVoid, getTimeLeftUntilPillageVoidTimerFinishes, getTimeLeftUntilStarInvestigationTimerFinishes, getCurrentlyInvestigatingStar, getRocketUserName, setRocketUserName, setRocketDirection, getRocketDirection, getDestinationAsteroid, deferredActions, getSortAsteroidMethod, getAsteroidArray, setCheckRocketFuellingStatus, getCurrencySymbol, setRocketsFuellerStartedArray, getLaunchedRockets, getRocketsFuellerStartedArray, getCurrentlySearchingAsteroid, getTimeLeftUntilAsteroidScannerTimerFinishes, setDestinationAsteroid, getMiningObject, setAsteroidArray, getCurrentStarSystemWeatherEfficiency, getPlayerPhilosophy, getPhilosophyAbilityActive, getStatRun, getDemoBuild, setCurrentDestinationDropdownText } from './constantsAndGlobalVars.js';
 
 
 
@@ -43,22 +43,8 @@ const localizeAsteroidRarity = (rarity) => (ASTEROID_RARITY_KEYS[rarity]
 
 export function drawTab6Content(heading, optionContentElement) {
 
-    // getCurrentOptionPane() is null until the player opens their first pane,
-    // and relocalizeAll() can reach this before that has happened.
-    const optionElement = document.getElementById((getCurrentOptionPane() ?? '').toLowerCase().replace(/\s(.)/g, (match, group1) => group1.toUpperCase()).replace(/\s+/g, '') + 'Option');
-
-    if (optionElement) {
-
-        const warningIcon = optionElement.querySelector('span.attention-indicator');
-
-        if (warningIcon && warningIcon.innerHTML.includes('⚠️')) {
-
-            warningIcon.remove();
-
-        }
-
-    }
-
+    // The row's own marker is cleared by the click that opened this pane — see
+    // clearOptionRowAttentionIndicator in ui.js.
     removeTabAttentionIfNoIndicators('tab6');
 
 

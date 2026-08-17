@@ -428,7 +428,7 @@ import {
     getCosmicRipScanResultsBySectorIndex,
 } from './resourceDataObject.js';
 
-import { localize, localizeMaterialName } from './localization.js';
+import { localize, localizeRaw, localizeMaterialName } from './localization.js';
 import { onboardingChecks } from './onboarding.js';
 
 import {
@@ -522,6 +522,7 @@ import {
     updateAttentionIndicators,
     clearAllAttentionIndicators,
     appendAttentionIndicator,
+    removeAttentionIndicator,
     getStarDataAndDistancesToAllStarsFromSettledStar,
     callPopupModal,
     showHideModal,
@@ -3614,9 +3615,20 @@ function blackHoleUIChecks() {
     if (interactionDescriptionElement) {
         const researchPoints = getResourceDataObject('research', ['quantity']);
         const baseText = localize('blackHoleInteractionResearchPointsLabel', getLanguage());
-        const formattedBase = baseText.replace(/ /g, '&nbsp;');
         const formattedResearch = `<span class="green-ready-text">${formatNumber(researchPoints)}</span>`;
-        interactionDescriptionElement.innerHTML = `${formattedBase}&nbsp;${formattedResearch}`;
+        // Two things about this line:
+        //
+        // Only the gap before the number is non-breaking. Replacing every space
+        // with `&nbsp;` made the whole sentence one unbreakable token, which
+        // overflowed the panel in every language and worst of all in German.
+        //
+        // The wrapping span is load-bearing: this element carries
+        // `option-row-description d-flex`, so a bare text node and the value span
+        // become two *flex items*. Once the sentence was long enough to wrap —
+        // which German is — the value was laid out beside the wrapped text rather
+        // than after it, reading "…und verbessern 1.0B — Forschungspunkte:".
+        // One flex item restores normal inline flow.
+        interactionDescriptionElement.innerHTML = `<span>${baseText}&nbsp;${formattedResearch}</span>`;
     }
 
     if (getBlackHoleDiscovered()) {
@@ -3643,7 +3655,7 @@ function blackHoleUIChecks() {
             const price = getBlackHoleResearchPrice();
             const currentResearch = getResourceDataObject('research', ['quantity']);
 
-            researchButton.textContent = localize('buttonResearchBlackHoleWithPrice', getLanguage()).replace('{price}', formatNumber(price));
+            researchButton.textContent = localizeRaw('buttonResearchBlackHoleWithPrice', getLanguage()).replace('{price}', formatNumber(price));
             setButtonState(researchButton, { enabled: false, ready: false });
 
             if (currentResearch >= price) {
@@ -3752,12 +3764,18 @@ function blackHoleUIChecks() {
     const charging = getCurrentlyChargingBlackHole();
     const chargeReady = getBlackHoleChargeReady();
 
+    // 🌀 is the black hole's charge-ready marker, and only that. The row's
+    // removal used to drop *any* indicator on the row while charging or warping,
+    // while the tab's removal below is correctly limited to 🌀 — so an ordinary
+    // ⚠️ "not visited yet" marker was stripped from the row and left on the tab,
+    // giving the Galactic tab a badge with no option under it carrying one.
+    // Both sides now remove only what this function put there.
     if (researchDone && chargeReady && !timeWarping) {
         appendAttentionIndicator(rowElement, '🌀');
     } else if (charging || timeWarping) {
         const icon = rowElement.querySelector('.attention-indicator');
-        if (icon) {
-            icon.remove();
+        if (icon && icon.textContent?.trim() === '🌀') {
+            removeAttentionIndicator(rowElement);
         }
     }
 
@@ -3768,7 +3786,7 @@ function blackHoleUIChecks() {
         } else {
             const tabIcon = tab7.querySelector('.attention-indicator');
             if (tabIcon && tabIcon.textContent?.trim() === '🌀') {
-                tabIcon.remove();
+                removeAttentionIndicator(tab7);
             }
         }
     }
@@ -3872,7 +3890,7 @@ function blackHoleUIChecks() {
         const baseIncrement = getBlackHolePowerUpgradeIncrement();
         const increment = Number(currentPower) >= 50 ? 0.5 : baseIncrement;
         const nextPower = Number(currentPower) + Number(increment);
-        secondaryButton2.textContent = localize('buttonBlackHolePowerUpgrade', getLanguage()).replace('{current}', currentPower).replace('{next}', nextPower).replace('{price}', formatNumber(price));
+        secondaryButton2.textContent = localizeRaw('buttonBlackHolePowerUpgrade', getLanguage()).replace('{current}', currentPower).replace('{next}', nextPower).replace('{price}', formatNumber(price));
         const canAfford = currentResearch >= price;
         setButtonState(secondaryButton2, { enabled: canAfford, ready: canAfford });
     }
@@ -3889,7 +3907,7 @@ function blackHoleUIChecks() {
         }
 
         if (rechargeCapped) {
-            secondaryButton3.textContent = localize('buttonBlackHoleDurationAlwaysActive', getLanguage());
+            secondaryButton3.textContent = localizeRaw('buttonBlackHoleDurationAlwaysActive', getLanguage());
             setButtonState(secondaryButton3, { enabled: false, ready: false });
         } else {
             const price = getBlackHoleDurationPrice();
@@ -3897,7 +3915,7 @@ function blackHoleUIChecks() {
             const nextDurationMs = currentDurationMs + getBlackHoleDurationUpgradeIncrementMs();
             const currentDurationSeconds = Math.round(currentDurationMs / 1000);
             const nextDurationSeconds = Math.round(nextDurationMs / 1000);
-            secondaryButton3.textContent = localize('buttonBlackHoleDurationUpgrade', getLanguage()).replace('{current}', currentDurationSeconds).replace('{next}', nextDurationSeconds).replace('{price}', formatNumber(price));
+            secondaryButton3.textContent = localizeRaw('buttonBlackHoleDurationUpgrade', getLanguage()).replace('{current}', currentDurationSeconds).replace('{next}', nextDurationSeconds).replace('{price}', formatNumber(price));
             const canAfford = currentResearch >= price;
             setButtonState(secondaryButton3, { enabled: canAfford, ready: canAfford });
         }
@@ -3921,12 +3939,12 @@ function blackHoleUIChecks() {
         }
 
         if (rechargeCapped) {
-            secondaryButton4.textContent = localize('buttonBlackHoleRechargeMaxed', getLanguage()).replace('{seconds}', (minChargeMs / 1000).toFixed(0));
+            secondaryButton4.textContent = localizeRaw('buttonBlackHoleRechargeMaxed', getLanguage()).replace('{seconds}', (minChargeMs / 1000).toFixed(0));
             setButtonState(secondaryButton4, { enabled: false, ready: false });
         } else {
             const currentChargeSeconds = (currentChargeMs / 1000).toFixed(1);
             const nextChargeSeconds = (Math.max(minChargeMs, nextChargeMs) / 1000).toFixed(1);
-            secondaryButton4.textContent = localize('buttonBlackHoleRechargeUpgrade', getLanguage()).replace('{current}', currentChargeSeconds).replace('{next}', nextChargeSeconds).replace('{price}', formatNumber(price));
+            secondaryButton4.textContent = localizeRaw('buttonBlackHoleRechargeUpgrade', getLanguage()).replace('{current}', currentChargeSeconds).replace('{next}', nextChargeSeconds).replace('{price}', formatNumber(price));
 
             const canAfford = currentResearch >= price;
             setButtonState(secondaryButton4, { enabled: canAfford, ready: canAfford });
@@ -3940,7 +3958,7 @@ function blackHoleUIChecks() {
     if (chargeButton) {
         chargeButton.classList.toggle('visibility-hidden', alwaysOn);
         if (alwaysOn) {
-            chargeButton.textContent = 'ACTIVE';
+            chargeButton.textContent = localize('buttonBlackHoleChargeActive', getLanguage());
             setButtonState(chargeButton, {
                 enabled: false,
                 ready: false,
@@ -3960,7 +3978,7 @@ function blackHoleUIChecks() {
             });
             chargeButton.classList.add('green-ready-text');
         } else if (charging) {
-            chargeButton.textContent = 'Charging...';
+            chargeButton.textContent = localize('buttonBlackHoleCharging', getLanguage());
             setButtonState(chargeButton, {
                 enabled: false,
                 ready: false,
@@ -3970,7 +3988,7 @@ function blackHoleUIChecks() {
             chargeButton.classList.add('warning-orange-text');
             chargeButton.classList.remove('green-ready-text');
         } else if (chargeReady) {
-            chargeButton.textContent = 'ACTIVATE';
+            chargeButton.textContent = localize('buttonBlackHoleActivate', getLanguage());
             setButtonState(chargeButton, {
                 enabled: true,
                 ready: false,
@@ -3981,7 +3999,7 @@ function blackHoleUIChecks() {
             chargeButton.classList.remove('warning-orange-text');
             chargeButton.classList.remove('green-ready-text');
         } else {
-            chargeButton.textContent = 'Charge';
+            chargeButton.textContent = localize('buttonBlackHoleCharge', getLanguage());
             setButtonState(chargeButton, {
                 enabled: true,
                 ready: false,
@@ -9119,12 +9137,14 @@ function rebirthChecks() {
     }
 
     if (getCurrentOptionPane() === 'rebirth') {
-        if (getRebirthPossible()) {
-            document.querySelector('.rebirth-check').classList.remove('red-disabled-text');
-            document.querySelector('.rebirth-check').classList.add('green-ready-text');
-        } else {
-            document.querySelector('.rebirth-check').classList.add('red-disabled-text');
-            document.querySelector('.rebirth-check').classList.remove('green-ready-text');
+        const rebirthButton = document.querySelector('.rebirth-check');
+        if (rebirthButton) {
+            // setButtonState rather than the two classes alone: `red-disabled-text`
+            // only removes pointer events, so the button stayed programmatically
+            // clickable and rebirth() could still be entered from a state it
+            // cannot complete. This sets `disabled` as well.
+            const ready = rebirthPreconditionsMet();
+            setButtonState(rebirthButton, { enabled: ready, ready });
         }
     }
 }
@@ -15163,7 +15183,30 @@ export function addPermanentBuffsBackInAfterRebirth() {
     }
 }
 
+// The new run is rebuilt around the scanned destination system, so the
+// `stars.destinationStar` record is a hard precondition for rebirth. It is
+// written by the system scan on tab 5 and deleted by every rebirth, so any state
+// that reaches `rebirth()` without one — a rebirth attempted twice, or a run
+// where the destination was never scanned — cannot complete it.
+export function rebirthDestinationSystem() {
+    const destination = getStarSystemDataObject('stars', ['destinationStar'], true);
+    return destination?.starCode ? destination : null;
+}
+
+export function rebirthPreconditionsMet() {
+    return getRebirthPossible() && rebirthDestinationSystem() !== null;
+}
+
 export function rebirth() {
+    // Bail before anything is reset. Without this the run tears down as far as
+    // setupNewRunStarSystem(), which throws on the missing record and leaves the
+    // save half-wiped: resources cleared, run counter not incremented, and
+    // rebirthPossible still true so the next click repeats the damage.
+    if (!rebirthDestinationSystem()) {
+        showNotification(localize('notificationRebirthNoDestination', getLanguage()), 'error', 6000, 'special2');
+        return false;
+    }
+
     stopAutoSave();
     setAchievementFlagArray('rebirth', 'add');
 
@@ -15299,6 +15342,8 @@ export function rebirth() {
     }
 
     initializeAutoSave();
+
+    return true;
 }
 
 function resetUIElementsOnRebirth() {

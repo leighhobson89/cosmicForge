@@ -1,20 +1,15 @@
-import { getLastSellResourceCompoundDropdownOption, setLastSellResourceCompoundDropdownOption, getResourceSalePreview, getTimerRateRatio, getLanguage, getCurrentOptionPane } from './constantsAndGlobalVars.js';
+import { getLastSellResourceCompoundDropdownOption, setLastSellResourceCompoundDropdownOption, getResourceSalePreview, getTimerRateRatio, getLanguage } from './constantsAndGlobalVars.js';
 import { sellResource, fuseResource, gain, increaseResourceStorage, getBTypeAutoBuyerBoostForTier } from './game.js';
 import { getResourceDataObject, setResourceDataObject } from './resourceDataObject.js';
 import { removeTabAttentionIfNoIndicators, createTextElement, createToggleSwitch, createOptionRow, createDropdown, createButton, disableStorageNotificationActionIfShowing } from './ui.js';
 import { localize } from './localization.js';
 
 export function drawTab1Content(heading, optionContentElement) {
-    // getCurrentOptionPane() is null until the player opens their first pane,
-    // and relocalizeAll() can reach this before that has happened.
-    const optionElement = document.getElementById((getCurrentOptionPane() ?? '').toLowerCase().replace(/\s(.)/g, (match, group1) => group1.toUpperCase()).replace(/\s+/g, '') + 'Option');
-    if (optionElement) {
-        const warningIcon = optionElement.querySelector('span.attention-indicator');
-        if (warningIcon && warningIcon.innerHTML.includes('⚠️')) {
-            warningIcon.remove();
-        }
-    }
-    removeTabAttentionIfNoIndicators('tab1');   
+    // The row's own marker is cleared by the click that opened this pane — see
+    // clearOptionRowAttentionIndicator in ui.js. Only the tab badge is recomputed
+    // here, because a redraw can also follow a language change or a state change
+    // rather than a click.
+    removeTabAttentionIfNoIndicators('tab1');
 
     if (heading === 'Hydrogen') {
         let storagePrice = getResourceDataObject('resources', ['hydrogen', 'storageCapacity']);

@@ -19,6 +19,10 @@ Tabs, side-menu panes, hotkeys, tab ordering, collapsibles and tooltips.
 - [ ] Collapsible sections toggle and persist state
 - [ ] Tooltips appear with correct localized content
 - [ ] Attention indicators highlight the right tabs and clear when addressed
+- [ ] Every option row on every tab clears its attention marker when opened, driven through the real click path rather than a list of ids
+- [ ] The tab badge clears once no option row on that tab still carries a marker
+- [ ] The black hole 🌀 state marker is left alone by the novelty sweep
+- [ ] The marker is positioned out of the layout flow, so a translated label keeps the full width of its control
 
 ## Status meaning
 

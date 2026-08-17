@@ -342,9 +342,26 @@ language pairs and asserts the expected form after each.
 
 ---
 
-## 7. Five controls clip their translated label
+## 7. Five controls clip their translated label — ✅ FIXED
 
 **Severity: low — cosmetic, but present in four of five languages.**
+
+All five are fixed and the allowlist in
+`tests/e2e/localization/translated-ui.spec.js` is now **empty**, which is itself
+the assertion: any control clipped by a translation is a regression rather than a
+backlog item.
+
+- **`Sell All`** — the button and the heading beside it were split 20/80 of the
+  header row. The button now takes the width its label needs (`flex: 0 0 auto`,
+  capped at 45%) and the heading takes the remainder.
+- **Tab 2's side menu** — the three side-menu columns were an even 33/33/33 while
+  only the first carries a name; the other two are short right-aligned numbers.
+  The name column now takes 44% to the numbers' 28%, and `fitSideMenuLabels()` in
+  `ui.js` shrinks the few labels that still do not fit. German supplies single
+  unbreakable words — "Energiespeicher", "Solarkraftwerk" — that no column width
+  makes wrap, so a font step-down is the only thing short of breaking mid-word.
+
+The original description follows.
 
 ### `Sell All`
 
@@ -376,10 +393,9 @@ pre-existing layout bug rather than a translation one — which is why the spec
 measures clipping as a diff against the English layout of the same tab rather
 than in absolute terms.
 
-`tests/e2e/localization/translated-ui.spec.js` allowlists exactly these five ids
-and fails on any *other* control that a translation clips. This is the concrete
-worklist for `docs/localization/status.md` item 9; fixing one means deleting it
-from that allowlist.
+`tests/e2e/localization/translated-ui.spec.js` used to allowlist exactly these
+five ids and fail on any *other* control that a translation clips. The allowlist
+is now empty; see the note at the head of this entry.
 
 ---
 
@@ -437,3 +453,112 @@ visibly broken today.
 Removing the four characters from each of the five values closes it. The
 catalogue-integrity spec allowlists this one key and fails on any other
 unbalanced tag; the allowlist does not need to be emptied when the fix lands.
+
+---
+
+## 10. `rebirth()` tears the run down before checking it can finish — ✅ FIXED
+
+**Severity: high — corrupts the save, and the corrupted state invites a repeat.**
+
+### Reproduction
+
+1. Reach a state where a rebirth is possible and perform one.
+2. Without travelling to and scanning a new destination system, invoke
+   `rebirth()` again.
+
+```
+warning: Missing subKey: destinationStar        (resourceDataObject.js:3925)
+TypeError: Cannot read properties of undefined (reading 'mapSize')
+    at setupNewRunStarSystem  (resourceDataObject.js:3970)
+    at rebirth                (game.js:15253)
+```
+
+Thousands of follow-up `Missing subKey: undefined` warnings then stream from the
+frame loop, because the run is left half-reset.
+
+### Cause
+
+`rebirth()` rebuilds the new run from `starSystems.stars.destinationStar` — the
+record the tab 5 system scan copies in via `copyStarDataToDestinationStarField`.
+`setRebirthStarSystemToStarSystemDataObject`, at the end of every rebirth,
+replaces `starSystems.stars` wholesale, so that record is deleted by the very
+operation that consumes it. A second rebirth before a fresh scan therefore has
+nothing to build from.
+
+The throw lands *part-way through the teardown*: after `stopAutoSave()`, the tab
+reset and `setCurrentStarSystem(undefined)`, but before the run counter, the AP
+grant and `setRebirthPossible(false)`. So the save is left inconsistent **and**
+`rebirthPossible` is still true, which leaves the button green and every
+subsequent click repeating the damage.
+
+The button was also only cosmetically disabled: `rebirthChecks()` toggled the
+`red-disabled-text` class, whose `pointer-events: none` stops a mouse click but
+leaves `element.click()` and every non-pointer path working, and it keyed on
+`getRebirthPossible()` alone rather than on whether the rebirth could actually
+complete.
+
+### Fix
+
+- `rebirthDestinationSystem()` and `rebirthPreconditionsMet()` in `game.js` state
+  the precondition once.
+- `rebirth()` checks it before touching anything, shows
+  `notificationRebirthNoDestination` and returns `false`.
+- `rebirthChecks()` uses `setButtonState`, so the button carries a real
+  `disabled` attribute and reflects both halves of the precondition.
+
+Covered by `tests/e2e/rebirth/rebirth.spec.js` (10 specs), including that a
+refused rebirth leaves the run byte-for-byte unchanged and writes nothing to the
+console.
+
+---
+
+## 11. 25 of 59 side-menu options never cleared their attention marker — ✅ FIXED
+
+**Severity: medium — the ⚠️ "something new here" marker is the game's only
+prompt to visit an option, and a marker that never clears trains the player to
+ignore it.**
+
+### Reproduction
+
+Open any Cosmic Rip option (tab 8). Its ⚠️ stays, and so does the tab's badge,
+however many times the option is opened.
+
+### Cause
+
+Every `drawTab*Content` cleared the marker by rebuilding the row's element id
+from the current pane name:
+
+```js
+document.getElementById(
+    getCurrentOptionPane().toLowerCase()
+        .replace(/\s(.)/g, (m, g) => g.toUpperCase())
+        .replace(/\s+/g, '') + 'Option'
+)
+```
+
+That only works while every pane name camel-cases into its own id, and 25 of the
+59 pane names no longer did — the real ids are `#cosmicRipSituationOption`,
+`#cosmicRipNearSpaceScannerArrayOption`, `#cosmicRipCosmicRipOption`,
+`#blackholeOption`, `#tab9StoryOption`, `#powerPlant1Option` and so on. This is
+the same drift, in the same direction, as the ~20 broken relocalization ids that
+`docs/localization/status.md` item 5 found in `index.html`.
+
+Tabs 2, 4, 5, 6 and 7 hid the problem because `updateAttentionIndicators()` in the
+frame loop independently clears markers whose condition has gone false. Tabs 1, 3
+and 8 have no such sweep, so those were the tabs the bug was visible on. Tab 8
+also had no `removeTabAttentionIfNoIndicators` call at all, so its badge never
+cleared even once every row had.
+
+### Fix
+
+`clearOptionRowAttentionIndicator(clickedItem)` in `ui.js`, called from
+`selectRowCss` — which already receives the element that was clicked — removes the
+derivation entirely. The whole `.row-side-menu` is swept, because a row's label
+and its notation paragraphs share one click handler and the marker may sit on any
+of them. `🌀` is left alone: it reports the black hole's charge state rather than
+novelty, and `blackHoleUIChecks` re-derives it every frame.
+
+Covered by `tests/e2e/ui-navigation/attention-indicators.spec.js` (12 specs),
+which drives the real click path over every reachable option row on all eight
+content tabs rather than checking a list of ids — so a future row whose id does
+not match its pane name is caught rather than silently joining the backlog.

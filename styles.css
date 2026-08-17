@@ -1068,6 +1068,33 @@ p {
     padding-left: 10%;
 }
 
+/*
+ * The "something new here" marker on a tab or a side-menu row.
+ *
+ * It used to be an inline glyph appended to the label text, so it counted as
+ * part of the string being laid out: on a translated build the longer label plus
+ * the glyph no longer fitted, the glyph wrapped to a second line, and the marker
+ * ended up detached from the label it belongs to (German tab 4, 5 and 6 all did
+ * this). Taking it out of flow gives every label the full width of its control
+ * back and pins the marker to the control's corner in every language.
+ *
+ * `has-attention-indicator` is added by appendAttentionIndicator() so the marker
+ * positions against its own host whatever that host happens to be.
+ */
+.has-attention-indicator {
+    position: relative;
+}
+
+.attention-indicator {
+    position: absolute;
+    top: 1px;
+    right: 3px;
+    font-size: 0.65em;
+    line-height: 1;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
 .center-align {
     text-align: center;
 }
@@ -1903,9 +1930,20 @@ body {
     flex-direction: column;
 }
 
+/*
+ * The heading and the pane description. This is a flex item in a fixed-height
+ * column alongside the scrollable body, and it was shrinkable: the body pushed
+ * it from its 147px of content down to ~85px, and `overflow: hidden` silently
+ * cut the description in half. That happened in English too — a translated
+ * description, being longer, simply lost more of itself.
+ *
+ * The body below is `overflow: auto` and is the part meant to absorb the
+ * shortfall, so the header holds its content height instead.
+ */
 .container-item-menu-header {
     padding: 15px;
     height: auto;
+    flex: 0 0 auto;
     overflow: hidden;
     background-color: var(--container-bg-color);
     flex-direction: column;
@@ -1917,17 +1955,25 @@ body {
      align-items: center;
  }
 
+ /*
+  * The heading and its Sell All button. The split was a hard 80/20, which fits
+  * "Sell All" and nothing longer: "Alles Verkaufen" needs 135px of the 81px it
+  * was given and was cut off mid-word. The button now takes the width its label
+  * actually needs and the heading takes the remainder, so the pair works in
+  * every language without either being clipped.
+  */
  .container-item-menu-header.sidebar-intro-header #tab1Intro,
  .container-item-menu-header.sidebar-intro-header #tab4Intro {
-     flex: 0 0 80%;
-     max-width: 80%;
+     flex: 1 1 auto;
+     min-width: 0;
      margin: 0;
  }
 
  .container-item-menu-header.sidebar-intro-header #sellAllResourcesButton,
  .container-item-menu-header.sidebar-intro-header #sellAllCompoundsButton {
-     flex: 0 0 20%;
-     max-width: 20%;
+     flex: 0 0 auto;
+     max-width: 45%;
+     margin-left: 10px;
      padding: 6px 8px;
      font-size: 0.9rem;
      white-space: nowrap;
@@ -2547,6 +2593,27 @@ body {
 .row-side-menu-item {
     width: 33%;
     box-sizing: border-box;
+    min-width: 0;
+}
+
+/*
+ * The three columns of a side-menu row were an even 33/33/33, but only the
+ * first carries a name — the other two are short right-aligned numbers. Giving
+ * the name column the larger share is what lets a translated label fit at its
+ * authored size; fitSideMenuLabels() in ui.js only has to shrink the handful
+ * that still do not. Both columns keep a fixed share rather than sizing to
+ * content, so the numbers stay aligned down the panel.
+ */
+.row-side-menu-item:not(.right-align) {
+    width: 44%;
+}
+
+.row-side-menu-item.right-align {
+    width: 28%;
+}
+
+.row-side-menu-item .inset-paragraph {
+    padding-left: 8px;
 }
 
 .row-side-menu-item p[class*="tab"] {
@@ -2591,10 +2658,20 @@ cursor: pointer;
     border-color: var(--ready-text) !important;
 }
 
+/*
+ * The power-grid toggle lives in the 8% centre column, which leaves it about
+ * 82px. `.option-button` is `nowrap` + `overflow: hidden`, so "Power On" fitted
+ * by a hair and everything else was cut mid-word — "Strom A", "Désactiv",
+ * "Alimenta". Letting it wrap at its space costs a line and keeps every label
+ * readable; there is nothing else in that column competing for the height.
+ */
 #activateGridButton {
     margin-left: 10px;
     margin-right: 10px;
     border: solid 2px var(--text-color);
+    white-space: normal;
+    line-height: 1.15;
+    padding: 6px 4px;
 }
 
 .activate-grid-disabled-border {
@@ -2647,7 +2724,7 @@ cursor: pointer;
 .science-building-quantity,
 .autoBuyer-building-quantity,
 .toggle-switch-spacing,
-.full-screen-button
+.full-screen-button,
 #newsTickerSettingToggle,
 #launchPadAlreadyBoughtText,
 #spaceTelescopeAlreadyBoughtText,

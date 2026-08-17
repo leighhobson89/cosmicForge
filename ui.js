@@ -1763,6 +1763,53 @@ export function initialiseStaticButtonLabels() {
             element.innerText = localize(key, getLanguage());
         }
     });
+
+    fitSideMenuLabels();
+}
+
+
+/**
+ * Shrink one label's font until its text fits the box it was given, stopping at
+ * a floor rather than shrinking without limit.
+ *
+ * Used where the box cannot grow and the text cannot wrap out of trouble: a
+ * side-menu column is a fixed share of a fixed-width panel, and German supplies
+ * single words — "Energiespeicher", "Solarkraftwerk" — that are longer than the
+ * column and have nowhere to break. The alternative, breaking inside the word,
+ * is harder to read than a slightly smaller one.
+ *
+ * The authored size is restored first, so calling this repeatedly (every
+ * language change does) measures against the real size instead of ratcheting
+ * down from the last result.
+ */
+export function fitLabelToWidth(element, { minFontPx = 11 } = {}) {
+    if (!element) return;
+
+    element.style.fontSize = '';
+
+    // A hidden element measures 0 wide and would shrink to the floor for nothing.
+    if (element.clientWidth <= 0) return;
+    if (element.scrollWidth <= element.clientWidth + 1) return;
+
+    const authored = Number.parseFloat(getComputedStyle(element).fontSize);
+    if (!Number.isFinite(authored)) return;
+
+    for (let size = authored - 1; size >= minFontPx; size -= 1) {
+        element.style.fontSize = `${size}px`;
+        if (element.scrollWidth <= element.clientWidth + 1) return;
+    }
+}
+
+
+/**
+ * Fit every side-menu option label. Called after the static labels are written
+ * (boot and every language change) and on a tab change, which is when a label's
+ * text or its visibility can have changed.
+ */
+export function fitSideMenuLabels() {
+    document
+        .querySelectorAll('.row-side-menu-item p[class*="tab"]')
+        .forEach((label) => fitLabelToWidth(label));
 }
 
 
@@ -3196,6 +3243,39 @@ function buildFuelConsumptionLines(resourceKey, category, timerRatio) {
 });
 
 
+/**
+ * Clear the "new option" marker from the side-menu row a player just opened.
+ *
+ * Each `drawTab*Content` used to do this for itself by rebuilding the row's
+ * element id from the pane name — `'near space scanner array'` →
+ * `#nearSpaceScannerArrayOption` — which only works while every pane name
+ * camel-cases into its own id. 25 of the 59 pane names no longer did: the real
+ * ids are `#cosmicRipNearSpaceScannerArrayOption`, `#blackholeOption`,
+ * `#tab9StoryOption` and so on, so those rows kept their marker forever. All
+ * three Cosmic Rip options were in that group, which is why that tab never
+ * cleared at all.
+ *
+ * Working from the clicked element removes the derivation entirely. The whole
+ * row is swept rather than just the clicked `<p>`, because a row's label,
+ * notation and status paragraphs share one click handler and the marker may sit
+ * on any of them.
+ *
+ * Only `⚠️` is cleared. `🌀` marks the black hole's charge state rather than
+ * novelty; the frame loop owns it and re-adds it every tick, so removing it here
+ * would fight that.
+ */
+export function clearOptionRowAttentionIndicator(clickedItem) {
+    if (!clickedItem) return;
+    const row = clickedItem.closest?.('.row-side-menu') ?? clickedItem;
+
+    row.querySelectorAll('.attention-indicator').forEach((icon) => {
+        if (!icon.textContent?.includes('⚠️')) return;
+        icon.parentElement?.classList.remove('has-attention-indicator');
+        icon.remove();
+    });
+}
+
+
 export function removeTabAttentionIfNoIndicators(tabId) {
     const container = document.getElementById(`${tabId}ContainerGroup`);
     const tab = document.getElementById(tabId);
@@ -4388,13 +4468,18 @@ export function updateAttentionIndicators() {
 }
 
 
+// The indicator is positioned absolutely (see .attention-indicator in
+// styles.css) so it never counts towards the width of the label it marks. That
+// needs a positioned host, which `has-attention-indicator` supplies — added and
+// removed alongside the icon so no element is left positioned without one.
 export function appendAttentionIndicator(element, iconText = '⚠️') {
     if (!element || !(element instanceof HTMLElement)) return;
+    element.classList.add('has-attention-indicator');
+
     const existing = element.querySelector('.attention-indicator');
     if (existing) {
-        const desired = ` ${iconText}`;
-        if (existing.textContent !== desired) {
-            existing.textContent = desired;
+        if (existing.textContent !== iconText) {
+            existing.textContent = iconText;
         }
         return;
     }
@@ -4402,7 +4487,7 @@ export function appendAttentionIndicator(element, iconText = '⚠️') {
 
     const icon = document.createElement('span');
     icon.className = 'attention-indicator';
-    icon.textContent = ` ${iconText}`;
+    icon.textContent = iconText;
     element.appendChild(icon);
   }
 
@@ -4412,12 +4497,16 @@ export function removeAttentionIndicator(element) {
     if (icon) {
       icon.remove();
     }
+    element?.classList?.remove('has-attention-indicator');
   }
 
 
 export function clearAllAttentionIndicators() {
     const indicators = document.querySelectorAll('.attention-indicator');
-    indicators.forEach(indicator => indicator.remove());
+    indicators.forEach(indicator => {
+        indicator.parentElement?.classList.remove('has-attention-indicator');
+        indicator.remove();
+    });
 }
 
   
@@ -9504,10 +9593,35 @@ function normalizeTabName(tabName) {
 }
 
 
+/**
+ * The option-pane key a side-menu row stands for — the same string its click
+ * handler passes to `setCurrentOptionPane` and `setFirstAccessArray`, and
+ * therefore the key `showTabsUponUnlock` tests against `firstAccessArray` to
+ * decide whether the row still deserves its "something new here" marker.
+ *
+ * Rebuilding that key from the element id only works while every id camel-cases
+ * back into its own pane name, and 13 of them do not: `#cosmicRipSituationOption`
+ * is the pane `situation`, `#blackholeOption` is `black hole`, and every tab 9
+ * row is prefixed `tab9`. Those 13 never matched, so they were permanently
+ * "first access" and the sweep re-added their marker every time it ran —
+ * however many times the player opened them. All three Cosmic Rip options were
+ * in that group, which is why that tab never cleared.
+ *
+ * `data-option-pane` in index.html declares the key for those rows rather than
+ * guessing it, following the `data-loc` convention that closed the same drift
+ * for the localization ids. The derivation below stays as the fallback for the
+ * 39 rows whose ids do line up.
+ */
 function optionPaneKeyFromOptionElement(optionEl) {
     const id = String(optionEl?.id ?? '');
     if (!id.endsWith('Option')) {
         return '';
+    }
+
+
+    const declared = optionEl?.dataset?.optionPane;
+    if (declared) {
+        return declared;
     }
 
 
@@ -10392,7 +10506,12 @@ function initializeTabEventListeners() {
         const [tabClass, optionClass] = tabClassName.split('.');
         if (!tabClass || !optionClass) return;
 
-        
+        // Opening a pane is what makes it no longer new, so the marker is cleared
+        // here, from the row that was actually clicked, and the tab's own badge is
+        // recomputed from what is left.
+        clearOptionRowAttentionIndicator(clickedItem);
+        removeTabAttentionIfNoIndicators(tabClass);
+
         document.querySelectorAll('.row-side-menu').forEach(i => i.classList.remove('row-side-menu-selected'));
         clickedItem.parentElement?.parentElement?.classList.add('row-side-menu-selected');
     }
@@ -10429,6 +10548,11 @@ function initializeTabEventListeners() {
                 setCurrentTab([dynamicIndex, tabName]);
                 highlightActiveTab(tab.textContent);
                 setGameState(getGameVisibleActive());
+
+                // A side-menu label can only be measured once its row is on
+                // screen, and rows unhide as the run unlocks them, so the fit is
+                // re-run whenever a tab is brought forward.
+                fitSideMenuLabels();
 
 
                 let content = tabName;

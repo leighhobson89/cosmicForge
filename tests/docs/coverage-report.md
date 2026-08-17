@@ -6,18 +6,18 @@ _Generated from `functional-areas.json`. Re-run `node tests/docs/generate-report
 
 | | Areas | Share |
 |---|---:|---:|
-| 🔴 Red — no coverage | 20 | 47% |
-| 🟠 Amber — partial / smoke only | 7 | 16% |
+| 🔴 Red — no coverage | 19 | 44% |
+| 🟠 Amber — partial / smoke only | 8 | 19% |
 | 🟢 Green — comprehensive | 16 | 37% |
 | **Total functional areas** | **43** | |
 
-277 individual test cases are identified across all areas. **264 Playwright specs are implemented and passing** across 16 areas. The 7 amber areas are covered only by legacy smoke tests, which prove a path exists but assert almost nothing about branches, boundaries or failure modes.
+287 individual test cases are identified across all areas. **286 Playwright specs are implemented and passing** across 18 areas. The 8 amber areas are covered only by legacy smoke tests, which prove a path exists but assert almost nothing about branches, boundaries or failure modes.
 
 Run them with `npm run test:e2e` (all areas) or `node tests/run-e2e.mjs <area>`. Each area writes its own HTML report to `test-reports/e2e/<area>/index.html`, with a summary index at `test-reports/e2e/index.html`.
 
 ## Highest priority — high risk, zero coverage
 
-These 7 areas would each cause serious, often unrecoverable player harm if they regressed, and none has any automated test today.
+These 6 areas would each cause serious, often unrecoverable player harm if they regressed, and none has any automated test today.
 
 | Area | Group | Why it matters |
 |---|---|---|
@@ -25,7 +25,6 @@ These 7 areas would each cause serious, often unrecoverable player harm if they 
 | [Save Migration](areas/save-migration.md) | Foundation | The patches.js version ladder that upgrades old saves. The best-engineered code in the project and entirely untested. |
 | [Starship](areas/starship.md) | Interstellar | Starship construction, fitting, fuelling and interstellar travel to a chosen destination. |
 | [Fleet Hangar](areas/fleet-hangar.md) | Interstellar | Fleet construction, ship classes and the aggregate strength calculation that feeds battle. |
-| [Rebirth](areas/rebirth.md) | Meta Progression | The prestige reset. The single most destructive operation in the game if it misbehaves. |
 | [Philosophies](areas/philosophies.md) | Meta Progression | The four permanent player paths chosen once and affecting the whole account thereafter. |
 | [Performance & Frame Budget](areas/performance.md) | Presentation & Shell | Frame-loop cost and long-session stability. Not a feature, but the area most likely to degrade silently as content grows. |
 
@@ -91,7 +90,7 @@ Cross-run systems. Bugs here destroy player progress permanently, which makes th
 | 🔴 | [Galactic Market](areas/galactic-market.md) | Medium | 6 | — | — |
 | 🟢 | [Ascendency Points & Perks](areas/ascendency.md) | High | 6 | **12** | — |
 | 🔴 | [Galactic Casino](areas/galactic-casino.md) | Medium | 7 | — | — |
-| 🔴 | [Rebirth](areas/rebirth.md) | High | 6 | — | — |
+| 🟠 | [Rebirth](areas/rebirth.md) | High | 12 | **10** | — |
 | 🔴 | [Philosophies](areas/philosophies.md) | High | 5 | — | — |
 | 🟢 | [Achievements](areas/achievements.md) | Low | 6 | **9** | — |
 
@@ -124,7 +123,7 @@ Navigation, tutorial, formatting and build variants. Highly visible, cheap to te
 | Status | Area | Risk | Planned | Specs | Existing coverage |
 |:--:|---|:--:|--:|--:|---|
 | 🔴 | [Number Notation](areas/notation.md) | Medium | 6 | — | — |
-| 🟠 | [UI Navigation](areas/ui-navigation.md) | Medium | 7 | — | launch-app.test.js |
+| 🟠 | [UI Navigation](areas/ui-navigation.md) | Medium | 11 | **12** | launch-app.test.js |
 | 🟠 | [Onboarding & Tutorial](areas/onboarding.md) | High | 7 | — | launchAndOnboard.test.js |
 | 🟢 | [Cosmicopedia & Help](areas/cosmicopedia.md) | Low | 5 | **6** | — |
 | 🟢 | [Demo Build Lockdowns](areas/demo-build.md) | High | 6 | **13** | — |

@@ -7,24 +7,28 @@ Status as of HEAD `a193a44` + in-session work. Five languages: **en, es, de, it,
 | | Items | Share |
 |---|---:|---:|
 | 🟢 Done | 9 | 90% |
-| 🟠 Partial | 0 | 0% |
-| 🔴 Not started | 1 | 10% |
+| 🟠 Partial | 1 | 10% |
+| 🔴 Not started | 0 | 0% |
 | **Total tracked items** | **10** | |
 
-The catalogue is **2,587 keys × 5 languages, complete parity, zero keys referenced in code that are
+The catalogue is **2,591 keys × 5 languages, complete parity, zero keys referenced in code that are
 missing from the JSON, and zero keys that nothing in the source can reach**. Item 5 — the string
 extraction — is **done**: every player-facing literal in every shipped source file resolves through
 the catalogue. Item 7 — the checker — is **done** too: `validateLocalization.cjs` now resolves the
 five constructed key families from source, which is what finally made the 20 genuinely dead keys
-safe to delete, and it gates every build. The only item left is the German layout pass (item 9),
-which is a human play-through rather than an engineering task.
+safe to delete, and it gates every build.
+
+Item 9, the layout pass, moved from 🔴 to 🟠 this session: the measurable half is closed — **no
+control anywhere is clipped by its translated label in any language**, which was five controls
+before, and the ratchet that tracked them is now an absolute. What is left is the part no automated
+measure catches: wrapping quality, overlapping absolute positioning and truncated modals, which
+still want a human play-through in German.
 
 The area has **91 automated specs** in `tests/e2e/localization/`, covering catalogue integrity, the
 resolution chain, runtime switching, tab identity and intro pages, the reverse lookup, the extraction
 backlog, the frame-loop cost labels, and a five-language sweep of every tab at a late-game state. All
-91 pass, as does the whole **264-spec** E2E suite. The remaining open item is held in place by
-*ratchets* in those specs — a recorded baseline that may fall but must never rise. See
-[Test coverage](#test-coverage) at the foot of this document.
+91 pass. The remaining open item is held in place by *ratchets* in those specs — a recorded baseline
+that may fall but must never rise. See [Test coverage](#test-coverage) at the foot of this document.
 
 ## Status at a glance
 
@@ -38,7 +42,7 @@ backlog, the frame-loop cost labels, and a five-language sweep of every tab at a
 | 6 | [Remove eval() from interpolation](#6-remove-eval-from-interpolation-path) | 🟢 Done | — |
 | 7 | [Harden the key checker](#7-harden-the-key-checker) | 🟢 Done | — |
 | 8 | [Translation quality pass](#8-translation-quality-pass) | 🟢 Done | — |
-| 9 | [Layout under translation](#9-layout-under-translation) | 🔴 Not started | Medium — German runs 20–35% longer than English |
+| 9 | [Layout under translation](#9-layout-under-translation) | 🟠 Partial | Low — no control is clipped in any language; wrapping quality still wants a human pass |
 | 10 | [Frame-loop tab gates compare English names](#10-frame-loop-tab-gates-compare-english-names) | 🟢 Done | — |
 
 ---
@@ -483,7 +487,9 @@ The fuel tuples were the piece the previous revision of this document missed. It
 price tuple, only as `fuel: ['solar', 0, 'resources']` on the solar power plant, so a resolver that
 read price tuples alone still reported the key as dead.
 
-**Twenty keys turned out to be genuinely dead, and were deleted** (2,607 → 2,587). The previous
+**Twenty keys turned out to be genuinely dead, and were deleted** (2,607 → 2,587; four keys have been
+added since — one for the rebirth precondition notice and three for the Black Hole charge button's
+frame-loop states — giving the current 2,591). The previous
 revision assumed all 59 were explained; resolving the families showed that two of the six listed
 "families" were not constructions at all:
 
@@ -535,37 +541,104 @@ untranslated placeholders.
 
 ## 9. Layout under translation
 
-**🔴 Not started**
+**🟠 Partial**
 
-German runs 20–35% longer than English. The UI uses fixed-width panels and hand-placed `<br>`
-breaks throughout, so overflow and bad wrapping will surface there first. Needs a full session
-played in German, checking modals, tooltips, sidebar labels and the tech tree.
+German runs 20–35% longer than English, and the UI is built from fixed-width panels and fixed
+percentage columns, so overflow and bad wrapping surface there first.
 
-The automated sweep gives a starting point and a floor. Across all five languages and all nine
-tabs, at a late-game state:
+Across all five languages and all nine tabs, at a late-game state:
 
-- **No tab overflows the viewport horizontally** in any language. That is asserted absolutely.
-- **Five** controls are clipped by their translated label and are not clipped in English:
-  - `#sellAllResourcesButton` and `#sellAllCompoundsButton`, both laid out at a fixed 81px against
-    103px of content in es/it/fr and 135px in de.
-  - `#energyOption`, `#powerPlant2Option` and `#powerPlant3Option` in tab 2's side menu. These are
-    new to the list only because they now translate at all — they were among the ~20 labels the old
-    relocalization block looked up under ids that do not exist, so they rendered in English and
-    always fitted. "Energiespeicher", "Solarkraftwerk" and "Fortschrittliches Kraftwerk" all
-    overflow the fixed side-menu width.
+- **No tab overflows the viewport horizontally** in any language.
+- **No control is clipped by its translated label.** This was five controls; all five are fixed and
+  `KNOWN_TRANSLATION_OVERFLOW` in `translated-ui.spec.js` is now an empty list, which is itself the
+  assertion. See `tests/docs/known-issues.md` #7.
 
-  See `tests/docs/known-issues.md` #7.
+### What was fixed
+
+Four causes, none of them specific to German — in each case English was living inside the same
+mistake with just enough room to get away with it.
+
+**The `<br>` tags visible on the Black Hole buttons.** `localize()` substitutes `\n` → `<br>` for
+its `innerHTML` callers, and six frame-loop writes in `blackHoleUIChecks` put that result into
+`textContent`, so the players saw the literal tag. `localizeRaw()` now returns the catalogue value
+untouched and those six sites use it, which also makes the `white-space: pre-wrap` already on
+`.option-button--wrap` mean something: the buttons render as real multi-line labels. The research
+button gained that class, because `.option-button` is `nowrap` and the frame loop swaps its label
+for a two-line one.
+
+**Three columns adding up to 105%.** An option row is `label 20% + input 50% + description 35%`,
+plus a 30px margin and a 10% left padding on the description. The row absorbed the excess by letting
+the input column's children spill out of their own box and slide under the description text — which
+is the price label sitting on top of the auto-buy switch on the resource sell rows, reported in
+German and equally present in English. The description inset is now a fixed 20px, and the input
+column is `flex-wrap`, so anything still too wide drops to a second line inside its own column
+rather than over its neighbour.
+
+**A header that could be squashed.** `.container-item-menu-header` holds the heading and the pane
+description, is `overflow: hidden`, and was shrinkable: the scrollable body below pushed it from its
+147px of content down to ~85px and silently cut the description in half — in every language, with
+German simply losing more of itself. It is now `flex: 0 0 auto`; the body, which is `overflow:
+auto`, absorbs the shortfall as it was always meant to.
+
+**Two fixed shares that ignored their content.** The `Sell All` buttons were pinned to 20% of their
+header row (81px against the 135px "Alles Verkaufen" needs) and now size to their label, with the
+heading taking the remainder. Side-menu rows were an even 33/33/33 while only the first column
+carries a name; it now takes 44% to the numbers' 28%.
+
+### The two ideas from the layout review
+
+Both were worth doing, and both are in.
+
+**The attention marker is now out of the layout flow.** `.attention-indicator` was an inline glyph
+appended to the label text, so it counted as part of the string being laid out — a translated tab
+name plus the glyph no longer fitted, the glyph wrapped to a second line, and the marker ended up
+visually detached from the label it belongs to (German tabs 4, 5 and 6 all did this). It is now
+`position: absolute` in the host's top-right corner, with `appendAttentionIndicator()` adding a
+`has-attention-indicator` class so the host is positioned whatever it happens to be. Every label
+gets the full width of its control back, which is where most of the recovered space came from.
+
+**Automatic text shrinking, where structure cannot help.** `fitLabelToWidth()` in `ui.js` steps a
+label's font down until it fits its own box, with an 11px floor, restoring the authored size first
+so repeated calls do not ratchet. It is applied to side-menu labels by `fitSideMenuLabels()`, called
+from `initialiseStaticButtonLabels()` (boot and every language change) and on a tab change, which is
+when a label's text or its visibility can have changed. This is deliberately the *last* resort, used
+only where the box cannot grow and the text cannot wrap out of trouble: German supplies single
+unbreakable words — "Energiespeicher", "Solarkraftwerk" — that no column width makes wrap, and a
+slightly smaller word reads better than one broken in half.
+
+### What is left
+
+The sweep only catches *clipping* (`scrollWidth > clientWidth`). Wrapping quality, overlapping
+absolute positioning and truncated modals still need a human play-through in German, checking
+modals, tooltips and the tech tree. That is what keeps this item 🟠 rather than 🟢.
 
 The category-header stranding described under item 5 is closed: those headers are now keyed by
 `data-loc`, and a walk over all twenty ordered language pairs passes.
 
-`tests/e2e/localization/translated-ui.spec.js` measures clipping as a diff against the English
-layout of the same tab, so pre-existing layout bugs cancel out and only translation-caused overflow
-is reported. The two known ids are allowlisted; anything else fails. Fixing them means deleting
-them from that allowlist.
+### Four more untranslated frame-loop literals, found in the same pass
 
-Note that this only catches *clipping* (`scrollWidth > clientWidth`). Bad wrapping, overlapping
-absolute positioning and truncated modals still need a human pass.
+The Black Hole charge button is written by the frame loop in four states, and all four were English
+literals — `ACTIVE`, `Charging...`, `ACTIVATE`, `Charge`. They are the same class the four
+"misses found in play" under item 5 belong to: written over the draw function's work a frame later,
+so no sweep of the draw functions could have caught them. `buttonBlackHoleChargeActive`,
+`buttonBlackHoleCharging` and `buttonBlackHoleActivate` were added across all five languages, and
+the fourth state now reuses the existing `buttonBlackHoleCharge`.
+
+Two more layout bugs went with them, both on the Black Hole interaction description:
+
+- It ran `baseText.replace(/ /g, '&nbsp;')`, making the whole sentence a single unbreakable token
+  that overflowed the panel in every language. Only the gap before the number needs to be
+  non-breaking.
+- That element carries `option-row-description d-flex`, so the sentence and the research-point value
+  were two *flex items*, not inline text. Once the sentence was long enough to wrap — which German
+  is — the value was laid out beside the wrapped text rather than after it, reading
+  "…und verbessern 1.0B — Forschungspunkte:". Wrapping both in one `<span>` restores inline flow.
+
+Separately, `#activateGridButton` — the power-grid toggle in tab 2's 8% centre column — was
+`nowrap` with `overflow: hidden` in about 82px. "Power On" fitted by a hair and every other language
+was cut mid-word ("Strom A", "Désactiv", "Alimenta"). It now wraps at its space. This one is *not*
+counted by the clipping sweep, because it clipped in English too and the sweep measures each
+language against English.
 
 ---
 
@@ -628,18 +701,19 @@ translated.
 8. ~~`ui.js`, `game.js` and the support files~~ 🟢 (item 5, second half — 452 keys)
 9. ~~Remove the `eval()`~~ 🟢 (item 6)
 10. ~~Harden the checker and wire it into the build~~ 🟢 (item 7)
-11. ~~Translation quality pass~~ 🟢 (item 8), then the German layout pass (item 9).
+11. ~~Translation quality pass~~ 🟢 (item 8)
+12. ~~The measurable half of the layout pass~~ 🟢 (item 9 — clipping is now zero and asserted absolutely)
 
-Only item 9 is left, and it is not an engineering task: it is a human play-through in German checking
+What is left of item 9 is not an engineering task: it is a human play-through in German checking
 wrapping and truncation. Item 4's remaining note — eagerly refreshing inactive tabs and open modals on
 a language change — is the natural companion to it.
 
 ## Test coverage
 
 91 specs in `tests/e2e/localization/`, all passing. Run them with
-`node tests/run-e2e.mjs localization`. The whole E2E suite — 264 specs across 16 areas — also passes;
-run it with `node tests/run-e2e.mjs`. The catalogue checker can also be run on its own, without
-Playwright, with `bun run check:localization` (add `:report` for the full key classification).
+`node tests/run-e2e.mjs localization`. Run the whole E2E suite with `node tests/run-e2e.mjs`. The
+catalogue checker can also be run on its own, without Playwright, with `bun run check:localization`
+(add `:report` for the full key classification).
 
 | File | Specs | Covers |
 |---|--:|---|
@@ -654,14 +728,19 @@ Playwright, with `bun run check:localization` (add `:report` for the full key cl
 
 ### Ratchets
 
-Three assertions are deliberately baselines rather than absolutes, so the remaining item can be closed
+Two assertions are deliberately baselines rather than absolutes, so the remaining item can be closed
 incrementally. Each may fall; none may rise without a reason recorded in the spec.
 
 | Ratchet | Baseline | Item |
 |---|--:|---|
 | Values identical to English | es 50, de 66, it 50, fr 79 | 8 |
 | Unannotated visible text in `index.html` | 74 (debug windows and modal placeholders) | 5 |
-| Controls clipped by translation but not by English | 5 | 9 |
+
+**The clipping ratchet became an absolute this session.** It peaked at 5 —
+`sellAllResourcesButton`, `sellAllCompoundsButton`, `energyOption`, `powerPlant2Option`,
+`powerPlant3Option` — and `KNOWN_TRANSLATION_OVERFLOW` in `translated-ui.spec.js` is now an empty
+list. All five were fixed rather than tolerated; see item 9 and `tests/docs/known-issues.md` #7. A
+control appearing there again is a regression, not a backlog item.
 
 **Two ratchets became absolutes when item 7 landed**, and are recorded here so the change is not
 mistaken for a lost assertion:

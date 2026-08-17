@@ -52,28 +52,29 @@ const TAB_HEADERS = [
 /**
  * Controls already known to be clipped by their translated label, allowlisted so
  * the sweep below can stay strict about everything else. Both are `Sell All`
- * buttons on a fixed 81px width; English fits, every other language does not
- * (German is worst at 135px of content). See docs/localization/status.md item 9
- * and tests/docs/known-issues.md #7.
+ * Controls allowed to be clipped by their translated label. **This list is now
+ * empty, and that is the assertion** — the ratchet became an absolute when the
+ * five entries it used to hold were fixed rather than tolerated:
+ *
+ *  - `sellAllResourcesButton` / `sellAllCompoundsButton` were pinned to a hard
+ *    20% of their header row — 81px against the 135px "Alles Verkaufen" needs.
+ *    The button now takes the width its label needs and the heading beside it
+ *    takes the remainder.
+ *  - `energyOption`, `powerPlant2Option` and `powerPlant3Option` sat in a
+ *    side-menu column that was an even third of the panel while carrying the
+ *    only real text in the row. The name column now takes 44% to the numbers'
+ *    28%, and `fitSideMenuLabels()` shrinks the few labels that still do not fit
+ *    — German supplies single unbreakable words ("Energiespeicher") that no
+ *    amount of column width makes wrap.
+ *
+ * Anything appearing here again is a regression, not a backlog item. See
+ * docs/localization/status.md item 9 and tests/docs/known-issues.md #7.
  *
  * `activateGridButton` is deliberately *not* here: it clips in English too, so
  * the language-relative diff this spec performs never attributes it to
  * translation.
  */
-const KNOWN_TRANSLATION_OVERFLOW = [
-  'sellAllResourcesButton',
-  'sellAllCompoundsButton',
-  // Tab 2's side menu. These three only started clipping once they began
-  // translating at all: the old relocalization block looked them up under ids
-  // that do not exist in index.html (`energyStorageOption` rather than
-  // `energyOption`, and so on), so they rendered in English in every language
-  // and always fitted. German is the worst case — "Energiespeicher",
-  // "Solarkraftwerk" and "Fortschrittliches Kraftwerk" all overflow the fixed
-  // side-menu width.
-  'energyOption',
-  'powerPlant2Option',
-  'powerPlant3Option'
-];
+const KNOWN_TRANSLATION_OVERFLOW = [];
 
 const capitalise = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 

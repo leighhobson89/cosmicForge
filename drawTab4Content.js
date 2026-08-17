@@ -1,4 +1,4 @@
-import { getCompoundCreateDropdownRecipeText, getLastSellResourceCompoundDropdownOption, setLastSellResourceCompoundDropdownOption, getImageUrls, getTimerRateRatio, getCompoundSalePreview, getCompoundCreatePreview, setCreateCompoundPreview, setAchievementFlagArray, getCurrencySymbol, getLanguage, getCurrentOptionPane } from './constantsAndGlobalVars.js';
+import { getCompoundCreateDropdownRecipeText, getLastSellResourceCompoundDropdownOption, setLastSellResourceCompoundDropdownOption, getImageUrls, getTimerRateRatio, getCompoundSalePreview, getCompoundCreatePreview, setCreateCompoundPreview, setAchievementFlagArray, getCurrencySymbol, getLanguage } from './constantsAndGlobalVars.js';
 
 import { increaseResourceStorage, createCompound, sellCompound, gain, addToResourceAllTimeStat } from './game.js';
 
@@ -19,15 +19,8 @@ export function drawTab4Content(heading, optionContentElement) {
         }
     };
 
-    // getCurrentOptionPane() is null until the player opens their first pane,
-    // and relocalizeAll() can reach this before that has happened.
-    const optionElement = document.getElementById((getCurrentOptionPane() ?? '').toLowerCase().replace(/\s(.)/g, (match, group1) => group1.toUpperCase()).replace(/\s+/g, '') + 'Option');
-        if (optionElement) {
-            const warningIcon = optionElement.querySelector('span.attention-indicator');
-            if (warningIcon && warningIcon.innerHTML.includes('⚠️')) {
-                warningIcon.remove();
-            }
-        }
+    // The row's own marker is cleared by the click that opened this pane — see
+    // clearOptionRowAttentionIndicator in ui.js.
         removeTabAttentionIfNoIndicators('tab4');
 
         if (heading === 'Diesel') {

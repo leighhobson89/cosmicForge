@@ -111,18 +111,26 @@ export async function initLocalization(language) {
     return available;
 }
 
-function localize(key, language) {
+// The catalogue value exactly as authored, with real newlines left alone. Use
+// this wherever the result is written to `textContent` / `innerText` on an
+// element that wraps (`white-space: pre-wrap`); `localize()` would hand those
+// call sites a literal `<br>` to display.
+function localizeRaw(key, language) {
     const data = getLocalization();
     if (!data || !data[language]) {
         console.error(`Localization data not loaded or language '${language}' not found`);
         return key;
     }
-    let localizedString = data[language][key];
+    const localizedString = data[language][key];
     if (!localizedString) return key;
 
-    localizedString = localizedString.replace(/\n/g, '<br>');
-
     return localizedString;
+}
+
+function localize(key, language) {
+    const localizedString = localizeRaw(key, language);
+
+    return localizedString.replace(/\n/g, '<br>');
 }
 
 // Build the translated-name -> internal-key map for one language, once. Cached
@@ -175,6 +183,7 @@ function reverseLocalizeForCompounds(localizedValue, language) {
 
 export {
     localize,
+    localizeRaw,
     localizeMaterialName,
     reverseLocalizeForCompounds,
     LANGUAGE_STORAGE_KEY,

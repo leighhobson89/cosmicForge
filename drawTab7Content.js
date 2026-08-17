@@ -41,7 +41,6 @@ import {
     getBlackHoleAlwaysOn,
     setGalacticCasinoPurchaseItem,
     getCurrentTheme,
-    getCurrentOptionPane,
     getPlayerPhilosophy,
     getUnlockedResourcesArray,
     getUnlockedCompoundsArray,
@@ -125,15 +124,8 @@ const tradeableMaterialOptions = () => TRADEABLE_MATERIALS.map(({ value, type })
 const materialDisplayName = (key, type) => localizeMaterialName(key, type, getLanguage());
 
 export function drawTab7Content(heading, optionContentElement) {
-    // getCurrentOptionPane() is null until the player opens their first pane,
-    // and relocalizeAll() can reach this before that has happened.
-    const optionElement = document.getElementById((getCurrentOptionPane() ?? '').toLowerCase().replace(/\s(.)/g, (match, group1) => group1.toUpperCase()).replace(/\s+/g, '') + 'Option');
-    if (optionElement) {
-        const warningIcon = optionElement.querySelector('span.attention-indicator');
-        if (warningIcon && warningIcon.innerHTML.includes('⚠️')) {
-            warningIcon.remove();
-        }
-    }
+    // The row's own marker is cleared by the click that opened this pane — see
+    // clearOptionRowAttentionIndicator in ui.js.
     removeTabAttentionIfNoIndicators('tab7');
 
     if (heading === 'Rebirth') {
@@ -1986,7 +1978,9 @@ export function drawTab7Content(heading, optionContentElement) {
 
         const blackHoleButton1 = createButton({
             text: localize('buttonResearchBlackHole', getLanguage()),
-            classNames: ['id_blackHoleResearchButton', 'option-button', 'red-disabled-text', 'wide-option-button'],
+            // --wrap because the frame loop swaps this label for the two-line
+            // `buttonResearchBlackHoleWithPrice`, and `.option-button` is nowrap.
+            classNames: ['id_blackHoleResearchButton', 'option-button', 'red-disabled-text', 'wide-option-button', 'option-button--wrap'],
             onClick: () => {
                 if (getBlackHoleResearchDone()) {
                     return;
