@@ -84,6 +84,36 @@ import { sfxPlayer } from './audioManager.js';
 import { capitaliseString, capitaliseWordsWithRomanNumerals } from './utilityFunctions.js';
 import { modalRebirthText, modalRebirthHeader, getStarNames, getStarTypeByName, getNewsTickerContent } from './descriptions.js';
 import { timerManagerDelta } from './timerManagerDelta.js';
+import { localize, localizeMaterialName } from './localization.js';
+import { getLanguage } from './constantsAndGlobalVars.js';
+
+// The market and casino dropdowns offer the same 14 tradeable materials. Their
+// display names come from the catalogue, so the list is built from the internal
+// keys rather than repeating the English names three times.
+const TRADEABLE_MATERIALS = [
+    { value: 'hydrogen', type: 'resources' },
+    { value: 'helium', type: 'resources' },
+    { value: 'carbon', type: 'resources' },
+    { value: 'neon', type: 'resources' },
+    { value: 'oxygen', type: 'resources' },
+    { value: 'sodium', type: 'resources' },
+    { value: 'silicon', type: 'resources' },
+    { value: 'iron', type: 'resources' },
+    { value: 'diesel', type: 'compounds' },
+    { value: 'glass', type: 'compounds' },
+    { value: 'steel', type: 'compounds' },
+    { value: 'concrete', type: 'compounds' },
+    { value: 'water', type: 'compounds' },
+    { value: 'titanium', type: 'compounds' }
+];
+
+const tradeableMaterialOptions = () => TRADEABLE_MATERIALS.map(({ value, type }) => ({
+    value,
+    text: localizeMaterialName(value, type, getLanguage()),
+    type
+}));
+
+const materialDisplayName = (key, type) => localizeMaterialName(key, type, getLanguage());
 
 export function drawTab7Content(heading, optionContentElement) {
     // getCurrentOptionPane() is null until the player opens their first pane,
@@ -101,10 +131,10 @@ export function drawTab7Content(heading, optionContentElement) {
         const rebirthRow = createOptionRow({
             labelId: 'rebirthRow',
             renderNameABs: null,
-            labelText: 'Rebirth:',
+            labelText: localize('tab7RebirthRowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `REBIRTH`,
+                    text: localize('buttonRebirth', getLanguage()),
                     classNames: ['option-button', 'red-disabled-text', 'rebirth-check'],
                     onClick: () => {
                         const currentAp = getResourceDataObject('ascendencyPoints', ['quantity']);
@@ -112,8 +142,8 @@ export function drawTab7Content(heading, optionContentElement) {
 
                         const content = modalRebirthText.replace(
                             /<span class="green-ready-text">.*?<\/span>/,
-                            `<span class="${spanClass}">You will carry over ${currentAp} AP!</span>` +
-                            (getTechUnlockedArray().includes('cosmicRip') ? `<br><span class="${spanClass}">You will gain 1GP!</span>` : '')
+                            `<span class="${spanClass}">${localize('modalRebirthCarryOverAp', getLanguage()).replace('{ap}', currentAp)}</span>` +
+                            (getTechUnlockedArray().includes('cosmicRip') ? `<br><span class="${spanClass}">${localize('modalRebirthGainGp', getLanguage())}</span>` : '')
                         );
 
                         callPopupModal({
@@ -132,8 +162,8 @@ export function drawTab7Content(heading, optionContentElement) {
                             },
                             onExtra1: null,
                             onExtra2: null,
-                            confirmLabel: 'RESET ALL PROGRESS AND KEEP AP',
-                            cancelLabel: 'CANCEL',
+                            confirmLabel: localize('modalRebirthConfirmLabel', getLanguage()),
+                            cancelLabel: localize('buttonCancel', getLanguage()),
                             extra1Label: null,
                             extra2Label: null,
                             setupToolTips: false,
@@ -143,7 +173,7 @@ export function drawTab7Content(heading, optionContentElement) {
                     rowCategory: 'rebirth'
                 }),
             ],
-            descriptionText: `RESET ALL PROGRESS AND KEEP AWARDED AP`,
+            descriptionText: localize('tab7RebirthRowDescription', getLanguage()),
             resourcePriceObject: '',
             dataConditionCheck: null,
             objectSectionArgument1: null,
@@ -161,16 +191,16 @@ export function drawTab7Content(heading, optionContentElement) {
         const galacticMarketLiquidateForAPRow = createOptionRow({
             labelId: 'galacticMarketLiquidateForAPRow',
             renderNameABs: null,
-            labelText: 'Liquidate:',
+            labelText: localize('tab7LiquidateRowLabel', getLanguage()),
             inputElements: [
                 createDropdown('galacticMarketLiquidateDropDown', [
-                    { value: 'no', text: 'I DO NOT WANT TO LIQUIDATE' },
-                    { value: 'yes', text: 'I WANT TO LIQUIDATE' },
+                    { value: 'no', text: localize('dropdownDoNotLiquidate', getLanguage()) },
+                    { value: 'yes', text: localize('dropdownDoLiquidate', getLanguage()) },
                 ], 'no', (value) => {
                     setGalacticMarketLiquidationAuthorization(value);
                 }),
                 createButton({
-                    text: `LIQUIDATE`,
+                    text: localize('buttonLiquidate', getLanguage()),
                     classNames: ['option-button', 'red-disabled-text', 'galactic-market-confirm-liquidate-button'],
                     onClick: () => {
                         galacticMarketLiquidateForAp(getApLiquidationQuantity());
@@ -179,7 +209,7 @@ export function drawTab7Content(heading, optionContentElement) {
                     rowCategory: 'galacticMarketLiquidateForApConfirm'
                 }),
             ],
-            descriptionText: `AP GAIN: <span id ="galacticMarketApLiquidationQuantity" class="green-ready-text">0</span>`,
+            descriptionText: `${localize('labelApGain', getLanguage())} <span id ="galacticMarketApLiquidationQuantity" class="green-ready-text">0</span>`,
             resourcePriceObject: '',
             dataConditionCheck: null,
             objectSectionArgument1: null,
@@ -215,45 +245,19 @@ export function drawTab7Content(heading, optionContentElement) {
         const galacticMarketItemSelectRow = createOptionRow({
             labelId: 'galacticMarketItemSelectRow',
             renderNameABs: null,
-            labelText: 'Trade:',
+            labelText: localize('tab7TradeRowLabel', getLanguage()),
             inputElements: [
                 createDropdown('galacticMarketOutgoingStockTypeDropDown', [
-                    { value: 'select', text: 'Select Resource / Compound', type: 'select' },
-                    { value: 'hydrogen', text: 'Hydrogen', type: 'resources' },
-                    { value: 'helium', text: 'Helium', type: 'resources' },
-                    { value: 'carbon', text: 'Carbon', type: 'resources' },
-                    { value: 'neon', text: 'Neon', type: 'resources' },
-                    { value: 'oxygen', text: 'Oxygen', type: 'resources' },
-                    { value: 'sodium', text: 'Sodium', type: 'resources' },
-                    { value: 'silicon', text: 'Silicon', type: 'resources' },
-                    { value: 'iron', text: 'Iron', type: 'resources' },
-                    { value: 'diesel', text: 'Diesel', type: 'compounds' },
-                    { value: 'glass', text: 'Glass', type: 'compounds' },
-                    { value: 'steel', text: 'Steel', type: 'compounds' },
-                    { value: 'concrete', text: 'Concrete', type: 'compounds' },
-                    { value: 'water', text: 'Water', type: 'compounds' },
-                    { value: 'titanium', text: 'Titanium', type: 'compounds' }
+                    { value: 'select', text: localize('dropdownSelectResourceOrCompound', getLanguage()), type: 'select' },
+                    ...tradeableMaterialOptions()
                 ], 'select', (value) => {
                     setGalacticMarketOutgoingStockType(value);
                     setHasClickedOutgoingOptionGalacticMarket(true);
                 }),
-                createTextElement(`For:`, 'galacticMarketForText', '', null),
+                createTextElement(localize('labelFor', getLanguage()), 'galacticMarketForText', '', null),
                 createDropdown('galacticMarketIncomingStockTypeDropDown', [
-                    { value: 'select', text: 'Select Resource / Compound', type: 'select'},
-                    { value: 'hydrogen', text: 'Hydrogen', type: 'resources' },
-                    { value: 'helium', text: 'Helium', type: 'resources' },
-                    { value: 'carbon', text: 'Carbon', type: 'resources' },
-                    { value: 'neon', text: 'Neon', type: 'resources' },
-                    { value: 'oxygen', text: 'Oxygen', type: 'resources' },
-                    { value: 'sodium', text: 'Sodium', type: 'resources' },
-                    { value: 'silicon', text: 'Silicon', type: 'resources' },
-                    { value: 'iron', text: 'Iron', type: 'resources' },
-                    { value: 'diesel', text: 'Diesel', type: 'compounds' },
-                    { value: 'glass', text: 'Glass', type: 'compounds' },
-                    { value: 'steel', text: 'Steel', type: 'compounds' },
-                    { value: 'concrete', text: 'Concrete', type: 'compounds' },
-                    { value: 'water', text: 'Water', type: 'compounds' },
-                    { value: 'titanium', text: 'Titanium', type: 'compounds' }
+                    { value: 'select', text: localize('dropdownSelectResourceOrCompound', getLanguage()), type: 'select'},
+                    ...tradeableMaterialOptions()
                 ], 'select', (value) => {
                     setGalacticMarketIncomingStockType(value);
                 }),
@@ -276,12 +280,12 @@ export function drawTab7Content(heading, optionContentElement) {
         const galacticMarketQuantitySelectorRow = createOptionRow({
             labelId: 'galacticMarketQuantitySelectorRow',
             renderNameABs: null,
-            labelText: 'Quantity:',
+            labelText: localize('tab7QuantityRowLabel', getLanguage()),
             inputElements: [
                 createDropdown('galacticMarketQuantityToTradeDropDown', [
-                    { value: 'select', text: 'Select Quantity' },
-                    { value: 'all', text: 'All Stock' },
-                    { value: 'enter', text: 'Enter Quantity' },
+                    { value: 'select', text: localize('dropdownSelectQuantity', getLanguage()) },
+                    { value: 'all', text: localize('dropdownOptionAllStock', getLanguage()) },
+                    { value: 'enter', text: localize('dropdownEnterQuantity', getLanguage()) },
                 ], 'select', (value) => {
                     setGalacticMarketOutgoingQuantitySelectionType(value);
                     setGalacticMarketOutgoingQuantitySelectionTypeDisabledStatus(value);
@@ -314,13 +318,13 @@ export function drawTab7Content(heading, optionContentElement) {
         const galacticMarketTradeSummaryAndConfirmRow = createOptionRow({
             labelId: 'galacticMarketTradeSummaryAndConfirmRow',
             renderNameABs: null,
-            labelText: 'Confirm:',
+            labelText: localize('tab7ConfirmRowLabel', getLanguage()),
             inputElements: [
-                createTextElement(`Trade <span id="galacticMarketOutgoingQuantityText" class="green-ready-text notation">999</span> <span id="galacticMarketOutgoingStockTypeText" class="green-ready-text">Hydrogen</span>`, 'galacticMarketSummaryOutgoing', ['galactic-market-summary-text'], null),
-                createTextElement(`for <span id="galacticMarketIncomingQuantityText" class="green-ready-text notation">12</span> <span id="galacticMarketIncomingStockTypeText" class="green-ready-text">Diesel</span>`, 'galacticMarketSummaryIncoming', ['galactic-market-summary-text'], null),
-                createTextElement(`Commission: <span id="galacticMarketComissionQuantitySummaryText" class="warning-orange-text">49</span> <span id="galacticMarketComissionQuantityStockTypeText" class="warning-orange-text">Hydrogen</span>`, 'galacticMarketSummaryCommission', ['galactic-market-summary-text-wide'], null),
+                createTextElement(`${localize('labelTradeSummaryOutgoing', getLanguage())} <span id="galacticMarketOutgoingQuantityText" class="green-ready-text notation">999</span> <span id="galacticMarketOutgoingStockTypeText" class="green-ready-text">Hydrogen</span>`, 'galacticMarketSummaryOutgoing', ['galactic-market-summary-text'], null),
+                createTextElement(`${localize('labelTradeSummaryIncoming', getLanguage())} <span id="galacticMarketIncomingQuantityText" class="green-ready-text notation">12</span> <span id="galacticMarketIncomingStockTypeText" class="green-ready-text">Diesel</span>`, 'galacticMarketSummaryIncoming', ['galactic-market-summary-text'], null),
+                createTextElement(`${localize('labelCommission', getLanguage())} <span id="galacticMarketComissionQuantitySummaryText" class="warning-orange-text">49</span> <span id="galacticMarketComissionQuantityStockTypeText" class="warning-orange-text">Hydrogen</span>`, 'galacticMarketSummaryCommission', ['galactic-market-summary-text-wide'], null),
                 createButton({
-                    text: `CONFIRM`,
+                    text: localize('buttonConfirm', getLanguage()),
                     classNames: ['option-button', 'red-disabled-text', 'galactic-market-confirm-trade-button'],
                     onClick: () => {
                         galacticMarketTrade();
@@ -347,18 +351,18 @@ export function drawTab7Content(heading, optionContentElement) {
         const galacticMarketSellApForCashRow = createOptionRow({
             labelId: 'galacticMarketSellApForCashRow',
             renderNameABs: null,
-            labelText: 'Sell AP:',
+            labelText: localize('tab7SellApRowLabel', getLanguage()),
             inputElements: [
                 createDropdown('galacticMarketSellApForCashDropDown', [
-                    { value: 'select', text: 'Select Quantity' },
-                    { value: '1', text: 'Sell 1 AP' },
-                    { value: '5', text: 'Sell 5 AP' },
-                    { value: '10', text: 'Sell 10 AP' },
+                    { value: 'select', text: localize('dropdownSelectQuantity', getLanguage()) },
+                    { value: '1', text: localize('dropdownSell1Ap', getLanguage()) },
+                    { value: '5', text: localize('dropdownSell5Ap', getLanguage()) },
+                    { value: '10', text: localize('dropdownSell10Ap', getLanguage()) },
                 ], 'select', (value) => {
                     setGalacticMarketSellApForCashQuantity(value);
                 }),
                 createButton({
-                    text: `SELL`,
+                    text: localize('buttonSellUpper', getLanguage()),
                     classNames: ['option-button', 'red-disabled-text', 'galactic-market-confirm-sell-ap-button'],
                     onClick: () => {
                         galacticMarketSellApForCash(getGalacticMarketSellApForCashQuantity());
@@ -367,7 +371,7 @@ export function drawTab7Content(heading, optionContentElement) {
                     rowCategory: 'galacticMarketSellApForCashConfirm'
                 }),
             ],
-            descriptionText: `Cash Gain: <span id ="galacticMarketCashGainQuantity" class="green-ready-text notation">0</span>`,
+            descriptionText: `${localize('labelCashGain', getLanguage())} <span id ="galacticMarketCashGainQuantity" class="green-ready-text notation">0</span>`,
             resourcePriceObject: '',
             dataConditionCheck: null,
             objectSectionArgument1: null,
@@ -385,37 +389,24 @@ export function drawTab7Content(heading, optionContentElement) {
     if (heading === 'Galactic Casino') {
         const headerRow = document.getElementById('headerContentTab7');
         if (headerRow) {
-            headerRow.innerHTML = `Galactic Casino <p id="info_galacticCasinoHeader" class="info-emoji">ℹ️</p>`;
+            headerRow.innerHTML = `${localize('headerMainGalacticCasino', getLanguage())} <p id="info_galacticCasinoHeader" class="info-emoji">ℹ️</p>`;
         }
 
         const purchaseCpRow = createOptionRow({
             labelId: 'galacticCasinoPurchaseCpRow',
             renderNameABs: null,
-            labelText: 'Purchase CP:',
+            labelText: localize('tab7PurchaseCpRowLabel', getLanguage()),
             inputElements: [
                 createDropdown('galacticCasinoPurchaseItemDropDown', [
-                    { value: 'select', text: 'Select Currency', type: 'select' },
-                    { value: 'cash', text: '<strong>Cash</strong>', type: 'currency' },
-                    { value: 'hydrogen', text: 'Hydrogen', type: 'resources' },
-                    { value: 'helium', text: 'Helium', type: 'resources' },
-                    { value: 'carbon', text: 'Carbon', type: 'resources' },
-                    { value: 'neon', text: 'Neon', type: 'resources' },
-                    { value: 'oxygen', text: 'Oxygen', type: 'resources' },
-                    { value: 'sodium', text: 'Sodium', type: 'resources' },
-                    { value: 'silicon', text: 'Silicon', type: 'resources' },
-                    { value: 'iron', text: 'Iron', type: 'resources' },
-                    { value: 'diesel', text: 'Diesel', type: 'compounds' },
-                    { value: 'glass', text: 'Glass', type: 'compounds' },
-                    { value: 'steel', text: 'Steel', type: 'compounds' },
-                    { value: 'concrete', text: 'Concrete', type: 'compounds' },
-                    { value: 'water', text: 'Water', type: 'compounds' },
-                    { value: 'titanium', text: 'Titanium', type: 'compounds' }
+                    { value: 'select', text: localize('dropdownSelectCurrency', getLanguage()), type: 'select' },
+                    { value: 'cash', text: `<strong>${localize('dropdownCurrencyCash', getLanguage())}</strong>`, type: 'currency' },
+                    ...tradeableMaterialOptions()
                 ], 'select', (value) => {
                     setGalacticCasinoPurchaseItem(value);
                 }, ['galactic-casino-dropdown']),
-                createTextFieldArea('galacticCasinoPurchaseQuantityTextArea', ['galactic-market-textarea', 'galactic-casino-quantity-textarea'], 'Buy CP Quantity', ''),
+                createTextFieldArea('galacticCasinoPurchaseQuantityTextArea', ['galactic-market-textarea', 'galactic-casino-quantity-textarea'], localize('placeholderBuyCpQuantity', getLanguage()), ''),
                 createButton({
-                    text: `BUY`,
+                    text: localize('buttonBuy', getLanguage()),
                     classNames: ['option-button', 'red-disabled-text', 'galactic-casino-buy-cp-button'],
                     onClick: () => {
                         buyCasinoPoints();
@@ -423,7 +414,7 @@ export function drawTab7Content(heading, optionContentElement) {
                     disableKeyboardForButton: true,
                     rowCategory: 'galacticCasinoBuyCp'
                 }),
-                createTextElement(`Cost: <span id="galacticCasinoPurchaseCpPreview" class="green-ready-text notation">0</span>`, 'galacticCasinoPurchaseCpPreviewText', ['galactic-market-summary-text'], null),
+                createTextElement(`${localize('labelCost', getLanguage())} <span id="galacticCasinoPurchaseCpPreview" class="green-ready-text notation">0</span>`, 'galacticCasinoPurchaseCpPreviewText', ['galactic-market-summary-text'], null),
             ],
             descriptionText: '',
             resourcePriceObject: '',
@@ -451,18 +442,18 @@ export function drawTab7Content(heading, optionContentElement) {
             document.getElementById('galacticCasinoPurchaseQuantityTextArea').value = event.target.value;
         });
 
-        const game1StakeInput = createTextFieldArea('galacticCasinoGame1StakeTextArea', ['galactic-market-textarea', 'galactic-casino-stake-textarea'], 'Stake', '');
+        const game1StakeInput = createTextFieldArea('galacticCasinoGame1StakeTextArea', ['galactic-market-textarea', 'galactic-casino-stake-textarea'], localize('placeholderStake', getLanguage()), '');
         const game1Spinner = createSpinningDropdown(
             'galacticCasinoGame1Spinner',
             [
-                { value: 'win', text: 'WIN WIN WIN WIN', className: 'green-ready-text' },
-                { value: 'lose', text: 'LOSE LOSE LOSE LOSE', className: 'red-disabled-text' }
+                { value: 'win', text: localize('spinnerWin', getLanguage()), className: 'green-ready-text' },
+                { value: 'lose', text: localize('spinnerLose', getLanguage()), className: 'red-disabled-text' }
             ],
             'win',
             ['galactic-casino-spinner']
         );
         const game1SpinButton = createButton({
-            text: 'SPIN',
+            text: localize('buttonSpin', getLanguage()),
             classNames: ['id_galacticCasinoGame1SpinButton', 'option-button', 'red-disabled-text', 'galactic-casino-spin-button'],
             onClick: () => {
                 const stakeEl = document.getElementById('galacticCasinoGame1StakeTextArea');
@@ -478,7 +469,7 @@ export function drawTab7Content(heading, optionContentElement) {
         const game1Row = createOptionRow({
             labelId: 'galacticCasinoGame1Row',
             renderNameABs: null,
-            labelText: 'Double Or Nothing:',
+            labelText: localize('tab7DoubleOrNothingRowLabel', getLanguage()),
             inputElements: [
                 game1StakeInput,
                 game1Spinner,
@@ -517,7 +508,7 @@ export function drawTab7Content(heading, optionContentElement) {
         wheel.appendChild(wheelIndicator);
 
         const game2SpinButton = createButton({
-            text: 'SPIN WHEEL',
+            text: localize('buttonSpinWheel', getLanguage()),
             classNames: ['id_galacticCasinoGame2SpinWheelButton', 'option-button', 'red-disabled-text', 'galactic-casino-spin-button', 'galactic-casino-wheel-spin-button'],
             onClick: () => {
                 playWheelOfFortune({ wheelId: 'galacticCasinoGame2Wheel' });
@@ -534,19 +525,19 @@ export function drawTab7Content(heading, optionContentElement) {
         const prizeDropdown = createDropdown(
             'galacticCasinoGame2PrizeDropdown',
             [
-                { value: 'select', text: 'Select Special Prize', type: 'select' },
-                { value: 'special_rocket_warp', text: 'Rocket Warp To Asteroid / Base', type: 'special' },
-                { value: 'special_starship_warp', text: 'Starship Warp Instantly', type: 'special' },
-                { value: 'special_telescope_finish_asteroid_search', text: 'Space Telescope Finished Asteroid Search!', type: 'special' },
-                { value: 'special_telescope_finish_star_study', text: 'Space Telescope Finished Star Study!', type: 'special' },
-                { value: 'special_telescope_finish_void_pillage', text: 'Space Telescope Finished Pillaging The Void!', type: 'special' },
-                { value: 'special_100cp', text: '100CP', type: 'special' },
-                { value: 'special_double_titanium', text: 'Double your quantity of Titanium', type: 'special' },
-                { value: 'special_double_steel', text: 'Double your quantity of Steel', type: 'special' },
-                { value: 'special_double_silicon', text: 'Double your quantity of Silicon', type: 'special' },
-                { value: 'special_double_iron', text: 'Double your quantity of Iron', type: 'special' },
-                { value: 'special_double_sodium', text: 'Double your quantity of Sodium', type: 'special' },
-                { value: 'special_100k_research', text: '100,000 Research Points', type: 'special' }
+                { value: 'select', text: localize('dropdownSelectSpecialPrize', getLanguage()), type: 'select' },
+                { value: 'special_rocket_warp', text: localize('casinoPrizeRocketWarp', getLanguage()), type: 'special' },
+                { value: 'special_starship_warp', text: localize('casinoPrizeStarshipWarp', getLanguage()), type: 'special' },
+                { value: 'special_telescope_finish_asteroid_search', text: localize('casinoPrizeTelescopeFinishAsteroidSearch', getLanguage()), type: 'special' },
+                { value: 'special_telescope_finish_star_study', text: localize('casinoPrizeTelescopeFinishStarStudy', getLanguage()), type: 'special' },
+                { value: 'special_telescope_finish_void_pillage', text: localize('casinoPrizeTelescopeFinishVoidPillage', getLanguage()), type: 'special' },
+                { value: 'special_100cp', text: localize('casinoPrize100Cp', getLanguage()), type: 'special' },
+                { value: 'special_double_titanium', text: localize('casinoPrizeDoubleMaterial', getLanguage()).replace('{material}', materialDisplayName('titanium', 'compounds')), type: 'special' },
+                { value: 'special_double_steel', text: localize('casinoPrizeDoubleMaterial', getLanguage()).replace('{material}', materialDisplayName('steel', 'compounds')), type: 'special' },
+                { value: 'special_double_silicon', text: localize('casinoPrizeDoubleMaterial', getLanguage()).replace('{material}', materialDisplayName('silicon', 'resources')), type: 'special' },
+                { value: 'special_double_iron', text: localize('casinoPrizeDoubleMaterial', getLanguage()).replace('{material}', materialDisplayName('iron', 'resources')), type: 'special' },
+                { value: 'special_double_sodium', text: localize('casinoPrizeDoubleMaterial', getLanguage()).replace('{material}', materialDisplayName('sodium', 'resources')), type: 'special' },
+                { value: 'special_100k_research', text: localize('casinoPrize100kResearch', getLanguage()), type: 'special' }
             ],
             'select',
             (value) => {
@@ -562,7 +553,7 @@ export function drawTab7Content(heading, optionContentElement) {
         prizeDropdown.style.pointerEvents = 'none';
 
         const claimButton = createButton({
-            text: 'CLAIM',
+            text: localize('buttonClaim', getLanguage()),
             classNames: ['id_galacticCasinoGame2ClaimButton', 'option-button', 'red-disabled-text', 'galactic-casino-spin-button'],
             onClick: () => {
                 const w = document.getElementById('galacticCasinoGame2Wheel');
@@ -586,7 +577,7 @@ export function drawTab7Content(heading, optionContentElement) {
 
                     const dropdownTextEl = dd.querySelector('.dropdown-text');
                     if (dropdownTextEl) {
-                        dropdownTextEl.textContent = 'Select Special Prize';
+                        dropdownTextEl.textContent = localize('dropdownSelectSpecialPrize', getLanguage());
                     }
                 }
 
@@ -607,7 +598,7 @@ export function drawTab7Content(heading, optionContentElement) {
         const game2Row = createOptionRow({
             labelId: 'galacticCasinoGame2Row',
             renderNameABs: null,
-            labelText: 'Wheel Of Fortune:',
+            labelText: localize('tab7WheelOfFortuneRowLabel', getLanguage()),
             inputElements: [
                 wheelStack,
                 prizeDropdown,
@@ -730,10 +721,10 @@ export function drawTab7Content(heading, optionContentElement) {
         const game4PrizeDropdown = createDropdown(
             'galacticCasinoGame4PrizeDropdown',
             [
-                { value: 'select', text: 'Select Prize', type: 'select' },
-                { value: 'prize1', text: String(voidSeerPrizeCatalog?.prize1?.label || 'Prize 1'), type: 'prize' },
-                { value: 'prize2', text: String(voidSeerPrizeCatalog?.prize2?.label || 'Prize 2'), type: 'prize' },
-                { value: 'prize3', text: String(voidSeerPrizeCatalog?.prize3?.label || 'Prize 3'), type: 'prize' }
+                { value: 'select', text: localize('dropdownSelectPrize', getLanguage()), type: 'select' },
+                { value: 'prize1', text: String(voidSeerPrizeCatalog?.prize1?.label || localize('casinoVoidSeerPrizeFallback1', getLanguage())), type: 'prize' },
+                { value: 'prize2', text: String(voidSeerPrizeCatalog?.prize2?.label || localize('casinoVoidSeerPrizeFallback2', getLanguage())), type: 'prize' },
+                { value: 'prize3', text: String(voidSeerPrizeCatalog?.prize3?.label || localize('casinoVoidSeerPrizeFallback3', getLanguage())), type: 'prize' }
             ],
             'select',
             (value) => {
@@ -751,7 +742,7 @@ export function drawTab7Content(heading, optionContentElement) {
         );
 
         const game4SpinButton = createButton({
-            text: 'SPIN',
+            text: localize('buttonSpin', getLanguage()),
             classNames: ['galacticCasinoGame4SpinButton', 'id_galacticCasinoGame4SpinButton', 'option-button', 'red-disabled-text', 'galactic-casino-spin-button'],
             onClick: () => {
                 const spinning = String(game4Container.getAttribute('data-spinning') || 'false') === 'true';
@@ -834,9 +825,9 @@ export function drawTab7Content(heading, optionContentElement) {
                         const makeOTypeClueMessage = (targetLower) => {
                             const starName = capitaliseWordsWithRomanNumerals(targetLower);
                             const templates = [
-                                '{STAR} is giving off very high energy signals, it could be a type O star!',
-                                'Your instruments spike whenever they point toward {STAR}. All signs suggest an O-type star.',
-                                'Long-range scans detect extreme radiation from {STAR}. This could be an O-type system.'
+                                localize('casinoClueOTypeSignals', getLanguage()),
+                                localize('casinoClueOTypeInstruments', getLanguage()),
+                                localize('casinoClueOTypeRadiation', getLanguage())
                             ];
                             const template = pickRandom(templates);
                             return String(template || '').replaceAll('{STAR}', starName);
@@ -848,7 +839,7 @@ export function drawTab7Content(heading, optionContentElement) {
                             const gain = Math.max(1, Math.floor(base * (0.10 + Math.random() * 0.20)));
                             const next = Math.max(0, base + gain);
                             setResourceDataObject?.(next, 'antimatter', ['quantity']);
-                            showNotification(`WIN! +${gain} Antimatter`, 'info', 3000, 'galacticCasino');
+                            showNotification(localize('notificationCasinoWinAntimatter', getLanguage()).replace('{amount}', gain), 'info', 3000, 'galacticCasino');
                         } else if (selectedPrize === 'prize2') {
                             const manuscriptEntries = getStarsWithAncientManuscripts?.() || [];
                             const eligible = (manuscriptEntries || [])
@@ -858,9 +849,9 @@ export function drawTab7Content(heading, optionContentElement) {
                             const target = pickRandom(eligible);
                             if (target) {
                                 const clue = makeManuscriptClueMessage(target);
-                                showNotification(`WIN! ${clue}<span style="display:none">${Date.now()}</span>`, 'warning', 15000, 'galacticCasino');
+                                showNotification(`${localize('notificationCasinoWinWithClue', getLanguage()).replace('{clue}', clue)}<span style="display:none">${Date.now()}</span>`, 'warning', 15000, 'galacticCasino');
                             } else {
-                                showNotification('WIN!', 'info', 2500, 'galacticCasino');
+                                showNotification(localize('notificationCasinoWin', getLanguage()), 'info', 2500, 'galacticCasino');
                             }
                         } else if (selectedPrize === 'prize1') {
                             const starNames = getStarNames?.() || [];
@@ -871,15 +862,15 @@ export function drawTab7Content(heading, optionContentElement) {
                             const target = pickRandom(eligible);
                             if (target) {
                                 const clue = makeOTypeClueMessage(target);
-                                showNotification(`WIN! ${clue}<span style="display:none">${Date.now()}</span>`, 'warning', 15000, 'galacticCasino');
+                                showNotification(`${localize('notificationCasinoWinWithClue', getLanguage()).replace('{clue}', clue)}<span style="display:none">${Date.now()}</span>`, 'warning', 15000, 'galacticCasino');
                             } else {
-                                showNotification('WIN!', 'info', 2500, 'galacticCasino');
+                                showNotification(localize('notificationCasinoWin', getLanguage()), 'info', 2500, 'galacticCasino');
                             }
                         } else {
-                            showNotification('WIN!', 'info', 2500, 'galacticCasino');
+                            showNotification(localize('notificationCasinoWin', getLanguage()), 'info', 2500, 'galacticCasino');
                         }
                     } else {
-                        showNotification('LOSE! Better luck next time', 'error', 2000, 'galacticCasino');
+                        showNotification(localize('notificationCasinoLose', getLanguage()), 'error', 2000, 'galacticCasino');
                     }
 
                     updateVoidSeerSpinButtonState();
@@ -896,7 +887,7 @@ export function drawTab7Content(heading, optionContentElement) {
         const game4Row = createOptionRow({
             labelId: 'galacticCasinoGame4Row',
             renderNameABs: null,
-            labelText: 'Visiting VoidSeer:',
+            labelText: localize('tab7VisitingVoidSeerRowLabel', getLanguage()),
             inputElements: [
                 game4Container,
             ],
@@ -940,7 +931,7 @@ export function drawTab7Content(heading, optionContentElement) {
         }
 
         const game3LowerButton = createButton({
-            text: 'LOWER',
+            text: localize('buttonLower', getLanguage()),
             classNames: ['id_galacticCasinoGame3LowerButton', 'option-button', 'red-disabled-text', 'galactic-casino-spin-button'],
             onClick: () => {
             },
@@ -949,7 +940,7 @@ export function drawTab7Content(heading, optionContentElement) {
         });
 
         const game3HigherButton = createButton({
-            text: 'HIGHER',
+            text: localize('buttonHigher', getLanguage()),
             classNames: ['id_galacticCasinoGame3HigherButton', 'option-button', 'red-disabled-text', 'galactic-casino-spin-button'],
             onClick: () => {
             },
@@ -965,63 +956,75 @@ export function drawTab7Content(heading, optionContentElement) {
 
         let hiloEndResetTimeoutId = null;
 
+        // Prize labels are built from the catalogue; the key stays internal
+        // because awardHiloPrize and the analytics events both branch on it.
+        const cpPrize = (amount, key) => ({ label: localize('hiloPrizeCp', getLanguage()).replace('{amount}', amount), key });
+        const doublePrize = (material, type, key) => ({
+            label: localize('hiloPrizeDoubleMaterial', getLanguage()).replace('{material}', materialDisplayName(material, type)),
+            key
+        });
+        const timeWarpPrize = (multiplier, key) => ({
+            label: localize('hiloPrizeTimeWarp', getLanguage()).replace('{multiplier}', multiplier),
+            key
+        });
+
         const hiloPrizeTiers = {
             1: [
-                { label: '+5 CP', key: 'hilo_cp_5' },
-                { label: 'Cash Boost', key: 'hilo_cash_boost_small' },
-                { label: 'Research Boost', key: 'hilo_research_boost_small' },
-                { label: 'Resource Top-Up', key: 'hilo_resource_topup' },
-                { label: 'Compound Top-Up', key: 'hilo_compound_topup' }
+                cpPrize(5, 'hilo_cp_5'),
+                { label: localize('hiloPrizeCashBoost', getLanguage()), key: 'hilo_cash_boost_small' },
+                { label: localize('hiloPrizeResearchBoost', getLanguage()), key: 'hilo_research_boost_small' },
+                { label: localize('hiloPrizeResourceTopUp', getLanguage()), key: 'hilo_resource_topup' },
+                { label: localize('hiloPrizeCompoundTopUp', getLanguage()), key: 'hilo_compound_topup' }
             ],
             2: [
-                { label: '+10 CP', key: 'hilo_cp_10' },
-                { label: 'Cash Boost', key: 'hilo_cash_boost_medium' },
-                { label: 'Research Boost', key: 'hilo_research_boost_medium' },
-                { label: 'Double Hydrogen', key: 'special_double_hydrogen' },
-                { label: 'Double Carbon', key: 'special_double_carbon' }
+                cpPrize(10, 'hilo_cp_10'),
+                { label: localize('hiloPrizeCashBoost', getLanguage()), key: 'hilo_cash_boost_medium' },
+                { label: localize('hiloPrizeResearchBoost', getLanguage()), key: 'hilo_research_boost_medium' },
+                doublePrize('hydrogen', 'resources', 'special_double_hydrogen'),
+                doublePrize('carbon', 'resources', 'special_double_carbon')
             ],
             3: [
-                { label: '+20 CP', key: 'hilo_cp_20' },
-                { label: 'Cash Boost', key: 'hilo_cash_boost_large' },
-                { label: 'Research Boost', key: 'hilo_research_boost_large' },
-                { label: 'Double Iron', key: 'special_double_iron' },
-                { label: 'Double Silicon', key: 'special_double_silicon' }
+                cpPrize(20, 'hilo_cp_20'),
+                { label: localize('hiloPrizeCashBoost', getLanguage()), key: 'hilo_cash_boost_large' },
+                { label: localize('hiloPrizeResearchBoost', getLanguage()), key: 'hilo_research_boost_large' },
+                doublePrize('iron', 'resources', 'special_double_iron'),
+                doublePrize('silicon', 'resources', 'special_double_silicon')
             ],
             4: [
-                { label: '+40 CP', key: 'hilo_cp_40' },
-                { label: 'Research Grant', key: 'hilo_research_flat' },
-                { label: 'Cash Grant', key: 'hilo_cash_flat' },
-                { label: 'Double Steel', key: 'special_double_steel' },
-                { label: 'Double Concrete', key: 'special_double_concrete' }
+                cpPrize(40, 'hilo_cp_40'),
+                { label: localize('hiloPrizeResearchGrant', getLanguage()), key: 'hilo_research_flat' },
+                { label: localize('hiloPrizeCashGrant', getLanguage()), key: 'hilo_cash_flat' },
+                doublePrize('steel', 'compounds', 'special_double_steel'),
+                doublePrize('concrete', 'compounds', 'special_double_concrete')
             ],
             5: [
-                { label: '+70 CP', key: 'hilo_cp_70' },
-                { label: 'Research Grant+', key: 'hilo_research_big_flat' },
-                { label: 'Double Titanium', key: 'special_double_titanium' },
-                { label: 'TimeWarp x25', key: 'hilo_timewarp_25_20000' },
-                { label: 'TimeWarp x50', key: 'hilo_timewarp_50_15000' }
+                cpPrize(70, 'hilo_cp_70'),
+                { label: localize('hiloPrizeResearchGrantPlus', getLanguage()), key: 'hilo_research_big_flat' },
+                doublePrize('titanium', 'compounds', 'special_double_titanium'),
+                timeWarpPrize(25, 'hilo_timewarp_25_20000'),
+                timeWarpPrize(50, 'hilo_timewarp_50_15000')
             ],
             6: [
-                { label: '+100 CP', key: 'hilo_cp_100' },
-                { label: 'Research Mega', key: 'hilo_research_mega' },
-                { label: 'Cash Mega', key: 'hilo_cash_mega' },
-                { label: 'TimeWarp x75', key: 'hilo_timewarp_75_15000' },
-                { label: 'TimeWarp x100', key: 'hilo_timewarp_100_12000' }
+                cpPrize(100, 'hilo_cp_100'),
+                { label: localize('hiloPrizeResearchMega', getLanguage()), key: 'hilo_research_mega' },
+                { label: localize('hiloPrizeCashMega', getLanguage()), key: 'hilo_cash_mega' },
+                timeWarpPrize(75, 'hilo_timewarp_75_15000'),
+                timeWarpPrize(100, 'hilo_timewarp_100_12000')
             ]
         };
 
         const getTier7PrizeList = () => {
             const list = [
-                { label: 'Finish Rocket', key: 'special_finish_rocket_journey' },
-                { label: 'Finish Starship', key: 'special_finish_starship_journey' },
-                { label: 'Finish Asteroid', key: 'special_telescope_finish_asteroid_search' },
-                { label: 'Finish Star Study', key: 'special_telescope_finish_star_study' },
-                { label: 'TimeWarp x200', key: 'hilo_timewarp_200_20000' }
+                { label: localize('hiloPrizeFinishRocket', getLanguage()), key: 'special_finish_rocket_journey' },
+                { label: localize('hiloPrizeFinishStarship', getLanguage()), key: 'special_finish_starship_journey' },
+                { label: localize('hiloPrizeFinishAsteroid', getLanguage()), key: 'special_telescope_finish_asteroid_search' },
+                { label: localize('hiloPrizeFinishStarStudy', getLanguage()), key: 'special_telescope_finish_star_study' },
+                timeWarpPrize(200, 'hilo_timewarp_200_20000')
             ];
 
             const philosophy = String(getPlayerPhilosophy?.() || '');
             if (philosophy === 'voidborn') {
-                list[3] = { label: 'Finish Void', key: 'special_telescope_finish_void_pillage' };
+                list[3] = { label: localize('hiloPrizeFinishVoid', getLanguage()), key: 'special_telescope_finish_void_pillage' };
             }
             return list;
         };
@@ -1161,62 +1164,53 @@ export function drawTab7Content(heading, optionContentElement) {
                 return '';
             }
 
-            const titleCaseFromKey = (value) => {
-                return String(value || '')
-                    .replace(/[_-]+/g, ' ')
-                    .split(' ')
-                    .filter(Boolean)
-                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-                    .join(' ');
-            };
-
             const type = String(awarded.type || '').toLowerCase();
 
             if (type === 'cp' && Number.isFinite(Number(awarded.amount))) {
-                return `${Math.floor(Number(awarded.amount))} CP`;
+                return localize('casinoAwardCp', getLanguage()).replace('{amount}', Math.floor(Number(awarded.amount)));
             }
 
             if (type === 'cash' && Number.isFinite(Number(awarded.amount))) {
-                return `${Math.floor(Number(awarded.amount))} Cash`;
+                return localize('casinoAwardCash', getLanguage()).replace('{amount}', Math.floor(Number(awarded.amount)));
             }
 
             if (type === 'research' && Number.isFinite(Number(awarded.amount))) {
-                return `${Math.floor(Number(awarded.amount))} Research Points`;
+                return localize('casinoAwardResearch', getLanguage()).replace('{amount}', Math.floor(Number(awarded.amount)));
             }
 
             if ((type === 'resources' || type === 'compounds') && awarded.key && Number.isFinite(Number(awarded.amount))) {
-                return `${Math.floor(Number(awarded.amount))} ${titleCaseFromKey(awarded.key)}`;
+                return localize('casinoAwardMaterialAmount', getLanguage()).replace('{amount}', Math.floor(Number(awarded.amount))).replace('{material}', materialDisplayName(awarded.key, type));
             }
 
             if ((type === 'resources' || type === 'compounds') && awarded.key && Number.isFinite(Number(awarded.oldQuantity)) && Number.isFinite(Number(awarded.newQuantity))) {
-                return `${titleCaseFromKey(awarded.key)} doubled`;
+                return localize('casinoAwardMaterialDoubled', getLanguage()).replace('{material}', materialDisplayName(awarded.key, type));
             }
 
             if (type === 'timewarp' && Number.isFinite(Number(awarded.multiplier)) && Number.isFinite(Number(awarded.durationMs))) {
                 const seconds = Math.max(0, Math.round(Number(awarded.durationMs) / 1000));
-                return `TimeWarp x${Number(awarded.multiplier)} for ${seconds}s`;
+                return localize('casinoAwardTimeWarp', getLanguage()).replace('{multiplier}', Number(awarded.multiplier)).replace('{seconds}', seconds);
             }
 
             if (type === 'telescope_finish_asteroid_search') {
                 const asteroid = awarded.asteroid ? ` (${String(awarded.asteroid)})` : '';
-                return `Finished Asteroid Search${asteroid}`;
+                return localize('casinoAwardFinishedAsteroidSearch', getLanguage()).replace('{suffix}', asteroid);
             }
 
             if (type === 'telescope_finish_star_study') {
-                return 'Finished Star Study';
+                return localize('casinoAwardFinishedStarStudy', getLanguage());
             }
 
             if (type === 'telescope_finish_void_pillage') {
-                return 'Finished Void Pillage';
+                return localize('casinoAwardFinishedVoidPillage', getLanguage());
             }
 
             if (type === 'finish_starship_journey' && awarded.destinationStar) {
-                return `Finished Starship Journey (${String(awarded.destinationStar)})`;
+                return localize('casinoAwardFinishedStarshipJourney', getLanguage()).replace('{star}', String(awarded.destinationStar));
             }
 
             if (type === 'finish_rocket_journey') {
                 const name = awarded.name ? ` ${String(awarded.name)}` : '';
-                return `Finished Rocket Journey${name}`;
+                return localize('casinoAwardFinishedRocketJourney', getLanguage()).replace('{suffix}', name);
             }
 
             return '';
@@ -1252,18 +1246,12 @@ export function drawTab7Content(heading, optionContentElement) {
                 && awarded.key
                 && Number.isFinite(Number(awarded.oldQuantity))
                 && Number.isFinite(Number(awarded.newQuantity))) {
-                const keyName = String(awarded.key || '');
-                const keyTitle = keyName
-                    .replace(/[_-]+/g, ' ')
-                    .split(' ')
-                    .filter(Boolean)
-                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-                    .join(' ');
-
-                const name = String(prizeName || '').toLowerCase();
-                if (name.includes('double') && name.includes(keyTitle.toLowerCase())) {
-                    return false;
-                }
+                // A finite old/new quantity pair is the doubling award, and the
+                // prize label for it already names the material, so the detail
+                // line would just repeat it. This used to be decided by matching
+                // the English words "double" and the material name inside the
+                // rendered label, which was false in every other language.
+                return false;
             }
 
             return true;
@@ -1422,7 +1410,7 @@ export function drawTab7Content(heading, optionContentElement) {
 
             const cashOutBtn = document.getElementById('galacticCasinoGame3CashOutButton');
             if (cashOutBtn) {
-                cashOutBtn.textContent = 'PLAY';
+                cashOutBtn.textContent = localize('buttonPlay', getLanguage());
                 setButtonState(cashOutBtn, { enabled: true, ready: true });
             }
 
@@ -1445,7 +1433,7 @@ export function drawTab7Content(heading, optionContentElement) {
 
             const cashOutBtn = document.getElementById('galacticCasinoGame3CashOutButton');
             if (cashOutBtn) {
-                cashOutBtn.textContent = 'CASH OUT';
+                cashOutBtn.textContent = localize('buttonCashOut', getLanguage());
                 setButtonState(cashOutBtn, { enabled: false, ready: false });
             }
 
@@ -1521,7 +1509,7 @@ export function drawTab7Content(heading, optionContentElement) {
                     setCardRevealed(cards[nextIndex], nextCard);
                     game3HiloContainer.setAttribute('data-hilo-index', String(nextIndex));
                 }
-                showNotification('LOSE! Better luck next time.', 'error', 2500, 'galacticCasino');
+                showNotification(localize('notificationCasinoLoseHilo', getLanguage()), 'error', 2500, 'galacticCasino');
                 hiloResetAfterDelay(2000);
                 return;
             }
@@ -1531,7 +1519,7 @@ export function drawTab7Content(heading, optionContentElement) {
                     setCardRevealed(cards[nextIndex], nextCard);
                     game3HiloContainer.setAttribute('data-hilo-index', String(nextIndex));
                 }
-                showNotification('LOSE! Better luck next time.', 'error', 2500, 'galacticCasino');
+                showNotification(localize('notificationCasinoLoseHilo', getLanguage()), 'error', 2500, 'galacticCasino');
                 hiloResetAfterDelay(2000);
                 return;
             }
@@ -1567,7 +1555,7 @@ export function drawTab7Content(heading, optionContentElement) {
                 const prizeName = getHiloNotificationPrizeName(prizeNameRaw, awarded);
                 const details = formatHiloAwardDetails(awarded);
                 const suffix = shouldAppendHiloAwardDetails(prizeName, awarded, details) ? ` - ${details}` : '';
-                showNotification(`WON! Well done you guessed all Cards! ${prizeName}${suffix}`, 'info', 2500, 'galacticCasino');
+                showNotification(`${localize('notificationHiloWonAllCards', getLanguage()).replace('{prize}', prizeName)}${suffix}`, 'info', 2500, 'galacticCasino');
                 if (awarded?.type === 'timewarp') {
                     setTimeout(() => {
                         timeWarp(awarded.durationMs, awarded.multiplier);
@@ -1578,14 +1566,14 @@ export function drawTab7Content(heading, optionContentElement) {
         };
 
         const game3CashOutButton = createButton({
-            text: 'PLAY',
+            text: localize('buttonPlay', getLanguage()),
             classNames: ['id_galacticCasinoGame3CashOutButton', 'option-button', 'green-ready-text', 'galactic-casino-spin-button'],
             onClick: () => {
                 const state = String(game3HiloContainer.getAttribute('data-hilo-state') || 'idle');
                 if (state === 'idle') {
                     const cpBalance = getGalacticCasinoDataObject('casinoPoints', ['quantity']) ?? 0;
                     if (cpBalance < 5) {
-                        showNotification('Not enough CP to play.', 'info', 2500, 'galacticCasino');
+                        showNotification(localize('notificationCasinoNotEnoughCp', getLanguage()), 'info', 2500, 'galacticCasino');
                         return;
                     }
 
@@ -1630,7 +1618,7 @@ export function drawTab7Content(heading, optionContentElement) {
                     const prizeName = getHiloNotificationPrizeName(prizeNameRaw, awarded);
                     const details = formatHiloAwardDetails(awarded);
                     const suffix = shouldAppendHiloAwardDetails(prizeName, awarded, details) ? ` - ${details}` : '';
-                    showNotification(`You cashed out at ${revealedCount} cards - ${prizeName}${suffix}`, 'info', 2500, 'galacticCasino');
+                    showNotification(`${localize('notificationHiloCashedOut', getLanguage()).replace('{count}', revealedCount).replace('{prize}', prizeName)}${suffix}`, 'info', 2500, 'galacticCasino');
                     if (awarded?.type === 'timewarp') {
                         setTimeout(() => {
                             timeWarp(awarded.durationMs, awarded.multiplier);
@@ -1644,7 +1632,7 @@ export function drawTab7Content(heading, optionContentElement) {
         });
 
         const game3PrizeInfo = createTextElement(
-            `Prize: <span id="galacticCasinoGame3PrizePreview" class="green-ready-text notation">---</span>`,
+            `${localize('labelPrize', getLanguage())} <span id="galacticCasinoGame3PrizePreview" class="green-ready-text notation">---</span>`,
             'galacticCasinoGame3PrizePreviewText',
             ['galactic-market-summary-text'],
             null
@@ -1673,7 +1661,7 @@ export function drawTab7Content(heading, optionContentElement) {
         const game3Row = createOptionRow({
             labelId: 'galacticCasinoGame3Row',
             renderNameABs: null,
-            labelText: 'Higher Or Lower:',
+            labelText: localize('tab7HigherOrLowerRowLabel', getLanguage()),
             inputElements: [
                 game3HiloContainer,
                 game3CashOutButton,
@@ -1760,14 +1748,22 @@ export function drawTab7Content(heading, optionContentElement) {
     
         Object.keys(ascendencyBuffsArray).forEach(buffKey => {
             const buff = ascendencyBuffsArray[buffKey];
-            const buffNameRaw = typeof buff?.name === 'string' ? buff.name : capitaliseString(buffKey);
+            // The buff's display name comes from the catalogue, keyed by its
+            // internal key; buff.name in the data file is the English fallback.
+            const buffNameKey = 'buffName' + capitaliseString(buffKey);
+            const buffNameLocalized = localize(buffNameKey, getLanguage());
+            const buffNameRaw = buffNameLocalized !== buffNameKey
+                ? buffNameLocalized
+                : (typeof buff?.name === 'string' ? buff.name : capitaliseString(buffKey));
             const buffName = typeof buffNameRaw === 'string' ? buffNameRaw : capitaliseString(buffKey);
             const buffNameSlug = String(buffName).replace(/\s+/g, '-').toLowerCase();
             const buffNameId = String(buffName).replace(/\s+/g, '').replace(/^./, str => str.toLowerCase());
     
             const buffRowDescription = `buff${capitaliseString(buffKey)}Row`;
             const cost = buff.rebuyable ? buff.baseCostAp * Math.pow(buff.rebuyableIncreaseMultiple, buff.boughtYet) : buff.baseCostAp;
-            const buyStatus = buff.boughtYet > 0 ? (buff.rebuyable ? `Bought ${buff.boughtYet} times` : "Purchased") : "Not Bought";
+            const buyStatus = buff.boughtYet > 0
+                ? (buff.rebuyable ? localize('textBoughtTimes', getLanguage()).replace('{count}', buff.boughtYet) : localize('textPurchased', getLanguage()))
+                : localize('textNotBought', getLanguage());
     
             const buffRow = createOptionRow({
                 labelId: buffRowDescription,
@@ -1775,15 +1771,15 @@ export function drawTab7Content(heading, optionContentElement) {
                 labelText: `${buffName}:`,
                 inputElements: [
                     createTextElement(
-                        `Rebuyable: <span class="green-ready-text">
-                        ${buff.rebuyable ? (buff.timesRebuyable === 100000 ? "Yes" : buff.timesRebuyable) : "No"}
+                        `${localize('labelRebuyable', getLanguage())} <span class="green-ready-text">
+                        ${buff.rebuyable ? (buff.timesRebuyable === 100000 ? localize('textYes', getLanguage()) : buff.timesRebuyable) : localize('textNo', getLanguage())}
                       </span>`,                  
                         `buff${capitaliseString(buffKey)}RebuyableText`,
                         ['buff-value']
                     ),                
                     createTextElement(buyStatus, `buff${capitaliseString(buffKey)}BuyStatusText`, ['buff-value']),
                     createButton({
-                        text: `BUY`,
+                        text: localize('buttonBuy', getLanguage()),
                         classNames: ['option-button', 'red-disabled-text', 'ascendency-buff-button', `buff-class-${buffNameSlug}`],
                         onClick: () => {
                             purchaseBuff(buffKey, cost);
@@ -1903,7 +1899,7 @@ export function drawTab7Content(heading, optionContentElement) {
                     ['progress-bar-container', 'invisible']
                 ),
             ],
-            descriptionText: '<span id="blackHoleChargeProgressRowDescription">BLACK HOLE CHARGING</span>',
+            descriptionText: `<span id="blackHoleChargeProgressRowDescription">${localize('textBlackHoleCharging', getLanguage())}</span>`,
             resourcePriceObject: '',
             dataConditionCheck: null,
             objectSectionArgument1: null,
@@ -1980,7 +1976,7 @@ export function drawTab7Content(heading, optionContentElement) {
         blackHoleCanvasContainer.style.flex = '0 0 auto';
 
         const blackHoleButton1 = createButton({
-            text: 'Research Black Hole',
+            text: localize('buttonResearchBlackHole', getLanguage()),
             classNames: ['id_blackHoleResearchButton', 'option-button', 'red-disabled-text', 'wide-option-button'],
             onClick: () => {
                 if (getBlackHoleResearchDone()) {
@@ -2017,7 +2013,7 @@ export function drawTab7Content(heading, optionContentElement) {
             }
         });
         const blackHoleButton2 = createButton({
-            text: 'Power',
+            text: localize('buttonBlackHolePower', getLanguage()),
             classNames: ['id_blackHoleButton2', 'option-button', 'wide-option-button', 'option-button--wrap'],
             onClick: () => {
                 if (!getBlackHoleResearchDone()) {
@@ -2040,7 +2036,7 @@ export function drawTab7Content(heading, optionContentElement) {
             }
         });
         const blackHoleButton3 = createButton({
-            text: 'Duration',
+            text: localize('buttonBlackHoleDuration', getLanguage()),
             classNames: ['id_blackHoleButton3', 'option-button', 'wide-option-button', 'option-button--wrap'],
             onClick: () => {
                 if (!getBlackHoleResearchDone()) {
@@ -2067,7 +2063,7 @@ export function drawTab7Content(heading, optionContentElement) {
             }
         });
         const blackHoleButton4 = createButton({
-            text: 'Recharge',
+            text: localize('buttonBlackHoleRecharge', getLanguage()),
             classNames: ['id_blackHoleButton4', 'option-button', 'wide-option-button', 'option-button--wrap'],
             onClick: () => {
                 if (!getBlackHoleResearchDone()) {
@@ -2118,7 +2114,7 @@ export function drawTab7Content(heading, optionContentElement) {
             }
         });
         const blackHoleActivateChargeButton = createButton({
-            text: 'Charge',
+            text: localize('buttonBlackHoleCharge', getLanguage()),
             classNames: ['id_blackHoleChargeButton', 'option-button'],
             onClick: () => {
                 if (getBlackHoleAlwaysOn()) {

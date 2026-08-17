@@ -155,7 +155,7 @@ export function drawTab4Content(heading, optionContentElement) {
                         classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check'],
                         onClick: () => {
                             increaseResourceStorage(['dieselQuantity'], ['diesel'], ['compounds']);
-                            disableStorageNotificationActionIfShowing('diesel', 'Already Increased!');
+                            disableStorageNotificationActionIfShowing('diesel');
                             storagePrice = getResourceDataObject('compounds', ['diesel', 'storageCapacity']) - 1;
                         },
                         dataConditionCheck: 'upgradeCheck',
@@ -199,7 +199,7 @@ export function drawTab4Content(heading, optionContentElement) {
                         autoBuyerTier: 'tier1',
                         rowCategory: 'compound'
                     }),
-                    createTextElement(`Quantity: ${getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier1', 'quantity'])}`, 'dieselAB1Quantity', ['autoBuyer-building-quantity']),
+                    createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier1', 'quantity'])}`, 'dieselAB1Quantity', ['autoBuyer-building-quantity']),
                     createToggleSwitch('diesel1Toggle', true, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier1', 'active']);
                     }, ['toggle-switch-spacing']),
@@ -464,7 +464,7 @@ export function drawTab4Content(heading, optionContentElement) {
                         classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check'],
                         onClick: () => {
                             increaseResourceStorage(['glassQuantity'], ['glass'], ['compounds']);
-                            disableStorageNotificationActionIfShowing('glass', 'Already Increased!');
+                            disableStorageNotificationActionIfShowing('glass');
                             storagePrice = getResourceDataObject('compounds', ['glass', 'storageCapacity']) - 1;
                         },
                         dataConditionCheck: 'upgradeCheck',
@@ -765,7 +765,7 @@ export function drawTab4Content(heading, optionContentElement) {
                         classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check'],
                         onClick: () => {
                             increaseResourceStorage(['steelQuantity'], ['steel'], ['compounds']);
-                            disableStorageNotificationActionIfShowing('steel', 'Already Increased!');
+                            disableStorageNotificationActionIfShowing('steel');
                             storagePrice = getResourceDataObject('compounds', ['steel', 'storageCapacity']) - 1;
                         },
                         dataConditionCheck: 'upgradeCheck',
@@ -1065,7 +1065,7 @@ export function drawTab4Content(heading, optionContentElement) {
                         classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check'],
                         onClick: () => {
                             increaseResourceStorage(['concreteQuantity'], ['concrete'], ['compounds']);
-                            disableStorageNotificationActionIfShowing('concrete', 'Already Increased!');
+                            disableStorageNotificationActionIfShowing('concrete');
                             storagePrice = getResourceDataObject('compounds', ['concrete', 'storageCapacity']) - 1;
                         },
                         dataConditionCheck: 'upgradeCheck',
@@ -1367,9 +1367,9 @@ export function drawTab4Content(heading, optionContentElement) {
                         classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check'],
                         onClick: () => {
                             increaseResourceStorage(['waterQuantity', 'concreteQuantity'], ['water', 'concrete'], ['compounds', 'compounds']);
-                            disableStorageNotificationActionIfShowing('water', 'Already Increased!');
+                            disableStorageNotificationActionIfShowing('water');
                             storagePrice = getResourceDataObject('compounds', ['water', 'storageCapacity']) - 1;
-                            extraResourceName = 'Concrete';
+                            extraResourceName = localize('compoundConcrete', getLanguage());
                         },
                         dataConditionCheck: 'upgradeCheck',
                         resourcePriceObject: '',
@@ -1668,7 +1668,7 @@ export function drawTab4Content(heading, optionContentElement) {
                         classNames: ['option-button', 'red-disabled-text', 'compound-cost-sell-check'],
                         onClick: () => {
                             increaseResourceStorage(['titaniumQuantity'], ['titanium'], ['compounds']);
-                            disableStorageNotificationActionIfShowing('titanium', 'Already Increased!');
+                            disableStorageNotificationActionIfShowing('titanium');
                             storagePrice = getResourceDataObject('compounds', ['titanium', 'storageCapacity']) - 1;
                         },
                         dataConditionCheck: 'upgradeCheck',

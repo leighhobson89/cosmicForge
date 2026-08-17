@@ -59,8 +59,25 @@ const SANCTIONED_EMPTY_KEYS = [
  *   de 41 -> 42   "AP:"
  *   it 37 -> 39   "AP:", "NO"
  *   fr 44 -> 45   "Options" (categoryOptions)
+ *
+ * Raised again while extracting the drawTab*Content literals, which added ~570
+ * keys. Every addition below is a word that is genuinely the same in that
+ * language — currency names, the theme proper nouns, and units:
+ *   es 37 -> 48   "Solar", "Euro", "Yen", "Won", "Normal" (notation and star-map
+ *                 mode), "Terminal", "Supernova", "Neutral", "Bitcoin (₿)"
+ *   de 42 -> 60   the same set plus "Dollar ($)", "Notation:", "Land:",
+ *                 "Industrial"/"Normal" variants and the German-identical
+ *                 megastructure stage words
+ *   it 39 -> 46   "Euro", "Yen", "Won", "Bitcoin (₿)", "Supernova", "Rare",
+ *                 "Intelligence:"
+ *   fr 45 -> 72   the currency block, "Terminal", "Supernova", "Distance",
+ *                 "Rare", "Notation:", "Traits:", "Air:", "Type", "2 Minutes"
+ *                 through "10 Minutes"
+ *
+ * These are the numbers a native-reader pass (item 8) should bring down; none
+ * of them may rise without a line added here.
  */
-const IDENTICAL_TO_ENGLISH_CEILING = { es: 37, de: 42, it: 39, fr: 45 };
+const IDENTICAL_TO_ENGLISH_CEILING = { es: 48, de: 60, it: 46, fr: 72 };
 
 /**
  * Ratchet for status.md item 7 (harden the key checker). Keys that never appear
@@ -68,8 +85,17 @@ const IDENTICAL_TO_ENGLISH_CEILING = { es: 37, de: 42, it: 39, fr: 45 };
  * is currently explained — built by concatenation at runtime, or wired through
  * `index.html` element ids — but the number must not grow, because an unwired
  * key is a string that will never reach a player.
+ *
+ * Raised from 21 to 46 by the drawTab*Content extraction. The 25 additions are
+ * all built by concatenation at the call site, so no literal for them exists:
+ *   starShipModule* / fleetShip*   built from the module or ship id in
+ *                                  drawTab5Content (`'starShipModule' + id.slice(2)`)
+ *   buffName*                      built from the ascendency buff key in
+ *                                  drawTab7Content
+ *   resourceSolar                  reached through localizeMaterialName, which
+ *                                  concatenates the section prefix and the key
  */
-const UNREFERENCED_KEY_CEILING = 21;
+const UNREFERENCED_KEY_CEILING = 46;
 
 /**
  * Keys with a known unbalanced HTML tag, allowlisted so the sweep below can stay

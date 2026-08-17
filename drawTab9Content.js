@@ -23,10 +23,10 @@ export function drawTab9Content(heading, optionContentElement) {
         const exitGameRow = createOptionRow({
             labelId: 'exitGameRow',
             renderNameABs: null,
-            labelText: 'Exit Game:',
+            labelText: localize('tab9ExitGameRowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: 'EXIT GAME',
+                    text: localize('headerMainExitGame', getLanguage()),
                     classNames: ['option-button', 'green-ready-text'],
                     onClick: () => {
                         const ua = (typeof window !== 'undefined' && window.navigator?.userAgent) ? window.navigator.userAgent.toLowerCase() : '';
@@ -36,8 +36,8 @@ export function drawTab9Content(heading, optionContentElement) {
                         }
 
                         callPopupModal({
-                            header: 'EXIT GAME',
-                            content: 'Would you like to save to the cloud before exiting?',
+                            header: localize('headerMainExitGame', getLanguage()),
+                            content: localize('modalExitGameText', getLanguage()),
                             showConfirm: true,
                             showCancel: true,
                             showExtra1: true,
@@ -58,19 +58,19 @@ export function drawTab9Content(heading, optionContentElement) {
                             onExtra1: function() {
                                 (async () => {
                                     if (getOnboardingMode()) {
-                                        showNotification("You can't save while onboarding mode is active!", 'info', 4000, 'loadSave');
+                                        showNotification(localize('notificationCannotSaveDuringOnboarding', getLanguage()), 'info', 4000, 'loadSave');
                                         return;
                                     }
 
                                     if (getDemoBuild()) {
-                                        showNotification('Saving is disabled in the demo build!', 'info', 4000, 'loadSave');
+                                        showNotification(localize('notificationSavingDisabledInDemo', getLanguage()), 'info', 4000, 'loadSave');
                                         return;
                                     }
 
                                     saveGame('manualExportCloud');
                                     const saveData = getSaveData();
                                     if (!saveData) {
-                                        showNotification('No save data available to export.', 'error', 3000, 'loadSave');
+                                        showNotification(localize('notificationNoSaveDataToExport', getLanguage()), 'error', 3000, 'loadSave');
                                         return;
                                     }
 
@@ -93,20 +93,20 @@ export function drawTab9Content(heading, optionContentElement) {
                                     window.close();
                                 })().catch((error) => {
                                     console.error('Exit & Save failed:', error);
-                                    showNotification('Error saving game to cloud!', 'error', 3000, 'loadSave');
+                                    showNotification(localize('notificationErrorSavingToCloud', getLanguage()), 'error', 3000, 'loadSave');
                                 });
                             },
                             onExtra2: null,
-                            confirmLabel: "EXIT AND DON'T SAVE",
-                            cancelLabel: 'CANCEL',
-                            extra1Label: 'EXIT AND SAVE',
+                            confirmLabel: localize('modalExitGameConfirmLabel', getLanguage()),
+                            cancelLabel: localize('buttonCancel', getLanguage()),
+                            extra1Label: localize('modalExitGameExtra1Label', getLanguage()),
                             extra2Label: null,
                             setupToolTips: false,
                         });
                     },
                 }),
             ],
-            descriptionText: 'Here you can Exit The Game',
+            descriptionText: localize('headerDescExitGame', getLanguage()),
             resourcePriceObject: null,
             dataConditionCheck: null,
             objectSectionArgument1: null,
@@ -129,22 +129,22 @@ export function drawTab9Content(heading, optionContentElement) {
         const settingsCurrencySymbolRow = createOptionRow({
             labelId: 'settingsCurrencySymbolRow',
             renderNameABs: null,
-            labelText: 'Currency:',
+            labelText: localize('tab9CurrencyRowLabel', getLanguage()),
             inputElements: [
                 createDropdown('currencySelect', [
-                    { value: '$', text: 'Dollar ($)' },
-                    { value: '€', text: 'Euro (€)' },
-                    { value: '£', text: 'Pound (£)' },
-                    { value: '¥', text: 'Yen (¥)' },
-                    { value: '₹', text: 'Rupee (₹)' },
-                    { value: '₩', text: 'Won (₩)' },
-                    { value: '₣', text: 'Franc (₣)' },
-                    { value: '₿', text: 'Bitcoin (₿)' },
+                    { value: '$', text: localize('dropdownCurrencyDollar', getLanguage()) },
+                    { value: '€', text: localize('dropdownCurrencyEuro', getLanguage()) },
+                    { value: '£', text: localize('dropdownCurrencyPound', getLanguage()) },
+                    { value: '¥', text: localize('dropdownCurrencyYen', getLanguage()) },
+                    { value: '₹', text: localize('dropdownCurrencyRupee', getLanguage()) },
+                    { value: '₩', text: localize('dropdownCurrencyWon', getLanguage()) },
+                    { value: '₣', text: localize('dropdownCurrencyFranc', getLanguage()) },
+                    { value: '₿', text: localize('dropdownCurrencyBitcoin', getLanguage()) },
                 ], getCurrencySymbol(), (value) => {
                     setCurrencySymbol(value);
                 }),
             ],
-            descriptionText: 'Change the symbol used for Cash (Visual Only).',
+            descriptionText: localize('tab9CurrencyRowDescription', getLanguage()),
             resourcePriceObject: null,
             dataConditionCheck: null,
             objectSectionArgument1: null,
@@ -164,16 +164,16 @@ export function drawTab9Content(heading, optionContentElement) {
         const settingsNotationRow = createOptionRow({
             labelId: 'settingsNotationRow',
             renderNameABs: null,
-            labelText: 'Notation:',
+            labelText: localize('tab9NotationRowLabel', getLanguage()),
             inputElements: [
                 createDropdown('notationSelect', [
-                    { value: 'normalCondensed', text: 'Normal Condensed' },
-                    { value: 'normal', text: 'Normal' },
+                    { value: 'normalCondensed', text: localize('dropdownNotationNormalCondensed', getLanguage()) },
+                    { value: 'normal', text: localize('dropdownNotationNormal', getLanguage()) },
                 ], getNotationType(), (value) => {
                     setNotationType(value);
                 }),
             ],
-            descriptionText: 'Change the notation used.',
+            descriptionText: localize('tab9NotationRowDescription', getLanguage()),
             resourcePriceObject: null,
             dataConditionCheck: null,
             objectSectionArgument1: null,
@@ -193,13 +193,13 @@ export function drawTab9Content(heading, optionContentElement) {
         const settingsToggleNotificationsRow = createOptionRow({
             labelId: 'settingsToggleNotificationsRow',
             renderNameABs: null,
-            labelText: 'Toggle Notifications:',
+            labelText: localize('tab9ToggleNotificationsRowLabel', getLanguage()),
             inputElements: [
                 createToggleSwitch('notificationsToggle', true, (isEnabled) => {
                     setNotificationsToggle(isEnabled);
                 }, null),
             ],
-            descriptionText: 'Toggle notifications',
+            descriptionText: localize('tab9ToggleNotificationsRowDescription', getLanguage()),
             resourcePriceObject: null,
             dataConditionCheck: null,
             objectSectionArgument1: null,
@@ -219,7 +219,7 @@ export function drawTab9Content(heading, optionContentElement) {
         const customPointerToggleRow = createOptionRow({
             labelId: 'customPointerToggleRow',
             renderNameABs: null,
-            labelText: 'Custom Pointer:',
+            labelText: localize('tab9CustomPointerRowLabel', getLanguage()),
             inputElements: [
                 createToggleSwitch('customPointerToggle', false, (isEnabled) => {
                     setCustomPointerEnabled(isEnabled);
@@ -237,7 +237,7 @@ export function drawTab9Content(heading, optionContentElement) {
                     }, { immediate: true, flushReason: 'settings' });
                 }, null),
             ],
-            descriptionText: 'Toggle Cosmic Forge mouse cursor.',
+            descriptionText: localize('tab9CustomPointerRowDescription', getLanguage()),
             resourcePriceObject: null,
             dataConditionCheck: null,
             objectSectionArgument1: null,
@@ -257,7 +257,7 @@ export function drawTab9Content(heading, optionContentElement) {
         const mouseTrailToggleRow = createOptionRow({
             labelId: 'mouseTrailToggleRow',
             renderNameABs: null,
-            labelText: 'Mouse Trail:',
+            labelText: localize('tab9MouseTrailRowLabel', getLanguage()),
             inputElements: [
                 createToggleSwitch('mouseTrailToggle', true, (isEnabled) => {
                     setMouseParticleTrailEnabled(isEnabled);
@@ -274,7 +274,7 @@ export function drawTab9Content(heading, optionContentElement) {
                     }, { immediate: true, flushReason: 'settings' });
                 }, null),
             ],
-            descriptionText: 'Toggle the mouse particle trail effect.',
+            descriptionText: localize('tab9MouseTrailRowDescription', getLanguage()),
             resourcePriceObject: null,
             dataConditionCheck: null,
             objectSectionArgument1: null,
@@ -294,24 +294,24 @@ export function drawTab9Content(heading, optionContentElement) {
         const settingsThemeRow = createOptionRow({
             labelId: 'settingsThemeRow',
             renderNameABs: null,
-            labelText: 'Theme:',
+            labelText: localize('tab9ThemeRowLabel', getLanguage()),
             inputElements: [
                 createDropdown('themeSelect', [
-                    { value: 'terminal', text: 'Terminal' },
-                    { value: 'dark', text: 'Dark' },
-                    { value: 'supernova', text: 'Supernova' },
-                    { value: 'galaxy', text: 'Galaxy' },
-                    { value: 'space', text: 'Space' },
-                    { value: 'misty', text: 'Misty' },
-                    { value: 'light', text: 'Light' },
-                    { value: 'frosty', text: 'Frosty' },
-                    { value: 'summer', text: 'Summer' },
+                    { value: 'terminal', text: localize('dropdownThemeTerminal', getLanguage()) },
+                    { value: 'dark', text: localize('dropdownThemeDark', getLanguage()) },
+                    { value: 'supernova', text: localize('dropdownThemeSupernova', getLanguage()) },
+                    { value: 'galaxy', text: localize('dropdownThemeGalaxy', getLanguage()) },
+                    { value: 'space', text: localize('dropdownThemeSpace', getLanguage()) },
+                    { value: 'misty', text: localize('dropdownThemeMisty', getLanguage()) },
+                    { value: 'light', text: localize('dropdownThemeLight', getLanguage()) },
+                    { value: 'frosty', text: localize('dropdownThemeFrosty', getLanguage()) },
+                    { value: 'summer', text: localize('dropdownThemeSummer', getLanguage()) },
                 ], document.body.getAttribute('data-theme'), (value) => {
                     selectTheme(value);
                     setAchievementIconImageUrls();
                 }),
             ],
-            descriptionText: 'Change styling of the page.',
+            descriptionText: localize('tab9ThemeRowDescription', getLanguage()),
             resourcePriceObject: null,
             dataConditionCheck: null,
             objectSectionArgument1: null,
@@ -331,13 +331,13 @@ export function drawTab9Content(heading, optionContentElement) {
         const weatherEffectSettingsRow = createOptionRow({
             labelId: 'weatherEffectSettingsRow',
             renderNameABs: null,
-            labelText: 'Weather Effects:',
+            labelText: localize('tab9WeatherEffectsRowLabel', getLanguage()),
             inputElements: [
                 createToggleSwitch('weatherEffectSettingToggle', true, (isEnabled) => {
                     setWeatherEffectSetting(isEnabled);
                 }, null),
             ],
-            descriptionText: 'Toggle weather effects on or off.',
+            descriptionText: localize('tab9WeatherEffectsRowDescription', getLanguage()),
             resourcePriceObject: null,
             dataConditionCheck: null,
             objectSectionArgument1: null,
@@ -395,17 +395,17 @@ export function drawTab9Content(heading, optionContentElement) {
         const toggleGameFullScreenRow = createOptionRow({
             labelId: 'toggleGameFullScreenRow',
             renderNameABs: null,
-            labelText: 'Toggle Full Screen:',
+            labelText: localize('tab9ToggleFullScreenRowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Toggle`,
+                    text: localize('buttonToggle', getLanguage()),
                     classNames: ['option-button', 'full-screen-button'],
                     onClick: () => {
                         toggleGameFullScreen();
                     },
                 }),
             ],
-            descriptionText: 'Toggle Full Screen Mode. (or F11)',
+            descriptionText: localize('tab9ToggleFullScreenRowDescription', getLanguage()),
             resourcePriceObject: null,
             dataConditionCheck: null,
             objectSectionArgument1: null,
@@ -459,13 +459,13 @@ export function drawTab9Content(heading, optionContentElement) {
         const newsTickerToggleRow = createOptionRow({
             labelId: 'newsTickerToggleRow',
             renderNameABs: null,
-            labelText: 'News Ticker Feature:',
+            labelText: localize('tab9NewsTickerRowLabel', getLanguage()),
             inputElements: [
                 createToggleSwitch('newsTickerSettingToggle', true, (isEnabled) => {
                     setNewsTickerSetting(isEnabled);
                 }, null),
             ],
-            descriptionText: 'Toggle the News Ticker feature on or off.',
+            descriptionText: localize('tab9NewsTickerRowDescription', getLanguage()),
             resourcePriceObject: null,
             dataConditionCheck: null,
             objectSectionArgument1: null,
@@ -490,7 +490,7 @@ export function drawTab9Content(heading, optionContentElement) {
         const backGroundAudioRow = createOptionRow({
             labelId: 'backGroundAudioRow',
             renderNameABs: null,
-            labelText: 'Background Ambience Sound:',
+            labelText: localize('tab9BackgroundAudioRowLabel', getLanguage()),
             inputElements: [
                 createToggleSwitch('backGroundAudioToggle', false, (isEnabled) => {
                     setBackgroundAudio(isEnabled);
@@ -507,7 +507,7 @@ export function drawTab9Content(heading, optionContentElement) {
                     }, { immediate: true, flushReason: 'settings' });
                 }, null),
             ],
-            descriptionText: 'Toggle Background Ambience on or off.',
+            descriptionText: localize('tab9BackgroundAudioRowDescription', getLanguage()),
             resourcePriceObject: null,
             dataConditionCheck: null,
             objectSectionArgument1: null,
@@ -532,7 +532,7 @@ export function drawTab9Content(heading, optionContentElement) {
         const sfxAudioRow = createOptionRow({
             labelId: 'sfxAudioRow',
             renderNameABs: null,
-            labelText: 'Sound Effects:',
+            labelText: localize('tab9SfxRowLabel', getLanguage()),
             inputElements: [
                 createToggleSwitch('sfxToggle', false, (isEnabled) => {
                     setSfx(isEnabled);
@@ -549,7 +549,7 @@ export function drawTab9Content(heading, optionContentElement) {
                     }, { immediate: true, flushReason: 'settings' });
                 }, null),
             ],
-            descriptionText: 'Toggle Sound Effects on or off.',
+            descriptionText: localize('tab9SfxRowDescription', getLanguage()),
             resourcePriceObject: null,
             dataConditionCheck: null,
             objectSectionArgument1: null,
@@ -577,13 +577,13 @@ export function drawTab9Content(heading, optionContentElement) {
         const autoSaveConfigRow = createOptionRow({
             labelId: 'autoSaveConfigRow',
             renderNameABs: null,
-            labelText: 'Auto Save:',
+            labelText: localize('tab9AutoSaveRowLabel', getLanguage()),
             inputElements: [
                 createDropdown('autoSaveFrequency', [
-                    { value: 120000, text: '2 Minutes' },
-                    { value: 180000, text: '3 Minutes' },
-                    { value: 300000, text: '5 Minutes' },
-                    { value: 600000, text: '10 Minutes' },
+                    { value: 120000, text: localize('dropdownAutoSave2Minutes', getLanguage()) },
+                    { value: 180000, text: localize('dropdownAutoSave3Minutes', getLanguage()) },
+                    { value: 300000, text: localize('dropdownAutoSave5Minutes', getLanguage()) },
+                    { value: 600000, text: localize('dropdownAutoSave10Minutes', getLanguage()) },
                 ], parseInt(getAutoSaveFrequency()), (value) => {
                     setAutoSaveFrequency(parseInt(value));
                     initializeAutoSave();
@@ -593,7 +593,7 @@ export function drawTab9Content(heading, optionContentElement) {
                     setWasAutoSaveToggled(getAutoSaveToggle());
                     initializeAutoSave();
                     if (!isEnabled) {
-                        showNotification('AUTOSAVE IS OFF, REMEMBER TO BACK UP SAVES MANUALLY', 'error', 5000, 'loadSave');
+                        showNotification(localize('notificationAutoSaveOff', getLanguage()), 'error', 5000, 'loadSave');
                     }
                 }, ['toggle-switch-spacing']),
             ],
@@ -629,18 +629,18 @@ export function drawTab9Content(heading, optionContentElement) {
         const exportSaveRow = createOptionRow({
             labelId: 'exportSaveRow',
             renderNameABs: null,
-            labelText: 'Export Save:',
+            labelText: localize('tab9ExportSaveRowLabel', getLanguage()),
             inputElements: [
-                createTextFieldArea('exportSaveArea', ['export-save'], 'Save Data should appear here', null),
+                createTextFieldArea('exportSaveArea', ['export-save'], localize('placeholderExportSaveArea', getLanguage()), null),
                 createButton({
-                    text: `Export`,
+                    text: localize('buttonExport', getLanguage()),
                     classNames: ['option-button', 'save-load-button', ...demoExtraClasses],
                     onClick: () => {
                         copySaveStringToClipBoard();
                     },
                 }),
                 createButton({
-                    text: `Manual Save`,
+                    text: localize('buttonManualSave', getLanguage()),
                     classNames: ['option-button', 'save-load-file-export', ...demoExtraClasses],
                     onClick: () => {
                         downloadSaveStringToComputer();
@@ -667,18 +667,18 @@ export function drawTab9Content(heading, optionContentElement) {
         const importSaveRow = createOptionRow({
             labelId: 'importSaveRow',
             renderNameABs: null,
-            labelText: 'Import Save:',
+            labelText: localize('tab9ImportSaveRowLabel', getLanguage()),
             inputElements: [
-                createTextFieldArea('importSaveArea', ['import-save'], 'Please paste your Save Data here...', null),
+                createTextFieldArea('importSaveArea', ['import-save'], localize('placeholderImportSaveArea', getLanguage()), null),
                 createButton({
-                    text: `Import`,
+                    text: localize('buttonImport', getLanguage()),
                     classNames: ['option-button', 'save-load-button', ...demoExtraClasses],
                     onClick: () => {
                         loadGame();
                     },
                 }),
                 createButton({
-                    text: `Manual Load`,
+                    text: localize('buttonManualLoad', getLanguage()),
                     classNames: ['option-button', 'save-load-file-export', ...demoExtraClasses],
                     onClick: () => {
                         importSaveStringFileFromComputer();
@@ -705,14 +705,14 @@ export function drawTab9Content(heading, optionContentElement) {
         const exportCloudSaveRow = createOptionRow({
             labelId: 'exportCloudSaveRow',
             renderNameABs: null,
-            labelText: 'Export Cloud Save:',
+            labelText: localize('tab9ExportCloudSaveRowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Save To Cloud`,
+                    text: localize('buttonSaveToCloud', getLanguage()),
                     classNames: ['option-button', 'save-load-button', ...demoExtraClasses],
                     onClick: () => {
                         if (getOnboardingMode()) {
-                            showNotification("You can't save while onboarding mode is active!", 'info', 4000, 'loadSave');
+                            showNotification(localize('notificationCannotSaveDuringOnboarding', getLanguage()), 'info', 4000, 'loadSave');
                             return;
                         }
 
@@ -725,7 +725,7 @@ export function drawTab9Content(heading, optionContentElement) {
                         setSaveData(null);
                     },
                 }),
-                Object.assign(document.createElement('span'), { innerHTML: 'Pioneer Name:', className: 'save-name-margin' }),
+                Object.assign(document.createElement('span'), { innerHTML: localize('labelPioneerName', getLanguage()), className: 'save-name-margin' }),
                 createTextFieldArea('saveName', ['save-name', 'save-name-width', 'save-name-height', 'save-name-margin'], '', getSaveName()),
             ],
             descriptionText: '',
@@ -748,10 +748,10 @@ export function drawTab9Content(heading, optionContentElement) {
         const importCloudSaveRow = createOptionRow({
             labelId: 'importCloudSaveRow',
             renderNameABs: null,
-            labelText: 'Import Cloud Save:',
+            labelText: localize('tab9ImportCloudSaveRowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Load From Cloud`,
+                    text: localize('buttonLoadFromCloud', getLanguage()),
                     classNames: ['option-button', 'save-load-button', ...demoExtraClasses],
                     onClick: () => {
                         loadGameFromCloud();
@@ -778,10 +778,10 @@ export function drawTab9Content(heading, optionContentElement) {
         const hardResetRow = createOptionRow({
             labelId: 'hardResetRow',
             renderNameABs: null,
-            labelText: 'HARD RESET:',
+            labelText: localize('tab9HardResetRowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `!!!RESET ALL GAME PROGRESS FOR THIS PIONEER NAME!!!`,
+                    text: localize('buttonHardResetAllProgress', getLanguage()),
                     classNames: ['option-button', 'hard-reset-button'],
                     onClick: () => {
                         callPopupModal({
@@ -794,7 +794,7 @@ export function drawTab9Content(heading, optionContentElement) {
                             onConfirm: function () {
                                 destroySaveGameOnCloud();
                                 showNotification(
-                                    `GAME HARD RESET!<br><br>Please REFRESH your Browser and use same Pioneer name to start the new game!`,
+                                    localize('notificationHardResetComplete', getLanguage()),
                                     'error',
                                     200000000,
                                     'special'
@@ -807,8 +807,8 @@ export function drawTab9Content(heading, optionContentElement) {
                             },
                             onExtra1: null,
                             onExtra2: null,
-                            confirmLabel: '! RESET ALL PROGRESS, EVEN ON CLOUD !',
-                            cancelLabel: 'CANCEL TO SAFETY',
+                            confirmLabel: localize('modalHardResetConfirmLabel', getLanguage()),
+                            cancelLabel: localize('modalHardResetCancelLabel', getLanguage()),
                             extra1Label: null,
                             extra2Label: null,
                             setupToolTips: false,
@@ -816,7 +816,7 @@ export function drawTab9Content(heading, optionContentElement) {
                     },
                 }),
             ],
-            descriptionText: 'Hard Reset',
+            descriptionText: localize('tab9HardResetRowDescription', getLanguage()),
             resourcePriceObject: null,
             dataConditionCheck: null,
             objectSectionArgument1: null,
@@ -988,7 +988,7 @@ export function drawTab9Content(heading, optionContentElement) {
         const activeTitle = document.createElement('div');
         activeTitle.id = `${rowId}ActiveTitle`;
         activeTitle.classList.add('help-sub-header-text');
-        activeTitle.innerHTML = 'Active Events';
+        activeTitle.innerHTML = localize('tab9EventsActiveTitle', getLanguage());
         container.appendChild(activeTitle);
 
         const activeTable = document.createElement('table');
@@ -997,13 +997,13 @@ export function drawTab9Content(heading, optionContentElement) {
         activeTable.innerHTML = `
             <thead>
                 <tr>
-                    <th>Event</th>
-                    <th>Active Until</th>
-                    <th>Effect</th>
+                    <th>${localize('tab9EventsColumnEvent', getLanguage())}</th>
+                    <th>${localize('tab9EventsColumnActiveUntil', getLanguage())}</th>
+                    <th>${localize('tab9EventsColumnEffect', getLanguage())}</th>
                 </tr>
             </thead>
             <tbody id="timedEventsActiveBody">
-                <tr><td colspan="3">No active timed events.</td></tr>
+                <tr><td colspan="3">${localize('tab9EventsNoneActive', getLanguage())}</td></tr>
             </tbody>
         `;
         container.appendChild(activeTable);
@@ -1012,7 +1012,7 @@ export function drawTab9Content(heading, optionContentElement) {
         historyTitle.id = `${rowId}HistoryTitle`;
         historyTitle.classList.add('help-sub-header-text');
         historyTitle.style.marginTop = '14px';
-        historyTitle.innerHTML = 'Event History';
+        historyTitle.innerHTML = localize('tab9EventsHistoryTitle', getLanguage());
         container.appendChild(historyTitle);
 
         const historyTable = document.createElement('table');
@@ -1021,13 +1021,13 @@ export function drawTab9Content(heading, optionContentElement) {
         historyTable.innerHTML = `
             <thead>
                 <tr>
-                    <th>Event</th>
-                    <th>Total Duration</th>
-                    <th>Effect</th>
+                    <th>${localize('tab9EventsColumnEvent', getLanguage())}</th>
+                    <th>${localize('tab9EventsColumnTotalDuration', getLanguage())}</th>
+                    <th>${localize('tab9EventsColumnEffect', getLanguage())}</th>
                 </tr>
             </thead>
             <tbody id="timedEventsHistoryBody">
-                <tr><td colspan="3">No completed timed events yet.</td></tr>
+                <tr><td colspan="3">${localize('tab9EventsNoneCompleted', getLanguage())}</td></tr>
             </tbody>
         `;
         container.appendChild(historyTable);

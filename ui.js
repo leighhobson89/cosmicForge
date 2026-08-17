@@ -5328,7 +5328,9 @@ function hideNotification(notification) {
 }
 
 
-export function disableStorageNotificationActionIfShowing(key, tooltipText = 'Already Increased!') {
+// The tooltip default is resolved per call rather than baked in, so it follows a
+// runtime language change instead of freezing on whatever was active at import.
+export function disableStorageNotificationActionIfShowing(key, tooltipText = localize('tooltipStorageAlreadyIncreased', getLanguage())) {
     const normalizedKey = String(key || '').trim();
     if (!normalizedKey) {
         return;

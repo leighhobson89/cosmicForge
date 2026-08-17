@@ -172,6 +172,18 @@ function getCompoundReverseIndex(language) {
     return index;
 }
 
+// Resource and compound display names are stored in the catalogue under
+// `resource<Name>` / `compound<Name>`, but the game data holds the internal key
+// plus the section it lives in ('resources' / 'compounds'). Several draw
+// functions and the frame loop need to turn that pair into a display name, so
+// the mapping lives here rather than being re-derived at each call site.
+function localizeMaterialName(name, section, language) {
+    if (typeof name !== 'string' || !name) return name;
+    const prefix = section === 'compounds' ? 'compound' : 'resource';
+    const capitalised = name.charAt(0).toUpperCase() + name.slice(1);
+    return localize(prefix + capitalised, language);
+}
+
 function reverseLocalizeForCompounds(localizedValue, language) {
     if (typeof localizedValue !== 'string') return localizedValue;
 
@@ -184,6 +196,7 @@ function reverseLocalizeForCompounds(localizedValue, language) {
 
 export {
     localize,
+    localizeMaterialName,
     reverseLocalizeForCompounds,
     LANGUAGE_STORAGE_KEY,
     DEFAULT_LANGUAGE

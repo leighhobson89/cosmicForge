@@ -6,6 +6,65 @@ import { getFactoryStarsArray, getSettledStars, setInFormation, setRedrawBattleD
 import { getMaxFleetShip, getFleetShips, copyStarDataToDestinationStarField, getResourceDataObject, getStarShipParts, getStarShipPartsNeededInTotalPerModule, getStarSystemDataObject, setStarSystemDataObject } from './resourceDataObject.js';
 import { capitaliseString, capitaliseWordsWithRomanNumerals } from './utilityFunctions.js';
 import { updateDiplomacySituation, calculateModifiedAttitude, increaseAttackAndDefensePower, generateDestinationStarData, gain, getAscendencyPointsWithRepeatableBonus } from './game.js';
+import { localize, localizeMaterialName } from './localization.js';
+import { getLanguage } from './constantsAndGlobalVars.js';
+
+// Star data holds these as English words, and the surrounding code branches on
+// them to pick a colour class, so the stored value stays canonical and only the
+// rendering of it is localized. Anything not in a map falls through unchanged,
+// which is what generated race names and trait names need.
+const CIVILIZATION_LEVEL_KEYS = {
+    None: 'civilizationLevelNone',
+    Unsentient: 'civilizationLevelUnsentient',
+    Industrial: 'civilizationLevelIndustrial',
+    Spacefaring: 'civilizationLevelSpacefaring',
+    Robotic: 'civilizationLevelRobotic'
+};
+
+const THREAT_LEVEL_KEYS = {
+    None: 'threatLevelNone',
+    Low: 'threatLevelLow',
+    Moderate: 'threatLevelModerate',
+    High: 'threatLevelHigh',
+    Extreme: 'threatLevelExtreme'
+};
+
+const ATTITUDE_KEYS = {
+    None: 'attitudeNone',
+    Receptive: 'attitudeReceptive',
+    Neutral: 'attitudeNeutral',
+    Reserved: 'attitudeReserved',
+    Belligerent: 'attitudeBelligerent',
+    Scared: 'attitudeScared'
+};
+
+const localizeFromMap = (map, value) => (map[value] ? localize(map[value], getLanguage()) : value);
+const localizeCivilizationLevel = (value) => localizeFromMap(CIVILIZATION_LEVEL_KEYS, value);
+const localizeThreatLevel = (value) => localizeFromMap(THREAT_LEVEL_KEYS, value);
+const localizeAttitude = (value) => localizeFromMap(ATTITUDE_KEYS, value);
+
+// Precipitation is a compound key plus the section it lives in.
+// Stars stubbed in for settled systems carry the literal 'Unknown' rather than a
+// compound key, so that value has to be caught before it reaches the catalogue —
+// `compoundUnknown` does not exist, and localize() would render the key itself.
+const localizePrecipitationType = (star) => {
+    const type = star?.precipitationType;
+    if (!type || type === 'Unknown') {
+        return localize('textUnknown', getLanguage());
+    }
+    return localizeMaterialName(type, star.precipitationResourceCategory ?? 'compounds', getLanguage());
+};
+
+// Star ship modules and fleet ships are addressed by id everywhere else, so the
+// display name is looked up from the id rather than carried alongside it.
+const localizeStarShipModule = (id) => localize('starShipModule' + id.slice(2), getLanguage());
+const localizeFleetShip = (id) => localize('fleetShip' + id.slice('fleet'.length), getLanguage());
+
+// Space upgrade price tuples are [quantity, key, section].
+const spaceUpgradePriceName = (upgrade, slot) => {
+    const price = getResourceDataObject('space', ['upgrades', upgrade, `resource${slot}Price`]);
+    return localizeMaterialName(price[1], price[2], getLanguage());
+};
 
 function getWeatherDisplayData(weatherTendency, weather) {
     if (Array.isArray(weatherTendency) && weatherTendency.length >= 3 && weatherTendency.every(value => value !== undefined)) {
@@ -56,7 +115,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
         
         headerRow.innerHTML = `
             <div class="star-map-header-top">
-                <div id="starMapNameField" class="star-map-name-field">Star Map</div>
+                <div id="starMapNameField" class="star-map-name-field">${localize('headerMainStarMap', getLanguage())}</div>
                 <div id="starButtonContainer" class="header-button-container"></div>
                 <div id="starMapSearchRow" class="star-map-search-row">
                     <input id="starMapSearchInput" class="star-map-search-input" type="text" placeholder="" autocomplete="off" />
@@ -67,7 +126,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                             </svg>
                         </span>
-                        <span class="star-map-search-overlay-text">Search Star...</span>
+                        <span class="star-map-search-overlay-text">${localize('placeholderSearchStar', getLanguage())}</span>
                     </div>
                     <div id="starMapSearchResults" class="star-map-search-results invisible" role="listbox"></div>
                 </div>
@@ -91,7 +150,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             }
 
             if (overlayTextEl) {
-                overlayTextEl.textContent = enabled ? 'Search Star...' : 'Normal/Dist Mode...';
+                overlayTextEl.textContent = enabled ? localize('placeholderSearchStar', getLanguage()) : localize('placeholderSearchModeUnavailable', getLanguage());
                 overlayTextEl.classList.toggle('red-disabled-text', !enabled);
             }
 
@@ -121,11 +180,16 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             }
         };
 
-        const buttons = ['Normal', 'Distance', 'Studied', 'In Range'];
+        const buttons = [
+            { mode: 'normal', key: 'starMapModeNormal' },
+            { mode: 'distance', key: 'starMapModeDistance' },
+            { mode: 'studied', key: 'starMapModeStudied' },
+            { mode: 'in range', key: 'starMapModeInRange' }
+        ];
         
         buttons.forEach(button => {
             const buttonElement = createButton({
-                text: button,
+                text: localize(button.key, getLanguage()),
                 classNames: ['option-button', 'star-option-button'],
                 onClick: () => { 
                     document.querySelectorAll('.star-option-button').forEach(btn => {
@@ -134,13 +198,13 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
 
                     buttonElement.classList.add('green-ready-text');
                     
-                    setStarMapMode(button.toLowerCase());
-                    setSearchEnabledForMode(button.toLowerCase());
+                    setStarMapMode(button.mode);
+                    setSearchEnabledForMode(button.mode);
 
                     removeStarConnectionTooltip();
                     const destinationRow = document.getElementById('descriptionContentTab5');
                     if (destinationRow) {
-                        destinationRow.innerHTML = 'This is a map of the known galaxy.';
+                        destinationRow.innerHTML = localize('headerDescStarMap', getLanguage());
                     }
 
                     const starContainer = document.querySelector('#optionContentTab5');
@@ -152,7 +216,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             
             starButtonContainer.appendChild(buttonElement);
 
-            if (buttonElement.innerHTML.toLowerCase() === getStarMapMode()) {
+            if (button.mode === getStarMapMode()) {
                 buttonElement.classList.add('green-ready-text');
             }
         });
@@ -240,7 +304,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             if (starElement) {
                 starElement.dispatchEvent(new MouseEvent('click', { bubbles: true }));
             } else {
-                showNotification(`Star not found on map: ${normalized}`, 'warning', 2500, 'starMap');
+                showNotification(localize('notificationStarNotFoundOnMap', getLanguage()).replace('{star}', normalized), 'warning', 2500, 'starMap');
             }
         };
 
@@ -252,7 +316,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             resultsEl.innerHTML = '';
 
             if (matches.length === 0) {
-                resultsEl.innerHTML = `<div class="star-map-search-item red-disabled-text" role="option">No matches</div>`;
+                resultsEl.innerHTML = `<div class="star-map-search-item red-disabled-text" role="option">${localize('textNoMatches', getLanguage())}</div>`;
                 resultsEl.classList.remove('invisible');
                 return;
             }
@@ -499,37 +563,37 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
         starLegendCells.classList.add('star-table-cells');
         starLegendCells.append(
             createTextElement(
-                `Distance`,
+                localize('textAsteroidDistance', getLanguage()),
                 'starLegendDistance',
                 ['sort-by', 'label-star'],
                 (event) => handleSortStarClick('distance')
             ),
             createTextElement(
-                `Type`,
+                localize('textStarType', getLanguage()),
                 'starLegendType',
                 ['sort-by', 'label-star'],
                 (event) => handleSortStarClick('type')
             ),
             createTextElement(
-                `<span class="inline-icon-header">Weather <p id="info_starLegendWeather" class="info-emoji">ℹ️</p></span>`,
+                `<span class="inline-icon-header">${localize('textStarWeather', getLanguage())} <p id="info_starLegendWeather" class="info-emoji">ℹ️</p></span>`,
                 'starLegendWeatherProb',
                 ['sort-by', 'label-star'],
                 (event) => handleSortStarClick('weather')
             ),
             createTextElement(
-                `Precipitation`,
+                localize('textStarPrecipitation', getLanguage()),
                 'starLegendPrecipitationType',
                 ['sort-by', 'label-star'],
                 (event) => handleSortStarClick('precipitationType')
             ),
             createTextElement(
-                `Fuel (AM)`,
+                localize('textStarFuel', getLanguage()),
                 'starLegendFuel',
                 ['no-sort', 'label-star'],
                 (event) => handleSortStarClick('fuel')
             ),
             createTextElement(
-                `AP`,
+                localize('textStarAscendencyPoints', getLanguage()),
                 'starLegendAscendencyPoints',
                 ['no-sort', 'label-star'],
                 (event) => handleSortStarClick('ascendencyPoints')
@@ -539,7 +603,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
         const starLegendRow = createOptionRow({
             labelId: `starLegendRow`,
             renderNameABs: null,
-            labelText: `Sort By:`,
+            labelText: localize('tab6SortByRowLabel', getLanguage()),
             inputElements: [
                 starLegendCells,
             ],
@@ -581,7 +645,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             const safeWeatherTendency = getWeatherDisplayData(weatherTendency, weather);
             const safeDistance = Number.isFinite(distance) ? distance : Number(distance ?? 0);
             const safeFuel = Number.isFinite(fuel) ? fuel : Number(fuel ?? 0);
-            const safePrecipitationType = precipitationType ? capitaliseString(precipitationType) : 'Unknown';
+            const safePrecipitationType = localizePrecipitationType(star);
             const safeStarType = star?.starType ?? 'A';
 
             const weatherIconSpan = `<span class="${safeWeatherTendency[2]}">${safeWeatherTendency[0]}</span>`;
@@ -592,10 +656,10 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             const isSettled = settledStarNameSet.has(normalizedLower);
             const fuelClass = isSettled ? 'red-disabled-text' : (hasEnoughFuel ? 'green-ready-text' : 'red-disabled-text');
 
-            const distanceText = isSettled ? 'Settled' : `${safeDistance.toFixed(2)} ly`;
+            const distanceText = isSettled ? localize('textSettled', getLanguage()) : `${safeDistance.toFixed(2)} ly`;
             const weatherTextDisplay = isSettled ? ' ' : weatherText;
             const precipitationText = isSettled ? ' ' : `${safePrecipitationType}`;
-            const fuelText = isSettled ? 'Settled' : `${safeFuel}`;
+            const fuelText = isSettled ? localize('textSettled', getLanguage()) : `${safeFuel}`;
 
             const apText = isSettled ? ' ' : `${displayAscendencyPoints}`;
 
@@ -720,21 +784,21 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             optionContentElement.appendChild(destinationReminderRow);
 
             const starShipModules = [
-                { id: 'ssStructural', label: 'Structural' },
-                { id: 'ssLifeSupport', label: 'Life Support Module' },
-                { id: 'ssAntimatterEngine', label: 'Antimatter Engine' },
-                { id: 'ssFleetHangar', label: 'Fleet Hangar' },
-                { id: 'ssStellarScanner', label: 'Stellar Scanner' }
+                { id: 'ssStructural' },
+                { id: 'ssLifeSupport' },
+                { id: 'ssAntimatterEngine' },
+                { id: 'ssFleetHangar' },
+                { id: 'ssStellarScanner' }
             ];
 
             starShipModules.forEach(module => {
                 const starshipComponentBuildRow = createOptionRow({
                     labelId: `space${capitaliseString(module.id)}BuildRow`,
                     renderNameABs: null,
-                    labelText: `${module.label}:`,
+                    labelText: `${localizeStarShipModule(module.id)}:`,
                     inputElements: [
                         createButton({
-                            text: `Build Module`,
+                            text: localize('buttonBuildModule', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check'],
                             onClick: () => {
                                 gain(1, `${module.id}BuiltPartsQuantity`, module.id, false, null, 'space', 'space');
@@ -749,15 +813,15 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                             rowCategory: 'starShipPurchase'
                         }),
                         createTextElement(
-                            `Built: <span id="${module.id}BuiltPartsQuantity">${getStarShipParts(module.id)}</span> / <span id="${module.id}TotalPartsQuantity">${getStarShipPartsNeededInTotalPerModule(module.id)}</span>`,
+                            `${localize('textBuilt', getLanguage())} <span id="${module.id}BuiltPartsQuantity">${getStarShipParts(module.id)}</span> / <span id="${module.id}TotalPartsQuantity">${getStarShipPartsNeededInTotalPerModule(module.id)}</span>`,
                             `${module.id}PartsCountText`,
                             []
                         ),
                     ],
                     descriptionText: `${getCurrencySymbol() + getResourceDataObject('space', ['upgrades', module.id, 'price'])}, 
-                    ${getResourceDataObject('space', ['upgrades', module.id, 'resource1Price'])[0]} ${capitaliseString(getResourceDataObject('space', ['upgrades', module.id, 'resource1Price'])[1])}, 
-                    ${getResourceDataObject('space', ['upgrades', module.id, 'resource2Price'])[0]} ${capitaliseString(getResourceDataObject('space', ['upgrades', module.id, 'resource2Price'])[1])}, 
-                    ${getResourceDataObject('space', ['upgrades', module.id, 'resource3Price'])[0]} ${capitaliseString(getResourceDataObject('space', ['upgrades', module.id, 'resource3Price'])[1])}`,
+                    ${getResourceDataObject('space', ['upgrades', module.id, 'resource1Price'])[0]} ${spaceUpgradePriceName(module.id, 1)}, 
+                    ${getResourceDataObject('space', ['upgrades', module.id, 'resource2Price'])[0]} ${spaceUpgradePriceName(module.id, 2)}, 
+                    ${getResourceDataObject('space', ['upgrades', module.id, 'resource3Price'])[0]} ${spaceUpgradePriceName(module.id, 3)}`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'upgradeCheck',
                     objectSectionArgument1: 'spaceUpgrade',
@@ -776,12 +840,12 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             const starShipTravelRow = createOptionRow({
                 labelId: `spaceStarShipTravelRow`,
                 renderNameABs: null,
-                labelText: `Travelling To:`,
+                labelText: localize('tab5TravellingToRowLabel', getLanguage()),
                 inputElements: [
                     createTextElement(`${capitaliseWordsWithRomanNumerals(destinationStar || '')}`, `starShipDestinationStar`, ['green-ready-text', 'destination-text']),
                     createTextElement(`<div id="spaceTravelToStarProgressBar">`, `spaceTravelToStarProgressBarContainer`, ['progress-bar-container']),
                 ],
-                descriptionText: `Travelling...`,
+                descriptionText: localize('textTravelling', getLanguage()),
                 resourcePriceObject: '',
                 dataConditionCheck: null,
                 objectSectionArgument1: null,
@@ -798,24 +862,24 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             const starShipStellarScannerRow = createOptionRow({
                 labelId: `spaceStarShipStellarScannerRow`,
                 renderNameABs: null,
-                labelText: `Perform System Scan:`,
+                labelText: localize('tab5PerformSystemScanRowLabel', getLanguage()),
                 inputElements: [
                     createButton({
-                        text: `Scan System`,
+                        text: localize('buttonScanSystem', getLanguage()),
                         classNames: ['option-button', 'green-ready-text'],
                         onClick: () => {
                             sfxPlayer.playAudio("asteroidScan");
                             setDestinationStarScanned(true);
                             copyStarDataToDestinationStarField(destinationStar);
                             generateDestinationStarData();
-                            showNotification(`${capitaliseWordsWithRomanNumerals(destinationStar)} System Scanned!`, 'info', 3000, 'starShip');
+                            showNotification(localize('notificationSystemScanned', getLanguage()).replace('{star}', capitaliseWordsWithRomanNumerals(destinationStar)), 'info', 3000, 'starShip');
 
                             drawTab5Content('Star Ship', optionContentElement, true, false);
                         },
                         disableKeyboardForButton: true
                     }),
                 ],
-                descriptionText: `Scan ${capitaliseWordsWithRomanNumerals(destinationStar)} System`,
+                descriptionText: localize('tab5ScanSystemDescription', getLanguage()).replace('{star}', capitaliseWordsWithRomanNumerals(destinationStar)),
                 resourcePriceObject: '',
                 dataConditionCheck: null,
                 objectSectionArgument1: null,
@@ -842,7 +906,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             const starNameRow = createOptionRow({
                 labelId: 'starNameRow',
                 renderNameABs: null,
-                labelText: 'Star Name:',
+                labelText: localize('tab5StarNameRowLabel', getLanguage()),
                 inputElements: [
                     createTextElement(
                         capitaliseWordsWithRomanNumerals(getDestinationStar()),
@@ -851,18 +915,18 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                     ),
                     createTextElement(
                         `<span class="ap-destination-star-element-right">AP: <span class="green-ready-text">${displayAscendencyPoints}</span> <p id="info_starShipScanAP" class="info-emoji">ℹ️</p></span>
-                    Life: <span class="${getStellarScannerBuilt() ? (starData.lifeDetected ? 'green-ready-text' : 'red-disabled-text') : 'red-disabled-text'}">
-                        ${getStellarScannerBuilt() ? (starData.lifeDetected ? 'Yes' : 'No') : '???'}
+                    ${localize('labelLife', getLanguage())} <span class="${getStellarScannerBuilt() ? (starData.lifeDetected ? 'green-ready-text' : 'red-disabled-text') : 'red-disabled-text'}">
+                        ${getStellarScannerBuilt() ? (starData.lifeDetected ? localize('textYes', getLanguage()) : localize('textNo', getLanguage())) : '???'}
                     </span>`,
                         'apContainer',
                         ['value-text', 'ap-destination-star-element']
                     ),
                     createTextElement(
                         `<span class="ap-destination-star-element-right">
-                        Weather: <span class="${starData.weatherTendency[2]}">${starData.weatherTendency[0]}</span> 
+                        ${localize('labelWeather', getLanguage())} <span class="${starData.weatherTendency[2]}">${starData.weatherTendency[0]}</span> 
                         (<span class="probability-text">${starData.weatherTendency[1]}</span>%) - 
                         <span class="${starData.precipitation !== 'water' ? 'green-ready-text' : ''}">
-                            ${capitaliseString(starData.precipitationType)} <p id="info_starShipScanPrecipitation" class="info-emoji">ℹ️</p>
+                            ${localizePrecipitationType(starData)} <p id="info_starShipScanPrecipitation" class="info-emoji">ℹ️</p>
                         </span>
                     </span>`,
                         'weatherContainer',
@@ -886,19 +950,19 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             const civilizationRow = createOptionRow({
                 labelId: 'civilizationLevelRow',
                 renderNameABs: null,
-                labelText: 'Civilization:',
+                labelText: localize('tab5CivilizationRowLabel', getLanguage()),
                 inputElements: [
                     createTextElement(
                         getStellarScannerBuilt() 
                             ? (starData.raceName === 'None' 
-                                ? '<span class="green-ready-text">None</span>' 
+                                ? `<span class="green-ready-text">${localize('textNone', getLanguage())}</span>` 
                                 : starData.raceName)
                             : `<span class="red-disabled-text">???</span>`,
                         'civilizationLevelText',
                         ['value-text']
                     ),
                     createTextElement(
-                        `<span class="ap-destination-star-element-right">Type: 
+                        `<span class="ap-destination-star-element-right">${localize('labelType', getLanguage())} 
                         <span class="${getStellarScannerBuilt() 
                             ? (starData.civilizationLevel === 'Unsentient' 
                                 ? 'green-ready-text' 
@@ -908,7 +972,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                                         ? 'green-ready-text' 
                                         : 'red-disabled-text') 
                             : 'red-disabled-text'}">
-                            ${getStellarScannerBuilt() ? starData.civilizationLevel : '???'}
+                            ${getStellarScannerBuilt() ? localizeCivilizationLevel(starData.civilizationLevel) : '???'}
                         </span> <p id="info_starShipScanType" class="info-emoji">ℹ️</p>
                     </span>`,
                         'apContainer',
@@ -937,15 +1001,15 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
         
         const populationText = getStellarScannerBuilt() 
         ? (starData.civilizationLevel === 'Unsentient' 
-            ? 'N/A' 
-            : (starData.populationEstimate ? starData.populationEstimate.toLocaleString() : 'N/A')) 
+            ? localize('textNotApplicable', getLanguage()) 
+            : (starData.populationEstimate ? starData.populationEstimate.toLocaleString() : localize('textNotApplicable', getLanguage()))) 
         : `<span class="red-disabled-text">???</span>`;
         
         
         const populationRow = createOptionRow({
             labelId: 'populationRow',
             renderNameABs: null,
-            labelText: 'Population:',
+            labelText: localize('tab5PopulationRowLabel', getLanguage()),
             inputElements: [
                 createTextElement(
                     populationText,
@@ -953,7 +1017,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                     ['value-text']
                 ),
                 createTextElement(
-                    `<span class="ap-destination-star-element-right">Traits: <span class="value-text">${traitsText}</span></span>`,
+                    `<span class="ap-destination-star-element-right">${localize('labelTraits', getLanguage())} <span class="value-text">${traitsText}</span></span>`,
                     'traitsText',
                     ['value-text', 'ap-destination-star-element']
                 ),
@@ -1002,15 +1066,15 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
         const threatRow = createOptionRow({
             labelId: 'threatLevelRow',
             renderNameABs: null,
-            labelText: 'Threat Level:',
+            labelText: localize('tab5ThreatLevelRowLabel', getLanguage()),
             inputElements: [
                 createTextElement(
-                    `<span class="${threatLevelClass}">${threatLevel}</span> <p id="info_starShipScanThreatLevel" class="info-emoji">ℹ️</p>`,
+                    `<span class="${threatLevelClass}">${localizeThreatLevel(threatLevel)}</span> <p id="info_starShipScanThreatLevel" class="info-emoji">ℹ️</p>`,
                     'threatLevelText',
                     [threatLevelClass]
                 ),
                 createTextElement(
-                    `<span class="ap-destination-star-element-right">Defense: <span class="value-text ${defenseClass}">${defenseText}</span> <p id="info_starShipScanDefense" class="info-emoji">ℹ️</p></span>`,
+                    `<span class="ap-destination-star-element-right">${localize('labelDefense', getLanguage())} <span class="value-text ${defenseClass}">${defenseText}</span> <p id="info_starShipScanDefense" class="info-emoji">ℹ️</p></span>`,
                     'defenseRatingText',
                     ['value-text', 'ap-destination-star-element']
                 ),
@@ -1032,16 +1096,16 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
         const fleetRow = createOptionRow({
             labelId: 'enemyFleetsRow',
             renderNameABs: null,
-            labelText: 'Enemy Fleets:',
+            labelText: localize('tab5EnemyFleetsRowLabel', getLanguage()),
             inputElements: [
                 createTextElement(
-                    `Air: <span class="${starData.civilizationLevel === 'None' 
+                    `${localize('labelFleetAir', getLanguage())} <span class="${starData.civilizationLevel === 'None' 
                         ? 'green-ready-text' 
                         : (getStellarScannerBuilt() 
                             ? (starData.enemyFleets.fleetChanges.air.class || '') 
                             : 'red-disabled-text')}">
                         ${starData.civilizationLevel === 'None' 
-                            ? 'None' 
+                            ? localize('textNone', getLanguage()) 
                             : (getStellarScannerBuilt() 
                                 ? starData.enemyFleets.air 
                                 : '???')}
@@ -1050,13 +1114,13 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                     ['value-text', 'ap-destination-star-element']
                 ),
                 createTextElement(
-                    `Land: <span class="${starData.civilizationLevel === 'None' 
+                    `${localize('labelFleetLand', getLanguage())} <span class="${starData.civilizationLevel === 'None' 
                         ? 'green-ready-text' 
                         : (getStellarScannerBuilt() 
                             ? (starData.enemyFleets.fleetChanges.land.class || '') 
                             : 'red-disabled-text')}">
                         ${starData.civilizationLevel === 'None' 
-                            ? 'None' 
+                            ? localize('textNone', getLanguage()) 
                             : (getStellarScannerBuilt() 
                                 ? starData.enemyFleets.land 
                                 : '???')}
@@ -1065,13 +1129,13 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                     ['value-text', 'ap-destination-star-element']
                 ),
                 createTextElement(
-                    `Sea: <span class="${starData.civilizationLevel === 'None' 
+                    `${localize('labelFleetSea', getLanguage())} <span class="${starData.civilizationLevel === 'None' 
                         ? 'green-ready-text' 
                         : (getStellarScannerBuilt() 
                             ? (starData.enemyFleets.fleetChanges.sea.class || '') 
                             : 'red-disabled-text')}">
                         ${starData.civilizationLevel === 'None' 
-                            ? 'None' 
+                            ? localize('textNone', getLanguage()) 
                             : (getStellarScannerBuilt() 
                                 ? starData.enemyFleets.sea 
                                 : '???')}
@@ -1097,13 +1161,13 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
         let anomaliesText;
 
         if (getFactoryStarsArray().includes(getDestinationStar())) {
-            anomaliesText = '<span class="red-disabled-text">Megastructure</span>';
+            anomaliesText = `<span class="red-disabled-text">${localize('textMegastructure', getLanguage())}</span>`;
         } else if (starData.civilizationLevel === 'None') {
-            anomaliesText = '<span>N/A</span>';
+            anomaliesText = `<span>${localize('textNotApplicable', getLanguage())}</span>`;
         } else if (!getStellarScannerBuilt()) {
             anomaliesText = '<span class="red-disabled-text">???</span>';
         } else if (starData.anomalies.length === 0) {
-            anomaliesText = '<span>None</span>';
+            anomaliesText = `<span>${localize('textNone', getLanguage())}</span>`;
         } else {
             anomaliesText = starData.anomalies.map(a => {
                 if (typeof a === 'string') {
@@ -1111,7 +1175,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                 }
 
                 if (a?.name === 'None') {
-                    return `<span>N/A</span>`;
+                    return `<span>${localize('textNotApplicable', getLanguage())}</span>`;
                 }
 
                 return `${a?.name}: <span class="${a?.class}">${a?.effect}</span>`;
@@ -1121,7 +1185,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
         const anomaliesRow = createOptionRow({
             labelId: 'anomaliesRow',
             renderNameABs: null,
-            labelText: 'Anomalies:',
+            labelText: localize('tab5AnomaliesRowLabel', getLanguage()),
             inputElements: [
                 createTextElement(
                     anomaliesText,
@@ -1155,25 +1219,25 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
     if (heading === 'Fleet Hangar') {
         const headerRow = document.getElementById('headerContentTab5');
         if (headerRow) {
-            headerRow.innerHTML = `Fleet Hangar <p id="info_fleetHangarHeader" class="info-emoji">ℹ️</p>`;
+            headerRow.innerHTML = `${localize('headerMainFleetHangar', getLanguage())} <p id="info_fleetHangarHeader" class="info-emoji">ℹ️</p>`;
         }
         
         const fleetShips = [
-            { id: 'fleetEnvoy', label: 'Envoy' },
-            { id: 'fleetScout', label: 'Scout' },
-            { id: 'fleetMarauder', label: 'Marauder' },
-            { id: 'fleetLandStalker', label: 'Land Stalker' },
-            { id: 'fleetNavalStrafer', label: 'Naval Strafer' }
+            { id: 'fleetEnvoy' },
+            { id: 'fleetScout' },
+            { id: 'fleetMarauder' },
+            { id: 'fleetLandStalker' },
+            { id: 'fleetNavalStrafer' }
         ];
 
         fleetShips.forEach(fleetShip => {
             const fleetShipBuildRow = createOptionRow({
                 labelId: `space${capitaliseString(fleetShip.id)}BuildRow`,
                 renderNameABs: null,
-                labelText: `${fleetShip.label}:`,
+                labelText: `${localizeFleetShip(fleetShip.id)}:`,
                 inputElements: [
                     createButton({
-                        text: `Build`,
+                        text: localize('buttonBuild', getLanguage()),
                         classNames: ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check'],
                         onClick: () => {
                             gain(1, `${fleetShip.id}BuiltQuantity`, fleetShip.id, false, null, 'space', 'space');
@@ -1195,16 +1259,16 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                     }),
                     createTextElement(
                         fleetShip.id === 'fleetEnvoy' 
-                        ? `Quantity: <span id="${fleetShip.id}BuiltQuantity">${getFleetShips(fleetShip.id)}</span> / <span id="${fleetShip.id}BuiltQuantityMax">${getMaxFleetShip(fleetShip.id)}</span>`
-                        : `Quantity: <span id="${fleetShip.id}BuiltQuantity">${getFleetShips(fleetShip.id)}</span>`,
+                        ? `${localize('textQuantity', getLanguage())}: <span id="${fleetShip.id}BuiltQuantity">${getFleetShips(fleetShip.id)}</span> / <span id="${fleetShip.id}BuiltQuantityMax">${getMaxFleetShip(fleetShip.id)}</span>`
+                        : `${localize('textQuantity', getLanguage())}: <span id="${fleetShip.id}BuiltQuantity">${getFleetShips(fleetShip.id)}</span>`,
                     `${fleetShip.id}QuantityText`,
                     []
                     ),
                 ],
                 descriptionText: `${getCurrencySymbol() + getResourceDataObject('space', ['upgrades', fleetShip.id, 'price'])}, 
-                ${getResourceDataObject('space', ['upgrades', fleetShip.id, 'resource1Price'])[0]} ${capitaliseString(getResourceDataObject('space', ['upgrades', fleetShip.id, 'resource1Price'])[1])}, 
-                ${getResourceDataObject('space', ['upgrades', fleetShip.id, 'resource2Price'])[0]} ${capitaliseString(getResourceDataObject('space', ['upgrades', fleetShip.id, 'resource2Price'])[1])}, 
-                ${getResourceDataObject('space', ['upgrades', fleetShip.id, 'resource3Price'])[0]} ${capitaliseString(getResourceDataObject('space', ['upgrades', fleetShip.id, 'resource3Price'])[1])}`,
+                ${getResourceDataObject('space', ['upgrades', fleetShip.id, 'resource1Price'])[0]} ${spaceUpgradePriceName(fleetShip.id, 1)}, 
+                ${getResourceDataObject('space', ['upgrades', fleetShip.id, 'resource2Price'])[0]} ${spaceUpgradePriceName(fleetShip.id, 2)}, 
+                ${getResourceDataObject('space', ['upgrades', fleetShip.id, 'resource3Price'])[0]} ${spaceUpgradePriceName(fleetShip.id, 3)}`,
                 resourcePriceObject: '',
                 dataConditionCheck: 'upgradeCheck',
                 objectSectionArgument1: 'spaceUpgrade',
@@ -1252,10 +1316,10 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             const diplomacyOptionsRow = createOptionRow({
                 labelId: 'diplomacyOptionsRow',
                 renderNameABs: null,
-                labelText: 'Relations:',
+                labelText: localize('tab5RelationsRowLabel', getLanguage()),
                 inputElements: [
                     createButton({
-                        text: `Bully`,
+                        text: localize('buttonBully', getLanguage()),
                         classNames: ['option-button', 'red-disabled-text', 'diplomacy-button', 'bully'],
                         onClick: () => {
                             setStarSystemDataObject(true, 'stars', ['destinationStar', 'triedToBully']);
@@ -1265,7 +1329,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                         rowCategory: 'diplomacy'
                     }),
                     createButton({
-                        text: `Passive`,
+                        text: localize('buttonPassive', getLanguage()),
                         classNames: ['option-button', 'red-disabled-text', 'diplomacy-button', 'passive'],
                         onClick: () => {
                             updateDiplomacySituation('passive', starData);
@@ -1274,7 +1338,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                         rowCategory: 'diplomacy'
                     }),
                     createButton({
-                        text: `Harmony`,
+                        text: localize('buttonHarmony', getLanguage()),
                         classNames: ['option-button', 'red-disabled-text', 'diplomacy-button', 'harmony'],
                         onClick: () => {
                             updateDiplomacySituation('harmony', starData);
@@ -1283,7 +1347,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                         rowCategory: 'diplomacy'
                     }),
                     createButton({
-                        text: `Vassalize`,
+                        text: localize('buttonVassalize', getLanguage()),
                         classNames: ['option-button', 'red-disabled-text', 'diplomacy-button', 'vassalize'],
                         onClick: () => {
                             updateDiplomacySituation('vassalize', starData);
@@ -1292,7 +1356,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                         rowCategory: 'diplomacy'
                     }),
                     createButton({
-                        text: `Conquest`,
+                        text: localize('buttonConquest', getLanguage()),
                         classNames: ['option-button', 'red-disabled-text', 'diplomacy-button', 'conquest'],
                         onClick: () => {
                             updateDiplomacySituation('conquest', starData);
@@ -1334,15 +1398,15 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             const receptionStatusRow = createOptionRow({
                 labelId: 'receptionStatusRow',
                 renderNameABs: null,
-                labelText: 'Attitude:',
+                labelText: localize('tab5AttitudeRowLabel', getLanguage()),
                 inputElements: [
                     createTextElement(
-                        `<span class="${attitudeClass}">${attitude}</span>`,
+                        `<span class="${attitudeClass}">${localizeAttitude(attitude)}</span>`,
                         'attitudeText',
                         ['value-text', 'intelligence-element']
                     ),
                     createTextElement(
-                        `Threat: <span class="${threatLevelClass}">${threatLevel}</span>`,
+                        `${localize('labelThreat', getLanguage())} <span class="${threatLevelClass}">${localizeThreatLevel(threatLevel)}</span>`,
                         'threatLevelText',
                         [threatLevelClass, 'intelligence-element']
                     ),
@@ -1376,7 +1440,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             const intelligenceRow = createOptionRow({
                 labelId: 'intelligenceRow',
                 renderNameABs: null,
-                labelText: 'Intelligence:',
+                labelText: localize('tab5IntelligenceRowLabel', getLanguage()),
                 inputElements: [
                     createTextElement(
                         `<span class="${
@@ -1386,7 +1450,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                                     ? 'warning-orange-text'
                                     : 'red-disabled-text'
                         }">
-                        ${starData.civilizationLevel}
+                        ${localizeCivilizationLevel(starData.civilizationLevel)}
                     </span>`,
                         'apContainer',
                         ['value-text', 'intelligence-element']
@@ -1397,7 +1461,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                         ['value-text', 'intelligence-element']
                     ),
                     createTextElement(
-                        `Defense: <span class="value-text ${defenseClass}">${defenseText}</span>`,
+                        `${localize('labelDefense', getLanguage())} <span class="value-text ${defenseClass}">${defenseText}</span>`,
                         'defenseRatingText',
                         ['value-text', 'intelligence-element']
                     ),
@@ -1419,16 +1483,16 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             const fleetRow = createOptionRow({
                 labelId: 'enemyFleetsRow',
                 renderNameABs: null,
-                labelText: 'Enemy Fleets:',
+                labelText: localize('tab5EnemyFleetsRowLabel', getLanguage()),
                 inputElements: [
                     createTextElement(
-                        `Air: <span class="${starData.civilizationLevel === 'None' 
+                        `${localize('labelFleetAir', getLanguage())} <span class="${starData.civilizationLevel === 'None' 
                             ? 'green-ready-text' 
                             : (getStellarScannerBuilt() 
                                 ? (starData.enemyFleets.fleetChanges.air.class || '') 
                                 : 'red-disabled-text')}">
                         ${starData.civilizationLevel === 'None' 
-                            ? 'None' 
+                            ? localize('textNone', getLanguage()) 
                             : (getStellarScannerBuilt() 
                                 ? starData.enemyFleets.air 
                                 : '???')}
@@ -1437,13 +1501,13 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                         ['value-text', 'ap-destination-star-element']
                     ),
                     createTextElement(
-                        `Land: <span class="${starData.civilizationLevel === 'None' 
+                        `${localize('labelFleetLand', getLanguage())} <span class="${starData.civilizationLevel === 'None' 
                             ? 'green-ready-text' 
                             : (getStellarScannerBuilt() 
                                 ? (starData.enemyFleets.fleetChanges.land.class || '') 
                                 : 'red-disabled-text')}">
                         ${starData.civilizationLevel === 'None' 
-                            ? 'None' 
+                            ? localize('textNone', getLanguage()) 
                             : (getStellarScannerBuilt() 
                                 ? starData.enemyFleets.land 
                                 : '???')}
@@ -1452,13 +1516,13 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                         ['value-text', 'ap-destination-star-element']
                     ),
                     createTextElement(
-                        `Sea: <span class="${starData.civilizationLevel === 'None' 
+                        `${localize('labelFleetSea', getLanguage())} <span class="${starData.civilizationLevel === 'None' 
                             ? 'green-ready-text' 
                             : (getStellarScannerBuilt() 
                                 ? (starData.enemyFleets.fleetChanges.sea.class || '') 
                                 : 'red-disabled-text')}">
                         ${starData.civilizationLevel === 'None' 
-                            ? 'None' 
+                            ? localize('textNone', getLanguage()) 
                             : (getStellarScannerBuilt() 
                                 ? starData.enemyFleets.sea 
                                 : '???')}

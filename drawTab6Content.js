@@ -17,6 +17,27 @@ import { capitaliseString } from './utilityFunctions.js';
 import { sfxPlayer } from './audioManager.js';
 
 import { trackAnalyticsEvent } from './analytics.js';
+import { localize, localizeMaterialName } from './localization.js';
+import { getLanguage } from './constantsAndGlobalVars.js';
+
+// Space upgrade price tuples are [quantity, key, section].
+const spaceUpgradePriceName = (upgrade, slot) => {
+    const price = getResourceDataObject('space', ['upgrades', upgrade, `resource${slot}Price`]);
+    return localizeMaterialName(price[1], price[2], getLanguage());
+};
+
+// Asteroid rarity is stored in the save as an English word and compared against
+// it in getRarityClass, so only the rendering of it is localized.
+const ASTEROID_RARITY_KEYS = {
+    Common: 'asteroidRarityCommon',
+    Uncommon: 'asteroidRarityUncommon',
+    Rare: 'asteroidRarityRare',
+    Legendary: 'asteroidRarityLegendary'
+};
+
+const localizeAsteroidRarity = (rarity) => (ASTEROID_RARITY_KEYS[rarity]
+    ? localize(ASTEROID_RARITY_KEYS[rarity], getLanguage())
+    : rarity);
 
 
 
@@ -58,19 +79,19 @@ export function drawTab6Content(heading, optionContentElement) {
 
         if (heading === 'Mining') {
 
-            headerRow.innerHTML = `Mining <p id="info_miningHeader" class="info-emoji">ℹ️</p>`;
+            headerRow.innerHTML = `${localize('headerMainMining', getLanguage())} <p id="info_miningHeader" class="info-emoji">ℹ️</p>`;
 
         }
 
         if (heading === 'Launch Pad') {
 
-            headerRow.innerHTML = `Launch Pad <p id="info_launchPadHeader" class="info-emoji">ℹ️</p>`;
+            headerRow.innerHTML = `${localize('headerMainLaunchPad', getLanguage())} <p id="info_launchPadHeader" class="info-emoji">ℹ️</p>`;
 
         }
 
         if (heading === 'Asteroids') {
 
-            headerRow.innerHTML = `Asteroids <p id="info_asteroidsHeader" class="info-emoji">ℹ️</p>`;
+            headerRow.innerHTML = `${localize('headerMainAsteroids', getLanguage())} <p id="info_asteroidsHeader" class="info-emoji">ℹ️</p>`;
 
         }
 
@@ -96,13 +117,13 @@ export function drawTab6Content(heading, optionContentElement) {
 
             renderNameABs: null,
 
-            labelText: 'Space Telescope:',
+            labelText: localize('tab6SpaceTelescopeRowLabel', getLanguage()),
 
             inputElements: [
 
                 createButton({
 
-                    text: `Build Space Telescope`,
+                    text: localize('buttonBuildSpaceTelescope', getLanguage()),
 
                     classNames: ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check', 'spaceTelescope'],
 
@@ -124,7 +145,7 @@ export function drawTab6Content(heading, optionContentElement) {
 
                         spaceBuildTelescopeRow.classList.add('invisible');
 
-                        showNotification('Space Telescope Built!', 'info', 3000, 'special');
+                        showNotification(localize('notificationSpaceTelescopeBuilt', getLanguage()), 'info', 3000, 'special');
 
                     },
 
@@ -146,17 +167,17 @@ export function drawTab6Content(heading, optionContentElement) {
 
                 }),
 
-                createTextElement('Bought', 'spaceTelescopeAlreadyBoughtText', ['green-ready-text', 'invisible']),
+                createTextElement(localize('textBought', getLanguage()), 'spaceTelescopeAlreadyBoughtText', ['green-ready-text', 'invisible']),
 
             ],
 
             descriptionText: `${getCurrencySymbol() + getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'price'])}, 
 
-            ${getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'resource1Price'])[0]} ${capitaliseString(getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'resource1Price'])[1])}, 
+            ${getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'resource1Price'])[0]} ${spaceUpgradePriceName('spaceTelescope', 1)}, 
 
-            ${getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'resource2Price'])[0]} ${capitaliseString(getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'resource2Price'])[1])}, 
+            ${getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'resource2Price'])[0]} ${spaceUpgradePriceName('spaceTelescope', 2)}, 
 
-            ${getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'resource3Price'])[0]} ${capitaliseString(getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'resource3Price'])[1])}`,
+            ${getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'resource3Price'])[0]} ${spaceUpgradePriceName('spaceTelescope', 3)}`,
 
             resourcePriceObject: '',
 
@@ -186,13 +207,13 @@ export function drawTab6Content(heading, optionContentElement) {
 
         const autoTelescopeOptions = [
 
-            { value: 'studyAsteroid', text: 'Study Asteroid' },
+            { value: 'studyAsteroid', text: localize('dropdownTelescopeStudyAsteroid', getLanguage()) },
 
-            { value: 'studyStars', text: 'Study Stars' },
+            { value: 'studyStars', text: localize('dropdownTelescopeStudyStars', getLanguage()) },
 
             ...(getPlayerPhilosophy() === 'voidborn' && getPhilosophyAbilityActive() && getStatRun() > 1
 
-                ? [{ value: 'pillageVoid', text: 'Pillage The Void' }]
+                ? [{ value: 'pillageVoid', text: localize('dropdownTelescopePillageVoid', getLanguage()) }]
 
                 : [])
 
@@ -204,9 +225,9 @@ export function drawTab6Content(heading, optionContentElement) {
 
             labelId: 'spaceTelescopeAutoRow',
 
-            renderNameABs: 'Auto Space Telescope',
+            renderNameABs: localize('tab6AutoSpaceTelescopeName', getLanguage()),
 
-            labelText: 'Auto Space Telescope:',
+            labelText: localize('tab6AutoSpaceTelescopeRowLabel', getLanguage()),
 
             inputElements: [
 
@@ -282,15 +303,15 @@ export function drawTab6Content(heading, optionContentElement) {
 
             labelId: 'spaceTelescopeSearchAsteroidRow',
 
-            renderNameABs: 'Scan Asteroids',
+            renderNameABs: localize('buttonScanAsteroids', getLanguage()),
 
-            labelText: 'Scan Asteroids',
+            labelText: localize('buttonScanAsteroids', getLanguage()),
 
             inputElements: [
 
                 createButton({
 
-                    text: `Scan Asteroids`,
+                    text: localize('buttonScanAsteroids', getLanguage()),
 
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check'],
 
@@ -332,7 +353,7 @@ export function drawTab6Content(heading, optionContentElement) {
 
             ],
 
-            descriptionText: `Ready To Search`,
+            descriptionText: localize('textReadyToSearch', getLanguage()),
 
             resourcePriceObject: '',
 
@@ -370,9 +391,9 @@ export function drawTab6Content(heading, optionContentElement) {
 
             labelId: 'spaceTelescopeInvestigateStarRow',
 
-            renderNameABs: 'Study Stars',
+            renderNameABs: localize('dropdownTelescopeStudyStars', getLanguage()),
 
-            labelText: 'Study Stars',
+            labelText: localize('dropdownTelescopeStudyStars', getLanguage()),
 
             inputElements: [
 
@@ -382,7 +403,7 @@ export function drawTab6Content(heading, optionContentElement) {
 
                     return createButton({
 
-                        text: `Study Stars`,
+                        text: localize('dropdownTelescopeStudyStars', getLanguage()),
 
                         classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', ...extraClasses],
 
@@ -426,7 +447,7 @@ export function drawTab6Content(heading, optionContentElement) {
 
             ],
 
-            descriptionText: `Ready To Study`,
+            descriptionText: localize('textReadyToStudy', getLanguage()),
 
             resourcePriceObject: '',
 
@@ -464,15 +485,15 @@ export function drawTab6Content(heading, optionContentElement) {
 
             labelId: 'spaceTelescopePhilosophyBoostResourcesAndCompoundsRow',
 
-            renderNameABs: 'Pillage The Void',
+            renderNameABs: localize('dropdownTelescopePillageVoid', getLanguage()),
 
-            labelText: 'Pillage The Void',
+            labelText: localize('dropdownTelescopePillageVoid', getLanguage()),
 
             inputElements: [
 
                 createButton({
 
-                    text: `Pillage the Void`,
+                    text: localize('buttonPillageTheVoid', getLanguage()),
 
                     classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'pillageVoid'],
 
@@ -514,7 +535,7 @@ export function drawTab6Content(heading, optionContentElement) {
 
             ],
 
-            descriptionText: `Ready To Pillage`,
+            descriptionText: localize('textReadyToPillage', getLanguage()),
 
             resourcePriceObject: '',
 
@@ -630,13 +651,13 @@ export function drawTab6Content(heading, optionContentElement) {
 
             renderNameABs: null,
 
-            labelText: 'Launch Pad:',
+            labelText: localize('tab6LaunchPadRowLabel', getLanguage()),
 
             inputElements: [
 
                 createButton({
 
-                    text: `Build Launch Pad`,
+                    text: localize('buttonBuildLaunchPad', getLanguage()),
 
                     classNames: ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check', 'launchPad'],
 
@@ -656,7 +677,7 @@ export function drawTab6Content(heading, optionContentElement) {
 
                         spaceBuildLaunchPadRow.classList.add('invisible');
 
-                        showNotification('Launch Pad Built!', 'info', 3000, 'special');
+                        showNotification(localize('notificationLaunchPadBuilt', getLanguage()), 'info', 3000, 'special');
 
                     },
 
@@ -678,17 +699,17 @@ export function drawTab6Content(heading, optionContentElement) {
 
                 }),
 
-                createTextElement('Bought', 'launchPadAlreadyBoughtText', ['green-ready-text', 'invisible']),
+                createTextElement(localize('textBought', getLanguage()), 'launchPadAlreadyBoughtText', ['green-ready-text', 'invisible']),
 
             ],
 
             descriptionText: `${getCurrencySymbol() + getResourceDataObject('space', ['upgrades', 'launchPad', 'price'])}, 
 
-            ${getResourceDataObject('space', ['upgrades', 'launchPad', 'resource1Price'])[0]} ${capitaliseString(getResourceDataObject('space', ['upgrades', 'launchPad', 'resource1Price'])[1])}, 
+            ${getResourceDataObject('space', ['upgrades', 'launchPad', 'resource1Price'])[0]} ${spaceUpgradePriceName('launchPad', 1)}, 
 
-            ${getResourceDataObject('space', ['upgrades', 'launchPad', 'resource2Price'])[0]} ${capitaliseString(getResourceDataObject('space', ['upgrades', 'launchPad', 'resource2Price'])[1])}, 
+            ${getResourceDataObject('space', ['upgrades', 'launchPad', 'resource2Price'])[0]} ${spaceUpgradePriceName('launchPad', 2)}, 
 
-            ${getResourceDataObject('space', ['upgrades', 'launchPad', 'resource3Price'])[0]} ${capitaliseString(getResourceDataObject('space', ['upgrades', 'launchPad', 'resource3Price'])[1])}`,
+            ${getResourceDataObject('space', ['upgrades', 'launchPad', 'resource3Price'])[0]} ${spaceUpgradePriceName('launchPad', 3)}`,
 
             resourcePriceObject: '',
 
@@ -726,13 +747,13 @@ export function drawTab6Content(heading, optionContentElement) {
 
         const rockets = [
 
-            { id: 'rocket1', label: 'Rocket Miner 1' },
+            { id: 'rocket1', label: localize('rocketMinerName1', getLanguage()) },
 
-            { id: 'rocket2', label: 'Rocket Miner 2' },
+            { id: 'rocket2', label: localize('rocketMinerName2', getLanguage()) },
 
-            { id: 'rocket3', label: 'Rocket Miner 3' },
+            { id: 'rocket3', label: localize('rocketMinerName3', getLanguage()) },
 
-            { id: 'rocket4', label: 'Rocket Miner 4' }
+            { id: 'rocket4', label: localize('rocketMinerName4', getLanguage()) }
 
         ];
 
@@ -756,7 +777,7 @@ export function drawTab6Content(heading, optionContentElement) {
 
                     createButton({
 
-                        text: `Build Rocket Part`,
+                        text: localize('buttonBuildRocketPart', getLanguage()),
 
                         classNames: ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check', ...extraClasses],
 
@@ -794,7 +815,7 @@ export function drawTab6Content(heading, optionContentElement) {
 
                     createTextElement(
 
-                        `Built: <span id="${rocket.id}BuiltPartsQuantity">${getRocketParts(rocket.id)}</span> / <span id="${rocket.id}TotalPartsQuantity">${getRocketPartsNeededInTotalPerRocket(rocket.id)}</span>`,
+                        `${localize('textBuilt', getLanguage())} <span id="${rocket.id}BuiltPartsQuantity">${getRocketParts(rocket.id)}</span> / <span id="${rocket.id}TotalPartsQuantity">${getRocketPartsNeededInTotalPerRocket(rocket.id)}</span>`,
 
                         `${rocket.id}PartsCountText`,
 
@@ -806,11 +827,11 @@ export function drawTab6Content(heading, optionContentElement) {
 
                 descriptionText: `${getCurrencySymbol() + getResourceDataObject('space', ['upgrades', rocket.id, 'price'])}, 
 
-                ${getResourceDataObject('space', ['upgrades', rocket.id, 'resource1Price'])[0]} ${capitaliseString(getResourceDataObject('space', ['upgrades', rocket.id, 'resource1Price'])[1])}, 
+                ${getResourceDataObject('space', ['upgrades', rocket.id, 'resource1Price'])[0]} ${spaceUpgradePriceName(rocket.id, 1)}, 
 
-                ${getResourceDataObject('space', ['upgrades', rocket.id, 'resource2Price'])[0]} ${capitaliseString(getResourceDataObject('space', ['upgrades', rocket.id, 'resource2Price'])[1])}, 
+                ${getResourceDataObject('space', ['upgrades', rocket.id, 'resource2Price'])[0]} ${spaceUpgradePriceName(rocket.id, 2)}, 
 
-                ${getResourceDataObject('space', ['upgrades', rocket.id, 'resource3Price'])[0]} ${capitaliseString(getResourceDataObject('space', ['upgrades', rocket.id, 'resource3Price'])[1])}`,
+                ${getResourceDataObject('space', ['upgrades', rocket.id, 'resource3Price'])[0]} ${spaceUpgradePriceName(rocket.id, 3)}`,
 
                 resourcePriceObject: '',
 
@@ -872,13 +893,13 @@ export function drawTab6Content(heading, optionContentElement) {
 
             renderNameABs: null,
 
-            labelText: 'Sort By:',
+            labelText: localize('tab6SortByRowLabel', getLanguage()),
 
             inputElements: [
 
                 createTextElement(
 
-                    `Rarity`,
+                    localize('textAsteroidRarity', getLanguage()),
 
                     'asteroidLegendRarity',
 
@@ -890,7 +911,7 @@ export function drawTab6Content(heading, optionContentElement) {
 
                 createTextElement(
 
-                    `Distance`,
+                    localize('textAsteroidDistance', getLanguage()),
 
                     'asteroidLegendDistance',
 
@@ -902,7 +923,7 @@ export function drawTab6Content(heading, optionContentElement) {
 
                 createTextElement(
 
-                    `Complexity`,
+                    localize('textAsteroidComplexity', getLanguage()),
 
                     'asteroidLegendEOE',
 
@@ -914,7 +935,7 @@ export function drawTab6Content(heading, optionContentElement) {
 
                 createTextElement(
 
-                    `Antimatter`,
+                    localize('textAsteroidAntimatter', getLanguage()),
 
                     'asteroidLegendQuantity',
 
@@ -1000,7 +1021,7 @@ export function drawTab6Content(heading, optionContentElement) {
 
             if (asteroid[asteroidName].destroyed) {
 
-                rarityElementOverride = createTextElement("Destroyed!", 'asteroidInfoContainerRarity', ['value-asteroid', 'red-disabled-text']);
+                rarityElementOverride = createTextElement(localize('textAsteroidDestroyed', getLanguage()), 'asteroidInfoContainerRarity', ['value-asteroid', 'red-disabled-text']);
 
                 asteroid[asteroidName].quantity[1] = 'red-disabled-text';
 
@@ -1010,7 +1031,7 @@ export function drawTab6Content(heading, optionContentElement) {
 
             } else if (asteroid[asteroidName].quantity[0] === 0) {
 
-                rarityElementOverride = createTextElement("Exhausted!", 'asteroidInfoContainerRarity', ['value-asteroid', 'red-disabled-text']);
+                rarityElementOverride = createTextElement(localize('textAsteroidExhausted', getLanguage()), 'asteroidInfoContainerRarity', ['value-asteroid', 'red-disabled-text']);
 
                 asteroid[asteroidName].quantity[1] = 'red-disabled-text';
 
@@ -1020,11 +1041,11 @@ export function drawTab6Content(heading, optionContentElement) {
 
             } else if (asteroid[asteroidName].beingMined) {
 
-                rarityElementOverride = createTextElement("Being Mined!", 'asteroidInfoContainerRarity', ['value-asteroid', 'green-ready-text']);
+                rarityElementOverride = createTextElement(localize('textAsteroidBeingMined', getLanguage()), 'asteroidInfoContainerRarity', ['value-asteroid', 'green-ready-text']);
 
             } else {
 
-                rarityElementOverride = createTextElement(`${rarity[0]}`, 'asteroidInfoContainerRarity', ['value-asteroid', 'rarity-asteroid', rarity[1]]);
+                rarityElementOverride = createTextElement(localizeAsteroidRarity(rarity[0]), 'asteroidInfoContainerRarity', ['value-asteroid', 'rarity-asteroid', rarity[1]]);
 
             }
 
@@ -1192,9 +1213,9 @@ function setFuellingVisibility(rocket, params) {
 
         launchButton.classList.remove('invisible');
 
-        launchButton.textContent = 'Launch!';
+        launchButton.textContent = localize('buttonLaunch', getLanguage());
 
-        document.getElementById('fuelDescription').textContent = 'Fuelling...'
+        document.getElementById('fuelDescription').textContent = localize('textFuelling', getLanguage())
 
         document.getElementById('fuelDescription').classList.remove('red-disabled-text');
 
@@ -1212,9 +1233,9 @@ function setFuellingVisibility(rocket, params) {
 
             launchButton.classList.remove('red-disabled-text');
 
-            launchButton.textContent = 'Launch!';
+            launchButton.textContent = localize('buttonLaunch', getLanguage());
 
-            document.getElementById('fuelDescription').textContent = 'Ready For Launch...'
+            document.getElementById('fuelDescription').textContent = localize('textReadyForLaunch', getLanguage())
 
             document.getElementById('fuelDescription').classList.add('green-ready-text');
 
@@ -1224,9 +1245,9 @@ function setFuellingVisibility(rocket, params) {
 
             launchButton.classList.add('red-disabled-text');
 
-            launchButton.textContent = 'Launch!';
+            launchButton.textContent = localize('buttonLaunch', getLanguage());
 
-            document.getElementById('fuelDescription').textContent = 'Bad Weather!'
+            document.getElementById('fuelDescription').textContent = localize('textBadWeather', getLanguage())
 
             document.getElementById('fuelDescription').classList.remove('green-ready-text');
 
@@ -1330,7 +1351,7 @@ function createRocketUI(rocketId, optionContentElement, asteroids, asteroidsBein
 
         createButton({
 
-            text: 'Rename',
+            text: localize('buttonRename', getLanguage()),
 
             classNames: ['option-button', 'rename-rocket'],
 
@@ -1398,13 +1419,13 @@ function createRocketUI(rocketId, optionContentElement, asteroids, asteroidsBein
 
         renderNameABs: getResourceDataObject('space', ['upgrades', rocketId, 'autoBuyer', 'tier1', 'nameUpgrade']),
 
-        labelText: 'Fuel:',
+        labelText: localize('tab6FuelRowLabel', getLanguage()),
 
         inputElements: [
 
             createButton({
 
-                text: `Fuel Rocket`,
+                text: localize('buttonFuelRocket', getLanguage()),
 
                 classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', rocketId],
 
@@ -1440,7 +1461,7 @@ function createRocketUI(rocketId, optionContentElement, asteroids, asteroidsBein
 
             createButton({
 
-                text: `Power Off!`,
+                text: localize('buttonPowerOffRocket', getLanguage()),
 
                 classNames: ['option-button', 'red-disabled-text', 'rocket-fuelled-check', `${rocketId}-launch-button`, 'invisible'],
 
@@ -1500,7 +1521,7 @@ function createRocketUI(rocketId, optionContentElement, asteroids, asteroidsBein
 
         renderNameABs: null,
 
-        labelText: `Travel To:`,
+        labelText: localize('tab6TravelToRowLabel', getLanguage()),
 
         inputElements: [
 
@@ -1512,7 +1533,7 @@ function createRocketUI(rocketId, optionContentElement, asteroids, asteroidsBein
 
                     value: asteroid.name,
 
-                    text: `${asteroid.name}: Distance: <span class="dropDownDistanceValue ${getDistanceClass(asteroid.distance[0])}">${asteroid.distance[0]}</span>, Rarity: <span class="dropDownRarityValue ${getRarityClass(asteroid.rarity[0])}">${asteroid.rarity[0]}</span>, Antimatter: <span class="dropDownQuantityValue ${getQuantityClass(asteroid.quantity[0])}">${asteroid.quantity[0]}</span>`,
+                    text: `${asteroid.name}: ${localize('labelDistance', getLanguage())} <span class="dropDownDistanceValue ${getDistanceClass(asteroid.distance[0])}">${asteroid.distance[0]}</span>, ${localize('labelRarity', getLanguage())} <span class="dropDownRarityValue ${getRarityClass(asteroid.rarity[0])}">${localizeAsteroidRarity(asteroid.rarity[0])}</span>, ${localize('labelAntimatter', getLanguage())} <span class="dropDownQuantityValue ${getQuantityClass(asteroid.quantity[0])}">${asteroid.quantity[0]}</span>`,
 
                     distance: asteroid.distance[0]
 
@@ -1528,7 +1549,7 @@ function createRocketUI(rocketId, optionContentElement, asteroids, asteroidsBein
 
             createButton({
 
-                text: `Travel`,
+                text: localize('buttonTravel', getLanguage()),
 
                 classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', `${rocketId}-travel-to-asteroid-button`],
 
@@ -1538,7 +1559,7 @@ function createRocketUI(rocketId, optionContentElement, asteroids, asteroidsBein
 
                     setRocketDirection(rocketId, false);
 
-                    setCurrentDestinationDropdownText('Select an option');
+                    setCurrentDestinationDropdownText(localize('dropdownSelectAnOption', getLanguage()));
 
                 },
 
@@ -1564,7 +1585,7 @@ function createRocketUI(rocketId, optionContentElement, asteroids, asteroidsBein
 
         ],
 
-        descriptionText: `Travelling...`,
+        descriptionText: localize('textTravelling', getLanguage()),
 
         resourcePriceObject: '',
 

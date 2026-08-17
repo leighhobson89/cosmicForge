@@ -1,6 +1,6 @@
 # Localization Status
 
-Status as of HEAD `275f034` + in-session fixes. Five languages: **en, es, de, it, fr**.
+Status as of HEAD `ea131c4` + in-session fixes. Five languages: **en, es, de, it, fr**.
 
 ## Summary
 
@@ -11,7 +11,7 @@ Status as of HEAD `275f034` + in-session fixes. Five languages: **en, es, de, it
 | 🔴 Not started | 4 | 40% |
 | **Total tracked items** | **10** | |
 
-The catalogue itself is in good shape — **1,686 keys × 5 languages, complete parity, zero keys
+The catalogue itself is in good shape — **2,153 keys × 5 languages, complete parity, zero keys
 referenced in code that are missing from the JSON**. What remains is finishing and wiring, tracked
 as the 10 items below.
 
@@ -30,7 +30,7 @@ must never rise — so the remaining work can be done incrementally without losi
 | 2 | [Compound reverse-lookup performance](#2-compound-reverse-lookup-performance) | 🟢 Done | — |
 | 3 | [Player-facing language selector](#3-player-facing-language-selector) | 🟢 Done | — |
 | 4 | [Full redraw on language change](#4-full-redraw-on-language-change) | 🟢 Done | — |
-| 5 | [Extract remaining hardcoded strings](#5-extract-remaining-hardcoded-strings) | 🟠 Partial | Medium — the static shell and tutorial are done; ~360 literals remain in JS |
+| 5 | [Extract remaining hardcoded strings](#5-extract-remaining-hardcoded-strings) | 🟠 Partial | Low — all nine draw functions are done; ~155 literals remain in `ui.js`, `game.js` and the support files |
 | 6 | [Remove eval() from interpolation](#6-remove-eval-from-interpolation-path) | 🔴 Not started | Medium — latent code-injection surface |
 | 7 | [Harden the key checker](#7-harden-the-key-checker) | 🔴 Not started | Medium — can't safely prune dead keys |
 | 8 | [Translation quality pass](#8-translation-quality-pass) | 🔴 Not started | Low — a handful of possibly-untranslated values |
@@ -162,10 +162,10 @@ modals / the news ticker are not re-rendered mid-flight. Worth a tab-by-tab pass
 
 ## 5. Extract remaining hardcoded strings
 
-**🟠 Partial — priority 1 is done, plus part of priority 2**
+**🟠 Partial — the static shell, the tutorial and all nine draw functions are done**
 
-60 keys were added (1,626 → 1,686), covering the whole of the original priority 1 and the
-mechanical half of priority 2.
+527 keys were added in total (1,626 → 2,153): 60 for the static shell and tutorial, then 467 for
+the nine `drawTab*Content.js` files.
 
 ### Done
 
@@ -204,26 +204,78 @@ template. The step table stays readable in English; matching happens in the acti
 (`Power On` / `Power Off` / `Dyson Sphere`), the AP stat label and the antimatter stat label. These
 are written by the frame loop, so they stayed English while everything around them translated.
 
+**The nine `drawTab*Content.js` files — 467 keys.** Every player-facing literal in the draw
+functions now resolves through the catalogue. By tab:
+
+| File | Keys | Covers |
+|---|--:|---|
+| `drawTab1Content.js` | 1 | Only the *Already Increased!* storage tooltip was left; the rest was already done |
+| `drawTab2Content.js` | 13 | Battery and power-plant rows, the *Add N MWh* / *Add N KW /s* buttons, Activate/Deactivate |
+| `drawTab3Content.js` | 89 | **The `techName*` family** — all 58 tech display names — plus the megastructure rows, the Research pane, the philosophy abilities and their 19 effect notifications |
+| `drawTab4Content.js` | — | Reused tab 1's keys; two stragglers fixed |
+| `drawTab5Content.js` | 76 | Star map modes and search, the star table, star-ship modules, the lifeform scan panel, fleet hangar, diplomacy |
+| `drawTab6Content.js` | 50 | Space telescope, launch pad, rocket miners, the asteroid table, fuelling and travel |
+| `drawTab7Content.js` | 124 | Rebirth, the market, all four casino games and their prize tables, ascendency perks, the black hole |
+| `drawTab8Content.js` | 30 | Sector scanning, the deployables and the five cosmic-rip techs |
+| `drawTab9Content.js` | 84 | Every settings row and description, the currency/notation/theme/auto-save dropdowns, the exit and hard-reset modals, the events tables |
+
+The tech display names were the block called out above as the only non-mechanical part, and they
+are now done: 58 names × 4 languages, as one pass.
+
+Three patterns recur and are worth knowing before touching this area again:
+
+- **Composed names beat duplicated ones.** Megastructure rows read `<structure> <stage>`; the four
+  structure names already existed as `megaStructureTTName*`, so only five stage words were added
+  rather than twenty full labels. The same reasoning gives one `casinoPrizeDoubleMaterial` template
+  instead of six *Double your quantity of X* strings.
+- **Names that live in game data are looked up from the key, not carried beside it.** New
+  `localizeMaterialName(name, section, language)` in `localization.js` turns the `[quantity, key,
+  section]` price tuples the data files use into a display name, and the same idea keys star-ship
+  modules off their element id and ascendency perks off their buff key. This is why the
+  unreferenced-key ratchet rose — see below.
+- **A stored value is not a label.** Asteroid rarity, civilization level, attitude, threat level and
+  the cosmic-rip prerequisite lists are all English words held in the save and branched on in code.
+  Each is now rendered through a small map at the point of display while the stored value stays
+  canonical, which is the same separation item 10 established for tab names.
+
+**Three English-text comparisons were removed** in passing — the same class of latent bug as item 10,
+each of which would have been false in four languages:
+
+- `drawTab8Content.js` gated a sector click on `labelEl.textContent !== 'SCANNED!'`. The state now
+  rides on `dataset.scanned`, which `game.js` sets alongside the text.
+- `drawTab5Content.js` chose the active star-map mode button with
+  `buttonElement.innerHTML.toLowerCase() === getStarMapMode()`. The button list now carries its
+  canonical mode next to its label key.
+- `drawTab7Content.js` decided whether to append a prize detail line by looking for the words
+  "double" and the material name inside the rendered label. It now branches on the shape of the
+  award object.
+
+**Outside the draw functions**, three files needed a matching change or the extraction would have
+been invisible:
+
+- `game.js` — the frame loop rewrites the energy-building cost lines every tick, so it was
+  overwriting the translated material names a frame after `drawTab2Content` wrote them. It now uses
+  the same `localizeMaterialName` mapping. It also writes the cosmic-rip sector scan labels.
+- `ui.js` — `disableStorageNotificationActionIfShowing` had the *Already Increased!* tooltip as a
+  default parameter value; it now resolves through the catalogue per call, so it follows a runtime
+  language change, and the seventeen call sites no longer pass the literal at all.
+- `localization.js` — gained the exported `localizeMaterialName` described above.
+
 ### Remaining
 
-Roughly 360 prose literals, by file:
+Roughly 155 prose literals, by file:
 
 | Priority | Files | Approx | Why |
 |---|---|--:|---|
-| 1 | `ui.js` | ~86 | Fleet and diplomacy panels, scan results, dropdown labels, notifications |
+| 1 | `ui.js` | ~86 | Fleet and diplomacy panels, scan results, dropdown defaults, notifications |
 | 2 | `game.js` | ~45 | Battle and colonisation outcomes, travel status |
-| 3 | `drawTab3Content.js` | ~35 | **Tech display names** — 74 of them; needs a `techName*` key family |
-| 4 | `resourceDataObject.js` | ~32 | Check display names vs internal keys first |
-| 5 | `drawTab9Content.js` | ~27 | Settings rows and their descriptions |
-| 6 | `drawTab6Content.js` | ~24 | Rocket and asteroid panels |
-| 7 | `drawTab7Content.js` | ~19 | Market, casino and rebirth panels |
-| 8 | `drawTab5/8Content.js` | ~26 | Star map, fleet hangar, cosmic rip |
-| 9 | `patches.js`, `saveLoadGame.js`, `events.js` | ~25 | Migration notices, cloud-save status, event outcomes |
+| 3 | `resourceDataObject.js` | ~32 | Check display names vs internal keys first; the ascendency buff `name` fields are now only an English fallback behind `buffName*` |
+| 4 | `patches.js`, `saveLoadGame.js`, `events.js` | ~25 | Migration notices, cloud-save status, event outcomes |
 | — | `constantsAndGlobalVars.js` | ~28 | Debugger tooltips — fine to leave in English |
 
-The tech names are the single biggest block and the only one that is not mechanical: 74 names ×
-4 languages is real translation work, and they are worth doing as one deliberate pass rather than
-piecemeal.
+`ui.js` is now the single biggest block, and it holds the other half of a few pairs already started
+here: the *Select an option* dropdown default exists in `ui.js` and `constantsAndGlobalVars.js` as
+well as in `drawTab6Content.js`, and only the draw-function copy is translated so far.
 
 ---
 
@@ -232,7 +284,7 @@ piecemeal.
 **🔴 Not started**
 
 `interpolateTemplateLiteral()` runs `eval()` on any localized string containing `${…}`. No value in
-the current catalogue uses it — all 1,626 entries in all five languages checked, count is zero — so
+the current catalogue uses it — all 2,153 entries in all five languages checked, count is zero — so
 the path is dead today. It re-arms the moment a translator types `${` into a string, and it
 evaluates content from a data file. Delete the function and the branch that calls it.
 
@@ -250,7 +302,7 @@ clean — but can't see **dynamically constructed keys** (81 call sites): `autoB
 through the migration map in `patches.js`, and `resource${Name}` / `compound${Name}` built by
 concatenation at `ui.js:1790` and `ui.js:1799`.
 
-129 keys currently appear unreferenced as a result. Most are explained by the above. **Do not
+129 keys appeared unreferenced when this was written. Most are explained by the above. **Do not
 delete any until the checker resolves these patterns** — removing a key that's actually built at
 runtime is the hardest class of bug to spot in a language you don't read.
 
@@ -367,12 +419,15 @@ translated.
 3. ~~Compound reverse-lookup performance~~ 🟢 (item 2)
 4. ~~Frame-loop tab gates~~ 🟢 (item 10)
 5. ~~Static shell, tutorial, tech buttons~~ 🟢 (item 5, first half)
-6. **Tech display names** — the largest remaining block, and the only one that is real translation
-   work rather than mechanical extraction (item 5)
-7. The rest of item 5, in the file order listed above
-8. Remove the `eval()` (item 6)
-9. Harden the checker and wire it into the build (item 7)
-10. Translation quality pass, then the German layout pass (items 8–9)
+6. ~~Tech display names~~ 🟢 (item 5 — the `techName*` family, 58 names)
+7. ~~All nine `drawTab*Content.js` files~~ 🟢 (item 5)
+8. **`ui.js`, then `game.js`** — the rest of item 5, in the file order listed above. `ui.js` holds
+   the other half of several strings started here, so it is the natural next step.
+9. Remove the `eval()` (item 6)
+10. Harden the checker and wire it into the build (item 7)
+11. Translation quality pass, then the German layout pass (items 8–9). The identical-to-English
+    ratchet rose sharply with the draw-function extraction — currency names, theme proper nouns and
+    units — so this pass now has a bigger, and mostly benign, list to work through.
 
 ## Test coverage
 
@@ -396,8 +451,8 @@ closed incrementally. Each may fall; none may rise without a reason recorded in 
 
 | Ratchet | Baseline | Item |
 |---|--:|---|
-| Values identical to English | es 37, de 42, it 39, fr 45 | 8 |
-| Keys not referenced anywhere in shipped source | 21 | 7 |
+| Values identical to English | es 48, de 60, it 46, fr 72 | 8 |
+| Keys not referenced anywhere in shipped source | 46 | 7 |
 | Sanctioned empty values | 3 (the casino suffix keys) | 7 |
 | Unannotated visible text in `index.html` | 74 (debug windows and modal placeholders) | 5 |
 | Controls clipped by translation but not by English | 5 | 9 |

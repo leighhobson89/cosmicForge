@@ -428,7 +428,7 @@ import {
     getCosmicRipScanResultsBySectorIndex,
 } from './resourceDataObject.js';
 
-import { localize } from './localization.js';
+import { localize, localizeMaterialName } from './localization.js';
 import { onboardingChecks } from './onboarding.js';
 
 import {
@@ -655,7 +655,7 @@ function performIncreaseStorageForKey(category, key) {
 
     if (normalizedCategory === 'compounds' && normalizedKey === 'water') {
         increaseResourceStorage(['waterQuantity', 'concreteQuantity'], ['water', 'concrete'], ['compounds', 'compounds']);
-        disableStorageNotificationActionIfShowing(normalizedKey, 'Already Increased!');
+        disableStorageNotificationActionIfShowing(normalizedKey);
         const bucket = storageFullNotificationState[normalizedCategory];
         if (bucket) {
             bucket[normalizedKey] = false;
@@ -664,7 +664,7 @@ function performIncreaseStorageForKey(category, key) {
     }
 
     increaseResourceStorage([`${normalizedKey}Quantity`], [normalizedKey], [normalizedCategory]);
-    disableStorageNotificationActionIfShowing(normalizedKey, 'Already Increased!');
+    disableStorageNotificationActionIfShowing(normalizedKey);
     const bucket = storageFullNotificationState[normalizedCategory];
     if (bucket) {
         bucket[normalizedKey] = false;
@@ -1625,12 +1625,18 @@ function cosmicRipChecks() {
             const shouldBeGreen = scanned || ready;
             el.classList.toggle('green-ready-text', shouldBeGreen);
             el.classList.toggle('red-disabled-text', !shouldBeGreen);
+            // `dataset.scanned` carries the state; the text is only a rendering
+            // of it, so drawTab8Content's click gate does not have to compare
+            // against an English word.
             if (scanned) {
-                if (el.textContent !== 'SCANNED!') {
-                    el.textContent = 'SCANNED!';
+                const desiredText = localize('textSectorScanned', getLanguage());
+                el.dataset.scanned = 'true';
+                if (el.textContent !== desiredText) {
+                    el.textContent = desiredText;
                 }
             } else {
-                const desiredText = `Scan 1 GP`;
+                const desiredText = localize('textSectorScanCost', getLanguage()).replace('{cost}', 1);
+                el.dataset.scanned = 'false';
                 if (el.textContent !== desiredText) {
                     el.textContent = desiredText;
                 }
@@ -5915,6 +5921,14 @@ function getScienceResourceDescriptionElements() {
     };
 }
 
+// The frame loop rewrites these cost lines every tick, so the material names in
+// them have to be localized here too — otherwise the translated names written by
+// drawTab2Content are overwritten with English a frame later.
+function energyUpgradePriceName(upgrade, slot) {
+    const price = getResourceDataObject('buildings', ['energy', 'upgrades', upgrade, `resource${slot}Price`]);
+    return localizeMaterialName(price[1], price[2], getLanguage());
+}
+
 function getBuildingResourceDescriptionElements() {
     const battery1BuyDescElement = document.getElementById('sodiumIonBatteryDescription');
     const battery1BuyPrice = getResourceDataObject('buildings', ['energy', 'upgrades', 'battery1', 'price']);
@@ -5960,9 +5974,9 @@ function getBuildingResourceDescriptionElements() {
             resource2Price: battery1BuyResource2Price, 
             resource3Price: battery1BuyResource3Price, 
             string1: getCurrencySymbol(),
-            string2: capitaliseString(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery1', 'resource1Price'])[1]), 
-            string3: capitaliseString(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery1', 'resource2Price'])[1]), 
-            string4: capitaliseString(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery1', 'resource3Price'])[1]) 
+            string2: energyUpgradePriceName('battery1', 1), 
+            string3: energyUpgradePriceName('battery1', 2), 
+            string4: energyUpgradePriceName('battery1', 3) 
         },
         battery2Buy: { 
             element: battery2BuyDescElement, 
@@ -5971,9 +5985,9 @@ function getBuildingResourceDescriptionElements() {
             resource2Price: battery2BuyResource2Price, 
             resource3Price: battery2BuyResource3Price, 
             string1: getCurrencySymbol(),
-            string2: capitaliseString(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery2', 'resource1Price'])[1]), 
-            string3: capitaliseString(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery2', 'resource2Price'])[1]), 
-            string4: capitaliseString(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery2', 'resource3Price'])[1]) 
+            string2: energyUpgradePriceName('battery2', 1), 
+            string3: energyUpgradePriceName('battery2', 2), 
+            string4: energyUpgradePriceName('battery2', 3) 
         },
         battery3Buy: { 
             element: battery3BuyDescElement, 
@@ -5982,9 +5996,9 @@ function getBuildingResourceDescriptionElements() {
             resource2Price: battery3BuyResource2Price, 
             resource3Price: battery3BuyResource3Price, 
             string1: getCurrencySymbol(),
-            string2: capitaliseString(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery3', 'resource1Price'])[1]), 
-            string3: capitaliseString(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery3', 'resource2Price'])[1]), 
-            string4: capitaliseString(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery3', 'resource3Price'])[1]) 
+            string2: energyUpgradePriceName('battery3', 1), 
+            string3: energyUpgradePriceName('battery3', 2), 
+            string4: energyUpgradePriceName('battery3', 3) 
         },
         powerPlant1Buy: { 
             element: powerPlant1BuyDescElement, 
@@ -5993,9 +6007,9 @@ function getBuildingResourceDescriptionElements() {
             resource2Price: powerPlant1BuyResource2Price, 
             resource3Price: powerPlant1BuyResource3Price, 
             string1: getCurrencySymbol(),
-            string2: capitaliseString(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'resource1Price'])[1]), 
-            string3: capitaliseString(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'resource2Price'])[1]), 
-            string4: capitaliseString(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'resource3Price'])[1]) 
+            string2: energyUpgradePriceName('powerPlant1', 1), 
+            string3: energyUpgradePriceName('powerPlant1', 2), 
+            string4: energyUpgradePriceName('powerPlant1', 3) 
         },
         powerPlant2Buy: { 
             element: powerPlant2BuyDescElement, 
@@ -6004,9 +6018,9 @@ function getBuildingResourceDescriptionElements() {
             resource2Price: powerPlant2BuyResource2Price, 
             resource3Price: powerPlant2BuyResource3Price, 
             string1: getCurrencySymbol(),
-            string2: capitaliseString(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'resource1Price'])[1]), 
-            string3: capitaliseString(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'resource2Price'])[1]), 
-            string4: capitaliseString(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'resource3Price'])[1]) 
+            string2: energyUpgradePriceName('powerPlant2', 1), 
+            string3: energyUpgradePriceName('powerPlant2', 2), 
+            string4: energyUpgradePriceName('powerPlant2', 3) 
         },
         powerPlant3Buy: { 
             element: powerPlant3BuyDescElement, 
@@ -6015,9 +6029,9 @@ function getBuildingResourceDescriptionElements() {
             resource2Price: powerPlant3BuyResource2Price, 
             resource3Price: powerPlant3BuyResource3Price, 
             string1: getCurrencySymbol(),
-            string2: capitaliseString(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant3', 'resource1Price'])[1]), 
-            string3: capitaliseString(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant3', 'resource2Price'])[1]), 
-            string4: capitaliseString(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant3', 'resource3Price'])[1])  
+            string2: energyUpgradePriceName('powerPlant3', 1), 
+            string3: energyUpgradePriceName('powerPlant3', 2), 
+            string4: energyUpgradePriceName('powerPlant3', 3)  
         }        
     };
 }

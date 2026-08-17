@@ -4,6 +4,85 @@ import { setAllCompoundsToZeroQuantity, gain, startUpdateTimersAndRates, addToRe
 import { getStarSystemDataObject, setResourceDataObject, getResourceDataObject, setAutoBuyerTierLevel } from './resourceDataObject.js';
 import { createOptionRow, removeTabAttentionIfNoIndicators, createToggleSwitch, createSvgElement, createTextElement, sortTechRows, createButton, showNotification, updateDescriptionRow, appendAttentionIndicator, showHideModal, setupInfoTooltips, callPopupModal } from './ui.js';
 import { trackAnalyticsEvent } from './analytics.js';
+
+// Tech prerequisites are stored as English display names rather than tech keys,
+// so they need mapping back to a key before the cost line can show them
+// translated. The map is derived from the techName* family itself.
+const TECH_NAME_KEYS_BY_ENGLISH = {
+    "Knowledge Sharing": "techNameKnowledgeSharing",
+    "Fusion Theory": "techNameFusionTheory",
+    "Hydrogen Fusion": "techNameHydrogenFusion",
+    "Helium Fusion": "techNameHeliumFusion",
+    "Carbon Fusion": "techNameCarbonFusion",
+    "Neon Fusion": "techNameNeonFusion",
+    "Oxygen Fusion": "techNameOxygenFusion",
+    "Silicon Fusion": "techNameSiliconFusion",
+    "Noble Gas Collection": "techNameNobleGasCollection",
+    "Glass Manufacture": "techNameGlassManufacture",
+    "Aggregate Mixing": "techNameAggregateMixing",
+    "Neutron Capture": "techNameNeutronCapture",
+    "Quantum Computing": "techNameQuantumComputing",
+    "Science Laboratories": "techNameScienceLaboratories",
+    "HydroCarbons": "techNameHydroCarbons",
+    "Nano Tube Technology": "techNameNanoTubeTechnology",
+    "Nano Brokers": "techNameNanoBrokers",
+    "Stellar Cartography": "techNameStellarCartography",
+    "Basic Power Generation": "techNameBasicPowerGeneration",
+    "Sodium Ion Power Storage": "techNameSodiumIonPowerStorage",
+    "Advanced Power Generation": "techNameAdvancedPowerGeneration",
+    "Solar Power Generation": "techNameSolarPowerGeneration",
+    "Rocket Composites": "techNameRocketComposites",
+    "Advanced Fuels": "techNameAdvancedFuels",
+    "Planetary Navigation": "techNamePlanetaryNavigation",
+    "Compounds": "techNameCompounds",
+    "Steel Foundries": "techNameSteelFoundries",
+    "Gigantic Turbines": "techNameGiganticTurbines",
+    "Atmospheric Telescopes": "techNameAtmosphericTelescopes",
+    "Fusion Efficiency I": "techNameFusionEfficiencyI",
+    "Fusion Efficiency II": "techNameFusionEfficiencyII",
+    "Fusion Efficiency III": "techNameFusionEfficiencyIII",
+    "Orbital Construction": "techNameOrbitalConstruction",
+    "Antimatter Engines": "techNameAntimatterEngines",
+    "FTL Travel Theory": "techNameFTLTravelTheory",
+    "Life Support Systems": "techNameLifeSupportSystems",
+    "Starship Fleets": "techNameStarshipFleets",
+    "Stellar Scanners": "techNameStellarScanners",
+    "Space Storage Tank Research": "techNameSpaceStorageTankResearch",
+    "Efficient Assembly": "techNameEfficientAssembly",
+    "Laser Mining": "techNameLaserMining",
+    "Mass Compound Assembly": "techNameMassCompoundAssembly",
+    "Energy Drones": "techNameEnergyDrones",
+    "Fleet Holograms": "techNameFleetHolograms",
+    "Hangar Automation": "techNameHangarAutomation",
+    "Synthetic Plating": "techNameSyntheticPlating",
+    "Antimatter Engine Minaturization": "techNameAntimatterEngineMinaturization",
+    "Laser Intensity Research": "techNameLaserIntensityResearch",
+    "Void Seers": "techNameVoidSeers",
+    "Stellar Whispers": "techNameStellarWhispers",
+    "Stellar Insight Manifold": "techNameStellarInsightManifold",
+    "Asteroid Dwellers": "techNameAsteroidDwellers",
+    "Ascendency Philosophy": "techNameAscendencyPhilosophy",
+    "Rapid Expansion": "techNameRapidExpansion",
+    "Space Elevator": "techNameSpaceElevator",
+    "Launch Pad Mass Production": "techNameLaunchPadMassProduction",
+    "Asteroid Attractors": "techNameAsteroidAttractors",
+    "Warp Drive": "techNameWarpDrive"
+};
+
+const localizeTechName = (englishName) => {
+    const key = TECH_NAME_KEYS_BY_ENGLISH[englishName];
+    return key ? localize(key, getLanguage()) : englishName;
+};
+
+const localizeTechPrereqs = (prereqs) => (prereqs || [])
+    .filter((prereq) => prereq !== null)
+    .map(localizeTechName)
+    .join(', ');
+
+// Megastructure rows are labelled "<structure> <stage>"; both halves already
+// have catalogue entries, so the label is composed rather than duplicated.
+const megaStructureRowLabel = (structureKey, stageKey) =>
+    `${localize(structureKey, getLanguage())} ${localize(stageKey, getLanguage())}`;
 import { modalMegaStructureTechDysonSphere1Header, modalMegaStructureTechDysonSphere1Text, modalMegaStructureTechDysonSphere2Header, modalMegaStructureTechDysonSphere2Text, modalMegaStructureTechDysonSphere3Header, modalMegaStructureTechDysonSphere3Text, modalMegaStructureTechDysonSphere4Header, modalMegaStructureTechDysonSphere4Text, modalMegaStructureTechDysonSphere5Header, modalMegaStructureTechDysonSphere5Text, modalMegaStructureTechCelestialProcessingCore1Header, modalMegaStructureTechCelestialProcessingCore1Text, modalMegaStructureTechCelestialProcessingCore2Header, modalMegaStructureTechCelestialProcessingCore2Text, modalMegaStructureTechCelestialProcessingCore3Header, modalMegaStructureTechCelestialProcessingCore3Text, modalMegaStructureTechCelestialProcessingCore4Header, modalMegaStructureTechCelestialProcessingCore4Text, modalMegaStructureTechCelestialProcessingCore5Header, modalMegaStructureTechCelestialProcessingCore5Text, modalMegaStructureTechPlasmaForge1Header, modalMegaStructureTechPlasmaForge1Text, modalMegaStructureTechPlasmaForge2Header, modalMegaStructureTechPlasmaForge2Text, modalMegaStructureTechPlasmaForge3Header, modalMegaStructureTechPlasmaForge3Text, modalMegaStructureTechPlasmaForge4Header, modalMegaStructureTechPlasmaForge4Text, modalMegaStructureTechPlasmaForge5Header, modalMegaStructureTechPlasmaForge5Text, modalMegaStructureTechGalacticMemoryArchive1Header, modalMegaStructureTechGalacticMemoryArchive1Text, modalMegaStructureTechGalacticMemoryArchive2Header, modalMegaStructureTechGalacticMemoryArchive2Text, modalMegaStructureTechGalacticMemoryArchive3Header, modalMegaStructureTechGalacticMemoryArchive3Text, modalMegaStructureTechGalacticMemoryArchive4Header, modalMegaStructureTechGalacticMemoryArchive4Text, modalMegaStructureTechGalacticMemoryArchive5Header, modalMegaStructureTechGalacticMemoryArchive5Text, modalNanoBrokersUnlockHeader, modalNanoBrokersUnlockText, modalRocketCompositesTabUnlockHeader, modalRocketCompositesTabUnlockText, modalQuantumComputingTabUnlockHeader, modalQuantumComputingTabUnlockText, modalScienceLabsTabUnlockHeader, modalScienceLabsTabUnlockText, modalKnowledgeSharingTabUnlockHeader, modalKnowledgeSharingTabUnlockText, modalInterstellarTabUnlockHeader, modalInterstellarTabUnlockText, modalEnergyTabUnlockHeader, modalEnergyTabUnlockText, modalSpaceMiningTabUnlockText, modalSpaceMiningTabUnlockHeader, modalCompoundsTabUnlockHeader, modalCompoundsTabUnlockText, techNotificationMessages } from './descriptions.js';
 
 export function drawTab3Content(heading, optionContentElement) {
@@ -36,7 +115,7 @@ export function drawTab3Content(heading, optionContentElement) {
         const researchAutoBuyerRow = createOptionRow({
                 labelId: 'researchAutoBuyerRow',
                 renderNameABs: null,
-                labelText: 'Research AutoBuyer:',
+                labelText: localize('tab3ResearchAutoBuyerRowLabel', getLanguage()),
                 inputElements: [
                     createToggleSwitch('scienceAutoBuyerToggle', autoBuyerEnabled, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'research', ['upgrades', 'autoBuyer', 'enabled']);
@@ -60,7 +139,7 @@ export function drawTab3Content(heading, optionContentElement) {
         const researchScienceKitRow = createOptionRow({
                 labelId: 'researchScienceKitRow',
                 renderNameABs: null,
-                labelText: 'Science Kit:',
+                labelText: localize('tab3ScienceKitRowLabel', getLanguage()),
                 inputElements: [
                     createButton({
                         text: localize('buttonAddPerSecond', getLanguage()).replace('{rate}', getResourceDataObject('research', ['upgrades', 'scienceKit', 'rate']) * getTimerRateRatio()).replace('{resource}', localize('headerMainResearch', getLanguage())),
@@ -84,12 +163,12 @@ export function drawTab3Content(heading, optionContentElement) {
                         autoBuyerTier: null,
                         rowCategory: 'science'
                     }),
-                    createTextElement(`Quantity: ${getResourceDataObject('research', ['upgrades', 'scienceKit', 'quantity'])}`, 'scienceKitQuantity', ['science-building-quantity']),
+                    createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('research', ['upgrades', 'scienceKit', 'quantity'])}`, 'scienceKitQuantity', ['science-building-quantity']),
                     createToggleSwitch('scienceKitToggle', true, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'research', ['upgrades', 'scienceKit', 'active']);
                     }, ['toggle-switch-spacing']),
                 ],
-                descriptionText: `${getResourceDataObject('research', ['upgrades', 'scienceKit', 'price']) + ' Research'}`,
+                descriptionText: `${getResourceDataObject('research', ['upgrades', 'scienceKit', 'price']) + ' ' + localize('textResearchPointsSuffix', getLanguage())}`,
                 resourcePriceObject: '',
                 dataConditionCheck: 'upgradeCheck',
                 objectSectionArgument1: 'scienceUpgrade',
@@ -106,7 +185,7 @@ export function drawTab3Content(heading, optionContentElement) {
         const researchScienceClubRow = createOptionRow({
                 labelId: 'researchScienceClubRow',
                 renderNameABs: null,
-                labelText: 'Open Science Club:',
+                labelText: localize('tab3ScienceClubRowLabel', getLanguage()),
                 inputElements: [
                     createButton({
                         text: localize('buttonAddPerSecond', getLanguage()).replace('{rate}', getResourceDataObject('research', ['upgrades', 'scienceClub', 'rate']) * getTimerRateRatio()).replace('{resource}', localize('headerMainResearch', getLanguage())),
@@ -130,7 +209,7 @@ export function drawTab3Content(heading, optionContentElement) {
                         autoBuyerTier: null,
                         rowCategory: 'science'
                     }),
-                    createTextElement(`Quantity: ${getResourceDataObject('research', ['upgrades', 'scienceClub', 'quantity'])}`, 'scienceClubQuantity', ['science-building-quantity']),
+                    createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('research', ['upgrades', 'scienceClub', 'quantity'])}`, 'scienceClubQuantity', ['science-building-quantity']),
                     createToggleSwitch('scienceClubToggle', true, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'research', ['upgrades', 'scienceClub', 'active']);
                     }, ['toggle-switch-spacing']),
@@ -152,7 +231,7 @@ export function drawTab3Content(heading, optionContentElement) {
         const researchScienceLabRow = createOptionRow({
                 labelId: 'researchScienceLabRow',
                 renderNameABs: null,
-                labelText: 'Open Science Lab:',
+                labelText: localize('tab3ScienceLabRowLabel', getLanguage()),
                 inputElements: [
                     createButton({
                         text: localize('buttonAddPerSecond', getLanguage()).replace('{rate}', getResourceDataObject('research', ['upgrades', 'scienceLab', 'rate']) * getTimerRateRatio()).replace('{resource}', localize('headerMainResearch', getLanguage())),
@@ -176,7 +255,7 @@ export function drawTab3Content(heading, optionContentElement) {
                         autoBuyerTier: null,
                         rowCategory: 'science'
                     }),
-                    createTextElement(`Quantity: ${getResourceDataObject('research', ['upgrades', 'scienceLab', 'quantity'])}`, 'scienceLabQuantity', ['science-building-quantity']),
+                    createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('research', ['upgrades', 'scienceLab', 'quantity'])}`, 'scienceLabQuantity', ['science-building-quantity']),
                     createToggleSwitch('scienceLabToggle', true, (isEnabled) => {
                         setResourceDataObject(isEnabled, 'research', ['upgrades', 'scienceLab', 'active']);
                     }, ['toggle-switch-spacing']),
@@ -202,7 +281,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techKnowledgeSharingRow',
                     renderNameABs: null,
-                    labelText: 'Knowledge Sharing:',
+                    labelText: `${localize('techNameKnowledgeSharing', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -216,7 +295,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['knowledgeSharing', 'price'])} Research${getResourceDataObject('techs', ['knowledgeSharing', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="knowledgeSharingPrereq">${getResourceDataObject('techs', ['knowledgeSharing', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['knowledgeSharing', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['knowledgeSharing', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="knowledgeSharingPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['knowledgeSharing', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'knowledgeSharing',
@@ -234,7 +313,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techFusionTheoryRow',
                     renderNameABs: null,
-                    labelText: 'Fusion Theory:',
+                    labelText: `${localize('techNameFusionTheory', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -248,7 +327,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['fusionTheory', 'price'])} Research${getResourceDataObject('techs', ['fusionTheory', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="fusionTheoryPrereq">${getResourceDataObject('techs', ['fusionTheory', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['fusionTheory', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['fusionTheory', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="fusionTheoryPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['fusionTheory', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'fusionTheory',
@@ -266,7 +345,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techHydrogenFusionRow',
                     renderNameABs: null,
-                    labelText: 'Hydrogen Fusion:',
+                    labelText: `${localize('techNameHydrogenFusion', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -280,7 +359,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['hydrogenFusion', 'price'])} Research${getResourceDataObject('techs', ['hydrogenFusion', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="hydrogenFusionPrereq">${getResourceDataObject('techs', ['hydrogenFusion', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['hydrogenFusion', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['hydrogenFusion', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="hydrogenFusionPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['hydrogenFusion', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'hydrogenFusion',
@@ -298,7 +377,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techHeliumFusionRow',
                     renderNameABs: null,
-                    labelText: 'Helium Fusion:',
+                    labelText: `${localize('techNameHeliumFusion', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -312,7 +391,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['heliumFusion', 'price'])} Research${getResourceDataObject('techs', ['heliumFusion', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="heliumFusionPrereq">${getResourceDataObject('techs', ['heliumFusion', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['heliumFusion', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['heliumFusion', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="heliumFusionPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['heliumFusion', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'heliumFusion',
@@ -330,7 +409,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techCarbonFusionRow',
                     renderNameABs: null,
-                    labelText: 'Carbon Fusion:',
+                    labelText: `${localize('techNameCarbonFusion', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -344,7 +423,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['carbonFusion', 'price'])} Research${getResourceDataObject('techs', ['carbonFusion', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="carbonFusionPrereq">${getResourceDataObject('techs', ['carbonFusion', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['carbonFusion', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['carbonFusion', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="carbonFusionPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['carbonFusion', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'carbonFusion',
@@ -362,7 +441,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techNeonFusionRow',
                     renderNameABs: null,
-                    labelText: 'Neon Fusion:',
+                    labelText: `${localize('techNameNeonFusion', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -376,7 +455,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['neonFusion', 'price'])} Research${getResourceDataObject('techs', ['neonFusion', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="neonFusionPrereq">${getResourceDataObject('techs', ['neonFusion', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['neonFusion', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['neonFusion', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="neonFusionPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['neonFusion', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'neonFusion',
@@ -394,7 +473,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techOxygenFusionRow',
                     renderNameABs: null,
-                    labelText: 'Oxygen Fusion:',
+                    labelText: `${localize('techNameOxygenFusion', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -408,7 +487,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['oxygenFusion', 'price'])} Research${getResourceDataObject('techs', ['oxygenFusion', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="oxygenFusionPrereq">${getResourceDataObject('techs', ['oxygenFusion', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['oxygenFusion', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['oxygenFusion', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="oxygenFusionPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['oxygenFusion', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'oxygenFusion',
@@ -426,7 +505,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techSiliconFusionRow',
                     renderNameABs: null,
-                    labelText: 'Silicon Fusion:',
+                    labelText: `${localize('techNameSiliconFusion', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -440,7 +519,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['siliconFusion', 'price'])} Research${getResourceDataObject('techs', ['siliconFusion', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="siliconFusionPrereq">${getResourceDataObject('techs', ['siliconFusion', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['siliconFusion', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['siliconFusion', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="siliconFusionPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['siliconFusion', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'siliconFusion',
@@ -458,7 +537,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techNobleGasCollectionRow',
                     renderNameABs: null,
-                    labelText: 'Noble Gas Collection:',
+                    labelText: `${localize('techNameNobleGasCollection', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -472,7 +551,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['nobleGasCollection', 'price'])} Research${getResourceDataObject('techs', ['nobleGasCollection', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="nobleGasCollectionPrereq">${getResourceDataObject('techs', ['nobleGasCollection', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['nobleGasCollection', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['nobleGasCollection', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="nobleGasCollectionPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['nobleGasCollection', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'nobleGasCollection',
@@ -490,7 +569,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techGlassManufactureRow',
                     renderNameABs: null,
-                    labelText: 'Glass Manufacture:',
+                    labelText: `${localize('techNameGlassManufacture', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -504,7 +583,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['glassManufacture', 'price'])} Research${getResourceDataObject('techs', ['glassManufacture', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="glassManufacturePrereq">${getResourceDataObject('techs', ['glassManufacture', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['glassManufacture', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['glassManufacture', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="glassManufacturePrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['glassManufacture', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'glassManufacture',
@@ -522,7 +601,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techAggregateMixingRow',
                     renderNameABs: null,
-                    labelText: 'Aggregate Mixing:',
+                    labelText: `${localize('techNameAggregateMixing', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -536,7 +615,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['aggregateMixing', 'price'])} Research${getResourceDataObject('techs', ['aggregateMixing', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="aggregateMixingPrereq">${getResourceDataObject('techs', ['aggregateMixing', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['aggregateMixing', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['aggregateMixing', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="aggregateMixingPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['aggregateMixing', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'aggregateMixing',
@@ -554,7 +633,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techNeutronCaptureRow',
                     renderNameABs: null,
-                    labelText: 'Neutron Capture:',
+                    labelText: `${localize('techNameNeutronCapture', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -568,7 +647,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['neutronCapture', 'price'])} Research${getResourceDataObject('techs', ['neutronCapture', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="neutronCapturePrereq">${getResourceDataObject('techs', ['neutronCapture', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['neutronCapture', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['neutronCapture', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="neutronCapturePrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['neutronCapture', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'neutronCapture',
@@ -586,7 +665,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techQuantumComputingRow',
                     renderNameABs: null,
-                    labelText: 'Quantum Computing:',
+                    labelText: `${localize('techNameQuantumComputing', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -600,7 +679,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['quantumComputing', 'price'])} Research${getResourceDataObject('techs', ['quantumComputing', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="quantumComputingPrereq">${getResourceDataObject('techs', ['quantumComputing', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['quantumComputing', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['quantumComputing', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="quantumComputingPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['quantumComputing', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'quantumComputing',
@@ -618,7 +697,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techScienceLaboratoriesRow',
                     renderNameABs: null,
-                    labelText: 'Science Laboratories:',
+                    labelText: `${localize('techNameScienceLaboratories', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -632,7 +711,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['scienceLaboratories', 'price'])} Research${getResourceDataObject('techs', ['scienceLaboratories', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="scienceLaboratoriesPrereq">${getResourceDataObject('techs', ['scienceLaboratories', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['scienceLaboratories', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['scienceLaboratories', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="scienceLaboratoriesPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['scienceLaboratories', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'scienceLaboratories',
@@ -650,7 +729,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techHydroCarbonsRow',
                     renderNameABs: null,
-                    labelText: 'HydroCarbons:',
+                    labelText: `${localize('techNameHydroCarbons', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -664,7 +743,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['hydroCarbons', 'price'])} Research${getResourceDataObject('techs', ['hydroCarbons', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="hydroCarbonsPrereq">${getResourceDataObject('techs', ['hydroCarbons', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['hydroCarbons', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['hydroCarbons', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="hydroCarbonsPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['hydroCarbons', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'hydroCarbons',
@@ -682,7 +761,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techNanoTubeTechnologyRow',
                     renderNameABs: null,
-                    labelText: 'Nano Tube Technology:',
+                    labelText: `${localize('techNameNanoTubeTechnology', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -696,7 +775,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['nanoTubeTechnology', 'price'])} Research${getResourceDataObject('techs', ['nanoTubeTechnology', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="nanoTubeTechnologyPrereq">${getResourceDataObject('techs', ['nanoTubeTechnology', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['nanoTubeTechnology', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['nanoTubeTechnology', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="nanoTubeTechnologyPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['nanoTubeTechnology', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'nanoTubeTechnology',
@@ -714,7 +793,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techNanoBrokersRow',
                     renderNameABs: null,
-                    labelText: 'Nano Brokers:',
+                    labelText: `${localize('techNameNanoBrokers', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -728,7 +807,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['nanoBrokers', 'price'])} Research${getResourceDataObject('techs', ['nanoBrokers', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="nanoBrokersPrereq">${getResourceDataObject('techs', ['nanoBrokers', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['nanoBrokers', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['nanoBrokers', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="nanoBrokersPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['nanoBrokers', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'nanoBrokers',
@@ -746,7 +825,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techStellarCartographyRow',
                     renderNameABs: null,
-                    labelText: 'Stellar Cartography:',
+                    labelText: `${localize('techNameStellarCartography', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -760,7 +839,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['stellarCartography', 'price'])} Research${getResourceDataObject('techs', ['stellarCartography', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="stellarCartographyPrereq">${getResourceDataObject('techs', ['stellarCartography', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['stellarCartography', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['stellarCartography', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="stellarCartographyPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['stellarCartography', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'stellarCartography',
@@ -778,7 +857,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techBasicPowerGenerationRow',
                     renderNameABs: null,
-                    labelText: 'Basic Power Generation:',
+                    labelText: `${localize('techNameBasicPowerGeneration', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -792,7 +871,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['basicPowerGeneration', 'price'])} Research${getResourceDataObject('techs', ['basicPowerGeneration', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="basicPowerGenerationPrereq">${getResourceDataObject('techs', ['basicPowerGeneration', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['basicPowerGeneration', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['basicPowerGeneration', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="basicPowerGenerationPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['basicPowerGeneration', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'basicPowerGeneration',
@@ -810,7 +889,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techSodiumIonPowerStorageRow',
                     renderNameABs: null,
-                    labelText: 'Sodium Ion Power Storage:',
+                    labelText: `${localize('techNameSodiumIonPowerStorage', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -824,7 +903,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['sodiumIonPowerStorage', 'price'])} Research${getResourceDataObject('techs', ['sodiumIonPowerStorage', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="sodiumIonPowerStoragePrereq">${getResourceDataObject('techs', ['sodiumIonPowerStorage', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['sodiumIonPowerStorage', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['sodiumIonPowerStorage', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="sodiumIonPowerStoragePrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['sodiumIonPowerStorage', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'sodiumIonPowerStorage',
@@ -842,7 +921,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techAdvancedPowerGenerationRow',
                     renderNameABs: null,
-                    labelText: 'Advanced Power Generation:',
+                    labelText: `${localize('techNameAdvancedPowerGeneration', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -856,7 +935,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['advancedPowerGeneration', 'price'])} Research${getResourceDataObject('techs', ['advancedPowerGeneration', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="advancedPowerGenerationPrereq">${getResourceDataObject('techs', ['advancedPowerGeneration', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['advancedPowerGeneration', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['advancedPowerGeneration', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="advancedPowerGenerationPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['advancedPowerGeneration', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'advancedPowerGeneration',
@@ -874,7 +953,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techSolarPowerGenerationRow',
                     renderNameABs: null,
-                    labelText: 'Solar Power Generation:',
+                    labelText: `${localize('techNameSolarPowerGeneration', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -888,7 +967,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['solarPowerGeneration', 'price'])} Research${getResourceDataObject('techs', ['solarPowerGeneration', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="solarPowerGenerationPrereq">${getResourceDataObject('techs', ['solarPowerGeneration', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['solarPowerGeneration', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['solarPowerGeneration', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="solarPowerGenerationPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['solarPowerGeneration', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'solarPowerGeneration',
@@ -906,7 +985,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techRocketCompositesRow',
                     renderNameABs: null,
-                    labelText: 'Rocket Composites:',
+                    labelText: `${localize('techNameRocketComposites', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -922,7 +1001,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['rocketComposites', 'price'])} Research${getResourceDataObject('techs', ['rocketComposites', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="rocketCompositesPrereq">${getResourceDataObject('techs', ['rocketComposites', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['rocketComposites', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['rocketComposites', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="rocketCompositesPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['rocketComposites', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'rocketComposites',
@@ -940,7 +1019,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techAdvancedFuelsRow',
                     renderNameABs: null,
-                    labelText: 'Advanced Fuels:',
+                    labelText: `${localize('techNameAdvancedFuels', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -956,7 +1035,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['advancedFuels', 'price'])} Research${getResourceDataObject('techs', ['advancedFuels', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="advancedFuelsPrereq">${getResourceDataObject('techs', ['advancedFuels', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['advancedFuels', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['advancedFuels', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="advancedFuelsPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['advancedFuels', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'advancedFuels',
@@ -974,7 +1053,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techPlanetaryNavigationRow',
                     renderNameABs: null,
-                    labelText: 'Planetary Navigation:',
+                    labelText: `${localize('techNamePlanetaryNavigation', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -990,7 +1069,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['planetaryNavigation', 'price'])} Research${getResourceDataObject('techs', ['planetaryNavigation', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="planetaryNavigationPrereq">${getResourceDataObject('techs', ['planetaryNavigation', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['planetaryNavigation', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['planetaryNavigation', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="planetaryNavigationPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['planetaryNavigation', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'planetaryNavigation',
@@ -1008,7 +1087,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techCompoundsRow',
                     renderNameABs: null,
-                    labelText: 'Compounds:',
+                    labelText: `${localize('techNameCompounds', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -1024,7 +1103,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['compounds', 'price'])} Research${getResourceDataObject('techs', ['compounds', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="compoundsPrereq">${getResourceDataObject('techs', ['compounds', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['compounds', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['compounds', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="compoundsPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['compounds', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'compounds',
@@ -1042,7 +1121,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techSteelFoundriesRow',
                     renderNameABs: null,
-                    labelText: 'Steel Foundries:',
+                    labelText: `${localize('techNameSteelFoundries', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -1058,7 +1137,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['steelFoundries', 'price'])} Research${getResourceDataObject('techs', ['steelFoundries', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="steelFoundriesPrereq">${getResourceDataObject('techs', ['steelFoundries', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['steelFoundries', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['steelFoundries', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="steelFoundriesPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['steelFoundries', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'steelFoundries',
@@ -1076,7 +1155,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techGiganticTurbinesRow',
                     renderNameABs: null,
-                    labelText: 'Gigantic Turbines:',
+                    labelText: `${localize('techNameGiganticTurbines', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -1092,7 +1171,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['giganticTurbines', 'price'])} Research${getResourceDataObject('techs', ['giganticTurbines', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="giganticTurbinesPrereq">${getResourceDataObject('techs', ['giganticTurbines', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['giganticTurbines', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['giganticTurbines', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="giganticTurbinesPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['giganticTurbines', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'giganticTurbines',
@@ -1110,7 +1189,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techAtmosphericTelescopesRow',
                     renderNameABs: null,
-                    labelText: 'Atmospheric Telescopes:',
+                    labelText: `${localize('techNameAtmosphericTelescopes', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -1126,7 +1205,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['atmosphericTelescopes', 'price'])} Research${getResourceDataObject('techs', ['atmosphericTelescopes', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="atmosphericTelescopesPrereq">${getResourceDataObject('techs', ['atmosphericTelescopes', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['atmosphericTelescopes', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['atmosphericTelescopes', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="atmosphericTelescopesPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['atmosphericTelescopes', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'atmosphericTelescopes',
@@ -1144,7 +1223,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techFusionEfficiencyIRow',
                     renderNameABs: null,
-                    labelText: 'Fusion Efficiency I:',
+                    labelText: `${localize('techNameFusionEfficiencyI', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -1160,7 +1239,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['fusionEfficiencyI', 'price'])} Research${getResourceDataObject('techs', ['fusionEfficiencyI', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="fusionEfficiencyIPrereq">${getResourceDataObject('techs', ['fusionEfficiencyI', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['fusionEfficiencyI', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['fusionEfficiencyI', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="fusionEfficiencyIPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['fusionEfficiencyI', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'fusionEfficiencyI',
@@ -1178,7 +1257,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techFusionEfficiencyIIRow',
                     renderNameABs: null,
-                    labelText: 'Fusion Efficiency II:',
+                    labelText: `${localize('techNameFusionEfficiencyII', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -1194,7 +1273,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }), 
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['fusionEfficiencyII', 'price'])} Research${getResourceDataObject('techs', ['fusionEfficiencyII', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="fusionEfficiencyIIPrereq">${getResourceDataObject('techs', ['fusionEfficiencyII', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['fusionEfficiencyII', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['fusionEfficiencyII', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="fusionEfficiencyIIPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['fusionEfficiencyII', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'fusionEfficiencyII',
@@ -1212,7 +1291,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techFusionEfficiencyIIIRow',
                     renderNameABs: null,
-                    labelText: 'Fusion Efficiency III:',
+                    labelText: `${localize('techNameFusionEfficiencyIII', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -1228,7 +1307,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['fusionEfficiencyIII', 'price'])} Research${getResourceDataObject('techs', ['fusionEfficiencyIII', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="fusionEfficiencyIIIPrereq">${getResourceDataObject('techs', ['fusionEfficiencyIII', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['fusionEfficiencyIII', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['fusionEfficiencyIII', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="fusionEfficiencyIIIPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['fusionEfficiencyIII', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'fusionEfficiencyIII',
@@ -1246,7 +1325,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techOrbitalConstructionRow',
                     renderNameABs: null,
-                    labelText: 'Orbital Construction:',
+                    labelText: `${localize('techNameOrbitalConstruction', getLanguage())}:`,
                     inputElements: [
                         (() => {
                             const extraClasses = getDemoBuild() ? ['electron-purple-demo-button'] : [];
@@ -1265,7 +1344,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             });
                         })(),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['orbitalConstruction', 'price'])} Research${getResourceDataObject('techs', ['orbitalConstruction', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="orbitalConstructionPrereq">${getResourceDataObject('techs', ['orbitalConstruction', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['orbitalConstruction', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['orbitalConstruction', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="orbitalConstructionPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['orbitalConstruction', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'orbitalConstruction',
@@ -1283,7 +1362,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techAntimatterEnginesRow',
                     renderNameABs: null,
-                    labelText: 'Antimatter Engines:',
+                    labelText: `${localize('techNameAntimatterEngines', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -1299,7 +1378,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['antimatterEngines', 'price'])} Research${getResourceDataObject('techs', ['antimatterEngines', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="antimatterEnginesPrereq">${getResourceDataObject('techs', ['antimatterEngines', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['antimatterEngines', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['antimatterEngines', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="antimatterEnginesPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['antimatterEngines', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'antimatterEngines',
@@ -1317,7 +1396,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techFTLTravelTheoryRow',
                     renderNameABs: null,
-                    labelText: 'FTL Travel Theory:',
+                    labelText: `${localize('techNameFTLTravelTheory', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -1333,7 +1412,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['FTLTravelTheory', 'price'])} Research${getResourceDataObject('techs', ['FTLTravelTheory', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="FTLTravelTheoryPrereq">${getResourceDataObject('techs', ['FTLTravelTheory', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['FTLTravelTheory', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['FTLTravelTheory', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="FTLTravelTheoryPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['FTLTravelTheory', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'FTLTravelTheory',
@@ -1351,7 +1430,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techLifeSupportSystemsRow',
                     renderNameABs: null,
-                    labelText: 'Life Support Systems:',
+                    labelText: `${localize('techNameLifeSupportSystems', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -1367,7 +1446,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['lifeSupportSystems', 'price'])} Research${getResourceDataObject('techs', ['lifeSupportSystems', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="lifeSupportSystemsPrereq">${getResourceDataObject('techs', ['lifeSupportSystems', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['lifeSupportSystems', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['lifeSupportSystems', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="lifeSupportSystemsPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['lifeSupportSystems', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'lifeSupportSystems',
@@ -1385,7 +1464,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techStarshipFleetsRow',
                     renderNameABs: null,
-                    labelText: 'Starship Fleets:',
+                    labelText: `${localize('techNameStarshipFleets', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -1401,7 +1480,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['starshipFleets', 'price'])} Research${getResourceDataObject('techs', ['starshipFleets', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="starshipFleetsPrereq">${getResourceDataObject('techs', ['starshipFleets', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['starshipFleets', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['starshipFleets', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="starshipFleetsPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['starshipFleets', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'starshipFleets',
@@ -1419,7 +1498,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techStellarScannersRow',
                     renderNameABs: null,
-                    labelText: 'Stellar Scanners:',
+                    labelText: `${localize('techNameStellarScanners', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -1435,7 +1514,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['stellarScanners', 'price'])} Research${getResourceDataObject('techs', ['stellarScanners', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="stellarScannersPrereq">${getResourceDataObject('techs', ['stellarScanners', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['stellarScanners', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['stellarScanners', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="stellarScannersPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['stellarScanners', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'stellarScanners',
@@ -1457,7 +1536,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techDysonSphereUnderstandingRow',
                     renderNameABs: null,
-                    labelText: 'Dyson Sphere Understanding',
+                    labelText: megaStructureRowLabel('megaStructureTTNameDysonSphere', 'megaStructureStageUnderstanding'),
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -1480,7 +1559,7 @@ export function drawTab3Content(heading, optionContentElement) {
                                     onCancel: null,
                                     onExtra1: null,
                                     onExtra2: null,
-                                    confirmLabel: 'CONFIRM',
+                                    confirmLabel: localize('buttonConfirm', getLanguage()),
                                     cancelLabel: null,
                                     extra1Label: null,
                                     extra2Label: null,
@@ -1496,7 +1575,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['dysonSphereUnderstanding', 'price'])} Research${getResourceDataObject('techs', ['dysonSphereUnderstanding', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="dysonSphereUnderstandingPrereq">${getResourceDataObject('techs', ['dysonSphereUnderstanding', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['dysonSphereUnderstanding', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['dysonSphereUnderstanding', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="dysonSphereUnderstandingPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['dysonSphereUnderstanding', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'dysonSphereUnderstanding',
@@ -1515,7 +1594,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techDysonSphereCapabilitiesRow',
                     renderNameABs: null,
-                    labelText: 'Dyson Sphere Capabilities',
+                    labelText: megaStructureRowLabel('megaStructureTTNameDysonSphere', 'megaStructureStageCapabilities'),
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -1538,7 +1617,7 @@ export function drawTab3Content(heading, optionContentElement) {
                                     onCancel: null,
                                     onExtra1: null,
                                     onExtra2: null,
-                                    confirmLabel: 'CONFIRM',
+                                    confirmLabel: localize('buttonConfirm', getLanguage()),
                                     cancelLabel: null,
                                     extra1Label: null,
                                     extra2Label: null,
@@ -1554,7 +1633,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['dysonSphereCapabilities', 'price'])} Research${getResourceDataObject('techs', ['dysonSphereCapabilities', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="dysonSphereCapabilitiesPrereq">${getResourceDataObject('techs', ['dysonSphereCapabilities', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['dysonSphereCapabilities', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['dysonSphereCapabilities', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="dysonSphereCapabilitiesPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['dysonSphereCapabilities', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'dysonSphereCapabilities',
@@ -1573,7 +1652,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techDysonSphereDisconnectRow',
                     renderNameABs: null,
-                    labelText: 'Dyson Sphere Disconnect',
+                    labelText: megaStructureRowLabel('megaStructureTTNameDysonSphere', 'megaStructureStageDisconnect'),
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -1596,7 +1675,7 @@ export function drawTab3Content(heading, optionContentElement) {
                                     onCancel: null,
                                     onExtra1: null,
                                     onExtra2: null,
-                                    confirmLabel: 'CONFIRM',
+                                    confirmLabel: localize('buttonConfirm', getLanguage()),
                                     cancelLabel: null,
                                     extra1Label: null,
                                     extra2Label: null,
@@ -1612,7 +1691,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['dysonSphereDisconnect', 'price'])} Research${getResourceDataObject('techs', ['dysonSphereDisconnect', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="dysonSphereDisconnectPrereq">${getResourceDataObject('techs', ['dysonSphereDisconnect', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['dysonSphereDisconnect', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['dysonSphereDisconnect', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="dysonSphereDisconnectPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['dysonSphereDisconnect', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'dysonSphereDisconnect',
@@ -1631,7 +1710,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techDysonSpherePowerRow',
                     renderNameABs: null,
-                    labelText: 'Dyson Sphere Power',
+                    labelText: megaStructureRowLabel('megaStructureTTNameDysonSphere', 'megaStructureStagePower'),
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -1654,7 +1733,7 @@ export function drawTab3Content(heading, optionContentElement) {
                                     onCancel: null,
                                     onExtra1: null,
                                     onExtra2: null,
-                                    confirmLabel: 'CONFIRM',
+                                    confirmLabel: localize('buttonConfirm', getLanguage()),
                                     cancelLabel: null,
                                     extra1Label: null,
                                     extra2Label: null,
@@ -1670,7 +1749,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['dysonSpherePower', 'price'])} Research${getResourceDataObject('techs', ['dysonSpherePower', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="dysonSpherePowerPrereq">${getResourceDataObject('techs', ['dysonSpherePower', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['dysonSpherePower', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['dysonSpherePower', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="dysonSpherePowerPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['dysonSpherePower', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'dysonSpherePower',
@@ -1689,7 +1768,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techDysonSphereConnectRow',
                     renderNameABs: null,
-                    labelText: 'Dyson Sphere Connect',
+                    labelText: megaStructureRowLabel('megaStructureTTNameDysonSphere', 'megaStructureStageConnect'),
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -1712,7 +1791,7 @@ export function drawTab3Content(heading, optionContentElement) {
                                     onCancel: null,
                                     onExtra1: null,
                                     onExtra2: null,
-                                    confirmLabel: 'CONFIRM',
+                                    confirmLabel: localize('buttonConfirm', getLanguage()),
                                     cancelLabel: null,
                                     extra1Label: null,
                                     extra2Label: null,
@@ -1728,7 +1807,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['dysonSphereConnect', 'price'])} Research${getResourceDataObject('techs', ['dysonSphereConnect', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="dysonSphereConnectPrereq">${getResourceDataObject('techs', ['dysonSphereConnect', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['dysonSphereConnect', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['dysonSphereConnect', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="dysonSphereConnectPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['dysonSphereConnect', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'dysonSphereConnect',
@@ -1747,7 +1826,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techCelestialProcessingCoreUnderstandingRow',
                     renderNameABs: null,
-                    labelText: 'Celestial Processing Core Understanding',
+                    labelText: megaStructureRowLabel('megaStructureTTNameCelestialProcessingCore', 'megaStructureStageUnderstanding'),
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -1770,7 +1849,7 @@ export function drawTab3Content(heading, optionContentElement) {
                                     onCancel: null,
                                     onExtra1: null,
                                     onExtra2: null,
-                                    confirmLabel: 'CONFIRM',
+                                    confirmLabel: localize('buttonConfirm', getLanguage()),
                                     cancelLabel: null,
                                     extra1Label: null,
                                     extra2Label: null,
@@ -1786,7 +1865,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['celestialProcessingCoreUnderstanding', 'price'])} Research${getResourceDataObject('techs', ['celestialProcessingCoreUnderstanding', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="celestialProcessingCoreUnderstandingPrereq">${getResourceDataObject('techs', ['celestialProcessingCoreUnderstanding', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['celestialProcessingCoreUnderstanding', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['celestialProcessingCoreUnderstanding', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="celestialProcessingCoreUnderstandingPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['celestialProcessingCoreUnderstanding', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'celestialProcessingCoreUnderstanding',
@@ -1805,7 +1884,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techCelestialProcessingCoreCapabilitiesRow',
                     renderNameABs: null,
-                    labelText: 'Celestial Processing Core Capabilities',
+                    labelText: megaStructureRowLabel('megaStructureTTNameCelestialProcessingCore', 'megaStructureStageCapabilities'),
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -1828,7 +1907,7 @@ export function drawTab3Content(heading, optionContentElement) {
                                     onCancel: null,
                                     onExtra1: null,
                                     onExtra2: null,
-                                    confirmLabel: 'CONFIRM',
+                                    confirmLabel: localize('buttonConfirm', getLanguage()),
                                     cancelLabel: null,
                                     extra1Label: null,
                                     extra2Label: null,
@@ -1844,7 +1923,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['celestialProcessingCoreCapabilities', 'price'])} Research${getResourceDataObject('techs', ['celestialProcessingCoreCapabilities', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="celestialProcessingCoreCapabilitiesPrereq">${getResourceDataObject('techs', ['celestialProcessingCoreCapabilities', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['celestialProcessingCoreCapabilities', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['celestialProcessingCoreCapabilities', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="celestialProcessingCoreCapabilitiesPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['celestialProcessingCoreCapabilities', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'celestialProcessingCoreCapabilities',
@@ -1863,7 +1942,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techCelestialProcessingCoreDisconnectRow',
                     renderNameABs: null,
-                    labelText: 'Celestial Processing Core Disconnect',
+                    labelText: megaStructureRowLabel('megaStructureTTNameCelestialProcessingCore', 'megaStructureStageDisconnect'),
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -1886,7 +1965,7 @@ export function drawTab3Content(heading, optionContentElement) {
                                     onCancel: null,
                                     onExtra1: null,
                                     onExtra2: null,
-                                    confirmLabel: 'CONFIRM',
+                                    confirmLabel: localize('buttonConfirm', getLanguage()),
                                     cancelLabel: null,
                                     extra1Label: null,
                                     extra2Label: null,
@@ -1902,7 +1981,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['celestialProcessingCoreDisconnect', 'price'])} Research${getResourceDataObject('techs', ['celestialProcessingCoreDisconnect', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="celestialProcessingCoreDisconnectPrereq">${getResourceDataObject('techs', ['celestialProcessingCoreDisconnect', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['celestialProcessingCoreDisconnect', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['celestialProcessingCoreDisconnect', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="celestialProcessingCoreDisconnectPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['celestialProcessingCoreDisconnect', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'celestialProcessingCoreDisconnect',
@@ -1921,7 +2000,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techCelestialProcessingCorePowerRow',
                     renderNameABs: null,
-                    labelText: 'Celestial Processing Core Power',
+                    labelText: megaStructureRowLabel('megaStructureTTNameCelestialProcessingCore', 'megaStructureStagePower'),
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -1944,7 +2023,7 @@ export function drawTab3Content(heading, optionContentElement) {
                                     onCancel: null,
                                     onExtra1: null,
                                     onExtra2: null,
-                                    confirmLabel: 'CONFIRM',
+                                    confirmLabel: localize('buttonConfirm', getLanguage()),
                                     cancelLabel: null,
                                     extra1Label: null,
                                     extra2Label: null,
@@ -1960,7 +2039,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['celestialProcessingCorePower', 'price'])} Research${getResourceDataObject('techs', ['celestialProcessingCorePower', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="celestialProcessingCorePowerPrereq">${getResourceDataObject('techs', ['celestialProcessingCorePower', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['celestialProcessingCorePower', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['celestialProcessingCorePower', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="celestialProcessingCorePowerPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['celestialProcessingCorePower', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'celestialProcessingCorePower',
@@ -1979,7 +2058,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techCelestialProcessingCoreConnectRow',
                     renderNameABs: null,
-                    labelText: 'Celestial Processing Core Connect',
+                    labelText: megaStructureRowLabel('megaStructureTTNameCelestialProcessingCore', 'megaStructureStageConnect'),
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -2002,7 +2081,7 @@ export function drawTab3Content(heading, optionContentElement) {
                                     onCancel: null,
                                     onExtra1: null,
                                     onExtra2: null,
-                                    confirmLabel: 'CONFIRM',
+                                    confirmLabel: localize('buttonConfirm', getLanguage()),
                                     cancelLabel: null,
                                     extra1Label: null,
                                     extra2Label: null,
@@ -2018,7 +2097,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['celestialProcessingCoreConnect', 'price'])} Research${getResourceDataObject('techs', ['celestialProcessingCoreConnect', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="celestialProcessingCoreConnectPrereq">${getResourceDataObject('techs', ['celestialProcessingCoreConnect', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['celestialProcessingCoreConnect', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['celestialProcessingCoreConnect', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="celestialProcessingCoreConnectPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['celestialProcessingCoreConnect', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'celestialProcessingCoreConnect',
@@ -2037,7 +2116,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techPlasmaForgeUnderstandingRow',
                     renderNameABs: null,
-                    labelText: 'Plasma Forge Understanding',
+                    labelText: megaStructureRowLabel('megaStructureTTNamePlasmaForge', 'megaStructureStageUnderstanding'),
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -2060,7 +2139,7 @@ export function drawTab3Content(heading, optionContentElement) {
                                     onCancel: null,
                                     onExtra1: null,
                                     onExtra2: null,
-                                    confirmLabel: 'CONFIRM',
+                                    confirmLabel: localize('buttonConfirm', getLanguage()),
                                     cancelLabel: null,
                                     extra1Label: null,
                                     extra2Label: null,
@@ -2076,7 +2155,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['plasmaForgeUnderstanding', 'price'])} Research${getResourceDataObject('techs', ['plasmaForgeUnderstanding', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="plasmaForgeUnderstandingPrereq">${getResourceDataObject('techs', ['plasmaForgeUnderstanding', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['plasmaForgeUnderstanding', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['plasmaForgeUnderstanding', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="plasmaForgeUnderstandingPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['plasmaForgeUnderstanding', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'plasmaForgeUnderstanding',
@@ -2095,7 +2174,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techPlasmaForgeCapabilitiesRow',
                     renderNameABs: null,
-                    labelText: 'Plasma Forge Capabilities',
+                    labelText: megaStructureRowLabel('megaStructureTTNamePlasmaForge', 'megaStructureStageCapabilities'),
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -2118,7 +2197,7 @@ export function drawTab3Content(heading, optionContentElement) {
                                     onCancel: null,
                                     onExtra1: null,
                                     onExtra2: null,
-                                    confirmLabel: 'CONFIRM',
+                                    confirmLabel: localize('buttonConfirm', getLanguage()),
                                     cancelLabel: null,
                                     extra1Label: null,
                                     extra2Label: null,
@@ -2134,7 +2213,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['plasmaForgeCapabilities', 'price'])} Research${getResourceDataObject('techs', ['plasmaForgeCapabilities', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="plasmaForgeCapabilitiesPrereq">${getResourceDataObject('techs', ['plasmaForgeCapabilities', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['plasmaForgeCapabilities', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['plasmaForgeCapabilities', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="plasmaForgeCapabilitiesPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['plasmaForgeCapabilities', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'plasmaForgeCapabilities',
@@ -2153,7 +2232,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techPlasmaForgeDisconnectRow',
                     renderNameABs: null,
-                    labelText: 'Plasma Forge Disconnect',
+                    labelText: megaStructureRowLabel('megaStructureTTNamePlasmaForge', 'megaStructureStageDisconnect'),
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -2176,7 +2255,7 @@ export function drawTab3Content(heading, optionContentElement) {
                                     onCancel: null,
                                     onExtra1: null,
                                     onExtra2: null,
-                                    confirmLabel: 'CONFIRM',
+                                    confirmLabel: localize('buttonConfirm', getLanguage()),
                                     cancelLabel: null,
                                     extra1Label: null,
                                     extra2Label: null,
@@ -2192,7 +2271,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['plasmaForgeDisconnect', 'price'])} Research${getResourceDataObject('techs', ['plasmaForgeDisconnect', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="plasmaForgeDisconnectPrereq">${getResourceDataObject('techs', ['plasmaForgeDisconnect', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['plasmaForgeDisconnect', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['plasmaForgeDisconnect', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="plasmaForgeDisconnectPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['plasmaForgeDisconnect', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'plasmaForgeDisconnect',
@@ -2211,7 +2290,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techPlasmaForgePowerRow',
                     renderNameABs: null,
-                    labelText: 'Plasma Forge Power',
+                    labelText: megaStructureRowLabel('megaStructureTTNamePlasmaForge', 'megaStructureStagePower'),
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -2234,7 +2313,7 @@ export function drawTab3Content(heading, optionContentElement) {
                                     onCancel: null,
                                     onExtra1: null,
                                     onExtra2: null,
-                                    confirmLabel: 'CONFIRM',
+                                    confirmLabel: localize('buttonConfirm', getLanguage()),
                                     cancelLabel: null,
                                     extra1Label: null,
                                     extra2Label: null,
@@ -2250,7 +2329,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['plasmaForgePower', 'price'])} Research${getResourceDataObject('techs', ['plasmaForgePower', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="plasmaForgePowerPrereq">${getResourceDataObject('techs', ['plasmaForgePower', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['plasmaForgePower', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['plasmaForgePower', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="plasmaForgePowerPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['plasmaForgePower', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'plasmaForgePower',
@@ -2269,7 +2348,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techPlasmaForgeConnectRow',
                     renderNameABs: null,
-                    labelText: 'Plasma Forge Connect',
+                    labelText: megaStructureRowLabel('megaStructureTTNamePlasmaForge', 'megaStructureStageConnect'),
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -2292,7 +2371,7 @@ export function drawTab3Content(heading, optionContentElement) {
                                     onCancel: null,
                                     onExtra1: null,
                                     onExtra2: null,
-                                    confirmLabel: 'CONFIRM',
+                                    confirmLabel: localize('buttonConfirm', getLanguage()),
                                     cancelLabel: null,
                                     extra1Label: null,
                                     extra2Label: null,
@@ -2308,7 +2387,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['plasmaForgeConnect', 'price'])} Research${getResourceDataObject('techs', ['plasmaForgeConnect', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="plasmaForgeConnectPrereq">${getResourceDataObject('techs', ['plasmaForgeConnect', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['plasmaForgeConnect', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['plasmaForgeConnect', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="plasmaForgeConnectPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['plasmaForgeConnect', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'plasmaForgeConnect',
@@ -2327,7 +2406,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techGalacticMemoryArchiveUnderstandingRow',
                     renderNameABs: null,
-                    labelText: 'Galactic Memory Archive Understanding',
+                    labelText: megaStructureRowLabel('megaStructureTTNameGalacticMemoryArchive', 'megaStructureStageUnderstanding'),
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -2350,7 +2429,7 @@ export function drawTab3Content(heading, optionContentElement) {
                                     onCancel: null,
                                     onExtra1: null,
                                     onExtra2: null,
-                                    confirmLabel: 'CONFIRM',
+                                    confirmLabel: localize('buttonConfirm', getLanguage()),
                                     cancelLabel: null,
                                     extra1Label: null,
                                     extra2Label: null,
@@ -2366,7 +2445,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['galacticMemoryArchiveUnderstanding', 'price'])} Research${getResourceDataObject('techs', ['galacticMemoryArchiveUnderstanding', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="galacticMemoryArchiveUnderstandingPrereq">${getResourceDataObject('techs', ['galacticMemoryArchiveUnderstanding', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['galacticMemoryArchiveUnderstanding', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['galacticMemoryArchiveUnderstanding', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="galacticMemoryArchiveUnderstandingPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['galacticMemoryArchiveUnderstanding', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'galacticMemoryArchiveUnderstanding',
@@ -2385,7 +2464,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techGalacticMemoryArchiveCapabilitiesRow',
                     renderNameABs: null,
-                    labelText: 'Galactic Memory Archive Capabilities',
+                    labelText: megaStructureRowLabel('megaStructureTTNameGalacticMemoryArchive', 'megaStructureStageCapabilities'),
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -2408,7 +2487,7 @@ export function drawTab3Content(heading, optionContentElement) {
                                     onCancel: null,
                                     onExtra1: null,
                                     onExtra2: null,
-                                    confirmLabel: 'CONFIRM',
+                                    confirmLabel: localize('buttonConfirm', getLanguage()),
                                     cancelLabel: null,
                                     extra1Label: null,
                                     extra2Label: null,
@@ -2424,7 +2503,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['galacticMemoryArchiveCapabilities', 'price'])} Research${getResourceDataObject('techs', ['galacticMemoryArchiveCapabilities', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="galacticMemoryArchiveCapabilitiesPrereq">${getResourceDataObject('techs', ['galacticMemoryArchiveCapabilities', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['galacticMemoryArchiveCapabilities', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['galacticMemoryArchiveCapabilities', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="galacticMemoryArchiveCapabilitiesPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['galacticMemoryArchiveCapabilities', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'galacticMemoryArchiveCapabilities',
@@ -2443,7 +2522,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techGalacticMemoryArchiveDisconnectRow',
                     renderNameABs: null,
-                    labelText: 'Galactic Memory Archive Disconnect',
+                    labelText: megaStructureRowLabel('megaStructureTTNameGalacticMemoryArchive', 'megaStructureStageDisconnect'),
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -2466,7 +2545,7 @@ export function drawTab3Content(heading, optionContentElement) {
                                     onCancel: null,
                                     onExtra1: null,
                                     onExtra2: null,
-                                    confirmLabel: 'CONFIRM',
+                                    confirmLabel: localize('buttonConfirm', getLanguage()),
                                     cancelLabel: null,
                                     extra1Label: null,
                                     extra2Label: null,
@@ -2482,7 +2561,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['galacticMemoryArchiveDisconnect', 'price'])} Research${getResourceDataObject('techs', ['galacticMemoryArchiveDisconnect', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="galacticMemoryArchiveDisconnectPrereq">${getResourceDataObject('techs', ['galacticMemoryArchiveDisconnect', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['galacticMemoryArchiveDisconnect', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['galacticMemoryArchiveDisconnect', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="galacticMemoryArchiveDisconnectPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['galacticMemoryArchiveDisconnect', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'galacticMemoryArchiveDisconnect',
@@ -2501,7 +2580,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techGalacticMemoryArchivePowerRow',
                     renderNameABs: null,
-                    labelText: 'Galactic Memory Archive Power',
+                    labelText: megaStructureRowLabel('megaStructureTTNameGalacticMemoryArchive', 'megaStructureStagePower'),
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -2524,7 +2603,7 @@ export function drawTab3Content(heading, optionContentElement) {
                                     onCancel: null,
                                     onExtra1: null,
                                     onExtra2: null,
-                                    confirmLabel: 'CONFIRM',
+                                    confirmLabel: localize('buttonConfirm', getLanguage()),
                                     cancelLabel: null,
                                     extra1Label: null,
                                     extra2Label: null,
@@ -2540,7 +2619,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['galacticMemoryArchivePower', 'price'])} Research${getResourceDataObject('techs', ['galacticMemoryArchivePower', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="galacticMemoryArchivePowerPrereq">${getResourceDataObject('techs', ['galacticMemoryArchivePower', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['galacticMemoryArchivePower', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['galacticMemoryArchivePower', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="galacticMemoryArchivePowerPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['galacticMemoryArchivePower', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'galacticMemoryArchivePower',
@@ -2559,7 +2638,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techGalacticMemoryArchiveConnectRow',
                     renderNameABs: null,
-                    labelText: 'Galactic Memory Archive Connect',
+                    labelText: megaStructureRowLabel('megaStructureTTNameGalacticMemoryArchive', 'megaStructureStageConnect'),
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -2582,7 +2661,7 @@ export function drawTab3Content(heading, optionContentElement) {
                                     onCancel: null,
                                     onExtra1: null,
                                     onExtra2: null,
-                                    confirmLabel: 'CONFIRM',
+                                    confirmLabel: localize('buttonConfirm', getLanguage()),
                                     cancelLabel: null,
                                     extra1Label: null,
                                     extra2Label: null,
@@ -2598,7 +2677,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'tech'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('techs', ['galacticMemoryArchiveConnect', 'price'])} Research${getResourceDataObject('techs', ['galacticMemoryArchiveConnect', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="galacticMemoryArchiveConnectPrereq">${getResourceDataObject('techs', ['galacticMemoryArchiveConnect', 'prereqs']).filter(prereq => prereq !== null).join(', ') || ''}</span>`,
+                    descriptionText: `${getResourceDataObject('techs', ['galacticMemoryArchiveConnect', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['galacticMemoryArchiveConnect', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="galacticMemoryArchiveConnectPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['galacticMemoryArchiveConnect', 'prereqs']))}</span>`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'galacticMemoryArchiveConnect',
@@ -2689,15 +2768,15 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techPhilosophySpaceStorageTankResearchRow',
                     renderNameABs: null,
-                    labelText: 'Space Storage Tank Research:',
+                    labelText: `${localize('techNameSpaceStorageTankResearch', getLanguage())}:`,
                     inputElements: [
                         createButton({
-                            text: `UNLOCK`,
+                            text: localize('buttonUnlock', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock', 'special-ability'],
                             onClick: (event) => {
                                 gain('spaceStorageTankResearch', 'ability', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
                                 setIncreaseStorageFactor(5);
-                                showNotification('ABILITY: Base storage expansion multiplier now 5x instead of 2x!', 'info', 3000, 'tech');
+                                showNotification(localize('notificationPhilosophySpaceStorageTank', getLanguage()), 'info', 3000, 'tech');
                             },
                             dataConditionCheck: 'techUnlockPhilosophy',
                             resourcePriceObject: '',
@@ -2707,7 +2786,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'techPhilosophy'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['constructor', 'spaceStorageTankResearch', 'price'])} Research`,
+                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['constructor', 'spaceStorageTankResearch', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlockPhilosophy',
                     objectSectionArgument1: 'spaceStorageTankResearch',
@@ -2725,7 +2804,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techPhilosophyEfficientAssemblyRow',
                     renderNameABs: null,
-                    labelText: 'Efficient Assembly:',
+                    labelText: `${localize('techNameEfficientAssembly', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -2740,7 +2819,7 @@ export function drawTab3Content(heading, optionContentElement) {
                                     repeatable_slot: 1,
                                     new_level: currentRepeatableTechMultiplier
                                 }, { immediate: true, flushReason: 'philosophy_repeatable' });
-                                showNotification('Space Building costs reduced by 1%!', 'info', 3000, 'tech');
+                                showNotification(localize('notificationPhilosophyEfficientAssembly', getLanguage()), 'info', 3000, 'tech');
                             },
                             dataConditionCheck: 'techUnlockPhilosophy',
                             resourcePriceObject: '',
@@ -2750,7 +2829,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'techPhilosophy'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['constructor', 'efficientAssembly', 'price'])} Research`,
+                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['constructor', 'efficientAssembly', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlockPhilosophy',
                     objectSectionArgument1: 'efficientAssembly',
@@ -2768,7 +2847,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techPhilosophyLaserMiningRow',
                     renderNameABs: null,
-                    labelText: 'Laser Mining:',
+                    labelText: `${localize('techNameLaserMining', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -2784,7 +2863,7 @@ export function drawTab3Content(heading, optionContentElement) {
                                     new_level: currentRepeatableTechMultiplier
                                 }, { immediate: true, flushReason: 'philosophy_repeatable' });
                                 setResourceAutobuyerPricesAfterRepeatables();
-                                showNotification('Resources AutoBuyers 5% cheaper!', 'info', 3000, 'tech');
+                                showNotification(localize('notificationPhilosophyLaserMining', getLanguage()), 'info', 3000, 'tech');
                             },
                             dataConditionCheck: 'techUnlockPhilosophy',
                             resourcePriceObject: '',
@@ -2794,7 +2873,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'techPhilosophy'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['constructor', 'laserMining', 'price'])} Research`,
+                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['constructor', 'laserMining', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlockPhilosophy',
                     objectSectionArgument1: 'laserMining',
@@ -2812,7 +2891,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techPhilosophyMassCompoundAssemblyRow',
                     renderNameABs: null,
-                    labelText: 'Mass Compound Assembly:',
+                    labelText: `${localize('techNameMassCompoundAssembly', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -2828,7 +2907,7 @@ export function drawTab3Content(heading, optionContentElement) {
                                     new_level: currentRepeatableTechMultiplier
                                 }, { immediate: true, flushReason: 'philosophy_repeatable' });
                                 setCompoundRecipePricesAfterRepeatables();
-                                showNotification('Compounds recipes cheaper by 5%!', 'info', 3000, 'tech');
+                                showNotification(localize('notificationPhilosophyMassCompoundAssembly', getLanguage()), 'info', 3000, 'tech');
                             },
                             dataConditionCheck: 'techUnlockPhilosophy',
                             resourcePriceObject: '',
@@ -2838,7 +2917,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'techPhilosophy'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['constructor', 'massCompoundAssembly', 'price'])} Research`,
+                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['constructor', 'massCompoundAssembly', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlockPhilosophy',
                     objectSectionArgument1: 'massCompoundAssembly',
@@ -2856,7 +2935,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techPhilosophyEnergyDronesRow',
                     renderNameABs: null,
-                    labelText: 'Energy Drones:',
+                    labelText: `${localize('techNameEnergyDrones', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -2872,7 +2951,7 @@ export function drawTab3Content(heading, optionContentElement) {
                                     new_level: currentRepeatableTechMultiplier
                                 }, { immediate: true, flushReason: 'philosophy_repeatable' });
                                 setEnergyAndResearchBuildingPricesAfterRepeatables();
-                                showNotification('Energy and Research Buildings 5% cheaper!', 'info', 3000, 'tech');
+                                showNotification(localize('notificationPhilosophyEnergyDrones', getLanguage()), 'info', 3000, 'tech');
                             },
                             dataConditionCheck: 'techUnlockPhilosophy',
                             resourcePriceObject: '',
@@ -2882,7 +2961,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'techPhilosophy'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['constructor', 'energyDrones', 'price'])} Research`,
+                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['constructor', 'energyDrones', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlockPhilosophy',
                     objectSectionArgument1: 'energyDrones',
@@ -2903,14 +2982,14 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techPhilosophyFleetHologramsRow',
                     renderNameABs: null,
-                    labelText: 'Fleet Holograms:',
+                    labelText: `${localize('techNameFleetHolograms', getLanguage())}:`,
                     inputElements: [
                         createButton({
-                            text: `UNLOCK`,
+                            text: localize('buttonUnlock', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock', 'special-ability'],
                             onClick: (event) => {
                                 gain('fleetHolograms', 'ability', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
-                                showNotification('ABILITY: You can now always Vassalize enemies provided your fleet is 3x larger than theirs!', 'info', 3000, 'tech');
+                                showNotification(localize('notificationPhilosophyFleetHolograms', getLanguage()), 'info', 3000, 'tech');
                             },
                             dataConditionCheck: 'techUnlockPhilosophy',
                             resourcePriceObject: '',
@@ -2920,7 +2999,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'techPhilosophy'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['supremacist', 'fleetHolograms', 'price'])} Research`,
+                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['supremacist', 'fleetHolograms', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlockPhilosophy',
                     objectSectionArgument1: 'fleetHolograms',
@@ -2938,7 +3017,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techPhilosophyHangarAutomationRow',
                     renderNameABs: null,
-                    labelText: 'Hangar Automation:',
+                    labelText: `${localize('techNameHangarAutomation', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -2954,7 +3033,7 @@ export function drawTab3Content(heading, optionContentElement) {
                                     new_level: currentRepeatableTechMultiplier
                                 }, { immediate: true, flushReason: 'philosophy_repeatable' });
                                 setFleetPricesAfterRepeatables();
-                                showNotification('Fleet build costs reduced by 5%!', 'info', 3000, 'tech');
+                                showNotification(localize('notificationPhilosophyHangarAutomation', getLanguage()), 'info', 3000, 'tech');
                             },
                             dataConditionCheck: 'techUnlockPhilosophy',
                             resourcePriceObject: '',
@@ -2964,7 +3043,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'techPhilosophy'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['supremacist', 'hangarAutomation', 'price'])} Research`,
+                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['supremacist', 'hangarAutomation', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlockPhilosophy',
                     objectSectionArgument1: 'hangarAutomation',
@@ -2982,7 +3061,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techPhilosophySyntheticPlatingRow',
                     renderNameABs: null,
-                    labelText: 'Synthetic Plating:',
+                    labelText: `${localize('techNameSyntheticPlating', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -2998,7 +3077,7 @@ export function drawTab3Content(heading, optionContentElement) {
                                     new_level: currentRepeatableTechMultiplier
                                 }, { immediate: true, flushReason: 'philosophy_repeatable' });
                                 setFleetArmorBuffsAfterRepeatables();
-                                showNotification('Fleet Armor increased by 5%!', 'info', 3000, 'tech');
+                                showNotification(localize('notificationPhilosophySyntheticPlating', getLanguage()), 'info', 3000, 'tech');
                             },
                             dataConditionCheck: 'techUnlockPhilosophy',
                             resourcePriceObject: '',
@@ -3008,7 +3087,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'techPhilosophy'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['supremacist', 'syntheticPlating', 'price'])} Research`,
+                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['supremacist', 'syntheticPlating', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlockPhilosophy',
                     objectSectionArgument1: 'syntheticPlating',
@@ -3026,7 +3105,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techPhilosophyAntimatterEngineMinaturizationRow',
                     renderNameABs: null,
-                    labelText: 'Antimatter Engine Minaturization:',
+                    labelText: `${localize('techNameAntimatterEngineMinaturization', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -3042,7 +3121,7 @@ export function drawTab3Content(heading, optionContentElement) {
                                     new_level: currentRepeatableTechMultiplier
                                 }, { immediate: true, flushReason: 'philosophy_repeatable' });
                                 setFleetSpeedsAfterRepeatables();
-                                showNotification('Fleet Speed increased by 5%!', 'info', 3000, 'tech');
+                                showNotification(localize('notificationPhilosophyAntimatterEngineMinaturization', getLanguage()), 'info', 3000, 'tech');
                             },
                             dataConditionCheck: 'techUnlockPhilosophy',
                             resourcePriceObject: '',
@@ -3052,7 +3131,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'techPhilosophy'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['supremacist', 'antimatterEngineMinaturization', 'price'])} Research`,
+                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['supremacist', 'antimatterEngineMinaturization', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlockPhilosophy',
                     objectSectionArgument1: 'antimatterEngineMinaturization',
@@ -3070,7 +3149,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techPhilosophyLaserIntensityResearchRow',
                     renderNameABs: null,
-                    labelText: 'Laser Intensity Research:',
+                    labelText: `${localize('techNameLaserIntensityResearch', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -3086,7 +3165,7 @@ export function drawTab3Content(heading, optionContentElement) {
                                     new_level: currentRepeatableTechMultiplier
                                 }, { immediate: true, flushReason: 'philosophy_repeatable' });
                                 setFleetAttackDamageAfterRepeatables();
-                                showNotification('Fleet Attack Power increased by 5%! (Applicable to Newly Built Ships)', 'info', 3000, 'tech');
+                                showNotification(localize('notificationPhilosophyLaserIntensityResearch', getLanguage()), 'info', 3000, 'tech');
                             },
                             dataConditionCheck: 'techUnlockPhilosophy',
                             resourcePriceObject: '',
@@ -3096,7 +3175,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'techPhilosophy'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['supremacist', 'laserIntensityResearch', 'price'])} Research`,
+                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['supremacist', 'laserIntensityResearch', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlockPhilosophy',
                     objectSectionArgument1: 'laserIntensityResearch',
@@ -3117,14 +3196,14 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techPhilosophyVoidSeersRow',
                     renderNameABs: null,
-                    labelText: 'Void Seers:',
+                    labelText: `${localize('techNameVoidSeers', getLanguage())}:`,
                     inputElements: [
                         createButton({
-                            text: `UNLOCK`,
+                            text: localize('buttonUnlock', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock', 'special-ability'],
                             onClick: (event) => {
                                 gain('voidSeers', 'ability', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
-                                showNotification('ABILITY: Space Telescope can now scan for instant Resources and Compounds!', 'info', 3000, 'tech');
+                                showNotification(localize('notificationPhilosophyVoidSeers', getLanguage()), 'info', 3000, 'tech');
                             },
                             dataConditionCheck: 'techUnlockPhilosophy',
                             resourcePriceObject: '',
@@ -3134,7 +3213,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'techPhilosophy'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['voidborn', 'voidSeers', 'price'])} Research`,
+                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['voidborn', 'voidSeers', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlockPhilosophy',
                     objectSectionArgument1: 'voidSeers',
@@ -3152,7 +3231,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techPhilosophyStellarWhispersRow',
                     renderNameABs: null,
-                    labelText: 'Stellar Whispers:',
+                    labelText: `${localize('techNameStellarWhispers', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -3168,7 +3247,7 @@ export function drawTab3Content(heading, optionContentElement) {
                                     new_level: currentRepeatableTechMultiplier
                                 }, { immediate: true, flushReason: 'philosophy_repeatable' });
                                 setInitialImpressionBaseAfterRepeatables();
-                                showNotification('Initial Impression of enemies improved by 1%!', 'info', 3000, 'tech');
+                                showNotification(localize('notificationPhilosophyStellarWhispers', getLanguage()), 'info', 3000, 'tech');
                             },
                             dataConditionCheck: 'techUnlockPhilosophy',
                             resourcePriceObject: '',
@@ -3178,7 +3257,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'techPhilosophy'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['voidborn', 'stellarWhispers', 'price'])} Research`,
+                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['voidborn', 'stellarWhispers', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlockPhilosophy',
                     objectSectionArgument1: 'stellarWhispers',
@@ -3196,7 +3275,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techPhilosophyStellarInsightManifoldRow',
                     renderNameABs: null,
-                    labelText: 'Stellar Insight Manifold:',
+                    labelText: `${localize('techNameStellarInsightManifold', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -3212,7 +3291,7 @@ export function drawTab3Content(heading, optionContentElement) {
                                     new_level: currentRepeatableTechMultiplier
                                 }, { immediate: true, flushReason: 'philosophy_repeatable' });
                                 setStarStudyEfficiencyAfterRepeatables();
-                                showNotification('Star Study speed increased by 1%!', 'info', 3000, 'tech');
+                                showNotification(localize('notificationPhilosophyStellarInsightManifold', getLanguage()), 'info', 3000, 'tech');
                             },
                             dataConditionCheck: 'techUnlockPhilosophy',
                             resourcePriceObject: '',
@@ -3222,7 +3301,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'techPhilosophy'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['voidborn', 'stellarInsightManifold', 'price'])} Research`,
+                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['voidborn', 'stellarInsightManifold', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlockPhilosophy',
                     objectSectionArgument1: 'stellarInsightManifold',
@@ -3240,7 +3319,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techPhilosophyAsteroidDwellersRow',
                     renderNameABs: null,
-                    labelText: 'Asteroid Dwellers:',
+                    labelText: `${localize('techNameAsteroidDwellers', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -3256,7 +3335,7 @@ export function drawTab3Content(heading, optionContentElement) {
                                     new_level: currentRepeatableTechMultiplier
                                 }, { immediate: true, flushReason: 'philosophy_repeatable' });
                                 setAsteroidSearchEfficiencyAfterRepeatables();
-                                showNotification('Asteroid Search speed increased by 1%!', 'info', 3000, 'tech');
+                                showNotification(localize('notificationPhilosophyAsteroidDwellers', getLanguage()), 'info', 3000, 'tech');
                             },
                             dataConditionCheck: 'techUnlockPhilosophy',
                             resourcePriceObject: '',
@@ -3266,7 +3345,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'techPhilosophy'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['voidborn', 'asteroidDwellers', 'price'])} Research`,
+                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['voidborn', 'asteroidDwellers', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlockPhilosophy',
                     objectSectionArgument1: 'asteroidDwellers',
@@ -3284,7 +3363,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techPhilosophyAscendencyPhilosophyRow',
                     renderNameABs: null,
-                    labelText: 'Ascendency Philosophy:',
+                    labelText: `${localize('techNameAscendencyPhilosophy', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -3299,7 +3378,7 @@ export function drawTab3Content(heading, optionContentElement) {
                                     repeatable_slot: 4,
                                     new_level: currentRepeatableTechMultiplier
                                 }, { immediate: true, flushReason: 'philosophy_repeatable' });
-                                showNotification('Base Ascendency Point gain +1!', 'info', 3000, 'tech');
+                                showNotification(localize('notificationPhilosophyAscendencyPhilosophy', getLanguage()), 'info', 3000, 'tech');
                             },
                             dataConditionCheck: 'techUnlockPhilosophy',
                             resourcePriceObject: '',
@@ -3309,7 +3388,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'techPhilosophy'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['voidborn', 'ascendencyPhilosophy', 'price'])} Research`,
+                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['voidborn', 'ascendencyPhilosophy', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlockPhilosophy',
                     objectSectionArgument1: 'ascendencyPhilosophy',
@@ -3330,14 +3409,14 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techPhilosophyRapidExpansionRow',
                     renderNameABs: null,
-                    labelText: 'Rapid Expansion:',
+                    labelText: `${localize('techNameRapidExpansion', getLanguage())}:`,
                     inputElements: [
                         createButton({
-                            text: `UNLOCK`,
+                            text: localize('buttonUnlock', getLanguage()),
                             classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'philosophy-tech-unlock', 'special-ability'],
                             onClick: (event) => {
                                 gain('rapidExpansion', 'ability', 'techUnlockPhilosophy', 'techUnlockPhilosophy', false, 'techsPhilosophy', 'research');
-                                showNotification('ABILITY: You now have a chance of capturing up to 3 nearby Systems for every 1!', 'info', 3000, 'tech');
+                                showNotification(localize('notificationPhilosophyRapidExpansion', getLanguage()), 'info', 3000, 'tech');
                             },
                             dataConditionCheck: 'techUnlockPhilosophy',
                             resourcePriceObject: '',
@@ -3347,7 +3426,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'techPhilosophy'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['expansionist', 'rapidExpansion', 'price'])} Research`,
+                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['expansionist', 'rapidExpansion', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlockPhilosophy',
                     objectSectionArgument1: 'rapidExpansion',
@@ -3365,7 +3444,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techPhilosophySpaceElevatorRow',
                     renderNameABs: null,
-                    labelText: 'Space Elevator:',
+                    labelText: `${localize('techNameSpaceElevator', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -3381,7 +3460,7 @@ export function drawTab3Content(heading, optionContentElement) {
                                     new_level: currentRepeatableTechMultiplier
                                 }, { immediate: true, flushReason: 'philosophy_repeatable' });
                                 setStarshipPartPricesAfterRepeatables();
-                                showNotification('Starship Parts cost reduced by 5%!', 'info', 3000, 'tech');
+                                showNotification(localize('notificationPhilosophySpaceElevator', getLanguage()), 'info', 3000, 'tech');
                             },
                             dataConditionCheck: 'techUnlockPhilosophy',
                             resourcePriceObject: '',
@@ -3391,7 +3470,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'techPhilosophy'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['expansionist', 'spaceElevator', 'price'])} Research`,
+                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['expansionist', 'spaceElevator', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlockPhilosophy',
                     objectSectionArgument1: 'spaceElevator',
@@ -3409,7 +3488,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techPhilosophyLaunchPadMassProductionRow',
                     renderNameABs: null,
-                    labelText: 'Launch Pad Mass Production:',
+                    labelText: `${localize('techNameLaunchPadMassProduction', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -3425,7 +3504,7 @@ export function drawTab3Content(heading, optionContentElement) {
                                     new_level: currentRepeatableTechMultiplier
                                 }, { immediate: true, flushReason: 'philosophy_repeatable' });
                                 setRocketPartPricesAfterRepeatables();
-                                showNotification('Rocket Parts cost reduced by 5%!', 'info', 3000, 'tech');
+                                showNotification(localize('notificationPhilosophyLaunchPadMassProduction', getLanguage()), 'info', 3000, 'tech');
                             },
                             dataConditionCheck: 'techUnlockPhilosophy',
                             resourcePriceObject: '',
@@ -3437,7 +3516,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'techPhilosophy'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['expansionist', 'launchPadMassProduction', 'price'])} Research`,
+                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['expansionist', 'launchPadMassProduction', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlockPhilosophy',
                     objectSectionArgument1: 'launchPadMassProduction',
@@ -3455,7 +3534,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techPhilosophyAsteroidAttractorsRow',
                     renderNameABs: null,
-                    labelText: 'Asteroid Attractors:',
+                    labelText: `${localize('techNameAsteroidAttractors', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -3471,7 +3550,7 @@ export function drawTab3Content(heading, optionContentElement) {
                                     new_level: currentRepeatableTechMultiplier
                                 }, { immediate: true, flushReason: 'philosophy_repeatable' });
                                 setRocketTravelTimeReductionAfterRepeatables();
-                                showNotification('Rocket Travel time reduced by 5%!', 'info', 3000, 'tech');
+                                showNotification(localize('notificationPhilosophyAsteroidAttractors', getLanguage()), 'info', 3000, 'tech');
                             },
                             dataConditionCheck: 'techUnlockPhilosophy',
                             resourcePriceObject: '',
@@ -3483,7 +3562,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'techPhilosophy'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['expansionist', 'asteroidAttractors', 'price'])} Research`,
+                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['expansionist', 'asteroidAttractors', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlockPhilosophy',
                     objectSectionArgument1: 'asteroidAttractors',
@@ -3501,7 +3580,7 @@ export function drawTab3Content(heading, optionContentElement) {
                 row: createOptionRow({
                     labelId: 'techPhilosophyWarpDriveRow',
                     renderNameABs: null,
-                    labelText: 'Warp Drive:',
+                    labelText: `${localize('techNameWarpDrive', getLanguage())}:`,
                     inputElements: [
                         createButton({
                             text: localize('buttonResearch', getLanguage()),
@@ -3517,7 +3596,7 @@ export function drawTab3Content(heading, optionContentElement) {
                                     new_level: currentRepeatableTechMultiplier
                                 }, { immediate: true, flushReason: 'philosophy_repeatable' });
                                 setStarshipTravelTimeReductionAfterRepeatables();
-                                showNotification('Starship Travel time reduced by 5%!', 'info', 3000, 'tech');
+                                showNotification(localize('notificationPhilosophyWarpDrive', getLanguage()), 'info', 3000, 'tech');
                             },
                             dataConditionCheck: 'techUnlockPhilosophy',
                             resourcePriceObject: '',
@@ -3529,7 +3608,7 @@ export function drawTab3Content(heading, optionContentElement) {
                             rowCategory: 'techPhilosophy'
                         }),
                     ],
-                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['expansionist', 'warpDrive', 'price'])} Research`,
+                    descriptionText: `${getResourceDataObject('philosophyRepeatableTechs', ['expansionist', 'warpDrive', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}`,
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlockPhilosophy',
                     objectSectionArgument1: 'warpDrive',
@@ -3601,7 +3680,7 @@ export function handleTechnologyButtonClick(techName, event) {
                     onCancel: null,
                     onExtra1: null,
                     onExtra2: null,
-                    confirmLabel: 'CONFIRM',
+                    confirmLabel: localize('buttonConfirm', getLanguage()),
                     cancelLabel: null,
                     extra1Label: null,
                     extra2Label: null,
@@ -3675,7 +3754,7 @@ export function handleTechnologyButtonClick(techName, event) {
                     onCancel: null,
                     onExtra1: null,
                     onExtra2: null,
-                    confirmLabel: 'CONFIRM',
+                    confirmLabel: localize('buttonConfirm', getLanguage()),
                     cancelLabel: null,
                     extra1Label: null,
                     extra2Label: null,
@@ -3700,7 +3779,7 @@ export function handleTechnologyButtonClick(techName, event) {
                     onCancel: null,
                     onExtra1: null,
                     onExtra2: null,
-                    confirmLabel: 'CONFIRM',
+                    confirmLabel: localize('buttonConfirm', getLanguage()),
                     cancelLabel: null,
                     extra1Label: null,
                     extra2Label: null,
@@ -3731,7 +3810,7 @@ export function handleTechnologyButtonClick(techName, event) {
                     onCancel: null,
                     onExtra1: null,
                     onExtra2: null,
-                    confirmLabel: 'CONFIRM',
+                    confirmLabel: localize('buttonConfirm', getLanguage()),
                     cancelLabel: null,
                     extra1Label: null,
                     extra2Label: null,
@@ -3754,7 +3833,7 @@ export function handleTechnologyButtonClick(techName, event) {
                     onCancel: null,
                     onExtra1: null,
                     onExtra2: null,
-                    confirmLabel: 'CONFIRM',
+                    confirmLabel: localize('buttonConfirm', getLanguage()),
                     cancelLabel: null,
                     extra1Label: null,
                     extra2Label: null,
@@ -3777,7 +3856,7 @@ export function handleTechnologyButtonClick(techName, event) {
                     onCancel: null,
                     onExtra1: null,
                     onExtra2: null,
-                    confirmLabel: 'CONFIRM',
+                    confirmLabel: localize('buttonConfirm', getLanguage()),
                     cancelLabel: null,
                     extra1Label: null,
                     extra2Label: null,
@@ -3817,7 +3896,7 @@ export function handleTechnologyButtonClick(techName, event) {
                     onCancel: null,
                     onExtra1: null,
                     onExtra2: null,
-                    confirmLabel: 'CONFIRM',
+                    confirmLabel: localize('buttonConfirm', getLanguage()),
                     cancelLabel: null,
                     extra1Label: null,
                     extra2Label: null,
@@ -3850,7 +3929,7 @@ export function handleTechnologyButtonClick(techName, event) {
                     onCancel: null,
                     onExtra1: null,
                     onExtra2: null,
-                    confirmLabel: 'CONFIRM',
+                    confirmLabel: localize('buttonConfirm', getLanguage()),
                     cancelLabel: null,
                     extra1Label: null,
                     extra2Label: null,
@@ -3885,7 +3964,7 @@ export function handleTechnologyButtonClick(techName, event) {
                     onCancel: null,
                     onExtra1: null,
                     onExtra2: null,
-                    confirmLabel: 'CONFIRM',
+                    confirmLabel: localize('buttonConfirm', getLanguage()),
                     cancelLabel: null,
                     extra1Label: null,
                     extra2Label: null,

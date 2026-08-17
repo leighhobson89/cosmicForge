@@ -1,9 +1,21 @@
-import { getImageUrls, getTimerRateRatio, getCurrencySymbol, getBuildingTypeOnOff, setPowerOnOff, getCurrentStarSystemWeatherEfficiency, getInfinitePower, getDemoBuild, getCurrentOptionPane } from './constantsAndGlobalVars.js';
+import { getImageUrls, getTimerRateRatio, getCurrencySymbol, getBuildingTypeOnOff, setPowerOnOff, getCurrentStarSystemWeatherEfficiency, getInfinitePower, getDemoBuild, getCurrentOptionPane, getLanguage } from './constantsAndGlobalVars.js';
+import { localize, localizeMaterialName } from './localization.js';
 import { sellBuilding, toggleBuildingTypeOnOff, addOrRemoveUsedPerSecForFuelRate, setEnergyCapacity, gain, startUpdateTimersAndRates, addBuildingPotentialRate, addToResourceAllTimeStat, getOTypePowerPlantBoostMultiplierForCurrentSystem } from './game.js';
 import { setResourceDataObject, getResourceDataObject } from './resourceDataObject.js';
 import { removeTabAttentionIfNoIndicators, switchBatteryStatBarWhenBatteryBought, createTextElement, createOptionRow, createButton } from './ui.js';
-import { capitaliseString } from './utilityFunctions.js';
 import { sfxPlayer, playClickSfx } from './audioManager.js';
+
+// The resource a building costs, and the fuel it burns, are stored as internal
+// keys plus the section they live in. Both render as display names.
+const energyUpgradePriceName = (upgrade, slot) => {
+    const price = getResourceDataObject('buildings', ['energy', 'upgrades', upgrade, `resource${slot}Price`]);
+    return localizeMaterialName(price[1], price[2], getLanguage());
+};
+
+const energyUpgradeFuelName = (upgrade) => {
+    const fuel = getResourceDataObject('buildings', ['energy', 'upgrades', upgrade, 'fuel']);
+    return localizeMaterialName(fuel[0], fuel[2], getLanguage());
+};
 
 export function drawTab2Content(heading, optionContentElement) {
     // getCurrentOptionPane() is null until the player opens their first pane,
@@ -25,10 +37,10 @@ export function drawTab2Content(heading, optionContentElement) {
         const battery1Row = createOptionRow({
             labelId: 'energyBattery1Row',
             renderNameABs: null,
-            labelText: 'Sodium Ion Battery:',
+            labelText: localize('tab2Battery1RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Add ${Math.floor(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery1', 'capacity']) / 1000)} MWh`,
+                    text: localize('buttonAddCapacityMwh', getLanguage()).replace('{capacity}', Math.floor(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery1', 'capacity']) / 1000)),
                     classNames: ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check', ...demoExtraClasses],
                     onClick: () => {
                         gain(1, 'battery1Quantity', 'battery1', false, null, 'energy', 'resources');
@@ -48,9 +60,9 @@ export function drawTab2Content(heading, optionContentElement) {
                 }),
             ],
             descriptionText: `${getCurrencySymbol() + getResourceDataObject('buildings', ['energy', 'upgrades', 'battery1', 'price'])}, 
-            ${getResourceDataObject('buildings', ['energy', 'upgrades', 'battery1', 'resource1Price'])[0]} ${capitaliseString(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery1', 'resource1Price'])[1])}, 
-            ${getResourceDataObject('buildings', ['energy', 'upgrades', 'battery1', 'resource2Price'])[0]} ${capitaliseString(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery1', 'resource2Price'])[1])}, 
-            ${getResourceDataObject('buildings', ['energy', 'upgrades', 'battery1', 'resource3Price'])[0]} ${capitaliseString(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery1', 'resource3Price'])[1])}`,
+            ${getResourceDataObject('buildings', ['energy', 'upgrades', 'battery1', 'resource1Price'])[0]} ${energyUpgradePriceName('battery1', 1)}, 
+            ${getResourceDataObject('buildings', ['energy', 'upgrades', 'battery1', 'resource2Price'])[0]} ${energyUpgradePriceName('battery1', 2)}, 
+            ${getResourceDataObject('buildings', ['energy', 'upgrades', 'battery1', 'resource3Price'])[0]} ${energyUpgradePriceName('battery1', 3)}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'energy',
@@ -67,10 +79,10 @@ export function drawTab2Content(heading, optionContentElement) {
         const battery2Row = createOptionRow({
             labelId: 'energyBattery2Row',
             renderNameABs: null,
-            labelText: 'Lithium Ion Battery:',
+            labelText: localize('tab2Battery2RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Add ${Math.floor(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery2', 'capacity']) / 1000)} MWh`,
+                    text: localize('buttonAddCapacityMwh', getLanguage()).replace('{capacity}', Math.floor(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery2', 'capacity']) / 1000)),
                     classNames: ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check', ...demoExtraClasses],
                     onClick: () => {
                         gain(1, 'battery2Quantity', 'battery2', false, null, 'energy', 'resources');
@@ -90,9 +102,9 @@ export function drawTab2Content(heading, optionContentElement) {
                 }),
             ],
             descriptionText: `${getCurrencySymbol() + getResourceDataObject('buildings', ['energy', 'upgrades', 'battery2', 'price'])}, 
-            ${getResourceDataObject('buildings', ['energy', 'upgrades', 'battery2', 'resource1Price'])[0]} ${capitaliseString(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery2', 'resource1Price'])[1])}, 
-            ${getResourceDataObject('buildings', ['energy', 'upgrades', 'battery2', 'resource2Price'])[0]} ${capitaliseString(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery2', 'resource2Price'])[1])}, 
-            ${getResourceDataObject('buildings', ['energy', 'upgrades', 'battery2', 'resource3Price'])[0]} ${capitaliseString(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery2', 'resource3Price'])[1])}`,
+            ${getResourceDataObject('buildings', ['energy', 'upgrades', 'battery2', 'resource1Price'])[0]} ${energyUpgradePriceName('battery2', 1)}, 
+            ${getResourceDataObject('buildings', ['energy', 'upgrades', 'battery2', 'resource2Price'])[0]} ${energyUpgradePriceName('battery2', 2)}, 
+            ${getResourceDataObject('buildings', ['energy', 'upgrades', 'battery2', 'resource3Price'])[0]} ${energyUpgradePriceName('battery2', 3)}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'energy',
@@ -109,10 +121,10 @@ export function drawTab2Content(heading, optionContentElement) {
         const battery3Row = createOptionRow({
             labelId: 'energyBattery3Row',
             renderNameABs: null,
-            labelText: 'Stellar Capacitor Array:',
+            labelText: localize('tab2Battery3RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Add ${Math.floor(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery3', 'capacity']) / 1000)} MWh`,
+                    text: localize('buttonAddCapacityMwh', getLanguage()).replace('{capacity}', Math.floor(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery3', 'capacity']) / 1000)),
                     classNames: ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check', ...demoExtraClasses],
                     onClick: () => {
                         gain(1, 'battery3Quantity', 'battery3', false, null, 'energy', 'resources');
@@ -132,9 +144,9 @@ export function drawTab2Content(heading, optionContentElement) {
                 }),
             ],
             descriptionText: `${getCurrencySymbol() + getResourceDataObject('buildings', ['energy', 'upgrades', 'battery3', 'price'])}, 
-            ${getResourceDataObject('buildings', ['energy', 'upgrades', 'battery3', 'resource1Price'])[0]} ${capitaliseString(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery3', 'resource1Price'])[1])}, 
-            ${getResourceDataObject('buildings', ['energy', 'upgrades', 'battery3', 'resource2Price'])[0]} ${capitaliseString(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery3', 'resource2Price'])[1])}, 
-            ${getResourceDataObject('buildings', ['energy', 'upgrades', 'battery3', 'resource3Price'])[0]} ${capitaliseString(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery3', 'resource3Price'])[1])}`,
+            ${getResourceDataObject('buildings', ['energy', 'upgrades', 'battery3', 'resource1Price'])[0]} ${energyUpgradePriceName('battery3', 1)}, 
+            ${getResourceDataObject('buildings', ['energy', 'upgrades', 'battery3', 'resource2Price'])[0]} ${energyUpgradePriceName('battery3', 2)}, 
+            ${getResourceDataObject('buildings', ['energy', 'upgrades', 'battery3', 'resource3Price'])[0]} ${energyUpgradePriceName('battery3', 3)}`,
             resourcePriceObject: '',
             dataConditionCheck: 'upgradeCheck',
             objectSectionArgument1: 'energy',
@@ -152,18 +164,18 @@ export function drawTab2Content(heading, optionContentElement) {
     if (heading === 'Power Plant') {
         const activeStatus = getBuildingTypeOnOff('powerPlant1');
         if (activeStatus) {
-            toggleButtonText = 'Deactivate';
+            toggleButtonText = localize('buttonDeactivate', getLanguage());
         } else {
-            toggleButtonText = 'Activate';
+            toggleButtonText = localize('buttonActivate', getLanguage());
         }
 
         const powerPlant1Row = createOptionRow({
             labelId: 'energyPowerPlant1Row',
             renderNameABs: null,
-            labelText: 'Power Plant:',
+            labelText: localize('tab2PowerPlant1RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Sell 1`,
+                    text: localize('buttonSellOne', getLanguage()),
                     classNames: ['option-button', 'red-disabled-text', 'sell-building-button', 'resource-cost-sell-check'],
                     onClick: () => {
                         sellBuilding(1, 'powerPlant1');
@@ -179,7 +191,7 @@ export function drawTab2Content(heading, optionContentElement) {
                     rowCategory: 'building'
                 }),
                 createButton({
-                    text: `Add ${Math.round(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'rate']) * getOTypePowerPlantBoostMultiplierForCurrentSystem('powerPlant1') * getTimerRateRatio())} KW /s`,
+                    text: localize('buttonAddRateKwPerSecond', getLanguage()).replace('{rate}', Math.round(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'rate']) * getOTypePowerPlantBoostMultiplierForCurrentSystem('powerPlant1') * getTimerRateRatio())),
                     classNames: ['option-button', 'building-purchase-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         gain(1, 'powerPlant1Quantity', 'powerPlant1', false, null, 'energy', 'resources');
@@ -219,7 +231,7 @@ export function drawTab2Content(heading, optionContentElement) {
                     autoBuyerTier: null,
                     rowCategory: 'building'
                 }),
-                createTextElement(`${capitaliseString(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'fuel'])[0])}:`, 'powerPlant1FuelType', ['red-disabled-text', 'fuel-type', 'invisible']),
+                createTextElement(`${energyUpgradeFuelName('powerPlant1')}:`, 'powerPlant1FuelType', ['red-disabled-text', 'fuel-type', 'invisible']),
                 createTextElement(`${getResourceDataObject(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'fuel'])[2], [getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'fuel'])[0], 'quantity'])}`, 'powerPlant1FuelQuantity', ['red-disabled-text', 'fuel-quantity', 'invisible']),
             ],
             descriptionText: `${getCurrencySymbol() + getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'price'])}`,
@@ -242,18 +254,18 @@ export function drawTab2Content(heading, optionContentElement) {
         const demoExtraClasses = getDemoBuild() ? ['electron-purple-demo-button'] : [];
         const activeStatus = getBuildingTypeOnOff('powerPlant2');
         if (activeStatus) {
-            toggleButtonText = 'Deactivate';
+            toggleButtonText = localize('buttonDeactivate', getLanguage());
         } else {
-            toggleButtonText = 'Activate';
+            toggleButtonText = localize('buttonActivate', getLanguage());
         }
 
         const powerPlant2Row = createOptionRow({
             labelId: 'energyPowerPlant2Row',
             renderNameABs: null,
-            labelText: 'Solar Power Plant:',
+            labelText: localize('tab2PowerPlant2RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Sell 1`,
+                    text: localize('buttonSellOne', getLanguage()),
                     classNames: ['option-button', 'red-disabled-text', 'sell-building-button', 'resource-cost-sell-check'],
                     onClick: () => {
                         sellBuilding(1, 'powerPlant2');
@@ -269,7 +281,7 @@ export function drawTab2Content(heading, optionContentElement) {
                     rowCategory: 'building'
                 }),
                 createButton({
-                    text: `Add (max) ${Math.round(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'rate']) * getOTypePowerPlantBoostMultiplierForCurrentSystem('powerPlant2') * getTimerRateRatio())} KW /s`,
+                    text: localize('buttonAddMaxRateKwPerSecond', getLanguage()).replace('{rate}', Math.round(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'rate']) * getOTypePowerPlantBoostMultiplierForCurrentSystem('powerPlant2') * getTimerRateRatio())),
                     classNames: ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check', ...demoExtraClasses],
                     onClick: () => {
                         gain(1, 'powerPlant2Quantity', 'powerPlant2', false, null, 'energy', 'resources');
@@ -309,7 +321,7 @@ export function drawTab2Content(heading, optionContentElement) {
                     autoBuyerTier: null,
                     rowCategory: 'building'
                 }),
-                createTextElement(`${capitaliseString(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'fuel'])[0])}:`, 'powerPlant2FuelType', ['red-disabled-text', 'fuel-type', 'invisible']),
+                createTextElement(`${energyUpgradeFuelName('powerPlant2')}:`, 'powerPlant2FuelType', ['red-disabled-text', 'fuel-type', 'invisible']),
                 createTextElement(`${getCurrentStarSystemWeatherEfficiency()[1]}%`, 'powerPlant2FuelQuantity', ['red-disabled-text', 'fuel-quantity', 'invisible']),
             ],
             descriptionText: `${getCurrencySymbol() + getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'price'])}`,
@@ -332,18 +344,18 @@ export function drawTab2Content(heading, optionContentElement) {
         const demoExtraClasses = getDemoBuild() ? ['electron-purple-demo-button'] : [];
         const activeStatus = getBuildingTypeOnOff('powerPlant3');
         if (activeStatus) {
-            toggleButtonText = 'Deactivate';
+            toggleButtonText = localize('buttonDeactivate', getLanguage());
         } else {
-            toggleButtonText = 'Activate';
+            toggleButtonText = localize('buttonActivate', getLanguage());
         }
 
         const powerPlant3Row = createOptionRow({
             labelId: 'energyPowerPlant3Row',
             renderNameABs: null,
-            labelText: 'Advanced Power Plant:',
+            labelText: localize('tab2PowerPlant3RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: `Sell 1`,
+                    text: localize('buttonSellOne', getLanguage()),
                     classNames: ['option-button', 'red-disabled-text', 'sell-building-button', 'resource-cost-sell-check'],
                     onClick: () => {
                         sellBuilding(1, 'powerPlant3');
@@ -359,7 +371,7 @@ export function drawTab2Content(heading, optionContentElement) {
                     rowCategory: 'building'
                 }),
                 createButton({
-                    text: `Add ${Math.round(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant3', 'rate']) * getOTypePowerPlantBoostMultiplierForCurrentSystem('powerPlant3') * getTimerRateRatio())} KW /s`,
+                    text: localize('buttonAddRateKwPerSecond', getLanguage()).replace('{rate}', Math.round(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant3', 'rate']) * getOTypePowerPlantBoostMultiplierForCurrentSystem('powerPlant3') * getTimerRateRatio())),
                     classNames: ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check', ...demoExtraClasses],
                     onClick: () => {
                         gain(1, 'powerPlant3Quantity', 'powerPlant3', false, null, 'energy', 'resources');
@@ -399,7 +411,7 @@ export function drawTab2Content(heading, optionContentElement) {
                     autoBuyerTier: null,
                     rowCategory: 'building'
                 }),
-                createTextElement(`${capitaliseString(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant3', 'fuel'])[0])}:`, 'powerPlant3FuelType', ['red-disabled-text', 'fuel-type', 'invisible']),
+                createTextElement(`${energyUpgradeFuelName('powerPlant3')}:`, 'powerPlant3FuelType', ['red-disabled-text', 'fuel-type', 'invisible']),
                 createTextElement(`${getResourceDataObject(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant3', 'fuel'])[2], [getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant3', 'fuel'])[0], 'quantity'])}`, 'powerPlant3FuelQuantity', ['red-disabled-text', 'fuel-quantity', 'invisible']),
             ],
             descriptionText: `${getCurrencySymbol() + getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant3', 'price'])}`,
