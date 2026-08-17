@@ -17,10 +17,12 @@ import {
     getOnboardingMode,
     setOnboardingMode,
     getDemoBuild,
+    getLanguage,
 } from './constantsAndGlobalVars.js';
 
 import { setAchievementIconImageUrls } from './resourceDataObject.js';
 
+import { localize } from './localization.js';
 import { showNotification } from './ui.js';
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 import { getNavigatorLanguage } from './game.js';
@@ -137,11 +139,11 @@ export async function destroySaveGameOnCloud() {
             throw updateError;
         }
 
-        showNotification('Cloud Save data deleted, Pioneer name can be re-used.', 'info', 3000, 'loadSave');
+        showNotification(localize('notificationCloudSaveDeleted', getLanguage()), 'info', 3000, 'loadSave');
 
     } catch (error) {
         console.error('Error archiving and nulling save data:', error);
-        showNotification('Failed to delete save data.', 'error', 3000, 'loadSave');
+        showNotification(localize('notificationCloudSaveDeleteFailed', getLanguage()), 'error', 3000, 'loadSave');
     }
 }
 
@@ -163,7 +165,7 @@ export async function saveGameToCloud(gameData, type) {
     try {
         const userId = getSaveName();
         if (!userId || (typeof userId === 'string' && userId.trim() === '')) {
-            showNotification('Error saving game to cloud! Pioneer name is missing.', 'error', 3000, 'loadSave');
+            showNotification(localize('notificationErrorSavingToCloudNoPioneerName', getLanguage()), 'error', 3000, 'loadSave');
             return false;
         }
         const currentTimestamp = new Date().toISOString();
@@ -196,7 +198,7 @@ export async function saveGameToCloud(gameData, type) {
             }
 
             if (type !== 'initialise') {
-                showNotification('Game updated in the cloud!', 'info', 3000, 'loadSave');
+                showNotification(localize('notificationGameUpdatedInCloud', getLanguage()), 'info', 3000, 'loadSave');
             }
         } else {
             const { error: insertError } = await supabase
@@ -216,13 +218,13 @@ export async function saveGameToCloud(gameData, type) {
             }
 
             if (type !== 'initialise') {
-                showNotification('Game saved to the cloud!', 'info', 3000, 'loadSave');
+                showNotification(localize('notificationGameSavedToCloud', getLanguage()), 'info', 3000, 'loadSave');
             }
         }
         return true;
     } catch (error) {
         console.error('Error saving game to cloud:', error);
-        showNotification('Error saving game to cloud!', 'error', 3000, 'loadSave');
+        showNotification(localize('notificationErrorSavingToCloud', getLanguage()), 'error', 3000, 'loadSave');
         return false;
     }
 }
@@ -235,7 +237,7 @@ export function saveGame(type) {
 
     if (getOnboardingMode()) {
         if (type !== 'onSaveScreen') {
-            showNotification("You can't save while onboarding mode is active!", 'info', 4000, 'loadSave');
+            showNotification(localize('notificationCannotSaveDuringOnboarding', getLanguage()), 'info', 4000, 'loadSave');
         }
 
         setSaveData(null);
@@ -274,7 +276,7 @@ export function saveGame(type) {
 
     if (typeof LZString === 'undefined') {
         console.error('saveGame: LZString is not available');
-        showNotification('Save failed: compression library not available. Please refresh and try again.', 'error', 5000, 'loadSave');
+        showNotification(localize('notificationSaveCompressionUnavailable', getLanguage()), 'error', 5000, 'loadSave');
         setSaveData(null);
         return;
     }
@@ -284,7 +286,7 @@ export function saveGame(type) {
         compressedSaveData = LZString.compressToEncodedURIComponent(serializedGameState);
     } catch (err) {
         console.error('saveGame failed to compress game state:', err);
-        showNotification('Save failed: compression library not available. Please refresh and try again.', 'error', 5000, 'loadSave');
+        showNotification(localize('notificationSaveCompressionUnavailable', getLanguage()), 'error', 5000, 'loadSave');
         setSaveData(null);
         return;
     }
@@ -336,12 +338,12 @@ export function importSaveStringFileFromComputer() {
 
 export function downloadSaveStringToComputer() {
     if (isElectronDemoBuild()) {
-        showNotification("Saving is disabled in the demo build!", 'info', 4000, 'loadSave');
+        showNotification(localize('notificationSavingDisabledInDemo', getLanguage()), 'info', 4000, 'loadSave');
         return;
     }
 
     if (getOnboardingMode()) {
-        showNotification("You can't save while onboarding mode is active!", 'info', 4000, 'loadSave');
+        showNotification(localize('notificationCannotSaveDuringOnboarding', getLanguage()), 'info', 4000, 'loadSave');
         return;
     }
 
@@ -369,12 +371,12 @@ export function downloadSaveStringToComputer() {
 
 export function copySaveStringToClipBoard() {
     if (isElectronDemoBuild()) {
-        showNotification("Saving is disabled in the demo build!", 'info', 4000, 'loadSave');
+        showNotification(localize('notificationSavingDisabledInDemo', getLanguage()), 'info', 4000, 'loadSave');
         return;
     }
 
     if (getOnboardingMode()) {
-        showNotification("You can't save while onboarding mode is active!", 'info', 4000, 'loadSave');
+        showNotification(localize('notificationCannotSaveDuringOnboarding', getLanguage()), 'info', 4000, 'loadSave');
         return;
     }
 
@@ -385,10 +387,10 @@ export function copySaveStringToClipBoard() {
     try {
         navigator.clipboard.writeText(textArea.value)
             .then(() => {
-                showNotification('Data copied to clipboard!', 'info', 3000, 'loadSave');
+                showNotification(localize('notificationDataCopiedToClipboard', getLanguage()), 'info', 3000, 'loadSave');
             })
             .catch(err => {
-                showNotification('Error copying data! If on Chrome, this could be expected.  Select and copy the text string manually!', 'error', 3000, 'loadSave');
+                showNotification(localize('notificationErrorCopyingData', getLanguage()), 'error', 3000, 'loadSave');
                 console.log('Error copying data! ' + err);
             })
             .finally(() => {
@@ -414,12 +416,12 @@ export async function loadGameFromCloud() {
         }
 
         if (!data) {
-            showNotification('No saved game data found.', 'warning', 3000, 'loadSave');
+            showNotification(localize('notificationNoSavedGameDataFound', getLanguage()), 'warning', 3000, 'loadSave');
             return false;
         }
 
         if (data.data === null) {
-            showNotification('This Pioneer name is being reused for a new game.', 'info', 5000, 'loadSave');
+            showNotification(localize('notificationPioneerNameReused', getLanguage()), 'info', 5000, 'loadSave');
             return false;
         }
 
@@ -432,7 +434,7 @@ export async function loadGameFromCloud() {
             decompressedJson = LZString.decompressFromEncodedURIComponent(gameData);
         } catch (err) {
             console.error('loadGameFromCloud failed to decompress game state:', err);
-            showNotification('Error loading game data from the cloud.', 'error', 3000, 'loadSave');
+            showNotification(localize('notificationErrorLoadingFromCloud', getLanguage()), 'error', 3000, 'loadSave');
             return false;
         }
         const gameState = JSON.parse(decompressedJson);
@@ -441,12 +443,12 @@ export async function loadGameFromCloud() {
         setOnboardingMode(false);
         setAchievementIconImageUrls();
         getNavigatorLanguage();
-        showNotification('Game loaded successfully!', 'info', 3000, 'loadSave');
+        showNotification(localize('notificationGameLoadedSuccessfully', getLanguage()), 'info', 3000, 'loadSave');
         return true;
 
     } catch (error) {
         console.error("Error loading game from cloud:", error);
-        showNotification('Error loading game data from the cloud.', 'error', 3000, 'loadSave');
+        showNotification(localize('notificationErrorLoadingFromCloud', getLanguage()), 'error', 3000, 'loadSave');
         return false;
     }
 }
@@ -462,7 +464,7 @@ export function loadGame() {
             const compressed = textArea.value.trim();
 
             if (!validateSaveString(compressed)) {
-                showNotification('Invalid game data string. Please check and try again.', 'warning', 3000, 'loadSave');
+                showNotification(localize('notificationInvalidSaveString', getLanguage()), 'warning', 3000, 'loadSave');
                 return reject('Invalid game data string');
             }
 
@@ -474,7 +476,7 @@ export function loadGame() {
                 decompressedJson = LZString.decompressFromEncodedURIComponent(compressed);
             } catch (err) {
                 console.error('loadGame failed to decompress game state:', err);
-                showNotification('Error loading game. Please make sure the string contains valid game data.', 'error', 3000, 'loadSave');
+                showNotification(localize('notificationErrorLoadingSaveString', getLanguage()), 'error', 3000, 'loadSave');
                 return reject(err);
             }
             const gameState = JSON.parse(decompressedJson);
@@ -483,18 +485,18 @@ export function loadGame() {
                 .then(() => {
                     setOnboardingMode(false);
                     setAchievementIconImageUrls();
-                    showNotification('Game loaded successfully!', 'info', 3000, 'loadSave');
+                    showNotification(localize('notificationGameLoadedSuccessfully', getLanguage()), 'info', 3000, 'loadSave');
                     resolve();
                 })
                 .catch(error => {
                     console.error('Error initializing game:', error);
-                    showNotification('Error initializing game. Please make sure the data is correct.', 'error', 3000, 'loadSave');
+                    showNotification(localize('notificationErrorInitializingGame', getLanguage()), 'error', 3000, 'loadSave');
                     reject(error);
                 });
 
         } catch (error) {
             console.error('Error loading game:', error);
-            showNotification('Error loading game. Please make sure the string contains valid game data.', 'error', 3000, 'loadSave');
+            showNotification(localize('notificationErrorLoadingSaveString', getLanguage()), 'error', 3000, 'loadSave');
             reject(error);
         }
     });

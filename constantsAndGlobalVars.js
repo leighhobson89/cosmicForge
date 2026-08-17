@@ -11,7 +11,7 @@ import { offlineGains, startNewsTickerTimer } from './game.js';
 import { rocketNames, getStarNames, getStarTypeByName } from './descriptions.js';
 import { boostSoundManager } from './audioManager.js';
 import { trackAnalyticsEvent } from './analytics.js';
-import { localize } from './localization.js';
+import { localize, localizeMaterialName } from './localization.js';
 
 //DEBUG
 export let debugFlag = false;
@@ -68,10 +68,13 @@ export const ENEMY_FLEET_SPEED_LAND = 2;
 export const ENEMY_FLEET_SPEED_SEA = 1;
 export const PRICE_CASINO_GAME_2 = 1;
 export const PRICE_CASINO_GAME_3 = 5;
+// The label is a catalogue key rather than a rendered string: the cost and the
+// odds it quotes are the two numbers beside it, so the display form is composed
+// at draw time and follows a language change.
 export const VOID_SEER_PRIZE_CATALOG = {
-    prize1: { costCp: 7, maxReel: 6, label: 'O Type Star Clue - 7CP - Odds: 6/1' },
-    prize2: { costCp: 10, maxReel: 8, label: 'Ancient Manuscript Clue - 10CP - Odds: 8/1' },
-    prize3: { costCp: 15, maxReel: 12, label: 'Pillage Antimatter - 15CP - Odds: 12/1' }
+    prize1: { costCp: 7, maxReel: 6, labelKey: 'casinoVoidSeerPrizeLabel1' },
+    prize2: { costCp: 10, maxReel: 8, labelKey: 'casinoVoidSeerPrizeLabel2' },
+    prize3: { costCp: 15, maxReel: 12, labelKey: 'casinoVoidSeerPrizeLabel3' }
 
 };
 
@@ -224,7 +227,11 @@ export let repeatableTechMultipliers = {
     4: 1
 };
 
-let compoundCreateDropdownRecipeText = () => {
+// Built on demand rather than at module evaluation: `localize` needs the
+// catalogue, which is fetched after this module is imported. Everything that
+// reads the table goes through `ensureCompoundCreateDropdownRecipeText()`, so
+// the first read after boot produces the table in the player's language.
+const buildCompoundCreateDropdownRecipeText = () => {
     return {
         diesel: {
           fillToCapacity: { value: 'fillToCapacity', text: localize('compoundCreateFillToCapacity', getLanguage()) },
@@ -313,6 +320,16 @@ let compoundCreateDropdownRecipeText = () => {
       }
     };
 
+let compoundCreateDropdownRecipeText = null;
+
+
+function ensureCompoundCreateDropdownRecipeText() {
+    if (!compoundCreateDropdownRecipeText) {
+        compoundCreateDropdownRecipeText = buildCompoundCreateDropdownRecipeText();
+    }
+    return compoundCreateDropdownRecipeText;
+}
+
 //GLOBAL VARIABLES
 export let gameState;
 let language = 'en';
@@ -335,7 +352,7 @@ let gameStartTimeStamp = null;
 let runStartTimeStamp = null;
 let gameActiveCountTime = [0, 0];
 let blackHoleNerfPatched = false;
-let rocketUserName = {rocket1: 'Rocket 1', rocket2: 'Rocket 2', rocket3: 'Rocket 3', rocket4: 'Rocket 4'};
+let rocketUserName = {};
 let asteroidArray = [];
 let alreadySeenNewsTickerArray = [];
 let activatedWackyNewsEffectsArray = [];
@@ -395,7 +412,7 @@ let timeLeftUntilPillageVoidTimerFinishes = 0;
 let timeLeftUntilStarInvestigationTimerFinishes = 0;
 let timeLeftUntilBlackHoleChargeTimerFinishes = 0;
 let oldAntimatterRightBoxSvgData = null;
-let currentDestinationDropdownText = 'Select an option';
+let currentDestinationDropdownText = null;
 let starVisionDistance = 0;
 let starMapMode = 'normal';
 let starVisionIncrement = 1;
@@ -1372,7 +1389,7 @@ export function resetAllVariablesOnRebirth() {
     rocketTravelSpeed = 0.1;
     starShipTravelSpeed = 360000; //3600000 one real hour per light year
     runStartTimeStamp = null;
-    rocketUserName = {rocket1: 'Rocket 1', rocket2: 'Rocket 2', rocket3: 'Rocket 3', rocket4: 'Rocket 4'};
+    rocketUserName = {};
     asteroidArray = [];
     rocketsBuilt = [];
     starShipModulesBuilt = [];
@@ -1412,7 +1429,7 @@ export function resetAllVariablesOnRebirth() {
     timeLeftUntilPillageVoidTimerFinishes = 0;
     timeLeftUntilStarInvestigationTimerFinishes = 0;
     oldAntimatterRightBoxSvgData = null;
-    currentDestinationDropdownText = 'Select an option';
+    currentDestinationDropdownText = null;
     starVisionDistance = 0; //0
     starMapMode = 'normal';
     starVisionIncrement = 1;
@@ -1514,92 +1531,9 @@ export function resetAllVariablesOnRebirth() {
         powerPlant3: false,
     }
 
-    compoundCreateDropdownRecipeText = {
-        diesel: {
-          fillToCapacity: { value: 'fillToCapacity', text: 'Fill To Capacity' },
-          max: { value: 'max', text: 'Max Possible' },
-          threeQuarters: { value: 'threeQuarters', text: 'Up to 75%' },
-          twoThirds: { value: 'twoThirds', text: 'Up to 67%' },
-          half: { value: 'half', text: 'Up to 50%' },
-          oneThird: { value: 'oneThird', text: 'Up to 33%' },
-          50000: { value: '50000', text: '50000 - 1.3M Hyd, 600K Crb' },
-          5000: { value: '5000', text: '5000 - 130K Hyd, 60K Crb' },
-          500: { value: '500', text: '500 - 13K Hyd, 6K Crb' },
-          50: { value: '50', text: '50 - 1.3K Hyd, 600 Crb' },
-          5: { value: '5', text: '5 - 130 Hyd, 60 Crb' },
-          1: { value: '1', text: '1 - 26 Hyd, 12 Crb' }
-        },
-        glass: {
-          fillToCapacity: { value: 'fillToCapacity', text: 'Fill To Capacity' },
-          max: { value: 'max', text: 'Max Possible' },
-          threeQuarters: { value: 'threeQuarters', text: 'Up to 75%' },
-          twoThirds: { value: 'twoThirds', text: 'Up to 67%' },
-          half: { value: 'half', text: 'Up to 50%' },
-          oneThird: { value: 'oneThird', text: 'Up to 33%' },
-          50000: { value: '50000', text: '50000 - 200K Sil, 100K Oxy, 50K Sod' },
-          5000: { value: '5000', text: '5000 - 20K Sil, 10K Oxy, 5K Sod' },
-          500: { value: '500', text: '500 - 2K Sil, 1K Oxy, 500 Sod' },
-          50: { value: '50', text: '50 - 200 Sil, 100 Oxy, 50 Sod' },
-          5: { value: '5', text: '5 - 20 Sil, 10 Oxy, 5 Sod' },
-          1: { value: '1', text: '1 - 4 Sil, 2 Oxy, 1 Sod' }
-        },
-        steel: {
-          fillToCapacity: { value: 'fillToCapacity', text: 'Fill To Capacity' },
-          max: { value: 'max', text: 'Max Possible' },
-          threeQuarters: { value: 'threeQuarters', text: 'Up to 75%' },
-          twoThirds: { value: 'twoThirds', text: 'Up to 67%' },
-          half: { value: 'half', text: 'Up to 50%' },
-          oneThird: { value: 'oneThird', text: 'Up to 33%' },
-          50000: { value: '50000', text: '50000 - 200K Irn, 50K Crb' },
-          5000: { value: '5000', text: '5000 - 20K Irn, 5K Crb' },
-          500: { value: '500', text: '500 - 2K Irn, 500 Crb' },
-          50: { value: '50', text: '50 - 200 Irn, 50 Crb' },
-          5: { value: '5', text: '5 - 20 Irn, 5 Crb' },
-          1: { value: '1', text: '1 - 4 Irn, 1 Crb' }
-        },
-        concrete: {
-          fillToCapacity: { value: 'fillToCapacity', text: 'Fill To Capacity' },
-          max: { value: 'max', text: 'Max Possible' },
-          threeQuarters: { value: 'threeQuarters', text: 'Up to 75%' },
-          twoThirds: { value: 'twoThirds', text: 'Up to 67%' },
-          half: { value: 'half', text: 'Up to 50%' },
-          oneThird: { value: 'oneThird', text: 'Up to 33%' },
-          50000: { value: '50000', text: '50000 - 250K Sil, 100K Sod, 150K Hyd' },
-          5000: { value: '5000', text: '5000 - 25K Sil, 10K Sod, 15K Hyd' },
-          500: { value: '500', text: '500 - 2.5K Sil, 1K Sod, 1.5K Hyd' },
-          50: { value: '50', text: '50 - 250 Sil, 100 Sod, 150 Hyd' },
-          5: { value: '5', text: '5 - 25 Sil, 10 Sod, 15 Hyd' },
-          1: { value: '1', text: '1 - 5 Sil, 2 Sod, 3 Hyd' }
-        },
-        water: {
-          fillToCapacity: { value: 'fillToCapacity', text: 'Fill To Capacity' },
-          max: { value: 'max', text: 'Max Possible' },
-          threeQuarters: { value: 'threeQuarters', text: 'Up to 75%' },
-          twoThirds: { value: 'twoThirds', text: 'Up to 67%' },
-          half: { value: 'half', text: 'Up to 50%' },
-          oneThird: { value: 'oneThird', text: 'Up to 33%' },
-          50000: { value: '50000', text: '50000 - 1M Hyd, 500K Oxy' },
-          5000: { value: '5000', text: '5000 - 100K Hyd, 50K Oxy' },
-          500: { value: '500', text: '500 - 10K Hyd, 5K Oxy' },
-          50: { value: '50', text: '50 - 1K Hyd, 500 Oxy' },
-          5: { value: '5', text: '5 - 100 Hyd, 50 Oxy' },
-          1: { value: '1', text: '1 - 20 Hyd, 10 Oxy' }
-        },
-        titanium: {
-          fillToCapacity: { value: 'fillToCapacity', text: 'Fill To Capacity' },
-          max: { value: 'max', text: 'Max Possible' },
-          threeQuarters: { value: 'threeQuarters', text: 'Up to 75%' },
-          twoThirds: { value: 'twoThirds', text: 'Up to 67%' },
-          half: { value: 'half', text: 'Up to 50%' },
-          oneThird: { value: 'oneThird', text: 'Up to 33%' },
-          50000: { value: '50000', text: '50000 - 1.1M Irn, 900K Sod, 2M Neo' },
-          5000: { value: '5000', text: '5000 - 110K Irn, 90K Sod, 200K Neo' },
-          500: { value: '500', text: '500 - 11K Irn, 9K Sod, 20K Neo' },
-          50: { value: '50', text: '50 - 1.1K Irn, 900 Sod, 2K Neo' },
-          5: { value: '5', text: '5 - 110 Irn, 90 Sod, 200 Neo' },
-          1: { value: '1', text: '1 - 22 Irn, 18 Sod, 40 Neo' }
-        }
-    };
+    // Cleared rather than rebuilt: a reset can run before the catalogue has
+    // been fetched, and the lazy accessor rebuilds it on the first read.
+    compoundCreateDropdownRecipeText = null;
     
     battleResolved = [false, null];
 
@@ -1908,7 +1842,7 @@ export function captureGameStatusForSaving(type) {
     gameState.gameActiveCountTime = gameActiveCountTime;
     gameState.userPlatform = userPlatform;
     gameState.hostSource = hostSource;
-    gameState.compoundCreateDropdownRecipeText = compoundCreateDropdownRecipeText;
+    gameState.compoundCreateDropdownRecipeText = ensureCompoundCreateDropdownRecipeText();
     gameState.firstAccessArray = firstAccessArray;
     gameState.philosophy = philosophy;
     gameState.repeatableTechMultipliers = repeatableTechMultipliers;
@@ -2136,7 +2070,7 @@ export function restoreGameStatus(gameState, type) {
             miningObject = gameState.miningObject ?? {rocket1: null, rocket2: null, rocket3: null, rocket4: null};
             destinationAsteroid = gameState.destinationAsteroid ?? {rocket1: null, rocket2: null, rocket3: null, rocket4: null};
             rocketDirection = gameState.rocketDirection ?? {rocket1: false, rocket2: false, rocket3: false, rocket4: false};
-            rocketUserName = gameState.rocketUserName ?? {rocket1: 'Rocket 1', rocket2: 'Rocket 2', rocket3: 'Rocket 3', rocket4: 'Rocket 4'};
+            rocketUserName = gameState.rocketUserName ?? {};
             starVisionDistance = gameState.starVisionDistance ?? 0;
             starVisionIncrement = gameState.starVisionIncrement ?? 1;
             destinationStar = gameState.destinationStar ?? null;
@@ -2899,14 +2833,22 @@ export function setCreateCompoundPreview(compoundToCreate, dropDownString) {
 }
 
 export function setCompoundCreatePreview(compoundToCreate, createAmount, amountConstituentPart1, amountConstituentPart2, amountConstituentPart3, amountConstituentPart4) {
-    const compoundToCreateCapitalised = getResourceDataObject('compounds', [compoundToCreate, 'nameResource']);
+    const compoundToCreateCapitalised = localizeMaterialName(compoundToCreate, 'compounds', getLanguage());
     const compoundToCreateQuantity = getResourceDataObject('compounds', [compoundToCreate, 'quantity']);
     const compoundToCreateStorage = getResourceDataObject('compounds', [compoundToCreate, 'storageCapacity']);
     
-    const constituentPartString1 = capitaliseString(getResourceDataObject('compounds', [compoundToCreate, 'createsFrom1'])[0]);
-    const constituentPartString2 = capitaliseString(getResourceDataObject('compounds', [compoundToCreate, 'createsFrom2'])[0]);
-    const constituentPartString3 = capitaliseString(getResourceDataObject('compounds', [compoundToCreate, 'createsFrom3'])[0]);
-    const constituentPartString4 = capitaliseString(getResourceDataObject('compounds', [compoundToCreate, 'createsFrom4'])[0]);
+    // Each createsFrom entry is [internalKey, section], which is exactly what
+    // localizeMaterialName needs to resolve a display name from the catalogue.
+    const constituentPartName = (index) => {
+        const source = getResourceDataObject('compounds', [compoundToCreate, `createsFrom${index}`]);
+        if (!Array.isArray(source) || !source[0]) return '';
+        return localizeMaterialName(source[0], source[1], getLanguage());
+    };
+
+    const constituentPartString1 = constituentPartName(1);
+    const constituentPartString2 = constituentPartName(2);
+    const constituentPartString3 = constituentPartName(3);
+    const constituentPartString4 = constituentPartName(4);
     
     let constituentParts = [];
     
@@ -2936,12 +2878,12 @@ export function setResourceSalePreview(resource, value, fuseToResource1, fuseToR
     let tooManyToStore2 = 0;
     let suffixFusion = '';
 
-    const resourceCapitalised = getResourceDataObject('resources', [resource, 'nameResource']);
+    const resourceCapitalised = localizeMaterialName(resource, 'resources', getLanguage());
     const resourceQuantity = getResourceDataObject('resources', [resource, 'quantity']);
     const resourceSaleValueFactor = getResourceDataObject('resources', [resource, 'saleValue']);
 
     if (getTechUnlockedArray().includes(getResourceDataObject('resources', [resource, 'canFuseTech']))) {
-        const fuseToCapitalised1 = getResourceDataObject('resources', [fuseToResource1, 'nameResource']);
+        const fuseToCapitalised1 = localizeMaterialName(fuseToResource1, 'resources', getLanguage());
         const fuseToQuantity1 = getResourceDataObject('resources', [fuseToResource1, 'quantity']);
         const fuseToStorage1 = getResourceDataObject('resources', [fuseToResource1, 'storageCapacity']);
         const fuseToRatio1 = getResourceDataObject('resources', [resource, 'fuseToRatio1']);
@@ -2964,7 +2906,7 @@ export function setResourceSalePreview(resource, value, fuseToResource1, fuseToR
         let fuseToCapitalised2 = '';
 
         if (fuseToResource2 !== '' && fuseToResource2 !== undefined) {
-            fuseToCapitalised2 = getResourceDataObject('resources', [fuseToResource2, 'nameResource']);
+            fuseToCapitalised2 = localizeMaterialName(fuseToResource2, 'resources', getLanguage());
             const fuseToQuantity2 = getResourceDataObject('resources', [fuseToResource2, 'quantity']);
             const fuseToStorage2 = getResourceDataObject('resources', [fuseToResource2, 'storageCapacity']);
             const fuseToRatio2 = getResourceDataObject('resources', [resource, 'fuseToRatio2']);
@@ -3024,7 +2966,7 @@ export function setResourceSalePreview(resource, value, fuseToResource1, fuseToR
 }
 
 export function setCompoundSalePreview(compound, value) {
-    const compoundCapitalised = getResourceDataObject('compounds', [compound, 'nameResource']);
+    const compoundCapitalised = localizeMaterialName(compound, 'compounds', getLanguage());
     const compoundQuantity = getResourceDataObject('compounds', [compound, 'quantity']);
     const compoundSaleValueFactor = getResourceDataObject('compounds', [compound, 'saleValue']);
 
@@ -4135,11 +4077,22 @@ export function setCurrentDestinationDropdownText(value) {
 }
 
 export function getCurrentDestinationDropdownText() {
-    return currentDestinationDropdownText ?? 'Select an option';
+    return currentDestinationDropdownText ?? localize('dropdownSelectAnOption', getLanguage());
 }
 
+// A rocket the player has never renamed carries no stored name, so the default
+// is resolved from the catalogue on every read and follows a language change.
+// Saves written before this change stored the English default verbatim; that
+// exact shape is treated as "not renamed" so those rockets translate too. A
+// player who deliberately types "Rocket 2" simply gets the translated form.
+const LEGACY_DEFAULT_ROCKET_NAME = /^Rocket [1-4]$/;
+
 export function getRocketUserName(key) {
-    return rocketUserName[key] ?? `Rocket ${capitaliseString(key).slice(-1)}`;
+    const stored = rocketUserName[key];
+    if (typeof stored === 'string' && stored.trim() !== '' && !LEGACY_DEFAULT_ROCKET_NAME.test(stored.trim())) {
+        return stored;
+    }
+    return localize('rocketDefaultName', getLanguage()).replace('{index}', capitaliseString(key).slice(-1));
 }
 
 export function setRocketUserName(key, value) {
@@ -5146,7 +5099,7 @@ function getStatPower() {//
 }
 
 function getStatPowerAllTime() {
-    return 'N/A';
+    return localize('textNotApplicable', getLanguage());
 }
 
 function getStatTotalEnergy() {//
@@ -5154,7 +5107,7 @@ function getStatTotalEnergy() {//
 }
 
 function getStatTotalEnergyAllTime() {
-    return 'N/A';
+    return localize('textNotApplicable', getLanguage());
 }
 
 function getStatTotalProduction() {//
@@ -5165,7 +5118,7 @@ function getStatTotalProduction() {//
 }
 
 function getStatTotalProductionAllTime() {
-    return 'N/A';
+    return localize('textNotApplicable', getLanguage());
 }
 
 function getStatTotalConsumption() {//
@@ -5173,7 +5126,7 @@ function getStatTotalConsumption() {//
 }
 
 function getStatTotalConsumptionAllTime() {
-    return 'N/A';
+    return localize('textNotApplicable', getLanguage());
 }
 
 function getStatTotalBatteryStorage() {//
@@ -5181,7 +5134,7 @@ function getStatTotalBatteryStorage() {//
 }
 
 function getStatTotalBatteryStorageAllTime() {
-    return 'N/A';
+    return localize('textNotApplicable', getLanguage());
 }
 
 function getStatTimesTripped() {//
@@ -5241,19 +5194,19 @@ function getStatBattery3ThisRun() {
 }
 
 function getStatSpaceTelescopeBuilt() {//
-    return getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'spaceTelescopeBoughtYet']) ? "Yes" : "No";
+    return getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'spaceTelescopeBoughtYet']) ? localize('textYes', getLanguage()) : localize('textNo', getLanguage());
 }
 
 function getStatSpaceTelescopeBuiltAllTime() {
-    return 'N/A';
+    return localize('textNotApplicable', getLanguage());
 }
 
 function getStatLaunchPadBuilt() {//
-    return getResourceDataObject('space', ['upgrades', 'launchPad', 'launchPadBoughtYet']) ? "Yes" : "No";
+    return getResourceDataObject('space', ['upgrades', 'launchPad', 'launchPadBoughtYet']) ? localize('textYes', getLanguage()) : localize('textNo', getLanguage());
 }
 
 function getStatLaunchPadBuiltAllTime() {
-    return 'N/A';
+    return localize('textNotApplicable', getLanguage());
 }
 
 function getStatRocketsBuilt() {//
@@ -5277,31 +5230,31 @@ function getStatAsteroidsMinedThisRun() {
 }
 
 function getStatStarStudyRange() {//
-    return `${starStudyRange} ly`;
+    return `${starStudyRange} ${localize('textLightYearsShort', getLanguage())}`;
 }
 
 function getStatStarStudyRangeAllTime() {
-    return 'N/A';
+    return localize('textNotApplicable', getLanguage());
 }
 
 function getStatStarShipBuilt() {//
-    return starShipBuilt ? "Yes" : "No";
+    return starShipBuilt ? localize('textYes', getLanguage()) : localize('textNo', getLanguage());
 }
 
 function getStatStarShipBuiltAllTime() {
-    return 'N/A';
+    return localize('textNotApplicable', getLanguage());
 }
 
 function getStatStarShipDistanceTravelled() {//
-    return `${starShipTravelDistance} ly`;
+    return `${starShipTravelDistance} ${localize('textLightYearsShort', getLanguage())}`;
 }
 
 function getStatSystemScanned() {//
-    return destinationStarScanned ? "Yes" : "No";
+    return destinationStarScanned ? localize('textYes', getLanguage()) : localize('textNo', getLanguage());
 }
 
 function getStatSystemScannedAllTime() {
-    return 'N/A';
+    return localize('textNotApplicable', getLanguage());
 }
 
 function getStatFleetAttackStrength() {
@@ -5353,11 +5306,11 @@ function getStatEnemy() {
 }
 
 function getStatEnemyAllTime() {
-    return 'N/A';
+    return localize('textNotApplicable', getLanguage());
 }
 
 function getStatEnemyTotalDefenceOvercome() {
-    return 'N/A';
+    return localize('textNotApplicable', getLanguage());
 }
 
 function getStatEnemyTotalDefenceOvercomeAllTime() {
@@ -5367,23 +5320,23 @@ function getStatEnemyTotalDefenceOvercomeAllTime() {
 }
 
 function getStatBlackHoleDiscoveredThisRun() {
-    return 'N/A';
+    return localize('textNotApplicable', getLanguage());
 }
 
 function getStatBlackHoleDiscoveredAllTime() {
-    return getBlackHoleDiscovered() ? 'Yes' : 'No';
+    return getBlackHoleDiscovered() ? localize('textYes', getLanguage()) : localize('textNo', getLanguage());
 }
 
 function getStatBlackHoleAlwaysActiveThisRun() {
-    return 'N/A';
+    return localize('textNotApplicable', getLanguage());
 }
 
 function getStatBlackHoleAlwaysActiveAllTime() {
-    return getBlackHoleAlwaysOn() ? 'Yes' : 'No';
+    return getBlackHoleAlwaysOn() ? localize('textYes', getLanguage()) : localize('textNo', getLanguage());
 }
 
 function getStatBlackHoleStrengthThisRun() {
-    return 'N/A';
+    return localize('textNotApplicable', getLanguage());
 }
 
 function getStatBlackHoleStrengthAllTime() {
@@ -5391,7 +5344,7 @@ function getStatBlackHoleStrengthAllTime() {
 }
 
 function getStatCosmicRipChapterGalacticPointsEarnedThisRun() {
-    return 'N/A';
+    return localize('textNotApplicable', getLanguage());
 }
 
 function getStatCosmicRipChapterGalacticPointsEarnedAllTime() {
@@ -5400,7 +5353,7 @@ function getStatCosmicRipChapterGalacticPointsEarnedAllTime() {
 }
 
 function getStatCosmicRipChapterGalacticPointsSpentThisRun() {
-    return 'N/A';
+    return localize('textNotApplicable', getLanguage());
 }
 
 function getStatCosmicRipChapterGalacticPointsSpentAllTime() {
@@ -5408,31 +5361,31 @@ function getStatCosmicRipChapterGalacticPointsSpentAllTime() {
 }
 
 function getStatCosmicRipChapterUnlockThisRun() {
-    return 'N/A';
+    return localize('textNotApplicable', getLanguage());
 }
 
 function getStatCosmicRipChapterUnlockAllTime() {
-    return getTechUnlockedArray?.().includes('cosmicRip') ? 'Yes' : 'No';
+    return getTechUnlockedArray?.().includes('cosmicRip') ? localize('textYes', getLanguage()) : localize('textNo', getLanguage());
 }
 
 function getStatNearSpaceScannerArrayRestoredThisRun() {
-    return 'N/A';
+    return localize('textNotApplicable', getLanguage());
 }
 
 function getStatNearSpaceScannerArrayRestoredAllTime() {
-    return (getResourceDataObject('cosmicRip', ['nearSpaceScannerArrayRestored']) === true) ? 'Yes' : 'No';
+    return (getResourceDataObject('cosmicRip', ['nearSpaceScannerArrayRestored']) === true) ? localize('textYes', getLanguage()) : localize('textNo', getLanguage());
 }
 
 function getStatCosmicRipLocatedThisRun() {
-    return 'N/A';
+    return localize('textNotApplicable', getLanguage());
 }
 
 function getStatCosmicRipLocatedAllTime() {
-    return (getResourceDataObject('cosmicRip', ['ripFound']) === true) ? 'Yes' : 'No';
+    return (getResourceDataObject('cosmicRip', ['ripFound']) === true) ? localize('textYes', getLanguage()) : localize('textNo', getLanguage());
 }
 
 function getStatCosmicRipStabilisedThisRun() {
-    return 'N/A';
+    return localize('textNotApplicable', getLanguage());
 }
 
 function getStatCosmicRipStabilisedAllTime() {
@@ -5440,11 +5393,11 @@ function getStatCosmicRipStabilisedAllTime() {
     const total = Object.keys(techs).length;
     const unlocked = (getCosmicRipTechUnlockedArray?.() || []).length;
     if (!total) return 'No';
-    return unlocked >= total ? 'Yes' : 'No';
+    return unlocked >= total ? localize('textYes', getLanguage()) : localize('textNo', getLanguage());
 }
 
 function getStatRipTelemetryDataGainedThisRun() {
-    return 'N/A';
+    return localize('textNotApplicable', getLanguage());
 }
 
 function getStatRipTelemetryDataGainedAllTime() {
@@ -5483,7 +5436,7 @@ function getStatEnemyTotalDefenceRemaining() {
 }
 
 function getStatEnemyTotalDefenceRemainingAllTime() {
-    return 'N/A';
+    return localize('textNotApplicable', getLanguage());
 }
 
 function getStatApFromStarVoyage() {
@@ -6346,7 +6299,7 @@ export function populateVariableDebugger() {
     
     const variables = [
         { label: "", value: "" },
-        { label: "Game Settings:", value: "" },
+        { label: "Game Settings:", labelKey: 'debuggerSectionGameSettings', value: "" },
         { label: "", value: "" },
 
         { label: "gamestate", value: gameState },
@@ -6368,7 +6321,7 @@ export function populateVariableDebugger() {
         { label: "savedYetSinceOpeningSaveDialogue", value: savedYetSinceOpeningSaveDialogue },
 
         { label: "", value: "" },
-        { label: "Run:", value: "" },
+        { label: "Run:", labelKey: 'debuggerSectionRun', value: "" },
         { label: "", value: "" },
 
         { label: "rebirthPossible", value: rebirthPossible },
@@ -6378,7 +6331,7 @@ export function populateVariableDebugger() {
         { label: "currentStarSystem", value: currentStarSystem },
 
         { label: "", value: "" },
-        { label: "Resources / Compounds / AutoBuyers:", value: "" },
+        { label: "Resources / Compounds / AutoBuyers:", labelKey: 'debuggerSectionResourcesCompoundsAutoBuyers', value: "" },
         { label: "", value: "" },
 
         { label: "saleResourcePreviews", value: saleResourcePreviews },
@@ -6394,7 +6347,7 @@ export function populateVariableDebugger() {
         { label: "originalFrameNumbers", value: originalFrameNumbers },
 
         { label: "", value: "" },
-        { label: "Research AutoBuyer:", value: "" },
+        { label: "Research AutoBuyer:", labelKey: 'debuggerSectionResearchAutoBuyer', value: "" },
         { label: "", value: "" },
 
         { label: "researchAutoBuyerActive", value: researchAutoBuyerConfig?.active ?? null },
@@ -6402,7 +6355,7 @@ export function populateVariableDebugger() {
         { label: "researchAutoBuyerConfig", value: researchAutoBuyerConfig },
 
         { label: "", value: "" },
-        { label: "Tech:", value: "" },
+        { label: "Tech:", labelKey: 'debuggerSectionTech', value: "" },
         { label: "", value: "" },
 
         { label: "techRenderCounter", value: techRenderCounter },
@@ -6412,7 +6365,7 @@ export function populateVariableDebugger() {
         { label: "tempRowValue", value: tempRowValue },
 
         { label: "", value: "" },
-        { label: "Energy:", value: "" },
+        { label: "Energy:", labelKey: 'debuggerSectionEnergy', value: "" },
         { label: "", value: "" },
 
         { label: "losingEnergy", value: losingEnergy },
@@ -6420,7 +6373,7 @@ export function populateVariableDebugger() {
         { label: "trippedStatus", value: trippedStatus },
 
         { label: "", value: "" },
-        { label: "Statistics:", value: "" },
+        { label: "Statistics:", labelKey: 'debuggerSectionStatistics', value: "" },
         { label: "", value: "" },
 
         { label: "allTimeTotalHydrogen", value: allTimeTotalHydrogen },
@@ -6465,7 +6418,7 @@ export function populateVariableDebugger() {
         { label: "asteroidsMinedThisRun", value: asteroidsMinedThisRun },
 
         { label: "", value: "" },
-        { label: "Weather:", value: "" },
+        { label: "Weather:", labelKey: 'debuggerSectionWeather', value: "" },
         { label: "", value: "" },
 
         { label: "weatherEffectOn", value: weatherEffectOn },
@@ -6474,7 +6427,7 @@ export function populateVariableDebugger() {
         { label: "currentPrecipitationRate", value: currentPrecipitationRate },
 
         { label: "", value: "" },
-        { label: "Space Telescope:", value: "" },
+        { label: "Space Telescope:", labelKey: 'debuggerSectionSpaceTelescope', value: "" },
         { label: "", value: "" },
 
         { label: "currentlySearchingAsteroid", value: currentlySearchingAsteroid },
@@ -6500,7 +6453,7 @@ export function populateVariableDebugger() {
         { label: "oldAntimatterRightBoxSvgData", value: oldAntimatterRightBoxSvgData },
 
         { label: "", value: "" },
-        { label: "Rockets And Asteroid Mining:", value: "" },
+        { label: "Rockets And Asteroid Mining:", labelKey: 'debuggerSectionRocketsAndAsteroidMining', value: "" },
         { label: "", value: "" },
 
         { label: "antimatterUnlocked", value: antimatterUnlocked },
@@ -6528,7 +6481,7 @@ export function populateVariableDebugger() {
         { label: "launchedRockets", value: launchedRockets },
 
         { label: "", value: "" },
-        { label: "Star Ship:", value: "" },
+        { label: "Star Ship:", labelKey: 'debuggerSectionStarShip', value: "" },
         { label: "", value: "" },
 
         { label: "starShipBuilt", value: starShipBuilt },
@@ -6548,13 +6501,13 @@ export function populateVariableDebugger() {
         { label: "starShipModulesBuilt", value: starShipModulesBuilt },
 
         { label: "", value: "" },
-        { label: "Diplomacy:", value: "" },
+        { label: "Diplomacy:", labelKey: 'debuggerSectionDiplomacy', value: "" },
         { label: "", value: "" },
 
         { label: "diplomacyPossible", value: diplomacyPossible },
 
         { label: "", value: "" },
-        { label: "Battle:", value: "" },
+        { label: "Battle:", labelKey: 'debuggerSectionBattle', value: "" },
         { label: "", value: "" },
 
         { label: "needNewBattleCanvas", value: needNewBattleCanvas },
@@ -6569,7 +6522,7 @@ export function populateVariableDebugger() {
         { label: "enemyFleetAdjustedForDiplomacy", value: enemyFleetAdjustedForDiplomacy },
 
         { label: "", value: "" },
-        { label: "Philosophy:", value: "" },
+        { label: "Philosophy:", labelKey: 'debuggerSectionPhilosophy', value: "" },
         { label: "", value: "" },
 
         { label: "philosophy", value: philosophy },
@@ -6578,7 +6531,7 @@ export function populateVariableDebugger() {
         { label: "philosophyRepeatableTechs", value: philosophyTechData },
 
         { label: "", value: "" },
-        { label: "MegaStructures:", value: "" },
+        { label: "MegaStructures:", labelKey: 'debuggerSectionMegaStructures', value: "" },
         { label: "", value: "" },
 
         { label: "starsWithAncientManuscripts", value: starsWithAncientManuscripts },
@@ -6594,7 +6547,7 @@ export function populateVariableDebugger() {
         { label: "infinitePower", value: infinitePower },
 
         { label: "", value: "" },
-        { label: "Black Hole:", value: "" },
+        { label: "Black Hole:", labelKey: 'debuggerSectionBlackHole', value: "" },
         { label: "", value: "" },
 
         { label: "blackHoleDiscovered", value: blackHoleDiscovered },
@@ -6623,7 +6576,7 @@ export function populateVariableDebugger() {
         { label: "blackHoleRechargePrice", value: getBlackHoleRechargePrice() },
 
         { label: "", value: "" },
-        { label: "Galactic Casino:", value: "" },
+        { label: "Galactic Casino:", labelKey: 'debuggerSectionGalacticCasino', value: "" },
         { label: "", value: "" },
 
         { label: "casinoPoints.quantity", value: getGalacticCasinoDataObject('casinoPoints', ['quantity']) ?? 0 },
@@ -6632,7 +6585,7 @@ export function populateVariableDebugger() {
         { label: "casinoGame5VoidSeerAlwaysMatch", value: getCasinoGame5VoidSeerAlwaysMatch() },
 
         { label: "", value: "" },
-        { label: "Cosmic Rip:", value: "" },
+        { label: "Cosmic Rip:", labelKey: 'debuggerSectionCosmicRip', value: "" },
         { label: "", value: "" },
 
         { label: "cosmicRip", value: cosmicRipData },
@@ -6684,8 +6637,12 @@ export function populateVariableDebugger() {
             const blankLineDiv = document.createElement("div");
             blankLineDiv.style.height = "10px";
             debugTextAreaContainer.appendChild(blankLineDiv);
-        } else if (variable.value === "" && variable.label.endsWith(':')) {
-            label.innerHTML = `${variable.label}`;
+        } else if (variable.value === "" && (variable.labelKey || variable.label.endsWith(':'))) {
+            // Section headings carry a catalogue key; identifying them by a
+            // trailing colon in the rendered text would not survive translation.
+            label.innerHTML = variable.labelKey
+                ? localize(variable.labelKey, getLanguage())
+                : `${variable.label}`;
             label.style.fontSize = "2rem";
             div.appendChild(label);
             debugTextAreaContainer.appendChild(div);
@@ -6705,7 +6662,7 @@ export function populateVariableDebugger() {
             clipboardIcon.style.padding = "2px 4px";
             clipboardIcon.style.pointerEvents = "auto";
             clipboardIcon.style.touchAction = "manipulation";
-            clipboardIcon.title = "Copy to clipboard";
+            clipboardIcon.title = localize('debuggerTooltipCopyToClipboard', getLanguage());
             clipboardIcon.addEventListener("pointerdown", (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -6715,7 +6672,7 @@ export function populateVariableDebugger() {
                 if (navigator.clipboard && window.isSecureContext) {
                     navigator.clipboard.writeText(textToCopy).then(() => {
                         console.log("Copied to clipboard:", textToCopy);
-                        showNotification(`Copied: ${variable.label}`, 'warning', 2000, 'general');
+                        showNotification(localize('debuggerNotificationCopied', getLanguage()).replace('{label}', variable.label), 'warning', 2000, 'general');
                     }).catch((err) => {
                         console.error("Clipboard API failed:", err);
                         fallbackCopy(textToCopy, variable.label);
@@ -6731,7 +6688,7 @@ export function populateVariableDebugger() {
             pencilIcon.style.padding = "2px 4px";
             pencilIcon.style.pointerEvents = "auto";
             pencilIcon.style.touchAction = "manipulation";
-            pencilIcon.title = "Edit variable";
+            pencilIcon.title = localize('debuggerTooltipEditVariable', getLanguage());
             pencilIcon.addEventListener("pointerdown", (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -6744,14 +6701,14 @@ export function populateVariableDebugger() {
 
             label.innerHTML = `${variable.label}:&nbsp;&nbsp;`;
             label.style.cursor = 'pointer';
-            label.title = "Click to copy variable";
+            label.title = localize('debuggerTooltipClickToCopy', getLanguage());
             label.addEventListener("pointerdown", (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 const textToCopy = `${variable.label}: ${formatVariableDebuggerValue(variable.value)}`;
                 if (navigator.clipboard && window.isSecureContext) {
                     navigator.clipboard.writeText(textToCopy).then(() => {
-                        showNotification(`Copied: ${variable.label}`, 'warning', 2000, 'general');
+                        showNotification(localize('debuggerNotificationCopied', getLanguage()).replace('{label}', variable.label), 'warning', 2000, 'general');
                     }).catch((err) => {
                         fallbackCopy(textToCopy, variable.label);
                     });
@@ -6768,7 +6725,7 @@ export function populateVariableDebugger() {
             valueDiv.style.cursor = "pointer";
             valueDiv.style.pointerEvents = "auto";
             valueDiv.style.touchAction = "manipulation";
-            valueDiv.title = "Click to edit";
+            valueDiv.title = localize('debuggerTooltipClickToEdit', getLanguage());
             valueDiv.addEventListener("pointerdown", (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -6867,7 +6824,7 @@ function openVariableDebuggerInlineEditor(label) {
     }
 
     if (!getVariableDebuggerSetterForLabel(safeLabel)) {
-        showNotification(`Cannot edit: ${safeLabel}`, 'warning', 2000, 'general');
+        showNotification(localize('debuggerNotificationCannotEdit', getLanguage()).replace('{label}', safeLabel), 'warning', 2000, 'general');
         return;
     }
 
@@ -7015,7 +6972,7 @@ function createVariableDebuggerInlineEditorRow(label) {
 function applyVariableDebuggerEdit(label, raw) {
     const setter = getVariableDebuggerSetterForLabel(label);
     if (!setter) {
-        showNotification(`Cannot edit: ${label}`, 'warning', 2000, 'general');
+        showNotification(localize('debuggerNotificationCannotEdit', getLanguage()).replace('{label}', label), 'warning', 2000, 'general');
         return;
     }
 
@@ -7023,16 +6980,16 @@ function applyVariableDebuggerEdit(label, raw) {
     try {
         parsed = parseVariableDebuggerInput(raw);
     } catch (err) {
-        showNotification(`Invalid value: ${err.message}`, 'warning', 3000, 'general');
+        showNotification(localize('debuggerNotificationInvalidValue', getLanguage()).replace('{message}', err.message), 'warning', 3000, 'general');
         return;
     }
 
     try {
         setter(parsed);
-        showNotification(`Updated: ${label}`, 'warning', 2000, 'general');
+        showNotification(localize('debuggerNotificationUpdated', getLanguage()).replace('{label}', label), 'warning', 2000, 'general');
         closeVariableDebuggerInlineEditor();
     } catch (err) {
-        showNotification(`Failed to update: ${label} - ${err.message}`, 'warning', 3000, 'general');
+        showNotification(localize('debuggerNotificationFailedToUpdate', getLanguage()).replace('{label}', label).replace('{message}', err.message), 'warning', 3000, 'general');
     }
 }
 
@@ -7056,7 +7013,7 @@ function parseVariableDebuggerInput(raw) {
             }
         } catch (err) {
             // JSON parse failed, throw a descriptive error
-            throw new Error(`Invalid JSON: ${err.message}`);
+            throw new Error(localize('debuggerErrorInvalidJson', getLanguage()).replace('{message}', err.message));
         }
     }
 
@@ -7343,7 +7300,7 @@ function fallbackCopy(text, label) {
     try {
         document.execCommand('copy');
         console.log("Copied via fallback:", text);
-        showNotification(`Copied: ${label}`, 'warning', 2000, 'general');
+        showNotification(localize('debuggerNotificationCopied', getLanguage()).replace('{label}', label), 'warning', 2000, 'general');
     } catch (err) {
         console.error("Fallback copy failed:", err);
     }
@@ -7412,11 +7369,11 @@ export function getAchievementFlagArray() {
 }
   
 export function getCompoundCreateDropdownRecipeText(compound) {
-    return compoundCreateDropdownRecipeText[compound];
+    return ensureCompoundCreateDropdownRecipeText()[compound];
 }
 
 export function setCompoundCreateDropdownRecipeText(compound, newOptions) {
-    compoundCreateDropdownRecipeText[compound] = newOptions;
+    ensureCompoundCreateDropdownRecipeText()[compound] = newOptions;
 }
 
 export function getMultiplierPermanentResources() {

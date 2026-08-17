@@ -146,12 +146,14 @@
         "No raw localization key (camelCase identifier) is ever visible on screen, in any language, on any tab",
         "validateLocalization.cjs passes — run it as an assertion, not just a manual script",
         "The catalogue has key parity, string-only values, no duplicates and no armed ${} template literals",
-        "Dynamically constructed keys resolve: resource*, compound*, autoBuyerName*",
+        "Dynamically constructed keys resolve: resource*, compound*, autoBuyerName*, eventName*, buffName*, starShipModule*, fleetShip*",
         "Every statically-authored label in index.html renders from its data-loc key",
         "The onboarding tutorial, including its text-matched targets, works in every language",
         "No language overflows the viewport horizontally on any tab",
         "Translation clips no control that English does not already clip",
-        "The compound reverse lookup honours its language argument and stays within the frame budget"
+        "The compound reverse lookup honours its language argument and stays within the frame budget",
+        "Event history rows render their name from the canonical event id, not the name stored in the save",
+        "Nothing calls localize() before initLocalization() has fetched the catalogue"
       ],
       "specCount": 84
     },

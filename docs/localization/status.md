@@ -1,25 +1,26 @@
 # Localization Status
 
-Status as of HEAD `ea131c4` + in-session fixes. Five languages: **en, es, de, it, fr**.
+Status as of HEAD `0a11c3b` + in-session work. Five languages: **en, es, de, it, fr**.
 
 ## Summary
 
 | | Items | Share |
 |---|---:|---:|
-| 🟢 Done | 7 | 70% |
-| 🟠 Partial | 1 | 10% |
+| 🟢 Done | 8 | 80% |
+| 🟠 Partial | 0 | 0% |
 | 🔴 Not started | 2 | 20% |
 | **Total tracked items** | **10** | |
 
-The catalogue itself is in good shape — **2,153 keys × 5 languages, complete parity, zero keys
-referenced in code that are missing from the JSON**. What remains is finishing and wiring, tracked
-as the 10 items below.
+The catalogue is **2,605 keys × 5 languages, complete parity, zero keys referenced in code that are
+missing from the JSON**. Item 5 — the string extraction — is now **done**: every player-facing
+literal in every shipped source file resolves through the catalogue. What remains is the checker
+hardening (item 7) and the German layout pass (item 9), neither of which is an extraction task.
 
-The area now has **84 automated specs** in `tests/e2e/localization/`, covering catalogue integrity,
-the resolution chain, runtime switching, tab identity and intro pages, the reverse lookup, the
-extraction backlog, and a five-language sweep of every tab at a late-game state. Several of the open
-items below are held in place by *ratchets* in those specs — a recorded baseline that may fall but
-must never rise — so the remaining work can be done incrementally without losing ground. See
+The area has **84 automated specs** in `tests/e2e/localization/`, covering catalogue integrity, the
+resolution chain, runtime switching, tab identity and intro pages, the reverse lookup, the extraction
+backlog, and a five-language sweep of every tab at a late-game state. All 84 pass, as does the whole
+**257-spec** E2E suite. Two of the open items are held in place by *ratchets* in those specs — a
+recorded baseline that may fall but must never rise. See
 [Test coverage](#test-coverage) at the foot of this document.
 
 ## Status at a glance
@@ -30,7 +31,7 @@ must never rise — so the remaining work can be done incrementally without losi
 | 2 | [Compound reverse-lookup performance](#2-compound-reverse-lookup-performance) | 🟢 Done | — |
 | 3 | [Player-facing language selector](#3-player-facing-language-selector) | 🟢 Done | — |
 | 4 | [Full redraw on language change](#4-full-redraw-on-language-change) | 🟢 Done | — |
-| 5 | [Extract remaining hardcoded strings](#5-extract-remaining-hardcoded-strings) | 🟠 Partial | Low — all nine draw functions are done; ~155 literals remain in `ui.js`, `game.js` and the support files |
+| 5 | [Extract remaining hardcoded strings](#5-extract-remaining-hardcoded-strings) | 🟢 Done | — |
 | 6 | [Remove eval() from interpolation](#6-remove-eval-from-interpolation-path) | 🟢 Done | — |
 | 7 | [Harden the key checker](#7-harden-the-key-checker) | 🔴 Not started | Medium — can't safely prune dead keys |
 | 8 | [Translation quality pass](#8-translation-quality-pass) | 🟢 Done | — |
@@ -156,16 +157,22 @@ Verified end-to-end in a real browser: switching to German updated the row label
 (`Resources` → `Ressourcen`), with zero console errors, and the choice survived a reload.
 
 **Still open:** other tabs are refreshed lazily when next visited rather than eagerly, and open
-modals / the news ticker are not re-rendered mid-flight. Worth a tab-by-tab pass once item 5 lands.
+modals / the news ticker are not re-rendered mid-flight. Item 5 has since landed, so this is now the
+natural next tab-by-tab pass.
+
+Note that the events-history tables and the rocket / starship status rows *do* follow a language
+change now — they resolve their display name from the canonical id rather than from the value stored
+in the save. See item 5's "Patterns that recur in this half".
 
 ---
 
 ## 5. Extract remaining hardcoded strings
 
-**🟠 Partial — the static shell, the tutorial and all nine draw functions are done**
+**🟢 Done**
 
-527 keys were added in total (1,626 → 2,153): 60 for the static shell and tutorial, then 467 for
-the nine `drawTab*Content.js` files.
+979 keys were added in total (1,626 → 2,605): 60 for the static shell and tutorial, 467 for the nine
+`drawTab*Content.js` files, and **452 for the support files** — `ui.js`, `game.js`, `events.js`,
+`constantsAndGlobalVars.js`, `resourceDataObject.js` and `saveLoadGame.js`.
 
 ### Done
 
@@ -261,21 +268,89 @@ been invisible:
   language change, and the seventeen call sites no longer pass the literal at all.
 - `localization.js` — gained the exported `localizeMaterialName` described above.
 
-### Remaining
+### The support files — 452 keys
 
-Roughly 155 prose literals, by file:
+The estimate in the previous revision of this document was ~155 literals across five files. The real
+figure was about three times that, because the estimate counted only bare prose and missed the
+composed strings — every `${...} storage is full.`, every `Quantity: ${n}`, every tooltip line built
+from a label and a value. By file:
 
-| Priority | Files | Approx | Why |
-|---|---|--:|---|
-| 1 | `ui.js` | ~86 | Fleet and diplomacy panels, scan results, dropdown defaults, notifications |
-| 2 | `game.js` | ~45 | Battle and colonisation outcomes, travel status |
-| 3 | `resourceDataObject.js` | ~32 | Check display names vs internal keys first; the ascendency buff `name` fields are now only an English fallback behind `buffName*` |
-| 4 | `patches.js`, `saveLoadGame.js`, `events.js` | ~25 | Migration notices, cloud-save status, event outcomes |
-| — | `constantsAndGlobalVars.js` | ~28 | Debugger tooltips — fine to leave in English |
+| File | Keys | Covers |
+|---|--:|---|
+| `ui.js` | ~190 | Every stat and energy tooltip, the market and megastructure tooltips, rocket and starship status labels, weather notices, battle and diplomacy result lines, the star map warnings, the two end-game cinematics |
+| `game.js` | ~120 | Battle and colonisation outcomes, travel and fuelling status, the Black Hole panel, sell/create/fuse notifications, the tech-researched notice, the generated battle anomalies and lifeform traits |
+| `events.js` | 71 | The thirteen random-event names, every timed-effect and instant-event description, the expiry notices, the stock-loss reasons, the debug triggers |
+| `constantsAndGlobalVars.js` | 31 | The variable debugger's eighteen section headings and its ten interaction strings, the Void Seer prize labels, the stats-panel `Yes`/`No`/`N/A`/`ly` values |
+| `saveLoadGame.js` | 15 | Cloud-save status, load and import failures, the clipboard notices |
+| `resourceDataObject.js` | 3 | One save-too-old notice, plus the two fixed Miaplacidus anomaly names |
+| `patches.js` | 0 | Nothing player-facing — see below |
 
-`ui.js` is now the single biggest block, and it holds the other half of a few pairs already started
-here: the *Select an option* dropdown default exists in `ui.js` and `constantsAndGlobalVars.js` as
-well as in `drawTab6Content.js`, and only the draw-function copy is translated so far.
+**`patches.js` needed no changes at all.** Every string in it is either a legacy value being matched
+during a save migration (the `old:` side of the `autoBuyerName*` map, which must stay English
+verbatim or the migration stops matching), a canonical `prereqs` entry rendered through
+`localizeCosmicRipPrereqs` at display time, or an achievement `name` field that no code path
+displays — achievement tooltips render from the `achievement<Id>` key family instead. Its estimated
+~25 literals were all internal.
+
+`resourceDataObject.js` was the same story at a larger scale: of the ~165 prose literals in it, only
+one is player-facing. The rest are tech `prereqs` lists (rendered through `localizeTechName` in
+`drawTab3Content`), ascendency buff `name` fields (an English fallback behind `buffName*`) and
+achievement `name` fields (unused for display).
+
+### Patterns that recur in this half
+
+The three patterns from the draw-function pass all held. Three more were needed here:
+
+- **A stored label is not a label — resolve it from the id at read time.** The tab 9 events tables
+  rendered `entry.name`, the event name recorded into the save when the event fired, so history rows
+  were frozen in whatever language was active at the time. `eventDisplayName()` in `events.js` and
+  `localizedEventName()` in `ui.js` both build `eventName<Id>` from the canonical event id instead.
+  The same change gives the rocket default name (`getRocketUserName`), the destination dropdown
+  default (`getCurrentDestinationDropdownText`) and the megastructure tooltip their own resolution.
+- **Where a value is both compared and displayed, keep the stored value and add a key beside it.**
+  The generated battle anomalies carry `nameKey`/`effectKey` next to their canonical `name`/`effect`,
+  lifeform traits gained a third slot, `VOID_SEER_PRIZE_CATALOG` swapped `label` for `labelKey`, and
+  the megastructure tooltip list carries `nameKey`/`techKeys` while `name` stays the string matched
+  against the possession array. `rocketStatusClassMap` and `starShipStatusClassMap` stay keyed by the
+  canonical English status; only the rendered text goes through the catalogue.
+- **Nothing may call `localize()` before the catalogue is fetched.** `initLocalization()` is async, so
+  anything evaluated at module load or in a `DOMContentLoaded` handler runs first and gets the key
+  echoed back plus a console error. Three sites had to become lazy: the compound-recipe dropdown
+  table in `constantsAndGlobalVars.js` (now built on first read via
+  `ensureCompoundCreateDropdownRecipeText()`), `fuelConsumptionMap` in `ui.js` (now stores
+  `labelKey`), and the debug event list (`getRandomEventDebugOptions()` now returns a `titleKey` that
+  the `data-loc` sweep resolves). The hold-Enter debug toggle is written from the boot sequence
+  instead of at module scope.
+
+**Two more English-text comparisons were removed**, the same class as item 10:
+
+- `game.js` gated the philosophy special-ability rows on `element.innerHTML === 'UNLOCKED'`. The
+  frame loop rewrites that element, so in any other language the row never latched. The state now
+  rides on `dataset.abilityUnlocked`, and the legacy English form is still accepted for elements
+  drawn before the change.
+- `game.js` compared a build button against `'Built!'` / `'Launched!'`. Both sides of the comparison
+  now go through the catalogue together.
+
+**One pre-existing runtime bug was fixed in passing.** `resourceDataObject.js` used `localize`,
+`getLanguage` and `capitaliseString` when rebuilding the compound-recipe dropdown text, but imported
+none of them — that path threw a `ReferenceError`. Adding the imports the extraction needed fixed it.
+
+### Sanctioned exclusions
+
+Three groups are deliberately left in English, and the audit script counts them as residue rather
+than debt:
+
+- **Console output** — `console.log` / `warn` / `error`, `new Error(...)` messages and Promise
+  rejection reasons. These are for the developer, never rendered.
+- **Canonical identifiers** — option-pane names (`'star map'`, `'fleet hangar'`), the
+  `headingToLocalizationKey` map's own keys, `updateContent()` heading arguments, the status class
+  maps, analytics event names, and the stored values the save file round-trips (`factoryStar`,
+  lifeform traits, asteroid rarity, timezone abbreviations). Translating any of these breaks a
+  comparison rather than a label.
+- **The cheat panel** — the ~22 `CHEAT! …` notifications behind the Numpad debug window. The variable
+  debugger *was* localized (its eighteen section headings and ten interaction strings), because it is
+  the surface a curious player is most likely to open; the cheat messages are not reachable outside a
+  cheats-enabled build.
 
 ---
 
@@ -284,7 +359,7 @@ well as in `drawTab6Content.js`, and only the draw-function copy is translated s
 **🟢 Done**
 
 `interpolateTemplateLiteral()` ran `eval()` on any localized string containing `${…}`. No value in
-the catalogue used it — all 2,153 entries in all five languages checked, count was zero — so the
+the catalogue used it — all 2,605 entries in all five languages checked, count was zero — so the
 path was dead, but it re-armed the moment a translator typed `${` into a string, and it evaluated
 content from a data file.
 
@@ -312,10 +387,20 @@ delete any until the checker resolves these patterns** — removing a key that's
 runtime is the hardest class of bug to spot in a language you don't read.
 
 Widening the search from `localize('key')` call sites to *any* quoted string literal in shipped
-source brings that number down from 129 to **21**, which is the number
-`catalogue-integrity.spec.js` currently ratchets against. All 21 are explained: 14 menu and modal
-keys wired through `index.html` element ids, and 7 `compoundCreateQty*` / `compoundRecipePattern`
-keys built by concatenation. That broader scan is a reasonable basis for the hardened checker.
+source brings that number down sharply; **59** is what `catalogue-integrity.spec.js` now ratchets
+against. All 59 are explained, and the extraction work has made the list of constructed-key families
+the hardened checker must understand explicit:
+
+| Family | Count | Built from |
+|---|--:|---|
+| menu and modal keys | 14 | `index.html` element ids |
+| `compoundCreateQty*` / `compoundRecipePattern` | 7 | concatenation in the recipe-text builder |
+| `starShipModule*` / `fleetShip*` | 10 | the module or ship id in `drawTab5Content` |
+| `buffName*` | 15 | the ascendency buff key in `drawTab7Content` |
+| `resourceSolar` | 1 | `localizeMaterialName`'s section prefix + key |
+| `eventName*` | 13 | the canonical random-event id, in `events.js` and `ui.js` |
+
+Teaching the checker those six construction shapes is what closes this item.
 
 Also add: fail the check on any empty value (all five languages currently have 3, the casino
 special-prize suffixes — pinned as an exact allowlist by the same spec). Then wire the checker into
@@ -426,16 +511,21 @@ translated.
 5. ~~Static shell, tutorial, tech buttons~~ 🟢 (item 5, first half)
 6. ~~Tech display names~~ 🟢 (item 5 — the `techName*` family, 58 names)
 7. ~~All nine `drawTab*Content.js` files~~ 🟢 (item 5)
-8. **`ui.js`, then `game.js`** — the rest of item 5, in the file order listed above. `ui.js` holds
-   the other half of several strings started here, so it is the natural next step.
+8. ~~`ui.js`, `game.js` and the support files~~ 🟢 (item 5, second half — 452 keys)
 9. ~~Remove the `eval()`~~ 🟢 (item 6)
 10. Harden the checker and wire it into the build (item 7)
 11. ~~Translation quality pass~~ 🟢 (item 8), then the German layout pass (item 9).
 
+Only items 7 and 9 are left. Neither is an extraction task: 7 teaches
+`validateLocalization.cjs` to resolve constructed keys so dead keys can safely be pruned, and 9 is a
+human play-through in German checking wrapping and truncation. Item 4's remaining note — eagerly
+refreshing inactive tabs and open modals on a language change — is the natural companion to 9.
+
 ## Test coverage
 
 84 specs in `tests/e2e/localization/`, all passing. Run them with
-`node tests/run-e2e.mjs localization`.
+`node tests/run-e2e.mjs localization`. The whole E2E suite — 257 specs across 16 areas — also passes
+after the extraction; run it with `node tests/run-e2e.mjs`.
 
 | File | Specs | Covers |
 |---|--:|---|
@@ -454,11 +544,32 @@ closed incrementally. Each may fall; none may rise without a reason recorded in 
 
 | Ratchet | Baseline | Item |
 |---|--:|---|
-| Values identical to English | es 48, de 60, it 46, fr 72 | 8 |
-| Keys not referenced anywhere in shipped source | 46 | 7 |
+| Values identical to English | es 50, de 66, it 50, fr 79 | 8 |
+| Keys not referenced anywhere in shipped source | 59 | 7 |
 | Sanctioned empty values | 3 (the casino suffix keys) | 7 |
 | Unannotated visible text in `index.html` | 74 (debug windows and modal placeholders) | 5 |
 | Controls clipped by translation but not by English | 5 | 9 |
+
+Two of these rose with the support-file extraction, each with the reason recorded in
+`catalogue-integrity.spec.js` beside the constant:
+
+- **Identical to English** rose by 2–7 per language. The additions are terms that genuinely coincide
+  — `BOOST`, `Stock`, `Instant`, `stable`, `Hypercharge`, `Opinion: 0%`, and the credit lines, which
+  are proper nouns.
+- **Unreferenced keys** rose from 46 to 59. All thirteen additions are the `eventName*` family, built
+  from the canonical event id at the call site (`'eventName' + id[0].toUpperCase() + id.slice(1)`),
+  so no quoted literal for any of them exists to be found. They are what makes the tab 9 events
+  tables follow a language change.
+
+### Residual English in shipped source
+
+An audit over the 22 shipped `.js` files finds **695** remaining English prose literals. None are
+player-facing; they break down as the three sanctioned groups under item 5, concentrated in
+`ui.js` (~174, mostly the `headingToLocalizationKey` map keys and the status class maps),
+`resourceDataObject.js` (165, tech prerequisite lists and unused `name` fallbacks),
+`drawTab3Content.js` (77, the tech prereq arrays), `patches.js` (73, legacy migration values) and
+`constantsAndGlobalVars.js` (46, variable-debugger *variable names*, which name code identifiers and
+must stay as written).
 
 ## Related
 

@@ -76,8 +76,18 @@ const SANCTIONED_EMPTY_KEYS = [
  *
  * These are the numbers a native-reader pass (item 8) should bring down; none
  * of them may rise without a line added here.
+ *
+ * Raised again by the support-file extraction (item 5, second half: game.js,
+ * ui.js, events.js, constantsAndGlobalVars.js, resourceDataObject.js). The
+ * additions are terms that genuinely coincide across these languages:
+ *   es 48 -> 50   "BOOST", "Opinion: 0%"
+ *   de 60 -> 66   "BOOST", "Instant", "Story - Leigh Hobson", "CPC Tech I/II/…"
+ *                 and the other credit lines that are proper nouns
+ *   it 46 -> 50   "BOOST", "Rifornimento", "No", "Stock"
+ *   fr 72 -> 79   "BOOST", "Stock", "stable", "Instabilité", "Opinion: 0%",
+ *                 "Hypercharge", "Impression: {value}%"
  */
-const IDENTICAL_TO_ENGLISH_CEILING = { es: 48, de: 60, it: 46, fr: 72 };
+const IDENTICAL_TO_ENGLISH_CEILING = { es: 50, de: 66, it: 50, fr: 79 };
 
 /**
  * Ratchet for status.md item 7 (harden the key checker). Keys that never appear
@@ -94,8 +104,15 @@ const IDENTICAL_TO_ENGLISH_CEILING = { es: 48, de: 60, it: 46, fr: 72 };
  *                                  drawTab7Content
  *   resourceSolar                  reached through localizeMaterialName, which
  *                                  concatenates the section prefix and the key
+ *
+ * Raised from 46 to 59 by the support-file extraction. The 13 additions are the
+ * `eventName*` family, one per random event, built from the canonical event id
+ * by `eventDisplayName()` in events.js and `localizedEventName()` in ui.js
+ * (`'eventName' + id[0].toUpperCase() + id.slice(1)`), so no literal exists for
+ * any of them. They are what lets the tab 9 events tables render an event name
+ * that follows a language change instead of the English name stored in history.
  */
-const UNREFERENCED_KEY_CEILING = 46;
+const UNREFERENCED_KEY_CEILING = 59;
 
 /**
  * Keys with a known unbalanced HTML tag, allowlisted so the sweep below can stay

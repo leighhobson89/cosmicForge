@@ -5,6 +5,12 @@ import { getMultiplierPermanentCompounds, getMultiplierPermanentResources, getCu
 
 import { achievementAchieve100FusionEfficiency, achievementActivateAllWackyNewsTickers, achievementAdoptPhilosophy, achievementBeatEnemy, achievementBringDownMiaplacideanForceField, achievementBuyCasinoPoints, achievementCollect100Precipitation, achievementCollect100TitaniumAsPrecipitation, achievementCompleteGame, achievementCompleteOnboarding, achievementCompleteRunOnMiaplacidus, achievementConquerMegastructureSystem, achievementConquerStarSystems, achievementCreateCompound, achievementDiscoverAsteroid, achievementDiscoverBlackHole, achievementDiscoverLegendaryAsteroid, achievementEnjoyEndlessSummer, achievementFindAncientManuscript, achievementFindCosmicRip, achievementGain1MTelemetryData, achievementHave4RocketsMiningAntimatter, achievementHave50HoursWithOnePioneer, achievementHaveFleetSizeOf50EachShipType, achievementInitiateDiplomacyWithAlienRace, achievementLaunchRocket, achievementLaunchStarShip, achievementLiquidateAllAssets, achievementMineAllAntimatterAsteroid, achievementPerformGalaticMarketTransaction, achievementRebirth, achievementResearchAllTechnologies, achievementRestoreNearSpaceScannerArray, achievementSeeAllNewsTickers, achievementSpendAp, achievementStudyAllStarsInOneRun, achievementStudyAStar, achievementSuffer5NegativeEvents, achievementTrade10APForCash, achievementTripPower, achievementActivateBlackHoleOver10x, achievementTryAllThemes, achievementWinAllCasinoGames, achievementWinWheelSpecialPrize, achievementCloseCosmicRip } from "./achievements.js";
 import { showNotification } from "./ui.js";
+// `localize`, `getLanguage` and `capitaliseString` are used when rebuilding the
+// compound-recipe dropdown text; they were referenced there without ever being
+// imported, so that path threw a ReferenceError.
+import { localize } from "./localization.js";
+import { getLanguage } from "./constantsAndGlobalVars.js";
+import { capitaliseString } from "./utilityFunctions.js";
 
 export let achievementImageUrls;
 export let resourceData = {
@@ -3143,7 +3149,7 @@ export function copyStarDataToDestinationStarField(starName) {
 
 export function restoreResourceDataObject(value) {
     if (value?.version && value.version < getMinimumVersion()) {
-        showNotification('Philosophies - This save file will no longer work correctly. Please Hard Reset the game in the Save Settings Menu to continue playing, or choose a new Pioneer Name.', 'error', 20000000, 'special2');
+        showNotification(localize('notificationSaveTooOldForPhilosophies', getLanguage()), 'error', 20000000, 'special2');
     } else {
         value = migrateResourceData(value, 'resourceData', {
             getCurrentGameVersion,

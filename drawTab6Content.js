@@ -1559,7 +1559,9 @@ function createRocketUI(rocketId, optionContentElement, asteroids, asteroidsBein
 
                     setRocketDirection(rocketId, false);
 
-                    setCurrentDestinationDropdownText(localize('dropdownSelectAnOption', getLanguage()));
+                    // Clearing rather than storing the rendered default lets
+                    // getCurrentDestinationDropdownText() resolve it per read.
+                    setCurrentDestinationDropdownText(null);
 
                 },
 

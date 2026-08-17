@@ -38,10 +38,25 @@ const ATTITUDE_KEYS = {
     Scared: 'attitudeScared'
 };
 
+// The two fixed anomalies on the Miaplacidus system are authored in
+// `resourceDataObject.js` as plain strings; generated anomalies are objects and
+// take the branch below this map.
+const ANOMALY_KEYS = {
+    'Broken Force Field': 'anomalyBrokenForceField',
+    'AI Master Race': 'anomalyAiMasterRace'
+};
+
 const localizeFromMap = (map, value) => (map[value] ? localize(map[value], getLanguage()) : value);
 const localizeCivilizationLevel = (value) => localizeFromMap(CIVILIZATION_LEVEL_KEYS, value);
 const localizeThreatLevel = (value) => localizeFromMap(THREAT_LEVEL_KEYS, value);
 const localizeAttitude = (value) => localizeFromMap(ATTITUDE_KEYS, value);
+const localizeAnomalyName = (value) => localizeFromMap(ANOMALY_KEYS, value);
+
+// Generated anomalies and lifeform traits carry their catalogue key next to the
+// canonical English value, so the display resolves from the key and the stored
+// value stays the one the battle code branches on.
+const localizeKeyed = (key, fallback) => (key ? localize(key, getLanguage()) : fallback);
+const localizeTraitName = (trait) => localizeKeyed(trait?.[2], trait?.[0]);
 
 // Precipitation is a compound key plus the section it lives in.
 // Stars stubbed in for settled systems carry the literal 'Unknown' rather than a
@@ -995,7 +1010,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
         
         const traitsText = getStellarScannerBuilt() 
         ? starData.lifeformTraits.map(trait => 
-            `<span class="${trait[1]}">${trait[0]}</span>`
+            `<span class="${trait[1]}">${localizeTraitName(trait)}</span>`
         ).join(", ") 
         : `<span class="red-disabled-text">???</span>`;
         
@@ -1171,14 +1186,14 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
         } else {
             anomaliesText = starData.anomalies.map(a => {
                 if (typeof a === 'string') {
-                    return `<span class="red-disabled-text">${a}</span>`;
+                    return `<span class="red-disabled-text">${localizeAnomalyName(a)}</span>`;
                 }
 
                 if (a?.name === 'None') {
                     return `<span>${localize('textNotApplicable', getLanguage())}</span>`;
                 }
 
-                return `${a?.name}: <span class="${a?.class}">${a?.effect}</span>`;
+                return `${localizeKeyed(a?.nameKey, a?.name)}: <span class="${a?.class}">${localizeKeyed(a?.effectKey, a?.effect)}</span>`;
             }).join('<br/>');
         }
         
@@ -1427,7 +1442,7 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             
             const traitsText = starData.lifeformTraits
             .slice(0, 2)
-            .map(trait => `<span class="${trait[1]}">${trait[0]}</span>`)
+            .map(trait => `<span class="${trait[1]}">${localizeTraitName(trait)}</span>`)
             .join(", ");
         
             const defenseText = `${starData.defenseRating}%`;

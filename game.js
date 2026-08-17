@@ -727,7 +727,7 @@ function maybeNotifyStorageFull(category, key, previousQuantity, newQuantity, st
 
     const pretty = capitaliseString(key);
     const classification = 'storage';
-    const message = `${pretty} storage is full.`;
+    const message = localize('notificationStorageFull', getLanguage()).replace('{material}', pretty);
 
     let actionDisabled = false;
     let actionDisabledTooltip = null;
@@ -739,10 +739,10 @@ function maybeNotifyStorageFull(category, key, previousQuantity, newQuantity, st
 
         if (!(Number.isFinite(requiredConcrete) && requiredConcrete > 0)) {
             actionDisabled = true;
-            actionDisabledTooltip = 'Cannot calculate concrete requirement for reservoir upgrade.';
+            actionDisabledTooltip = localize('tooltipReservoirConcreteUnknown', getLanguage());
         } else if (!(Number.isFinite(currentConcrete) && currentConcrete >= requiredConcrete)) {
             actionDisabled = true;
-            actionDisabledTooltip = `Need ${Math.ceil(requiredConcrete)} Concrete to enlarge reservoir.`;
+            actionDisabledTooltip = localize('tooltipReservoirNeedConcrete', getLanguage()).replace('{amount}', Math.ceil(requiredConcrete));
         }
     }
 
@@ -751,7 +751,7 @@ function maybeNotifyStorageFull(category, key, previousQuantity, newQuantity, st
         'info',
         8000,
         classification,
-        'Increase Storage',
+        localize('buttonIncreaseStorage', getLanguage()),
         () => {
             performIncreaseStorageForKey(category, key);
         },
@@ -930,7 +930,7 @@ function galacticCasinoChecks() {
             if (!enableDropdown) {
                 const dropdownTextEl = wheelPrizeDropdown.querySelector('.dropdown-text');
                 if (dropdownTextEl) {
-                    dropdownTextEl.textContent = 'Select Special Prize';
+                    dropdownTextEl.textContent = localize('dropdownSelectSpecialPrize', getLanguage());
                 }
             } else {
                 const unlockedResources = new Set((getUnlockedResourcesArray?.() || []).map((v) => String(v || '').toLowerCase()));
@@ -990,7 +990,7 @@ function galacticCasinoChecks() {
                     wheelEl.setAttribute('data-prize-selection', 'select');
                     const dropdownTextEl = wheelPrizeDropdown.querySelector('.dropdown-text');
                     if (dropdownTextEl) {
-                        dropdownTextEl.textContent = 'Select Special Prize';
+                        dropdownTextEl.textContent = localize('dropdownSelectSpecialPrize', getLanguage());
                     }
                 }
             }
@@ -1101,7 +1101,7 @@ function galacticCasinoChecks() {
                 voidSeerContainer.setAttribute('data-prize-selection', 'select');
                 const dropdownTextEl = voidSeerPrizeDropdown.querySelector('.dropdown-text');
                 if (dropdownTextEl) {
-                    dropdownTextEl.textContent = 'Select Prize';
+                    dropdownTextEl.textContent = localize('dropdownSelectPrize', getLanguage());
                 }
             }
         }
@@ -1178,7 +1178,7 @@ function galacticCasinoChecks() {
         if (selection !== 'select') {
             const dropdownTextEl = purchaseDropdown.querySelector('.dropdown-text');
             if (dropdownTextEl) {
-                dropdownTextEl.textContent = 'Select Currency';
+                dropdownTextEl.textContent = localize('dropdownSelectCurrency', getLanguage());
             }
             setGalacticCasinoPurchaseItem('select');
         }
@@ -1387,7 +1387,7 @@ function cosmicRipChecks() {
             situationScannerStatusText.classList.remove('red-disabled-text');
             situationScannerStatusText.classList.add('green-ready-text');
         } else {
-            situationScannerStatusText.textContent = 'Requires Restoration';
+            situationScannerStatusText.textContent = localize('textRequiresRestoration', getLanguage());
             situationScannerStatusText.classList.remove('green-ready-text');
             situationScannerStatusText.classList.add('red-disabled-text');
         }
@@ -1399,7 +1399,7 @@ function cosmicRipChecks() {
         const unlocked = getCosmicRipTechUnlockedArray?.() || [];
         
         if (!scannerRestored) {
-            situationStatusText.textContent = 'Not Located';
+            situationStatusText.textContent = localize('textNotLocated', getLanguage());
             situationStatusText.classList.remove('green-ready-text');
             situationStatusText.classList.add('red-disabled-text');
         } else if (ripFound && isOneSectorState) {
@@ -1423,13 +1423,13 @@ function cosmicRipChecks() {
                     const sectorEl = document.getElementById(`cosmicRipNearSpaceScannerArraySector${safeIdx}`);
                     sectorLabel = sectorEl?.dataset?.sectorId ? String(sectorEl.dataset.sectorId) : '';
                 }
-                statusMessage = `Located in Sector ${sectorLabel}`;
+                statusMessage = localize('textLocatedInSector', getLanguage()).replace('{sector}', sectorLabel);
             }
             situationStatusText.textContent = statusMessage;
             situationStatusText.classList.remove('red-disabled-text');
             situationStatusText.classList.add('green-ready-text');
         } else {
-            situationStatusText.textContent = 'Not Located';
+            situationStatusText.textContent = localize('textNotLocated', getLanguage());
             situationStatusText.classList.remove('green-ready-text');
             situationStatusText.classList.add('red-disabled-text');
         }
@@ -1512,7 +1512,7 @@ function cosmicRipChecks() {
     const statusRowLabel = document.querySelector('.option-row-main div label');
     if (getCurrentOptionPane() === 'near space scanner array') {
         const isOneSectorState = getCosmicRipNearSpaceScannerArrayOneSectorState() === true;
-        const desired = (isOneSectorState && ripFound) ? 'Cosmic Rip Sector:' : 'Miaplacidus Sectors Map:';
+        const desired = (isOneSectorState && ripFound) ? localize('tab8CosmicRipSectorRowLabel', getLanguage()) : localize('tab8SectorsMapRowLabel', getLanguage());
         if (statusRowLabel.innerText !== desired) {
             statusRowLabel.innerText = desired;
         }
@@ -1863,13 +1863,13 @@ function cosmicRipChecks() {
     const sensorBuoyQuantityEl = document.getElementById('sensorBuoyQuantity');
     if (sensorBuoyQuantityEl) {
         const sensorBuoyQty = getResourceDataObject('cosmicRip', ['upgrades', 'sensorBuoy', 'quantity']);
-        sensorBuoyQuantityEl.textContent = `Quantity: ${sensorBuoyQty}`;
+        sensorBuoyQuantityEl.textContent = localize('textQuantityWithValue', getLanguage()).replace('{quantity}', sensorBuoyQty);
     }
 
     const ripResearchOrbiterQuantityEl = document.getElementById('ripResearchOrbiterQuantity');
     if (ripResearchOrbiterQuantityEl) {
         const ripResearchOrbiterQty = getResourceDataObject('cosmicRip', ['upgrades', 'ripResearchOrbiter', 'quantity']);
-        ripResearchOrbiterQuantityEl.textContent = `Quantity: ${ripResearchOrbiterQty}`;
+        ripResearchOrbiterQuantityEl.textContent = localize('textQuantityWithValue', getLanguage()).replace('{quantity}', ripResearchOrbiterQty);
     }
 
     updateCosmicRipStabilityProgressBar(getCosmicRipTechCurrentResearchProgress());
@@ -1912,7 +1912,7 @@ function cosmicRipChecks() {
             if (descriptionEl) {
                 const timeLeftUI = Math.max(Math.floor(timeLeft / 1000), 0);
                 descriptionEl.classList.add('green-ready-text');
-                descriptionEl.textContent = `Researching ... ${timeLeftUI}s`;
+                descriptionEl.textContent = localize('textResearchingProgress', getLanguage()).replace('{seconds}', timeLeftUI);
             }
         }
     });
@@ -3511,7 +3511,7 @@ function megastructureUIChecks() {
 
     if (isMegaStructureRun) {
         if (!getMegaStructureTabNotificationShown() && !getHasVisitedMegaStructure()) {
-            showNotification(`The MegaStructure Option is now available in the Galactic Tab!`, 'info', 3000, 'tech');
+            showNotification(localize('notificationMegaStructureOptionAvailable', getLanguage()), 'info', 3000, 'tech');
             setMegaStructureTabNotificationShown(true);
             setHasVisitedMegaStructure(true);
         }
@@ -3613,7 +3613,7 @@ function blackHoleUIChecks() {
     const interactionDescriptionElement = document.getElementById('blackHoleInteractionRowDescription');
     if (interactionDescriptionElement) {
         const researchPoints = getResourceDataObject('research', ['quantity']);
-        const baseText = 'Here you can research and upgrade your interaction power with the Black Hole - Research Points:';
+        const baseText = localize('blackHoleInteractionResearchPointsLabel', getLanguage());
         const formattedBase = baseText.replace(/ /g, '&nbsp;');
         const formattedResearch = `<span class="green-ready-text">${formatNumber(researchPoints)}</span>`;
         interactionDescriptionElement.innerHTML = `${formattedBase}&nbsp;${formattedResearch}`;
@@ -3643,7 +3643,7 @@ function blackHoleUIChecks() {
             const price = getBlackHoleResearchPrice();
             const currentResearch = getResourceDataObject('research', ['quantity']);
 
-            researchButton.textContent = `Research Black Hole\n(${formatNumber(price)} Research)`;
+            researchButton.textContent = localize('buttonResearchBlackHoleWithPrice', getLanguage()).replace('{price}', formatNumber(price));
             setButtonState(researchButton, { enabled: false, ready: false });
 
             if (currentResearch >= price) {
@@ -3701,10 +3701,10 @@ function blackHoleUIChecks() {
     const timeWarping = alwaysOn || getCurrentlyTimeWarpingBlackHole();
     if (timeMultiplierElement) {
         if (timeWarping) {
-            timeMultiplierElement.textContent = `Time ${getBlackHolePower()}x`;
+            timeMultiplierElement.textContent = localize('textTimeWarpMultiplier', getLanguage()).replace('{multiplier}', getBlackHolePower());
             timeMultiplierElement.classList.add('green-ready-text');
         } else {
-            timeMultiplierElement.textContent = 'Time 1x';
+            timeMultiplierElement.textContent = localize('textTimeWarpMultiplier', getLanguage()).replace('{multiplier}', 1);
             timeMultiplierElement.classList.remove('green-ready-text');
         }
     }
@@ -3716,12 +3716,12 @@ function blackHoleUIChecks() {
     if (timeWarpDescriptionElement) {
         timeWarpDescriptionElement.classList.add('green-ready-text');
         if (alwaysOn) {
-            timeWarpDescriptionElement.textContent = `BLACK HOLE ALWAYS ACTIVE - ${getBlackHolePower()}x`;
+            timeWarpDescriptionElement.textContent = localize('textBlackHoleAlwaysActiveWithPower', getLanguage()).replace('{multiplier}', getBlackHolePower());
         } else if (timeWarping) {
             const remainingSeconds = (timeWarpRemainingMs / 1000).toFixed(1);
-            timeWarpDescriptionElement.textContent = `BLACK HOLE ACTIVATED - ${remainingSeconds}s - ${getBlackHolePower()}x`;
+            timeWarpDescriptionElement.textContent = localize('textBlackHoleActivatedWithPower', getLanguage()).replace('{seconds}', remainingSeconds).replace('{multiplier}', getBlackHolePower());
         } else {
-            timeWarpDescriptionElement.textContent = 'BLACK HOLE ACTIVATED';
+            timeWarpDescriptionElement.textContent = localize('textBlackHoleActivated', getLanguage());
         }
     }
 
@@ -3730,11 +3730,11 @@ function blackHoleUIChecks() {
         chargeDescriptionElement.classList.add('green-ready-text');
         if (getCurrentlyChargingBlackHole()) {
             const remainingSeconds = (getTimeLeftUntilBlackHoleChargeTimerFinishes() / 1000).toFixed(1);
-            chargeDescriptionElement.textContent = `BLACK HOLE CHARGING - ${remainingSeconds}s`;
+            chargeDescriptionElement.textContent = localize('textBlackHoleChargingWithTime', getLanguage()).replace('{seconds}', remainingSeconds);
         } else if (getBlackHoleChargeReady()) {
-            chargeDescriptionElement.textContent = 'BLACK HOLE CHARGED';
+            chargeDescriptionElement.textContent = localize('textBlackHoleCharged', getLanguage());
         } else {
-            chargeDescriptionElement.textContent = 'BLACK HOLE CHARGING';
+            chargeDescriptionElement.textContent = localize('textBlackHoleCharging', getLanguage());
         }
     }
     if (blackHoleCanvas) {
@@ -3777,10 +3777,10 @@ function blackHoleUIChecks() {
         statusIndicatorElement.classList.remove('warning-orange-text', 'green-ready-text');
 
         if (timeWarping && researchDone) {
-            statusIndicatorElement.textContent = 'ACTIVE!';
+            statusIndicatorElement.textContent = localize('textActiveExclaim', getLanguage());
             statusIndicatorElement.classList.add('green-ready-text');
         } else if (chargeReady && researchDone && !timeWarping) {
-            statusIndicatorElement.textContent = 'READY!';
+            statusIndicatorElement.textContent = localize('textReadyExclaim', getLanguage());
             statusIndicatorElement.classList.add('green-ready-text');
         } else if (charging && researchDone && !timeWarping) {
             statusIndicatorElement.textContent = 'Charging...';
@@ -3872,7 +3872,7 @@ function blackHoleUIChecks() {
         const baseIncrement = getBlackHolePowerUpgradeIncrement();
         const increment = Number(currentPower) >= 50 ? 0.5 : baseIncrement;
         const nextPower = Number(currentPower) + Number(increment);
-        secondaryButton2.textContent = `Power\nx${currentPower} -> x${nextPower}\n${formatNumber(price)} Research Points`;
+        secondaryButton2.textContent = localize('buttonBlackHolePowerUpgrade', getLanguage()).replace('{current}', currentPower).replace('{next}', nextPower).replace('{price}', formatNumber(price));
         const canAfford = currentResearch >= price;
         setButtonState(secondaryButton2, { enabled: canAfford, ready: canAfford });
     }
@@ -3889,7 +3889,7 @@ function blackHoleUIChecks() {
         }
 
         if (rechargeCapped) {
-            secondaryButton3.textContent = `Duration\nALWAYS ACTIVE`;
+            secondaryButton3.textContent = localize('buttonBlackHoleDurationAlwaysActive', getLanguage());
             setButtonState(secondaryButton3, { enabled: false, ready: false });
         } else {
             const price = getBlackHoleDurationPrice();
@@ -3897,7 +3897,7 @@ function blackHoleUIChecks() {
             const nextDurationMs = currentDurationMs + getBlackHoleDurationUpgradeIncrementMs();
             const currentDurationSeconds = Math.round(currentDurationMs / 1000);
             const nextDurationSeconds = Math.round(nextDurationMs / 1000);
-            secondaryButton3.textContent = `Duration\n${currentDurationSeconds}s -> ${nextDurationSeconds}s\n${formatNumber(price)} Research Points`;
+            secondaryButton3.textContent = localize('buttonBlackHoleDurationUpgrade', getLanguage()).replace('{current}', currentDurationSeconds).replace('{next}', nextDurationSeconds).replace('{price}', formatNumber(price));
             const canAfford = currentResearch >= price;
             setButtonState(secondaryButton3, { enabled: canAfford, ready: canAfford });
         }
@@ -3921,12 +3921,12 @@ function blackHoleUIChecks() {
         }
 
         if (rechargeCapped) {
-            secondaryButton4.textContent = `Recharge\n${(minChargeMs / 1000).toFixed(0)}s\nMAX UPGRADE`;
+            secondaryButton4.textContent = localize('buttonBlackHoleRechargeMaxed', getLanguage()).replace('{seconds}', (minChargeMs / 1000).toFixed(0));
             setButtonState(secondaryButton4, { enabled: false, ready: false });
         } else {
             const currentChargeSeconds = (currentChargeMs / 1000).toFixed(1);
             const nextChargeSeconds = (Math.max(minChargeMs, nextChargeMs) / 1000).toFixed(1);
-            secondaryButton4.textContent = `Recharge\n${currentChargeSeconds}s -> ${nextChargeSeconds}s\n${formatNumber(price)} Research Points`;
+            secondaryButton4.textContent = localize('buttonBlackHoleRechargeUpgrade', getLanguage()).replace('{current}', currentChargeSeconds).replace('{next}', nextChargeSeconds).replace('{price}', formatNumber(price));
 
             const canAfford = currentResearch >= price;
             setButtonState(secondaryButton4, { enabled: canAfford, ready: canAfford });
@@ -3950,7 +3950,7 @@ function blackHoleUIChecks() {
             });
             chargeButton.classList.add('green-ready-text');
         } else if (timeWarping) {
-            chargeButton.textContent = 'ACTIVE!';
+            chargeButton.textContent = localize('textActiveExclaim', getLanguage());
             setButtonState(chargeButton, {
                 enabled: false,
                 ready: false,
@@ -4410,7 +4410,7 @@ function checkIfStarShipBuilt() {
     
         setStarShipBuilt(allMandatoryModulesFinished);
         if (allMandatoryModulesFinished) {
-            showNotification('Star Ship can now be launched!', 'info', 3000, 'starShip');
+            showNotification(localize('notificationStarShipCanBeLaunched', getLanguage()), 'info', 3000, 'starShip');
         }
     }
 
@@ -4443,7 +4443,7 @@ function buildRocketFuelCostSuffix(rocketKey) {
         ? `${formattedPrice}${currencySymbol}`
         : `${currencySymbol}${formattedPrice}`;
 
-    return ` - Fuel:&nbsp;<span class="${className}">${displayPrice}</span>`;
+    return `${localize('textFuelCostSuffix', getLanguage()).replace(/ /g, '&nbsp;')}&nbsp;<span class="${className}">${displayPrice}</span>`;
 }
 
 function updateRocketFuelAutoBuyerDescriptions() {
@@ -4460,7 +4460,7 @@ function updateRocketFuelAutoBuyerDescriptions() {
         }
 
         const powerKwPerSecond = Math.floor((getResourceDataObject('space', ['upgrades', rocketKey, 'autoBuyer', 'tier1', 'energyUse']) ?? 0) * getTimerRateRatio());
-        descElement.innerHTML = `Fuel and launch your mining vessel to start mining valuable Antimatter - Power: ${powerKwPerSecond}KW / s${buildRocketFuelCostSuffix(rocketKey)}`;
+        descElement.innerHTML = localize('tab6RocketDescriptionWithPower', getLanguage()).replace('{power}', powerKwPerSecond) + buildRocketFuelCostSuffix(rocketKey);
     }
 }
 
@@ -4727,14 +4727,14 @@ export function fuseResource(resource, fuseTargets) {
             const dedMatch = String(fuseData || '').match(/\((\d+)/);
             if (!dedMatch) {
                 console.warn('fuseResource: unexpected preview string (deduct parse failed):', fuseData);
-                showNotification('Fusion failed due to invalid preview data.', 'error', 3000, 'fuse');
+                showNotification(localize('notificationFusionInvalidPreview', getLanguage()), 'error', 3000, 'fuse');
                 return;
             }
             amountToDeductFromResource = parseInt(dedMatch[1], 10);
             const amountToAdd = Math.ceil((amountToDeductFromResource * ratio) / 4);
 
             showNotification(
-                `Discovered ${fuseToString} and made ${amountToAdd} ${fuseToString} from ${amountToDeductFromResource} ${resourceString}!`,
+                localize('notificationFusionDiscovered', getLanguage()).replace('{amount}', amountToAdd).replace('{sourceAmount}', amountToDeductFromResource).replace('{sourceMaterial}', resourceString).replace(/\{material\}/g, fuseToString),
                 'info', 3000, 'fuse'
             );
             setResourceDataObject(resourceQuantity - amountToDeductFromResource, 'resources', [resource, 'quantity']);
@@ -4756,7 +4756,7 @@ export function fuseResource(resource, fuseTargets) {
             const dedMatch2 = String(fuseData || '').match(/\((\d+)/);
             if (!dedMatch2) {
                 console.warn('fuseResource: unexpected preview string (deduct parse failed):', fuseData);
-                showNotification('Fusion failed due to invalid preview data.', 'error', 3000, 'fuse');
+                showNotification(localize('notificationFusionInvalidPreview', getLanguage()), 'error', 3000, 'fuse');
                 return;
             }
             amountToDeductFromResource = parseInt(dedMatch2[1], 10);
@@ -4765,7 +4765,7 @@ export function fuseResource(resource, fuseTargets) {
                 const addMatch = String(fuseData || '').match(/->\s*(\d+)/);
                 if (!addMatch) {
                     console.warn('fuseResource: unexpected preview string (add parse failed):', fuseData);
-                    showNotification('Fusion failed due to invalid preview data.', 'error', 3000, 'fuse');
+                    showNotification(localize('notificationFusionInvalidPreview', getLanguage()), 'error', 3000, 'fuse');
                     return;
                 }
                 amountToAddToResource = parseInt(addMatch[1], 10);
@@ -4773,7 +4773,7 @@ export function fuseResource(resource, fuseTargets) {
                 const addMatch = String(fuseData || '').match(/,\s*(\d+)/);
                 if (!addMatch) {
                     console.warn('fuseResource: unexpected preview string (add parse failed):', fuseData);
-                    showNotification('Fusion failed due to invalid preview data.', 'error', 3000, 'fuse');
+                    showNotification(localize('notificationFusionInvalidPreview', getLanguage()), 'error', 3000, 'fuse');
                     return;
                 }
                 amountToAddToResource = parseInt(addMatch[1], 10);
@@ -4785,7 +4785,7 @@ export function fuseResource(resource, fuseTargets) {
 
             if (Math.abs(amountToDeductFromResource * ratio - amountToAddToResource) <= 1) {
                 showNotification(
-                    `Should Fuse ${amountToDeductFromResource} ${resourceString} into ${Math.floor(amountToDeductFromResource * ratio)} ${fuseToString}. Lost ${energyLossFuseToQuantity} ${fuseToString} as energy due to sub-optimal fusion efficiency, receive ${realAmountToAdd} ${fuseToString}`,
+                    localize('notificationFusionEnergyLoss', getLanguage()).replace('{sourceAmount}', amountToDeductFromResource).replace('{sourceMaterial}', resourceString).replace('{idealAmount}', Math.floor(amountToDeductFromResource * ratio)).replace('{lostAmount}', energyLossFuseToQuantity).replace('{receivedAmount}', realAmountToAdd).replace(/\{material\}/g, fuseToString),
                     'info',
                     3000, 'fuse'
                 );
@@ -4793,7 +4793,7 @@ export function fuseResource(resource, fuseTargets) {
                 
                 lostQuantity = Math.max(realAmountToAdd - availableStorageFuseTo, 0);
                 showNotification(
-                    `Should Fuse ${amountToDeductFromResource} ${resourceString} into ${Math.floor(amountToDeductFromResource * ratio)} ${fuseToString}. Max available storage is for ${availableStorageFuseTo}.  Of those, ${energyLossFuseToQuantity} lost due to sub-optimal fusion efficiency. So receive ${realAmountToAdd - lostQuantity} ${fuseToString}`,
+                    localize('notificationFusionStorageLimited', getLanguage()).replace('{sourceAmount}', amountToDeductFromResource).replace('{sourceMaterial}', resourceString).replace('{idealAmount}', Math.floor(amountToDeductFromResource * ratio)).replace('{availableStorage}', availableStorageFuseTo).replace('{lostAmount}', energyLossFuseToQuantity).replace('{receivedAmount}', realAmountToAdd - lostQuantity).replace(/\{material\}/g, fuseToString),
                     'warning',
                     5000, 'fuse'
                 );
@@ -4826,12 +4826,12 @@ export function sellResource(resource) {
 
     if (getCurrencySymbol() === "€") {
         showNotification(
-            `You sold ${quantityToDeduct} ${capitaliseString(resource)} for ${cashRaised}${getCurrencySymbol()}!`,
+            localize('notificationSoldMaterialSymbolAfter', getLanguage()).replace('{amount}', quantityToDeduct).replace('{material}', localizeMaterialName(resource, 'resources', getLanguage())).replace('{cash}', cashRaised).replace('{currency}', getCurrencySymbol()),
             'info', 3000, 'sold'
         );
     } else {
         showNotification(
-            `You sold ${quantityToDeduct} ${capitaliseString(resource)} for ${getCurrencySymbol()}${cashRaised}!`,
+            localize('notificationSoldMaterialSymbolBefore', getLanguage()).replace('{amount}', quantityToDeduct).replace('{material}', localizeMaterialName(resource, 'resources', getLanguage())).replace('{cash}', cashRaised).replace('{currency}', getCurrencySymbol()),
             'info', 3000, 'sold'
         );
     }
@@ -4878,14 +4878,14 @@ export function sellAllUnlockedResources() {
 
     if (getCurrencySymbol() === '€') {
         showNotification(
-            `You sold all resources for ${totalCashRaised.toFixed(2)}${getCurrencySymbol()}!`,
+            localize('notificationSoldAllResourcesSymbolAfter', getLanguage()).replace('{cash}', totalCashRaised.toFixed(2)).replace('{currency}', getCurrencySymbol()),
             'info',
             3000,
             'sold'
         );
     } else {
         showNotification(
-            `You sold all resources for ${getCurrencySymbol()}${totalCashRaised.toFixed(2)}!`,
+            localize('notificationSoldAllResourcesSymbolBefore', getLanguage()).replace('{cash}', totalCashRaised.toFixed(2)).replace('{currency}', getCurrencySymbol()),
             'info',
             3000,
             'sold'
@@ -4937,7 +4937,7 @@ export function createCompound(compound) {
                 [partName, 'quantity']
             );
 
-            notificationParts.push(`${partQuantity} ${capitaliseString(partName)}`);
+            notificationParts.push(`${partQuantity} ${localizeMaterialName(partName, getResourceDataObject('compounds', [partName]) ? 'compounds' : 'resources', getLanguage())}`);
         }
     }
 
@@ -4946,12 +4946,12 @@ export function createCompound(compound) {
 
     if (exceededDifference > 0) {
         showNotification(
-            `You created ${compoundCreatedQuantity} ${compoundCreatedName} from ${notificationParts.join(', ')} but ${exceededDifference} ${compoundCreatedName} was wasted due to storage limit being exceeded.`,
+            localize('notificationCompoundCreatedWithWaste', getLanguage()).replace('{amount}', compoundCreatedQuantity).replace('{parts}', notificationParts.join(', ')).replace('{wasted}', exceededDifference).replace(/\{compound\}/g, compoundCreatedName),
             'warning', 3000, 'create'
         );
     } else {
         showNotification(
-            `You created ${compoundCreatedQuantity} ${compoundCreatedName} from ${notificationParts.join(', ')}`,
+            localize('notificationCompoundCreated', getLanguage()).replace('{amount}', compoundCreatedQuantity).replace('{parts}', notificationParts.join(', ')).replace('{compound}', compoundCreatedName),
             'info', 3000, 'create'
         );
     }
@@ -4984,12 +4984,12 @@ export function sellCompound(compound) {
 
     if (getCurrencySymbol() === "€") {
         showNotification(
-            `You sold ${quantityToDeduct} ${capitaliseString(compound)} for ${cashRaised}${getCurrencySymbol()}!`,
+            localize('notificationSoldMaterialSymbolAfter', getLanguage()).replace('{amount}', quantityToDeduct).replace('{material}', localizeMaterialName(compound, 'compounds', getLanguage())).replace('{cash}', cashRaised).replace('{currency}', getCurrencySymbol()),
             'info', 3000, 'special'
         );
     } else {
         showNotification(
-            `You sold ${quantityToDeduct} ${capitaliseString(compound)} for ${getCurrencySymbol()}${cashRaised}!`,
+            localize('notificationSoldMaterialSymbolBefore', getLanguage()).replace('{amount}', quantityToDeduct).replace('{material}', localizeMaterialName(compound, 'compounds', getLanguage())).replace('{cash}', cashRaised).replace('{currency}', getCurrencySymbol()),
             'info', 3000, 'special'
         );
     }
@@ -5028,14 +5028,14 @@ export function sellAllUnlockedCompounds() {
 
     if (getCurrencySymbol() === '€') {
         showNotification(
-            `You sold all compounds for ${totalCashRaised.toFixed(2)}${getCurrencySymbol()}!`,
+            localize('notificationSoldAllCompoundsSymbolAfter', getLanguage()).replace('{cash}', totalCashRaised.toFixed(2)).replace('{currency}', getCurrencySymbol()),
             'info',
             3000,
             'special'
         );
     } else {
         showNotification(
-            `You sold all compounds for ${getCurrencySymbol()}${totalCashRaised.toFixed(2)}!`,
+            localize('notificationSoldAllCompoundsSymbolBefore', getLanguage()).replace('{cash}', totalCashRaised.toFixed(2)).replace('{currency}', getCurrencySymbol()),
             'info',
             3000,
             'special'
@@ -5083,7 +5083,7 @@ function updateAllCreatePreviews() {
             }
 
             if (getPowerOnOff() && getResourceDataObject('compounds', [compound, 'autoCreate'])) {
-                createPreviewElement.innerHTML = '<span class="red-disabled-text">Auto Creating...</span>';
+                createPreviewElement.innerHTML = `<span class="red-disabled-text">${localize('textAutoCreating', getLanguage())}</span>`;
             }
         }
     }
@@ -5124,7 +5124,7 @@ function updateAllSalePricePreviews() {
 
             const sellDescription = document.getElementById(`${resource}SellRow`);
             if (sellDescription && getComputedStyle(sellDescription).pointerEvents === 'none') {
-                salePreviewElement.innerHTML = '<span class="red-disabled-text">Auto Creating...</span>';
+                salePreviewElement.innerHTML = `<span class="red-disabled-text">${localize('textAutoCreating', getLanguage())}</span>`;
             }
         }
     }
@@ -6248,7 +6248,7 @@ function updateUIQuantities(allQuantities, allStorages, allElements, allDescript
             const quantityScienceBuilding = allQuantities[item];
             const element = document.getElementById(`${item}Quantity`);
             if (element && quantityScienceBuilding) {
-                element.textContent = `Quantity: ${quantityScienceBuilding}`;
+                element.textContent = localize('textQuantityWithValue', getLanguage()).replace('{quantity}', quantityScienceBuilding);
             }
         }
 
@@ -6278,7 +6278,7 @@ function updateUIQuantities(allQuantities, allStorages, allElements, allDescript
                     : getStarShipPartsNeededInTotalPerModule;
 
                 if (partsCountText) {
-                    partsCountText.innerHTML = `Built: <span id="${item}BuiltPartsQuantity">${quantity}</span> / <span id="${item}TotalPartsQuantity">${getTotalPartsNeeded(item)}</span>`;
+                    partsCountText.innerHTML = `${localize('textBuilt', getLanguage())}: <span id="${item}BuiltPartsQuantity">${quantity}</span> / <span id="${item}TotalPartsQuantity">${getTotalPartsNeeded(item)}</span>`;
                 }
             }
         }
@@ -6289,8 +6289,8 @@ function updateUIQuantities(allQuantities, allStorages, allElements, allDescript
                 const quantityText = document.getElementById(`${item}QuantityText`);
                 if (quantityText) {
                     quantityText.innerHTML = item === 'fleetEnvoy'
-                        ? `Quantity: <span id="${item}BuiltQuantity">${quantity}</span> / <span id="${item}BuiltQuantityMax">${getMaxFleetShip(item)}</span>`
-                        : `Quantity: <span id="${item}BuiltQuantity">${quantity}</span>`;
+                        ? `${localize('textQuantity', getLanguage())}: <span id="${item}BuiltQuantity">${quantity}</span> / <span id="${item}BuiltQuantityMax">${getMaxFleetShip(item)}</span>`
+                        : `${localize('textQuantity', getLanguage())}: <span id="${item}BuiltQuantity">${quantity}</span>`;
                 }
             }
         }        
@@ -6437,7 +6437,7 @@ function updateAntimatterAndDiagram(ticks = 1) {
 
         if (asteroid) {
             rocketData[`rocket${i}`] = [
-                `Rocket ${i}`,
+                localize('rocketDefaultName', getLanguage()).replace('{index}', i),
                 asteroid.name,
                 asteroid.easeOfExtraction[0],
                 getSpecificAsteroidExtractionRate(asteroid),
@@ -6616,7 +6616,7 @@ function updateCosmicRipStabilityProgressBar(currentResearchProgress = 0) {
         progressBar.style.width = `${percentage}%`;
     }
     if (percentageText) {
-        percentageText.textContent = `${percentage}% Stabilised`;
+        percentageText.textContent = localize('textPercentStabilised', getLanguage()).replace('{percentage}', percentage);
     }
 }
 
@@ -6770,14 +6770,14 @@ function travelToAsteroidChecks(element) {
 
             if (getRocketReadyToTravel(rocketName) && getLaunchedRockets().includes(rocketName) && getCanTravelToAsteroids()) {
                 accompanyingLabel.classList.remove('red-disabled-text');
-                accompanyingLabel.innerHTML = `Ready To Travel...<br>${getDestinationAsteroid(getCurrentOptionPane())}`;
+                accompanyingLabel.innerHTML = `${localize('textReadyToTravel', getLanguage())}<br>${getDestinationAsteroid(getCurrentOptionPane())}`;
                 accompanyingLabel.classList.add('green-ready-text');
                 travelToProgressBarElement.classList.add('invisible');
                 destinationAsteroidTextElement.classList.add('invisible');
                 element.classList.remove('invisible');
                 travelToDropdown.classList.remove('invisible');
                 if (!getDestinationAsteroid(rocketName)) {
-                    accompanyingLabel.innerText = 'Select Destination...';
+                    accompanyingLabel.innerText = localize('textSelectDestination', getLanguage());
                 }
             } else {
                 if (getCurrentlyTravellingToAsteroid(rocketName)) { //travelling case handled in timer
@@ -6793,11 +6793,11 @@ function travelToAsteroidChecks(element) {
                     destinationAsteroidTextElement.classList.add('invisible');
                     element.classList.add('invisible');
                     travelToDropdown.classList.add('invisible');
-                    accompanyingLabel.innerText = 'Mining Antimatter at ' + asteroidBeingMinedByCurrentRocket;
+                    accompanyingLabel.innerText = localize('textMiningAntimatterAt', getLanguage()).replace('{asteroid}', asteroidBeingMinedByCurrentRocket);
                 } else if (!getLaunchedRockets().includes(rocketName)) {
                     accompanyingLabel.classList.add('red-disabled-text');
                     accompanyingLabel.classList.remove('green-ready-text');
-                    accompanyingLabel.innerText = 'Not Launched!';
+                    accompanyingLabel.innerText = localize('textNotLaunched', getLanguage());
                     travelToProgressBarElement.classList.add('invisible');
                     destinationAsteroidTextElement.classList.add('invisible');
                     element.classList.add('invisible');
@@ -6807,7 +6807,7 @@ function travelToAsteroidChecks(element) {
                     element.classList.remove('green-ready-text');
                     accompanyingLabel.classList.remove('green-ready-text');
                     accompanyingLabel.classList.add('red-disabled-text');
-                    accompanyingLabel.innerHTML = `Lack Nav Tech!`;
+                    accompanyingLabel.innerHTML = localize('textLackNavTech', getLanguage());
                     travelToDropdown.classList.remove('invisible');
                 }
 
@@ -6874,34 +6874,34 @@ function spaceTelescopeChecks(element, type) {
             accompanyingLabel.classList.remove('red-disabled-text');
             if (getTelescopeReadyToSearch()) {
                 accompanyingLabel.innerText = isAsteroid
-                ? 'Ready To Search...'
+                ? localize('textReadyToSearch', getLanguage())
                 : isStar
-                  ? 'Ready To Study...'
-                  : 'Ready To Pillage...';
+                  ? localize('textReadyToStudy', getLanguage())
+                  : localize('textReadyToPillage', getLanguage());
               
                 accompanyingLabel.classList.add('green-ready-text');
             } else {
                 if (isAsteroid) {
                     if (getCurrentlyInvestigatingStar() || getCurrentlyPillagingVoid()) {
                         accompanyingLabel.innerText = getCurrentlyInvestigatingStar()
-                            ? 'Currently Investigating Stars...'
-                            : 'Currently Pillaging the Void...';
+                            ? localize('textCurrentlyInvestigatingStars', getLanguage())
+                            : localize('textCurrentlyPillagingTheVoid', getLanguage());
                         accompanyingLabel.classList.remove('green-ready-text');
                         accompanyingLabel.classList.add('red-disabled-text');
                     }
                 } else if (isStar) {
                     if (getCurrentlySearchingAsteroid() || getCurrentlyPillagingVoid()) {
                         accompanyingLabel.innerText = getCurrentlySearchingAsteroid()
-                            ? 'Currently Searching Asteroids...'
-                            : 'Currently Pillaging the Void...';
+                            ? localize('textCurrentlySearchingAsteroids', getLanguage())
+                            : localize('textCurrentlyPillagingTheVoid', getLanguage());
                         accompanyingLabel.classList.remove('green-ready-text');
                         accompanyingLabel.classList.add('red-disabled-text');
                     }
                 } else if (isPillageVoid) {
                     if (getCurrentlySearchingAsteroid() || getCurrentlyInvestigatingStar()) {
                         accompanyingLabel.innerText = getCurrentlySearchingAsteroid()
-                            ? 'Currently Searching Asteroids...'
-                            : 'Currently Investigating Stars...';
+                            ? localize('textCurrentlySearchingAsteroids', getLanguage())
+                            : localize('textCurrentlyInvestigatingStars', getLanguage());
                         accompanyingLabel.classList.remove('green-ready-text');
                         accompanyingLabel.classList.add('red-disabled-text');
                     }
@@ -6910,7 +6910,7 @@ function spaceTelescopeChecks(element, type) {
         } else {
             accompanyingLabel.classList.add('red-disabled-text');
             accompanyingLabel.classList.remove('green-ready-text');
-            accompanyingLabel.innerText = 'Requires Power!';
+            accompanyingLabel.innerText = localize('textRequiresPower', getLanguage());
         
             let elapsedTime, totalDuration;
         
@@ -7056,7 +7056,7 @@ function powerOnOrOffChecks(element) {
             element.classList.add('green-ready-text');
             element.classList.remove('warning-orange-text');
         } else if (getTrippedStatus()) { 
-            element.textContent = '• TRIPPED';
+            element.textContent = localize('textTrippedIndicator', getLanguage());
             element.classList.add('warning-orange-text');
             element.classList.remove('green-ready-text');
             element.classList.remove('red-disabled-text');
@@ -7073,7 +7073,7 @@ function powerOnOrOffChecks(element) {
             element.classList.add('green-ready-text');
             element.classList.remove('warning-orange-text');
         } else if (getTrippedStatus()) {
-            element.textContent = '• TRIPPED';
+            element.textContent = localize('textTrippedIndicator', getLanguage());
             element.classList.add('warning-orange-text');
             element.classList.remove('green-ready-text');
             element.classList.remove('red-disabled-text');
@@ -7096,6 +7096,47 @@ function displayNameForCompoundKey(compoundKey) {
     return getResourceDataObject('compounds', [compoundKey])
         ? localize('compound' + capitaliseString(compoundKey), getLanguage())
         : capitaliseString(compoundKey);
+}
+
+// Galactic market items are internal keys naming either a resource or a
+// compound; the display name is resolved from the key and whichever section it
+// actually lives in.
+function localizeTradeItemName(itemKey) {
+    if (!itemKey) return '';
+    const section = getResourceDataObject('compounds', [itemKey]) ? 'compounds' : 'resources';
+    return localizeMaterialName(itemKey, section, getLanguage());
+}
+
+// Cosmic Rip tech ids map to their own display-name key family, the same one
+// drawTab8Content uses for the prerequisite lists.
+const COSMIC_RIP_TECH_NAME_KEYS_BY_ID = {
+    stabilizerArray: 'cosmicRipTechNameStabilizerArray',
+    quantumContainmentField: 'cosmicRipTechNameQuantumContainmentField',
+    dimensionalAnchorMatrix: 'cosmicRipTechNameDimensionalAnchorMatrix',
+    singularityStabilizer: 'cosmicRipTechNameSingularityStabilizer',
+    realityWeaveRegulator: 'cosmicRipTechNameRealityWeaveRegulator'
+};
+
+// `factoryStar` holds the canonical megastructure name, which is also matched
+// against elsewhere, so the display form is looked up from a map rather than
+// being stored translated.
+const FACTORY_STAR_NAME_KEYS = {
+    'Dyson Sphere': 'megaStructureTTNameDysonSphere',
+    'Celestial Processing Core': 'megaStructureTTNameCelestialProcessingCore',
+    'Plasma Forge': 'megaStructureTTNamePlasmaForge',
+    'Galactic Memory Archive': 'megaStructureTTNameGalacticMemoryArchive'
+};
+
+function localizeFactoryStarName(name) {
+    const key = FACTORY_STAR_NAME_KEYS[name];
+    return key ? localize(key, getLanguage()) : name;
+}
+
+function localizeCosmicRipTechName(techName) {
+    const key = COSMIC_RIP_TECH_NAME_KEYS_BY_ID[techName];
+    return key
+        ? localize(key, getLanguage())
+        : capitaliseString(techName).replace(/([a-z])([A-Z])/g, '$1 $2');
 }
 
 function compoundCostSellCreateChecks(element) {
@@ -7424,7 +7465,9 @@ function handleCosmicRipUpgradeResourceType(element) {
             return null;
         }
         const amount = formatCostValue(priceTuple[0]);
-        const name = capitaliseString(String(priceTuple[1] || ''));
+        // Price tuples are [quantity, key, section]; the display name is looked
+        // up from the key rather than derived from it.
+        const name = localizeMaterialName(String(priceTuple[1] || ''), priceTuple[2], getLanguage());
         return `${amount} ${name}`;
     };
 
@@ -7647,7 +7690,7 @@ function handlePhilosophyTechnologyScreenButtonAndDescriptionStates(element, qua
 
         if (element.classList.contains('special-ability')) {
             if (getPhilosophyAbilityActive()) {
-                element.innerHTML = 'UNLOCKED';
+                element.innerHTML = localize('textUnlocked', getLanguage());
                 setElementPointerEvents(element, 'none');
             }
         }
@@ -7844,7 +7887,7 @@ function setStateOfButtonsBasedOnDescriptionStateForBuildingPurchases(element) {
         if (hasRedDisabledText) {
             buyButton.classList.add('red-disabled-text');
         } else {
-            if (buyButton.innerHTML !== 'Built!' && buyButton.innerHTML !== 'Launched!') {
+            if (buyButton.innerHTML !== localize('textBuiltExclaim', getLanguage()) && buyButton.innerHTML !== localize('textLaunchedExclaim', getLanguage())) {
                 buyButton.classList.remove('red-disabled-text');
             }
         }
@@ -7870,7 +7913,7 @@ function handleVisibilityOfOneOffPurchaseButtonsAndDescriptions(element) {
         }
     });
 
-    if (element.innerHTML === 'Built!' || element.innerHTML === 'Launched!') {
+    if (element.innerHTML === localize('textBuiltExclaim', getLanguage()) || element.innerHTML === localize('textLaunchedExclaim', getLanguage())) {
         element.classList.remove('green-ready-text');
         element.classList.add('red-disabled-text');
         const rocketNumber = element.dataset.resourceToFuseTo;
@@ -7916,14 +7959,14 @@ function handleRocketFuellingChecksAndOneOffPurchases(element, price) {
     }
 
     if (rocketsFuellerStartedArray.includes(`${rocket}FuelledUp`) && getCurrentStarSystemWeatherEfficiency()[2] !== 'rain' && getCurrentStarSystemWeatherEfficiency()[2] !== 'volcano' && getCurrentOptionPane() === rocket) {
-        document.getElementById('fuelDescription').textContent = 'Ready For Launch...';
+        document.getElementById('fuelDescription').textContent = localize('textReadyForLaunch', getLanguage());
         document.getElementById('fuelDescription').classList.add('green-ready-text');
         document.getElementById('fuelDescription').classList.remove('red-disabled-text');
         setCheckRocketFuellingStatus(rocket, false);
         launchButton.classList.add('green-ready-text');
         launchButton.classList.remove('red-disabled-text');
     } else if (rocketsFuellerStartedArray.includes(`${rocket}FuelledUp`) && (getCurrentStarSystemWeatherEfficiency()[2] === 'rain' || getCurrentStarSystemWeatherEfficiency()[2] === 'volcano') && getCurrentOptionPane() === rocket) {
-        document.getElementById('fuelDescription').textContent = 'Bad Weather!';
+        document.getElementById('fuelDescription').textContent = localize('textBadWeather', getLanguage());
         document.getElementById('fuelDescription').classList.remove('green-ready-text');
         document.getElementById('fuelDescription').classList.add('red-disabled-text');
         launchButton.classList.remove('green-ready-text');
@@ -7955,14 +7998,14 @@ function handleSpaceUpgradeResourceType(element) {
             builtPartsElement.classList.add('green-ready-text');
             totalPartsElement.classList.add('green-ready-text');
             element.classList.remove('red-disabled-text');
-            element.textContent = 'Built!';
+            element.textContent = localize('textBuiltExclaim', getLanguage());
 
             if (dataName.includes('ss') && !getResourceDataObject('space', ['upgrades', dataName, 'finished'])) {
                 setResourceDataObject(true, 'space', ['upgrades', dataName, 'finished']);
             }
 
             if (dataName.includes('rocket') && getLaunchedRockets().includes(dataName)) {
-                element.textContent = 'Launched!';
+                element.textContent = localize('textLaunchedExclaim', getLanguage());
             }
         }
 
@@ -8002,7 +8045,7 @@ function handleSpaceUpgradeResourceType(element) {
             quantityElement.classList.add('green-ready-text');
             maxQuantityElement.classList.add('green-ready-text');
             element.classList.remove('red-disabled-text');
-            element.textContent = 'Built!';
+            element.textContent = localize('textBuiltExclaim', getLanguage());
 
             if (dataName.includes('fleetEnvoy') && !getResourceDataObject('space', ['upgrades', dataName, 'envoyBuiltYet'])) {
                 setResourceDataObject(true, 'space', ['upgrades', dataName, 'envoyBuiltYet']);
@@ -8016,8 +8059,16 @@ function checkStatusAndSetTextClasses(element) {
         return;
     }
     if (element.id === 'spaceStorageTankResearchDescription' || element.id === 'fleetHologramsDescription' || element.id === 'voidSeersDescription' || element.id === 'rapidExpansionDescription') {
-        if (element.innerHTML === 'UNLOCKED' || (element.querySelector('span') && element.querySelector('span').innerHTML === 'UNLOCKED')) {
-            element.innerHTML = '<span class="green-ready-text">UNLOCKED</span>';
+        // The marker cannot be an English text comparison: this element is
+        // rewritten every frame, so the state rides on a dataset flag and the
+        // legacy English form is still accepted for elements drawn before it.
+        const unlockedText = localize('textUnlocked', getLanguage());
+        if (element.dataset.abilityUnlocked === 'true'
+            || element.innerHTML === 'UNLOCKED' || element.innerHTML === unlockedText
+            || element.querySelector('span')?.innerHTML === 'UNLOCKED'
+            || element.querySelector('span')?.innerHTML === unlockedText) {
+            element.dataset.abilityUnlocked = 'true';
+            element.innerHTML = `<span class="green-ready-text">${unlockedText}</span>`;
             element.parentElement.parentElement.parentElement.querySelector('.special-ability').classList.remove('red-disabled-text');
             element.parentElement.parentElement.parentElement.querySelector('.special-ability').classList.add('green-ready-text');
         }
@@ -8210,7 +8261,7 @@ function starShipUiChecks() {
         }
 
         if (getDestinationStarScanned()) {
-            getStellarScannerBuilt() ? document.getElementById('descriptionContentTab5').innerHTML = 'Here you can analyse the findings of your System Scan!' : document.getElementById('descriptionContentTab5').innerHTML = 'Without a Stellar Scanner fitted, you cannot determine anything, Good Luck!';
+            getStellarScannerBuilt() ? document.getElementById('descriptionContentTab5').innerHTML = localize('tab5ScanResultsAnalyse', getLanguage()) : document.getElementById('descriptionContentTab5').innerHTML = localize('tab5ScanResultsNoScanner', getLanguage());
         }
     }
 
@@ -8266,7 +8317,7 @@ function selectStarShipSidebarOption(retryCount = 0) {
 
 function fleetHangarChecks() {
     if (getCurrentOptionPane() === 'fleet hangar') {
-        document.getElementById('descriptionContentTab5').innerHTML = `Build your fleets to conquer visited Systems - Fleet Strength: <span class="green-ready-text">${getResourceDataObject('fleets', ['attackPower']).toFixed(0)}</span>`;
+        document.getElementById('descriptionContentTab5').innerHTML = `${localize('tab5FleetHangarDescription', getLanguage())} <span class="green-ready-text">${getResourceDataObject('fleets', ['attackPower']).toFixed(0)}</span>`;
         if (getStarShipStatus()[0] !== 'preconstruction' && getStarShipStatus()[0] !== 'readyForTravel' && !getStellarScannerBuilt()) {
             if (document.getElementById('spaceFleetEnvoyBuildRow')) {
                 document.getElementById('spaceFleetEnvoyBuildRow').classList.add('invisible');
@@ -8343,7 +8394,7 @@ export function updateFleetsAfterDestroyingAUnit(unit) {
 
 
 export function writeBattleTopDescriptionUpdate() {
-    document.getElementById('descriptionContentTab5').innerHTML = `Defeat The Enemy! - Fleet Power: <span class="green-ready-text">${getResourceDataObject('fleets', ['attackPower']).toFixed(0)}</span> Enemy Fleet Power: <span class="red-disabled-text">${getStarSystemDataObject('stars', ['destinationStar', 'enemyFleets', 'fleetPower']).toFixed(0)}</span>`;
+    document.getElementById('descriptionContentTab5').innerHTML = localize('tab5BattleDescription', getLanguage()).replace('{playerPower}', `<span class="green-ready-text">${getResourceDataObject('fleets', ['attackPower']).toFixed(0)}</span>`).replace('{enemyPower}', `<span class="red-disabled-text">${getStarSystemDataObject('stars', ['destinationStar', 'enemyFleets', 'fleetPower']).toFixed(0)}</span>`);
 }
 
 export function writeEnemyFleetStats(type) {
@@ -8522,11 +8573,11 @@ function updateAscendencyRowTextFields() {
         let statusText = "";
 
         if (buff.boughtYet === 0) {
-            statusText = "Not Bought";
+            statusText = localize('textNotBought', getLanguage());
         } else if (!rebuyable) {
-            statusText = `<span class="green-ready-text">Bought</span>`;
+            statusText = `<span class="green-ready-text">${localize('textBought', getLanguage())}</span>`;
         } else {
-            statusText = `<span class="green-ready-text">Bought * ${buff.boughtYet}</span>`;
+            statusText = `<span class="green-ready-text">${localize('textBoughtTimes', getLanguage()).replace('{count}', buff.boughtYet)}</span>`;
         }
 
         const statusElement = document.getElementById(statusElementId);
@@ -8544,7 +8595,7 @@ function updateAscendencyRowTextFields() {
 
         if (costTextElement) {
             if (buff.rebuyable && buff.timesRebuyable === buff.boughtYet) {
-                costTextElement.innerHTML = 'Bought Max';
+                costTextElement.innerHTML = localize('textBoughtMax', getLanguage());
                 costTextElement.classList.add("green-ready-text");
                 costTextElement.classList.remove("red-disabled-text");
             } else if (!buff.rebuyable && buff.boughtYet > 0) {
@@ -8595,7 +8646,7 @@ function galacticMarketChecks() {
             if (!dropdown) return;
             const textEl = dropdown.querySelector('.dropdown-text');
             if (textEl) {
-                textEl.textContent = 'Select Resource / Compound';
+                textEl.textContent = localize('dropdownSelectResourceOrCompound', getLanguage());
             }
         };
 
@@ -8650,7 +8701,7 @@ function galacticMarketChecks() {
         }
 
         if (getGalacticMarketOutgoingStockType() !== 'select' && getGalacticMarketOutgoingStockType() === getGalacticMarketIncomingStockType()) {
-            document.getElementById('galacticMarketIncomingStockTypeDropDown').querySelector('.dropdown-text').textContent = 'Select Resource / Compound';
+            document.getElementById('galacticMarketIncomingStockTypeDropDown').querySelector('.dropdown-text').textContent = localize('dropdownSelectResourceOrCompound', getLanguage());
             setGalacticMarketIncomingStockType('select');
         }
 
@@ -8723,7 +8774,7 @@ function galacticMarketChecks() {
 
         } else {
             galacticMarketQuantityToTradeDropDown.classList.add('dropdown-disabled');
-            galacticMarketQuantityToTradeDropDown.querySelector('.dropdown-text').textContent = 'Select Quantity';
+            galacticMarketQuantityToTradeDropDown.querySelector('.dropdown-text').textContent = localize('dropdownSelectQuantity', getLanguage());
             setGalacticMarketOutgoingQuantitySelectionType('select');
             galacticMarketQuantityTextArea.classList.add('invisible');
             document.getElementById('galacticMarketOutgoingStockTypeText').innerHTML = 'N/A';
@@ -8928,16 +8979,16 @@ export function galacticMarketTrade() {
 
     const galacticMarketQuantityToTradeDropDown = document.getElementById('galacticMarketQuantityToTradeDropDown');
     galacticMarketQuantityToTradeDropDown.classList.add('dropdown-disabled');
-    galacticMarketQuantityToTradeDropDown.querySelector('.dropdown-text').textContent = 'Select Quantity';
+    galacticMarketQuantityToTradeDropDown.querySelector('.dropdown-text').textContent = localize('dropdownSelectQuantity', getLanguage());
     setGalacticMarketOutgoingQuantitySelectionType('select');
     document.getElementById('galacticMarketQuantityTextArea').value = 0;
     document.getElementById('galacticMarketQuantityTextArea').classList.add('invisible');
     setGalacticMarketIncomingQuantity(0);
 
-    const outgoingMessage = `${Math.floor(outgoingQuantity - commissionQuantity)} ${capitaliseString(outgoingItem)}`;
-    const incomingMessage = `${commissionAdjustedIncomingQuantity} ${capitaliseString(incomingItem)}`;
-    const commissionMessage = `${commissionQuantity} ${capitaliseString(outgoingItem)}`;
-    const notificationMessage = `You have traded ${outgoingMessage} for ${incomingMessage} and paid ${commissionMessage} commission!`;
+    const outgoingMessage = `${Math.floor(outgoingQuantity - commissionQuantity)} ${localizeTradeItemName(outgoingItem)}`;
+    const incomingMessage = `${commissionAdjustedIncomingQuantity} ${localizeTradeItemName(incomingItem)}`;
+    const commissionMessage = `${commissionQuantity} ${localizeTradeItemName(outgoingItem)}`;
+    const notificationMessage = localize('notificationTradedForCommission', getLanguage()).replace('{outgoing}', outgoingMessage).replace('{incoming}', incomingMessage).replace('{commission}', commissionMessage);
 
     showNotification(notificationMessage, 'info', 5000, 3000, 'special');
     setAchievementFlagArray('performGalacticMarketTransaction', 'add');
@@ -8985,7 +9036,7 @@ function removeAndReplaceOutgoingOptionFromIncomingDropDown(outgoingDropdown, in
                 playClickSfx();
                 const value = event.target.getAttribute('data-value');
                 const selectedOption = allOptions.find(option => option.value === value);
-                incomingDropdown.querySelector('.dropdown-text').innerHTML = selectedOption ? selectedOption.text : 'Select an option';
+                incomingDropdown.querySelector('.dropdown-text').innerHTML = selectedOption ? selectedOption.text : localize('dropdownSelectAnOption', getLanguage());
 
                 optionsContainer.classList.remove('show');
                 incomingDropdown.style.borderRadius = '10px 10px 10px 10px';
@@ -9129,9 +9180,9 @@ async function coloniseChecks() {
             if (patience <= 0 && fleetPowerPlayer === 0) {
                 document.querySelectorAll("button.bully, button.passive, button.harmony, button.conquest, button.vassalize")
                 .forEach(button => button.classList.add("red-disabled-text"));
-                document.getElementById('descriptionContentTab5').innerHTML = `<span class="green-ready-text">Build Your Fleets to Engage the Enemy! - Fleet Power: </span><span class="red-disabled-text">${getResourceDataObject('fleets', ['attackPower']).toFixed(0)}</span>`;
+                document.getElementById('descriptionContentTab5').innerHTML = `<span class="green-ready-text">${localize('tab5BuildFleetsToEngage', getLanguage())} </span><span class="red-disabled-text">${getResourceDataObject('fleets', ['attackPower']).toFixed(0)}</span>`;
             } else {
-                document.getElementById('descriptionContentTab5').innerHTML = `Engage in Diplomacy and War to establish your new colony at <span class="green-ready-text">${capitaliseWordsWithRomanNumerals(getDestinationStar())}</span> - Fleet Power: <span class="green-ready-text">${getResourceDataObject('fleets', ['attackPower']).toFixed(0)}</span>`;
+                document.getElementById('descriptionContentTab5').innerHTML = localize('tab5ColoniseDescription', getLanguage()).replace('{star}', `<span class="green-ready-text">${capitaliseWordsWithRomanNumerals(getDestinationStar())}</span>`).replace('{playerPower}', `<span class="green-ready-text">${getResourceDataObject('fleets', ['attackPower']).toFixed(0)}</span>`);
             }
 
             const enemyFleetTotals = getStarSystemDataObject('stars', ['destinationStar', 'enemyFleets']);
@@ -9149,7 +9200,7 @@ async function coloniseChecks() {
                     conquestButton.classList.remove('red-disabled-text');
                     conquestButton.classList.add('green-ready-text');
                 }
-                document.getElementById('descriptionContentTab5').innerHTML = `Simply Settle at <span class="green-ready-text">${capitaliseWordsWithRomanNumerals(getDestinationStar())}</span> with no resistance!`;
+                document.getElementById('descriptionContentTab5').innerHTML = localize('tab5SettleNoResistance', getLanguage()).replace('{star}', `<span class="green-ready-text">${capitaliseWordsWithRomanNumerals(getDestinationStar())}</span>`);
             }
 
         } else {
@@ -9158,11 +9209,11 @@ async function coloniseChecks() {
 
             if (getRedrawBattleDescription()) { //set this true when fleet power changes during battle
                 writeBattleTopDescriptionUpdate();
-                descriptionTab.innerHTML = `Defeat The Enemy! - Fleet Power: <span class="green-ready-text">${getResourceDataObject('fleets', ['attackPower']).toFixed(0)}</span> Enemy Fleet Power: <span class="red-disabled-text">${getStarSystemDataObject('stars', ['destinationStar', 'enemyFleets', 'fleetPower']).toFixed(0)}</span>`;
+                descriptionTab.innerHTML = localize('tab5BattleDescription', getLanguage()).replace('{playerPower}', `<span class="green-ready-text">${getResourceDataObject('fleets', ['attackPower']).toFixed(0)}</span>`).replace('{enemyPower}', `<span class="red-disabled-text">${getStarSystemDataObject('stars', ['destinationStar', 'enemyFleets', 'fleetPower']).toFixed(0)}</span>`);
                 button = document.createElement('button');
                 button.id = 'battleButton';
                 button.classList.add('option-button', 'red-disabled-text', 'battle-button');
-                button.innerHTML = 'Attack!';
+                button.innerHTML = localize('buttonAttack', getLanguage());
                 button.onclick = function() {
                     disableTabsLinksAndAutoSaveDuringBattle(true);
                     settleSystemAfterBattleCalled = false;
@@ -9227,8 +9278,8 @@ function drawBattleResultText(canvasId, result) {
     const canvasHeight = canvas.height;
 
     const won = result === 'player';
-    const text = won ? 'BATTLE WON' : 'BATTLE LOST';
-    const subText = won ? 'SYSTEM SECURED' : 'FLEET DESTROYED';
+    const text = won ? localize('textBattleWon', getLanguage()) : localize('textBattleLost', getLanguage());
+    const subText = won ? localize('textSystemSecured', getLanguage()) : localize('textFleetDestroyed', getLanguage());
 
     const x = canvasWidth / 2;
     const y = canvasHeight / 2;
@@ -9398,8 +9449,8 @@ function checkTravelToDescriptions(element) {
         labelElement.classList.add('green-ready-text');
         labelElement.classList.remove('red-disabled-text');
         labelElement.innerHTML = getRocketDirection(rocket)
-            ? `Returning ... ${timeLeft}s`
-            : `Travelling ... ${timeLeft}s`;
+            ? localize('textReturningProgress', getLanguage()).replace('{seconds}', timeLeft)
+            : localize('textTravellingProgress', getLanguage()).replace('{seconds}', timeLeft);
     }
 }
 
@@ -9461,7 +9512,7 @@ const updateQuantityDisplays = (element, data1, data2, resourceData1, resourceDa
                     priceString = data1 + ' ' + data2;
                 } else {
                     if (getPhilosophyAbilityActive()) {
-                        priceString = 'UNLOCKED';
+                        priceString = localize('textUnlocked', getLanguage());
                     } else {
                         priceString = data1 + ' ' + data2;
                     }
@@ -9636,7 +9687,7 @@ export function sellBuilding(quantityToSell, building) {
         } else {
           value = Math.floor(value / costMultiplier);
           setResourceDataObject(Math.floor(value * 0.4) + currentCash, 'currency', ['cash']);
-          showNotification(`You sold a Power Plant!  Receive: ${getCurrencySymbol()}${Math.floor(value * 0.4)}`);
+          showNotification(localize('notificationSoldPowerPlant', getLanguage()).replace('{currency}', getCurrencySymbol()).replace('{cash}', Math.floor(value * 0.4)));
         }
       
         setResourceDataObject(value, 'buildings', ['energy', 'upgrades', building, item.key]);
@@ -10567,14 +10618,14 @@ export function startTravelToAndFromAsteroidTimer(adjustment, rocket, direction)
 
                 if (direction) {
                     sfxPlayer.playAudio('rocketLand', false);
-                    showNotification(`${getRocketUserName(rocket)} has returned to be refuelled!`, 'info', 3000, 'rocket');
+                    showNotification(localize('notificationRocketReturnedToRefuel', getLanguage()).replace('{rocketName}', getRocketUserName(rocket)), 'info', 3000, 'rocket');
                     resetRocketForNextJourney(rocket);
                 } else {
-                    showNotification(`${getRocketUserName(rocket)} has reached ${destination} and started mining Antimatter!`, 'info', 3000, 'rocket');
+                    showNotification(localize('notificationRocketReachedAsteroid', getLanguage()).replace('{rocketName}', getRocketUserName(rocket)).replace('{destination}', destination), 'info', 3000, 'rocket');
                     addToResourceAllTimeStat(1, 'asteroidsMined');
 
                     if (travelTimerDescriptionElement) {
-                        travelTimerDescriptionElement.innerText = 'Mining Antimatter at ' + destination;
+                        travelTimerDescriptionElement.innerText = localize('textMiningAntimatterAt', getLanguage()).replace('{asteroid}', destination);
                     }
 
                     if (!getAntimatterUnlocked()) {
@@ -10590,8 +10641,8 @@ export function startTravelToAndFromAsteroidTimer(adjustment, rocket, direction)
                 travelTimerDescriptionElement.classList.remove('red-disabled-text');
                 travelTimerDescriptionElement.classList.add('green-ready-text');
                 travelTimerDescriptionElement.innerText = direction
-                    ? `Returning ... ${timeLeftUI}s`
-                    : `Travelling ... ${timeLeftUI}s`;
+                    ? localize('textReturningProgress', getLanguage()).replace('{seconds}', timeLeftUI)
+                    : localize('textTravellingProgress', getLanguage()).replace('{seconds}', timeLeftUI);
 
                 const elapsedTime = getRocketTravelDuration()[rocket] - getTimeLeftUntilRocketTravelToAsteroidTimerFinishes(rocket);
                 const progressBarPercentage = (elapsedTime / getRocketTravelDuration()[rocket]) * 100;
@@ -10655,7 +10706,7 @@ export function startBlackHoleChargeTimer(adjustment) {
                 setCurrentlyChargingBlackHole(false);
                 setBlackHoleChargeReady(true);
                 appendAttentionIndicator(document.getElementById('blackholeOption'), '🌀');
-                showNotification('The Black Hole is Charged and ready to Activate!', 'info', 3000, 'special');
+                showNotification(localize('notificationBlackHoleCharged', getLanguage()), 'info', 3000, 'special');
                 setTimeLeftUntilBlackHoleChargeTimerFinishes(0);
 
                 if (progressBar) {
@@ -10721,7 +10772,7 @@ export function startTravelToDestinationStarTimer(adjustment) {
 
             if (timeRemaining <= 0) {
                 timerManagerDelta.removeTimer(timerName);
-                showNotification(`StarShip has reached orbit of the ${capitaliseWordsWithRomanNumerals(destination)} system!`, 'info', 3000, 'starShip');
+                showNotification(localize('notificationStarShipReachedOrbit', getLanguage()).replace('{star}', capitaliseWordsWithRomanNumerals(destination)), 'info', 3000, 'starShip');
 
                 sfxPlayer.playAudio('starShipArrive', false);
 
@@ -10745,7 +10796,7 @@ export function startTravelToDestinationStarTimer(adjustment) {
                         showExtra2: false,
                         onConfirm: function() {
                             showHideModal();
-                            showNotification('Galactic Tab Unlocked!', 'warning', 3000, 'special');
+                            showNotification(localize('notificationGalacticTabUnlocked', getLanguage()), 'warning', 3000, 'special');
                         },
                         onCancel: null,
                         onExtra1: null,
@@ -10804,7 +10855,7 @@ export function startTravelToDestinationStarTimer(adjustment) {
                     if (getMegaStructureAssignmentMode?.() !== 'legacy') { //can remove later
                         ensureFactoryStarMegaStructureAssigned(getDestinationStar());
                     }
-                    const content = `Your Starship arrived at the <span class="factory-star-text">${capitaliseWordsWithRomanNumerals(getDestinationStar())}</span> System!<br>You gasp at what you see! The main star has been completely enveloped by a gigantic structure!<br>It looks to be some kind of <span class="factory-star-text">${getStarSystemDataObject('stars', [getDestinationStar(), 'factoryStar'])}</span><br>No wonder we didn't discover this System before,<br>the star is not visible due to the size of this structure!<br>This system is going to be heavily defended for sure, but if we can conquer it,<br>for sure it will open up vast opportunities for us...`;
+                    const content = localize('modalStarshipArrivedFactoryStarText', getLanguage()).replace('{star}', `<span class="factory-star-text">${capitaliseWordsWithRomanNumerals(getDestinationStar())}</span>`).replace('{structure}', `<span class="factory-star-text">${localizeFactoryStarName(getStarSystemDataObject('stars', [getDestinationStar(), 'factoryStar']))}</span>`);
                     callPopupModal({
                         header,
                         content,
@@ -10815,7 +10866,7 @@ export function startTravelToDestinationStarTimer(adjustment) {
                         onConfirm: function() {
                             showHideModal();
                             if (getStatRun() === 1) {
-                                showNotification('Galactic Tab Unlocked!', 'warning', 3000, 'special');
+                                showNotification(localize('notificationGalacticTabUnlocked', getLanguage()), 'warning', 3000, 'special');
                             }
                         },
                         onCancel: null,
@@ -10837,7 +10888,7 @@ export function startTravelToDestinationStarTimer(adjustment) {
                 if (travelTimerDescriptionElement) {
                     travelTimerDescriptionElement.classList.remove('red-disabled-text');
                     travelTimerDescriptionElement.classList.add('green-ready-text');
-                    travelTimerDescriptionElement.innerText = `Travelling ... ${timeLeftUI}s`;
+                    travelTimerDescriptionElement.innerText = localize('textTravellingProgress', getLanguage()).replace('{seconds}', timeLeftUI);
 
                     const progressBar = document.getElementById('spaceTravelToStarProgressBar');
                     if (progressBar) {
@@ -10919,14 +10970,14 @@ export function startPillageVoidTimer(adjustment) {
                 gainPillageVoidResourcesAndCompounds();
                 timerManagerDelta.removeTimer(timerName);
                 if (pillageVoidTimerDescriptionElement) {             
-                    pillageVoidTimerDescriptionElement.innerText = 'Ready To Pillage';
+                    pillageVoidTimerDescriptionElement.innerText = localize('textReadyToPillage', getLanguage());
                 }
                 setTelescopeReadyToSearch(true);
                 setCurrentlyPillagingVoid(false);
                 setTimeLeftUntilPillageVoidTimerFinishes(0);
             } else if (pillageVoidTimerDescriptionElement) {
                 pillageVoidTimerDescriptionElement.classList.add('green-ready-text');
-                pillageVoidTimerDescriptionElement.innerText = `Pillaging ... ${timeLeftUI}s`;
+                pillageVoidTimerDescriptionElement.innerText = localize('textPillagingProgress', getLanguage()).replace('{seconds}', timeLeftUI);
                 const elapsedTime = getCurrentPillageVoidTimerDurationTotal() - getTimeLeftUntilPillageVoidTimerFinishes();
                 const progressBarPercentage = (elapsedTime / getCurrentPillageVoidTimerDurationTotal()) * 100;
                 document.getElementById('spaceTelescopePillageVoidProgressBar').style.width = `${progressBarPercentage}%`;
@@ -10994,7 +11045,7 @@ export function startInvestigateStarTimer(adjustment) {
                                 source: 'star_study_modal'
                             }, { immediate: true, flushReason: 'philosophy' });
                             setAchievementFlagArray('adoptPhilosophy', 'add');
-                            showNotification('You are a CONSTRUCTOR!', 'warning', 3000, 'special');
+                            showNotification(localize('notificationPhilosophyConstructor', getLanguage()), 'warning', 3000, 'special');
                             showHideModal();
                             removeModalButtonTooltips();
                         },
@@ -11005,7 +11056,7 @@ export function startInvestigateStarTimer(adjustment) {
                                 source: 'star_study_modal'
                             }, { immediate: true, flushReason: 'philosophy' });
                             setAchievementFlagArray('adoptPhilosophy', 'add');
-                            showNotification('You are a SUPREMACIST!', 'warning', 3000, 'special');
+                            showNotification(localize('notificationPhilosophySupremacist', getLanguage()), 'warning', 3000, 'special');
                             showHideModal();
                             removeModalButtonTooltips();
                         },
@@ -11016,7 +11067,7 @@ export function startInvestigateStarTimer(adjustment) {
                                 source: 'star_study_modal'
                             }, { immediate: true, flushReason: 'philosophy' });
                             setAchievementFlagArray('adoptPhilosophy', 'add');
-                            showNotification('You are VOIDBORN!', 'warning', 3000, 'special');
+                            showNotification(localize('notificationPhilosophyVoidborn', getLanguage()), 'warning', 3000, 'special');
                             showHideModal();
                             removeModalButtonTooltips();
                         },
@@ -11027,7 +11078,7 @@ export function startInvestigateStarTimer(adjustment) {
                                 source: 'star_study_modal'
                             }, { immediate: true, flushReason: 'philosophy' });
                             setAchievementFlagArray('adoptPhilosophy', 'add');
-                            showNotification('You are an EXPANSIONIST!', 'warning', 3000, 'special');
+                            showNotification(localize('notificationPhilosophyExpansionist', getLanguage()), 'warning', 3000, 'special');
                             showHideModal();
                             removeModalButtonTooltips();
                         },
@@ -11041,14 +11092,14 @@ export function startInvestigateStarTimer(adjustment) {
 
                 timerManagerDelta.removeTimer(timerName);
                 if (searchTimerDescriptionElement) {             
-                    searchTimerDescriptionElement.innerText = 'Ready To Study';
+                    searchTimerDescriptionElement.innerText = localize('textReadyToStudy', getLanguage());
                 }
                 setTelescopeReadyToSearch(true);
                 setCurrentlyInvestigatingStar(false);
                 setTimeLeftUntilStarInvestigationTimerFinishes(0);
             } else if (searchTimerDescriptionElement) {
                 searchTimerDescriptionElement.classList.add('green-ready-text');
-                searchTimerDescriptionElement.innerText = `Studying ... ${timeLeftUI}s`;
+                searchTimerDescriptionElement.innerText = localize('textStudyingProgress', getLanguage()).replace('{seconds}', timeLeftUI);
                 const elapsedTime = getCurrentInvestigateStarTimerDurationTotal() - getTimeLeftUntilStarInvestigationTimerFinishes();
                 const progressBarPercentage = (elapsedTime / getCurrentInvestigateStarTimerDurationTotal()) * 100;
                 document.getElementById('spaceTelescopeInvestigateStarProgressBar').style.width = `${progressBarPercentage}%`;
@@ -11108,14 +11159,14 @@ export function startSearchAsteroidTimer(adjustment) {
                 discoverAsteroid(false);
                 timerManagerDelta.removeTimer(timerName);
                 if (searchTimerDescriptionElement) {             
-                    searchTimerDescriptionElement.innerText = 'Ready To Search';
+                    searchTimerDescriptionElement.innerText = localize('textReadyToSearch', getLanguage());
                 }
                 setTelescopeReadyToSearch(true);
                 setCurrentlySearchingAsteroid(false);
                 setTimeLeftUntilAsteroidScannerTimerFinishes(0);
             } else if (searchTimerDescriptionElement) { 
                 searchTimerDescriptionElement.classList.add('green-ready-text');
-                searchTimerDescriptionElement.innerText = `Searching ... ${timeLeftUI}s`;
+                searchTimerDescriptionElement.innerText = localize('textSearchingProgress', getLanguage()).replace('{seconds}', timeLeftUI);
                 const elapsedTime = getCurrentAsteroidSearchTimerDurationTotal() - getTimeLeftUntilAsteroidScannerTimerFinishes();
                 const progressBarPercentage = (elapsedTime / getCurrentAsteroidSearchTimerDurationTotal()) * 100;
                 document.getElementById('spaceTelescopeSearchAsteroidProgressBar').style.width = `${progressBarPercentage}%`;
@@ -11197,7 +11248,7 @@ export function startCosmicRipTechResearchTimer(techName, adjustment = [0, 'norm
                 delete finalDurations[techName];
                 setCosmicRipTechResearchDurations(finalDurations);
 
-                showNotification(`${capitaliseString(techName).replace(/([a-z])([A-Z])/g, '$1 $2')} Researched!`, 'info', 3000, 'cosmicRip');
+                showNotification(localize('notificationTechResearched', getLanguage()).replace('{tech}', localizeCosmicRipTechName(techName)), 'info', 3000, 'cosmicRip');
 
                 if (techName === 'stabilizerArray') {
                     callPopupModal({
@@ -11300,7 +11351,7 @@ export function startCosmicRipTechResearchTimer(techName, adjustment = [0, 'norm
                 }
                 if (descriptionEl) {
                     descriptionEl.classList.add('green-ready-text');
-                    descriptionEl.textContent = `Researching ... ${timeLeftUI}s`;
+                    descriptionEl.textContent = localize('textResearchingProgress', getLanguage()).replace('{seconds}', timeLeftUI);
                 }
                 
                 setCosmicRipTechCurrentResearchProgress(researchProgress);
@@ -12433,7 +12484,7 @@ export function offlineGains(switchedFocus) {
         addToResourceAllTimeStat(Math.floor(offlineGainsAntimatter), 'antimatter');
         
         if (!switchedFocus) {
-            showNotification('Offline Gains Added!', 'info', 3000, 'loadSave');
+            showNotification(localize('notificationOfflineGainsAdded', getLanguage()), 'info', 3000, 'loadSave');
         }
     }
 }
@@ -12551,7 +12602,7 @@ export function fuelRockets() {
         const fuelQuantityProgressBarElement = document.getElementById(rocket + 'FuellingProgressBar');
 
         if (newFuelQuantity >= fullLevel) {
-            showNotification(`${getRocketUserName(rocket)} is ready for Launch!`, 'info', 3000, 'rocket');
+            showNotification(localize('notificationRocketReadyForLaunch', getLanguage()).replace('{rocketName}', getRocketUserName(rocket)), 'info', 3000, 'rocket');
             if (!getRocketsFuellerStartedArray().includes(rocket + 'FuelledUp')) {
                 setRocketsFuellerStartedArray(`${rocket}FuelledUp`, 'add');
             }
@@ -12564,7 +12615,7 @@ export function fuelRockets() {
                 rocketLaunchButton.classList.remove('invisible');
                 rocketLaunchButton.classList.remove('red-disabled-text');
                 rocketLaunchButton.classList.add('green-ready-text');
-                rocketLaunchButton.textContent = 'Launch!';
+                rocketLaunchButton.textContent = localize('buttonLaunch', getLanguage());
                 rocketLaunchButton.classList.remove('no-interaction');
             }
         }
@@ -12594,7 +12645,7 @@ export function fuelRockets() {
                 rocketLaunchButton.classList.add('red-disabled-text');
                 rocketLaunchButton.textContent = `${Math.floor(progressBarPercentage)}%`;
                 rocketLaunchButton.classList.add('no-interaction');
-                document.getElementById('fuelDescription').textContent = 'Requires Power!';
+                document.getElementById('fuelDescription').textContent = localize('textRequiresPower', getLanguage());
                 document.getElementById('fuelDescription').classList.remove('green-ready-text');
                 document.getElementById('fuelDescription').classList.add('red-disabled-text');
             }
@@ -12612,7 +12663,7 @@ export function fuelRockets() {
             }
 
             if (fuelDescriptionElement) {
-                fuelDescriptionElement.textContent = 'Lack Fuel Tech!';
+                fuelDescriptionElement.textContent = localize('textLackFuelTech', getLanguage());
                 fuelDescriptionElement.classList.remove('green-ready-text');
                 fuelDescriptionElement.classList.add('red-disabled-text');
             }
@@ -12635,22 +12686,22 @@ export function fuelRockets() {
 
             if (fuelDescriptionElement && getPowerOnOff() && getRocketsFuellerStartedArray().includes(`${rocket}FuelledUp`) && getCurrentOptionPane() === rocket) {
                 if (getCurrentStarSystemWeatherEfficiency()[2] !== 'rain' && getCurrentStarSystemWeatherEfficiency()[2] !== 'volcano') {
-                    fuelDescriptionElement.textContent = 'Ready For Launch...';
+                    fuelDescriptionElement.textContent = localize('textReadyForLaunch', getLanguage());
                     fuelDescriptionElement.classList.add('green-ready-text');
                     fuelDescriptionElement.classList.remove('red-disabled-text');
                 } else {
-                    fuelDescriptionElement.textContent = 'Bad Weather!';
+                    fuelDescriptionElement.textContent = localize('textBadWeather', getLanguage());
                     fuelDescriptionElement.classList.remove('green-ready-text');
                     fuelDescriptionElement.classList.add('red-disabled-text');
                 }
                 return;
             } else if (fuelDescriptionElement && getPowerOnOff() && !getRocketsFuellerStartedArray().includes(rocket) && getCurrentOptionPane() === rocket) {
-                fuelDescriptionElement.textContent = 'Ready To Fuel...';
+                fuelDescriptionElement.textContent = localize('textReadyToFuel', getLanguage());
                 fuelDescriptionElement.classList.add('green-ready-text');
                 fuelDescriptionElement.classList.remove('red-disabled-text');
                 return;
             } else if (fuelDescriptionElement && !getPowerOnOff() && getCurrentOptionPane() === rocket) {
-                fuelDescriptionElement.textContent = 'Requires Power!';
+                fuelDescriptionElement.textContent = localize('textRequiresPower', getLanguage());
                 fuelDescriptionElement.classList.remove('green-ready-text');
                 fuelDescriptionElement.classList.add('red-disabled-text');
                 return;
@@ -12665,7 +12716,7 @@ export function updateRocketDescription() {
 
     for (const rocket of launchedRockets) {
         if (rocket === currentScreen) {
-            document.getElementById('fuelDescription').textContent = 'Launched!';
+            document.getElementById('fuelDescription').textContent = localize('textLaunchedExclaim', getLanguage());
             break;
         }
     }
@@ -12675,7 +12726,7 @@ export function launchRocket(rocket) {
     setAchievementFlagArray('launchRocket', 'add');
     setLaunchedRockets(rocket, 'add');
     document.getElementById(`space${capitaliseString(rocket)}AutoBuyerRow`).classList.add('invisible');
-    showNotification(`${getRocketUserName(rocket)} Launched!`, 'info', 3000, 'rocket');
+    showNotification(localize('notificationRocketLaunched', getLanguage()).replace('{rocketName}', getRocketUserName(rocket)), 'info', 3000, 'rocket');
 }
 
 export function toggleAllPower() {
@@ -12822,17 +12873,17 @@ export function gainPillageVoidResourcesAndCompounds() {
     showNotification(
         `Pillage Void Complete!<br><br>${
             Object.entries(gains.resources).length
-                ? 'Resources Gained:<br>' +
+                ? localize('textResourcesGainedHeading', getLanguage()) + '<br>' +
                   Object.entries(gains.resources)
-                      .map(([resourceName, gainAmount]) => `${gainAmount} ${capitaliseString(resourceName)}`)
+                      .map(([resourceName, gainAmount]) => `${gainAmount} ${localizeMaterialName(resourceName, 'resources', getLanguage())}`)
                       .join('<br>') +
                   '<br><br>'
                 : ''
         }${
             Object.entries(gains.compounds).length
-                ? 'Compounds Gained:<br>' +
+                ? localize('textCompoundsGainedHeading', getLanguage()) + '<br>' +
                   Object.entries(gains.compounds)
-                      .map(([compoundName, gainAmount]) => `${gainAmount} ${capitaliseString(compoundName)}`)
+                      .map(([compoundName, gainAmount]) => `${gainAmount} ${localizeMaterialName(compoundName, 'compounds', getLanguage())}`)
                       .join('<br>')
                 : ''
         }`,
@@ -12908,7 +12959,7 @@ export function extendStarDataRange(debug) {
     }
 
     if (!debug) {
-        showNotification('Star Study Complete!</br></br>Take a look at the Star Map!', 'info', 3000, 'special');
+        showNotification(localize('notificationStarStudyComplete', getLanguage()), 'info', 3000, 'special');
         handleBlackHoleDiscoveryRoll();
     }
 }
@@ -13063,13 +13114,13 @@ function handleBlackHoleDiscoveryRoll() {
             onCancel: null,
             onExtra1: null,
             onExtra2: null,
-            confirmLabel: 'This should be interesting!',
+            confirmLabel: localize('notificationThisShouldBeInteresting', getLanguage()),
             cancelLabel: null,
             extra1Label: null,
             extra2Label: null,
             setupToolTips: false,
         });
-        showNotification('You have discovered a Black Hole - interact with it in the Galactic Tab!', 'info', 3000, 'special');
+        showNotification(localize('notificationBlackHoleDiscovered', getLanguage()), 'info', 3000, 'special');
     }
 }
 
@@ -13131,7 +13182,7 @@ export function discoverAsteroid(debug) {
     const { removableCount } = enforceUninteractedAsteroidCap({ maxUninteracted: 100 });
 
     if ((Math.random() < 0.07 && !debug) || removableCount >= 100) {
-        showNotification('Asteroid not found after search!', 'warning', 3000, 'special');
+        showNotification(localize('notificationAsteroidNotFound', getLanguage()), 'warning', 3000, 'special');
         return;
     }
 
@@ -13159,9 +13210,9 @@ export function discoverAsteroid(debug) {
                 rarity: 'Legendary'
             }, { immediate: true, flushReason: 'asteroid' });
             addToResourceAllTimeStat(1, 'totalLegendaryAsteroidsDiscovered');
-            showNotification(`Legendary Asteroid Discovered!<br><br>They named it after you!<br><br>${asteroid[keyName].name}`, 'info', 3000, 'special');
+            showNotification(localize('notificationLegendaryAsteroidDiscovered', getLanguage()).replace('{asteroid}', asteroid[keyName].name), 'info', 3000, 'special');
         } else {
-            showNotification(`Asteroid Discovered!<br><br>${asteroidName}`, 'info', 3000, 'special');
+            showNotification(localize('notificationAsteroidDiscovered', getLanguage()).replace('{asteroid}', asteroidName), 'info', 3000, 'special');
         }
     }
 }
@@ -13737,15 +13788,15 @@ function generateLifeDetection() {
 
 function generateLifeformTraits(civilizationLevel) {
     if (isHardModeDestinationStar()) {
-        return [['Aggressive', 'red-disabled-text'], ['Mechanized', ''], ['Armored', 'red-disabled-text']];
+        return [['Aggressive', 'red-disabled-text', 'traitNameAggressive'], ['Mechanized', '', 'traitNameMechanized'], ['Armored', 'red-disabled-text', 'traitNameArmored']];
     }
 
-    const primaryTraits = [['Aggressive', 'red-disabled-text'], ['Diplomatic', 'green-ready-text']];
-    const habitatTraits = [['Terrans', ''], ['Aquatic', ''], ['Aerialians', '']];
-    const extraTraits = [['Armored', 'red-disabled-text'], ['Hive Mind', 'red-disabled-text'], ['Power Siphon', 'warning-orange-text'], ['Hypercharge', 'warning-orange-text']];
+    const primaryTraits = [['Aggressive', 'red-disabled-text', 'traitNameAggressive'], ['Diplomatic', 'green-ready-text', 'traitNameDiplomatic']];
+    const habitatTraits = [['Terrans', '', 'traitNameTerrans'], ['Aquatic', '', 'traitNameAquatic'], ['Aerialians', '', 'traitNameAerialians']];
+    const extraTraits = [['Armored', 'red-disabled-text', 'traitNameArmored'], ['Hive Mind', 'red-disabled-text', 'traitNameHiveMind'], ['Power Siphon', 'warning-orange-text', 'traitNamePowerSiphon'], ['Hypercharge', 'warning-orange-text', 'traitNameHypercharge']];
     
     if (civilizationLevel === 'Unsentient' || civilizationLevel === 'None') {
-        return [['N/A', ''], ['N/A', ''], ['N/A', '']];
+        return [['N/A', '', 'textNotApplicable'], ['N/A', '', 'textNotApplicable'], ['N/A', '', 'textNotApplicable']];
     }
 
     const primaryTrait = primaryTraits[Math.floor(Math.random() * primaryTraits.length)];
@@ -13916,16 +13967,16 @@ function generateAnomalies(defenseRating, enemyFleets) {
     }
 
     const possibleAnomalies = [
-        { name: "Electromagnetic Surge", effect: "Enemy defense -20%", value: -20, type: "enemy-defense-debuff", counter: "enemy-defense-buff", target: "enemy", class: "green-ready-text" },
-        { name: "Fortified Magnetic Field", effect: "Enemy defense +20%", value: 20, type: "enemy-defense-buff", counter: "enemy-defense-debuff", target: "enemy", class: "red-disabled-text" },
-        { name: "Plasma Instability", effect: "Player attack power +15%", value: 15, type: "player-attack-buff", counter: "player-attack-debuff", target: "player", class: "green-ready-text" },
-        { name: "Energy Dampening Field", effect: "Player attack -15%", value: -15, type: "player-attack-debuff", counter: "player-attack-buff", target: "player", class: "red-disabled-text" },
-        { name: "Atmospheric Disturbance", effect: "Enemy air fleets -30%", value: -30, type: "air-debuff", counter: "air-buff", target: "enemy", class: "green-ready-text" },
-        { name: "High-Altitude Jet Streams", effect: "Enemy air fleets +20%", value: 20, type: "air-buff", counter: "air-debuff", target: "enemy", class: "red-disabled-text" },
-        { name: "Seismic Instability", effect: "Enemy land fleets -30%", value: -30, type: "land-debuff", counter: "land-buff", target: "enemy", class: "green-ready-text" },
-        { name: "Tectonic Shift", effect: "Enemy land fleets +20%", value: 20, type: "land-buff", counter: "land-debuff", target: "enemy", class: "red-disabled-text" },
-        { name: "Deep Ocean Currents", effect: "Enemy sea fleets -30%", value: -30, type: "sea-debuff", counter: "sea-buff", target: "enemy", class: "green-ready-text" },
-        { name: "Dark Matter Flux", effect: "Enemy sea fleets +20%", value: 20, type: "sea-buff", counter: "sea-debuff", target: "enemy", class: "red-disabled-text" }
+        { name: "Electromagnetic Surge", nameKey: "anomalyNameElectromagneticSurge", effect: "Enemy defense -20%", effectKey: "anomalyEffectEnemyDefenseDown", value: -20, type: "enemy-defense-debuff", counter: "enemy-defense-buff", target: "enemy", class: "green-ready-text" },
+        { name: "Fortified Magnetic Field", nameKey: "anomalyNameFortifiedMagneticField", effect: "Enemy defense +20%", effectKey: "anomalyEffectEnemyDefenseUp", value: 20, type: "enemy-defense-buff", counter: "enemy-defense-debuff", target: "enemy", class: "red-disabled-text" },
+        { name: "Plasma Instability", nameKey: "anomalyNamePlasmaInstability", effect: "Player attack power +15%", effectKey: "anomalyEffectPlayerAttackUp", value: 15, type: "player-attack-buff", counter: "player-attack-debuff", target: "player", class: "green-ready-text" },
+        { name: "Energy Dampening Field", nameKey: "anomalyNameEnergyDampeningField", effect: "Player attack -15%", effectKey: "anomalyEffectPlayerAttackDown", value: -15, type: "player-attack-debuff", counter: "player-attack-buff", target: "player", class: "red-disabled-text" },
+        { name: "Atmospheric Disturbance", nameKey: "anomalyNameAtmosphericDisturbance", effect: "Enemy air fleets -30%", effectKey: "anomalyEffectEnemyAirDown", value: -30, type: "air-debuff", counter: "air-buff", target: "enemy", class: "green-ready-text" },
+        { name: "High-Altitude Jet Streams", nameKey: "anomalyNameHighAltitudeJetStreams", effect: "Enemy air fleets +20%", effectKey: "anomalyEffectEnemyAirUp", value: 20, type: "air-buff", counter: "air-debuff", target: "enemy", class: "red-disabled-text" },
+        { name: "Seismic Instability", nameKey: "anomalyNameSeismicInstability", effect: "Enemy land fleets -30%", effectKey: "anomalyEffectEnemyLandDown", value: -30, type: "land-debuff", counter: "land-buff", target: "enemy", class: "green-ready-text" },
+        { name: "Tectonic Shift", nameKey: "anomalyNameTectonicShift", effect: "Enemy land fleets +20%", effectKey: "anomalyEffectEnemyLandUp", value: 20, type: "land-buff", counter: "land-debuff", target: "enemy", class: "red-disabled-text" },
+        { name: "Deep Ocean Currents", nameKey: "anomalyNameDeepOceanCurrents", effect: "Enemy sea fleets -30%", effectKey: "anomalyEffectEnemySeaDown", value: -30, type: "sea-debuff", counter: "sea-buff", target: "enemy", class: "green-ready-text" },
+        { name: "Dark Matter Flux", nameKey: "anomalyNameDarkMatterFlux", effect: "Enemy sea fleets +20%", effectKey: "anomalyEffectEnemySeaUp", value: 20, type: "sea-buff", counter: "sea-debuff", target: "enemy", class: "red-disabled-text" }
     ];
 
     const shuffled = possibleAnomalies.sort(() => Math.random() - 0.5);
@@ -14760,7 +14811,7 @@ export async function settleSystemAfterBattle(accessPoint) {
                 onCancel: null,
                 onExtra1: null,
                 onExtra2: null,
-                confirmLabel: 'IT SHALL BE DONE',
+                confirmLabel: localize('buttonItShallBeDone', getLanguage()),
                 cancelLabel: null,
                 extra1Label: null,
                 extra2Label: null,
@@ -14772,13 +14823,13 @@ export async function settleSystemAfterBattle(accessPoint) {
     switch(accessPoint) {
         case 'noSentientLife':
             if (getPlayerPhilosophy() === 'expansionist' && getPhilosophyAbilityActive()) {
-                showNotification('Rapid Expansion cannot capture extra systems when settling lifeless or unsentient worlds.', 'info', 3000, 'battle');
+                showNotification(localize('notificationRapidExpansionNotOnPeacefulSettle', getLanguage()), 'info', 3000, 'battle');
             }
             await showBattlePopup('noSentientLife', apGain);
             break;
         case 'surrender':
             if (getPlayerPhilosophy() === 'expansionist' && getPhilosophyAbilityActive()) {
-                showNotification('Rapid Expansion only triggers after conquest victories. No extra systems were captured.', 'info', 3000, 'battle');
+                showNotification(localize('notificationRapidExpansionConquestOnly', getLanguage()), 'info', 3000, 'battle');
             }
             await showBattlePopup(true, apGain);
             break;
@@ -14789,7 +14840,7 @@ export async function settleSystemAfterBattle(accessPoint) {
 
                 if (Array.isArray(rapidExpansionResult) && rapidExpansionResult.length > 0) {
                     const starNames = rapidExpansionResult.map(([name]) => name).join(', ');
-                    showNotification(`Rapid Expansion captured ${rapidExpansionResult.length} extra system${rapidExpansionResult.length === 1 ? '' : 's'}! - ${starNames}`, 'info', 3000, 'battle');
+                    showNotification(localize('notificationRapidExpansionCaptured', getLanguage()).replace('{count}', rapidExpansionResult.length).replace(/\{plural\}/g, rapidExpansionResult.length === 1 ? '' : 's').replace('{starNames}', starNames), 'info', 3000, 'battle');
                 } else {
                     const battleContainer = document.querySelector('.notification-container.classification-battle');
                     if (battleContainer) {
@@ -14845,9 +14896,9 @@ export async function settleSystemAfterBattle(accessPoint) {
                     const starsWithinTenLightYears = filteredStars.filter(star => star.distanceFromSettledStar <= 10);
 
                     if (starsWithinTenLightYears.length === 0) {
-                        showNotification('Rapid Expansion found no eligible nearby systems.', 'info', 3000, 'battle');
+                        showNotification(localize('notificationRapidExpansionNoEligible', getLanguage()), 'info', 3000, 'battle');
                     } else {
-                        showNotification('Rapid Expansion failed to capture any extra systems.', 'info', 3000, 'battle');
+                        showNotification(localize('notificationRapidExpansionFailed', getLanguage()), 'info', 3000, 'battle');
                     }
                 }
             }
@@ -14889,8 +14940,10 @@ export async function settleSystemAfterBattle(accessPoint) {
 
         const factoryStarToReport = activatedFactoryStars[0] ?? 'Unknown';
 
-        const header = 'ANCIENT MANUSCRIPT!';
-        const content = `Exploring a habitable Planet in the ${capitaliseWordsWithRomanNumerals(getDestinationStar())} System after your victory, you discover<br>an Ancient Manuscript!  It seems to point out about strange activities<br>in a previously undiscovered System, the <span class="factory-star-text">${capitaliseWordsWithRomanNumerals(factoryStarToReport)}</span> System! Its location has also<br>been revealed to us!`;
+        const header = localize('modalAncientManuscriptHeader', getLanguage());
+        const content = localize('modalAncientManuscriptText', getLanguage())
+            .replace('{star}', capitaliseWordsWithRomanNumerals(getDestinationStar()))
+            .replace('{factoryStar}', `<span class="factory-star-text">${capitaliseWordsWithRomanNumerals(factoryStarToReport)}</span>`);
 
         await new Promise((resolve) => {
             callPopupModal({

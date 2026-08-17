@@ -107,6 +107,15 @@ const TRADEABLE_MATERIALS = [
     { value: 'titanium', type: 'compounds' }
 ];
 
+// Void Seer prizes carry a catalogue key plus the cost and reel size the label
+// quotes, so the rendered label is composed here rather than stored in English.
+const voidSeerPrizeLabel = (prize, fallbackKey) => {
+    if (!prize?.labelKey) return localize(fallbackKey, getLanguage());
+    return localize(prize.labelKey, getLanguage())
+        .replace('{cost}', prize.costCp)
+        .replace('{odds}', prize.maxReel);
+};
+
 const tradeableMaterialOptions = () => TRADEABLE_MATERIALS.map(({ value, type }) => ({
     value,
     text: localizeMaterialName(value, type, getLanguage()),
@@ -722,9 +731,9 @@ export function drawTab7Content(heading, optionContentElement) {
             'galacticCasinoGame4PrizeDropdown',
             [
                 { value: 'select', text: localize('dropdownSelectPrize', getLanguage()), type: 'select' },
-                { value: 'prize1', text: String(voidSeerPrizeCatalog?.prize1?.label || localize('casinoVoidSeerPrizeFallback1', getLanguage())), type: 'prize' },
-                { value: 'prize2', text: String(voidSeerPrizeCatalog?.prize2?.label || localize('casinoVoidSeerPrizeFallback2', getLanguage())), type: 'prize' },
-                { value: 'prize3', text: String(voidSeerPrizeCatalog?.prize3?.label || localize('casinoVoidSeerPrizeFallback3', getLanguage())), type: 'prize' }
+                { value: 'prize1', text: voidSeerPrizeLabel(voidSeerPrizeCatalog?.prize1, 'casinoVoidSeerPrizeFallback1'), type: 'prize' },
+                { value: 'prize2', text: voidSeerPrizeLabel(voidSeerPrizeCatalog?.prize2, 'casinoVoidSeerPrizeFallback2'), type: 'prize' },
+                { value: 'prize3', text: voidSeerPrizeLabel(voidSeerPrizeCatalog?.prize3, 'casinoVoidSeerPrizeFallback3'), type: 'prize' }
             ],
             'select',
             (value) => {

@@ -45,8 +45,10 @@ import {
     getPlayerPhilosophy,
     getStatRun,
     setBuildingTypeOnOff,
-    setAchievementFlagArray
+    setAchievementFlagArray,
+    getLanguage
 } from "./constantsAndGlobalVars.js";
+import { localize, localizeMaterialName } from "./localization.js";
 import {
     getBlackHoleDuration,
     getBlackHolePower,
@@ -89,18 +91,40 @@ const GLOBAL_EVENT_TIMER_ID = 'randomEventGlobalTimer';
 
 const TIMED_EFFECTS_TIMER_ID = 'randomEventTimedEffectsTimer';
 
+// Every player-facing string in this file resolves through the catalogue at the
+// moment it is built, so a runtime language change is picked up by anything
+// rebuilt afterwards. `{placeholder}` tokens follow the same convention the draw
+// functions use.
+function t(key, replacements = null) {
+    let text = localize(key, getLanguage());
+    if (replacements) {
+        for (const [token, value] of Object.entries(replacements)) {
+            text = text.split(`{${token}}`).join(String(value));
+        }
+    }
+    return text;
+}
+
+// Event ids are canonical and stored; the display name is looked up from the id
+// rather than carried beside it, so the events tables follow a language change.
+function eventDisplayName(eventId) {
+    const key = `eventName${String(eventId).charAt(0).toUpperCase()}${String(eventId).slice(1)}`;
+    const localized = localize(key, getLanguage());
+    return localized === key ? formatEventName(String(eventId)) : localized;
+}
+
 const timedEffectDefinitions = {
     galacticMarketLockdown: {
         id: 'galacticMarketLockdown',
         onExpire: () => {
-            randomEventUiHandlers.showNotification?.('Galactic Market access restored.', 'info', 5000, 'default');
+            randomEventUiHandlers.showNotification?.(t('notificationGalacticMarketRestored'), 'info', 5000, 'default');
             randomEventUiHandlers.showEventModal?.('galacticMarketLockdownEnded');
         }
     },
     endlessSummer: {
         id: 'endlessSummer',
         onExpire: () => {
-            randomEventUiHandlers.showNotification?.('Endless Summer has ended.', 'info', 5000, 'default');
+            randomEventUiHandlers.showNotification?.(t('notificationEndlessSummerEnded'), 'info', 5000, 'default');
             randomEventUiHandlers.showEventModal?.('endlessSummerEnded');
             forceWeatherCycle?.();
         }
@@ -115,7 +139,9 @@ const timedEffectDefinitions = {
 
             setTimedEffectState('minerBrokeDown', { rocket: null });
             randomEventUiHandlers.showNotification?.(
-                rocketName ? `Mining operations restored, ${rocketName} has been repaired.` : 'Mining operations restored.',
+                rocketName
+                    ? t('notificationMiningOperationsRestoredNamed', { rocketName })
+                    : t('notificationMiningOperationsRestored'),
                 'info',
                 5000,
                 'default'
@@ -133,7 +159,9 @@ const timedEffectDefinitions = {
 
             setTimedEffectState('supplyChainDisruption', { category: null, key: null, percentDown: null });
             randomEventUiHandlers.showNotification?.(
-                itemName ? `Supply chains restored (${itemName}).` : 'Supply chains restored.',
+                itemName
+                    ? t('notificationSupplyChainsRestoredNamed', { itemName })
+                    : t('notificationSupplyChainsRestored'),
                 'info',
                 5000,
                 'default'
@@ -161,7 +189,7 @@ const timedEffectDefinitions = {
                 lastDurationMultiplier: 1
             });
 
-            randomEventUiHandlers.showNotification?.('Black Hole Instability stabilised.', 'info', 5000, 'default');
+            randomEventUiHandlers.showNotification?.(t('notificationBlackHoleInstabilityStabilised'), 'info', 5000, 'default');
             randomEventUiHandlers.showEventModal?.('blackHoleInstabilityEnded');
         }
     }
@@ -188,53 +216,61 @@ function buildInstantEventUiDescription(eventId, triggerResult) {
     const safe = (triggerResult && typeof triggerResult === 'object') ? triggerResult : {};
 
     if (eventId === 'powerPlantExplosion') {
-        return safe.destroyedBuilding ? `${safe.destroyedBuilding} destroyed.` : 'Power plant destroyed.';
+        return safe.destroyedBuilding
+            ? t('eventDescBuildingDestroyed', { building: safe.destroyedBuilding })
+            : t('eventDescPowerPlantDestroyed');
     }
 
     if (eventId === 'batteryExplosion') {
-        return safe.destroyedBuilding ? `${safe.destroyedBuilding} destroyed.` : 'Battery destroyed.';
+        return safe.destroyedBuilding
+            ? t('eventDescBuildingDestroyed', { building: safe.destroyedBuilding })
+            : t('eventDescBatteryDestroyed');
     }
 
     if (eventId === 'scienceTheft') {
         const amount = Number(safe.amountStolen);
         if (Number.isFinite(amount) && amount > 0) {
-            return `Research halved (-${amount}).`;
+            return t('eventDescResearchHalvedAmount', { amount });
         }
-        return 'Research halved.';
+        return t('eventDescResearchHalved');
     }
 
     if (eventId === 'researchBreakthrough') {
         const amount = Number(safe.amountGained);
         if (Number.isFinite(amount) && amount > 0) {
-            return `Research doubled (+${amount}).`;
+            return t('eventDescResearchDoubledAmount', { amount });
         }
-        return 'Research doubled.';
+        return t('eventDescResearchDoubled');
     }
 
     if (eventId === 'rocketInstantArrival') {
         const rocketName = safe.rocketName;
-        return rocketName ? `${rocketName} instantly arrived.` : 'A travelling rocket instantly arrived.';
+        return rocketName
+            ? t('eventDescRocketInstantArrivalNamed', { rocketName })
+            : t('eventDescRocketInstantArrival');
     }
 
     if (eventId === 'antimatterReaction') {
-        const rocketName = safe.rocketName ? String(safe.rocketName) : 'A mining rocket';
-        const asteroidName = safe.asteroidName ? String(safe.asteroidName) : 'an asteroid';
+        const rocketName = safe.rocketName ? String(safe.rocketName) : t('eventDescRocketFallbackName');
+        const asteroidName = safe.asteroidName ? String(safe.asteroidName) : t('eventDescAsteroidFallbackName');
         const antimatterLost = Number(safe.antimatterLost);
-        const lossText = Number.isFinite(antimatterLost) && antimatterLost > 0 ? ` -${antimatterLost} antimatter.` : '';
-        return `${rocketName} lost; ${asteroidName} destroyed.${lossText}`;
+        const lossText = Number.isFinite(antimatterLost) && antimatterLost > 0
+            ? t('eventDescAntimatterLoss', { amount: antimatterLost })
+            : '';
+        return t('eventDescAntimatterReaction', { rocketName, asteroidName, lossText });
     }
 
     if (eventId === 'stockLoss') {
-        const itemName = safe.itemName ? String(safe.itemName) : 'Stock';
+        const itemName = safe.itemName ? String(safe.itemName) : t('eventDescStockFallbackName');
         const lostPercent = Number(safe.lostPercent);
         if (Number.isFinite(lostPercent) && lostPercent > 0) {
-            return `-${lostPercent}% ${itemName}.`;
+            return t('eventDescStockLossPercent', { lostPercent, itemName });
         }
-        return `Stock loss (${itemName}).`;
+        return t('eventDescStockLossGeneric', { itemName });
     }
 
     if (eventId === 'starshipLostInSpace') {
-        return 'Starship lost; destination cleared; fleets reset.';
+        return t('eventDescStarshipLost');
     }
 
     return getEventTriggerDescription(eventId);
@@ -243,7 +279,7 @@ function buildInstantEventUiDescription(eventId, triggerResult) {
 function recordInstantEventHistory(eventId, triggerResult) {
     pushInstantEventHistoryEntry({
         id: eventId,
-        name: formatEventName(eventId),
+        name: eventDisplayName(eventId),
         endedAtMs: Date.now(),
         durationLabel: 'Instant',
         description: buildInstantEventUiDescription(eventId, triggerResult),
@@ -438,7 +474,7 @@ const randomEventDefinitions = {
             setResourceDataObject(false, 'space', ['upgrades', 'fleetEnvoy', 'envoyBuiltYet']);
 
             return {
-                notificationText: 'Random Event: Starship lost in space',
+                notificationText: t('notificationRandomEventStarshipLost'),
                 destinationStar: destination
             };
         }
@@ -528,7 +564,7 @@ const randomEventDefinitions = {
         trigger: () => {
             startTimedEffect('galacticMarketLockdown', 30 * 60 * 1000);
             return {
-                notificationText: 'Random Event: Galactic Market offline (30 minutes)'
+                notificationText: t('notificationRandomEventMarketOffline')
             };
         }
     },
@@ -541,7 +577,7 @@ const randomEventDefinitions = {
             startTimedEffect('endlessSummer', minutes * 60 * 1000);
             setWeatherCycleSecondsRemaining?.(10);
             return {
-                notificationText: `Random Event: Endless Summer (${minutes} minutes)`,
+                notificationText: t('notificationRandomEventEndlessSummer', { minutes }),
                 modalReplacements: { minutes }
             };
         }
@@ -561,7 +597,7 @@ const randomEventDefinitions = {
             startTimedEffect('minerBrokeDown', 15 * 60 * 1000, { rocket: pickedRocket });
 
             return {
-                notificationText: `Random Event: Miner broke down (${getRocketUserName(pickedRocket)})`,
+                notificationText: t('notificationRandomEventMinerBrokeDown', { rocketName: getRocketUserName(pickedRocket) }),
                 modalReplacements: { rocketName: getRocketUserName(pickedRocket) }
             };
         }
@@ -583,7 +619,7 @@ const randomEventDefinitions = {
             startTimedEffect('supplyChainDisruption', 15 * 60 * 1000, { category: picked.category, key: picked.key, percentDown });
 
             return {
-                notificationText: `Random Event: Supply Chain Disruption (${itemName})`,
+                notificationText: t('notificationRandomEventSupplyChain', { itemName }),
                 modalReplacements: { itemName, percentDown }
             };
         }
@@ -614,7 +650,7 @@ const randomEventDefinitions = {
             applyBlackHoleInstabilityShift(true);
 
             return {
-                notificationText: `Random Event: Black Hole Instability (${minutes} minutes)`,
+                notificationText: t('notificationRandomEventBlackHoleInstability', { minutes }),
                 modalReplacements: {
                     minutes
                 }
@@ -634,19 +670,19 @@ function roundToTwo(value) {
 function formatInstabilityDelta(multiplier) {
     const m = Number(multiplier);
     if (!Number.isFinite(m) || m <= 0) {
-        return 'unknown';
+        return t('textInstabilityUnknown');
     }
 
     const delta = (m - 1) * 100;
     const rounded = Math.round(Math.abs(delta));
 
     if (rounded === 0) {
-        return 'stable';
+        return t('textInstabilityStable');
     }
     if (delta < 0) {
-        return `${rounded}% weaker`;
+        return t('textInstabilityWeaker', { percent: rounded });
     }
-    return `${rounded}% stronger`;
+    return t('textInstabilityStronger', { percent: rounded });
 }
 
 function applyBlackHoleInstabilityShift(showNotification) {
@@ -688,7 +724,7 @@ function applyBlackHoleInstabilityShift(showNotification) {
         const powerText = formatInstabilityDelta(powerMultiplier);
         if (alwaysOn) {
             randomEventUiHandlers.showNotification?.(
-                `Black Hole Instability: Strength ${powerText} than standard.`,
+                t('notificationBlackHoleInstabilityShift', { powerText }),
                 'info',
                 5000,
                 'default'
@@ -696,7 +732,7 @@ function applyBlackHoleInstabilityShift(showNotification) {
         } else {
             const durationText = formatInstabilityDelta(appliedDurationMultiplier);
             randomEventUiHandlers.showNotification?.(
-                `Black Hole Instability: Strength ${powerText} than standard. Duration ${durationText} than standard.`,
+                t('notificationBlackHoleInstabilityShiftWithDuration', { powerText, durationText }),
                 'info',
                 5000,
                 'default'
@@ -707,7 +743,17 @@ function applyBlackHoleInstabilityShift(showNotification) {
 
 function getItemDisplayName(category, key) {
     if (!category || !key) {
-        return 'Unknown';
+        return t('textUnknown');
+    }
+
+    // The stored `nameResource` / `nameCompound` fields are English fallbacks;
+    // the display name is looked up from the internal key and its section.
+    // `localize` echoes the key back on a miss, so compare against that.
+    const catalogueKey = (category === 'compounds' ? 'compound' : 'resource')
+        + String(key).charAt(0).toUpperCase() + String(key).slice(1);
+    const localized = localizeMaterialName(String(key), category, getLanguage());
+    if (localized && localized !== catalogueKey) {
+        return localized;
     }
 
     const data = getResourceDataObject(category, [key], true);
@@ -817,11 +863,11 @@ function buildTimedEffectUiDescription(effectId, state) {
     const safeState = (state && typeof state === 'object') ? state : {};
 
     if (effectId === 'galacticMarketLockdown') {
-        return 'Galactic Market is offline.';
+        return t('eventDescGalacticMarketOffline');
     }
 
     if (effectId === 'endlessSummer') {
-        return 'Weather remains Sunny.';
+        return t('eventDescWeatherSunny');
     }
 
     if (effectId === 'minerBrokeDown') {
@@ -829,8 +875,8 @@ function buildTimedEffectUiDescription(effectId, state) {
         const fallbackRocketName = rocketKey ? formatEventName(String(rocketKey)) : null;
         const rocketName = rocketKey ? (getRocketUserName(rocketKey) || fallbackRocketName) : null;
         return rocketName
-            ? `${rocketName} mining rate is 0.`
-            : 'One mining rocket rate is 0.';
+            ? t('eventDescMinerRateZeroNamed', { rocketName })
+            : t('eventDescMinerRateZero');
     }
 
     if (effectId === 'supplyChainDisruption') {
@@ -839,15 +885,15 @@ function buildTimedEffectUiDescription(effectId, state) {
         const itemName = (category && key) ? getItemDisplayName(category, key) : null;
         const percentDown = Math.max(0, Math.min(100, Math.round(Number(safeState.percentDown) || 0)));
         return itemName
-            ? `${itemName} production reduced by -${percentDown}%.`
-            : `Production reduced by -${percentDown}%.`;
+            ? t('eventDescProductionReducedNamed', { itemName, percentDown })
+            : t('eventDescProductionReduced', { percentDown });
     }
 
     if (effectId === 'blackHoleInstability') {
-        return 'Black Hole strength (and duration) shift every minute.';
+        return t('eventDescBlackHoleShifting');
     }
 
-    return 'Ongoing timed effect.';
+    return t('eventDescOngoingTimedEffect');
 }
 
 function recordTimedEffectHistory(effectId) {
@@ -867,7 +913,7 @@ function recordTimedEffectHistory(effectId) {
 
     pushTimedEffectHistoryEntry({
         id: effectId,
-        name: formatEventName(effectId),
+        name: eventDisplayName(effectId),
         startedAtMs: Number.isFinite(startedAtMs) ? startedAtMs : null,
         endedAtMs,
         durationMs,
@@ -1047,7 +1093,7 @@ export function getTimedEffectsUiSnapshot() {
             }
             return {
                 id: effectId,
-                name: formatEventName(effectId),
+                name: eventDisplayName(effectId),
                 remainingMs,
                 description: buildTimedEffectUiDescription(effectId, state),
                 state
@@ -1088,7 +1134,7 @@ function getEventTriggerDescription(eventId) {
     const stored = randomEventTriggerDescriptions && typeof randomEventTriggerDescriptions === 'object'
         ? randomEventTriggerDescriptions[eventId]
         : null;
-    return stored || 'Unknown action';
+    return stored || t('eventDescUnknownAction');
 }
 
 function getUnlockedStockCandidates() {
@@ -1142,13 +1188,13 @@ function pickStockLossTarget() {
 }
 
 function pickStockLossReason() {
-    const reasons = [
-        'poor storage conditions',
-        'theft',
-        'a containment failure',
-        'a supply chain accident'
+    const reasonKeys = [
+        'stockLossReasonStorage',
+        'stockLossReasonTheft',
+        'stockLossReasonContainment',
+        'stockLossReasonSupplyChain'
     ];
-    return reasons[Math.floor(Math.random() * reasons.length)];
+    return t(reasonKeys[Math.floor(Math.random() * reasonKeys.length)]);
 }
 
 function getGlobalEventsState() {
@@ -1377,7 +1423,7 @@ function attemptTriggerAtCheckpoint(checkpointType) {
     randomEventUiHandlers.showNotification?.(
         (triggerResult && typeof triggerResult === 'object' && typeof triggerResult.notificationText === 'string' && triggerResult.notificationText.trim() !== '')
             ? triggerResult.notificationText
-            : `Random Event: ${formatEventName(picked)}`,
+            : t('notificationRandomEventGeneric', { eventName: eventDisplayName(picked) }),
         'info',
         5000,
         'default'
@@ -1474,10 +1520,9 @@ function resetRocketToUnbuilt(rocket) {
 
     removeRocketBuilt(rocket);
 
-    const rocketIndex = Number(rocket.replace('rocket', ''));
-    if (Number.isFinite(rocketIndex) && rocketIndex >= 1) {
-        setRocketUserName(rocket, `Rocket ${rocketIndex}`);
-    }
+    // Clearing the name rather than writing an English default lets
+    // `getRocketUserName` resolve the localized default at read time.
+    setRocketUserName(rocket, null);
 
     setRocketsFuellerStartedArray(rocket, 'remove', 'reset');
     setLaunchedRockets(rocket, 'remove');
@@ -1495,10 +1540,14 @@ function formatEventName(eventId) {
     return eventId.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase());
 }
 
+// Built at module-evaluation time by the debug panel, before the catalogue has
+// been fetched, so this returns the English name plus the key to render it from
+// rather than calling localize() here.
 export function getRandomEventDebugOptions() {
     return Object.keys(randomEventDefinitions).map((id) => ({
         id,
-        title: formatEventName(id)
+        title: formatEventName(id),
+        titleKey: `eventName${id.charAt(0).toUpperCase()}${id.slice(1)}`
     }));
 }
 
@@ -1508,14 +1557,15 @@ export function getRandomEventIds() {
 
 function getBuildingDisplayName(buildingKey) {
     const map = {
-        powerPlant1: 'Power Plant',
-        powerPlant2: 'Solar Power Plant',
-        powerPlant3: 'Advanced Power Plant',
-        battery1: 'Sodium Ion Battery',
-        battery2: 'Lithium Ion Battery',
-        battery3: 'Stellar Capacitor Array'
+        powerPlant1: 'headerMainPowerPlant',
+        powerPlant2: 'headerMainSolarPowerPlant',
+        powerPlant3: 'headerMainAdvancedPowerPlant',
+        battery1: 'buildingNameBattery1',
+        battery2: 'buildingNameBattery2',
+        battery3: 'buildingNameBattery3'
     };
-    return map[buildingKey] || buildingKey;
+    const key = map[buildingKey];
+    return key ? t(key) : buildingKey;
 }
 
 function getAvailablePowerPlantTypes() {
@@ -1624,7 +1674,7 @@ export function triggerRandomEventDebug() {
     const eligible = ids.filter((id) => randomEventDefinitions[id].canTrigger());
 
     if (eligible.length === 0) {
-        randomEventUiHandlers.showNotification?.('No eligible random events could trigger right now.', 'info', 3000, 'debug');
+        randomEventUiHandlers.showNotification?.(t('notificationDebugNoEligibleEvents'), 'info', 3000, 'debug');
         return;
     }
 
@@ -1659,7 +1709,7 @@ export function triggerRandomEventDebug() {
     randomEventUiHandlers.showNotification?.(
         (triggerResult && typeof triggerResult === 'object' && typeof triggerResult.notificationText === 'string' && triggerResult.notificationText.trim() !== '')
             ? triggerResult.notificationText
-            : `Random Event: ${formatEventName(picked)}`,
+            : t('notificationRandomEventGeneric', { eventName: eventDisplayName(picked) }),
         'info',
         5000,
         'default'
@@ -1674,12 +1724,12 @@ export function triggerRandomEventDebug() {
 export function triggerSpecificRandomEventDebug(eventId) {
     const def = randomEventDefinitions[eventId];
     if (!def) {
-        randomEventUiHandlers.showNotification?.(`Unknown random event: ${eventId}`, 'warning', 3000, 'debug');
+        randomEventUiHandlers.showNotification?.(t('notificationDebugUnknownEvent', { eventId }), 'warning', 3000, 'debug');
         return;
     }
 
     if (!def.canTrigger()) {
-        randomEventUiHandlers.showNotification?.(`Random Event not eligible: ${formatEventName(eventId)}`, 'info', 3000, 'debug');
+        randomEventUiHandlers.showNotification?.(t('notificationDebugEventNotEligible', { eventName: eventDisplayName(eventId) }), 'info', 3000, 'debug');
         return;
     }
 
@@ -1688,7 +1738,7 @@ export function triggerSpecificRandomEventDebug(eventId) {
 
     const triggerResult = def.trigger();
     if (!triggerResult) {
-        randomEventUiHandlers.showNotification?.(`Random Event failed to trigger: ${formatEventName(eventId)}`, 'info', 3000, 'debug');
+        randomEventUiHandlers.showNotification?.(t('notificationDebugEventFailedToTrigger', { eventName: eventDisplayName(eventId) }), 'info', 3000, 'debug');
         return;
     }
 
@@ -1709,7 +1759,7 @@ export function triggerSpecificRandomEventDebug(eventId) {
     randomEventUiHandlers.showNotification?.(
         (triggerResult && typeof triggerResult === 'object' && typeof triggerResult.notificationText === 'string' && triggerResult.notificationText.trim() !== '')
             ? triggerResult.notificationText
-            : `Random Event: ${formatEventName(eventId)}`,
+            : t('notificationRandomEventGeneric', { eventName: eventDisplayName(eventId) }),
         'info',
         5000,
         'default'

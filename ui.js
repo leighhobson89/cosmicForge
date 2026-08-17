@@ -1,4 +1,4 @@
-import { initLocalization, localize, reverseLocalizeForCompounds } from './localization.js';
+import { initLocalization, localize, localizeMaterialName, reverseLocalizeForCompounds } from './localization.js';
 import { getStatisticsContent, getStatKeyFromLocalizedName, statisticsContent } from './descriptions.js';
 import {
     setLastFocusOfflineGainsAppliedAt,
@@ -720,59 +720,88 @@ function formatHistoryAmount(value) {
 }
 
 
+// History rows carry the event name that was current when they were recorded.
+// The id is canonical, so resolve the display name from that instead and the
+// tables follow a runtime language change.
+function localizedEventName(entry) {
+    const id = String(entry?.id ?? '').trim();
+    if (id) {
+        const key = `eventName${id.charAt(0).toUpperCase()}${id.slice(1)}`;
+        const localized = localize(key, getLanguage());
+        if (localized !== key) return localized;
+    }
+    return String(entry?.name ?? entry?.id ?? localize('textUnknown', getLanguage()));
+}
+
+
 function buildInstantHistoryEffectText(eventId, context) {
     const safe = (context && typeof context === 'object') ? context : {};
 
 
     if (eventId === 'scienceTheft') {
         const amount = formatHistoryAmount(safe.amountStolen);
-        return amount ? `Research halved (-${amount}).` : 'Research halved.';
+        return amount
+            ? localize('eventDescResearchHalvedAmount', getLanguage()).replace('{amount}', amount)
+            : localize('eventDescResearchHalved', getLanguage());
     }
 
 
     if (eventId === 'researchBreakthrough') {
         const amount = formatHistoryAmount(safe.amountGained);
-        return amount ? `Research doubled (+${amount}).` : 'Research doubled.';
+        return amount
+            ? localize('eventDescResearchDoubledAmount', getLanguage()).replace('{amount}', amount)
+            : localize('eventDescResearchDoubled', getLanguage());
     }
 
 
     if (eventId === 'rocketInstantArrival') {
         const rocketName = safe.rocketName;
-        return rocketName ? `${rocketName} instantly arrived.` : 'A travelling rocket instantly arrived.';
+        return rocketName
+            ? localize('eventDescRocketInstantArrivalNamed', getLanguage()).replace('{rocketName}', rocketName)
+            : localize('eventDescRocketInstantArrival', getLanguage());
     }
 
 
     if (eventId === 'antimatterReaction') {
-        const rocketName = safe.rocketName ? String(safe.rocketName) : 'A mining rocket';
-        const asteroidName = safe.asteroidName ? String(safe.asteroidName) : 'an asteroid';
+        const rocketName = safe.rocketName ? String(safe.rocketName) : localize('eventDescRocketFallbackName', getLanguage());
+        const asteroidName = safe.asteroidName ? String(safe.asteroidName) : localize('eventDescAsteroidFallbackName', getLanguage());
         const lost = formatHistoryAmount(safe.antimatterLost);
-        const lossText = lost ? ` -${lost} antimatter.` : '';
-        return `${rocketName} lost; ${asteroidName} destroyed.${lossText}`;
+        const lossText = lost ? localize('eventDescAntimatterLoss', getLanguage()).replace('{amount}', lost) : '';
+        return localize('eventDescAntimatterReaction', getLanguage())
+            .replace('{rocketName}', rocketName)
+            .replace('{asteroidName}', asteroidName)
+            .replace('{lossText}', lossText);
     }
 
 
     if (eventId === 'stockLoss') {
-        const itemName = safe.itemName ? String(safe.itemName) : 'Stock';
+        const itemName = safe.itemName ? String(safe.itemName) : localize('eventDescStockFallbackName', getLanguage());
         const lostPercent = Number(safe.lostPercent);
         if (Number.isFinite(lostPercent) && lostPercent > 0) {
-            return `-${lostPercent}% ${itemName}.`;
+            return localize('eventDescStockLossPercent', getLanguage())
+                .replace('{lostPercent}', lostPercent)
+                .replace('{itemName}', itemName);
         }
-        return `Stock loss (${itemName}).`;
+        return localize('eventDescStockLossGeneric', getLanguage()).replace('{itemName}', itemName);
     }
 
 
     if (eventId === 'powerPlantExplosion') {
-        return safe.destroyedBuilding ? `${safe.destroyedBuilding} destroyed.` : 'Power plant destroyed.';
+        return safe.destroyedBuilding
+            ? localize('eventDescBuildingDestroyed', getLanguage()).replace('{building}', safe.destroyedBuilding)
+            : localize('eventDescPowerPlantDestroyed', getLanguage());
     }
 
 
     if (eventId === 'batteryExplosion') {
-        return safe.destroyedBuilding ? `${safe.destroyedBuilding} destroyed.` : 'Battery destroyed.';
+        return safe.destroyedBuilding
+            ? localize('eventDescBuildingDestroyed', getLanguage()).replace('{building}', safe.destroyedBuilding)
+            : localize('eventDescBatteryDestroyed', getLanguage());
     }
 
 
     if (eventId === 'starshipLostInSpace') {
-        return 'Starship lost; destination cleared; fleets reset.';
+        return localize('eventDescStarshipLost', getLanguage());
     }
 
 
@@ -794,10 +823,10 @@ function updateTimedEventsPanel() {
 
 
         if (!active.length) {
-            activeTbody.innerHTML = '<tr><td colspan="3">No active timed events.</td></tr>';
+            activeTbody.innerHTML = `<tr><td colspan="3">${localize('textNoActiveTimedEvents', getLanguage())}</td></tr>`;
         } else {
             activeTbody.innerHTML = active.map((entry) => {
-                const name = String(entry?.name ?? entry?.id ?? 'Unknown');
+                const name = localizedEventName(entry);
                 const remainingMs = Number(entry?.remainingMs) || 0;
                 const description = String(entry?.description ?? '');
                 const effectId = String(entry?.id ?? '').trim();
@@ -818,14 +847,14 @@ function updateTimedEventsPanel() {
     if (historyTbody) {
         const history = getEventsHistorySnapshot?.() || [];
         if (!history.length) {
-            historyTbody.innerHTML = '<tr><td colspan="3">No completed timed events yet.</td></tr>';
+            historyTbody.innerHTML = `<tr><td colspan="3">${localize('textNoCompletedTimedEvents', getLanguage())}</td></tr>`;
         } else {
             historyTbody.innerHTML = history.map((entry) => {
-                const name = String(entry?.name ?? entry?.id ?? 'Unknown');
+                const name = localizedEventName(entry);
                 const durationMs = entry?.durationMs;
                 const durationLabel = entry?.durationLabel;
                 const durationText = (durationLabel === 'Instant')
-                    ? 'Instant'
+                    ? localize('textInstantDuration', getLanguage())
                     : (durationMs === null || durationMs === undefined)
                         ? '--'
                         : `${formatDurationMinutesOnly(durationMs)}`;
@@ -984,7 +1013,7 @@ function updateHoldEnterToGainDebugStatus() {
 
 
     const enabled = getDebugHoldEnterToGainEnabled();
-    button.textContent = enabled ? 'Enabled' : 'Disabled';
+    button.textContent = enabled ? localize('textEnabled', getLanguage()) : localize('textDisabled', getLanguage());
     button.classList.remove('green-ready-text', 'debug-toggle-inactive');
     if (enabled) {
         button.classList.add('green-ready-text');
@@ -1273,7 +1302,7 @@ function buildForceFieldTooltipContent() {
 
 
     if (disconnectCount >= 4) {
-        strengthText = 'DOWN!';
+        strengthText = localize('textForceFieldDown', getLanguage());
         strengthClass = 'green-ready-text';
     } else if (disconnectCount === 3) {
         strengthText = '25%';
@@ -1293,12 +1322,12 @@ function buildForceFieldTooltipContent() {
 
 
     const followUp = disconnectCount >= 4
-        ? `<div class="green-ready-text">You can now move to Miaplacidus!</div>`
-        : '<div>Keep searching and conquering Ancient Megastructures to weaken the Miaplacidus Force Field</div>';
+        ? `<div class="green-ready-text">${localize('textCanMoveToMiaplacidus', getLanguage())}</div>`
+        : `<div>${localize('textKeepWeakeningForceField', getLanguage())}</div>`;
 
 
     return [
-        `<div>Force Field Strength: ${strengthHtml}</div>`,
+        `<div>${localize('textForceFieldStrength', getLanguage())} ${strengthHtml}</div>`,
         '<div class="tooltip-spacer">&nbsp;</div>',
         followUp
     ].join('');
@@ -1318,11 +1347,11 @@ function buildLaunchPadSidebarStatus() {
 
 
     if (built) {
-        return { text: 'Built', className: 'green-ready-text' };
+        return { text: localize('textBuiltStatus', getLanguage()), className: 'green-ready-text' };
     }
 
 
-    return { text: 'Not Built', className: 'red-disabled-text' };
+    return { text: localize('textNotBuilt', getLanguage()), className: 'red-disabled-text' };
 }
 
 
@@ -1934,7 +1963,7 @@ function setupDemoTooltips() {
             tooltip.style.display = 'none';
             return;
         }
-        tooltip.innerHTML = 'Not Available in Demo Version, if you love the game consider supporting the Developer and buy the game on Steam :)';
+        tooltip.innerHTML = localize('notificationNotAvailableInDemo', getLanguage());
         tooltip.style.display = 'block';
 
 
@@ -2196,7 +2225,7 @@ function setupProductionRateTooltips() {
         const updateCosmicRipTelemetryTooltip = event => {
             const rateText = cosmicRipTelemetryElement.textContent || '0 / s';
             const isZeroRate = rateText.trim() === '0 / s';
-            tooltip.innerHTML = `Rip Telemetry Data: <span class="${isZeroRate ? '' : 'green-ready-text'}">${rateText}</span>`;
+            tooltip.innerHTML = `${localize('tooltipRipTelemetryDataLabel', getLanguage())} <span class="${isZeroRate ? '' : 'green-ready-text'}">${rateText}</span>`;
             tooltip.style.display = 'block';
             tooltip.style.left = `${event.pageX + 10}px`;
             tooltip.style.top = `${event.pageY + 10}px`;
@@ -2314,14 +2343,14 @@ function buildProductionTooltipContent(resourceKey, category) {
         const clampedPercentDown = Math.max(0, Math.min(100, Math.round(percentDown)));
         lines.push('<div class="tooltip-spacer">&nbsp;</div>');
         lines.push(
-            `<div class="warning-orange-text">Supply Chain Disrupted:<br>Production Reduced -${clampedPercentDown}%<br>Time Remaining: ${formatted}</div>`
+            `<div class="warning-orange-text">${localize('tooltipSupplyChainDisrupted', getLanguage())}<br>${localize('tooltipProductionReducedBy', getLanguage()).replace('{percent}', clampedPercentDown)}<br>${localize('tooltipTimeRemaining', getLanguage()).replace('{time}', formatted)}</div>`
         );
     }
 
 
     if ((warpMultiplier || 1) !== 1) {
         lines.push('<div class="tooltip-spacer">&nbsp;</div>');
-        lines.push(`<div class="green-ready-text">Black Hole Multiplier of x${warpMultiplier} applied</div>`);
+        lines.push(`<div class="green-ready-text">${localize('tooltipBlackHoleMultiplierApplied', getLanguage()).replace('{multiplier}', warpMultiplier)}</div>`);
     }
 
 
@@ -2331,7 +2360,7 @@ function buildProductionTooltipContent(resourceKey, category) {
     const generationBlock = [autoBuyerGenerationLines, autoCreateGenerationLine, precipitationGenerationLine].filter(Boolean).join('');
     if (generationBlock) {
         lines.push('<div class="tooltip-spacer">&nbsp;</div>');
-        lines.push('<div><strong>Generation</strong></div>');
+        lines.push(`<div><strong>${localize('tooltipHeadingGeneration', getLanguage())}</strong></div>`);
         lines.push(generationBlock);
     }
 
@@ -2339,7 +2368,7 @@ function buildProductionTooltipContent(resourceKey, category) {
     const consumptionLines = buildFuelConsumptionLines(resourceKey, category, timerRatio);
     if (consumptionLines) {
         lines.push('<div class="tooltip-spacer">&nbsp;</div>');
-        lines.push('<div><strong>Consumption</strong></div>');
+        lines.push(`<div><strong>${localize('tooltipHeadingConsumption', getLanguage())}</strong></div>`);
         lines.push(consumptionLines);
     }
 
@@ -2366,20 +2395,20 @@ function buildResearchTooltipContent() {
 
 
     const lines = [
-        `<div><strong>Research</strong>: <span class="green-ready-text">${netRateDisplay}</span></div>`
+        `<div><strong>${localize('headerMainResearch', getLanguage())}</strong>: <span class="green-ready-text">${netRateDisplay}</span></div>`
     ];
 
 
     if ((warpMultiplier || 1) !== 1) {
         lines.push('<div class="tooltip-spacer">&nbsp;</div>');
-        lines.push(`<div class="green-ready-text">Black Hole Multiplier of x${warpMultiplier} applied</div>`);
+        lines.push(`<div class="green-ready-text">${localize('tooltipBlackHoleMultiplierApplied', getLanguage()).replace('{multiplier}', warpMultiplier)}</div>`);
     }
 
 
     const { lines: generationLines, total: generationTotal } = buildResearchGenerationLines(timerRatio);
     if (generationLines.length > 0) {
         lines.push('<div class="tooltip-spacer">&nbsp;</div>');
-        lines.push('<div><strong>Generation</strong></div>');
+        lines.push(`<div><strong>${localize('tooltipHeadingGeneration', getLanguage())}</strong></div>`);
         lines.push(...generationLines);
     }
 
@@ -2387,7 +2416,7 @@ function buildResearchTooltipContent() {
     const { lines: bonusLines } = buildResearchBonusLines(timerRatio);
     if (bonusLines.length > 0) {
         lines.push('<div class="tooltip-spacer">&nbsp;</div>');
-        lines.push('<div><strong>MegaStructure Bonuses</strong></div>');
+        lines.push(`<div><strong>${localize('tooltipHeadingMegaStructureBonuses', getLanguage())}</strong></div>`);
         lines.push(...bonusLines);
     }
 
@@ -2407,9 +2436,9 @@ function buildResearchGenerationLines(timerRatio) {
     const powerOn = getPowerOnOff();
     const upgrades = getResourceDataObject('research', ['upgrades']) || {};
     const researchSources = [
-        { key: 'scienceKit', label: 'Science Kit' },
-        { key: 'scienceClub', label: 'Science Club' },
-        { key: 'scienceLab', label: 'Science Lab', requiresPower: true }
+        { key: 'scienceKit', label: localize('buildingNameScienceKit', getLanguage()) },
+        { key: 'scienceClub', label: localize('buildingNameScienceClub', getLanguage()) },
+        { key: 'scienceLab', label: localize('buildingNameScienceLab', getLanguage()), requiresPower: true }
     ];
 
 
@@ -2453,20 +2482,20 @@ function buildAntimatterTooltipContent() {
 
 
     const lines = [
-        `<div><strong>Antimatter</strong>: <span class="green-ready-text">${netRateDisplay}</span></div>`
+        `<div><strong>${localize('textAsteroidAntimatter', getLanguage())}</strong>: <span class="green-ready-text">${netRateDisplay}</span></div>`
     ];
 
 
     if ((warpMultiplier || 1) !== 1) {
         lines.push('<div class="tooltip-spacer">&nbsp;</div>');
-        lines.push(`<div class="green-ready-text">Black Hole Multiplier of x${warpMultiplier} applied</div>`);
+        lines.push(`<div class="green-ready-text">${localize('tooltipBlackHoleMultiplierApplied', getLanguage()).replace('{multiplier}', warpMultiplier)}</div>`);
     }
 
 
     const { lines: rocketLines } = buildAntimatterRocketLines(timerRatio);
     if (rocketLines.length > 0) {
         lines.push('<div class="tooltip-spacer">&nbsp;</div>');
-        lines.push('<div><strong>Rockets</strong></div>');
+        lines.push(`<div><strong>${localize('tooltipHeadingRockets', getLanguage())}</strong></div>`);
         lines.push(...rocketLines);
     }
 
@@ -2474,7 +2503,7 @@ function buildAntimatterTooltipContent() {
     const { lines: megaLines } = buildAntimatterMegaStructureLines(timerRatio);
     if (megaLines.length > 0) {
         lines.push('<div class="tooltip-spacer">&nbsp;</div>');
-        lines.push('<div><strong>MegaStructure Bonuses</strong></div>');
+        lines.push(`<div><strong>${localize('tooltipHeadingMegaStructureBonuses', getLanguage())}</strong></div>`);
         lines.push(...megaLines);
     }
 
@@ -2485,7 +2514,7 @@ function buildAntimatterTooltipContent() {
 
         const fTypeBonusAmount = totalAntimatterRate * (fTypeBoostMultiplier / (1 + fTypeBoostMultiplier));
         lines.push('<div class="tooltip-spacer">&nbsp;</div>');
-        lines.push('<div><strong>F-Type Star System Bonus</strong></div>');
+        lines.push(`<div><strong>${localize('tooltipHeadingFTypeBonus', getLanguage())}</strong></div>`);
         lines.push(`<div><span class="green-ready-text">+${formatProductionRateValue(fTypeBonusAmount)} / s</span></div>`);
     }
 
@@ -2509,7 +2538,7 @@ function buildAntimatterRocketLines(timerRatio) {
 
     for (let i = 1; i <= 4; i++) {
         const rocketKey = `rocket${i}`;
-        const rocketName = getRocketUserName?.(rocketKey) || `Rocket ${i}`;
+        const rocketName = getRocketUserName?.(rocketKey) || localize('rocketDefaultName', getLanguage()).replace('{index}', i);
         const asteroidName = miningAssignments?.[rocketKey];
         const asteroid = findAsteroidByName(asteroids, asteroidName);
         const basePerTick = calculateRocketExtractionPerTick(asteroid, buffMultiplier, boostMultiplier);
@@ -2522,7 +2551,7 @@ function buildAntimatterRocketLines(timerRatio) {
         if (isFTypeStar && basePerTick > 0) {
             const fTypeBonusPerSecond = (basePerTick * (fTypeMultiplier - 1)) * timerRatio;
             const formattedBonus = formatProductionRateValue(fTypeBonusPerSecond);
-            fTypeSuffix = ` (inc. <span class="green-ready-text">${formattedBonus}/s</span> Type-F Bonus)`;
+            fTypeSuffix = localize('tooltipFTypeBonusSuffix', getLanguage()).replace('{amount}', `<span class="green-ready-text">${formattedBonus}/s</span>`);
         }
         
         lines.push(`<div>${rocketName}: <span class="green-ready-text">${formatted}/s</span>${fTypeSuffix}</div>`);
@@ -2535,10 +2564,10 @@ function buildAntimatterRocketLines(timerRatio) {
 function buildAntimatterMegaStructureLines(timerRatio) {
     const megaStructureTechs = getMegaStructureTechsResearched?.() || [];
     const techLabels = {
-        1: 'Dyson Sphere',
-        2: 'Celestial Proc. Core',
-        3: 'Plasma Forge',
-        4: 'Galactic Mem. Arch.'
+        1: localize('megaStructureTTNameDysonSphere', getLanguage()),
+        2: localize('megaStructureShortCelestialProcessingCore', getLanguage()),
+        3: localize('megaStructureTTNamePlasmaForge', getLanguage()),
+        4: localize('megaStructureShortGalacticMemoryArchive', getLanguage())
     };
     const perSecondValue = 0.15;
 
@@ -2618,9 +2647,9 @@ function buildResearchBonusLines(timerRatio) {
 
     if (isMegaStructureRun && inCelestialProcessingCore) {
         const cpcBonuses = [
-            { index: 1, amount: 0.5, label: 'CPC Tech I' },
-            { index: 2, amount: 1, label: 'CPC Tech II' },
-            { index: 4, amount: 1.5, label: 'CPC Tech IV' }
+            { index: 1, amount: 0.5, label: localize('tooltipCpcTech1', getLanguage()) },
+            { index: 2, amount: 1, label: localize('tooltipCpcTech2', getLanguage()) },
+            { index: 4, amount: 1.5, label: localize('tooltipCpcTech4', getLanguage()) }
         ];
 
 
@@ -2634,7 +2663,7 @@ function buildResearchBonusLines(timerRatio) {
 
     if (hasMegaResearch(5)) {
         const amount = isMegaStructureRun && inCelestialProcessingCore ? 2 : 5;
-        bonusEntries.push({ label: 'CPC Tech V', amount });
+        bonusEntries.push({ label: localize('tooltipCpcTech5', getLanguage()), amount });
     }
 
 
@@ -2702,14 +2731,14 @@ function buildAutoBuyerGenerationLines(resourceKey, category, timerRatio) {
             const bTypeBoostPerUnit = (getBTypeAutoBuyerBoostForTier?.(tier) || 0);
             bTypeBoost = bTypeBoostPerUnit * quantity * timerRatio * supplyChainMultiplier;
             if (bTypeBoost > 0) {
-                bTypeText = ` (${formatProductionRateValue(bTypeBoost)}/s from Type B star)`;
+                bTypeText = localize('tooltipBTypeBoostSuffix', getLanguage()).replace('{amount}', formatProductionRateValue(bTypeBoost));
             }
         }
         
         const contribution = baseContribution + bTypeBoost;
         const className = contribution > 0 ? 'green-ready-text' : 'red-disabled-text';
-        const label = tierData.nameUpgrade || `Tier ${tier}`;
-        const tierLabel = `${label} (Tier ${tier})`;
+        const label = tierData.nameUpgrade || localize('tooltipTierLabel', getLanguage()).replace('{tier}', tier);
+        const tierLabel = localize('tooltipTierNamedLabel', getLanguage()).replace('{label}', label).replace('{tier}', tier);
         const formattedContribution = formatProductionRateValue(contribution);
 
 
@@ -2737,7 +2766,7 @@ function buildAutoCreateGenerationLine(resourceKey, category, timerRatio) {
     const autoCreateRate = autoCreatePerInterval * timerRatio;
     const formatted = formatProductionRateValue(autoCreateRate);
     const className = autoCreateRate > 0 ? 'green-ready-text' : 'red-disabled-text';
-    return `<div>Auto Creation: <span class="${className}">${formatted} / s</span></div>`;
+    return `<div>${localize('tooltipAutoCreationLabel', getLanguage())} <span class="${className}">${formatted} / s</span></div>`;
 }
 
 
@@ -2789,7 +2818,7 @@ function buildPrecipitationGenerationLine(resourceKey, category, timerRatio) {
 
     const className = perSecond > 0 ? 'green-ready-text' : 'red-disabled-text';
     const formatted = formatProductionRateValue(perSecond);
-    return `<div>Precipitation: <span class="${className}">${formatted} / s</span></div>`;
+    return `<div>${localize('tooltipPrecipitationLabel', getLanguage())} <span class="${className}">${formatted} / s</span></div>`;
 }
 
 
@@ -2811,8 +2840,8 @@ function buildAutoCreateDiversionLines(resourceKey, category) {
 
 
     const lines = diversionTargets.map(([compoundKey, data]) => {
-        const name = capitaliseString(data?.nameCompound || data?.nameResource || compoundKey);
-        return `<div class="stats-text">Resources diverted to create ${name}</div>`;
+        const name = localizeMaterialName(compoundKey, 'compounds', getLanguage());
+        return `<div class="stats-text">${localize('tooltipResourcesDivertedToCreate', getLanguage()).replace('{compound}', name)}</div>`;
     });
 
 
@@ -2924,12 +2953,14 @@ function getCompoundIngredientEntries(compoundData) {
 }
 
 
+// Evaluated at module load, before the catalogue is fetched, so the entries
+// carry the key and the label is resolved where the line is built.
 const fuelConsumptionMap = {
     resources: {
-        carbon: [{ buildingKey: 'powerPlant1', label: 'Basic Power Plant' }]
+        carbon: [{ buildingKey: 'powerPlant1', labelKey: 'buildingNameBasicPowerPlant' }]
     },
     compounds: {
-        diesel: [{ buildingKey: 'powerPlant3', label: 'Advanced Power Plant' }]
+        diesel: [{ buildingKey: 'powerPlant3', labelKey: 'headerMainAdvancedPowerPlant' }]
     }
 };
 
@@ -2944,7 +2975,7 @@ function buildFuelConsumptionLines(resourceKey, category, timerRatio) {
     const powerOn = getPowerOnOff();
 
 
-    const lines = consumptionEntries.map(({ buildingKey, label }) => {
+    const lines = consumptionEntries.map(({ buildingKey, labelKey }) => {
         const buildingData = getResourceDataObject('buildings', ['energy', 'upgrades', buildingKey]);
         if (!buildingData) {
             return null;
@@ -2958,7 +2989,7 @@ function buildFuelConsumptionLines(resourceKey, category, timerRatio) {
         const className = consumption > 0 ? 'red-disabled-text' : 'green-ready-text';
 
 
-        return `<div>${label}: <span class="${className}">${consumption.toFixed(2)} / s</span></div>`;
+        return `<div>${localize(labelKey, getLanguage())}: <span class="${className}">${consumption.toFixed(2)} / s</span></div>`;
     }).filter(Boolean);
 
 
@@ -2968,6 +2999,9 @@ function buildFuelConsumptionLines(resourceKey, category, timerRatio) {
     await initLocalization();
     initialiseDescriptions();
     initialiseStaticButtonLabels();
+    // A two-state label cannot ride the `data-loc` sweep, so it is written once
+    // the catalogue is available rather than at module load.
+    updateHoldEnterToGainDebugStatus();
 
     const headerText = gameIntroHeader;
     let content = gameSaveNameCollect;
@@ -3182,16 +3216,16 @@ export function removeTabAttentionIfNoIndicators(tabId) {
 
 function buildPowerPlantStatusLines() {
     const plants = [
-        { label: 'Basic Power Plant', key: 'powerPlant1' },
-        { label: 'Solar Power Plant', key: 'powerPlant2' },
-        { label: 'Advanced Power Plant', key: 'powerPlant3' }
+        { label: localize('buildingNameBasicPowerPlant', getLanguage()), key: 'powerPlant1' },
+        { label: localize('headerMainSolarPowerPlant', getLanguage()), key: 'powerPlant2' },
+        { label: localize('headerMainAdvancedPowerPlant', getLanguage()), key: 'powerPlant3' }
     ];
 
 
     return plants.map(({ label, key }) => {
         const isOn = getBuildingTypeOnOff(key);
         const className = isOn ? 'green-ready-text' : 'red-disabled-text';
-        const statusText = isOn ? 'ON' : 'OFF';
+        const statusText = isOn ? localize('textOn', getLanguage()) : localize('textOff', getLanguage());
         return `<div>${label}: <span class="${className}">${statusText}</span></div>`;
     }).join('');
 }
@@ -3390,7 +3424,7 @@ export function updateContent(heading, tab, type) {
             case 'tab7':
                 optionDescriptionElement = optionDescriptionElements[6];
                 if (heading.toLowerCase() === 'galactic casino') {
-                    optionDescriptionElement.innerHTML = `${optionDescription}CP Balance: <strong><span id="galacticCasinoCpBalance">0</span></strong>`;
+                    optionDescriptionElement.innerHTML = `${optionDescription}${localize('textCpBalanceLabel', getLanguage())} <strong><span id="galacticCasinoCpBalance">0</span></strong>`;
                 } else {
                     optionDescriptionElement.innerHTML = optionDescription;
                 }
@@ -3706,7 +3740,7 @@ export function createDropdown(id, options, selectedValue, onChange, classes = [
 
 
     const defaultOption = options.find(option => option.value === selectedValue);
-    dropdownText.innerHTML = defaultOption ? defaultOption.text : 'Select an option';
+    dropdownText.innerHTML = defaultOption ? defaultOption.text : localize('dropdownSelectAnOption', getLanguage());
     dropdownText.setAttribute('data-value', defaultOption ? defaultOption.value : '');
 
 
@@ -3729,7 +3763,7 @@ export function createDropdown(id, options, selectedValue, onChange, classes = [
             playClickSfx();
             const value = event.currentTarget.getAttribute('data-value');
             const selectedOption = options.find(option => option.value == value);
-            dropdownText.innerHTML = selectedOption ? selectedOption.text : 'Select an option';
+            dropdownText.innerHTML = selectedOption ? selectedOption.text : localize('dropdownSelectAnOption', getLanguage());
             dropdownText.setAttribute('data-value', selectedOption ? selectedOption.value : '');
             if (getCurrentOptionPane().startsWith('rocket')) {
                 setCurrentDestinationDropdownText(dropdownText.innerHTML);
@@ -4971,13 +5005,13 @@ export function showWeatherNotification(type) {
 
 
         if (hasRockets && benefits) {
-            showNotification(`Heavy Rain! No launches until it clears, but ${precipitationType} stores benefit!`, 'warning', 3000, 'weather');
+            showNotification(localize('weatherHeavyRainNoLaunchWithBenefit', getLanguage()).replace('{material}', localizeMaterialName(precipitationType, 'compounds', getLanguage())), 'warning', 3000, 'weather');
         } else if (hasRockets) {
-            showNotification('Heavy Rain! No launches until it clears.', 'warning');
+            showNotification(localize('weatherHeavyRainNoLaunch', getLanguage()), 'warning');
         } else if (benefits) {
-            showNotification(`Heavy Rain! ${capitaliseString(precipitationType)} stores benefit!`, 'warning', 3000, 'weather');
+            showNotification(localize('weatherHeavyRainWithBenefit', getLanguage()).replace('{material}', localizeMaterialName(precipitationType, 'compounds', getLanguage())), 'warning', 3000, 'weather');
         } else {
-            showNotification('Heavy Rain!', 'warning', 3000, 'weather');
+            showNotification(localize('weatherHeavyRain', getLanguage()), 'warning', 3000, 'weather');
         }
     } else if (type === 'volcano') {
         const hasRockets = tech.includes('rocketComposites');
@@ -4985,13 +5019,13 @@ export function showWeatherNotification(type) {
 
 
         if (hasRockets && hasSolar) {
-            showNotification('Volcano Eruption! No launches until it clears, and solar power generation severely affected!', 'error', 3000, 'weather');
+            showNotification(localize('weatherVolcanoNoLaunchAndSolar', getLanguage()), 'error', 3000, 'weather');
         } else if (hasRockets) {
-            showNotification('Volcano Eruption! No launches until it clears.', 'error', 3000, 'weather');
+            showNotification(localize('weatherVolcanoNoLaunch', getLanguage()), 'error', 3000, 'weather');
         } else if (hasSolar) {
-            showNotification('Volcano Eruption! Solar power severely affected!', 'error', 3000, 'weather');
+            showNotification(localize('weatherVolcanoSolarAffected', getLanguage()), 'error', 3000, 'weather');
         } else {
-            showNotification('Volcano Eruption!', 'warning', 3000, 'weather');
+            showNotification(localize('weatherVolcano', getLanguage()), 'warning', 3000, 'weather');
         }
     } else {
         console.error('Unknown weather type:', type);
@@ -5264,7 +5298,7 @@ function sendNotification(message, type, classification, duration, actionLabel, 
 
     const button = document.createElement('button');
     button.className = 'notification-button';
-    button.innerText = 'Clear All';
+    button.innerText = localize('buttonClearAllNotifications', getLanguage());
     button.onclick = () => {
         dismissed = true;
         if (autoDismissTimeoutId !== null) {
@@ -5659,9 +5693,9 @@ export function generateStarfield(starfieldContainer, numberOfStars = 70, seed =
         if (starElement.id.includes("settledStar")) {
             const tags = [];
             if (isFactoryStar) {
-                tags.push('(MEGASTRUCTURE)');
+                tags.push(localize('textStarTagMegastructure', getLanguage()));
             }
-            tags.push('(SETTLED)');
+            tags.push(localize('textStarTagSettled', getLanguage()));
             starElement.setAttribute("titler", `${star.name} ${tags.join(' ')}`.trim());
         } else if (star.name.toLowerCase() === getCurrentStarSystem()) {
             starElement.setAttribute("titler", `${star.name}`);
@@ -5815,14 +5849,14 @@ export function createStarDestinationRow(starData, isInteresting) {
 
     const buttonContainer = document.getElementById('starDestinationButton');
     const button = createButton({
-        text: `Travel`,
+        text: localize('buttonTravel', getLanguage()),
         classNames: ['option-button', 'red-disabled-text', 'travel-starship-button'],
         onClick: () => {
             let content = launchStarShipWarningText;
             if (getFactoryStarsArray().includes(getDestinationStar())) {
-                content += `<br><br><span class="warning-orange-text">WARNING: MegaStructure Systems are Extremely difficult to conquer!<br>Only go if you have high Production to rebuild broken Fleets multiple times!</span>`;
+                content += `<br><br><span class="warning-orange-text">${localize('warningMegaStructureSystemHard', getLanguage())}</span>`;
             } else if (getHomeStarName() === getDestinationStar()) {
-                content += `<br><br><span class="red-disabled-text">WARNING: Flying to Miaplacidus is suicidal unless you are VERY strong with<br>VERY high production capabilities to rebuild broken Fleets multiple times!</span>`;
+                content += `<br><br><span class="red-disabled-text">${localize('warningMiaplacidusSuicidal', getLanguage())}</span>`;
             }
 
             content += `<br><br><span class="${
@@ -5855,7 +5889,7 @@ export function createStarDestinationRow(starData, isInteresting) {
                         destination_star: destinationStar,
                         ts: new Date().toISOString()
                     }, { immediate: true, flushReason: 'starship' });
-                    showNotification(`Travelling to ${capitaliseWordsWithRomanNumerals(starData.name)}`, 'info', 3000, 'special');
+                    showNotification(localize('textTravellingToStar', getLanguage()).replace('{star}', capitaliseWordsWithRomanNumerals(starData.name)), 'info', 3000, 'special');
                     sfxPlayer.playAudio('starShipLaunch', false);
                     startTravelToDestinationStarTimer([0, 'buttonClick'], false);
                     spendAntimatterOnFuelForStarShip(starData.fuel);
@@ -5870,8 +5904,8 @@ export function createStarDestinationRow(starData, isInteresting) {
                 },
                 onExtra1: null,
                 onExtra2: null,
-                confirmLabel: 'LAUNCH',
-                cancelLabel: 'CANCEL',
+                confirmLabel: localize('buttonLaunchUpper', getLanguage()),
+                cancelLabel: localize('buttonCancelUpper', getLanguage()),
                 extra1Label: null,
                 extra2Label: null,
                 setupToolTips: false
@@ -5987,8 +6021,8 @@ export function showEnterWarModeModal(reason) {
         const overlay = getElements().overlay;
         const enterWarModeConfirmButton = document.getElementById('modalConfirm');
         const enterWarModeCancelButton = document.getElementById('modalCancel');
-        enterWarModeConfirmButton.innerText = 'CONFIRM';
-        enterWarModeCancelButton.innerText = 'CANCEL';
+        enterWarModeConfirmButton.innerText = localize('buttonConfirmUpper', getLanguage());
+        enterWarModeCancelButton.innerText = localize('buttonCancelUpper', getLanguage());
 
 
         enterWarModeConfirmButton.classList.remove('invisible');
@@ -6032,45 +6066,45 @@ export function showEnterWarModeModal(reason) {
                     spanClass = finalDifference < 0 ? 'red-disabled-text' : (finalDifference > 0 ? 'green-ready-text' : '');
                     content = enterWarModeModalPatience + "<br>";
                     const spanText = finalDifference === 0
-                    ? "No change in overall impression - Fleets unaffected."
+                    ? localize('battleImpressionNoChange', getLanguage())
                     : (finalDifference < 0
-                        ? `Overall Impression Worsened - Enemy Fleets bolstered by ${Math.abs(finalDifference / 3).toFixed(2)}%`
-                        : `Overall Impression Improved - Enemy Fleets reduced by ${Math.abs(finalDifference / 3).toFixed(2)}%`);                
+                        ? localize('battleImpressionWorsened', getLanguage()).replace('{percent}', Math.abs(finalDifference / 3).toFixed(2))
+                        : localize('battleImpressionImproved', getLanguage()).replace('{percent}', Math.abs(finalDifference / 3).toFixed(2)));                
 
 
                     content += `<span class="${spanClass}">${spanText}</span>`;
                     setWarUI(true);
                     break;
                 case "insulted":
-                    content = enterWarModeInsultedText + "<br><span class='red-disabled-text'>Enemy Defense Bolstered by 10%</span>";
+                    content = enterWarModeInsultedText + `<br><span class='red-disabled-text'>${localize('battleEnemyDefenseBolstered', getLanguage())}</span>`;
                     break;
                 case "scared":
-                    content = enterWarModeScaredText + "<br><span class='green-ready-text'>Half of the enemy fleets have deserted through fear!</span>";
+                    content = enterWarModeScaredText + `<br><span class='green-ready-text'>${localize('battleEnemyFleetsDeserted', getLanguage())}</span>`;
                     break;
                 case "surrender":
-                    content = enterWarModeSurrenderText + "<br><span class='green-ready-text'>Victory!</span>";
+                    content = enterWarModeSurrenderText + `<br><span class='green-ready-text'>${localize('battleVictory', getLanguage())}</span>`;
                     break;
                 case "notVassalized":
                     content = enterWarModeNotVassalizedText;
                     break;
                 case "noScanner":
-                    content = enterwarModeModalNoBackOutText + "<br><span class='red-disabled-text'>Attacking Blind!</span>";
+                    content = enterwarModeModalNoBackOutText + `<br><span class='red-disabled-text'>${localize('battleAttackingBlind', getLanguage())}</span>`;
                     break;
                 case "laugh":
                 case "rebuff":
-                    content = enterWarModeModalLaughAtProspect + "<br><span class='red-disabled-text'>Enemy Impression of you -10%</span>";
+                    content = enterWarModeModalLaughAtProspect + `<br><span class='red-disabled-text'>${localize('battleEnemyImpressionDown', getLanguage())}</span>`;
                     break;
                 case "laughWar":
-                    content = enterWarModeModalLaughAndEnterWar + "<br><span class='red-disabled-text'>Immediate Closure of Diplomacy!</span>";
+                    content = enterWarModeModalLaughAndEnterWar + `<br><span class='red-disabled-text'>${localize('battleDiplomacyClosed', getLanguage())}</span>`;
                     break; 
                 case "reserved":
-                    content = enterWarModeModalReserved + (latestDifferenceInImpression !== 0 ? "<br><span class='" + spanClass + "'>Impression change: " + (latestDifferenceInImpression < 0 ? "-" : "") + Math.abs(percentageChange).toFixed(2) + "%</span>" : "");
+                    content = enterWarModeModalReserved + (latestDifferenceInImpression !== 0 ? "<br><span class='" + spanClass + `'>${localize('battleImpressionChange', getLanguage())} ` + (latestDifferenceInImpression < 0 ? "-" : "") + Math.abs(percentageChange).toFixed(2) + "%</span>" : "");
                     break;
                 case "neutral":
-                    content = enterWarModeModalNeutral + (latestDifferenceInImpression !== 0 ? "<br><span class='" + spanClass + "'>Impression change: " + (latestDifferenceInImpression < 0 ? "-" : "") + Math.abs(percentageChange).toFixed(2) + "%</span>" : "");
+                    content = enterWarModeModalNeutral + (latestDifferenceInImpression !== 0 ? "<br><span class='" + spanClass + `'>${localize('battleImpressionChange', getLanguage())} ` + (latestDifferenceInImpression < 0 ? "-" : "") + Math.abs(percentageChange).toFixed(2) + "%</span>" : "");
                     break;
                 case "receptive":
-                    content = enterWarModeModalImproveToReceptive + (latestDifferenceInImpression !== 0 ? "<br><span class='" + spanClass + "'>Impression change: " + (latestDifferenceInImpression < 0 ? "-" : "") + Math.abs(percentageChange).toFixed(2) + "%</span>" : "");
+                    content = enterWarModeModalImproveToReceptive + (latestDifferenceInImpression !== 0 ? "<br><span class='" + spanClass + `'>${localize('battleImpressionChange', getLanguage())} ` + (latestDifferenceInImpression < 0 ? "-" : "") + Math.abs(percentageChange).toFixed(2) + "%</span>" : "");
                     break;
             }
         }
@@ -6115,8 +6149,8 @@ export async function triggerFeedBackModal(feedback) {
     const overlay = getElements().overlay;
     const sendFeedBackConfirmButton = document.getElementById('modalConfirm');
     const sendFeedBackCancelButton = document.getElementById('modalCancel');
-    sendFeedBackConfirmButton.innerText = 'SEND FEEDBACK';
-    sendFeedBackCancelButton.innerText = 'NO THANKS';
+    sendFeedBackConfirmButton.innerText = localize('buttonSendFeedback', getLanguage());
+    sendFeedBackCancelButton.innerText = localize('buttonNoThanks', getLanguage());
 
     
     let headerText = modalFeedbackHeaderText;
@@ -6172,7 +6206,7 @@ export async function showBattlePopup(won, apGain = 0) {
         const overlay = getElements().overlay;
         const battleOutcomeConfirmButton = document.getElementById('modalConfirm');
         const battleOutcomeCancelButton = document.getElementById('modalCancel');
-        battleOutcomeConfirmButton.innerText = 'CONFIRM';
+        battleOutcomeConfirmButton.innerText = localize('buttonConfirmUpper', getLanguage());
 
 
         let headerText = modalBattleHeaderText;
@@ -6181,9 +6215,9 @@ export async function showBattlePopup(won, apGain = 0) {
 
         if (won) {
             if (won !== 'megastructure') {
-                content += `<br>- You have conquered the <span class="green-ready-text">${capitaliseWordsWithRomanNumerals(getDestinationStar())}</span> System!`;
+                content += localize('battleConqueredSystem', getLanguage()).replace('{star}', capitaliseWordsWithRomanNumerals(getDestinationStar()));
             } else {
-                content += `<br>- You have defeated the Mechanized army and conquered the <span class="factory-star-text">${capitaliseWordsWithRomanNumerals(getDestinationStar())}</span> System!<br>You will be able to conduct investigative research on how to harness its power on your next run!<br><br><span class="green-ready-text">Prepare for Glory!</span>`;
+                content += localize('battleConqueredMegaStructureSystem', getLanguage()).replace('{star}', capitaliseWordsWithRomanNumerals(getDestinationStar()));
             }
 
 
@@ -6191,7 +6225,7 @@ export async function showBattlePopup(won, apGain = 0) {
             if (Array.isArray(extraSystems) && extraSystems.length > 0) {
                 extraSystems.forEach(([name, distance]) => {
                     const formattedDistance = distance.toFixed(1);
-                    content += `<br>- Leaders ${formattedDistance}ly away in the <span class="green-ready-text">${name}</span> System<br>have also heard of your greatness and have ceded their System!`;
+                    content += localize('battleLeadersCededSystem', getLanguage()).replace('{distance}', formattedDistance).replace('{star}', name);
                 });
             }
         }
@@ -6200,7 +6234,7 @@ export async function showBattlePopup(won, apGain = 0) {
         if (won === 'noSentientLife') {
             headerText = modalBattleNoSentientLifeHeader;
             content = modalBattleNoSentientLifeText.replace(' X ', ` ${apGain} `);
-            content += `<br>- You have settled the <span class="green-ready-text">${capitaliseWordsWithRomanNumerals(getDestinationStar())}</span> System!`;
+            content += localize('battleSettledSystem', getLanguage()).replace('{star}', capitaliseWordsWithRomanNumerals(getDestinationStar()));
         }
 
 
@@ -6465,7 +6499,7 @@ export function drawStarConnectionDrawings(fromStar, toStar, isInteresting) {
             labelElement.classList.add('star-connection-label');
             const displayAp = (isInteresting && toStarData) ? getAscendencyPointsWithRepeatableBonus(apGranted) : null;
             labelElement.innerHTML = (isInteresting && toStarData)
-                ? `Antimatter: ${fuelNeeded}<br>AP: ${displayAp}`
+                ? localize('tooltipAntimatterAndApCost', getLanguage()).replace('{antimatter}', fuelNeeded).replace('{ap}', displayAp)
                 : `??? <br> ???`;
             labelElement.style.color = labelColor;
             labelElement.style.textAlign = 'center';
@@ -6721,7 +6755,7 @@ async function getUserSaveName() {
         const saveNameButton = document.getElementById('modalConfirm');
         const saveNameField = document.getElementById('pioneerCodeName');
         saveNameButton.classList.remove('invisible');
-        saveNameButton.innerText = 'CONFIRM';
+        saveNameButton.innerText = localize('buttonConfirmUpper', getLanguage());
 
 
         const handleSaveNameClick = async () => {
@@ -6730,7 +6764,7 @@ async function getUserSaveName() {
                 setSaveName(userName);
                 localStorage.setItem('saveName', getSaveName());
                 setOnboardingMode(false);
-                saveNameButton.innerText = 'START';
+                saveNameButton.innerText = localize('buttonStartUpper', getLanguage());
                 showHideModal();
 
 
@@ -6746,7 +6780,7 @@ async function getUserSaveName() {
                 saveNameButton.removeEventListener('click', handleSaveNameClick);
                 resolve();
             } else {
-                alert("Please enter a valid code name!");
+                alert(localize('notificationEnterValidCodeName', getLanguage()));
             }
         };
 
@@ -6828,10 +6862,10 @@ export function getTimeInStatCell() {
         stat8Element.textContent = timeString;
         stat8Element.dataset.tooltipContent = [
             `<div><strong>${timeString}</strong></div>`,
-            showGp ? `<div>Galactic Points: <span class="green-ready-text">${gpQuantity}</span></div>` : '',
-            `<div>Run: <span class="green-ready-text">${currentRun}</span></div>`,
-            `<div>Run Time: <span class="green-ready-text">${runDuration}</span></div>`,
-            `<div>Total Time: <span class="green-ready-text">${totalDuration}</span></div>`,
+            showGp ? `<div>${localize('tooltipGalacticPointsLabel', getLanguage())} <span class="green-ready-text">${gpQuantity}</span></div>` : '',
+            `<div>${localize('tooltipRunLabel', getLanguage())} <span class="green-ready-text">${currentRun}</span></div>`,
+            `<div>${localize('tooltipRunTimeLabel', getLanguage())} <span class="green-ready-text">${runDuration}</span></div>`,
+            `<div>${localize('tooltipTotalTimeLabel', getLanguage())} <span class="green-ready-text">${totalDuration}</span></div>`,
             ].join('');
     }
 }
@@ -6851,19 +6885,19 @@ function buildEnergyTooltipContent(netText) {
     const consumerLines = buildEnergyConsumerLines(timerRatio);
 
 
-    const generationSubtotalLine = `<div>Total Generated: <span class="green-ready-text">${formatEnergyValue(totalGeneration, true)}</span></div>`;
-    const consumptionSubtotalLine = `<div>Total Consumed: <span class="red-disabled-text">${formatEnergyValue(-totalConsumption)}</span></div>`;
+    const generationSubtotalLine = `<div>${localize('tooltipTotalGeneratedLabel', getLanguage())} <span class="green-ready-text">${formatEnergyValue(totalGeneration, true)}</span></div>`;
+    const consumptionSubtotalLine = `<div>${localize('tooltipTotalConsumedLabel', getLanguage())} <span class="red-disabled-text">${formatEnergyValue(-totalConsumption)}</span></div>`;
 
 
     return [
-        `<div>Net Energy: <span class="${netClass}">${netDisplay}</span></div>`,
+        `<div>${localize('tooltipNetEnergyLabel', getLanguage())} <span class="${netClass}">${netDisplay}</span></div>`,
         generationSubtotalLine,
         consumptionSubtotalLine,
         `<div class="tooltip-spacer">&nbsp;</div>`,
-        `<div><strong>Generators</strong></div>`,
+        `<div><strong>${localize('tooltipHeadingGenerators', getLanguage())}</strong></div>`,
         generatorLines,
         `<div class="tooltip-spacer">&nbsp;</div>`,
-        `<div><strong>Consumers</strong></div>`,
+        `<div><strong>${localize('tooltipHeadingConsumers', getLanguage())}</strong></div>`,
         consumerLines
     ].filter(Boolean).join('');
 }
@@ -6871,9 +6905,9 @@ function buildEnergyTooltipContent(netText) {
 
 function buildPowerPlantGenerationLines(timerRatio) {
     const plants = [
-        { label: 'Basic Power Plant', key: 'powerPlant1' },
-        { label: 'Solar Power Plant', key: 'powerPlant2' },
-        { label: 'Advanced Power Plant', key: 'powerPlant3' }
+        { label: localize('buildingNameBasicPowerPlant', getLanguage()), key: 'powerPlant1' },
+        { label: localize('headerMainSolarPowerPlant', getLanguage()), key: 'powerPlant2' },
+        { label: localize('headerMainAdvancedPowerPlant', getLanguage()), key: 'powerPlant3' }
     ];
 
 
@@ -6885,7 +6919,7 @@ function buildPowerPlantGenerationLines(timerRatio) {
         const generationClass = generation > 0 ? 'green-ready-text' : 'red-disabled-text';
 
 
-        return `<div>${label}: <span class="${generationClass}">${formatEnergyValue(generation, true)}</span> (${quantity.toLocaleString()} online)</div>`;
+        return `<div>${localize('tooltipOnlineCount', getLanguage()).replace('{label}', label).replace('{value}', `<span class="${generationClass}">${formatEnergyValue(generation, true)}</span>`).replace('{count}', quantity.toLocaleString())}</div>`;
     }).join('');
 }
 
@@ -6945,7 +6979,7 @@ function buildAutoBuyerConsumptionLines(timerRatio) {
         const usageKw = usage * timerRatio;
         const usageClass = usageKw > 0 ? 'red-disabled-text' : 'green-ready-text';
         const countClass = count > 0 ? 'green-ready-text' : 'red-disabled-text';
-        return `<div>Tier ${tier} Autobuyers: <span class="${usageClass}">${formatEnergyValue(-usageKw)}</span> (${count.toLocaleString()} active)</div>`;
+        return `<div>${localize('tooltipTierAutobuyers', getLanguage()).replace('{tier}', tier).replace('{value}', `<span class="${usageClass}">${formatEnergyValue(-usageKw)}</span>`).replace('{count}', count.toLocaleString())}</div>`;
     }).join('');
 }
 
@@ -6958,29 +6992,29 @@ function buildScienceLabConsumptionLine(timerRatio) {
     const quantityClass = quantity > 0 ? 'green-ready-text' : 'red-disabled-text';
 
 
-    return `<div>Science Labs: <span class="${usageClass}">${formatEnergyValue(-energyUse)}</span> (${quantity.toLocaleString()} active)</div>`;
+    return `<div>${localize('tooltipScienceLabs', getLanguage()).replace('{value}', `<span class="${usageClass}">${formatEnergyValue(-energyUse)}</span>`).replace('{count}', quantity.toLocaleString())}</div>`;
 }
 
 
 function buildSpaceTelescopeConsumptionLine(timerRatio) {
     const telescope = getResourceDataObject('space', ['upgrades', 'spaceTelescope']);
     if (!telescope || !telescope.spaceTelescopeBoughtYet) {
-        return `<div>Space Telescope: <span class="red-disabled-text">Not built</span></div>`;
+        return `<div><span class="red-disabled-text">${localize('tooltipSpaceTelescopeNotBuilt', getLanguage())}</span></div>`;
     }
 
 
-    let status = 'Idle';
+    let status = localize('textIdle', getLanguage());
     let usage = 0;
 
 
     if (getCurrentlySearchingAsteroid() && getTimeLeftUntilAsteroidScannerTimerFinishes() > 0) {
-        status = 'Searching Asteroids';
+        status = localize('textSearchingAsteroids', getLanguage());
         usage = telescope.energyUseSearchAsteroid || 0;
     } else if (getCurrentlyInvestigatingStar() && getTimeLeftUntilStarInvestigationTimerFinishes() > 0) {
-        status = 'Investigating Stars';
+        status = localize('textInvestigatingStars', getLanguage());
         usage = telescope.energyUseInvestigateStar || 0;
     } else if (getCurrentlyPillagingVoid() && getTimeLeftUntilPillageVoidTimerFinishes() > 0) {
-        status = 'Pillaging the Void';
+        status = localize('textPillagingTheVoid', getLanguage());
         usage = telescope.energyUsePhilosophyBoostResourcesAndCompounds || 0;
     }
 
@@ -6990,7 +7024,7 @@ function buildSpaceTelescopeConsumptionLine(timerRatio) {
     const usageText = usageKw > 0 ? formatEnergyValue(-usageKw) : '0 KW / s';
 
 
-    return `<div>Space Telescope (${status}): <span class="${className}">${usageText}</span></div>`;
+    return `<div>${localize('tooltipSpaceTelescopeStatus', getLanguage()).replace('{status}', status).replace('{value}', `<span class="${className}">${usageText}</span>`)}</div>`;
 }
 
 
@@ -7000,7 +7034,7 @@ function buildRocketRefuelLines(timerRatio) {
 
 
     if (!activeRockets.length) {
-        return `<div>Rocket Refuelling: <span class="green-ready-text">Idle</span></div>`;
+        return `<div>${localize('tooltipRocketRefuellingIdle', getLanguage()).replace('{status}', `<span class="green-ready-text">${localize('textIdle', getLanguage())}</span>`)}</div>`;
     }
 
 
@@ -7008,8 +7042,8 @@ function buildRocketRefuelLines(timerRatio) {
         const rocket = getResourceDataObject('space', ['upgrades', rocketKey]);
         const energyUsePerTick = rocket?.autoBuyer?.tier1?.energyUse || 0;
         const usageKw = energyUsePerTick * timerRatio;
-        const label = rocketKey.replace('rocket', 'Rocket ');
-        return `<div><span class="green-ready-text">${label} Refuel:</span> <span class="red-disabled-text">${formatEnergyValue(-usageKw)}</span></div>`;
+        const label = getRocketUserName(rocketKey);
+        return `<div><span class="green-ready-text">${localize('tooltipRefuelLabel', getLanguage()).replace('{label}', label)}</span> <span class="red-disabled-text">${formatEnergyValue(-usageKw)}</span></div>`;
     }).join('');
 }
 
@@ -7064,16 +7098,16 @@ function buildBatteryTooltipContent() {
     const energyQuantity = getResourceDataObject('buildings', ['energy', 'quantity']) || 0;
 
 
-    let statusText = 'NO BATTERY';
+    let statusText = localize('textNoBattery', getLanguage());
     let statusClass = 'red-disabled-text';
 
 
     if (hasBattery) {
         if (energyRate >= consumption) {
-            statusText = 'BATTERY CHARGING';
+            statusText = localize('textBatteryCharging', getLanguage());
             statusClass = 'green-ready-text';
         } else {
-            statusText = 'BATTERY DEPLETING';
+            statusText = localize('textBatteryDepleting', getLanguage());
             statusClass = 'red-disabled-text';
         }
     }
@@ -7085,9 +7119,9 @@ function buildBatteryTooltipContent() {
 
 
     const batteryLines = [
-        { label: 'Sodium Ion Battery', path: ['energy', 'upgrades', 'battery1', 'quantity'] },
-        { label: 'Lithium Ion Battery', path: ['energy', 'upgrades', 'battery2', 'quantity'] },
-        { label: 'Stellar Capacitor Array', path: ['energy', 'upgrades', 'battery3', 'quantity'] }
+        { label: localize('buildingNameBattery1', getLanguage()), path: ['energy', 'upgrades', 'battery1', 'quantity'] },
+        { label: localize('buildingNameBattery2', getLanguage()), path: ['energy', 'upgrades', 'battery2', 'quantity'] },
+        { label: localize('buildingNameBattery3', getLanguage()), path: ['energy', 'upgrades', 'battery3', 'quantity'] }
     ].map(({ label, path }) => {
         const quantity = getResourceDataObject('buildings', path) ?? 0;
         const quantityClass = quantity > 0 ? 'green-ready-text' : 'red-disabled-text';
@@ -7096,18 +7130,18 @@ function buildBatteryTooltipContent() {
 
 
     const capacityMwh = Math.floor(totalCapacity / 1000);
-    const totalCapacityLine = `<div>Total Battery Capacity: <span class="green-ready-text">${capacityMwh.toLocaleString()} MWh</span></div>`;
+    const totalCapacityLine = `<div>${localize('tooltipTotalBatteryCapacity', getLanguage()).replace('{value}', `<span class="green-ready-text">${capacityMwh.toLocaleString()}</span>`)}</div>`;
 
 
     const depletionInfo = getBatteryDepletionInfo(energyRate, consumption, totalCapacity, energyQuantity, hasBattery);
-    const depletionLabel = depletionInfo.mode === 'charging' ? 'Time until Charged:' : 'Time until Depletion:';
+    const depletionLabel = depletionInfo.mode === 'charging' ? localize('tooltipTimeUntilCharged', getLanguage()) : localize('tooltipTimeUntilDepletion', getLanguage());
     const depletionLine = `<div>${depletionLabel} <span class="${depletionInfo.className}">${depletionInfo.text}</span></div>`;
 
 
     return [
         `<div><span class="${statusClass}">${statusText}</span></div>`,
         `<div class="tooltip-spacer">&nbsp;</div>`,
-        `<div>Battery Charge: ${percentageSpan}</div>`,
+        `<div>${localize('tooltipBatteryChargeLabel', getLanguage())} ${percentageSpan}</div>`,
         ...batteryLines,
         `<div class="tooltip-spacer">&nbsp;</div>`,
         totalCapacityLine,
@@ -7216,7 +7250,7 @@ export function statToolBarCustomizations() {
         const cashDisplay = currencySymbol === '€'
             ? `${cashAmount.toLocaleString()}${currencySymbol}`
             : `${currencySymbol}${cashAmount.toLocaleString()}`;
-        cashStatElement.dataset.tooltipContent = `<div>Cash: <span class="green-ready-text">${cashDisplay}</span></div>`;
+        cashStatElement.dataset.tooltipContent = `<div>${localize('tooltipCashLabel', getLanguage())} <span class="green-ready-text">${cashDisplay}</span></div>`;
     }
 
 
@@ -7238,7 +7272,7 @@ export function statToolBarCustomizations() {
             const stat3Class = determineStatClassColor(stat3Text);
             const plantStatusLines = buildPowerPlantStatusLines();
             stat3Element.dataset.tooltipContent = [
-                `<div>Power Status: <span class="${stat3Class}">${stat3Text}</span></div>`,
+                `<div>${localize('tooltipPowerStatusLabel', getLanguage())} <span class="${stat3Class}">${stat3Text}</span></div>`,
                 `<div class="tooltip-spacer">&nbsp;</div>`,
                 plantStatusLines
             ].join('');
@@ -7265,7 +7299,7 @@ export function statToolBarCustomizations() {
         const isUnknown = stat5Text === '???';
         const stat5Value = isUnknown ? 0 : (parseInt(stat5Text.replace(/[^\d-]/g, ''), 10) || 0);
         const antimatterClass = stat5Value > 0 ? 'green-ready-text' : 'red-disabled-text';
-        const labelText = isUnknown ? '???' : 'Antimatter Fuel';
+        const labelText = isUnknown ? '???' : localize('tooltipAntimatterFuelLabel', getLanguage());
         const valueClass = isUnknown ? 'red-disabled-text' : antimatterClass;
         stat5Element.dataset.tooltipContent = `<div>${labelText}: <span class="${valueClass}">${stat5Text}</span></div>`;
     }
@@ -7275,7 +7309,7 @@ export function statToolBarCustomizations() {
         const stat6Value = parseInt(stat6Element.textContent.replace(/\D/g, ''), 10) || 0;
         const apClass = stat6Value > 0 ? 'green-ready-text' : 'red-disabled-text';
         const apDisplay = stat6Element.textContent.trim() || '0';
-        stat6Element.dataset.tooltipContent = `<div>Ascendency Points: <span class="${apClass}">${apDisplay}</span></div>`;
+        stat6Element.dataset.tooltipContent = `<div>${localize('tooltipAscendencyPointsLabel', getLanguage())} <span class="${apClass}">${apDisplay}</span></div>`;
     }
 
 
@@ -7317,10 +7351,10 @@ export function statToolBarCustomizations() {
 
 
         stat7Element.dataset.tooltipContent = [
-            `<div>System: <span class="green-ready-text">${systemName} (Type: ${starType})</span></div>`,
-                        `<div>Precipitation Type: <span class="green-ready-text">${capitaliseString(precipitationType)}</span></div>`,
-            `<div>Solar Energy Output: <span class="${weatherClass}">${solarOutput}</span></div>`,
-            `<div>Weather: ${weatherSymbolHtml}</div>`,
+            `<div>${localize('tooltipSystemWithType', getLanguage()).replace('{name}', systemName).replace('{type}', starType)}</div>`,
+                        `<div>${localize('tooltipPrecipitationTypeLabel', getLanguage())} <span class="green-ready-text">${localizeMaterialName(precipitationType, 'compounds', getLanguage())}</span></div>`,
+            `<div>${localize('tooltipSolarEnergyOutputLabel', getLanguage())} <span class="${weatherClass}">${solarOutput}</span></div>`,
+            `<div>${localize('tooltipWeatherLabel', getLanguage())} ${weatherSymbolHtml}</div>`,
         ].join('');
     }
 }
@@ -7570,7 +7604,7 @@ function drawStackedBarChart(canvasId, generationValues, consumptionValues, sola
 
 
         const genLabelX = (gap * 4) + barWidth / 2 - 10;
-        ctx.fillText('Gen.', genLabelX, height + 20);
+        ctx.fillText(localize('chartLabelGeneration', getLanguage()), genLabelX, height + 20);
 
 
         return;
@@ -7620,8 +7654,8 @@ function drawStackedBarChart(canvasId, generationValues, consumptionValues, sola
     const consLabelX = (gap * 4) + barWidth * 1.5 + gap - 10;
 
 
-    ctx.fillText('Gen.', genLabelX, height + 20);
-    ctx.fillText('Con.', consLabelX, height + 20);
+    ctx.fillText(localize('chartLabelGeneration', getLanguage()), genLabelX, height + 20);
+    ctx.fillText(localize('chartLabelConsumption', getLanguage()), consLabelX, height + 20);
 }
 
 
@@ -7885,22 +7919,22 @@ function buildSpaceTelescopeSidebarStatus() {
 
     const telescopeData = getResourceDataObject('space', ['upgrades', 'spaceTelescope']);
     if (!telescopeData?.spaceTelescopeBoughtYet) {
-        return { text: 'Not Built', className: 'red-disabled-text' };
+        return { text: localize('textNotBuilt', getLanguage()), className: 'red-disabled-text' };
     }
 
 
     const activeTasks = [
         {
             isActive: () => getCurrentlySearchingAsteroid() && (getTimeLeftUntilAsteroidScannerTimerFinishes() > 0),
-            label: 'Scanning Asteroids'
+            labelKey: 'textScanningAsteroids'
         },
         {
             isActive: () => getCurrentlyInvestigatingStar() && (getTimeLeftUntilStarInvestigationTimerFinishes() > 0),
-            label: 'Studying Stars'
+            labelKey: 'textStudyingStars'
         },
         {
             isActive: () => getCurrentlyPillagingVoid() && (getTimeLeftUntilPillageVoidTimerFinishes() > 0),
-            label: 'Pillaging The Void'
+            labelKey: 'textPillagingTheVoid'
         }
     ];
 
@@ -7909,16 +7943,16 @@ function buildSpaceTelescopeSidebarStatus() {
 
 
     if (!activeTask) {
-        return { text: 'Idle', className: '' };
+        return { text: localize('textIdle', getLanguage()), className: '' };
     }
 
 
     if (!getPowerOnOff()) {
-        return { text: 'No Power', className: 'red-disabled-text' };
+        return { text: localize('textNoPower', getLanguage()), className: 'red-disabled-text' };
     }
 
 
-    return { text: activeTask.label, className: 'green-ready-text' };
+    return { text: localize(activeTask.labelKey, getLanguage()), className: 'green-ready-text' };
 }
 
 
@@ -7947,7 +7981,7 @@ function buildRocketSidebarStatus(rocketKey) {
 
     const builtRockets = getRocketsBuilt() || [];
     if (!builtRockets.includes(rocketKey)) {
-        return { text: 'Not Built', className: rocketStatusClassMap['Not Built'] };
+        return { text: localize('textNotBuilt', getLanguage()), className: rocketStatusClassMap['Not Built'] };
     }
 
 
@@ -7978,54 +8012,59 @@ function buildRocketSidebarStatus(rocketKey) {
             const minutes = Math.floor(remainingSeconds / 60);
             const seconds = remainingSeconds % 60;
             const formatted = `${minutes}:${String(seconds).padStart(2, '0')}`;
-            statusElement.dataset.rocketStatusTooltipContent = `<div class="red-disabled-text">Miner Broke Down<br>Time Remaining: ${formatted}</div>`;
-            return { text: 'Repairing', className: rocketStatusClassMap['Repairing'] };
+            statusElement.dataset.rocketStatusTooltipContent = `<div class="red-disabled-text">${localize('textMinerBrokeDownStatus', getLanguage())}<br>${localize('tooltipTimeRemaining', getLanguage()).replace('{time}', formatted)}</div>`;
+            return { text: localize('textRepairing', getLanguage()), className: rocketStatusClassMap['Repairing'] };
         }
-        return { text: 'Mining', className: rocketStatusClassMap['Mining'] };
+        return { text: localize('headerMainMining', getLanguage()), className: rocketStatusClassMap['Mining'] };
     }
 
 
     if (isTravelling) {
+        // The class map stays keyed by the canonical English status; only the
+        // rendered text resolves through the catalogue.
         const status = isReturning ? 'Returning' : 'Travelling';
-        return { text: status, className: rocketStatusClassMap[status] };
+        return {
+            text: isReturning ? localize('textReturning', getLanguage()) : localize('textTravellingShort', getLanguage()),
+            className: rocketStatusClassMap[status]
+        };
     }
 
 
     if (launched) {
         if (destination) {
-            return { text: 'Ready To Travel', className: 'green-ready-text' };
+            return { text: localize('textReadyToTravelShort', getLanguage()), className: 'green-ready-text' };
         }
 
 
-        return { text: 'Select Destination', className: rocketStatusClassMap['Select Destination'] };
+        return { text: localize('textSelectDestinationShort', getLanguage()), className: rocketStatusClassMap['Select Destination'] };
     }
 
 
     if (fuelingEntries.includes(rocketKey)) {
-        return { text: 'Fuelling', className: rocketStatusClassMap['Fuelling'] };
+        return { text: localize('textFuellingShort', getLanguage()), className: rocketStatusClassMap['Fuelling'] };
     }
 
 
     if (fuelingEntries.includes(`${rocketKey}FuelledUp`)) {
-        return { text: 'Ready For Launch', className: rocketStatusClassMap['Ready For Launch'] };
+        return { text: localize('textReadyForLaunchShort', getLanguage()), className: rocketStatusClassMap['Ready For Launch'] };
     }
 
 
     if (!fuelingEntries.includes(rocketKey) && !fuelingEntries.includes(`${rocketKey}FuelledUp`) && destination) {
-        return { text: 'Ready To Travel', className: 'green-ready-text' };
+        return { text: localize('textReadyToTravelShort', getLanguage()), className: 'green-ready-text' };
     }
 
 
     if (!fuelingEntries.length) {
-        return { text: 'Ready For Refuel', className: rocketStatusClassMap['Ready For Refuel'] };
+        return { text: localize('textReadyForRefuel', getLanguage()), className: rocketStatusClassMap['Ready For Refuel'] };
     }
 
     if (!fuelingEntries.includes(rocketKey) && !fuelingEntries.includes(`${rocketKey}FuelledUp`)) {
-        return { text: 'Ready For Refuel', className: rocketStatusClassMap['Ready For Refuel'] };
+        return { text: localize('textReadyForRefuel', getLanguage()), className: rocketStatusClassMap['Ready For Refuel'] };
     }
 
 
-    return { text: 'Idle', className: rocketStatusClassMap['Idle'] };
+    return { text: localize('textIdle', getLanguage()), className: rocketStatusClassMap['Idle'] };
 }
 
 
@@ -8036,6 +8075,15 @@ const starShipStatusClassMap = {
     'Orbiting Destination': 'green-ready-text',
     'Colonised Destination': 'green-ready-text'
 };
+
+
+// Market items are internal keys naming either a resource or a compound, so the
+// display name is resolved from the key and the section it lives in.
+function localizeTradeItemDisplayName(item) {
+    if (!item || item === 'select') return '';
+    const section = galacticMarketCompoundKeys.includes(item) ? 'compounds' : 'resources';
+    return localizeMaterialName(item, section, getLanguage());
+}
 
 
 const galacticMarketResourceKeys = ['hydrogen', 'helium', 'carbon', 'neon', 'oxygen', 'sodium', 'silicon', 'iron'];
@@ -8103,17 +8151,17 @@ function buildGalacticMarketSelectionTooltip(outgoingSelection, incomingSelectio
 
     const lines = [
         '<div class="tooltip-section">',
-        '<div class="tooltip-heading">Current Selection</div>'
+        `<div class="tooltip-heading">${localize('tooltipHeadingCurrentSelection', getLanguage())}</div>`
     ];
 
 
     if (outgoingType) {
-        lines.push(`<div><strong>Outgoing:</strong> ${capitaliseString(outgoingSelection)}</div>`);
+        lines.push(`<div><strong>${localize('tooltipOutgoingLabel', getLanguage())}</strong> ${localizeTradeItemDisplayName(outgoingSelection)}</div>`);
     }
 
 
     if (incomingType) {
-        lines.push(`<div><strong>Incoming:</strong> ${capitaliseString(incomingSelection)}</div>`);
+        lines.push(`<div><strong>${localize('tooltipIncomingLabel', getLanguage())}</strong> ${localizeTradeItemDisplayName(incomingSelection)}</div>`);
     }
 
 
@@ -8174,11 +8222,11 @@ function getMarketTooltipSection(sectionKey, item, bias) {
     return [
         '<div class="tooltip-section">',
         `<div class="tooltip-heading">${title}</div>`,
-        `<div><strong>Item:</strong> ${capitaliseString(item)}</div>`,
-        `<div>Bias: <span class="${biasClass}">${formatMarketBiasValue(bias)}</span></div>`,
-        `<div>Base Price: ${baseValue.toFixed(2)}</div>`,
-        `<div>Adjusted Price: ${adjustedPrice.toFixed(2)}</div>`,
-        `<div>Trade Volume: ${tradeVolume.toLocaleString()}</div>`,
+        `<div><strong>${localize('tooltipItemLabel', getLanguage())}</strong> ${localizeTradeItemDisplayName(item)}</div>`,
+        `<div>${localize('tooltipBiasLabel', getLanguage())} <span class="${biasClass}">${formatMarketBiasValue(bias)}</span></div>`,
+        `<div>${localize('tooltipBasePriceLabel', getLanguage())} ${baseValue.toFixed(2)}</div>`,
+        `<div>${localize('tooltipAdjustedPriceLabel', getLanguage())} ${adjustedPrice.toFixed(2)}</div>`,
+        `<div>${localize('tooltipTradeVolumeLabel', getLanguage())} ${tradeVolume.toLocaleString()}</div>`,
         '</div>'
     ].join('');
 }
@@ -8286,8 +8334,8 @@ function buildGalacticMarketSidebarStatus() {
         const formatted = `${minutes}:${String(seconds).padStart(2, '0')}`;
 
 
-        statusElement.dataset.galacticTooltipContent = `<div class="red-disabled-text">Galactic Market Shutdown<br>Time Remaining: ${formatted}</div>`;
-        return { text: 'Shutdown!', className: 'red-disabled-text' };
+        statusElement.dataset.galacticTooltipContent = `<div class="red-disabled-text">${localize('textGalacticMarketShutdown', getLanguage())}<br>${localize('tooltipTimeRemaining', getLanguage()).replace('{time}', formatted)}</div>`;
+        return { text: localize('textShutdown', getLanguage()), className: 'red-disabled-text' };
     }
 
 
@@ -8299,7 +8347,7 @@ function buildGalacticMarketSidebarStatus() {
 
     if (outgoingBias === null && incomingBias === null) {
         delete statusElement.dataset.galacticTooltipContent;
-        return { text: 'Bias --', className: '' };
+        return { text: localize('textBiasNone', getLanguage()), className: '' };
     }
 
 
@@ -8333,8 +8381,8 @@ function buildGalacticMarketSidebarStatus() {
 
 
     return {
-        text: `Bias ${textSegments.join(' | ')}`,
-        html: `Bias ${htmlSegments.join(' | ')}`,
+        text: `${localize('textBiasPrefix', getLanguage())} ${textSegments.join(' | ')}`,
+        html: `${localize('textBiasPrefix', getLanguage())} ${htmlSegments.join(' | ')}`,
         className: deriveMarketBiasClass((() => {
             if (outgoingBias !== null && incomingBias !== null) {
                 return Math.abs(outgoingBias) >= Math.abs(incomingBias) ? outgoingBias : incomingBias;
@@ -8353,49 +8401,55 @@ function buildMegastructuresSidebarStatus() {
     }
 
 
+    // `name` is matched against the stored possession array, so it stays
+    // canonical English; `nameKey` and `techKeys` drive what is displayed.
     const megastructures = [
-        { 
-            id: 1, 
+        {
+            id: 1,
             name: 'Dyson Sphere',
-            techs: [
-                'Dyson Sphere Understanding',
-                'Dyson Sphere Capabilities',
-                'Dyson Sphere Disconnect',
-                'Dyson Sphere Power',
-                'Dyson Sphere Connect'
+            nameKey: 'megaStructureTTNameDysonSphere',
+            techKeys: [
+                'megaStructureTechDysonSphereUnderstanding',
+                'megaStructureTechDysonSphereCapabilities',
+                'megaStructureTechDysonSphereDisconnect',
+                'megaStructureTechDysonSpherePower',
+                'megaStructureTechDysonSphereConnect'
             ]
         },
-        { 
-            id: 2, 
+        {
+            id: 2,
             name: 'Celestial Processing Core',
-            techs: [
-                'CPC Understanding',
-                'CPC Capabilities',
-                'CPC Disconnect',
-                'CPC Power',
-                'CPC Connect'
+            nameKey: 'megaStructureTTNameCelestialProcessingCore',
+            techKeys: [
+                'megaStructureTechCpcUnderstanding',
+                'megaStructureTechCpcCapabilities',
+                'megaStructureTechCpcDisconnect',
+                'megaStructureTechCpcPower',
+                'megaStructureTechCpcConnect'
             ]
         },
-        { 
-            id: 3, 
+        {
+            id: 3,
             name: 'Plasma Forge',
-            techs: [
-                'Plasma Forge Understanding',
-                'Plasma Forge Capabilities',
-                'Plasma Forge Disconnect',
-                'Plasma Forge Power',
-                'Plasma Forge Connect'
+            nameKey: 'megaStructureTTNamePlasmaForge',
+            techKeys: [
+                'megaStructureTechPlasmaForgeUnderstanding',
+                'megaStructureTechPlasmaForgeCapabilities',
+                'megaStructureTechPlasmaForgeDisconnect',
+                'megaStructureTechPlasmaForgePower',
+                'megaStructureTechPlasmaForgeConnect'
             ]
         },
-        { 
-            id: 4, 
+        {
+            id: 4,
             name: 'Galactic Memory Archive',
-            techs: [
-                'GMA Understanding',
-                'GMA Capabilities',
-                'GMA Disconnect',
-                'GMA Power',
-                'GMA Connect'
+            nameKey: 'megaStructureTTNameGalacticMemoryArchive',
+            techKeys: [
+                'megaStructureTechGmaUnderstanding',
+                'megaStructureTechGmaCapabilities',
+                'megaStructureTechGmaDisconnect',
+                'megaStructureTechGmaPower',
+                'megaStructureTechGmaConnect'
             ]
         }
     ];
@@ -8413,7 +8467,7 @@ function buildMegastructuresSidebarStatus() {
 
 
     let tooltipContent = '<div class="tooltip-section">';
-    tooltipContent += '<div class="tooltip-heading">Megastructures Status</div><br>';
+    tooltipContent += `<div class="tooltip-heading">${localize('tooltipHeadingMegastructuresStatus', getLanguage())}</div><br>`;
 
 
     const captured = [];
@@ -8433,17 +8487,17 @@ function buildMegastructuresSidebarStatus() {
 
 
     if (captured.length > 0) {
-        tooltipContent += '<div class="tooltip-subheading">Captured Megastructures:</div>';
+        tooltipContent += `<div class="tooltip-subheading">${localize('tooltipCapturedMegastructures', getLanguage())}</div>`;
         captured.forEach(ms => {
         const statusClass = 'green-ready-text';
 
         
         tooltipContent += `<div class="megastructure-status ${statusClass}">`;
-        tooltipContent += `<strong>${ms.name}:</strong> Captured`;
+        tooltipContent += `<strong>${localize(ms.nameKey, getLanguage())}:</strong> ${localize('textCaptured', getLanguage())}`;
 
         
         const techsResearched = getMegaStructureTechsResearched() || [];
-        ms.techs.forEach((techName, index) => {
+        ms.techKeys.forEach((techKey, index) => {
             const techId = index + 1;
             const isResearched = techsResearched.some(([msId, tId]) => 
                 msId === ms.id && tId === techId
@@ -8451,7 +8505,7 @@ function buildMegastructuresSidebarStatus() {
             const techStatus = isResearched ? '✓' : '✗';
             const techClass = isResearched ? 'green-ready-text' : 'red-disabled-text';
             tooltipContent += `<div class="tech-status ${techClass}" style="margin-left: 10px;">`;
-            tooltipContent += `${techName}: ${techStatus}`;
+            tooltipContent += `${localize(techKey, getLanguage())}: ${techStatus}`;
             tooltipContent += '</div>';
         });
 
@@ -8467,17 +8521,17 @@ function buildMegastructuresSidebarStatus() {
 
 
     if (notCaptured.length > 0) {
-        tooltipContent += '<div class="tooltip-subheading">Non-Captured Megastructures:</div>';
+        tooltipContent += `<div class="tooltip-subheading">${localize('tooltipNonCapturedMegastructures', getLanguage())}</div>`;
         notCaptured.forEach(ms => {
             const statusClass = 'red-disabled-text';
 
             
             tooltipContent += `<div class="megastructure-status ${statusClass}">`;
-            tooltipContent += `<strong>${ms.name}:</strong> Not Captured`;
+            tooltipContent += `<strong>${localize(ms.nameKey, getLanguage())}:</strong> ${localize('textNotCaptured', getLanguage())}`;
 
             
             const techsResearched = getMegaStructureTechsResearched() || [];
-            ms.techs.forEach((techName, index) => {
+            ms.techKeys.forEach((techKey, index) => {
                 const techId = index + 1;
                 const isResearched = techsResearched.some(([msId, tId]) => 
                     msId === ms.id && tId === techId
@@ -8485,7 +8539,7 @@ function buildMegastructuresSidebarStatus() {
                 const techStatus = isResearched ? '✓' : '✗';
                 const techClass = isResearched ? 'green-ready-text' : 'red-disabled-text';
                 tooltipContent += `<div class="tech-status ${techClass}" style="margin-left: 10px;">`;
-                tooltipContent += `${techName}: ${techStatus}`;
+                tooltipContent += `${localize(techKey, getLanguage())}: ${techStatus}`;
                 tooltipContent += '</div>';
             });
 
@@ -8502,7 +8556,7 @@ function buildMegastructuresSidebarStatus() {
     }
 
 
-    const text = `Captured: ${capturedCount}/${totalMegastructures}`;
+    const text = localize('tooltipCapturedCount', getLanguage()).replace('{captured}', capturedCount).replace('{total}', totalMegastructures);
     return {
         text: text,
         html: `<div style="text-align: center;">${text}</div>`,
@@ -8520,7 +8574,7 @@ function buildStarShipSidebarStatus() {
 
 
     if (!getStarShipBuilt()) {
-        return { text: 'Not Built', className: starShipStatusClassMap['Not Built'] };
+        return { text: localize('textNotBuilt', getLanguage()), className: starShipStatusClassMap['Not Built'] };
     }
 
 
@@ -8528,15 +8582,15 @@ function buildStarShipSidebarStatus() {
 
 
     if (getRebirthPossible()) {
-        return { text: 'Colonised', className: starShipStatusClassMap['Colonised Destination'] };
+        return { text: localize('textColonised', getLanguage()), className: starShipStatusClassMap['Colonised Destination'] };
     }
 
 
     if (starShipState === 'orbiting') {
         const destination = (getStarShipStatus() || [])[1];
         const destinationText = destination
-            ? `Orbiting ${capitaliseWordsWithRomanNumerals(destination)}`
-            : 'Orbiting Destination';
+            ? localize('textOrbitingStar', getLanguage()).replace('{star}', capitaliseWordsWithRomanNumerals(destination))
+            : localize('textOrbitingDestination', getLanguage());
         return { text: destinationText, className: starShipStatusClassMap['Orbiting Destination'] };
     }
 
@@ -8547,7 +8601,7 @@ function buildStarShipSidebarStatus() {
 
 
     if (starShipState === 'readyForTravel') {
-        return { text: 'Ready To Depart', className: starShipStatusClassMap['Ready To Depart'] };
+        return { text: localize('textReadyToDepart', getLanguage()), className: starShipStatusClassMap['Ready To Depart'] };
     }
 
 
@@ -8571,7 +8625,7 @@ function drawLeftSideOfAntimatterSvg(asteroidsArray, rocketData, svgElement, svg
     });
 
 
-    const rockets = ["Rocket 1", "Rocket 2", "Rocket 3", "Rocket 4"];
+    const rockets = [1, 2, 3, 4].map((index) => localize('rocketDefaultName', getLanguage()).replace('{index}', index));
     const numRockets = rockets.length;
 
 
@@ -8610,7 +8664,7 @@ function drawLeftSideOfAntimatterSvg(asteroidsArray, rocketData, svgElement, svg
     titleDiv.style.color = "var(--text-color)";
     titleDiv.style.fontFamily = "var(--font-family)";
     titleDiv.style.textAlign = "center";
-    titleDiv.innerHTML = "Antimatter Mining";
+    titleDiv.innerHTML = localize('textAntimatterMining', getLanguage());
 
 
     titleContainer.appendChild(titleDiv);
@@ -8648,19 +8702,19 @@ function drawLeftSideOfAntimatterSvg(asteroidsArray, rocketData, svgElement, svg
                 if (spaceIdx > 0) return name.slice(0, spaceIdx) + '...';
                 return name.length > 13 ? name.slice(0, 13) + '...' : name;
             })()],
-            ["Asteroid:", (() => {
+            [localize('tooltipAsteroidLabel', getLanguage()), (() => {
                 const name = rocketInfo[1];
                 const spaceIdx = name.indexOf(' ');
                 if (spaceIdx > 0) return name.slice(0, spaceIdx) + '...';
                 return name.length > 13 ? name.slice(0, 13) + '...' : name;
             })()],           
-            ["Complexity:", (minerBrokeDownRocket && minerBrokeDownRocket === `rocket${index + 1}`)
-                ? '<span class="red-disabled-text">Repairing</span>'
+            [localize('tooltipComplexityLabel', getLanguage()), (minerBrokeDownRocket && minerBrokeDownRocket === `rocket${index + 1}`)
+                ? `<span class="red-disabled-text">${localize('textRepairing', getLanguage())}</span>`
                 : rocketInfo[2]],
-            ["Antimatter Left:", Math.floor(rocketInfo[4])]
+            [localize('tooltipAntimatterLeftLabel', getLanguage()), Math.floor(rocketInfo[4])]
         ] : [
-            ['', `Rocket ${index + 1}`],
-            [getMiningObject()[`rocket${index + 1}`] === 'refuel' ? "Requires Refuelling" : "Not at Asteroid", ""],
+            ['', localize('rocketDefaultName', getLanguage()).replace('{index}', index + 1)],
+            [getMiningObject()[`rocket${index + 1}`] === 'refuel' ? localize('textRequiresRefuelling', getLanguage()) : localize('textNotAtAsteroid', getLanguage()), ""],
             ["", ""],
             ["", ""]
         ];
@@ -8731,8 +8785,8 @@ function drawLeftSideOfAntimatterSvg(asteroidsArray, rocketData, svgElement, svg
             }
 
     
-            if (label === "Not at Asteroid") {
-                labelCell.style.color = label === "Not at Asteroid" 
+            if (label === localize('textNotAtAsteroid', getLanguage())) {
+                labelCell.style.color = label === localize('textNotAtAsteroid', getLanguage())
                     ? "var(--disabled-text)" 
                     : "var(--warning-text)";
             } else {
@@ -8883,7 +8937,7 @@ export async function drawAntimatterFlowDiagram(rocketData, svgElement) {
 
 
     const boostWordLine = document.createElement("div");
-    boostWordLine.innerText = "BOOST";
+    boostWordLine.innerText = localize('buttonBoost', getLanguage());
     boostTextContainer.appendChild(boostWordLine);
 
 
@@ -9060,7 +9114,7 @@ export function drawNativeTechTree(techData, containerSelector) {
         if (status === 'researched') {
             const statusTag = document.createElement('span');
             statusTag.classList.add('native-tech-status');
-            statusTag.textContent = 'RESEARCHED';
+            statusTag.textContent = localize('textResearched', getLanguage());
             node.appendChild(statusTag);
         }
 
@@ -10067,7 +10121,7 @@ function initializeTabEventListeners() {
         element.addEventListener('click', function() {
             if (isTimedEffectActive?.('galacticMarketLockdown')) {
                 applyGalacticMarketLockdownUi();
-                showNotification('Galactic Market is currently offline.', 'warning', 3000, 'special');
+                showNotification(localize('notificationGalacticMarketOffline', getLanguage()), 'warning', 3000, 'special');
                 return;
             }
             selectRowCss(this);
@@ -10507,7 +10561,7 @@ export async function showNewsTickerMessage(newsTickerContainer) {
     } else {
         if (category === 'feedback') {
             const feedbackEntry = newsTickerContainer.wackyEffects?.find(entry => 
-                entry.body && entry.body.includes('Wanna Give FeedBack')
+                entry.body && entry.body.includes(localize('textWannaGiveFeedback', getLanguage()))
             );
             if (feedbackEntry) {
                 message = feedbackEntry;
@@ -10549,7 +10603,7 @@ export async function showNewsTickerMessage(newsTickerContainer) {
     }
 
 
-    if (message === false || message === undefined || message.includes('Wanna Give FeedBack') && !getFeedbackCanBeRequested()) {
+    if (message === false || message === undefined || message.includes(localize('textWannaGiveFeedback', getLanguage())) && !getFeedbackCanBeRequested()) {
         showNewsTickerMessage(newsTickerContainer);
     } else {
         if (category === 'noPrize') {
@@ -11046,7 +11100,7 @@ function addOneOffEventListeners() {
 
                    
                     if (buyBuildingButtonElement)  {
-                        buyBuildingButtonElement.innerHTML = `Add (max) ${Math.floor(getResourceDataObject('buildings', [item[0], 'upgrades', item[1], 'capacity']) / 1000)} MWh`;
+                        buyBuildingButtonElement.innerHTML = localize('buttonAddMaxMwh', getLanguage()).replace('{amount}', Math.floor(getResourceDataObject('buildings', [item[0], 'upgrades', item[1], 'capacity']) / 1000));
                     }
                 }
             });
@@ -11804,7 +11858,7 @@ export function createColoniseOpinionProgressBar(parentElement) {
 
     const progressText = document.createElement("span");
     progressText.classList.add("diplomacy-impression-bar-text");
-    progressText.textContent = "Opinion: 0%";
+    progressText.textContent = localize('textOpinionZero', getLanguage());
 
 
     diplomacyImpressionBarContainer.appendChild(underBar);
@@ -11830,7 +11884,7 @@ export function setColoniseOpinionProgressBar(value, parentElement) {
 
     const percentageBarFill = (value / 100) * horizontalWidth;
     horizontalBar.style.width = `${percentageBarFill}px`;
-    barText.textContent = `Impression: ${value}%`;
+    barText.textContent = localize('textImpressionPercent', getLanguage()).replace('{value}', value);
 }
 
 
@@ -14094,14 +14148,14 @@ export function playWinCinematic(durationMs = 14000) {
             ctx.shadowColor = 'rgba(120, 255, 230, 0.6)';
             ctx.shadowBlur = 24;
             ctx.fillStyle = 'rgba(220, 255, 245, 1)';
-            ctx.fillText('YOU ARE HOME', w * 0.5, h * 0.18);
+            ctx.fillText(localize('cinematicYouAreHome', getLanguage()), w * 0.5, h * 0.18);
 
             ctx.shadowColor = 'rgba(255, 255, 255, 0.2)';
             ctx.shadowBlur = 12;
             ctx.globalAlpha = 0.65 * a;
             ctx.font = `500 ${Math.round(size * 0.36)}px system-ui, -apple-system, Segoe UI, Roboto, Arial`;
             ctx.fillStyle = 'rgba(220, 255, 245, 1)';
-            ctx.fillText('WELCOME, MIA\' PLAC', w * 0.5, h * 0.245);
+            ctx.fillText(localize('cinematicWelcomeMiaPlac', getLanguage()), w * 0.5, h * 0.245);
             ctx.restore();
         };
 
@@ -14228,7 +14282,7 @@ export function playWinCinematic2(durationMs = 22000) {
 
         const theEndText = document.createElement('div');
         theEndText.className = 'win-cinematic2-the-end green-ready-text';
-        theEndText.textContent = 'THE END';
+        theEndText.textContent = localize('cinematicTheEnd', getLanguage());
         blackOverlay.appendChild(theEndText);
 
         for (let i = 0; i < 400; i++) {
@@ -14282,19 +14336,19 @@ export function playWinCinematic2(durationMs = 22000) {
 
         const creditsHeader = document.createElement('div');
         creditsHeader.className = 'win-cinematic2-credits-header';
-        creditsHeader.textContent = 'CREDITS:';
+        creditsHeader.textContent = localize('cinematicCreditsHeading', getLanguage());
         credits.appendChild(creditsHeader);
 
         const creditsContainer = document.createElement('div');
         creditsContainer.className = 'win-cinematic2-credits-container';
         
         const creditsLines = [
-            'Game Design - Leigh Hobson',
-            'Development - Leigh Hobson',
-            'Graphics and UI Design - Leigh Hobson',
-            'QA - Leigh Hobson',
-            'Story - Leigh Hobson',
-            'Cosmic Forge © 2026 Leigh Hobson'
+            localize('cinematicCreditGameDesign', getLanguage()),
+            localize('cinematicCreditDevelopment', getLanguage()),
+            localize('cinematicCreditGraphics', getLanguage()),
+            localize('cinematicCreditQa', getLanguage()),
+            localize('cinematicCreditStory', getLanguage()),
+            'Cosmic Forge \u00a9 2026 Leigh Hobson'
         ];
         
         creditsLines.forEach((line, idx) => {
@@ -14310,9 +14364,9 @@ export function playWinCinematic2(durationMs = 22000) {
 
         const victoryTitle = document.createElement('div');
         victoryTitle.className = 'win-cinematic2-victory';
-        victoryTitle.innerHTML = '<div class="win-cinematic2-victory-main">VICTORY</div>' +
-            '<div class="win-cinematic2-victory-sub">WELCOME, MIA\' PLAC, YOU HAVE SECURED YOUR PEOPLE\'S FUTURE</div>' +
-            '<div class="win-cinematic2-victory-sub2">YOU ARE THE COSMIC FORGER</div>';
+        victoryTitle.innerHTML = `<div class="win-cinematic2-victory-main">${localize('cinematicVictory', getLanguage())}</div>` +
+            `<div class="win-cinematic2-victory-sub">${localize('cinematicSecuredFuture', getLanguage())}</div>` +
+            `<div class="win-cinematic2-victory-sub2">${localize('cinematicYouAreTheCosmicForger', getLanguage())}</div>`;
 
         scene.appendChild(stars);
         scene.appendChild(rip);
@@ -14705,30 +14759,34 @@ export async function relocalizeAll(language) {
 debugSetLanguageButton?.addEventListener('click', async () => {
     const selected = String(debugLanguageSelect?.value ?? '').trim();
     if (!selected) {
-        showNotification('Please select a language.', 'info', 2500, 'debug');
+        showNotification(localize('notificationPleaseSelectLanguage', getLanguage()), 'info', 2500, 'debug');
         return;
     }
 
     const { redrew } = await relocalizeAll(selected);
     if (!redrew) {
-        showNotification('Could not find content container to redraw.', 'error', 2500, 'debug');
+        showNotification(localize('notificationCouldNotRedraw', getLanguage()), 'error', 2500, 'debug');
     }
 });
 
 
 if (debugRandomEventSelect) {
     const options = getRandomEventDebugOptions();
-    options.forEach(({ id, title }) => {
+    options.forEach(({ id, title, titleKey }) => {
         const opt = document.createElement('option');
         opt.value = id;
         opt.textContent = title;
+        // This list is built before the catalogue is fetched, so the label is
+        // annotated and picked up by the same `data-loc` sweep as the static
+        // shell — which also makes it follow a runtime language change.
+        if (titleKey) opt.dataset.loc = titleKey;
         debugRandomEventSelect.appendChild(opt);
     });
 }
 triggerRandomEventButton?.addEventListener('click', () => {
     const selected = debugRandomEventSelect?.value;
     if (!selected) {
-        showNotification('Please select an event to trigger.', 'info', 2500, 'debug');
+        showNotification(localize('notificationPleaseSelectEvent', getLanguage()), 'info', 2500, 'debug');
         return;
     }
     triggerSpecificRandomEventDebug(selected);
@@ -15240,7 +15298,7 @@ holdEnterToGainDebugButton?.addEventListener('click', () => {
     updateHoldEnterToGainDebugStatus();
 });
 
-updateHoldEnterToGainDebugStatus();
+
 
 const add10000CpButton = document.getElementById('add10000CpButton');
 add10000CpButton?.addEventListener('click', () => {
