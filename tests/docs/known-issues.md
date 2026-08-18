@@ -1444,3 +1444,79 @@ both halves of the contract. Both halves now pass, and the all-time half names
 any statistic that is lost if this regresses.
 
 ---
+
+## 25. Pressing Import with an empty box did nothing at all — ✅ FIXED
+
+**Severity: low — a dead button. No data loss, but the player is given no reason
+why nothing happened, and every click left an unhandled rejection behind.**
+
+### Reproduction
+
+1. Open **Settings → Saving / Loading**.
+2. Leave the **Import** box empty — or paste in nothing but whitespace.
+3. Press **Import**.
+4. Nothing happens. No notification, no modal, no change on screen. The console
+   gains `Uncaught (in promise) No valid save data found in the import area.`
+
+### Cause
+
+Two independent halves, which is why the fix is in two places.
+
+`loadGame()` (`saveLoadGame.js`) rejected before reaching any of its user-facing
+messages:
+
+```js
+const textArea = document.getElementById('importSaveArea');
+if (!textArea || !textArea.value.trim()) {
+    return reject('No valid save data found in the import area.');   // silent
+}
+```
+
+Every *other* refusal path in the same function does tell the player — a
+truncated code and arbitrary text both raise `notificationInvalidSaveString`
+through `validateSaveString()` a few lines below. The empty box was the one
+branch that returned before any of that, so the button behaved as though it were
+not wired up at all.
+
+The second half was the caller. The Import row's handler
+(`drawTab9Content.js`) was `onClick: () => { loadGame(); }` — the returned
+promise was never caught, so the rejection surfaced as an unhandled rejection on
+every click.
+
+### Fix — applied
+
+**`saveLoadGame.js`** — the empty branch now notifies before rejecting, so every
+caller of `loadGame()` is covered rather than just the one button:
+
+```js
+if (!textArea || !textArea.value.trim()) {
+    showNotification(localize('notificationInvalidSaveString', getLanguage()), 'warning', 3000, 'loadSave');
+    return reject('No valid save data found in the import area.');
+}
+```
+
+**`drawTab9Content.js`** — the handler absorbs the rejection, which it can now do
+safely because the message no longer depends on the caller:
+
+```js
+onClick: () => {
+    // loadGame() notifies the player itself on every refusal path, so this
+    // catch only stops the rejection surfacing as an unhandled error.
+    loadGame().catch(() => {});
+},
+```
+
+Keeping the rejection rather than resolving was deliberate: callers that want to
+know an import did not happen — `importSaveStringFileFromComputer()` logs it —
+can still tell the difference between "nothing to load" and success.
+
+### Coverage
+
+`tests/e2e/save-load-local/save-load-local.spec.js` → *"pressing Import with an
+empty box tells the player rather than failing silently"*. The spec presses the
+real button with an empty box and asserts three things: a notification appears,
+the live run is untouched, and `significantErrors()` is empty — that last
+assertion is what pins the unhandled rejection, and it is the one that stayed red
+after the first half of the fix was applied.
+
+---

@@ -261,6 +261,60 @@ artefact. Counting `document.querySelectorAll('*')` alongside the CDP metric is
 worth doing too: CDP `Nodes` includes text nodes and detached-but-referenced
 nodes, so the two disagreeing is itself informative.
 
+**The save pane fills its own export box, once per visit.** `#exportSaveArea` is
+empty when the Saving / Loading pane renders; `gameLoop` notices the pane is open
+and calls `saveGame('onSaveScreen')` one time, and *that* is what writes the
+value. So wait for the value to appear rather than for the pane, and to capture a
+save of the state as it stands *now*, leave the pane and come back — sitting on it
+never re-captures, by design.
+
+**A local import keeps the importing player's pioneer name; a cloud load adopts
+the saved one.** `setSaveName(gameState.saveName)` in `restoreGameStatus` is
+guarded by `if (type === 'cloud')`. This is deliberate — adopting the name from a
+pasted save string would point the importer's autosave at the cloud slot of
+whoever wrote it. Any round-trip comparison has to keep `saveName` out of the
+"everything must match" set for local imports and assert it separately.
+
+**Never edit game source from a spec, even with a restore afterwards.** When a
+test needs the game to behave as though its source were different — a bumped
+`GAME_VERSION_FOR_SAVES`, an extra migration rung — serve the change instead of
+writing it. `page.route()` can `route.fetch()` the real module, rewrite the body
+in memory and `route.fulfill()` with the result; the running game genuinely uses
+the modified code while the file on disk is only ever read. An edit-and-restore
+pair leaves the repository modified if the run is killed between the two halves.
+Two rules make it trustworthy: assert that the rewrite actually matched (compare
+before and after, so a future source edit cannot silently turn the spec into a
+no-op against the unmodified game), and snapshot the file in `beforeAll` to assert
+byte-equality in `afterAll`.
+
+**Age a real save rather than checking one in.** For migration coverage, take the
+save the current build just produced, rewind its `version` and strip whatever the
+rung under test is supposed to rebuild, then import it through the real button. A
+checked-in fixture is frozen the day it is written and drifts away from the shape
+the migration is actually asked to handle.
+
+**Downloads and file pickers are drivable, and are the real paths.** Manual Save
+goes through a blob download — `page.waitForEvent('download')` paired with the
+click, then `download.saveAs(testInfo.outputPath(...))`. Manual Load opens a real
+file input — `page.waitForEvent('filechooser')` paired with the click, then
+`chooser.setFiles(path)`. Both are worth using: the `FileReader` path in
+`importSaveStringFileFromComputer` is not reachable any other way.
+
+**Specs that share one piece of external state must be serial.** The config is
+`fullyParallel`, so tests inside a single file run concurrently by default. Where
+they share a row in Supabase — or anything else outside the page —
+`test.describe.configure({ mode: 'serial' })` is required, both to stop them
+overwriting each other and to fix the order when a later spec has to restore what
+an earlier one changed. Be aware that a failure then *skips* the rest, so a
+cleanup spec at the end may not run.
+
+**Assert an outgoing request when you cannot read the result back.** The analytics
+columns on a cloud save are written and never read by the game, and the suite has
+no database credentials. Intercepting the `PATCH`/`POST` and inspecting
+`route.request().postData()` asserts exactly what the game sends, which is the
+part that could be wrong. Note `POST` sends an array of rows and `PATCH` sends the
+changed columns.
+
 **A live bug must make the test fail. Never work around one.** This is the
 suite's governing rule. Do not weaken an assertion so a buggy path passes, do not
 add a harness helper whose job is to paper over a crash, and do not "pin both

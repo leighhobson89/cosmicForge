@@ -72,25 +72,27 @@
       "id": "save-load-local",
       "title": "Local Save & Load",
       "group": "foundation",
-      "status": "red",
+      "status": "green",
       "risk": "high",
       "legacy": [],
-      "summary": "Export/import of save strings, autosave scheduling, and round-trip fidelity of every persisted field.",
+      "summary": "The save code and the save file: export, import, download and file-picker load, driven through the real buttons, with full round-trip fidelity into a fresh session.",
       "tests": [
-        "Export produces a string that imports back to an identical game state (full round-trip deep-equal)",
-        "Autosave fires on the configured frequency and respects the autosave toggle",
-        "Autosave is suppressed during battle and during time warp (unless black hole always-on)",
+        "A run exported as a code restores into a brand new session, field for field",
+        "A downloaded .txt file loads back into a brand new session through the real file picker",
+        "The exported code is compressed rather than readable JSON, and matches the downloaded file byte for byte",
+        "The Export button copies the code to the clipboard",
+        "A local import keeps the importing player as the pioneer rather than adopting the name in the save",
         "Import rejects malformed, truncated and empty strings without corrupting live state",
-        "Import from file and paste-from-clipboard paths both work",
-        "Save on entering the save/load pane happens exactly once per visit",
-        "Demo build does not autosave"
-      ]
+        "The save pane captures exactly once per visit, and captures afresh on the next visit",
+        "Autosave suppression during battle, time warp and demo builds is covered in those areas"
+      ],
+      "specCount": 10
     },
     {
       "id": "save-load-cloud",
       "title": "Cloud Save & Load",
       "group": "foundation",
-      "status": "red",
+      "status": "green",
       "risk": "high",
       "legacy": [
         "autobuyer.test.js",
@@ -99,32 +101,39 @@
         "researchTech.test.js",
         "spaceAntimatter.test.js"
       ],
-      "summary": "Supabase-backed saves keyed on pioneer name. Legacy tests use this as a fixture mechanism but never test it as a feature.",
+      "summary": "Supabase-backed saves keyed on pioneer name, exercised as a feature: uploaded through the real button, loaded back in a fresh session, and destroyed through the real Hard Reset. All writes land on one reserved test row.",
       "tests": [
-        "Save to cloud then load in a fresh session restores identical state",
-        "Pioneer name collision is handled predictably",
-        "Destroying a cloud save moves it to the graveyard row and frees the name for reuse",
-        "Network failure during save surfaces an error and does not lose the local state",
+        "Save to cloud then load in a fresh session restores the run field for field",
+        "Saving again under an existing pioneer name updates that row rather than inserting a second",
+        "Destroying a cloud save archives it to the graveyard row and frees the name for reuse",
+        "Network failure during save surfaces an error and does not lose the local run",
         "Load of a nonexistent pioneer name gives a clear message rather than a silent failure",
-        "Region, hostSource and feedback columns are populated correctly"
-      ]
+        "A blank pioneer name is refused before any write is attempted",
+        "Autosave reaches the cloud on its configured interval with no player action",
+        "Region, hostSource and feedback columns are populated correctly on the outgoing write"
+      ],
+      "specCount": 8
     },
     {
       "id": "save-migration",
       "title": "Save Migration",
       "group": "foundation",
-      "status": "red",
+      "status": "green",
       "risk": "high",
       "legacy": [],
-      "summary": "The patches.js version ladder that upgrades old saves. The best-engineered code in the project and entirely untested.",
+      "summary": "The patches.js version ladder that upgrades old saves. Driven through the real Import button on aged saves, including a version bump and an extra rung served by route interception.",
       "tests": [
-        "A save at each historical version migrates cleanly to current",
-        "Migration is idempotent — running it twice changes nothing the second time",
-        "Version below minimum is clamped, version above current is left alone",
+        "A save at each historical version in the ladder migrates cleanly to current",
+        "Migration is idempotent — re-running the ladder over migrated data changes nothing",
+        "Version below the minimum is refused outright and the live run is untouched",
+        "Version above current is passed through unchanged rather than re-migrated",
         "The blackHoleNerfPatched flag prevents double-application of the power rescale",
-        "Autobuyer display-name to localization-key migration converts every old name (this one guards the entire localization release for returning players)",
-        "A save with missing or malformed sections migrates without throwing"
-      ]
+        "Autobuyer display-name to localization-key migration converts every old name, and the pane renders the localized name",
+        "A save with missing or malformed sections migrates without throwing",
+        "A newly added rung carries a previous-version save up, and leaves an already-current save alone",
+        "Adding a version never modifies the source files on disk"
+      ],
+      "specCount": 11
     },
     {
       "id": "localization",

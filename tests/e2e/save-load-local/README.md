@@ -1,8 +1,8 @@
 # e2e / save-load-local
 
-**Local Save & Load** — 🔴 RED
+**Local Save & Load** — 🟢 GREEN
 
-Export/import of save strings, autosave scheduling, and round-trip fidelity of every persisted field.
+The save code and the save file: export, import, download and file-picker load, driven through the real buttons, with full round-trip fidelity into a fresh session.
 
 Specs for this area go in this folder, named `<scenario>.spec.js`.
 

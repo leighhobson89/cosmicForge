@@ -903,6 +903,201 @@ are counted from. Everything after those is played.
 
 ---
 
+## 🟢 Save Migration — `save-migration.spec.js`, 11 specs, all passing
+
+**What is different.** There were no specs at all before this, and the obvious way
+to write them would have been to import `migrateResourceData` and call it with
+hand-built objects. None of these do that. Every spec plays a run, takes the save
+**the game itself produced**, *ages* it — rewinds `version` and strips out the
+sections a historical rung is supposed to rebuild — pastes it into the real import
+box and presses **Import**. The ladder then runs where it really runs:
+
+```
+Import click
+  -> loadGame()                     validate, decompress, parse
+  -> restoreGameStatus()            minimum-version gate
+  -> restoreResourceDataObject()    and its six sibling restorers
+  -> migrateResourceData()          the ladder, one rung at a time
+  -> live game                      asserted by re-exporting on the next pane visit
+```
+
+Ageing a save the current build just made, rather than checking in a fixture, is
+deliberate. A checked-in 0.93 save is frozen the day it is written and slowly
+stops resembling anything the migration is asked to handle; a rewound live save
+always has today's shape with yesterday's version number.
+
+**Coverage of the ladder itself.** One spec walks a save in at *every* version the
+ladder branches on — 0.93, 0.94, 0.95, 0.967, 0.969, 0.976, 0.978, 0.979 — and
+asserts all eight arrive at the current version with the run intact. Covering only
+the oldest would have left the common case untested: a player who last played two
+releases ago enters the ladder half way up.
+
+**The autobuyer rung gets the strongest assertion in the file**, because it guards
+the entire localization release for returning players. The spec puts all sixty
+pre-localization display names back — nine resources and six compounds, four tiers
+each — imports, and then checks two things: that every migrated `nameUpgrade`
+resolves through `localize()` to something other than itself, and that the hydrogen
+pane *renders* "Hydrogen Compressor" with no `autoBuyerName…` key anywhere in the
+row. A name left unconverted fails both.
+
+**Idempotence is tested the way it can actually break.** Re-importing an
+already-current save is trivially a no-op, because the `while` loop never runs.
+So the spec rewinds *only the version field*, leaving every migrated value in
+place, and sends it through again — which is what an interrupted or replayed
+upgrade looks like. The black hole rescale is the specific thing this protects:
+90 power becomes 60 on the first pass, and a save that arrives old *and* already
+carrying `blackHoleNerfPatched` must come out still at 90 rather than being halved
+a second time.
+
+### Adding a version without touching the source
+
+The case the ladder exists for is someone adding a rung and bumping the version,
+and that cannot be reached from inside the page — `GAME_VERSION_FOR_SAVES` is a
+`const` export, so the modified module has to be what the browser receives.
+
+The three specs that cover it use **Playwright route interception**: they intercept
+the requests for `constantsAndGlobalVars.js` and `patches.js`, rewrite the response
+bodies in memory, and fulfil the request with the rewritten text. The game then
+boots genuinely believing the current save version is `0.9995` and genuinely
+carrying an extra rung, and the import path exercises it for real.
+
+```js
+await game.page.route('**/patches.js', async (route) => {
+  const body = await (await route.fetch()).text();
+  const patched = body.replace(/\n(\s*)\}(\r?\n)(\s*)return saveData;/, ...);
+  rewritten.patches = patched !== body;      // asserted, so a silent miss cannot pass
+  await route.fulfill({ body: patched, ... });
+});
+```
+
+The alternative — writing the files, running, and restoring them in `afterAll` —
+was rejected. A run that is killed, times out or crashes between the edit and its
+restore leaves the repository holding a version number nobody chose, and for this
+particular constant that silently changes how every player's save is migrated.
+With interception the files are only ever *read*, so there is nothing to restore
+and no window in which to fail.
+
+Two details make the interception trustworthy rather than merely clever:
+
+- **The rewrite asserts that it matched.** Both `replace` calls compare before and
+  after and the spec fails if either was a no-op. Without that, a future edit to
+  either file would leave the specs passing against the unmodified game.
+- **The guarantee is asserted, not claimed.** `beforeAll` snapshots both files,
+  `afterAll` asserts byte-equality, and a third spec boots *without* the routes and
+  confirms an ordinary boot is still the real build. After the full run,
+  `git status` showed no modification to either file.
+
+---
+
+## 🟢 Local Save & Load — `save-load-local.spec.js`, 10 specs, all passing
+
+**What is different.** Local saving is two features sharing a payload, and the
+specs treat them separately: **the code** (the compressed string in the export box,
+Export to clipboard, Import from the box) and **the file** (Manual Save's real
+browser download, Manual Load's real file picker). Nothing calls `saveGame()` or
+`loadGame()` — the interesting failures are not in the compression, they are in the
+pane's once-per-visit `onSaveScreen` hook, the blob download, the `FileReader`
+path and the validate-before-parse guard.
+
+**Every round trip lands in a brand new run.** The spec plays, takes the artifact,
+then calls `boot()` again — which navigates, so it is a genuinely fresh session
+with a different pioneer — and only then imports. Loading back into the same
+session would pass even if `restoreGameStatus` did nothing at all, which is
+precisely the failure mode worth catching.
+
+**Two comparison sets, because they have different tolerances.** `structural()` —
+identity, unlock arrays, tech list, asteroid count, nested data-object values — is
+compared exactly, since none of it drifts. `totals()` — cash, antimatter,
+hydrogen, research — is compared with `>=`, because the frame loop keeps producing
+between the export and the comparison and an exact match would be racy by
+construction.
+
+### One assumption withdrawn, and what replaced it
+
+The first draft folded `saveName` into `structural()` and both round trips failed
+on it. The game is right and the assertion was wrong:
+`setSaveName(gameState.saveName)` in `restoreGameStatus` is guarded by
+`if (type === 'cloud')`, so a **local** import deliberately keeps the importing
+player's own pioneer name. That is not an oversight — adopting the name would
+point this player's autosave at the cloud slot of whoever wrote the code they
+pasted in, and quietly overwrite that person's game.
+
+So `saveName` came out of the comparison and became an assertion in its own right,
+in both round trips: the restored run must carry the importer's pioneer name and
+*not* the one in the save. The rule is now pinned rather than merely not violated.
+
+---
+
+## 🟢 Cloud Save & Load — `save-load-cloud.spec.js`, 8 specs, all passing
+
+**What is different.** The legacy suites used cloud saves as a *fixture mechanism*
+and never tested the feature. These specs upload through the real **Save To Cloud**
+button, load back by booting as the saved pioneer so the game calls
+`loadGameFromCloud()` on its own during boot, and destroy through the real **Hard
+Reset** button and its confirmation modal.
+
+**This is the only area in the suite that writes to production infrastructure**, so
+the footprint is fixed by design. Every write lands on one reserved row:
+
+```
+---000test_Test1981_cosmicForge_e2e
+```
+
+The leading dashes sort it above every real pioneer in the table, so it is obvious
+at a glance that it is not a player; the embedded `Test1981` is the game's own
+debug backdoor, so the same pioneer can still reach the debug menu. The row is
+**reused on every run** rather than uniquely named — a unique name would grow the
+table by a row every time the suite executes, forever — and reuse has the side
+benefit of exercising the UPDATE branch, which is the branch a returning player
+actually hits. Nothing is ever deleted. Total permanent additions: that row, and
+the `graveyard_` copy the hard-reset spec creates once.
+
+**The two write branches are separable from outside the database.** `INSERT` raises
+"Game saved to the cloud!" and `UPDATE` raises "Game updated in the cloud!", so the
+spec that saves a second time under an existing name can assert it updated rather
+than inserted — and then loads the row back to prove exactly one row exists,
+because a duplicate would make Supabase's `.single()` error outright.
+
+**The specs are serial.** They share one row, so `mode: 'serial'` stops a parallel
+autosave overwriting a round trip mid-flight, and fixes the order so the
+hard-reset spec — which nulls the row and then re-saves — leaves it holding data
+for the next run.
+
+### Three things worth knowing
+
+**Autosave is driven, not simulated.** The frequency dropdown's shortest option is
+two minutes, which is too long to sit through, so the spec sets `autoSaveFrequency`
+through the game's own variable debugger and then flips the autosave toggle off and
+on — the toggle's handler is what calls `initializeAutoSave()`, so the timer is
+rescheduled by a real control rather than a direct call. The upload then happens
+with nothing pressed, which is the whole point of the feature.
+
+**A network failure is a route abort, not a mock.** Aborting `*.supabase.co`
+requests leaves the client library — which comes from a different host — perfectly
+healthy, so the spec exercises a failed request rather than a broken page. The
+assertion that matters is the second one: losing the network must not cost the
+player the run they were trying to protect.
+
+That spec also cost a second withdrawn assumption. It first asserted the pioneer
+name was unchanged by a failed upload, and it is not: `captureGameStatusForSaving`
+adopts whatever is in the pane's name field *before* the upload is attempted. That
+rename is the player's own action in that click rather than damage from the
+failure, and keeping it is right — a retry then goes to the slot they chose. The
+comparison now excludes the name and asserts it separately.
+
+**The analytics columns are read on the way past.** `region`, `hostSource`,
+`feedback` and `feedback_content` are written on every save and never read back by
+the game, so nothing would notice them going null. Rather than reading the table
+back — which needs credentials the suite does not have — the spec intercepts the
+outgoing `PATCH`/`POST` and inspects its body, which asserts what the game actually
+sends. Worth knowing: `region` is a three-part tuple `[platform, userAgent, data]`,
+not a string, and `platform` is only ever `github` or `itch`, decided from the
+hostname — so `unknown` is the correct answer anywhere else, including a local test
+server. The spec asserts the shape and that the user agent is genuinely captured,
+rather than pinning a value that is environment-dependent.
+
+---
+
 ## The general rule this establishes
 
 Drive the game's own buttons, panes and debug menu. Reserve direct `withMods`

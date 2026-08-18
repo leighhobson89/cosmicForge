@@ -1,8 +1,8 @@
 # e2e / save-migration
 
-**Save Migration** — 🔴 RED
+**Save Migration** — 🟢 GREEN
 
-The patches.js version ladder that upgrades old saves. The best-engineered code in the project and entirely untested.
+The patches.js version ladder that upgrades old saves. Driven through the real Import button on aged saves, including a version bump and an extra rung served by route interception.
 
 Specs for this area go in this folder, named `<scenario>.spec.js`.
 

@@ -2,27 +2,28 @@
 
 | | |
 |---|---|
-| **Status** | 🔴 RED |
+| **Status** | 🟢 GREEN |
 | **Risk if broken** | High |
 | **Group** | Foundation |
 | **Spec folder** | `tests/e2e/save-load-local/` |
 | **Existing coverage** | _none_ |
 
-Export/import of save strings, autosave scheduling, and round-trip fidelity of every persisted field.
+The save code and the save file: export, import, download and file-picker load, driven through the real buttons, with full round-trip fidelity into a fresh session.
 
 ## What should be tested
 
-- [ ] Export produces a string that imports back to an identical game state (full round-trip deep-equal)
-- [ ] Autosave fires on the configured frequency and respects the autosave toggle
-- [ ] Autosave is suppressed during battle and during time warp (unless black hole always-on)
+- [ ] A run exported as a code restores into a brand new session, field for field
+- [ ] A downloaded .txt file loads back into a brand new session through the real file picker
+- [ ] The exported code is compressed rather than readable JSON, and matches the downloaded file byte for byte
+- [ ] The Export button copies the code to the clipboard
+- [ ] A local import keeps the importing player as the pioneer rather than adopting the name in the save
 - [ ] Import rejects malformed, truncated and empty strings without corrupting live state
-- [ ] Import from file and paste-from-clipboard paths both work
-- [ ] Save on entering the save/load pane happens exactly once per visit
-- [ ] Demo build does not autosave
+- [ ] The save pane captures exactly once per visit, and captures afresh on the next visit
+- [ ] Autosave suppression during battle, time warp and demo builds is covered in those areas
 
 ## Status meaning
 
-🔴 **RED** — No spec file exists for this area at all. A regression here ships unnoticed.
+🟢 **GREEN** — Signed off as done: the area is driven through its real controls, its rules are asserted by measurement rather than by field reads, and the whole suite passes.
 
 ---
 

@@ -4,13 +4,10 @@ _Generated from `functional-areas.json`. Re-run `node tests/docs/generate-report
 
 ## Coverage at a glance
 
-One line per functional area, worst first. 23 green, 13 amber, 7 red, out of 43.
+One line per functional area, worst first. 26 green, 13 amber, 4 red, out of 43.
 
 | | Area | Group | Risk | Specs | Where it stands |
 |:--:|---|---|:--:|--:|---|
-| 🔴 | [Cloud Save & Load](areas/save-load-cloud.md) | Foundation | High | — | No spec file yet. |
-| 🔴 | [Local Save & Load](areas/save-load-local.md) | Foundation | High | — | No spec file yet. |
-| 🔴 | [Save Migration](areas/save-migration.md) | Foundation | High | — | No spec file yet. |
 | 🔴 | [Space Mining & Asteroids](areas/space-mining.md) | Space Operations | Medium | — | No spec file yet. |
 | 🔴 | [Star Map & Star Data](areas/star-map.md) | Interstellar | Medium | — | No spec file yet. |
 | 🔴 | [Star Type Bonuses](areas/star-types.md) | Interstellar | Medium | — | No spec file yet. |
@@ -34,11 +31,13 @@ One line per functional area, worst first. 23 green, 13 amber, 7 red, out of 43.
 | 🟢 | [Auto Buyers](areas/autobuyers.md) | Core Economy | High | 19 | Done — driven through its own controls, 19 specs passing. |
 | 🟢 | [Battle & Conquest](areas/battle.md) | Interstellar | High | 17 | Done — driven through its own controls, 17 specs passing. |
 | 🟢 | [Black Hole Time Warp](areas/black-hole.md) | Endgame | High | 19 | Done — driven through its own controls, 19 specs passing. |
+| 🟢 | [Cloud Save & Load](areas/save-load-cloud.md) | Foundation | High | 8 | Done — driven through its own controls, 8 specs passing. |
 | 🟢 | [Compounds & Crafting](areas/compounds.md) | Core Economy | High | 31 | Done — driven through its own controls, 31 specs passing. |
 | 🟢 | [Cosmic Rip](areas/cosmic-rip.md) | Endgame | Medium | 28 | Done — driven through its own controls, 28 specs passing. |
 | 🟢 | [Cosmicopedia & Help](areas/cosmicopedia.md) | Presentation & Shell | Low | 6 | Done — driven through its own controls, 6 specs passing. |
 | 🟢 | [Demo Build Lockdowns](areas/demo-build.md) | Presentation & Shell | High | 19 | Done — driven through its own controls, 19 specs passing. |
 | 🟢 | [Energy & Power Grid](areas/energy.md) | Core Economy | High | 26 | Done — driven through its own controls, 26 specs passing. |
+| 🟢 | [Local Save & Load](areas/save-load-local.md) | Foundation | High | 10 | Done — driven through its own controls, 10 specs passing. |
 | 🟢 | [Localization](areas/localization.md) | Foundation | High | 91 | Done — driven through its own controls, 91 specs passing. |
 | 🟢 | [Onboarding & Tutorial](areas/onboarding.md) | Presentation & Shell | High | 13 | Done — driven through its own controls, 13 specs passing. |
 | 🟢 | [Performance & Frame Budget](areas/performance.md) | Presentation & Shell | High | 10 | Done — driven through its own controls, 10 specs passing. |
@@ -46,6 +45,7 @@ One line per functional area, worst first. 23 green, 13 amber, 7 red, out of 43.
 | 🟢 | [Rebirth](areas/rebirth.md) | Meta Progression | High | 10 | Done — driven through its own controls, 10 specs passing. |
 | 🟢 | [Research](areas/research.md) | Core Economy | High | 25 | Done — driven through its own controls, 25 specs passing. |
 | 🟢 | [Resources](areas/resources.md) | Core Economy | High | 21 | Done — driven through its own controls, 21 specs passing. |
+| 🟢 | [Save Migration](areas/save-migration.md) | Foundation | High | 11 | Done — driven through its own controls, 11 specs passing. |
 | 🟢 | [Settings & Preferences](areas/settings.md) | Foundation | Medium | 20 | Done — driven through its own controls, 20 specs passing. |
 | 🟢 | [Space Telescope](areas/space-telescope.md) | Space Operations | Medium | 10 | Done — driven through its own controls, 10 specs passing. |
 | 🟢 | [Starship](areas/starship.md) | Interstellar | High | 8 | Done — driven through its own controls, 8 specs passing. |
@@ -74,24 +74,21 @@ when an area is upgraded.
 
 | | Areas | Share |
 |---|---:|---:|
-| 🔴 Red — no spec file | 7 | 16% |
+| 🔴 Red — no spec file | 4 | 9% |
 | 🟠 Amber — spec written, not yet upgraded | 13 | 30% |
-| 🟢 Green — signed off | 23 | 53% |
+| 🟢 Green — signed off | 26 | 60% |
 | **Total functional areas** | **43** | |
 
-458 individual test cases are identified across all areas. **724 Playwright specs are implemented** across 36 areas, and all of them pass except where an area's note says otherwise — a spec that fails on a live defect is left failing on purpose, and the defect is written up in [known-issues.md](known-issues.md).
+464 individual test cases are identified across all areas. **753 Playwright specs are implemented** across 39 areas, and all of them pass except where an area's note says otherwise — a spec that fails on a live defect is left failing on purpose, and the defect is written up in [known-issues.md](known-issues.md).
 
 Run them with `npm run test:e2e` (all areas) or `node tests/run-e2e.mjs <area>`. Each area writes its own HTML report to `test-reports/e2e/<area>/index.html`, with a summary index at `test-reports/e2e/index.html`.
 
 ## Highest priority — high risk, no spec file
 
-These 3 areas would each cause serious, often unrecoverable player harm if they regressed, and none has any automated test today.
+These 0 areas would each cause serious, often unrecoverable player harm if they regressed, and none has any automated test today.
 
 | Area | Group | Why it matters |
 |---|---|---|
-| [Local Save & Load](areas/save-load-local.md) | Foundation | Export/import of save strings, autosave scheduling, and round-trip fidelity of every persisted field. |
-| [Cloud Save & Load](areas/save-load-cloud.md) | Foundation | Supabase-backed saves keyed on pioneer name. Legacy tests use this as a fixture mechanism but never test it as a feature. |
-| [Save Migration](areas/save-migration.md) | Foundation | The patches.js version ladder that upgrades old saves. The best-engineered code in the project and entirely untested. |
 
 ## All areas by group
 
@@ -102,9 +99,9 @@ Boot, persistence and the machinery every other area depends on. A failure here 
 | Status | Area | Risk | Planned | Specs | Existing coverage |
 |:--:|---|:--:|--:|--:|---|
 | 🟢 | [Application Boot](areas/app-boot.md) | High | 6 | **11** | launch-app.test.js |
-| 🔴 | [Local Save & Load](areas/save-load-local.md) | High | 7 | — | — |
-| 🔴 | [Cloud Save & Load](areas/save-load-cloud.md) | High | 6 | — | autobuyer.test.js, earlyLoop.test.js, energyMid.test.js, researchTech.test.js, spaceAntimatter.test.js |
-| 🔴 | [Save Migration](areas/save-migration.md) | High | 6 | — | — |
+| 🟢 | [Local Save & Load](areas/save-load-local.md) | High | 8 | **10** | — |
+| 🟢 | [Cloud Save & Load](areas/save-load-cloud.md) | High | 8 | **8** | autobuyer.test.js, earlyLoop.test.js, energyMid.test.js, researchTech.test.js, spaceAntimatter.test.js |
+| 🟢 | [Save Migration](areas/save-migration.md) | High | 9 | **11** | — |
 | 🟢 | [Localization](areas/localization.md) | High | 23 | **91** | — |
 | 🟢 | [Settings & Preferences](areas/settings.md) | Medium | 20 | **20** | — |
 

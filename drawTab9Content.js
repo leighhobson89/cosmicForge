@@ -674,7 +674,10 @@ export function drawTab9Content(heading, optionContentElement) {
                     text: localize('buttonImport', getLanguage()),
                     classNames: ['option-button', 'save-load-button', ...demoExtraClasses],
                     onClick: () => {
-                        loadGame();
+                        // loadGame() notifies the player itself on every refusal
+                        // path, so this catch only stops the rejection surfacing
+                        // as an unhandled error in the console.
+                        loadGame().catch(() => {});
                     },
                 }),
                 createButton({

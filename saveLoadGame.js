@@ -485,6 +485,7 @@ export function loadGame() {
     return new Promise((resolve, reject) => {
         const textArea = document.getElementById('importSaveArea');
         if (!textArea || !textArea.value.trim()) {
+            showNotification(localize('notificationInvalidSaveString', getLanguage()), 'warning', 3000, 'loadSave');
             return reject('No valid save data found in the import area.');
         }
 
