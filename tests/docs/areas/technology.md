@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | 🟠 AMBER |
+| **Status** | 🔴 RED |
 | **Risk if broken** | High |
 | **Group** | Core Economy |
 | **Spec folder** | `tests/e2e/technology/` |
@@ -21,7 +21,7 @@ Tech prerequisites, unlock effects, repeatable techs and the tree's deferred ren
 
 ## Status meaning
 
-🟠 **AMBER** — Partial coverage — a smoke test proves the path exists, but branches, failure modes and edge cases are unverified.
+🔴 **RED** — No spec file exists for this area at all. A regression here ships unnoticed.
 
 ---
 

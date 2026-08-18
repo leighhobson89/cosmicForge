@@ -7745,8 +7745,14 @@ function setStateOfSellResourceButton(element, quantity) {
 }
 
 function setStateOfFuseResourceButton(element, quantity, resource, resourceToFuseTo) {
-    if (getTechUnlockedArray().includes(resource + 'Fusion') && getUnlockedResourcesArray().includes(resourceToFuseTo)) {
-        element.classList.remove('invisible'); 
+    // The tech alone decides whether the button is on screen. It used to also
+    // require the fusion product to be a known resource, but the only thing that
+    // ever discovers a product is fusing to it, so that could never be true
+    // before the player's first fusion — leaving the button permanently hidden
+    // for anyone who researched the tech with this pane already open. Whether the
+    // player can afford to press it is the next condition's job.
+    if (getTechUnlockedArray().includes(resource + 'Fusion')) {
+        element.classList.remove('invisible');
     }
 
     if (getTechUnlockedArray().includes(resource + 'Fusion') && quantity > 0) {

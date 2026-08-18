@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | 🟢 GREEN |
+| **Status** | 🟠 AMBER |
 | **Risk if broken** | Medium |
 | **Group** | Endgame |
 | **Spec folder** | `tests/e2e/megastructures/` |
@@ -22,7 +22,7 @@ Ancient manuscripts, megastructure capture and the Miaplacidean force field.
 
 ## Status meaning
 
-🟢 **GREEN** — Comprehensive coverage — happy path, branches, boundaries and failure modes all asserted.
+🟠 **AMBER** — A spec file exists, but the area has not yet been through the integration upgrade — some of its coverage is still function-level rather than played through the UI.
 
 ---
 

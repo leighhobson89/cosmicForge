@@ -1343,6 +1343,22 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
 
         const starData = getStarSystemDataObject('stars', ['destinationStar']);
 
+        // The destination record is legitimately absent at points in the run —
+        // notably right after a battle resolves, when this pane is redrawn.
+        // Everything below is built from it: the opinion bar, the diplomacy
+        // rows, the enemy-fleet readout, and the click handlers that close over
+        // it. None of that is meaningful without the record, so bail rather than
+        // draw a pane full of undefined.
+        //
+        // This is the last branch in the function, so returning here skips
+        // nothing else. It was previously unguarded, and because
+        // drawTab5Content is async and called unawaited from the pane click
+        // handler, the throw surfaced as an unhandled promise rejection and
+        // left the pane half-drawn — four of them per battle fought.
+        if (!starData) {
+            return;
+        }
+
         if (getResourceDataObject('space', ['upgrades', 'fleetEnvoy', 'envoyBuiltYet']) && !getBelligerentEnemyFlag() && starData.civilizationLevel !== 'Unsentient' && starData.civilizationLevel !== 'None') {
             setAchievementFlagArray('initiateDiplomacyWithAlienRace', 'add');
         }

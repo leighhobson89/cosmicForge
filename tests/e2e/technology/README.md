@@ -1,6 +1,6 @@
 # e2e / technology
 
-**Tech Tree** — 🟠 AMBER
+**Tech Tree** — 🔴 RED
 
 Tech prerequisites, unlock effects, repeatable techs and the tree's deferred rendering.
 

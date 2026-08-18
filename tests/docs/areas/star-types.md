@@ -21,7 +21,7 @@ Per-star-type passive bonuses — the most recently changed area of the game and
 
 ## Status meaning
 
-🔴 **RED** — No automated coverage. A regression here ships unnoticed.
+🔴 **RED** — No spec file exists for this area at all. A regression here ships unnoticed.
 
 ---
 

@@ -1,6 +1,6 @@
 # e2e / cosmic-rip
 
-**Cosmic Rip** — 🟢 GREEN
+**Cosmic Rip** — 🟠 AMBER
 
 Sector scanning, the near-space scanner array and the galactic point economy.
 

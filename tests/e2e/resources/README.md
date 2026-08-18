@@ -2,7 +2,7 @@
 
 **Resources** — 🟢 GREEN
 
-The eight extractable base resources plus solar: accrual, four autobuyer tiers, storage caps and selling.
+The eight extractable base resources plus solar, driven through the Resources tab: storage caps and upgrades, selling, fusing, the quantity selector that feeds both, and the tech-gated autobuyer tiers.
 
 Specs for this area go in this folder, named `<scenario>.spec.js`.
 

@@ -2,7 +2,7 @@
 
 **Auto Buyers** — 🟢 GREEN
 
-Automation for all resources and compounds across four tiers, with per-buyer toggles.
+Automation for all resources and compounds across four tiers, measured as throughput: the power rule, the compound perk gate, the diesel exception and B-type star boosts.
 
 Specs for this area go in this folder, named `<scenario>.spec.js`.
 

@@ -1,6 +1,6 @@
 # e2e / rebirth
 
-**Rebirth** — 🟢 GREEN
+**Rebirth** — 🟠 AMBER
 
 The prestige reset. The single most destructive operation in the game if it misbehaves.
 

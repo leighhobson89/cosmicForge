@@ -21,7 +21,7 @@ The patches.js version ladder that upgrades old saves. The best-engineered code 
 
 ## Status meaning
 
-🔴 **RED** — No automated coverage. A regression here ships unnoticed.
+🔴 **RED** — No spec file exists for this area at all. A regression here ships unnoticed.
 
 ---
 

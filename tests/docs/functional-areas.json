@@ -1,9 +1,9 @@
 {
   "$comment": "Source of truth for the Cosmic Forge E2E test taxonomy. Edit this file, then run `node tests/docs/generate-report.cjs` to regenerate the reports and folder structure. status: red = no coverage, amber = partial/smoke only, green = comprehensive.",
   "statusLegend": {
-    "red": "No automated coverage. A regression here ships unnoticed.",
-    "amber": "Partial coverage — a smoke test proves the path exists, but branches, failure modes and edge cases are unverified.",
-    "green": "Comprehensive coverage — happy path, branches, boundaries and failure modes all asserted."
+    "red": "No spec file exists for this area at all. A regression here ships unnoticed.",
+    "amber": "A spec file exists, but the area has not yet been through the integration upgrade — some of its coverage is still function-level rather than played through the UI.",
+    "green": "Signed off as done: the area is driven through its real controls, its rules are asserted by measurement rather than by field reads, and the whole suite passes."
   },
   "groups": [
     {
@@ -52,7 +52,7 @@
       "id": "app-boot",
       "title": "Application Boot",
       "group": "foundation",
-      "status": "green",
+      "status": "amber",
       "risk": "high",
       "legacy": [
         "launch-app.test.js"
@@ -90,7 +90,7 @@
       "id": "save-load-cloud",
       "title": "Cloud Save & Load",
       "group": "foundation",
-      "status": "amber",
+      "status": "red",
       "risk": "high",
       "legacy": [
         "autobuyer.test.js",
@@ -165,18 +165,33 @@
       "id": "settings",
       "title": "Settings & Preferences",
       "group": "foundation",
-      "status": "red",
+      "status": "green",
       "risk": "medium",
       "legacy": [],
-      "summary": "Themes, audio toggles, autosave frequency, pointer style, notation preference and their persistence.",
+      "summary": "Every control on the three Options panes — currency, notation, notifications, custom pointer, mouse trail, theme, weather effects, full screen, language, news ticker, background audio, SFX and autosave — driven through the real toggles and dropdowns.",
       "tests": [
-        "Every theme applies and persists across reload",
-        "Audio toggles mute/unmute background music and SFX independently",
-        "Autosave frequency change takes effect on the next cycle",
-        "Custom pointer setting applies",
-        "Collapsible panel open/closed states persist",
-        "Settings survive a save/load round trip"
-      ]
+        "The Visual pane renders all seven of its rows, each with its own input",
+        "The Game Options pane renders all five of its rows",
+        "The Saving / Loading pane renders its autosave, export and import rows",
+        "Every control opens showing the value the game currently holds",
+        "The custom pointer toggle drives the body classes and builds or tears down the pointer",
+        "The mouse trail toggle stops and starts particles actually spawning",
+        "Choosing a theme repaints the document and records it as tried",
+        "Every theme in the dropdown is selectable and paints the body",
+        "Switching notation changes how figures are rendered on screen",
+        "The currency symbol carries through to what a sale is quoted in",
+        "Switching notifications off actually stops them appearing",
+        "The news ticker toggle adds and removes the real ticker timer",
+        "The weather effects toggle gates the overlay animation",
+        "The background audio toggle drives the player, not just the flag",
+        "The sfx toggle silences the effects player",
+        "Switching language relocalizes the running game, not just the flag",
+        "Every language in the dropdown round-trips without stranding the UI",
+        "The full screen button reaches the fullscreen API",
+        "Choosing an autosave frequency stores it and reschedules the timer",
+        "Turning autosave off warns the player, and turning it back on is silent"
+      ],
+      "specCount": 20
     },
     {
       "id": "resources",
@@ -187,31 +202,37 @@
       "legacy": [
         "earlyLoop.test.js"
       ],
-      "summary": "The eight extractable base resources plus solar: accrual, four autobuyer tiers, storage caps and selling.",
+      "summary": "The eight extractable base resources plus solar, driven through the Resources tab: storage caps and upgrades, selling, fusing, the quantity selector that feeds both, and the tech-gated autobuyer tiers.",
       "tests": [
-        "Every resource declares the fields the frame loop reads",
-        "Every resource has four autobuyer tiers with a rate, price and DOM anchor",
+        "The Increase Storage button multiplies the cap and charges the cap that was outgrown",
+        "A second increase costs the new, larger cap rather than the starting one",
+        "Production stops dead at the cap instead of overflowing it",
+        "Hitting the cap raises a storage-full notification whose action increases storage",
+        "The Sell button sells exactly the previewed amount and pays for it",
+        "The quantity selector decides how much the Sell button sells, across all eight options",
+        "Selling more than is in stock sells the stock and no more",
+        "Sell All empties every unlocked resource and then disables itself",
+        "The Fuse button is hidden until the fusion tech is researched (FAILING — known-issues #18)",
+        "The first fusion discovers the target resource at a quarter yield",
+        "Once discovered, fusing converts at the full ratio with Fusion Efficiency III",
+        "The quantity selector decides how much is fused, and the preview shows the yield",
+        "Fusion is limited by the target resource's storage, and warns about it",
+        "Carbon fuses to both of its targets in a single press, charged once",
+        "A fresh run offers tier 1 only; tiers 2-4 are not on the pane",
+        "Researching the techs raises the tier level to 4 and reveals every tier row",
+        "Buying a tier 1 autobuyer charges the resource, raises the price and starts extraction",
+        "A higher tier bought through its own button out-produces tier 1",
         "Each tier extracts faster and costs more than the one below it",
-        "Production never carries a resource past its storage cap, for any resource or all at once",
-        "A resource sitting exactly at capacity gains nothing further",
-        "The accrual rate is the sum of rate × quantity across every active tier",
-        "An inactive tier contributes nothing",
-        "Production stops entirely when the power is off",
-        "A stocked, powered resource actually accrues over a sampled interval",
-        "Selling all unlocked resources pays exactly quantity × saleValue and zeroes the stock",
-        "Selling ignores resources the player has not unlocked",
-        "Selling with nothing in stock changes neither cash nor stock",
-        "Solar has no sale value and so cannot be sold",
         "Every resource name resolves to real copy in all five languages",
-        "Quantities, caps and tier purchases survive a save/load round trip"
+        "Driving every resource pane raises no console or page errors"
       ],
-      "specCount": 19
+      "specCount": 21
     },
     {
       "id": "compounds",
       "title": "Compounds & Crafting",
       "group": "economy",
-      "status": "green",
+      "status": "amber",
       "risk": "high",
       "legacy": [],
       "summary": "The six compounds, their ingredient recipes, crafting rates and sale values.",
@@ -234,17 +255,28 @@
       "legacy": [
         "autobuyer.test.js"
       ],
-      "summary": "Automation for all resources and compounds across four tiers, with per-buyer toggles.",
+      "summary": "Automation for all resources and compounds across four tiers, measured as throughput: the power rule, the compound perk gate, the diesel exception and B-type star boosts.",
       "tests": [
-        "Every resource and compound autobuyer can be purchased at every tier",
-        "Toggling a buyer off halts its contribution immediately",
-        "Combined rate equals the sum of active buyers within tolerance",
-        "Energy consumption scales with active buyer count",
-        "Buyers stop when input resources or power are unavailable",
-        "Autobuyer names display localized in all five languages",
-        "Purchased quantities and toggle states survive save/load"
+        "With the grid down, tier 1 produces and tiers 2, 3 and 4 do not",
+        "With the grid up, all four tiers produce",
+        "The power rule holds for every one of the eight resources",
+        "A higher tier out-produces a lower one at equal quantity",
+        "An inactive tier produces nothing",
+        "The compoundAutomation perk is unowned on a fresh run and unlocks compoundMachining",
+        "All six compounds carry four priced tiers behind the perk",
+        "Diesel tier 1 ships active, priced and energy-free",
+        "Diesel tier 1 measurably produces with the grid down while tier 2 does not",
+        "Only tier 1 of each compound is free of an energy cost",
+        "B-type boosts match the shipped table and climb with tier",
+        "The B-type boost is all-or-nothing for the current system",
+        "getTotalAutoBuyerRateWithBTypeBoost is additive, not multiplicative",
+        "Energy use is non-decreasing across tiers for every resource",
+        "Owning tier 4 autobuyers raises total energy use",
+        "The displayed production rate never renders NaN",
+        "Quantities and toggle states survive serialisation",
+        "Autobuyer names localize in all five languages"
       ],
-      "specCount": 10
+      "specCount": 19
     },
     {
       "id": "energy",
@@ -256,7 +288,7 @@
         "energyMid.test.js"
       ],
       "summary": "Power plants, fuel consumption, storage, grid capacity and the consequences of a deficit.",
-      "specCount": 15,
+      "specCount": 26,
       "tests": [
         "Each power plant type generates its rated output",
         "Fuel is consumed at the documented rate and generation stops when fuel runs out",
@@ -271,7 +303,7 @@
       "id": "research",
       "title": "Research",
       "group": "economy",
-      "status": "green",
+      "status": "amber",
       "risk": "high",
       "legacy": [
         "researchTech.test.js"
@@ -297,7 +329,7 @@
       "id": "technology",
       "title": "Tech Tree",
       "group": "economy",
-      "status": "amber",
+      "status": "red",
       "risk": "high",
       "legacy": [
         "researchTech.test.js"
@@ -333,7 +365,7 @@
       "id": "rockets",
       "title": "Rockets & Launch Pad",
       "group": "space",
-      "status": "green",
+      "status": "amber",
       "risk": "medium",
       "legacy": [],
       "summary": "Rocket construction, fuelling, naming and the launch lifecycle across all four rockets.",
@@ -365,15 +397,36 @@
       "legacy": [
         "spaceAntimatter.test.js"
       ],
-      "summary": "Antimatter unlock gate, generation via the delta timer, and the antimatter diagram.",
+      "summary": "Asteroid mining end to end: the extraction formula, its ascendency, star-type and boost modifiers, asteroid depletion, the megastructure contribution and the delta timer that drives all of it.",
       "tests": [
-        "Antimatter unlocks at the correct gate and the mining option becomes visible",
-        "Generation accumulates via the delta accumulator without drift over a long window",
-        "The diagram updates in step with quantity",
-        "Time warp multiplies antimatter accrual correctly",
-        "Accumulator leftover is preserved across save/load (no lost or duplicated ticks)"
+        "Choosing a destination and pressing Travel flies the rocket out and starts it mining",
+        "Every unit of antimatter gained is a unit taken off the asteroid",
+        "Extraction follows the ease-of-extraction formula at both ends of the scale",
+        "An asteroid mines out exactly, never past zero, and sends the rocket home",
+        "Depleting an asteroid pays the flat 150 achievement award on top of the rock",
+        "The asteroid's remaining-quantity colour tracks how much is left",
+        "The Enhanced Mining perk multiplies extraction by a quarter per purchase",
+        "The antimatter boost doubles extraction while it is active",
+        "The F-type star bonus applies in an F-type system and nowhere else",
+        "A broken-down miner stops that rocket and only that rocket",
+        "Two rockets on two asteroids both contribute to one total",
+        "Each megastructure adds its 0.15 on top rather than replacing the last",
+        "A megastructure produces antimatter with no asteroid being mined at all",
+        "Megastructure output adds to mining output instead of replacing it",
+        "A megastructure unlock survives the rebirth reset that otherwise clears it",
+        "Antimatter starts locked with zero quantity on a fresh save",
+        "Nothing accrues while antimatter is locked, however much time passes",
+        "The reported rate is per tick, and the displayed rate is per second",
+        "The all-time stat tracks what was actually gained",
+        "Quantity and the megastructure grant survive a save/load round trip",
+        "The mining option becomes reachable once antimatter is unlocked",
+        "The antimatter delta timer is registered and repeating",
+        "The accumulator banks sub-interval remainder rather than discarding it",
+        "Elapsed time is conserved exactly across many small updates",
+        "The time warp multiplier scales elapsed time proportionally",
+        "An invalid or negative multiplier falls back to 1x instead of corrupting time"
       ],
-      "specCount": 12
+      "specCount": 26
     },
     {
       "id": "space-telescope",
@@ -447,7 +500,7 @@
       "id": "fleet-hangar",
       "title": "Fleet Hangar",
       "group": "interstellar",
-      "status": "green",
+      "status": "amber",
       "risk": "high",
       "legacy": [],
       "summary": "Fleet construction, ship classes and the aggregate strength calculation that feeds battle.",
@@ -468,7 +521,7 @@
       "id": "diplomacy",
       "title": "Diplomacy",
       "group": "interstellar",
-      "status": "green",
+      "status": "amber",
       "risk": "high",
       "legacy": [],
       "summary": "Impression mechanics and every negotiation outcome branch before conquest.",
@@ -498,13 +551,13 @@
         "Autosave is correctly suppressed while a battle is ongoing",
         "Battle outcome modals display correct localized text and substituted values"
       ],
-      "specCount": 13
+      "specCount": 17
     },
     {
       "id": "colonise",
       "title": "Colonisation",
       "group": "interstellar",
-      "status": "green",
+      "status": "amber",
       "risk": "high",
       "legacy": [],
       "summary": "Settling a conquered system and the state transition into the new run context.",
@@ -524,7 +577,7 @@
       "id": "galactic-market",
       "title": "Galactic Market",
       "group": "meta",
-      "status": "green",
+      "status": "amber",
       "risk": "medium",
       "legacy": [],
       "summary": "Material-for-material trading, bias-driven pricing, AP liquidation and the lockdown event.",
@@ -543,7 +596,7 @@
       "id": "ascendency",
       "title": "Ascendency Points & Perks",
       "group": "meta",
-      "status": "green",
+      "status": "amber",
       "risk": "high",
       "legacy": [],
       "summary": "The AP economy and permanent perk purchases. Errors here permanently corrupt cross-run progress.",
@@ -561,7 +614,7 @@
       "id": "galactic-casino",
       "title": "Galactic Casino",
       "group": "meta",
-      "status": "green",
+      "status": "amber",
       "risk": "medium",
       "legacy": [],
       "summary": "CP economy and four risk games with a shared special-prize architecture.",
@@ -581,7 +634,7 @@
       "id": "rebirth",
       "title": "Rebirth",
       "group": "meta",
-      "status": "green",
+      "status": "amber",
       "risk": "high",
       "legacy": [],
       "summary": "The prestige reset. The single most destructive operation in the game if it misbehaves.",
@@ -607,7 +660,7 @@
       "id": "philosophies",
       "title": "Philosophies",
       "group": "meta",
-      "status": "green",
+      "status": "amber",
       "risk": "high",
       "legacy": [],
       "summary": "The four permanent player paths chosen once and affecting the whole account thereafter.",
@@ -628,7 +681,7 @@
       "id": "achievements",
       "title": "Achievements",
       "group": "meta",
-      "status": "green",
+      "status": "amber",
       "risk": "low",
       "legacy": [],
       "summary": "Unlock conditions, notifications, icons and tooltip descriptions across the full achievement set.",
@@ -661,13 +714,13 @@
         "Black hole power purchases scale correctly post-nerf-migration",
         "No accumulator drift or double-counting across a long warp"
       ],
-      "specCount": 12
+      "specCount": 19
     },
     {
       "id": "megastructures",
       "title": "Megastructures",
       "group": "endgame",
-      "status": "green",
+      "status": "amber",
       "risk": "medium",
       "legacy": [
         "captureMegaStructureTest.test.js"
@@ -688,7 +741,7 @@
       "id": "cosmic-rip",
       "title": "Cosmic Rip",
       "group": "endgame",
-      "status": "green",
+      "status": "amber",
       "risk": "medium",
       "legacy": [],
       "summary": "Sector scanning, the near-space scanner array and the galactic point economy.",
@@ -724,7 +777,7 @@
       "id": "random-events",
       "title": "Random Events",
       "group": "simulation",
-      "status": "green",
+      "status": "amber",
       "risk": "medium",
       "legacy": [],
       "summary": "Instant and timed events, their probability model, effects and history tracking.",
@@ -744,7 +797,7 @@
       "id": "news-ticker",
       "title": "News Ticker",
       "group": "simulation",
-      "status": "green",
+      "status": "amber",
       "risk": "low",
       "legacy": [],
       "summary": "Rotating flavour content by category and interval.",
@@ -760,7 +813,7 @@
       "id": "audio",
       "title": "Audio",
       "group": "simulation",
-      "status": "green",
+      "status": "amber",
       "risk": "low",
       "legacy": [],
       "summary": "Background music, ambience and SFX, and their interaction with settings.",
@@ -793,7 +846,7 @@
       "id": "notation",
       "title": "Number Notation",
       "group": "presentation",
-      "status": "green",
+      "status": "amber",
       "risk": "medium",
       "legacy": [],
       "summary": "Formatting of every displayed number across notation modes — touches every screen in the game.",
@@ -831,13 +884,13 @@
         "The black hole 🌀 state marker is left alone by the novelty sweep",
         "The marker is positioned out of the layout flow, so a translated label keeps the full width of its control"
       ],
-      "specCount": 12
+      "specCount": 5
     },
     {
       "id": "onboarding",
       "title": "Onboarding & Tutorial",
       "group": "presentation",
-      "status": "green",
+      "status": "amber",
       "risk": "high",
       "legacy": [
         "launchAndOnboard.test.js"
@@ -858,7 +911,7 @@
       "id": "cosmicopedia",
       "title": "Cosmicopedia & Help",
       "group": "presentation",
-      "status": "green",
+      "status": "amber",
       "risk": "low",
       "legacy": [],
       "summary": "In-game help: concepts by game stage, story, philosophies and contact sections.",
@@ -875,7 +928,7 @@
       "id": "demo-build",
       "title": "Demo Build Lockdowns",
       "group": "presentation",
-      "status": "green",
+      "status": "amber",
       "risk": "high",
       "legacy": [],
       "summary": "Feature gating for the demo variant. A leak here gives away the full game.",

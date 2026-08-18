@@ -21,7 +21,7 @@ Asteroid discovery, mining rockets, extraction rates and star-type bonuses.
 
 ## Status meaning
 
-🔴 **RED** — No automated coverage. A regression here ships unnoticed.
+🔴 **RED** — No spec file exists for this area at all. A regression here ships unnoticed.
 
 ---
 

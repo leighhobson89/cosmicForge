@@ -1,6 +1,6 @@
 # e2e / demo-build
 
-**Demo Build Lockdowns** — 🟢 GREEN
+**Demo Build Lockdowns** — 🟠 AMBER
 
 Feature gating for the demo variant. A leak here gives away the full game.
 

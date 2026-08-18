@@ -2,7 +2,7 @@
 
 **Antimatter** — 🟢 GREEN
 
-Antimatter unlock gate, generation via the delta timer, and the antimatter diagram.
+Asteroid mining end to end: the extraction formula, its ascendency, star-type and boost modifiers, asteroid depletion, the megastructure contribution and the delta timer that drives all of it.
 
 Specs for this area go in this folder, named `<scenario>.spec.js`.
 

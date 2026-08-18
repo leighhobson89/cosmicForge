@@ -50,8 +50,6 @@ const TAB_HEADERS = [
 ];
 
 /**
- * Controls already known to be clipped by their translated label, allowlisted so
- * the sweep below can stay strict about everything else. Both are `Sell All`
  * Controls allowed to be clipped by their translated label. **This list is now
  * empty, and that is the assertion** — the ratchet became an absolute when the
  * five entries it used to hold were fixed rather than tolerated:

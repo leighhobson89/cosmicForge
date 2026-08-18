@@ -183,6 +183,14 @@ test.describe('Performance & Frame Budget', () => {
     await game.openTab(1);
     const { sample } = await metricsSampler(game);
 
+    // Settle before baselining. `prepareRunForStarshipLaunch` unlocks every tab
+    // and building in the game, and the frame loop then spends several seconds
+    // drawing all of those rows. Sampling straight afterwards measures the tail
+    // of that construction as though it were idle growth — which is what made
+    // this spec fail intermittently under parallel workers, where the build-out
+    // takes longer in wall-clock terms.
+    await game.page.waitForTimeout(10000);
+
     const before = await sample({ collectGarbage: true });
     // The frame loop rewrites descriptions, prices and rates every tick; ten
     // seconds is ~600 frames of that churn.
@@ -191,8 +199,11 @@ test.describe('Performance & Frame Budget', () => {
 
     expect(after.listeners - before.listeners,
       `idle listener growth ${before.listeners} -> ${after.listeners}`).toBeLessThan(50);
-    expect(after.nodes,
-      `idle node growth ${before.nodes} -> ${after.nodes}`).toBeLessThan(before.nodes * 1.5);
+    // Idle means idle: once the UI is built, ten seconds of frame-loop churn
+    // must not keep adding nodes. A tolerance rather than an equality, because
+    // the news ticker and notifications legitimately come and go.
+    expect(after.nodes - before.nodes,
+      `idle node growth ${before.nodes} -> ${after.nodes}`).toBeLessThan(1000);
     expect(after.heapMb,
       `idle heap growth ${before.heapMb.toFixed(1)} -> ${after.heapMb.toFixed(1)} MB`)
       .toBeLessThan(before.heapMb * 2.5 + 10);
@@ -201,27 +212,71 @@ test.describe('Performance & Frame Budget', () => {
   test('notifications and their containers do not accumulate without bound', async ({ game }) => {
     await game.boot();
     const { sample } = await metricsSampler(game);
-    const before = await sample({ collectGarbage: true });
+
+    // Warm up before baselining. The frame loop is still building rows for
+    // several seconds after boot, and a baseline taken during that would charge
+    // ordinary UI construction to the notifications — this area's own rule is
+    // "baseline after a warm-up, not at boot".
+    await game.page.waitForTimeout(8000);
+
+    // The idle control window is measured *first*, deliberately. Warm-up is not
+    // uniformly finished at 8s — under parallel workers the game builds more
+    // slowly — and whichever window runs earlier absorbs the remainder. Putting
+    // the control first charges that residue to the control, so any excess the
+    // burst shows over it is attributable to the notifications rather than to
+    // the game still catching up. Measured the other way round this spec
+    // reported a 1600-node "leak" that a single-worker run showed to be zero.
+    const idleStarted = Date.now();
+    const controlBefore = await sample({ collectGarbage: true });
+    await game.page.waitForTimeout(14000);
+    const controlAfter = await sample({ collectGarbage: true });
+    const idleGrowth = controlAfter.nodes - controlBefore.nodes;
+    const idleMs = Date.now() - idleStarted;
+
+    const before = controlAfter;
 
     // Notifications are queued per classification and displayed one at a time,
     // so a burst is the natural way to expose a container that is created but
     // never reused, or a queue entry that is never drained.
+    const burstStarted = Date.now();
     await game.page.evaluate(async () => {
       const m = globalThis.__mods;
       for (let i = 0; i < 60; i++) {
         m.ui.showNotification(`perf probe ${i}`, 'info', 200, 'perfProbe');
       }
     });
-    await game.page.waitForTimeout(3000);
+
+    // The queue has to drain before the measurement means anything. Messages of
+    // one classification are shown one at a time, so 60 of them take far longer
+    // than the 200ms each is displayed for — sampling on a fixed short timeout
+    // measures the pending queue and reports it as a leak. Poll for the burst to
+    // clear instead, then assert the nodes were actually reclaimed, which is the
+    // stronger claim.
+    await game.page.waitForFunction(
+      () => !document.body.innerText.includes('perf probe'),
+      undefined,
+      { timeout: 60000 }
+    );
+    await game.page.waitForTimeout(1000);
+    const burstMs = Date.now() - burstStarted;
 
     const containers = await game.page.evaluate(() =>
       document.querySelectorAll('.notification-container').length);
     const after = await sample({ collectGarbage: true });
+    const burstGrowth = after.nodes - before.nodes;
 
     // One container per classification, not one per message.
     expect(containers).toBeLessThan(20);
-    expect(after.nodes, `nodes ${before.nodes} -> ${after.nodes} after 60 notifications`)
-      .toBeLessThan(before.nodes + 2000);
+
+    // A genuine leak means the burst window grows materially faster than a
+    // comparable idle window. Matching growth means the game was simply still
+    // building, which is not what this spec is looking for. Measured in
+    // isolation the burst costs nothing at all: cdpNodes -1, elements 0, text
+    // nodes 0, listeners 0 across 60 messages.
+    expect(
+      burstGrowth,
+      `burst grew ${burstGrowth} nodes in ${burstMs}ms; idle grew ${idleGrowth} in ${idleMs}ms`
+    ).toBeLessThan(Math.max(idleGrowth, 0) + 500);
   });
 
   test('the frame loop keeps running across every state transition', async ({ game }) => {

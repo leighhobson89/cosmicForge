@@ -1,6 +1,6 @@
 # e2e / save-load-cloud
 
-**Cloud Save & Load** — 🟠 AMBER
+**Cloud Save & Load** — 🔴 RED
 
 Supabase-backed saves keyed on pioneer name. Legacy tests use this as a fixture mechanism but never test it as a feature.
 

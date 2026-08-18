@@ -26,7 +26,7 @@ Tabs, side-menu panes, hotkeys, tab ordering, collapsibles and tooltips.
 
 ## Status meaning
 
-🟠 **AMBER** — Partial coverage — a smoke test proves the path exists, but branches, failure modes and edge cases are unverified.
+🟠 **AMBER** — A spec file exists, but the area has not yet been through the integration upgrade — some of its coverage is still function-level rather than played through the UI.
 
 ---
 

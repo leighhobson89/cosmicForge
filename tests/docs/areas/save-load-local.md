@@ -22,7 +22,7 @@ Export/import of save strings, autosave scheduling, and round-trip fidelity of e
 
 ## Status meaning
 
-🔴 **RED** — No automated coverage. A regression here ships unnoticed.
+🔴 **RED** — No spec file exists for this area at all. A regression here ships unnoticed.
 
 ---
 

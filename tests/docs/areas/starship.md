@@ -22,7 +22,7 @@ Starship construction, fitting, fuelling and interstellar travel to a chosen des
 
 ## Status meaning
 
-🔴 **RED** — No automated coverage. A regression here ships unnoticed.
+🔴 **RED** — No spec file exists for this area at all. A regression here ships unnoticed.
 
 ---
 

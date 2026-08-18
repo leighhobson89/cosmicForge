@@ -22,7 +22,7 @@ Frame-loop cost and long-session stability. Not a feature, but the area most lik
 
 ## Status meaning
 
-🟢 **GREEN** — Comprehensive coverage — happy path, branches, boundaries and failure modes all asserted.
+🟢 **GREEN** — Signed off as done: the area is driven through its real controls, its rules are asserted by measurement rather than by field reads, and the whole suite passes.
 
 ---
 

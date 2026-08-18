@@ -1,6 +1,6 @@
 # e2e / megastructures
 
-**Megastructures** — 🟢 GREEN
+**Megastructures** — 🟠 AMBER
 
 Ancient manuscripts, megastructure capture and the Miaplacidean force field.
 

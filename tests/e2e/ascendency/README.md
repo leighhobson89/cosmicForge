@@ -1,6 +1,6 @@
 # e2e / ascendency
 
-**Ascendency Points & Perks** — 🟢 GREEN
+**Ascendency Points & Perks** — 🟠 AMBER
 
 The AP economy and permanent perk purchases. Errors here permanently corrupt cross-run progress.
 

@@ -1,6 +1,6 @@
 # e2e / research
 
-**Research** — 🟢 GREEN
+**Research** — 🟠 AMBER
 
 Research point generation, the three research buildings, and how research is spent on the tech tree.
 

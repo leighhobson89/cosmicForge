@@ -1,6 +1,6 @@
 # e2e / colonise
 
-**Colonisation** — 🟢 GREEN
+**Colonisation** — 🟠 AMBER
 
 Settling a conquered system and the state transition into the new run context.
 

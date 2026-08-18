@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | 🟠 AMBER |
+| **Status** | 🔴 RED |
 | **Risk if broken** | High |
 | **Group** | Foundation |
 | **Spec folder** | `tests/e2e/save-load-cloud/` |
@@ -21,7 +21,7 @@ Supabase-backed saves keyed on pioneer name. Legacy tests use this as a fixture 
 
 ## Status meaning
 
-🟠 **AMBER** — Partial coverage — a smoke test proves the path exists, but branches, failure modes and edge cases are unverified.
+🔴 **RED** — No spec file exists for this area at all. A regression here ships unnoticed.
 
 ---
 

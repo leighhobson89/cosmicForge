@@ -1,6 +1,6 @@
 # e2e / galactic-casino
 
-**Galactic Casino** — 🟢 GREEN
+**Galactic Casino** — 🟠 AMBER
 
 CP economy and four risk games with a shared special-prize architecture.
 

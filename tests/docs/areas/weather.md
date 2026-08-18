@@ -21,7 +21,7 @@ Per-system weather states, their efficiency modifiers and the precipitation reso
 
 ## Status meaning
 
-🔴 **RED** — No automated coverage. A regression here ships unnoticed.
+🔴 **RED** — No spec file exists for this area at all. A regression here ships unnoticed.
 
 ---
 

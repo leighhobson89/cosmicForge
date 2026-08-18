@@ -1,6 +1,6 @@
 # e2e / achievements
 
-**Achievements** — 🟢 GREEN
+**Achievements** — 🟠 AMBER
 
 Unlock conditions, notifications, icons and tooltip descriptions across the full achievement set.
 

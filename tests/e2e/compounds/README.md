@@ -1,6 +1,6 @@
 # e2e / compounds
 
-**Compounds & Crafting** — 🟢 GREEN
+**Compounds & Crafting** — 🟠 AMBER
 
 The six compounds, their ingredient recipes, crafting rates and sale values.
 

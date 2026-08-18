@@ -1,8 +1,8 @@
 # e2e / settings
 
-**Settings & Preferences** — 🔴 RED
+**Settings & Preferences** — 🟢 GREEN
 
-Themes, audio toggles, autosave frequency, pointer style, notation preference and their persistence.
+Every control on the three Options panes — currency, notation, notifications, custom pointer, mouse trail, theme, weather effects, full screen, language, news ticker, background audio, SFX and autosave — driven through the real toggles and dropdowns.
 
 Specs for this area go in this folder, named `<scenario>.spec.js`.
 

@@ -21,7 +21,7 @@ The three telescope actions — star study, asteroid search, void pillage — an
 
 ## Status meaning
 
-🔴 **RED** — No automated coverage. A regression here ships unnoticed.
+🔴 **RED** — No spec file exists for this area at all. A regression here ships unnoticed.
 
 ---
 

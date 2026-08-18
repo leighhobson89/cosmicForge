@@ -1,6 +1,6 @@
 # e2e / news-ticker
 
-**News Ticker** — 🟢 GREEN
+**News Ticker** — 🟠 AMBER
 
 Rotating flavour content by category and interval.
 

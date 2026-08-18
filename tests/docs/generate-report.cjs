@@ -92,29 +92,67 @@ function coverageReport() {
   const totalChecks = areas.reduce((n, a) => n + a.tests.length, 0);
   const totalSpecs = areas.reduce((n, a) => n + (a.specCount || 0), 0);
   const implemented = areas.filter((a) => a.specCount > 0);
-
   const highRiskRed = areas.filter((a) => a.risk === 'high' && a.status === 'red');
+
+  // One line per area, worst first, so the glance table reads as a work queue.
+  const ORDER = { red: 0, amber: 1, green: 2 };
+  const glance = [...areas].sort((a, b) =>
+    ORDER[a.status] - ORDER[b.status] || a.title.localeCompare(b.title));
+
+  const note = (a) => {
+    if (a.status === 'green') return `Done — driven through its own controls, ${a.specCount} specs passing.`;
+    if (a.status === 'amber') {
+      return `${a.specCount} spec${a.specCount === 1 ? '' : 's'} written; not yet upgraded to integration.`;
+    }
+    return 'No spec file yet.';
+  };
 
   let md = `# Cosmic Forge — E2E Coverage Report
 
 _Generated from \`functional-areas.json\`. Re-run \`node tests/docs/generate-report.cjs\` after editing._
 
-## Summary
+## Coverage at a glance
+
+One line per functional area, worst first. ${counts.green} green, ${counts.amber} amber, ${counts.red} red, out of ${total}.
+
+| | Area | Group | Risk | Specs | Where it stands |
+|:--:|---|---|:--:|--:|---|
+${glance.map((a) =>
+  `| ${LIGHT[a.status]} | [${a.title}](areas/${a.id}.md) | ${groupOf(a.group).title} | ${RISK[a.risk]} | ${a.specCount || '—'} | ${note(a)} |`
+).join('\n')}
+
+---
+
+## What the lights mean
+
+| | Meaning |
+|:--:|---|
+${Object.entries(statusLegend).map(([k, v]) => `| ${LIGHT[k]} ${k.toUpperCase()} | ${v} |`).join('\n')}
+
+**Green is a sign-off, not a spec count.** An area goes green only once it is played
+through its real controls rather than by calling its exported functions, its rules
+are asserted by measurement rather than by reading fields back, and the whole area
+passes. An area with plenty of specs that still reaches into \`withMods\` to do its
+work stays amber — that is exactly the state the integration upgrade exists to fix.
+See [integration-upgrade-report.md](integration-upgrade-report.md) for what changes
+when an area is upgraded.
+
+## Totals
 
 | | Areas | Share |
 |---|---:|---:|
-| 🔴 Red — no coverage | ${counts.red} | ${pct(counts.red)} |
-| 🟠 Amber — partial / smoke only | ${counts.amber} | ${pct(counts.amber)} |
-| 🟢 Green — comprehensive | ${counts.green} | ${pct(counts.green)} |
+| 🔴 Red — no spec file | ${counts.red} | ${pct(counts.red)} |
+| 🟠 Amber — spec written, not yet upgraded | ${counts.amber} | ${pct(counts.amber)} |
+| 🟢 Green — signed off | ${counts.green} | ${pct(counts.green)} |
 | **Total functional areas** | **${total}** | |
 
-${totalChecks} individual test cases are identified across all areas. **${totalSpecs} Playwright specs are implemented and passing** across ${implemented.length} area${implemented.length === 1 ? '' : 's'}. The ${counts.amber} amber areas have partial coverage only — a legacy smoke test that proves a path exists, or a focused spec file written alongside a bug fix — so their branches, boundaries and failure modes are still largely unverified.
+${totalChecks} individual test cases are identified across all areas. **${totalSpecs} Playwright specs are implemented and passing** across ${implemented.length} area${implemented.length === 1 ? '' : 's'}.
 
 Run them with \`npm run test:e2e\` (all areas) or \`node tests/run-e2e.mjs <area>\`. Each area writes its own HTML report to \`test-reports/e2e/<area>/index.html\`, with a summary index at \`test-reports/e2e/index.html\`.
 
-## Highest priority — high risk, zero coverage
+## Highest priority — high risk, no spec file
 
-These ${highRiskRed.length} areas would each cause serious, often unrecoverable player harm if they regressed, and none has any automated test today.
+These ${highRiskRed.length} area${highRiskRed.length === 1 ? '' : 's'} would each cause serious, often unrecoverable player harm if they regressed, and none has any automated test today.
 
 | Area | Group | Why it matters |
 |---|---|---|
@@ -137,13 +175,7 @@ ${highRiskRed.map((a) => `| [${a.title}](areas/${a.id}.md) | ${groupOf(a.group).
     md += '\n';
   }
 
-  md += `## Status legend
-
-| | Meaning |
-|:--:|---|
-${Object.entries(statusLegend).map(([k, v]) => `| ${LIGHT[k]} ${k.toUpperCase()} | ${v} |`).join('\n')}
-
-## Folder layout
+  md += `## Folder layout
 
 \`\`\`
 tests/

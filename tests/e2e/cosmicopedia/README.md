@@ -1,6 +1,6 @@
 # e2e / cosmicopedia
 
-**Cosmicopedia & Help** — 🟢 GREEN
+**Cosmicopedia & Help** — 🟠 AMBER
 
 In-game help: concepts by game stage, story, philosophies and contact sections.
 

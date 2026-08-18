@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | 🟢 GREEN |
+| **Status** | 🟠 AMBER |
 | **Risk if broken** | High |
 | **Group** | Interstellar |
 | **Spec folder** | `tests/e2e/colonise/` |
@@ -23,7 +23,7 @@ Settling a conquered system and the state transition into the new run context.
 
 ## Status meaning
 
-🟢 **GREEN** — Comprehensive coverage — happy path, branches, boundaries and failure modes all asserted.
+🟠 **AMBER** — A spec file exists, but the area has not yet been through the integration upgrade — some of its coverage is still function-level rather than played through the UI.
 
 ---
 

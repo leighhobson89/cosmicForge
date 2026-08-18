@@ -840,3 +840,204 @@ that assumed otherwise was withdrawn and replaced with one asserting that every
 prerequisite names a tech that actually exists — an invariant the game does rely
 on, since a mistyped prerequisite would leave its dependent permanently
 unreachable.
+
+---
+
+## 16. The Colonise pane throws for every battle fought — ✅ FIXED
+
+**Severity was: medium — four unhandled promise rejections per battle, and a
+half-drawn pane.**
+
+### Reproduction
+
+Fight any battle to a conclusion with the Colonise pane open. On resolution:
+
+```
+TypeError: Cannot read properties of undefined (reading 'civilizationLevel')
+    at drawTab5Content (drawTab5Content.js:1346)
+    at updateContent   (ui.js:3492)
+```
+
+Four of them, per battle.
+
+### Cause
+
+`drawTab5Content`'s Colonise branch read the destination-star record without a
+guard:
+
+```js
+const starData = getStarSystemDataObject('stars', ['destinationStar']);
+if (… && starData.civilizationLevel !== 'Unsentient' && …) {
+```
+
+That record is legitimately absent at points in the run, notably just after a
+battle resolves and the pane is redrawn. Two things made it worse than a stray
+warning:
+
+- `drawTab5Content` is `async` and is called **unawaited** from the pane click
+  handler, so the throw surfaced as an unhandled promise rejection rather than a
+  caught error, and the pane was left half-drawn;
+- guarding only that line moved the throw one line down, into
+  `calculateModifiedAttitude(starData)`, which reads `starData.currentImpression`
+  just as unguardedly. The whole branch — the opinion bar, the diplomacy rows,
+  the enemy-fleet readout, and the click handlers that close over `starData` —
+  is built from that record.
+
+### Resolution
+
+An early return, rather than optional-chaining each read in turn:
+
+```js
+if (!starData) {
+    return;
+}
+```
+
+The Colonise branch is the last thing in the function, so returning skips nothing
+else, and every downstream read is covered by the one guard. Drawing a pane full
+of `undefined` was never the better outcome.
+
+Found by `tests/e2e/battle/battle-live.spec.js`, which fights a real battle and
+asserts a clean console — the thirteen pre-existing battle specs all passed
+throughout, because none of them fought one.
+
+---
+
+## 17. Affordability gating is CSS-only — **BY DESIGN, not a defect**
+
+**Recorded so it is not re-reported.** This entry exists to close the question,
+not to track a fix.
+
+Purchase handlers in this game contain no affordability check of their own. For
+example the power-plant button in `drawTab2Content.js`:
+
+```js
+onClick: () => {
+    gain(1, 'powerPlant1Quantity', 'powerPlant1', false, null, 'energy', 'resources');
+    addToResourceAllTimeStat(1, 'allTimeBasicPowerPlantsBuilt');
+    addBuildingPotentialRate('powerPlant1');
+    …
+}
+```
+
+The gate is the `red-disabled-text` class that the frame loop adds and removes:
+
+```css
+.red-disabled-text {
+    color: var(--disabled-text);
+    font-weight: bold;
+    pointer-events: none;
+}
+```
+
+**This is the intended mechanism for every affordability check in the game.** A
+purchase handler without a guard is therefore correct, and must not be filed as a
+bug.
+
+### What this means for tests
+
+A synthetic click dispatched straight at an element — which integration specs here
+often need, because several controls sit underneath others and a real click lands
+on the coverer — **bypasses `pointer-events: none`**. The purchase then goes
+through with no funds. That is expected, not a finding.
+
+So keep the two concerns apart:
+
+- to exercise a *handler*, dispatch the event at the element;
+- to check the *gate*, assert that the frame loop has applied `red-disabled-text`
+  while the player cannot afford the item.
+
+Never assert that a purchase button carries a real `disabled` attribute.
+
+### Not to be confused with #10
+
+Known-issues #10 *was* a genuine defect, and the difference is worth keeping
+straight. There the CSS-only gate sat on **Rebirth** — not an affordability check,
+but a precondition on whether the operation could complete at all, and one that
+corrupted the save when it proceeded regardless. A CSS-only gate on an ordinary,
+repeatable purchase is fine; on a destructive, non-idempotent operation it was not.
+
+### Coverage
+
+`tests/e2e/energy/energy-live.spec.js` asserts the design: the button gains
+`red-disabled-text` when the plant is unaffordable and loses it when it is not.
+
+---
+
+## 18. The Fuse button can never reveal itself before the first fusion — ✅ FIXED
+
+**Severity:** medium — the control is reachable, but only by accident of a redraw.
+
+**Found by:** `tests/e2e/resources/resources.spec.js` →
+*"the Fuse button is hidden until the fusion tech is researched"*.
+
+### What happens
+
+Research Hydrogen Fusion while standing on the Hydrogen pane and the Fuse button
+does not appear. It stays hidden until the pane is closed and reopened, at which
+point it is rebuilt from scratch and shows normally.
+
+Observed class lists across the transition, with the Hydrogen pane open throughout:
+
+| moment | `#hydrogenSellRow button.fuse` classes |
+|---|---|
+| before the tech | `option-button red-disabled-text … fuse invisible` |
+| after Grant All Techs | `option-button … fuse invisible` |
+| after reopening the pane | `option-button … fuse` |
+
+Note the middle row: the tech has been applied — the button has lost
+`red-disabled-text`, so it is *enabled* — but it is still `invisible`.
+
+### Why
+
+`setStateOfFuseResourceButton` in `game.js`:
+
+```js
+function setStateOfFuseResourceButton(element, quantity, resource, resourceToFuseTo) {
+    if (getTechUnlockedArray().includes(resource + 'Fusion') && getUnlockedResourcesArray().includes(resourceToFuseTo)) {
+        element.classList.remove('invisible');
+    }
+
+    if (getTechUnlockedArray().includes(resource + 'Fusion') && quantity > 0) {
+        element.classList.remove('red-disabled-text');
+        …
+    } else if (!getTechUnlockedArray().includes(resource + 'Fusion')) {
+        element.classList.add('invisible');
+    } else {
+        …
+    }
+}
+```
+
+Only the **first** branch removes `invisible`, and it additionally requires
+`getUnlockedResourcesArray().includes(resourceToFuseTo)` — the fusion *product*
+to be already discovered. But the only thing that ever discovers a fusion product
+is fusing to it: `fuseResource()` calls `setUnlockedResourcesArray(fuseTo)` in its
+discovery branch. Before a player's first fusion of a given element the condition
+is therefore unsatisfiable, so that branch can never fire.
+
+Meanwhile the third branch adds `invisible` on every frame while the tech is
+missing. The class is added long before the tech arrives and nothing removes it
+afterwards. Only `updateContent()` rebuilding the row — which happens when the
+pane is reopened — produces a fresh button without the class.
+
+### Suggested fix
+
+Reveal on the tech alone, and let the second condition govern only whether the
+button is enabled:
+
+```js
+if (getTechUnlockedArray().includes(resource + 'Fusion')) {
+    element.classList.remove('invisible');
+}
+```
+
+The extra `resourceToFuseTo` clause guards nothing useful: the product is
+unlocked *by* the action the button performs.
+
+### Coverage
+
+The spec asserts the behaviour that should happen — grant the tech, and the Fuse
+button becomes visible and enabled without a redraw. It failed on first write,
+was brought to Leigh with the class-list evidence above, and the source was fixed
+rather than the test.

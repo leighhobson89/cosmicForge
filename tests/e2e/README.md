@@ -233,12 +233,33 @@ const { metrics } = await client.send('Performance.getMetrics'); // Nodes, JSEve
 await client.send('HeapProfiler.collectGarbage');                // force a GC before a heap reading
 ```
 
-Two rules make those assertions meaningful. **Baseline after a warm-up cycle,
-not at boot** — the first pass over the UI legitimately builds every pane's
-rows, so growth is only evidence of a leak once that has happened. And **assert
-the shape of heap growth, not its direction** — caches make the heap creep up
-and then flatten, so a leak is distinguished by the second half of a run growing
-as much as the first, not by the series rising at all.
+Four rules make those assertions meaningful.
+
+**Baseline after a warm-up, not at boot** — and not straight after
+`prepareRunForStarshipLaunch()` either. That chain unlocks every tab and
+building, and the frame loop then spends several seconds drawing all of those
+rows. A baseline taken before that finishes charges ordinary construction to
+whatever the spec is measuring.
+
+**Assert the shape of heap growth, not its direction** — caches make the heap
+creep up and then flatten, so a leak is distinguished by the second half of a
+run growing as much as the first, not by the series rising at all.
+
+**Measure the control window before the window under test.** Warm-up is not
+reliably finished at a fixed timeout — under eight parallel workers the game
+builds far more slowly in wall-clock terms — so whichever window runs first
+absorbs whatever construction is left. Putting the *control* first charges that
+residue to the control, and any excess the test window shows over it is real.
+Measured the other way round, the notification-burst spec reported a 1600-node
+leak that did not exist.
+
+**Confirm a suspected leak in isolation before believing it.** A single-worker
+run of the same burst showed cdpNodes −1, elements 0, text nodes 0 and listeners
+0 across 60 messages. `npx playwright test <file> --reporter=line` runs one
+worker and is the quickest way to separate a real finding from a scheduling
+artefact. Counting `document.querySelectorAll('*')` alongside the CDP metric is
+worth doing too: CDP `Nodes` includes text nodes and detached-but-referenced
+nodes, so the two disagreeing is itself informative.
 
 **A live bug must make the test fail. Never work around one.** This is the
 suite's governing rule. Do not weaken an assertion so a buggy path passes, do not

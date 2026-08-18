@@ -1,6 +1,6 @@
 # e2e / rockets
 
-**Rockets & Launch Pad** — 🟢 GREEN
+**Rockets & Launch Pad** — 🟠 AMBER
 
 Rocket construction, fuelling, naming and the launch lifecycle across all four rockets.
 
