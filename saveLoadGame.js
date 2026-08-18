@@ -114,20 +114,48 @@ export async function destroySaveGameOnCloud() {
         const currentTimestamp = new Date().toISOString();
         const backupUserId = `graveyard_${userId}`;
 
-        const { error: insertError } = await supabase
+        const { data: existingGraveyardRow, error: graveyardFetchError } = await supabase
             .from('CosmicForge_saves')
-            .insert([{
-                pioneer_name: backupUserId,
-                data: existingRow.data,
-                created_at: currentTimestamp,
-                region: existingRow.region,
-                hostSource: existingRow.hostSource,
-                feedback: existingRow.feedback,
-                feedback_content: existingRow.feedback_content
-            }]);
+            .select('*')
+            .eq('pioneer_name', backupUserId)
+            .single();
 
-        if (insertError) {
-            throw insertError;
+        if (graveyardFetchError && graveyardFetchError.code !== 'PGRST116') {
+            throw graveyardFetchError;
+        }
+
+        if (existingGraveyardRow) {
+            const { error: graveyardUpdateError } = await supabase
+                .from('CosmicForge_saves')
+                .update({
+                    data: existingRow.data,
+                    created_at: currentTimestamp,
+                    region: existingRow.region,
+                    hostSource: existingRow.hostSource,
+                    feedback: existingRow.feedback,
+                    feedback_content: existingRow.feedback_content
+                })
+                .eq('pioneer_name', backupUserId);
+
+            if (graveyardUpdateError) {
+                throw graveyardUpdateError;
+            }
+        } else {
+            const { error: insertError } = await supabase
+                .from('CosmicForge_saves')
+                .insert([{
+                    pioneer_name: backupUserId,
+                    data: existingRow.data,
+                    created_at: currentTimestamp,
+                    region: existingRow.region,
+                    hostSource: existingRow.hostSource,
+                    feedback: existingRow.feedback,
+                    feedback_content: existingRow.feedback_content
+                }]);
+
+            if (insertError) {
+                throw insertError;
+            }
         }
 
         const { error: updateError } = await supabase
