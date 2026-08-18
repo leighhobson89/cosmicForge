@@ -1,6 +1,6 @@
 # e2e / onboarding
 
-**Onboarding & Tutorial** — 🟠 AMBER
+**Onboarding & Tutorial** — 🟢 GREEN
 
 The guided first-run tutorial. Every new player’s first experience, and fully localized.
 

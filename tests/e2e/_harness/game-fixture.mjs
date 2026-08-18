@@ -348,8 +348,45 @@ class GameHarness {
   }
 }
 
+/** Per-step delay in ms, set by tests/run-e2e.mjs from `--slow --headed`. */
+const SLOW_MS = Number(process.env.E2E_SLOWMO) || 0;
+
+/**
+ * Pace the steps `launchOptions.slowMo` does not reach.
+ *
+ * Playwright's own slowMo pauses before each *input* operation — clicks, fills,
+ * key presses, locator waits — and that is genuinely useful, so it stays on. But
+ * it does nothing for `page.evaluate`, and this suite is mostly `page.evaluate`:
+ * every `withMods` call, every class-list read, every dispatched click goes
+ * through it. That is why slow mode looked like it barely did anything.
+ *
+ * Overriding `evaluate` once, here, gives the remaining steps the same pacing,
+ * so a `--slow` run advances at a followable rate whichever style a spec uses.
+ */
+function paceEvaluate(page) {
+  if (!SLOW_MS) return;
+
+  for (const method of ['evaluate', 'evaluateHandle']) {
+    const original = page[method].bind(page);
+    page[method] = async (...args) => {
+      const result = await original(...args);
+      await new Promise((resolve) => setTimeout(resolve, SLOW_MS));
+      return result;
+    };
+  }
+}
+
 export const test = base.extend({
   game: async ({ page }, use, testInfo) => {
+    // Slow mode pauses before every Playwright operation, so a spec that runs in
+    // 30 seconds can take several minutes. Specs set their own budgets with
+    // `test.setTimeout(...)` at describe level, which would otherwise override
+    // the config and cut a slow run short — clearing it here wins, because
+    // fixture setup runs after that value has been applied. A slow run is being
+    // watched by hand, so there is nothing useful for a timeout to protect.
+    if (SLOW_MS) testInfo.setTimeout(0);
+    paceEvaluate(page);
+
     const errors = [];
     page.on('pageerror', (err) => errors.push(`PAGEERROR: ${err.message}`));
     page.on('console', (msg) => {

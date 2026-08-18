@@ -1041,3 +1041,163 @@ The spec asserts the behaviour that should happen — grant the tech, and the Fu
 button becomes visible and enabled without a redraw. It failed on first write,
 was brought to Leigh with the class-list evidence above, and the source was fixed
 rather than the test.
+
+---
+
+## 19. Crafting a compound in any language but English is free — ✅ FIXED
+
+**Severity:** high — an economy exploit, live in four of the five shipped languages.
+
+**Found by:** `tests/e2e/compounds/compounds.spec.js` →
+*"crafting in another language still charges the right resources"*.
+
+### What happens
+
+Switch the game to German (or Spanish, Italian, French), open a compound pane,
+pick any amount and press **Create**. The compound is added. **No ingredients are
+deducted.** The player gets the goods for nothing, and can repeat it forever.
+
+Probe output, German, asking for 5 diesel:
+
+```
+language          de
+create preview    "5 Diesel (130 Wasserstoff, 60 Kohlenstoff)"
+parsed parts      { compoundToCreateQuantity: 5,
+                    constituentPartQuantity1: 130, constituentPartName1: "wasserstoff",
+                    constituentPartQuantity2: 60,  constituentPartName2: "kohlenstoff" }
+before            diesel 0,  hydrogen 100000
+after             diesel 5,  hydrogen 100000     <-- unchanged
+```
+
+In English the same sequence charges 130 hydrogen and 60 carbon correctly.
+
+### Cause
+
+The amount to craft and the ingredients to spend are recovered by **parsing the
+rendered preview sentence**:
+
+```
+setCompoundCreatePreview()   ->  "5 Diesel (130 Wasserstoff, 60 Kohlenstoff)"
+getConstituentComponents()   ->  { constituentPartName1: "Wasserstoff", … }
+unpackConstituentPartsObject()->  lowercases the names, and nothing more
+createCompound()             ->  looks the name up as a data-object key
+```
+
+`createCompound` then does:
+
+```js
+if (getResourceDataObject('resources')[partName]) {
+    type = 'resources';
+} else if (getResourceDataObject('compounds')[partName]) {
+    type = 'compounds';
+} else {
+    type = 'error';
+}
+
+setResourceDataObject(
+    getResourceDataObject(type, [partName, 'quantity']) - partQuantity,
+    type,
+    [partName, 'quantity']
+);
+```
+
+The names in the sentence are **display names**, but the data object is keyed by
+**internal keys**. `resourceData.resources['wasserstoff']` does not exist, so
+`type` becomes `'error'` and the write goes nowhere. It works in English only
+because there the display name and the internal key happen to coincide once
+lowercased (`Hydrogen` -> `hydrogen`).
+
+The compound quantity is added before that loop runs, so the credit lands and the
+charge does not.
+
+### Suggested fix
+
+### The fix
+
+A reverse lookup existed already — `reverseLocalizeForCompounds` — but it was not
+usable here: `getCompoundReverseIndex` indexes only `compound*` catalogue keys,
+and a recipe's ingredients are almost always **resources**. Feeding it
+"Wasserstoff" returned the input unchanged, which is exactly the failure.
+
+Two changes, plus a guard:
+
+1. **`localization.js`** — a new `reverseLocalizeMaterialName(value, language)`
+   built on a `getMaterialReverseIndex` that indexes `compound*` *and*
+   `resource*` keys. Compounds are indexed first, so a name shared by both
+   sections still resolves the way it always has (known-issues #8).
+2. **`game.js`, `unpackConstituentPartsObject`** — the parsed names now go
+   through that lookup before being lowercased. English is unaffected, because
+   the index maps an English display name to the key it already produced.
+3. **`game.js`, `createCompound`** — every ingredient is now resolved *before*
+   anything is credited, and an unresolvable name abandons the whole craft with a
+   `console.warn` instead of adding the compound and silently skipping the
+   charge. The old `type = 'error'` branch is gone.
+
+### Coverage
+
+The spec crafts in German and asserts the ingredients are charged. It failed on
+first write, was brought to Leigh with the probe output above, and the source was
+fixed rather than the test.
+
+---
+
+## 20. The compound create dropdown never changes language — ✅ FIXED
+
+**Severity:** low — cosmetic, but it strands one control in a language the player
+has just left.
+
+**Found by:** `tests/e2e/compounds/compounds.spec.js` →
+*"switching language relabels the create dropdown on screen"*.
+
+### What happens
+
+Switch language in Settings, reopen a compound pane, and the **create** dropdown
+still reads in the previous language:
+
+```
+["Fill To Capacity", "Max Possible", "Up to 75%", …, "5000 - 130K Hyd, 60K Crb", …]
+```
+
+Everything else on the pane relocalizes, including the sell dropdown right beside
+it and the create *preview* underneath it.
+
+### Cause
+
+The recipe table is built once and cached for the lifetime of the run:
+
+```js
+let compoundCreateDropdownRecipeText = null;
+
+function ensureCompoundCreateDropdownRecipeText() {
+    if (!compoundCreateDropdownRecipeText) {
+        compoundCreateDropdownRecipeText = buildCompoundCreateDropdownRecipeText();
+    }
+    return compoundCreateDropdownRecipeText;
+}
+```
+
+`buildCompoundCreateDropdownRecipeText()` calls `localize(..., getLanguage())` for
+every entry, so the table is frozen in whatever language was current the first
+time anything read it. The only thing that clears the cache is
+`resetAllVariablesOnRebirth`. `relocalizeAll()` redraws the pane, but the redraw
+reads the same stale table.
+
+The sell dropdown differs because it calls `localize` inline at draw time.
+
+### The fix
+
+`constantsAndGlobalVars.js` gained an exported
+`invalidateCompoundCreateDropdownRecipeText()` — the same one-line invalidation
+the rebirth reset already performs — and `relocalizeAll()` in `ui.js` now calls
+it straight after `initLocalization` resolves, before anything redraws. The next
+read rebuilds the table in the new language.
+
+An exported invalidator was needed because the variable is module-private and the
+existing `setCompoundCreateDropdownRecipeText` takes a single compound rather than
+the whole table; passing `undefined` through it destroys that compound's entry
+without triggering a rebuild.
+
+### Coverage
+
+The spec reads the rendered option list, switches language through
+`relocalizeAll`, reopens the pane and asserts the list changed.

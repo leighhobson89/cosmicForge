@@ -1,6 +1,6 @@
 # e2e / audio
 
-**Audio** — 🟠 AMBER
+**Audio** — 🟢 GREEN
 
 Background music, ambience and SFX, and their interaction with settings.
 

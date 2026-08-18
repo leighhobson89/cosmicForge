@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | 🟠 AMBER |
+| **Status** | 🟢 GREEN |
 | **Risk if broken** | High |
 | **Group** | Foundation |
 | **Spec folder** | `tests/e2e/app-boot/` |
@@ -21,7 +21,7 @@ The game reaches a playable state from a cold start, in both browser and Electro
 
 ## Status meaning
 
-🟠 **AMBER** — A spec file exists, but the area has not yet been through the integration upgrade — some of its coverage is still function-level rather than played through the UI.
+🟢 **GREEN** — Signed off as done: the area is driven through its real controls, its rules are asserted by measurement rather than by field reads, and the whole suite passes.
 
 ---
 

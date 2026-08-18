@@ -93,12 +93,52 @@ node tests/run-e2e.mjs audio --headed             # one area, headed
 `--headed` also forces `--workers=1`, so browser windows run one at a time
 instead of stacking on top of each other.
 
-Add `--slow` to slow each Playwright action down by 500ms, useful when a headed
-run moves too fast to actually watch:
+Add `--slow` to put a **700ms pause before every step**, for when a headed run
+moves too fast to follow:
 
 ```bash
-node tests/run-e2e.mjs audio --headed --slow      # one area, headed, slowed down
+node tests/run-e2e.mjs audio --headed --slow      # one area, headed, paced
 ```
+
+`--slow` only applies **together with `--headed`** — it exists to make a run
+watchable, and pacing a headless run just burns time. On its own it prints a
+warning and is ignored.
+
+Two mechanisms are involved, because one alone is not enough:
+
+- Playwright's `launchOptions.slowMo` paces *input* operations — clicks, fills,
+  key presses, locator waits.
+- The `game` fixture also paces `page.evaluate`, which slowMo does not touch.
+  That matters here because most of this suite's steps go through `evaluate`:
+  every `withMods` call, every class-list read, every dispatched click. With only
+  slowMo, `--slow` looked like it barely did anything.
+
+Slow mode also **lifts the time budgets** — the per-test timeout, the action
+timeout and the expect timeout — including the `test.setTimeout(...)` values
+specs set for themselves. Without that a paced run simply times out, which is the
+other half of why it used to be unusable. A slow run is being watched by hand, so
+stop it with Ctrl-C when you have seen enough.
+
+## Live progress
+
+Both the runner and a direct `playwright test` invocation print progress as it
+happens, from `tests/e2e/_harness/progress-reporter.mjs`:
+
+```
+── resources ─ 21 tests · 8 workers ────────────────────────────────
+  [resources]   5/21  ▶  the Sell button sells exactly the previewed amount
+  [resources]   5/21  ✓  the Sell button sells exactly the previewed amount  1.4s  · 3/21 done
+  [resources]   6/21  ✕  a second increase costs the new, larger cap         1.8s  · 4/21 done
+```
+
+- `▶` is a test starting, `✓`/`✕`/`○` is one finishing.
+- `5/21` is the test's index **in start order**, which ties a result line back to
+  the `▶` line it belongs to.
+- `· 3/21 done` is how far through the area the run actually is. The two numbers
+  differ once more than one worker is in flight, which is why both are shown.
+
+Failures are repeated at the end of the area with the first line of the error;
+the full diff, trace, screenshot and video are in that area's HTML report.
 
 ### Via Playwright directly
 
@@ -178,7 +218,7 @@ node tests/run-e2e.mjs audio                              # one area, headless, 
 node tests/run-e2e.mjs audio black-hole                   # several areas
 node tests/run-e2e.mjs --headed                           # everything, headed (1 worker)
 node tests/run-e2e.mjs audio --headed                     # one area, headed (1 worker)
-node tests/run-e2e.mjs audio --headed --slow              # one area, headed, 500ms slower per step
+node tests/run-e2e.mjs audio --headed --slow              # one area, headed, 700ms before each step
 node tests/run-e2e.mjs audio -- -g "some title"           # one area, filtered by title
 node tests/run-e2e.mjs --list                             # what's available to run
 

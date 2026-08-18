@@ -10,6 +10,7 @@ let localizationData = {};
 // language on first use. `reverseLocalizeForCompounds` is reached from the frame
 // loop, so it must not walk the catalogue on every call.
 let compoundReverseIndex = new Map();
+let materialReverseIndex = new Map();
 
 export function getSupportedLanguages() {
     return [...SUPPORTED_LANGUAGES];
@@ -77,6 +78,7 @@ function setLocalization(data) {
     // The catalogue is re-fetched on every initLocalization call, so any index
     // built from the previous copy is stale by definition.
     compoundReverseIndex = new Map();
+    materialReverseIndex = new Map();
 }
 
 function getLocalization() {
@@ -159,6 +161,52 @@ function getCompoundReverseIndex(language) {
     return index;
 }
 
+/**
+ * Translated material name -> internal key, across **both** sections.
+ *
+ * `getCompoundReverseIndex` deliberately covers only `compound*` keys, because
+ * its caller resolves compound names specifically. Crafting needs the wider
+ * mapping: a recipe's ingredients are usually resources ("Wasserstoff" ->
+ * "hydrogen"), and looking those up in the compound-only index silently returns
+ * the translated name unchanged.
+ *
+ * Compounds are indexed first so that a name shared by both sections resolves the
+ * same way it always has — see known-issues #8.
+ */
+function getMaterialReverseIndex(language) {
+    const cached = materialReverseIndex.get(language);
+    if (cached) return cached;
+
+    const data = getLocalization();
+    const table = data && data[language];
+    if (!table) return null;
+
+    const index = new Map();
+    for (const prefix of ['compound', 'resource']) {
+        for (const [key, value] of Object.entries(table)) {
+            if (!key.startsWith(prefix) || typeof value !== 'string') continue;
+            const name = value.toLowerCase();
+            if (!index.has(name)) {
+                index.set(name, key.slice(prefix.length).toLowerCase());
+            }
+        }
+    }
+
+    materialReverseIndex.set(language, index);
+    return index;
+}
+
+/** Turn a displayed material name back into the key the data object uses. */
+function reverseLocalizeMaterialName(localizedValue, language) {
+    if (typeof localizedValue !== 'string') return localizedValue;
+
+    const index = getMaterialReverseIndex(language);
+    if (!index) return localizedValue;
+
+    const resolved = index.get(localizedValue.toLowerCase());
+    return resolved === undefined ? localizedValue : resolved;
+}
+
 // Resource and compound display names are stored in the catalogue under
 // `resource<Name>` / `compound<Name>`, but the game data holds the internal key
 // plus the section it lives in ('resources' / 'compounds'). Several draw
@@ -186,6 +234,7 @@ export {
     localizeRaw,
     localizeMaterialName,
     reverseLocalizeForCompounds,
+    reverseLocalizeMaterialName,
     LANGUAGE_STORAGE_KEY,
     DEFAULT_LANGUAGE
 };

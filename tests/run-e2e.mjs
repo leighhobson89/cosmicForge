@@ -9,9 +9,18 @@
  *   node tests/run-e2e.mjs                          run every area that has specs
  *   node tests/run-e2e.mjs audio app-boot           run only the named areas
  *   node tests/run-e2e.mjs --headed                 run headed (visible browser)
+ *   node tests/run-e2e.mjs energy --headed --slow   headed, 700ms before every step
  *   node tests/run-e2e.mjs audio -- -g "some title"  extra args after -- go straight to
  *                                                     `playwright test` for each area run
  *   node tests/run-e2e.mjs --list                   show which areas have specs
+ *
+ * --slow only applies together with --headed: it exists to make a run followable
+ * by eye, and slowing a headless run just burns time. Passing it alone prints a
+ * warning and is ignored.
+ *
+ * Progress is printed live by tests/e2e/_harness/progress-reporter.mjs: the area,
+ * the running index against that area's total (5/21, 6/21 ...) and each outcome
+ * as it settles.
  *
  * Full usage guide: tests/docs/running-tests.md
  *
@@ -30,6 +39,9 @@ const ROOT = path.resolve(HERE, '..');
 const E2E_DIR = path.join(ROOT, 'tests', 'e2e');
 const REPORT_ROOT = path.join(ROOT, 'test-reports', 'e2e');
 
+/** Delay inserted before every Playwright step when --slow --headed is used. */
+const SLOW_STEP_MS = 700;
+
 /** Areas that actually contain at least one .spec.js file. */
 function discoverAreas() {
   return fs
@@ -44,7 +56,10 @@ function discoverAreas() {
 
 function runArea(area, { headed = false, slow = false, extraArgs = [] } = {}) {
   const started = Date.now();
-  process.stdout.write(`\n=== ${area}${headed ? ' (headed)' : ''} ===\n`);
+  const mode = [headed ? 'headed' : null, slow ? `slow ${SLOW_STEP_MS}ms/step` : null]
+    .filter(Boolean)
+    .join(', ');
+  process.stdout.write(`\n=== ${area}${mode ? ` (${mode})` : ''} ===\n`);
 
   // Reporters are configured in playwright.config.js and keyed off E2E_AREA, so
   // they write into this area's own folder. Passing --reporter here would
@@ -65,8 +80,9 @@ function runArea(area, { headed = false, slow = false, extraArgs = [] } = {}) {
       ...process.env,
       E2E_AREA: area,
       PLAYWRIGHT_HTML_OPEN: 'never',
-      // Read by playwright.config.js to set launchOptions.slowMo.
-      ...(slow ? { E2E_SLOWMO: '500' } : {})
+      // Read by playwright.config.js (launchOptions.slowMo, and the raised
+      // timeouts that make a paced run survivable) and by the game fixture.
+      ...(slow ? { E2E_SLOWMO: String(SLOW_STEP_MS) } : {})
     }
   });
 
@@ -227,7 +243,14 @@ const ownArgs = sepIndex === -1 ? args : args.slice(0, sepIndex);
 const extraArgs = sepIndex === -1 ? [] : args.slice(sepIndex + 1);
 
 const headed = ownArgs.includes('--headed');
-const slow = ownArgs.includes('--slow');
+const slowRequested = ownArgs.includes('--slow');
+
+// Slow mode is a watching aid, so it only means anything with a visible browser.
+const slow = slowRequested && headed;
+if (slowRequested && !headed) {
+  console.warn('  [warn] --slow only applies with --headed, so it has been ignored.');
+  console.warn('         Re-run as: node tests/run-e2e.mjs <area> --headed --slow');
+}
 const requested = ownArgs.filter((a) => a !== '--headed' && a !== '--slow' && a !== '--list');
 const areas = requested.length ? requested : available;
 

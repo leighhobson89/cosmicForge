@@ -1,6 +1,7 @@
 import { initLocalization, localize, localizeMaterialName, reverseLocalizeForCompounds } from './localization.js';
 import { getStatisticsContent, getStatKeyFromLocalizedName, statisticsContent } from './descriptions.js';
 import {
+    invalidateCompoundCreateDropdownRecipeText,
     setLastFocusOfflineGainsAppliedAt,
     setGalacticPointsSpent,
     getInFormation,
@@ -14824,6 +14825,11 @@ export async function relocalizeAll(language) {
     // initLocalization owns setting and persisting the language: an explicit
     // selection takes priority over the stored/browser fallbacks inside it.
     const resolved = await initLocalization(language);
+
+    // The compound create dropdown is built from a table that caches its
+    // localized strings for the lifetime of the run, so it has to be dropped
+    // here or that one control stays in the old language. See known-issues #20.
+    invalidateCompoundCreateDropdownRecipeText();
 
     initialiseDescriptions();
     initialiseStaticButtonLabels();

@@ -1,6 +1,6 @@
 # e2e / app-boot
 
-**Application Boot** — 🟠 AMBER
+**Application Boot** — 🟢 GREEN
 
 The game reaches a playable state from a cold start, in both browser and Electron shells.
 

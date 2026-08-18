@@ -355,13 +355,194 @@ by confirming the rock is still being worked at the same pace alongside it.
 
 ---
 
-## ⚪ Compounds — not started
+## 🟢 Compounds & Crafting — `compounds.spec.js`, 31 specs, all passing
 
-Creation runs through real dropdowns and a create button, and the
-`compoundCreateDropdownRecipeText` table behind known-issues #1 is read by that UI.
-Currently untested through the DOM.
+**What is different.** The old specs checked the data shape and called
+`sellCompound()` directly. Nothing ever pressed **Create**, which is the only
+thing the tab is for.
 
-`technology` remains a candidate after that.
+Crafting has to be tested through the DOM because **the rendered text is the
+contract**:
+
+```
+dropdown option -> setCreateCompoundPreview()   how many, and from what
+                -> setCompoundCreatePreview()   "5 Diesel (130 Hydrogen, 60 Carbon)"
+                -> frame loop renders it into #createDieselDescription
+                -> getConstituentComponents()   parses that string back out
+                -> createCompound()             moves the quantities
+```
+
+The amount crafted and the resources spent are recovered from a *localized
+sentence*. A spec that calls `createCompound()` proves almost nothing, and
+crafting in German is a genuinely different test from crafting in English.
+
+Covered end to end: every fixed quantity charges its exact ratio; `max` is limited
+by the scarcest ingredient; `fill to capacity` stops at the cap; an over-large
+craft is clamped and the waste announced; too few ingredients moves nothing;
+storage upgrades double the cap for all five simple compounds; **the water
+reservoir bills a second material** — 30% of the cap in concrete, and re-quotes
+against the *new* cap for the next one; selling matches the preview across all
+eight dropdown options. Autobuyers are deliberately out of scope; they belong to
+the autobuyers area.
+
+### Two live bugs, both found and fixed
+
+1. **Crafting outside English was free** (known-issues #19). The parsed ingredient
+   names are display names; the data object is keyed by internal names. Outside
+   English the lookup missed, `type` fell through to `'error'`, the deduction
+   wrote nowhere — and the compound had already been credited. Fixed with a new
+   `reverseLocalizeMaterialName` covering **both** `resource*` and `compound*`
+   keys (the existing reverse index was compound-only, and recipe ingredients are
+   almost always resources), plus a guard so an unresolvable ingredient abandons
+   the craft instead of paying out.
+2. **The create dropdown never changed language** (known-issues #20). Its recipe
+   table caches localized strings for the lifetime of the run and was only cleared
+   on rebirth. Fixed by invalidating it in `relocalizeAll()`.
+
+### Two traps
+
+- **Grant All Techs does not unlock auto-create.** `compoundMachining` is not a
+  researchable tech; it comes only from the `compoundAutomation` ascendency perk.
+  The spec buys it through `purchaseBuff`, the function the ascendency buttons
+  call, and asserts that a fully teched run *still* has the toggle hidden — which
+  is the part that makes the gate meaningful.
+- **Something falls from the sky, and it is not always water.** The first pass at
+  this area treated water as the one compound that drifts, and bounded its
+  assertions instead of pinning them. That was wrong twice over, and the second
+  pass replaced it — see the section below.
+
+---
+
+## 🟢 Compounds — second pass: precipitation
+
+**What was wrong.** The first pass allowed water, and only water, to drift: a
+craft asserted `made >= 5` instead of `made === 5` for it, a reservoir upgrade
+accepted a spend "between 95 and 99", and Sell All excused a non-zero water
+balance. The comment explaining this said rainfall collects into the reservoir
+continuously.
+
+Rainfall does collect — but into whichever compound *this star system* rains, and
+only while it is actually raining. `calculatePrecipitationType()` draws the type
+once per star system from a weighted table over the compounds: water at 40% is
+merely the likeliest, with diesel 30%, glass 19%, steel 7% and titanium 4% all
+real outcomes, and concrete in the table at weight 0 so it can never be drawn.
+`addPrecipitationResource()` then adds to it every frame, but only while
+`getCurrentStarSystemWeatherEfficiency()[2] === 'rain'`, and only at
+`getCurrentPrecipitationRate()` — which the weather countdown re-rolls to 1-4 per
+second when a shower starts and pins to 0 the rest of the time.
+
+So the old exception was both too generous and too strict. On a system that rains
+diesel it forgave drift in a compound that was perfectly still, while holding
+diesel — the compound the numbers actually depend on — to a figure it could not
+meet. It also passed for the wrong reason most of the time: a spec only rains at
+all one weather roll in five.
+
+**What is different.** The spec stops guessing and turns the rain off.
+`clearWeather()` presses the debug menu's own **Sunny** button — the same
+`forceClearWeather()` a developer clicks, which zeroes the rate and forces the
+weather to sunny — and then reads the state back and throws if it did not take.
+`prepareCraftingRun()` calls it for every test, and the loops that walk all six
+compounds call it again before each measurement, because weather re-rolls itself
+every one to three minutes and a six-compound walk outlives that.
+
+With nothing falling, every assertion in the file is exact again, for every
+compound alike: `made === 5` for all six, the reservoir spends exactly 99, the
+second reservoir leaves exactly 1, and Sell All empties every unlocked compound
+to zero with no exceptions.
+
+**And the rules themselves are now tested**, in a new `Compounds — precipitation`
+block of 5 specs that puts the rain back deliberately. `forceRain()` calls
+`forceWeatherCycle()` — the game's own re-roll, the one the `endlessSummer` event
+calls when it expires — until the roll comes up rain, then waits for the shower to
+set a rate. What that block pins:
+
+- the star system's `precipitationType` is one of the compounds in the shipped
+  table, its weight is greater than zero, its category is `compounds`, and the
+  compound it names has a real pane that opens;
+- with the weather clear, no compound gains anything at all;
+- while it rains, that compound gains and **no other compound does**;
+- clearing the weather stops it dead — an equality, not a comparison, because the
+  rate is pinned to zero rather than merely reduced;
+- precipitation respects the storage cap and does not overfill it.
+
+**The trap this replaces.** Never hard-code a compound name as "the one that
+drifts". Either clear the weather, or read `precipitationType` off the current
+star system and reason about that.
+
+---
+
+## 🟢 Demo Build Lockdowns — `demo-build.spec.js`, 19 specs, all passing
+
+**The reason this area could not be tested the easy way.** `setDemoBuild()` is
+exported, so the obvious move is to flip it on a running page and look at the UI.
+That proves almost nothing. Nearly every lockdown in the game is applied at *draw*
+time: `drawTab2Content` and friends read `getDemoBuild()` as they build each
+option row and bake `electron-purple-demo-button` into the class list there and
+then. Flipping the flag afterwards locks nothing that has already been drawn, and
+re-drawing is not something a spec can ask for directly.
+
+Worse, the flag is not even honoured in a browser. `initialiseStaticButtonLabels()`
+derives it itself, at DOMContentLoaded, with
+`setDemoBuild(isElectron ? window.__DEMO_BUILD__ === true : false)`.
+
+**What is different.** `bootVariant()` boots the game as the packaged Electron app
+presents itself: an `addInitScript` spoofs `navigator.userAgent` to look like
+Electron, and a route serves a `buildFlags.js` already carrying the flavour, both
+before any page script runs. The spec then asserts `getDemoBuild()` itself, so a
+spoof that failed to take reports as a broken spoof rather than as a puzzling
+"nothing was locked", and drives the real debug menu (through the `Test1981`
+backdoor, which a demo build keeps on purpose) to unlock the tabs it needs.
+
+`surveyLockdowns()` then walks every pane that carries a lock and returns one
+object, so the demo and full builds are compared whole. A lockdown added to the
+game but not to the survey shows up as a difference between the two runs rather
+than as silence.
+
+**What it proves the demo actually withholds** — all confirmed passing against the
+live game:
+
+| Locked | Left playable |
+|---|---|
+| all three battery tiers | the basic power plant |
+| Solar and Advanced power plants | the science kit and science club |
+| the science lab | rocket 1 |
+| `orbitalConstruction` | every other tech |
+| rockets 2, 3 and 4 | autobuyer tiers 1 and 2 |
+| Study Stars on the telescope | Star Map |
+| autobuyer tiers 3 and 4 on every resource and compound | |
+| autosave dropdown and toggle, save export | |
+| the whole Galactic tab, and five interstellar sidebar options | |
+
+**Three things the survey cannot see, tested separately.**
+
+- **The lock is a stylesheet rule, not a disabled attribute.**
+  `.electron-purple-demo-button { pointer-events: none }` is the entire
+  enforcement — the click handler behind a locked button is still attached and
+  would still fire. One spec reads the *computed* `pointer-events` of every locked
+  element on screen, because if that rule ever stopped applying, every lockdown in
+  the game would become cosmetic at once and nothing else in the file would
+  notice.
+- **The tooltip explains the lock.** A real `page.mouse.move` over a locked
+  button, rather than a synthetic event, because `setupDemoTooltips()` watches
+  document mousemove and uses `elementFromPoint` — temporarily restoring
+  pointer-events so it can see through the very rule that makes the control inert.
+  The text is asserted against `localize('notificationNotAvailableInDemo', ...)`,
+  so it is checked in the player's language rather than against an English string.
+- **A demo build never contacts the cloud.** The name prompt branches on
+  `getDemoBuild()`: a full build calls `loadGameFromCloud()`, a demo build sets the
+  onboarding flag instead. There is no accessor for that flag by the time a spec
+  can read it, but the branch is observable from outside — the spec counts
+  requests to the save backend during boot and expects none.
+
+**One thing worth knowing for release, not a test failure.** The two pipelines
+treat `buildFlags.js` differently. `tools/build-stamp.mjs` rewrites it and forces
+`__VARIABLE_DEBUGGER_AND_CHEATS__` to false on every desktop build, and a spec
+pins that. `create_build.py` does not — it copies the working tree as it finds
+it, and the checked-in default is `true`, which in a browser build lets any player
+open the debug menu. That is a procedural hazard rather than a code defect, and it
+is written up in [`docs/making-a-build.md`](../../docs/making-a-build.md).
+
+---
 
 ## The general rule this establishes
 

@@ -428,7 +428,7 @@ import {
     getCosmicRipScanResultsBySectorIndex,
 } from './resourceDataObject.js';
 
-import { localize, localizeRaw, localizeMaterialName } from './localization.js';
+import { localize, localizeRaw, localizeMaterialName, reverseLocalizeMaterialName } from './localization.js';
 import { onboardingChecks } from './onboarding.js';
 
 import {
@@ -4918,6 +4918,33 @@ export function createCompound(compound) {
     const existingCompoundQuantity = getResourceDataObject('compounds', [compound, 'quantity']);
     const compoundMaxStorage = getResourceDataObject('compounds', [compound, 'storageCapacity']);
 
+    // Resolve every ingredient before anything is credited. A name that does not
+    // map to a real material used to leave `type === 'error'`, so the deduction
+    // wrote nowhere while the compound had already been added — free goods. Fail
+    // the whole craft instead, loudly. See known-issues #19.
+    const resolvedParts = [];
+    for (let i = 1; i <= 4; i++) {
+        const partName = constituentPartsObject[`constituentPartName${i}`];
+        const partQuantity = constituentPartsObject[`constituentPartQuantity${i}`];
+        if (!partName || !(partQuantity > 0)) {
+            continue;
+        }
+
+        let type = null;
+        if (getResourceDataObject('resources')[partName]) {
+            type = 'resources';
+        } else if (getResourceDataObject('compounds')[partName]) {
+            type = 'compounds';
+        }
+
+        if (!type) {
+            console.warn(`createCompound: unknown ingredient "${partName}" for ${compound}; craft abandoned`);
+            return;
+        }
+
+        resolvedParts.push({ partName, partQuantity, type });
+    }
+
     let newQuantity = existingCompoundQuantity + constituentPartsObject.compoundToCreateQuantity;
     let exceededDifference = 0;
 
@@ -4930,33 +4957,14 @@ export function createCompound(compound) {
 
     let notificationParts = [];
 
-    for (let i = 1; i <= 4; i++) {
-        const partNameKey = `constituentPartName${i}`;
-        const partQuantityKey = `constituentPartQuantity${i}`;
-        const partName = constituentPartsObject[partNameKey];
-        const partQuantity = constituentPartsObject[partQuantityKey];
+    for (const { partName, partQuantity, type } of resolvedParts) {
+        setResourceDataObject(
+            getResourceDataObject(type, [partName, 'quantity']) - partQuantity,
+            type,
+            [partName, 'quantity']
+        );
 
-        if (partName && partQuantity > 0) {
-            let type;
-
-            if (getResourceDataObject('resources')[partName]) {
-                type = 'resources';
-            } 
-            else if (getResourceDataObject('compounds')[partName]) {
-                type = 'compounds';
-            } 
-            else {
-                type = 'error';
-            }
-
-            setResourceDataObject(
-                getResourceDataObject(type, [partName, 'quantity']) - partQuantity,
-                type, 
-                [partName, 'quantity']
-            );
-
-            notificationParts.push(`${partQuantity} ${localizeMaterialName(partName, getResourceDataObject('compounds', [partName]) ? 'compounds' : 'resources', getLanguage())}`);
-        }
+        notificationParts.push(`${partQuantity} ${localizeMaterialName(partName, type, getLanguage())}`);
     }
 
     const compoundCreatedQuantity = constituentPartsObject.compoundToCreateQuantity;
@@ -12019,7 +12027,13 @@ function unpackConstituentPartsObject(constituentComponents) {
 
         let nameKey = `constituentPartName${i}`;
         if (constituentComponents[nameKey]) {
-            constituentComponents[nameKey] = constituentComponents[nameKey].toLowerCase();
+            // The names arrive from the rendered preview sentence, so they are
+            // *display* names. The data object is keyed by internal names, and
+            // outside English the two differ ("Wasserstoff" vs "hydrogen") — so
+            // without this the ingredient lookup in createCompound misses and the
+            // player is charged nothing. See known-issues #19.
+            constituentComponents[nameKey] =
+                String(reverseLocalizeMaterialName(constituentComponents[nameKey], getLanguage())).toLowerCase();
         }
     }
 

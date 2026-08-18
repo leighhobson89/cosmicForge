@@ -7427,6 +7427,19 @@ export function setCompoundCreateDropdownRecipeText(compound, newOptions) {
     ensureCompoundCreateDropdownRecipeText()[compound] = newOptions;
 }
 
+/**
+ * Drop the cached recipe table so the next read rebuilds it.
+ *
+ * Every entry is produced by `localize(..., getLanguage())`, so the table is
+ * frozen in whatever language was current the first time anything read it.
+ * Without this, changing language left the compound create dropdown reading in
+ * the language the player had just left, while everything around it relocalized.
+ * See known-issues #20.
+ */
+export function invalidateCompoundCreateDropdownRecipeText() {
+    compoundCreateDropdownRecipeText = null;
+}
+
 export function getMultiplierPermanentResources() {
     return multiplierPermanentResources;
 }

@@ -210,6 +210,156 @@ test.describe('Demo Build Lockdowns — debugger reachability', () => {
 });
 
 /**
+ * Boot the game as the packaged Electron demo (or full) app would present itself.
+ *
+ * Two things have to be true *before* the first script runs, which is why this
+ * is an addInitScript plus a route rather than a call after boot:
+ *
+ *  - `navigator.userAgent` has to look like Electron, because
+ *    `initialiseStaticButtonLabels()` derives the flag itself with
+ *    `setDemoBuild(isElectron ? window.__DEMO_BUILD__ === true : false)` — in a
+ *    plain browser the demo flag is ignored entirely.
+ *  - `buildFlags.js` has to already carry the flavour, because that same line
+ *    reads `window.__DEMO_BUILD__` once, at DOMContentLoaded.
+ *
+ * That matters far beyond the sidebar. Nearly every lockdown in the game is
+ * applied at *draw* time — `drawTab2Content` and friends read `getDemoBuild()`
+ * as they build each option row and bake `electron-purple-demo-button` into the
+ * class list there and then. Flipping `setDemoBuild(true)` on a running page
+ * therefore locks nothing that has already been drawn, and a spec that did so
+ * would pass while proving nothing about a real demo build. Booting the variant
+ * is the only honest way to test them.
+ *
+ * The pioneer name keeps the `Test1981` backdoor so the debug menu is still
+ * reachable — a demo build gates the hotkeys on `getDemoBuild()`, and there is a
+ * test above proving the backdoor is the single exception to that.
+ */
+async function bootVariant(game, { demo }) {
+  await game.page.addInitScript(() => {
+    Object.defineProperty(window.navigator, 'userAgent', {
+      get: () => 'CosmicForgeElectronTestHarness/1.0 Electron/30.0.0',
+      configurable: true
+    });
+  });
+  await game.page.route('**/buildFlags.js', (route) =>
+    route.fulfill({
+      contentType: 'text/javascript',
+      body: `window.__DEMO_BUILD__ = ${demo};\n\nwindow.__COSMIC_RIP_ENABLED__ = true;\n\nwindow.__VARIABLE_DEBUGGER_AND_CHEATS__ = true;\n`
+    })
+  );
+
+  await game.boot({ pioneer: `Test1981_e2e_${demo ? 'demo' : 'full'}_${Date.now()}` });
+
+  // The lockdowns key off getDemoBuild(), not off the raw window flag, and the
+  // two only agree because the user-agent spoof took. Asserting the derived
+  // value here means a broken spoof fails at the cause rather than as a puzzling
+  // "nothing was locked" further down.
+  expect(await game.withMods((m) => m.cg.getDemoBuild())).toBe(demo);
+
+  await game.debugClick('grantAllTechsButton');
+  await game.page.waitForTimeout(1200);
+  await game.debugClick('unlockAllTabsButton');
+  await game.page.waitForTimeout(800);
+}
+
+/** Open a side-menu pane by its option id, revealing the row if it is still gated. */
+async function openOption(game, tab, optionId) {
+  await game.openTab(tab);
+  await game.page.waitForTimeout(300);
+  const opened = await game.page.evaluate((key) => {
+    const option = document.getElementById(key);
+    if (!option) return false;
+    option.classList.remove('invisible');
+    option.closest('.row-side-menu')?.classList.remove('invisible');
+    option.closest('.collapsible')?.classList.remove('invisible');
+    option.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    return true;
+  }, optionId);
+  if (!opened) throw new Error(`No side-menu option #${optionId}`);
+  await game.page.waitForTimeout(700);
+}
+
+/**
+ * Whether a row is locked, meaning it carries the demo class or contains a
+ * control that does.
+ *
+ * Rows are wrappers, and which of the two gets the class varies by call site:
+ * `createOptionRow` spreads `demoExtraClasses` into the button it builds, while
+ * the sidebar and tab locks are applied to the element itself. Asking "is
+ * anything in here locked" is the question that survives that difference.
+ */
+async function rowLocked(game, rowId) {
+  return game.page.evaluate((id) => {
+    const row = document.getElementById(id);
+    if (!row) return 'missing';
+    if (row.classList.contains('electron-purple-demo-button')) return true;
+    return Boolean(row.querySelector('.electron-purple-demo-button'));
+  }, rowId);
+}
+
+/**
+ * Walk every pane that carries a demo lockdown and report what is locked.
+ *
+ * Collected in one pass so that the demo and the full build can be compared as
+ * whole objects. Rows that must stay open in the demo are surveyed alongside the
+ * locked ones, because "the demo locks everything" would be just as broken as
+ * "the demo locks nothing" — the build has to remain playable up to its wall.
+ */
+async function surveyLockdowns(game) {
+  const survey = {};
+
+  await openOption(game, 2, 'energyOption');
+  survey.energyBattery1Row = await rowLocked(game, 'energyBattery1Row');
+  survey.energyBattery2Row = await rowLocked(game, 'energyBattery2Row');
+  survey.energyBattery3Row = await rowLocked(game, 'energyBattery3Row');
+
+  await openOption(game, 2, 'powerPlant1Option');
+  // The basic power plant is deliberately *not* locked: it is the only generator
+  // the demo gets, and locking it would leave the build unplayable.
+  survey.energyPowerPlant1Row = await rowLocked(game, 'energyPowerPlant1Row');
+
+  await openOption(game, 2, 'powerPlant2Option');
+  survey.energyPowerPlant2Row = await rowLocked(game, 'energyPowerPlant2Row');
+  await openOption(game, 2, 'powerPlant3Option');
+  survey.energyPowerPlant3Row = await rowLocked(game, 'energyPowerPlant3Row');
+
+  await openOption(game, 3, 'researchOption');
+  survey.researchScienceKitRow = await rowLocked(game, 'researchScienceKitRow');
+  survey.researchScienceLabRow = await rowLocked(game, 'researchScienceLabRow');
+
+  await openOption(game, 3, 'technologyOption');
+  survey.techOrbitalConstructionRow = await rowLocked(game, 'techOrbitalConstructionRow');
+  // A neighbouring tech, to show the lock is aimed at one row rather than laid
+  // over the whole technology pane.
+  survey.techAntimatterEnginesRow = await rowLocked(game, 'techAntimatterEnginesRow');
+
+  await openOption(game, 6, 'spaceTelescopeOption');
+  survey.spaceTelescopeInvestigateStarRow = await rowLocked(game, 'spaceTelescopeInvestigateStarRow');
+
+  await openOption(game, 6, 'launchPadOption');
+  survey.spaceRocket1BuildRow = await rowLocked(game, 'spaceRocket1BuildRow');
+  survey.spaceRocket2BuildRow = await rowLocked(game, 'spaceRocket2BuildRow');
+  survey.spaceRocket3BuildRow = await rowLocked(game, 'spaceRocket3BuildRow');
+  survey.spaceRocket4BuildRow = await rowLocked(game, 'spaceRocket4BuildRow');
+
+  await game.openTab(9);
+  await game.openPane('Saving / Loading');
+  await game.page.waitForTimeout(500);
+  survey.autoSaveConfigRow = await rowLocked(game, 'autoSaveConfigRow');
+  survey.exportSaveRow = await rowLocked(game, 'exportSaveRow');
+  survey.autoSaveToggle = await game.page.evaluate(() =>
+    Boolean(document.getElementById('autoSaveToggle')?.classList.contains('electron-purple-demo-button')));
+
+  survey.galacticTab = await game.page.evaluate(() =>
+    Boolean(document.getElementById('tab7')?.classList.contains('electron-purple-demo-button')));
+  survey.interstellarSidebar = await game.page.evaluate(() =>
+    ['starDataOption', 'starShipOption', 'fleetHangarOption', 'coloniseOption', 'galacticCasinoOption']
+      .every((id) => document.getElementById(id)?.classList.contains('electron-purple-demo-button') === true));
+
+  return survey;
+}
+
+/**
  * The interstellar-sidebar dimming (applyInterstellarSidebarDemoLockdownUi)
  * runs exactly once, from inside a `document.addEventListener('DOMContentLoaded', ...)`
  * handler in ui.js — it is not reachable through any exported, re-callable
@@ -361,5 +511,159 @@ test.describe('Demo Build Lockdowns — build-stamp.mjs template', () => {
     expect(source).toContain('`Cosmic Forge ${suffix}.exe`');
     expect(source).toContain('`Cosmic Forge ${suffix}.${\'${ext}\'}`');
     expect(source).toContain("const suffix = isDemo ? 'Demo' : 'Full';");
+  });
+});
+
+/**
+ * The lockdowns that are baked in at draw time, swept in one pass per flavour.
+ *
+ * These are the ones a spec cannot reach by toggling `setDemoBuild()` on a live
+ * page — see `bootVariant` above — and between them they are most of what the
+ * demo actually withholds: batteries, the two better power plants, the science
+ * lab, orbital construction, three of the four rockets, autosave and the save
+ * export, plus the Galactic tab and the interstellar sidebar.
+ */
+test.describe('Demo Build Lockdowns — what a packaged demo withholds', () => {
+  test.setTimeout(240000);
+
+  test('a demo Electron boot locks every gated purchase and leaves the rest playable', async ({ game }) => {
+    await bootVariant(game, { demo: true });
+    const survey = await surveyLockdowns(game);
+
+    expect(survey).toEqual({
+      // Energy storage is entirely off-limits, all three battery tiers.
+      energyBattery1Row: true,
+      energyBattery2Row: true,
+      energyBattery3Row: true,
+      // …but the basic power plant is not, or the demo could not generate at all.
+      energyPowerPlant1Row: false,
+      energyPowerPlant2Row: true,
+      energyPowerPlant3Row: true,
+      // The science kit is the demo's research; the lab is the paid upgrade.
+      researchScienceKitRow: false,
+      researchScienceLabRow: true,
+      // Orbital construction is the gate to the starship, so it is the wall the
+      // demo stops at — the techs either side of it stay researchable.
+      techOrbitalConstructionRow: true,
+      techAntimatterEnginesRow: false,
+      // Studying stars is how a run finds somewhere to go next, so the demo
+      // stops there too.
+      spaceTelescopeInvestigateStarRow: true,
+      // Rocket 1 flies in the demo; the three larger rockets do not.
+      spaceRocket1BuildRow: false,
+      spaceRocket2BuildRow: true,
+      spaceRocket3BuildRow: true,
+      spaceRocket4BuildRow: true,
+      // Saving is withheld in the UI as well as in the functions tested above.
+      autoSaveConfigRow: true,
+      autoSaveToggle: true,
+      exportSaveRow: true,
+      galacticTab: true,
+      interstellarSidebar: true
+    });
+  });
+
+  test('a full Electron boot locks none of them', async ({ game }) => {
+    await bootVariant(game, { demo: false });
+    const survey = await surveyLockdowns(game);
+
+    // Every single row, including the ones the demo locks: a full build has to
+    // be entirely free of the class, not merely mostly free of it.
+    expect(Object.entries(survey).filter(([, locked]) => locked !== false)).toEqual([]);
+  });
+
+  test('the autobuyer tiers the demo withholds are tier 3 and tier 4, and only those', async ({ game }) => {
+    await bootVariant(game, { demo: true });
+    await openOption(game, 1, 'hydrogenOption');
+
+    const tiers = await game.page.evaluate(() => {
+      const counts = {};
+      for (const button of document.querySelectorAll('button')) {
+        const tier = button.dataset?.autoBuyerTier;
+        if (!tier || tier === 'null') continue;
+        counts[tier] = counts[tier] || { total: 0, locked: 0 };
+        counts[tier].total++;
+        if (button.classList.contains('electron-purple-demo-button')) counts[tier].locked++;
+      }
+      return counts;
+    });
+
+    // Tiers 1 and 2 are the demo's economy and stay buyable; 3 and 4 are the
+    // ones the full game sells, and every button of theirs carries the lock.
+    expect(tiers.tier1.locked).toBe(0);
+    expect(tiers.tier2.locked).toBe(0);
+    expect(tiers.tier3.locked).toBe(tiers.tier3.total);
+    expect(tiers.tier4.locked).toBe(tiers.tier4.total);
+    expect(tiers.tier3.total).toBeGreaterThan(0);
+    expect(tiers.tier4.total).toBeGreaterThan(0);
+  });
+
+  test('the lock is enforced by the stylesheet, not merely coloured by it', async ({ game }) => {
+    await bootVariant(game, { demo: true });
+    await openOption(game, 2, 'energyOption');
+
+    // `.electron-purple-demo-button { pointer-events: none }` is the whole
+    // enforcement mechanism — the click handler behind a locked button is still
+    // attached and would still fire, so if this rule ever stopped applying, every
+    // lockdown in the game would become cosmetic at once. Read the computed value
+    // rather than the class, because the class is what the other tests assert and
+    // this one has to prove the class still means something.
+    const enforcement = await game.page.evaluate(() => {
+      const locked = Array.from(document.querySelectorAll('.electron-purple-demo-button'));
+      return {
+        count: locked.length,
+        allInert: locked.every((el) => getComputedStyle(el).pointerEvents === 'none')
+      };
+    });
+
+    expect(enforcement.count).toBeGreaterThan(0);
+    expect(enforcement.allInert).toBe(true);
+  });
+
+  test('hovering a locked control explains why it is locked, in the player’s language', async ({ game }) => {
+    await bootVariant(game, { demo: true });
+    await openOption(game, 2, 'energyOption');
+
+    const expected = await game.withMods((m) => m.loc.localize('notificationNotAvailableInDemo', m.cg.getLanguage()));
+    expect(expected).not.toBe('notificationNotAvailableInDemo');
+
+    // `setupDemoTooltips()` watches document mousemove and looks up whatever sits
+    // under the cursor, temporarily restoring pointer-events so `elementFromPoint`
+    // can see through the very rule that makes the control inert. Move a real
+    // mouse over a locked button to exercise that, rather than dispatching an
+    // event with made-up coordinates.
+    const box = await game.page.locator('#energyBattery1Row .electron-purple-demo-button').first().boundingBox();
+    expect(box).toBeTruthy();
+    await game.page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await game.page.waitForTimeout(300);
+
+    const tooltip = await game.page.evaluate(() => {
+      const el = document.getElementById('demo-tooltip');
+      return el ? { display: el.style.display, text: el.textContent.trim() } : null;
+    });
+    expect(tooltip.display).toBe('block');
+    expect(tooltip.text).toBe(expected);
+
+    // …and it goes away again once the cursor leaves.
+    await game.page.mouse.move(2, 2);
+    await game.page.waitForTimeout(300);
+    expect(await game.page.evaluate(() => document.getElementById('demo-tooltip').style.display)).toBe('none');
+  });
+
+  test('a demo build never contacts the cloud while booting', async ({ game }) => {
+    // The name prompt branches on getDemoBuild(): a full build calls
+    // loadGameFromCloud() and only offers onboarding if that fails, while a demo
+    // build sets the onboarding flag and never reaches the network. The branch
+    // has no accessor to read, but it is observable from outside — count the
+    // requests the page makes to the save backend.
+    const cloudRequests = [];
+    game.page.on('request', (request) => {
+      if (request.url().includes('supabase.co')) cloudRequests.push(request.url());
+    });
+
+    await bootVariant(game, { demo: true });
+    await game.page.waitForTimeout(1500);
+
+    expect(cloudRequests).toEqual([]);
   });
 });
