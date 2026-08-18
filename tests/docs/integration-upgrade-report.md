@@ -608,7 +608,7 @@ Net: 24 specs removed, 1 added, no coverage lost.
 
 ---
 
-## 🟡 Space Telescope — `space-telescope.spec.js`, 10 specs, 9 passing
+## 🟢 Space Telescope — `space-telescope.spec.js`, 10 specs, all passing
 
 A new area. There was no spec file at all before this.
 
@@ -643,14 +643,25 @@ miss by design, so nothing here demands a find from one press; and both duration
 carry a ±20% random offset, so every assertion is about the *base* duration and
 every timer is driven well past its widest roll.
 
-**The one failure is a live bug — known-issues #22.** Buying the telescope
-through its own button throws, and the throw aborts the rest of the click
-handler, so the pane the player is standing on never updates. The purchase is
-charged in full. Only the spec that presses the real Build button meets it; every
-other spec in the file stages the telescope through the debug menu's *Build Launch
-Pad, Scanner and All Rockets*, which takes the `debug` branch that skips the
-faulty code — so the failure stays pointed at the defect instead of spreading
-across ten specs.
+**The staging is deliberately small, and that mattered.** The two build specs use
+exactly three debug buttons — *Give $1B*, *Give 1M of all Resources and
+Compounds*, *Grant All Techs* — and then go to the Space Mining tab. An earlier
+draft stocked them with the full starship scenario, which builds the telescope
+outright and discovers ten asteroids on the way, and the resulting failure was
+written up as a product defect (known-issues #22) when the reported symptom — the
+pane never showing the building as bought — was not real: the frame loop's
+`handleVisibilityOfOneOffPurchaseButtonsAndDescriptions` tidies the row a moment
+after any purchase.
+
+Re-running on the minimal setup showed the genuine fault, which was narrower: an
+unguarded null lookup in `buildSpaceMiningBuilding` threw and aborted the rest of
+the build button's `onClick`, so the **Scan Asteroids** and **Study Stars** rows
+did not appear until the pane was next drawn. That is now fixed in the source with
+optional chaining, and the whole area passes.
+
+The lesson is worth keeping: use the smallest debug setup that makes the thing
+under test reachable. A heavy scenario puts the run in a state the interaction was
+never meant to be made from, and the failure it produces looks like a product bug.
 
 ---
 
@@ -713,6 +724,182 @@ drifts: whichever the current system rains. Precipitation accrues on its own,
 outside the autobuyers, and it is drawn per star system — so the spec reads
 `precipitationType` from the current star and gives that one bill a bounded
 window while every other bill is asserted to the unit.
+
+---
+
+## 🟢 Research — `research-live.spec.js`, 10 specs, all passing
+
+**What is different.** `research.spec.js` was the clearest surviving example of
+the problem this document exists for. It had fifteen passing specs, and its rate
+tests worked by re-implementing `calculateResearchRatePerTick` inside a
+`withMods` call and asserting that the test's own arithmetic came out right. That
+proves the tester can multiply. It would have passed with the research timer
+deleted.
+
+The new file buys the buildings. Every purchase goes through the row's own button
+in the Research pane, and every claim about rate is settled by measuring how much
+the pool actually gained over a wall-clock window.
+
+The chain exercised end to end:
+
+```
+#researchScienceKitRow button
+  -> gain(1, ..., 'scienceUpgrade', 'resources')   quantity up, cash down
+  -> addToResourceAllTimeStat(1, 'scienceKits')    the statistic
+  -> deferredActions -> startUpdateTimersAndRates  the rate fields
+  -> updateResearchDelta on the frame loop         the pool actually growing
+```
+
+**What it settled.** Three things the old file could not have told us:
+
+- A research building costs **cash**, not research points, despite the Science
+  Kit's row being built with a `textResearchPointsSuffix` label. The frame loop
+  rewrites the cost label to `$5` before a player ever sees it, so the label is
+  right on screen — but the only way to know that was to buy one and watch which
+  balance moved.
+- The rate the side menu shows is **rounded** by the `notation` class, so a true
+  0.5/s displays as `1 / s`. Any spec comparing display against truth has to
+  stage enough buildings for the rounding to be noise; this one buys forty.
+- One Science Kit is **0.5/s**, not 0.005/s. The data says `rate: 0.005` and the
+  tick is 10ms, so the per-second figure is a hundred times the per-tick figure.
+  The first draft of the measurement spec asserted the wrong number and failed,
+  which is exactly what a measured spec is for.
+
+**Where `withMods` is still used, and why.** To stage cash and to read the pool,
+the building counts and `getTotalEnergyUse()` back. The power tests flip
+`setPowerOnOff` directly rather than starving a plant, because what is under test
+there is the research side of the rule, and energy-live already plays the grid
+going down through its own controls.
+
+---
+
+## 🟢 Tech Tree — `technology.spec.js`, 18 specs, all passing
+
+**What is different.** The area had no spec file at all. It is written as an
+integration file from the start: it earns research, watches techs appear as the
+pool grows, buys them from their rows, and then goes and looks at the part of the
+game each purchase was supposed to open.
+
+The reveal specs are the ones worth describing. A threshold test could be written
+by setting the pool above `appearsAt` and reading `getRevealedTechArray()` back —
+and would pass whether or not the monitor that watches the pool still ran. So
+instead the pool is staged *just under* the threshold, twenty science kits are
+bought in the Research pane, and the crossing is produced by the game's own
+production while the spec waits for `monitorTechTree()` to notice and for the
+frame loop to un-hide the row. Same for the tree redraw: the tree is left open
+on screen and the node has to change state under it.
+
+**What it settled.**
+
+- The tech tree's "already bought" gate is **not** a colour class. The frame loop
+  relabels the button to *Researched*, sets `data-researched`, and takes its
+  pointer events away outright — which is what makes it safe that
+  `setTechUnlockedArray` does not de-duplicate. The first draft of that spec
+  pressed the button twice and found the tech in the array twice; the correct
+  reading is that a player cannot press it twice, and the spec now asserts the
+  gate rather than the bypass.
+- **Grant All Techs deliberately skips megastructure techs.** They belong to a
+  megastructure run and are filtered out of the tree on any other run, so
+  granting them would leave the tree in a state the game cannot reach. The spec
+  now states that as the rule instead of reporting it as a gap.
+- **Research points do not buy the cosmic rip.** A million research points
+  reveals and unlocks nothing in the Cosmic Rip pane, whose techs are priced in
+  rip telemetry data plus a galactic point. Confusing the two currencies would
+  hand the whole endgame chapter to any player with a research surplus, so the
+  separation is pinned explicitly.
+
+---
+
+## 🟢 Statistics — `statistics.spec.js`, 16 specs, all passing
+
+**What is different.** The area had no spec file. Statistics are written from
+exactly one place — `addToResourceAllTimeStat(amount, item)` — and rendered from
+one other, `getStats(statFunctionsGets)`, which the frame loop calls only while
+the Statistics pane is the open one. Both halves are played: the pane is opened
+through its real side-menu option, and every statistic is asserted as a **delta**
+produced by doing the thing that is supposed to move it.
+
+Where a statistic counts a quantity rather than an event, the delta is compared
+against the quantity the run actually gained — so a statistic that counted the
+button press rather than the gain fails. The at-capacity spec is the sharp end of
+that: five presses of a gain button on a full store must add nothing, because
+nothing was gained.
+
+**A measurement note that cost two failures.** Reading the statistic and the
+resource quantity in two separate `page.evaluate` round trips lets the frame loop
+run between them, and at a few hundred units a second that skew is larger than
+the tolerance. `readStatsAndQuantity()` samples both sides inside one evaluation,
+so a failure now means the statistic really has drifted from the thing it counts.
+
+**What it found.** Two live defects, both since fixed in the source:
+
+- [known-issues #23](known-issues.md) — four **Void Seer** cells were permanently
+  stuck on the `NoData` placeholder, because the getter table spelled the keys
+  `stat_voidseer…` while the page builds the ids `stat_voidSeer…`. The spec sweeps
+  every cell for the placeholder rather than naming those four, so it will catch
+  the next one too.
+- [known-issues #24](known-issues.md) — a rebirth zeroed **fourteen "All Time"
+  statistics**, while the research, resource and compound families correctly
+  survived. The spec plays a run, earns something in each family, takes the
+  rebirth through the real Rebirth button, and asserts both halves of the
+  two-column contract.
+
+Neither was reachable without playing: the first needs the pane open and rendering,
+the second needs a real rebirth taken between two readings.
+
+---
+
+## 🟢 Cosmic Rip — `cosmic-rip-live.spec.js`, 15 specs, all passing
+
+**What is different.** `cosmic-rip.spec.js` tested the module: what
+`scanCosmicRipSector` returns for a bad index, what `restoreNearSpaceScannerArray`
+refuses, that the location seeds once. Useful, and none of it touches the chapter
+a player actually plays. The new file plays it end to end — points earned off the
+settled ledger, the array restored with its own button, the **galactic telescope
+swept sector by sector** until the rip turns up, buoys deployed, telemetry
+gathered, all five stabilisation techs researched through their buttons and their
+timers — and stops with the Close The Rip button lit.
+
+**The galactic telescope is not the Space Telescope.** They are different
+instruments in different chapters, and this file touches only the first: the
+nine-sector grid the Near Space Scanner Array gives you, which is the only thing
+that can find the rip.
+
+**Sweeping the grid is the point.** The rebirth suite's endgame spec reaches the
+rip by calling `scanCosmicRipSector(ripIndex)` directly, with a comment explaining
+that the sector grid is a canvas overlay whose handler only fires for a sector its
+own scan label has lit. That is exactly the wiring worth testing, so this file
+dispatches clicks at the real `cosmicRipNearSpaceScannerArraySector*` divs and
+asserts the gate separately: every unscanned sector lit while there are points,
+every sector dark when the balance runs out, a click on a dark sector doing
+nothing, and a click on a scanned one charging nothing.
+
+**Galactic points cannot be staged, and that turned out to be a feature.** The
+frame loop recomputes the balance every frame from
+`settledStars.length - 1 - galacticPointsSpent`, so writing it is overwritten
+within a frame. The only way to have points is to settle systems, which means the
+economy is measured rather than asserted: six systems settled earn exactly six
+points, a repeat conquest earns nothing, the restoration takes ten, each scan
+takes one, each tech takes one, and the balance stops at zero rather than going
+through it. The "short of a full sweep" spec funds twelve conquests, restores the
+array, clicks all nine sectors and asserts that exactly as many landed as there
+were points to pay for.
+
+**The research is a timer, not a purchase.** Each stabilisation tech charges its
+telemetry price and a galactic point **up front**, swaps its button for a progress
+bar, and unlocks only when one to five minutes of delta time has run out. The spec
+asserts all four of those per tech, driving the delta manager rather than waiting.
+
+**Where it stops, and why.** Pressing Close The Rip starts the end-game cinematic,
+whose overlay is designed never to hand the game back. So the file asserts the
+state immediately before the press — stability bar at 100%, the row revealed, the
+button lit and genuinely pressable — and does not press it. A companion spec spends
+the last point and shows the same row revealed but blocked, which is the other half
+of that gate.
+
+**Two preconditions are staged, both the work of previous runs**: the `cosmicRip`
+tech, which the Miaplacidus win cinematic grants, and the settled ledger the points
+are counted from. Everything after those is played.
 
 ---
 

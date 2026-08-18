@@ -99,7 +99,10 @@ function coverageReport() {
   const glance = [...areas].sort((a, b) =>
     ORDER[a.status] - ORDER[b.status] || a.title.localeCompare(b.title));
 
+  // An area may carry its own `note` when neither stock sentence is true of it —
+  // an upgraded area held off green by specs that fail on a live defect, say.
   const note = (a) => {
+    if (a.note) return a.note;
     if (a.status === 'green') return `Done — driven through its own controls, ${a.specCount} specs passing.`;
     if (a.status === 'amber') {
       return `${a.specCount} spec${a.specCount === 1 ? '' : 's'} written; not yet upgraded to integration.`;
@@ -146,7 +149,7 @@ when an area is upgraded.
 | 🟢 Green — signed off | ${counts.green} | ${pct(counts.green)} |
 | **Total functional areas** | **${total}** | |
 
-${totalChecks} individual test cases are identified across all areas. **${totalSpecs} Playwright specs are implemented and passing** across ${implemented.length} area${implemented.length === 1 ? '' : 's'}.
+${totalChecks} individual test cases are identified across all areas. **${totalSpecs} Playwright specs are implemented** across ${implemented.length} area${implemented.length === 1 ? '' : 's'}, and all of them pass except where an area's note says otherwise — a spec that fails on a live defect is left failing on purpose, and the defect is written up in [known-issues.md](known-issues.md).
 
 Run them with \`npm run test:e2e\` (all areas) or \`node tests/run-e2e.mjs <area>\`. Each area writes its own HTML report to \`test-reports/e2e/<area>/index.html\`, with a summary index at \`test-reports/e2e/index.html\`.
 

@@ -2,26 +2,38 @@
 
 | | |
 |---|---|
-| **Status** | 🔴 RED |
+| **Status** | 🟢 GREEN |
 | **Risk if broken** | High |
 | **Group** | Core Economy |
 | **Spec folder** | `tests/e2e/technology/` |
 | **Existing coverage** | `tests/legacy/researchTech.test.js` |
 
-Tech prerequisites, unlock effects, repeatable techs and the tree's deferred rendering.
+Tech reveal thresholds, prerequisites, what each purchase unlocks, repeatable techs and the tech tree's rendering.
 
 ## What should be tested
 
-- [ ] Every tech unlocks only when its prerequisites are met
-- [ ] Each tech applies its stated effect on purchase
-- [ ] Repeatable techs scale cost and effect correctly across many purchases
-- [ ] Tech unlock notifications fire once and are localized
-- [ ] The 150-frame deferred tree re-render completes and produces correct ordering
-- [ ] Unlocked tech state survives save/load and is correctly restored on rebirth
+- [ ] A tech is hidden below its appearsAt threshold and revealed by the pool crossing it, without reopening the pane
+- [ ] A tech is flagged upcoming at 40% of its threshold, well before it is revealed
+- [ ] A revealed tech whose prerequisite is unmet is visible but gated
+- [ ] Buying a tech through its row deducts exactly its price
+- [ ] A researched tech retires its own button so it cannot be bought again
+- [ ] Researching a tech raises a localized notification naming it
+- [ ] Spending the pool down re-gates the techs it can no longer buy
+- [ ] Basic Power Generation is what puts the power plant in the Energy pane
+- [ ] Glass Manufacture unlocks glass and reveals its row in the Compounds tab
+- [ ] Quantum Computing lifts every normal-progression resource autobuyer to tier 2
+- [ ] Rocket Composites is what puts the Launch Pad in the Space Mining tab
+- [ ] The tree draws a node per tech the run has met, tagged with its state
+- [ ] Every node has a distinct position, so no two techs draw on top of each other
+- [ ] A node the player can afford is marked ready, and one they cannot is not
+- [ ] Revealing a tech redraws the tree while the player is looking at it
+- [ ] Research points buy the main tree only: a million of them opens nothing in the Cosmic Rip pane
+- [ ] Unlocked, revealed and upcoming techs all survive a save round trip
+- [ ] Granting every tech grants the whole ordinary tree and leaves a clean console
 
 ## Status meaning
 
-🔴 **RED** — No spec file exists for this area at all. A regression here ships unnoticed.
+🟢 **GREEN** — Signed off as done: the area is driven through its real controls, its rules are asserted by measurement rather than by field reads, and the whole suite passes.
 
 ---
 

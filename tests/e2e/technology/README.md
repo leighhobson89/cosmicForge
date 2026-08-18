@@ -1,8 +1,8 @@
 # e2e / technology
 
-**Tech Tree** — 🔴 RED
+**Tech Tree** — 🟢 GREEN
 
-Tech prerequisites, unlock effects, repeatable techs and the tree's deferred rendering.
+Tech reveal thresholds, prerequisites, what each purchase unlocks, repeatable techs and the tech tree's rendering.
 
 Specs for this area go in this folder, named `<scenario>.spec.js`.
 

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | 🟠 AMBER |
+| **Status** | 🟢 GREEN |
 | **Risk if broken** | Medium |
 | **Group** | Space Operations |
 | **Spec folder** | `tests/e2e/space-telescope/` |
@@ -25,7 +25,7 @@ The three telescope actions - star study, asteroid search, void pillage - the on
 
 ## Status meaning
 
-🟠 **AMBER** — A spec file exists, but the area has not yet been through the integration upgrade — some of its coverage is still function-level rather than played through the UI.
+🟢 **GREEN** — Signed off as done: the area is driven through its real controls, its rules are asserted by measurement rather than by field reads, and the whole suite passes.
 
 ---
 

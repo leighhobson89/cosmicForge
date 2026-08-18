@@ -143,23 +143,38 @@ async function readTelescopeState(game) {
 }
 
 /**
- * Stock a run without building the telescope.
+ * The setup for buying the Space Telescope or the Launch Pad: money, materials,
+ * techs, and nothing else.
  *
- * `prepareRunForStarshipLaunch` cannot be used by most of this file: its chain
- * clicks *Build Launch Pad, Scanner and All Rockets*, which builds the telescope
- * outright, and then *Add 10 Asteroids*, which reveals the Asteroids pane and
- * raises the base search duration ten times over. Both are exactly what these
- * specs are trying to observe happening.
+ * This is exactly the sequence a developer uses by hand — *Give $1B*, *Give 1M of
+ * all Resources and Compounds*, *Grant All Techs*, then straight to the Space
+ * Mining tab — and it is deliberately the whole of it. Reaching for a heavier
+ * scenario puts the run in a state the purchase was never meant to be made from:
+ * `prepareRunForStarshipLaunch` chains *Build Launch Pad, Scanner and All
+ * Rockets*, which builds the telescope outright, and *Add 10 Asteroids*, which
+ * reveals the Asteroids pane and raises the base search duration ten times over.
+ * Both are precisely what these specs exist to watch happen.
  */
-async function stockRunWithoutTelescope(game, page) {
-  await game.debugClick('unlockAllTabsButton');
+async function stockRunForPurchase(game, page) {
   await game.debugClick('give1BButton');
   await game.debugClick('give1MAllResourcesAndCompounds');
   await game.debugClick('grantAllTechsButton');
   await page.waitForTimeout(600);
   await dismissAnyOpenModal(page);
-  // The telescope draws power for every action, and a fresh run has none.
+}
+
+/**
+ * The purchase setup, plus the two things only the *action* specs need.
+ *
+ * Kept separate so the build specs stay on the minimal setup above: if a build
+ * spec ever fails, the staging is small enough to rule out as the cause.
+ */
+async function stockRunWithoutTelescope(game, page) {
+  await stockRunForPurchase(game, page);
+  await game.debugClick('unlockAllTabsButton');
+  await page.waitForTimeout(300);
   await game.withMods((m) => {
+    // The telescope draws power for every action, and a fresh run has none.
     m.cg.setInfinitePower(true);
     m.cg.setPowerOnOff(true);
     // A completed star study offers the philosophy choice while none is set,
@@ -179,9 +194,9 @@ async function stockRunWithoutTelescope(game, page) {
  * calls `buildSpaceMiningBuilding('spaceTelescope', true)`, so the board ends up
  * in the same state without the purchase's own UI tidy-up running.
  *
- * That distinction is not cosmetic while known-issues #22 is open — the tidy-up
- * throws — and keeping it in one spec keeps the failure pointed at the defect
- * instead of spreading it across every spec in this file.
+ * Keeping the played purchase in one spec means the rest of the file is not
+ * re-testing it, and a failure there points at the purchase rather than at
+ * whatever the failing spec was really about.
  */
 async function buildTelescopeThroughDebugMenu(game, page) {
   await game.debugClick('buildLaunchPadScannerAndAllRocketsButton');
@@ -220,7 +235,7 @@ async function runOneAsteroidSearch(game, page) {
 test.describe('Space Telescope — building it', () => {
   test('the build button charges cash, iron, glass and silicon, and opens the two actions', async ({ game, page }) => {
     await game.boot();
-    await stockRunWithoutTelescope(game, page);
+    await stockRunForPurchase(game, page);
     await openTelescopePane(game, page);
 
     // Before the purchase the pane is a shop and nothing else: the two action
@@ -297,7 +312,7 @@ test.describe('Space Telescope — building it', () => {
 
   test('an unaffordable telescope is gated by its colour class', async ({ game, page }) => {
     await game.boot();
-    await stockRunWithoutTelescope(game, page);
+    await stockRunForPurchase(game, page);
 
     // Affordability in this game is enforced by `red-disabled-text`, whose CSS
     // is `pointer-events: none`. What has to hold is that the frame loop keeps

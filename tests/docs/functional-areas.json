@@ -327,46 +327,68 @@
       "id": "research",
       "title": "Research",
       "group": "economy",
-      "status": "amber",
+      "status": "green",
       "risk": "high",
       "legacy": [
         "researchTech.test.js"
       ],
-      "summary": "Research point generation, the three research buildings, and how research is spent on the tech tree.",
+      "summary": "Research point generation, the three research buildings and the power they draw, and how research is spent on the tech tree.",
       "tests": [
         "All three research buildings exist with the documented rate, price and energy cost",
         "Each building is both dearer and faster than the one below it",
-        "The rate is the sum of rate × quantity across every active building",
+        "The rate is the sum of rate x quantity across every active building",
+        "Buying a Science Kit through its own button charges the advertised price in cash and adds one building",
+        "Each building bought raises the research the pool actually gains per second",
+        "The rate shown in the side menu agrees with the rate the pool is really gaining",
+        "A building the player cannot afford is gated by its colour class, and un-gated when they can",
+        "The Science Club appears only once Knowledge Sharing is researched, and then buys",
+        "The Science Lab appears only once Science Laboratories is researched, and then buys",
+        "Kits draw no power and labs do, measured on the grid consumption figure",
+        "Switching a lab off through its toggle stops it drawing power",
+        "With the grid down the labs stop producing and the kits carry on",
         "The Science Lab stops contributing when the power is off, but the Kit and Club do not",
         "Research accrues over a sampled interval when powered, and does not move with no buildings",
         "The displayed rate is a real formatted number, never NaN or a raw key",
         "Buying a tech deducts exactly its price, and research never goes negative",
         "Every tech declares a positive price and a unique render position",
         "Every tech prerequisite names a tech that exists",
-        "The research autobuyer starts inactive and disabled",
+        "The research autobuyer is revealed by the Robotic Research Automation perk and then researches techs on its own",
         "Research quantity and building counts survive serialisation",
         "Granting every tech through the debug menu leaves the console clean"
       ],
-      "specCount": 15
+      "specCount": 25
     },
     {
       "id": "technology",
       "title": "Tech Tree",
       "group": "economy",
-      "status": "red",
+      "status": "green",
       "risk": "high",
       "legacy": [
         "researchTech.test.js"
       ],
-      "summary": "Tech prerequisites, unlock effects, repeatable techs and the tree's deferred rendering.",
+      "summary": "Tech reveal thresholds, prerequisites, what each purchase unlocks, repeatable techs and the tech tree's rendering.",
       "tests": [
-        "Every tech unlocks only when its prerequisites are met",
-        "Each tech applies its stated effect on purchase",
-        "Repeatable techs scale cost and effect correctly across many purchases",
-        "Tech unlock notifications fire once and are localized",
-        "The 150-frame deferred tree re-render completes and produces correct ordering",
-        "Unlocked tech state survives save/load and is correctly restored on rebirth"
-      ]
+        "A tech is hidden below its appearsAt threshold and revealed by the pool crossing it, without reopening the pane",
+        "A tech is flagged upcoming at 40% of its threshold, well before it is revealed",
+        "A revealed tech whose prerequisite is unmet is visible but gated",
+        "Buying a tech through its row deducts exactly its price",
+        "A researched tech retires its own button so it cannot be bought again",
+        "Researching a tech raises a localized notification naming it",
+        "Spending the pool down re-gates the techs it can no longer buy",
+        "Basic Power Generation is what puts the power plant in the Energy pane",
+        "Glass Manufacture unlocks glass and reveals its row in the Compounds tab",
+        "Quantum Computing lifts every normal-progression resource autobuyer to tier 2",
+        "Rocket Composites is what puts the Launch Pad in the Space Mining tab",
+        "The tree draws a node per tech the run has met, tagged with its state",
+        "Every node has a distinct position, so no two techs draw on top of each other",
+        "A node the player can afford is marked ready, and one they cannot is not",
+        "Revealing a tech redraws the tree while the player is looking at it",
+        "Research points buy the main tree only: a million of them opens nothing in the Cosmic Rip pane",
+        "Unlocked, revealed and upcoming techs all survive a save round trip",
+        "Granting every tech grants the whole ordinary tree and leaves a clean console"
+      ],
+      "specCount": 18
     },
     {
       "id": "space-mining",
@@ -456,7 +478,7 @@
       "id": "space-telescope",
       "title": "Space Telescope",
       "group": "space",
-      "status": "amber",
+      "status": "green",
       "risk": "medium",
       "legacy": [],
       "summary": "The three telescope actions - star study, asteroid search, void pillage - the one instrument they share, and their auto-repeat.",
@@ -472,7 +494,7 @@
         "Voidborn's Void Seers adds the pillage row and takes the same lock; without the ability the row stays hidden",
         "The auto-telescope perk's row repeats the selected mode with no further presses"
       ],
-      "specCount": 9
+      "specCount": 10
     },
     {
       "id": "star-map",
@@ -774,19 +796,29 @@
       "id": "cosmic-rip",
       "title": "Cosmic Rip",
       "group": "endgame",
-      "status": "amber",
+      "status": "green",
       "risk": "medium",
       "legacy": [],
-      "summary": "Sector scanning, the near-space scanner array and the galactic point economy.",
-      "specCount": 13,
+      "summary": "The endgame chapter: galactic points earned from settled systems, the Near Space Scanner Array, sweeping the galactic telescope for the rip, the telemetry economy and the five stabilisation techs.",
+      "specCount": 28,
       "tests": [
-        "Cosmic rip location seeds deterministically and only once",
-        "Scanner array restoration costs the correct GP and enables scanning",
-        "Each sector scan resolves and reveals or eliminates the rip",
-        "Galactic points derive correctly from settled stars minus spent",
-        "GP cannot go negative",
-        "The __COSMIC_RIP_ENABLED__ build flag correctly hides the whole feature",
-        "Cosmic rip tech tree monitors independently of the main tree"
+        "A galactic point is one settled system beyond the first, counted by the frame loop, and a repeat conquest earns nothing",
+        "Spending points moves the balance down and the spent ledger up, and the balance never goes negative",
+        "The restore button is dead without the points and lit with them, and needs Miaplacidus settled",
+        "Restoring the array seeds the rip, clears the grid and opens the galactic telescope",
+        "Restoring twice is refused and charges nothing the second time",
+        "Every unscanned sector on the telescope is lit while there are points to spend",
+        "Clicking a sector scans it, charges a point and lifts its fog",
+        "Clicking a scanned sector again does nothing and costs nothing",
+        "Sweeping the telescope finds the rip, in the seeded sector and nowhere else",
+        "With the balance spent out the sectors go dark and a click does nothing",
+        "Deploying sensor buoys makes telemetry actually accrue, at the rate they advertise",
+        "A stabilisation tech reveals itself when the telemetry reaches its threshold",
+        "Researching a tech charges its telemetry price and a galactic point up front, and unlocks only when its timer finishes",
+        "All five techs researched fill the stability bar and reveal the Close The Rip row",
+        "The Close The Rip button is lit with a point banked and blocked without one",
+        "Cosmic rip techs unlock into their own array, independent of the main tech tree",
+        "The chapter is gated by the cosmic rip build flag"
       ]
     },
     {
@@ -863,17 +895,29 @@
       "id": "statistics",
       "title": "Statistics",
       "group": "simulation",
-      "status": "red",
+      "status": "green",
       "risk": "low",
       "legacy": [],
-      "summary": "Tracked lifetime and per-run statistics, including casino, cosmic rip and event stats.",
+      "summary": "Tracked lifetime and per-run statistics, including research, energy, casino, cosmic rip and event stats, and the page that renders them.",
       "tests": [
-        "Each tracked statistic increments on the right trigger",
-        "Per-run statistics reset on rebirth; lifetime statistics do not",
-        "Elapsed active game time excludes inactive periods",
-        "Statistics display formats correctly under every notation setting",
-        "Statistics survive save/load"
-      ]
+        "Every statistic on the page renders a real value, never the NoData placeholder",
+        "The page refreshes while it is open",
+        "Opening and re-opening the page writes nothing to the console",
+        "Each research building bought adds exactly one to its own statistic",
+        "Research produced is added to the research statistic, to the point earned",
+        "Researching a tech adds one to the techs-unlocked statistic",
+        "Gaining a resource by hand adds exactly what was gained",
+        "A gain refused because the store is full is not counted",
+        "Resources an autobuyer produces are counted as they accrue",
+        "Buying a power plant adds one to the basic power plant statistic",
+        "Overloading the grid trips it, and the trip is counted",
+        "The overview reports this run's own pioneer, run number and system",
+        "The cash figure follows the run's actual cash",
+        "Elapsed time figures are formatted durations, not raw milliseconds",
+        "Within one run the this-run and all-time columns move together",
+        "A rebirth clears the run column and leaves the all-time column standing"
+      ],
+      "specCount": 16
     },
     {
       "id": "notation",

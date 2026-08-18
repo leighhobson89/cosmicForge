@@ -12616,9 +12616,13 @@ export function buildSpaceMiningBuilding(spaceMiningBuilding, debug) {
     setResourceDataObject(true, 'space', ['upgrades', spaceMiningBuilding, `${spaceMiningBuilding}BoughtYet`]);
 
     if (!debug) {
-        buySpaceMiningBuildingButtonElement.classList.add('invisible');
-        spaceMiningBuildingDescriptionElement.classList.add('invisible');
-        spaceMiningBuildingAlreadyBoughtTextElement.classList.remove('invisible');
+        //none of these three is essential to the purchase, and the frame loop's
+        //handleVisibilityOfOneOffPurchaseButtonsAndDescriptions does the same tidy-up
+        //a moment later - so a missing one must not abort the rest of the caller's
+        //onClick, which is what reveals the newly bought building's action rows
+        buySpaceMiningBuildingButtonElement?.classList.add('invisible');
+        spaceMiningBuildingDescriptionElement?.classList.add('invisible');
+        spaceMiningBuildingAlreadyBoughtTextElement?.classList.remove('invisible');
     }
 }
 

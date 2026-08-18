@@ -4,7 +4,7 @@ _Generated from `functional-areas.json`. Re-run `node tests/docs/generate-report
 
 ## Coverage at a glance
 
-One line per functional area, worst first. 18 green, 16 amber, 9 red, out of 43.
+One line per functional area, worst first. 23 green, 13 amber, 7 red, out of 43.
 
 | | Area | Group | Risk | Specs | Where it stands |
 |:--:|---|---|:--:|--:|---|
@@ -14,13 +14,10 @@ One line per functional area, worst first. 18 green, 16 amber, 9 red, out of 43.
 | 🔴 | [Space Mining & Asteroids](areas/space-mining.md) | Space Operations | Medium | — | No spec file yet. |
 | 🔴 | [Star Map & Star Data](areas/star-map.md) | Interstellar | Medium | — | No spec file yet. |
 | 🔴 | [Star Type Bonuses](areas/star-types.md) | Interstellar | Medium | — | No spec file yet. |
-| 🔴 | [Statistics](areas/statistics.md) | Simulation & Ambience | Low | — | No spec file yet. |
-| 🔴 | [Tech Tree](areas/technology.md) | Core Economy | High | — | No spec file yet. |
 | 🔴 | [Weather](areas/weather.md) | Simulation & Ambience | Low | — | No spec file yet. |
 | 🟠 | [Achievements](areas/achievements.md) | Meta Progression | Low | 12 | 12 specs written; not yet upgraded to integration. |
 | 🟠 | [Ascendency Points & Perks](areas/ascendency.md) | Meta Progression | High | 12 | 12 specs written; not yet upgraded to integration. |
 | 🟠 | [Colonisation](areas/colonise.md) | Interstellar | High | 19 | 19 specs written; not yet upgraded to integration. |
-| 🟠 | [Cosmic Rip](areas/cosmic-rip.md) | Endgame | Medium | 13 | 13 specs written; not yet upgraded to integration. |
 | 🟠 | [Diplomacy](areas/diplomacy.md) | Interstellar | High | 12 | 12 specs written; not yet upgraded to integration. |
 | 🟠 | [Fleet Hangar](areas/fleet-hangar.md) | Interstellar | High | 14 | 14 specs written; not yet upgraded to integration. |
 | 🟠 | [Galactic Casino](areas/galactic-casino.md) | Meta Progression | Medium | 46 | 46 specs written; not yet upgraded to integration. |
@@ -29,7 +26,6 @@ One line per functional area, worst first. 18 green, 16 amber, 9 red, out of 43.
 | 🟠 | [News Ticker](areas/news-ticker.md) | Simulation & Ambience | Low | 18 | 18 specs written; not yet upgraded to integration. |
 | 🟠 | [Number Notation](areas/notation.md) | Presentation & Shell | Medium | 11 | 11 specs written; not yet upgraded to integration. |
 | 🟠 | [Random Events](areas/random-events.md) | Simulation & Ambience | Medium | 21 | 21 specs written; not yet upgraded to integration. |
-| 🟠 | [Research](areas/research.md) | Core Economy | High | 15 | 15 specs written; not yet upgraded to integration. |
 | 🟠 | [Rockets & Launch Pad](areas/rockets.md) | Space Operations | Medium | 20 | 20 specs written; not yet upgraded to integration. |
 | 🟠 | [UI Navigation](areas/ui-navigation.md) | Presentation & Shell | Medium | 5 | 5 specs written; not yet upgraded to integration. |
 | 🟢 | [Antimatter](areas/antimatter.md) | Space Operations | Medium | 26 | Done — driven through its own controls, 26 specs passing. |
@@ -39,6 +35,7 @@ One line per functional area, worst first. 18 green, 16 amber, 9 red, out of 43.
 | 🟢 | [Battle & Conquest](areas/battle.md) | Interstellar | High | 17 | Done — driven through its own controls, 17 specs passing. |
 | 🟢 | [Black Hole Time Warp](areas/black-hole.md) | Endgame | High | 19 | Done — driven through its own controls, 19 specs passing. |
 | 🟢 | [Compounds & Crafting](areas/compounds.md) | Core Economy | High | 31 | Done — driven through its own controls, 31 specs passing. |
+| 🟢 | [Cosmic Rip](areas/cosmic-rip.md) | Endgame | Medium | 28 | Done — driven through its own controls, 28 specs passing. |
 | 🟢 | [Cosmicopedia & Help](areas/cosmicopedia.md) | Presentation & Shell | Low | 6 | Done — driven through its own controls, 6 specs passing. |
 | 🟢 | [Demo Build Lockdowns](areas/demo-build.md) | Presentation & Shell | High | 19 | Done — driven through its own controls, 19 specs passing. |
 | 🟢 | [Energy & Power Grid](areas/energy.md) | Core Economy | High | 26 | Done — driven through its own controls, 26 specs passing. |
@@ -47,10 +44,13 @@ One line per functional area, worst first. 18 green, 16 amber, 9 red, out of 43.
 | 🟢 | [Performance & Frame Budget](areas/performance.md) | Presentation & Shell | High | 10 | Done — driven through its own controls, 10 specs passing. |
 | 🟢 | [Philosophies](areas/philosophies.md) | Meta Progression | High | 42 | Done — driven through its own controls, 42 specs passing. |
 | 🟢 | [Rebirth](areas/rebirth.md) | Meta Progression | High | 10 | Done — driven through its own controls, 10 specs passing. |
+| 🟢 | [Research](areas/research.md) | Core Economy | High | 25 | Done — driven through its own controls, 25 specs passing. |
 | 🟢 | [Resources](areas/resources.md) | Core Economy | High | 21 | Done — driven through its own controls, 21 specs passing. |
 | 🟢 | [Settings & Preferences](areas/settings.md) | Foundation | Medium | 20 | Done — driven through its own controls, 20 specs passing. |
-| 🟢 | [Space Telescope](areas/space-telescope.md) | Space Operations | Medium | 9 | 9 specs written. |
+| 🟢 | [Space Telescope](areas/space-telescope.md) | Space Operations | Medium | 10 | Done — driven through its own controls, 10 specs passing. |
 | 🟢 | [Starship](areas/starship.md) | Interstellar | High | 8 | Done — driven through its own controls, 8 specs passing. |
+| 🟢 | [Statistics](areas/statistics.md) | Simulation & Ambience | Low | 16 | Done — driven through its own controls, 16 specs passing. |
+| 🟢 | [Tech Tree](areas/technology.md) | Core Economy | High | 18 | Done — driven through its own controls, 18 specs passing. |
 
 ---
 
@@ -74,25 +74,24 @@ when an area is upgraded.
 
 | | Areas | Share |
 |---|---:|---:|
-| 🔴 Red — no spec file | 9 | 21% |
-| 🟠 Amber — spec written, not yet upgraded | 16 | 37% |
-| 🟢 Green — signed off | 18 | 42% |
+| 🔴 Red — no spec file | 7 | 16% |
+| 🟠 Amber — spec written, not yet upgraded | 13 | 30% |
+| 🟢 Green — signed off | 23 | 53% |
 | **Total functional areas** | **43** | |
 
-416 individual test cases are identified across all areas. **664 Playwright specs are implemented and passing** across 34 areas.
+458 individual test cases are identified across all areas. **724 Playwright specs are implemented** across 36 areas, and all of them pass except where an area's note says otherwise — a spec that fails on a live defect is left failing on purpose, and the defect is written up in [known-issues.md](known-issues.md).
 
 Run them with `npm run test:e2e` (all areas) or `node tests/run-e2e.mjs <area>`. Each area writes its own HTML report to `test-reports/e2e/<area>/index.html`, with a summary index at `test-reports/e2e/index.html`.
 
 ## Highest priority — high risk, no spec file
 
-These 4 areas would each cause serious, often unrecoverable player harm if they regressed, and none has any automated test today.
+These 3 areas would each cause serious, often unrecoverable player harm if they regressed, and none has any automated test today.
 
 | Area | Group | Why it matters |
 |---|---|---|
 | [Local Save & Load](areas/save-load-local.md) | Foundation | Export/import of save strings, autosave scheduling, and round-trip fidelity of every persisted field. |
 | [Cloud Save & Load](areas/save-load-cloud.md) | Foundation | Supabase-backed saves keyed on pioneer name. Legacy tests use this as a fixture mechanism but never test it as a feature. |
 | [Save Migration](areas/save-migration.md) | Foundation | The patches.js version ladder that upgrades old saves. The best-engineered code in the project and entirely untested. |
-| [Tech Tree](areas/technology.md) | Core Economy | Tech prerequisites, unlock effects, repeatable techs and the tree's deferred rendering. |
 
 ## All areas by group
 
@@ -119,8 +118,8 @@ The minute-to-minute loop: extract, craft, power, research. Where players spend 
 | 🟢 | [Compounds & Crafting](areas/compounds.md) | High | 30 | **31** | — |
 | 🟢 | [Auto Buyers](areas/autobuyers.md) | High | 18 | **19** | autobuyer.test.js |
 | 🟢 | [Energy & Power Grid](areas/energy.md) | High | 7 | **26** | energyMid.test.js |
-| 🟠 | [Research](areas/research.md) | High | 12 | **15** | researchTech.test.js |
-| 🔴 | [Tech Tree](areas/technology.md) | High | 6 | — | researchTech.test.js |
+| 🟢 | [Research](areas/research.md) | High | 21 | **25** | researchTech.test.js |
+| 🟢 | [Tech Tree](areas/technology.md) | High | 18 | **18** | researchTech.test.js |
 
 ### Space Operations
 
@@ -131,7 +130,7 @@ Mid-game expansion off-planet — asteroids, rockets, antimatter and the telesco
 | 🔴 | [Space Mining & Asteroids](areas/space-mining.md) | Medium | 6 | — | — |
 | 🟠 | [Rockets & Launch Pad](areas/rockets.md) | Medium | 15 | **20** | — |
 | 🟢 | [Antimatter](areas/antimatter.md) | Medium | 26 | **26** | spaceAntimatter.test.js |
-| 🟢 | [Space Telescope](areas/space-telescope.md) | Medium | 10 | **9** | — |
+| 🟢 | [Space Telescope](areas/space-telescope.md) | Medium | 10 | **10** | — |
 
 ### Interstellar
 
@@ -168,7 +167,7 @@ Late systems reached by few players but heavily interlinked with everything befo
 |:--:|---|:--:|--:|--:|---|
 | 🟢 | [Black Hole Time Warp](areas/black-hole.md) | High | 7 | **19** | — |
 | 🟠 | [Megastructures](areas/megastructures.md) | Medium | 7 | **18** | captureMegaStructureTest.test.js |
-| 🟠 | [Cosmic Rip](areas/cosmic-rip.md) | Medium | 7 | **13** | — |
+| 🟢 | [Cosmic Rip](areas/cosmic-rip.md) | Medium | 17 | **28** | — |
 
 ### Simulation & Ambience
 
@@ -180,7 +179,7 @@ Background systems that modify the economy or the presentation without direct pl
 | 🟠 | [Random Events](areas/random-events.md) | Medium | 8 | **21** | — |
 | 🟠 | [News Ticker](areas/news-ticker.md) | Low | 4 | **18** | — |
 | 🟢 | [Audio](areas/audio.md) | Low | 5 | **13** | — |
-| 🔴 | [Statistics](areas/statistics.md) | Low | 5 | — | — |
+| 🟢 | [Statistics](areas/statistics.md) | Low | 16 | **16** | — |
 
 ### Presentation & Shell
 

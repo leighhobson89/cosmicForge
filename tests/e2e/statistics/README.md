@@ -1,8 +1,8 @@
 # e2e / statistics
 
-**Statistics** — 🔴 RED
+**Statistics** — 🟢 GREEN
 
-Tracked lifetime and per-run statistics, including casino, cosmic rip and event stats.
+Tracked lifetime and per-run statistics, including research, energy, casino, cosmic rip and event stats, and the page that renders them.
 
 Specs for this area go in this folder, named `<scenario>.spec.js`.
 

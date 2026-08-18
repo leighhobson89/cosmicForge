@@ -1223,120 +1223,224 @@ The number is kept so the entries after it do not shift.
 
 ---
 
-## 22. Buying the Space Telescope or the Launch Pad throws, and the pane never updates — 🔴 OPEN
+## 22. Buying the Space Telescope or the Launch Pad aborted its own click handler — ✅ FIXED
 
-**Severity:** high — the purchase is charged in full and the pane shows no sign of
-it. Nothing on screen tells the player the building exists.
+**The original write-up of this entry was wrong and has been rewritten.** It
+claimed the pane never showed the building as bought. It does: the frame loop's
+`handleVisibilityOfOneOffPurchaseButtonsAndDescriptions` hides the Build button,
+reveals the **Bought** text and hides the price label a fraction of a second
+after the purchase, whatever the click handler managed to do. Leigh could not
+reproduce the reported symptom, and he was right not to — buying either building
+looks correct on screen.
 
-**Found by:** `tests/e2e/space-telescope/space-telescope.spec.js` →
-*"the build button charges cash, iron, glass and silicon, and opens the two actions"*.
+What was genuinely wrong was narrower, and only visible in the console and in one
+missing step.
 
-### What happens
+### Reproduction (before the fix)
 
-Build the Space Telescope from the Space Mining tab. Cash, iron, glass and silicon
-all come off correctly and `spaceTelescopeBoughtYet` is set — but:
+With the intended setup — *Give $1B*, *Give 1M of all Resources and Compounds*,
+*Grant All Techs*, then the Space Mining tab — build the Space Telescope:
 
-- the build row stays on screen with its Build button still showing;
-- the **Bought** text never appears;
-- the **Scan Asteroids** and **Study Stars** rows never appear;
-- no build sound plays and no "telescope built" notification is shown;
-- `PAGEERROR: Cannot read properties of null (reading 'classList')` lands in the
-  console.
+- the purchase is charged correctly and the row settles to **Bought**;
+- but `PAGEERROR: Cannot read properties of null (reading 'classList')` is
+  written to the console;
+- and the **Scan Asteroids** and **Study Stars** rows do not appear until the
+  pane is next drawn, because the throw aborted the rest of the click handler
+  before it reached them.
 
-The only way to see the telescope is to leave the pane and come back, at which
-point `drawTab6Content` rebuilds it from `spaceTelescopeBoughtYet` and everything
-is where it should be. A player who does not do that has apparently spent 10,000
-cash and 52,000 units of material on nothing.
+The Launch Pad had the identical fault, with its four rocket build rows.
 
 ### Cause
 
-`buildSpaceMiningBuilding` (`game.js:12571`) looks up three elements and then
-dereferences all three unguarded:
+`buildSpaceMiningBuilding` (`game.js`) looked up three elements and dereferenced
+all three unguarded. The middle one never exists: `createOptionRow` names the
+description container after the **row**, not the building, so the element in the
+DOM is `spaceBuildTelescopeRowDescription`, not `spaceTelescopeDescription`.
+
+The throw escaped into the build button's own `onClick`, which is what reveals
+the newly bought building's action rows.
+
+### Fix — applied
+
+All three lookups are now optional, with a comment recording that the frame loop
+does the same tidy-up regardless, so none of them is worth losing the rest of the
+handler over:
 
 ```js
-const buySpaceMiningBuildingButtonElement = document.querySelector(`button[data-resource-to-fuse-to="${spaceMiningBuilding}"]`);
-const spaceMiningBuildingDescriptionElement = document.getElementById(`${spaceMiningBuilding}Description`);
-const spaceMiningBuildingAlreadyBoughtTextElement = document.getElementById(`${spaceMiningBuilding}AlreadyBoughtText`);
-...
-if (!debug) {
-    buySpaceMiningBuildingButtonElement.classList.add('invisible');
-    spaceMiningBuildingDescriptionElement.classList.add('invisible');   // <- null
-    spaceMiningBuildingAlreadyBoughtTextElement.classList.remove('invisible');
-}
+buySpaceMiningBuildingButtonElement?.classList.add('invisible');
+spaceMiningBuildingDescriptionElement?.classList.add('invisible');
+spaceMiningBuildingAlreadyBoughtTextElement?.classList.remove('invisible');
 ```
-
-`spaceTelescopeDescription` does not exist. `createOptionRow` names the
-description container after the **row**, not the building — `ui.js:3561`:
-
-```js
-descriptionRowContainer.id = labelId + 'Description';
-```
-
-and the row's `labelId` is `spaceBuildTelescopeRow`, so the element in the DOM is
-`spaceBuildTelescopeRowDescription`. The lookup therefore returns `null` and the
-second line throws.
-
-The throw escapes `buildSpaceMiningBuilding` into the build button's own
-`onClick` (`drawTab6Content.js:118`), which is why everything after the call is
-skipped:
-
-```js
-onClick: () => {
-    buildSpaceMiningBuilding('spaceTelescope', false);          // throws here
-    sfxPlayer.playAudio('buildTelescope', false);               // never runs
-    document.getElementById('spaceTelescopeSearchAsteroidRow').classList.remove('invisible');
-    document.getElementById('spaceTelescopeInvestigateStarRow').classList.remove('invisible');
-    ...
-    showNotification(localize('notificationSpaceTelescopeBuilt', ...));
-}
-```
-
-**The Launch Pad has the identical defect.** Its row's `labelId` is
-`spaceBuildLaunchPadRow`, so `launchPadDescription` is null too, and
-`drawTab6Content.js:652` calls `buildSpaceMiningBuilding('launchPad', false)` the
-same way — the four rocket build rows it means to reveal on the next lines never
-appear either.
-
-### Why it has never been seen in a test before
-
-Every existing spec and the whole debug menu reach these buildings through
-`buildSpaceMiningBuilding(name, true)`. The `debug` argument is exactly what
-skips the block that throws, so the fault is only reachable by pressing the real
-button.
-
-### Proposed fix
-
-Either look the element up by the id it actually has:
-
-```js
-const spaceMiningBuildingDescriptionElement = document.getElementById(
-    spaceMiningBuilding === 'spaceTelescope' ? 'spaceBuildTelescopeRowDescription' : 'spaceBuildLaunchPadRowDescription');
-```
-
-— or, better, guard all three, since none of them is essential to the purchase
-and a missing one should never cost the player the rest of the handler:
-
-```js
-if (!debug) {
-    buySpaceMiningBuildingButtonElement?.classList.add('invisible');
-    spaceMiningBuildingDescriptionElement?.classList.add('invisible');
-    spaceMiningBuildingAlreadyBoughtTextElement?.classList.remove('invisible');
-}
-```
-
-The optional-chaining version alone fixes the visible symptom — the rest of the
-`onClick` runs, the action rows appear and the notification shows — and leaves
-only the description row still on screen, which the next redraw tidies.
-
-**Not yet applied — awaiting a decision on whether to change the game source.**
 
 ### Coverage
 
-The spec presses the real Build button and then reads the pane *without*
-reopening it, because "the pane the player is standing on updates" is the claim.
-It currently fails at the first of those assertions, which is the correct place
-to fail. Every other spec in the file stages the telescope through the debug
-menu's *Build Launch Pad, Scanner and All Rockets*, so the failure stays pointed
-at the defect instead of spreading across the file.
+`tests/e2e/space-telescope/space-telescope.spec.js` → *"the build button charges
+cash, iron, glass and silicon, and opens the two actions"*, which now runs on the
+minimal setup above and reads the pane **without** reopening it, so it would
+catch the handler aborting again. The whole area passes.
+
+---
+
+## 23. Four Void Seer statistics are permanently stuck on "NoData" — ✅ FIXED
+
+**Severity: low — four cells on the Statistics page never show a value, in every
+run, for every player.**
+
+### Reproduction
+
+1. Start a game.
+2. Open **Settings → Statistics**.
+3. Scroll to the **Galactic Casino** section.
+4. The four Void Seer rows — played and won, this run and all time — read
+   `NoData` rather than a number. Playing Void Seer in the casino does not
+   change them.
+
+Every other cell on the page renders. These four never do.
+
+### Cause
+
+The page and the getter table disagree about how to capitalise "Void Seer".
+
+`createHtmlTableStatistics()` builds each cell's id from
+`getStatKeyFromLocalizedName()`, whose casino key list uses a capital S
+(`descriptions.js`):
+
+```js
+const casinoKeys = ['casinoPointsSpent', 'doubleOrNothingPlayed', ...,
+                    'voidSeerPlayed', 'voidSeerWon'];
+```
+
+so the ids in the DOM are `stat_voidSeerPlayed`, `stat_voidSeerPlayedThisRun`,
+`stat_voidSeerWon`, `stat_voidSeerWonThisRun`.
+
+`getStats()` then walks `statFunctionsGets` and writes into
+`document.getElementById(stat)` — but that table spells the same four keys with a
+lower-case s (`constantsAndGlobalVars.js`):
+
+```js
+"stat_voidseerPlayedThisRun": () => getGalacticCasinoStatValue('game4_voidSeerPlayed', 'currentRun'),
+"stat_voidseerPlayed":        () => getGalacticCasinoStatValue('game4_voidSeerPlayed', 'allTime'),
+"stat_voidseerWonThisRun":    () => getGalacticCasinoStatValue('game4_voidSeerWon', 'currentRun'),
+"stat_voidseerWon":           () => getGalacticCasinoStatValue('game4_voidSeerWon', 'allTime'),
+```
+
+`getElementById('stat_voidseerPlayed')` finds nothing, the getter's value is
+thrown away, and the cell keeps the `"NoData"` placeholder every statistics cell
+is built with. Note the *underlying* casino keys passed to
+`getGalacticCasinoStatValue` are correct — the numbers are being tracked
+faithfully, they are simply never rendered.
+
+The eight other casino statistics on the same page work, which is why this reads
+as a typo rather than a missing feature.
+
+### Suggested fix
+
+Rename the four getter-table keys to match the ids the page builds:
+
+```js
+"stat_voidSeerPlayedThisRun": () => getGalacticCasinoStatValue('game4_voidSeerPlayed', 'currentRun'),
+"stat_voidSeerPlayed":        () => getGalacticCasinoStatValue('game4_voidSeerPlayed', 'allTime'),
+"stat_voidSeerWonThisRun":    () => getGalacticCasinoStatValue('game4_voidSeerWon', 'currentRun'),
+"stat_voidSeerWon":           () => getGalacticCasinoStatValue('game4_voidSeerWon', 'allTime'),
+```
+
+Nothing else reads these four keys, so the rename is contained.
+
+**Fix applied** in `constantsAndGlobalVars.js`. All four cells now render their
+value, and the sweeping spec passes.
+
+### Coverage
+
+`tests/e2e/statistics/statistics.spec.js` → *"every statistic on the page renders
+a real value"*. It sweeps every `#stat_…` cell for the `NoData` placeholder
+rather than naming the four, so the same spec catches any future cell that loses
+its getter.
+
+---
+
+## 24. A rebirth zeroed fourteen "All Time" statistics — ✅ FIXED
+
+**Severity: medium — the Statistics page shows a player a lifetime total, then
+silently resets it to zero the first time they rebirth.**
+
+### Reproduction
+
+1. Start a game and build two power plants.
+2. Open **Settings → Statistics** and read the **Basic Power Plants** row: the
+   *All Time* column shows 2.
+3. Play the run to a completed rebirth and take it.
+4. Read the same row again. Both columns now show 0.
+
+The same happens to asteroids discovered, rockets launched, starships launched,
+antimatter mined and the rest of the list below. Research points, science
+buildings and every resource and compound total behave correctly and survive.
+
+### Cause
+
+`resetAllVariablesOnRebirth()` (`constantsAndGlobalVars.js`) clears the per-run
+counters, which is its job — and then went on to clear fourteen all-time ones
+alongside them:
+
+```js
+researchPointsThisRun = 0;      // correct: a per-run counter
+scienceKitsThisRun = 0;         // correct
+...
+allTimeTotalRocketsLaunched = 0;          // <- lifetime
+allTimeTotalStarShipsLaunched = 0;        // <- lifetime
+allTimeTotalAsteroidsDiscovered = 0;      // <- lifetime
+allTimeTotalLegendaryAsteroidsDiscovered = 0;
+starStudyRange = 0;
+allTimeTotalAntimatterMined = 0;
+allTimeTotalApGain = 0;
+totalNewsTickerPrizesCollected = 0;
+allTimeStarShipsBuilt = 0;
+allTimesTripped = 0;
+allTimeBasicPowerPlantsBuilt = 0;
+allTimeAdvancedPowerPlantsBuilt = 0;
+allTimeSolarPowerPlantsBuilt = 0;
+allTimeSodiumIonBatteriesBuilt = 0;
+allTimeBattery2Built = 0;
+allTimeBattery3Built = 0;
+```
+
+The resource, compound and research families are handled correctly a few lines
+above — only their `…ThisRun` twins are zeroed — so the file already knows the
+distinction. These fifteen look like per-run counters that were given all-time
+names, or all-time counters that drifted into the per-run block.
+
+The consequence is visible rather than theoretical: the statistics table renders
+these under a heading that says **All Time**, next to families that genuinely are
+all-time, so the page contradicts itself from the second run onward.
+
+### Fix — applied
+
+The fourteen assignments have been taken out of `resetAllVariablesOnRebirth()`,
+with a comment in their place recording what was removed and why. Every one of
+them either has a `…ThisRun` counterpart that is still reset
+(`timesTrippedThisRun`, `basicPowerPlantsBuiltThisRun`, `asteroidsMinedThisRun`,
+`antimatterMinedThisRun` and the rest) or has no run column at all, so the
+two-column contract is restored without any new state. Each was checked for
+gameplay readers first: all fourteen are read only by their statistics getter,
+the save/load serialisation and the variable debugger, so nothing depends on them
+starting a run at zero.
+
+**Three that look like they belong on the list stay reset, and now say so in a
+comment**, because despite their names they are the *current run* figure:
+
+| Variable | Why it still resets |
+|---|---|
+| `starStudyRange` | `stat_starStudyRangeThisRun` reads it; the all-time column renders "N/A" |
+| `starShipTravelDistance` | both of its statistics keys map to the same run getter |
+| `allTimeStarShipsBuilt` | no statistics getter reads it at all; `starShipBuilt` is the run flag the page uses |
+
+That is why this entry now says fourteen where it first said fifteen.
+
+### Coverage
+
+`tests/e2e/statistics/statistics.spec.js` → *"a rebirth clears the run column and
+leaves the all-time column standing"*. The spec plays a run, earns something in
+each family, takes the rebirth through the real Rebirth button, and then asserts
+both halves of the contract. Both halves now pass, and the all-time half names
+any statistic that is lost if this regresses.
 
 ---

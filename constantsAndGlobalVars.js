@@ -1176,11 +1176,11 @@ export const statFunctionsGets = {
     "stat_higherLowerWonThisRun": () => getGalacticCasinoStatValue('game3_higherLowerWon', 'currentRun'),
     "stat_higherLowerWon": () => getGalacticCasinoStatValue('game3_higherLowerWon', 'allTime'),
 
-    "stat_voidseerPlayedThisRun": () => getGalacticCasinoStatValue('game4_voidSeerPlayed', 'currentRun'),
-    "stat_voidseerPlayed": () => getGalacticCasinoStatValue('game4_voidSeerPlayed', 'allTime'),
+    "stat_voidSeerPlayedThisRun": () => getGalacticCasinoStatValue('game4_voidSeerPlayed', 'currentRun'),
+    "stat_voidSeerPlayed": () => getGalacticCasinoStatValue('game4_voidSeerPlayed', 'allTime'),
 
-    "stat_voidseerWonThisRun": () => getGalacticCasinoStatValue('game4_voidSeerWon', 'currentRun'),
-    "stat_voidseerWon": () => getGalacticCasinoStatValue('game4_voidSeerWon', 'allTime'),
+    "stat_voidSeerWonThisRun": () => getGalacticCasinoStatValue('game4_voidSeerWon', 'currentRun'),
+    "stat_voidSeerWon": () => getGalacticCasinoStatValue('game4_voidSeerWon', 'allTime'),
 };
 
 export const statFunctionsSets = {
@@ -1585,28 +1585,32 @@ export function resetAllVariablesOnRebirth() {
     scienceKitsThisRun = 0;
     scienceClubsThisRun = 0;
     scienceLabsThisRun = 0;
-    allTimeTotalRocketsLaunched = 0;
-    allTimeTotalStarShipsLaunched = 0;
-    allTimeTotalAsteroidsDiscovered = 0;
-    allTimeTotalLegendaryAsteroidsDiscovered = 0;
-    starStudyRange = 0;
-    allTimeTotalAntimatterMined = 0;
     antimatterMinedThisRun = 0;
-    allTimeTotalApGain = 0;
     currentRunNumber = 0;
     currentRunTimer = 0;
-    totalNewsTickerPrizesCollected = 0;
     apAnticipatedThisRun = 0;
-    allTimeStarShipsBuilt = 0;
-    starShipTravelDistance = 0;
-    allTimesTripped = 0;
-    allTimeBasicPowerPlantsBuilt = 0;
-    allTimeAdvancedPowerPlantsBuilt = 0;
-    allTimeSolarPowerPlantsBuilt = 0;
-    allTimeSodiumIonBatteriesBuilt = 0;
-    allTimeBattery2Built = 0;
-    allTimeBattery3Built = 0;
     asteroidsMinedThisRun = 0;
+
+    //starStudyRange and starShipTravelDistance are reset here on purpose: despite the
+    //names, both are the CURRENT RUN figure on the statistics page - their all time
+    //column renders "N/A" - so a rebirth is exactly when they should go back to zero.
+    //allTimeStarShipsBuilt is likewise left alone; no statistic getter reads it.
+    starStudyRange = 0;
+    starShipTravelDistance = 0;
+    allTimeStarShipsBuilt = 0;
+
+    //Everything below used to be zeroed here too, which wiped fourteen lifetime totals
+    //the statistics page renders under an "All Time" heading - alongside the resource,
+    //compound and research totals, which correctly survive. Each of these has either a
+    //separate ...ThisRun counter reset above or in the block further up, or no run
+    //column at all, and none of them is read by gameplay, so they now persist across a
+    //rebirth as their names and their column promise:
+    //  allTimeTotalRocketsLaunched, allTimeTotalStarShipsLaunched,
+    //  allTimeTotalAsteroidsDiscovered, allTimeTotalLegendaryAsteroidsDiscovered,
+    //  allTimeTotalAntimatterMined, allTimeTotalApGain, totalNewsTickerPrizesCollected,
+    //  allTimesTripped, allTimeBasicPowerPlantsBuilt, allTimeAdvancedPowerPlantsBuilt,
+    //  allTimeSolarPowerPlantsBuilt, allTimeSodiumIonBatteriesBuilt,
+    //  allTimeBattery2Built, allTimeBattery3Built
     formationGoal = null;
     liquidationValue = 0;
 

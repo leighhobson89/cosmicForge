@@ -1,6 +1,6 @@
 # e2e / space-telescope
 
-**Space Telescope** — 🟠 AMBER
+**Space Telescope** — 🟢 GREEN
 
 The three telescope actions - star study, asteroid search, void pillage - the one instrument they share, and their auto-repeat.
 
