@@ -1203,3 +1203,140 @@ The spec reads the rendered option list, switches language through
 `relocalizeAll`, reopens the pane and asserts the list changed.
 
 ---
+
+## 21. The end-credits overlay never lifts — **BY DESIGN, not a defect**
+
+Entry withdrawn. The end-credits cinematic is *meant* to run and then leave its
+overlay in place for ever, blocking further interaction until the browser is
+refreshed: closing the cosmic rip ends the run, and there is nothing after it to
+hand the game back to.
+
+The consequence for the suite is a hard boundary rather than a bug to fix. The
+furthest an endgame spec may play is the point at which the game is *ready* for
+the player to close the rip; at that point it must rebirth instead. That is what
+`tests/e2e/rebirth/rebirth-live.spec.js` →
+*"the rip is left one button-press from closed, and the rebirth taken instead
+keeps it there"* does. Do not add teardown or refresh workarounds whose only
+purpose is to escape the overlay.
+
+The number is kept so the entries after it do not shift.
+
+---
+
+## 22. Buying the Space Telescope or the Launch Pad throws, and the pane never updates — 🔴 OPEN
+
+**Severity:** high — the purchase is charged in full and the pane shows no sign of
+it. Nothing on screen tells the player the building exists.
+
+**Found by:** `tests/e2e/space-telescope/space-telescope.spec.js` →
+*"the build button charges cash, iron, glass and silicon, and opens the two actions"*.
+
+### What happens
+
+Build the Space Telescope from the Space Mining tab. Cash, iron, glass and silicon
+all come off correctly and `spaceTelescopeBoughtYet` is set — but:
+
+- the build row stays on screen with its Build button still showing;
+- the **Bought** text never appears;
+- the **Scan Asteroids** and **Study Stars** rows never appear;
+- no build sound plays and no "telescope built" notification is shown;
+- `PAGEERROR: Cannot read properties of null (reading 'classList')` lands in the
+  console.
+
+The only way to see the telescope is to leave the pane and come back, at which
+point `drawTab6Content` rebuilds it from `spaceTelescopeBoughtYet` and everything
+is where it should be. A player who does not do that has apparently spent 10,000
+cash and 52,000 units of material on nothing.
+
+### Cause
+
+`buildSpaceMiningBuilding` (`game.js:12571`) looks up three elements and then
+dereferences all three unguarded:
+
+```js
+const buySpaceMiningBuildingButtonElement = document.querySelector(`button[data-resource-to-fuse-to="${spaceMiningBuilding}"]`);
+const spaceMiningBuildingDescriptionElement = document.getElementById(`${spaceMiningBuilding}Description`);
+const spaceMiningBuildingAlreadyBoughtTextElement = document.getElementById(`${spaceMiningBuilding}AlreadyBoughtText`);
+...
+if (!debug) {
+    buySpaceMiningBuildingButtonElement.classList.add('invisible');
+    spaceMiningBuildingDescriptionElement.classList.add('invisible');   // <- null
+    spaceMiningBuildingAlreadyBoughtTextElement.classList.remove('invisible');
+}
+```
+
+`spaceTelescopeDescription` does not exist. `createOptionRow` names the
+description container after the **row**, not the building — `ui.js:3561`:
+
+```js
+descriptionRowContainer.id = labelId + 'Description';
+```
+
+and the row's `labelId` is `spaceBuildTelescopeRow`, so the element in the DOM is
+`spaceBuildTelescopeRowDescription`. The lookup therefore returns `null` and the
+second line throws.
+
+The throw escapes `buildSpaceMiningBuilding` into the build button's own
+`onClick` (`drawTab6Content.js:118`), which is why everything after the call is
+skipped:
+
+```js
+onClick: () => {
+    buildSpaceMiningBuilding('spaceTelescope', false);          // throws here
+    sfxPlayer.playAudio('buildTelescope', false);               // never runs
+    document.getElementById('spaceTelescopeSearchAsteroidRow').classList.remove('invisible');
+    document.getElementById('spaceTelescopeInvestigateStarRow').classList.remove('invisible');
+    ...
+    showNotification(localize('notificationSpaceTelescopeBuilt', ...));
+}
+```
+
+**The Launch Pad has the identical defect.** Its row's `labelId` is
+`spaceBuildLaunchPadRow`, so `launchPadDescription` is null too, and
+`drawTab6Content.js:652` calls `buildSpaceMiningBuilding('launchPad', false)` the
+same way — the four rocket build rows it means to reveal on the next lines never
+appear either.
+
+### Why it has never been seen in a test before
+
+Every existing spec and the whole debug menu reach these buildings through
+`buildSpaceMiningBuilding(name, true)`. The `debug` argument is exactly what
+skips the block that throws, so the fault is only reachable by pressing the real
+button.
+
+### Proposed fix
+
+Either look the element up by the id it actually has:
+
+```js
+const spaceMiningBuildingDescriptionElement = document.getElementById(
+    spaceMiningBuilding === 'spaceTelescope' ? 'spaceBuildTelescopeRowDescription' : 'spaceBuildLaunchPadRowDescription');
+```
+
+— or, better, guard all three, since none of them is essential to the purchase
+and a missing one should never cost the player the rest of the handler:
+
+```js
+if (!debug) {
+    buySpaceMiningBuildingButtonElement?.classList.add('invisible');
+    spaceMiningBuildingDescriptionElement?.classList.add('invisible');
+    spaceMiningBuildingAlreadyBoughtTextElement?.classList.remove('invisible');
+}
+```
+
+The optional-chaining version alone fixes the visible symptom — the rest of the
+`onClick` runs, the action rows appear and the notification shows — and leaves
+only the description row still on screen, which the next redraw tidies.
+
+**Not yet applied — awaiting a decision on whether to change the game source.**
+
+### Coverage
+
+The spec presses the real Build button and then reads the pane *without*
+reopening it, because "the pane the player is standing on updates" is the claim.
+It currently fails at the first of those assertions, which is the correct place
+to fail. Every other spec in the file stages the telescope through the debug
+menu's *Build Launch Pad, Scanner and All Rockets*, so the failure stays pointed
+at the defect instead of spreading across the file.
+
+---

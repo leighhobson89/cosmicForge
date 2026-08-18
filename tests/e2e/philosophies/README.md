@@ -1,6 +1,6 @@
 # e2e / philosophies
 
-**Philosophies** — 🟠 AMBER
+**Philosophies** — 🟢 GREEN
 
 The four permanent player paths chosen once and affecting the whole account thereafter.
 

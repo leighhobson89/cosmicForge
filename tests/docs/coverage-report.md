@@ -4,7 +4,7 @@ _Generated from `functional-areas.json`. Re-run `node tests/docs/generate-report
 
 ## Coverage at a glance
 
-One line per functional area, worst first. 15 green, 17 amber, 11 red, out of 43.
+One line per functional area, worst first. 18 green, 16 amber, 9 red, out of 43.
 
 | | Area | Group | Risk | Specs | Where it stands |
 |:--:|---|---|:--:|--:|---|
@@ -12,10 +12,8 @@ One line per functional area, worst first. 15 green, 17 amber, 11 red, out of 43
 | 🔴 | [Local Save & Load](areas/save-load-local.md) | Foundation | High | — | No spec file yet. |
 | 🔴 | [Save Migration](areas/save-migration.md) | Foundation | High | — | No spec file yet. |
 | 🔴 | [Space Mining & Asteroids](areas/space-mining.md) | Space Operations | Medium | — | No spec file yet. |
-| 🔴 | [Space Telescope](areas/space-telescope.md) | Space Operations | Medium | — | No spec file yet. |
 | 🔴 | [Star Map & Star Data](areas/star-map.md) | Interstellar | Medium | — | No spec file yet. |
 | 🔴 | [Star Type Bonuses](areas/star-types.md) | Interstellar | Medium | — | No spec file yet. |
-| 🔴 | [Starship](areas/starship.md) | Interstellar | High | — | No spec file yet. |
 | 🔴 | [Statistics](areas/statistics.md) | Simulation & Ambience | Low | — | No spec file yet. |
 | 🔴 | [Tech Tree](areas/technology.md) | Core Economy | High | — | No spec file yet. |
 | 🔴 | [Weather](areas/weather.md) | Simulation & Ambience | Low | — | No spec file yet. |
@@ -30,9 +28,7 @@ One line per functional area, worst first. 15 green, 17 amber, 11 red, out of 43
 | 🟠 | [Megastructures](areas/megastructures.md) | Endgame | Medium | 18 | 18 specs written; not yet upgraded to integration. |
 | 🟠 | [News Ticker](areas/news-ticker.md) | Simulation & Ambience | Low | 18 | 18 specs written; not yet upgraded to integration. |
 | 🟠 | [Number Notation](areas/notation.md) | Presentation & Shell | Medium | 11 | 11 specs written; not yet upgraded to integration. |
-| 🟠 | [Philosophies](areas/philosophies.md) | Meta Progression | High | 21 | 21 specs written; not yet upgraded to integration. |
 | 🟠 | [Random Events](areas/random-events.md) | Simulation & Ambience | Medium | 21 | 21 specs written; not yet upgraded to integration. |
-| 🟠 | [Rebirth](areas/rebirth.md) | Meta Progression | High | 22 | 22 specs written; not yet upgraded to integration. |
 | 🟠 | [Research](areas/research.md) | Core Economy | High | 15 | 15 specs written; not yet upgraded to integration. |
 | 🟠 | [Rockets & Launch Pad](areas/rockets.md) | Space Operations | Medium | 20 | 20 specs written; not yet upgraded to integration. |
 | 🟠 | [UI Navigation](areas/ui-navigation.md) | Presentation & Shell | Medium | 5 | 5 specs written; not yet upgraded to integration. |
@@ -49,8 +45,12 @@ One line per functional area, worst first. 15 green, 17 amber, 11 red, out of 43
 | 🟢 | [Localization](areas/localization.md) | Foundation | High | 91 | Done — driven through its own controls, 91 specs passing. |
 | 🟢 | [Onboarding & Tutorial](areas/onboarding.md) | Presentation & Shell | High | 13 | Done — driven through its own controls, 13 specs passing. |
 | 🟢 | [Performance & Frame Budget](areas/performance.md) | Presentation & Shell | High | 10 | Done — driven through its own controls, 10 specs passing. |
+| 🟢 | [Philosophies](areas/philosophies.md) | Meta Progression | High | 42 | Done — driven through its own controls, 42 specs passing. |
+| 🟢 | [Rebirth](areas/rebirth.md) | Meta Progression | High | 10 | Done — driven through its own controls, 10 specs passing. |
 | 🟢 | [Resources](areas/resources.md) | Core Economy | High | 21 | Done — driven through its own controls, 21 specs passing. |
 | 🟢 | [Settings & Preferences](areas/settings.md) | Foundation | Medium | 20 | Done — driven through its own controls, 20 specs passing. |
+| 🟢 | [Space Telescope](areas/space-telescope.md) | Space Operations | Medium | 9 | 9 specs written. |
+| 🟢 | [Starship](areas/starship.md) | Interstellar | High | 8 | Done — driven through its own controls, 8 specs passing. |
 
 ---
 
@@ -74,18 +74,18 @@ when an area is upgraded.
 
 | | Areas | Share |
 |---|---:|---:|
-| 🔴 Red — no spec file | 11 | 26% |
-| 🟠 Amber — spec written, not yet upgraded | 17 | 40% |
-| 🟢 Green — signed off | 15 | 35% |
+| 🔴 Red — no spec file | 9 | 21% |
+| 🟠 Amber — spec written, not yet upgraded | 16 | 37% |
+| 🟢 Green — signed off | 18 | 42% |
 | **Total functional areas** | **43** | |
 
-409 individual test cases are identified across all areas. **638 Playwright specs are implemented and passing** across 32 areas.
+416 individual test cases are identified across all areas. **664 Playwright specs are implemented and passing** across 34 areas.
 
 Run them with `npm run test:e2e` (all areas) or `node tests/run-e2e.mjs <area>`. Each area writes its own HTML report to `test-reports/e2e/<area>/index.html`, with a summary index at `test-reports/e2e/index.html`.
 
 ## Highest priority — high risk, no spec file
 
-These 5 areas would each cause serious, often unrecoverable player harm if they regressed, and none has any automated test today.
+These 4 areas would each cause serious, often unrecoverable player harm if they regressed, and none has any automated test today.
 
 | Area | Group | Why it matters |
 |---|---|---|
@@ -93,7 +93,6 @@ These 5 areas would each cause serious, often unrecoverable player harm if they 
 | [Cloud Save & Load](areas/save-load-cloud.md) | Foundation | Supabase-backed saves keyed on pioneer name. Legacy tests use this as a fixture mechanism but never test it as a feature. |
 | [Save Migration](areas/save-migration.md) | Foundation | The patches.js version ladder that upgrades old saves. The best-engineered code in the project and entirely untested. |
 | [Tech Tree](areas/technology.md) | Core Economy | Tech prerequisites, unlock effects, repeatable techs and the tree's deferred rendering. |
-| [Starship](areas/starship.md) | Interstellar | Starship construction, fitting, fuelling and interstellar travel to a chosen destination. |
 
 ## All areas by group
 
@@ -132,7 +131,7 @@ Mid-game expansion off-planet — asteroids, rockets, antimatter and the telesco
 | 🔴 | [Space Mining & Asteroids](areas/space-mining.md) | Medium | 6 | — | — |
 | 🟠 | [Rockets & Launch Pad](areas/rockets.md) | Medium | 15 | **20** | — |
 | 🟢 | [Antimatter](areas/antimatter.md) | Medium | 26 | **26** | spaceAntimatter.test.js |
-| 🔴 | [Space Telescope](areas/space-telescope.md) | Medium | 6 | — | — |
+| 🟢 | [Space Telescope](areas/space-telescope.md) | Medium | 10 | **9** | — |
 
 ### Interstellar
 
@@ -142,7 +141,7 @@ Travel, conquest and settlement. The most stateful and branch-heavy part of the 
 |:--:|---|:--:|--:|--:|---|
 | 🔴 | [Star Map & Star Data](areas/star-map.md) | Medium | 5 | — | — |
 | 🔴 | [Star Type Bonuses](areas/star-types.md) | Medium | 6 | — | — |
-| 🔴 | [Starship](areas/starship.md) | High | 7 | — | — |
+| 🟢 | [Starship](areas/starship.md) | High | 10 | **8** | — |
 | 🟠 | [Fleet Hangar](areas/fleet-hangar.md) | High | 9 | **14** | — |
 | 🟠 | [Diplomacy](areas/diplomacy.md) | High | 6 | **12** | — |
 | 🟢 | [Battle & Conquest](areas/battle.md) | High | 6 | **17** | — |
@@ -157,8 +156,8 @@ Cross-run systems. Bugs here destroy player progress permanently, which makes th
 | 🟠 | [Galactic Market](areas/galactic-market.md) | Medium | 7 | **17** | — |
 | 🟠 | [Ascendency Points & Perks](areas/ascendency.md) | High | 6 | **12** | — |
 | 🟠 | [Galactic Casino](areas/galactic-casino.md) | Medium | 8 | **46** | — |
-| 🟠 | [Rebirth](areas/rebirth.md) | High | 14 | **22** | — |
-| 🟠 | [Philosophies](areas/philosophies.md) | High | 9 | **21** | — |
+| 🟢 | [Rebirth](areas/rebirth.md) | High | 10 | **10** | — |
+| 🟢 | [Philosophies](areas/philosophies.md) | High | 13 | **42** | — |
 | 🟠 | [Achievements](areas/achievements.md) | Low | 8 | **12** | — |
 
 ### Endgame

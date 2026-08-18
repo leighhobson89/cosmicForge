@@ -1,8 +1,8 @@
 # e2e / starship
 
-**Starship** — 🔴 RED
+**Starship** — 🟢 GREEN
 
-Starship construction, fitting, fuelling and interstellar travel to a chosen destination.
+Starship construction module by module, the optional Stellar Scanner, antimatter fuelling and interstellar travel to a chosen destination.
 
 Specs for this area go in this folder, named `<scenario>.spec.js`.
 

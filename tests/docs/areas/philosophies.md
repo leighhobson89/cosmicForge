@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | 🟠 AMBER |
+| **Status** | 🟢 GREEN |
 | **Risk if broken** | High |
 | **Group** | Meta Progression |
 | **Spec folder** | `tests/e2e/philosophies/` |
@@ -12,19 +12,23 @@ The four permanent player paths chosen once and affecting the whole account ther
 
 ## What should be tested
 
-- [ ] The choice modal appears at the correct trigger and only while no philosophy is set
-- [ ] All four paths carry one special ability and four non-overlapping repeatables
-- [ ] Each of Constructor, Supremacist, Voidborn, Expansionist applies its own documented effect set and no other path’s
+- [ ] All twenty upgrades - four repeatables and one special ability on each of the four paths - are bought through their own buttons on the Philosophy pane, on run 2
+- [ ] Each purchase charges its price from research and raises it by the cost multiplier
+- [ ] Each repeatable moves only its own slot and has only its own documented effect, leaving every other path's board untouched
+- [ ] The special ability unlocks once, reports itself spent and stops accepting clicks
+- [ ] Constructor's ability takes a storage upgrade from doubling to quintupling, measured on the real button
+- [ ] Supremacist's ability turns the 75% vassalize roll into a certainty, with the ability off as the control
+- [ ] Voidborn's ability reveals the telescope pillage row and a pillage actually pays out
+- [ ] Expansionist's ability settles the neighbours a conquest earned, one galactic point each
+- [ ] The choice modal appears at its real trigger and only while no philosophy is set
+- [ ] The Philosophy row is hidden on run 1 and revealed by the run-1 rebirth; repeatables bought on run 2 are replayed into run 3
 - [ ] The Voidborn AP bonus applies only from run 2, as documented
-- [ ] The Supremacist ability guarantees vassalization where other paths must roll
+- [ ] Every philosophy name resolves from the catalogue in all five languages and no button clips its translated label
 - [ ] The choice survives save/load, and the debug scenario defaults run 1 to Voidborn
-- [ ] The four choice-button labels are hardcoded English (known-issues #13)
-- [ ] Every philosophy name resolves from the catalogue in all five languages
-- [ ] The modal renders localized names and no button clips its translated label
 
 ## Status meaning
 
-🟠 **AMBER** — A spec file exists, but the area has not yet been through the integration upgrade — some of its coverage is still function-level rather than played through the UI.
+🟢 **GREEN** — Signed off as done: the area is driven through its real controls, its rules are asserted by measurement rather than by field reads, and the whole suite passes.
 
 ---
 

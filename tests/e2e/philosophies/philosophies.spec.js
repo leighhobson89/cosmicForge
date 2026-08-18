@@ -19,6 +19,15 @@
  * Note `setDefaultPhilosophyForRun1IfUnset()` in the debug tooling assigns
  * voidborn on run 1, so any spec that cares about an *unset* philosophy must
  * avoid `prepareRunForStarshipLaunch()`.
+ *
+ * `philosophies-live.spec.js` now buys all twenty upgrades through their own
+ * buttons on the Philosophy pane and measures each effect afterwards, so the
+ * cases here that called the `set…AfterRepeatables()` functions directly — the
+ * four per-path effect specs — and the one that asserted the Supremacist
+ * vassalization exemption have been removed rather than asserted twice. What
+ * remains is the part the live file does not cover: the catalogue's shape, the
+ * choice modal and its localization, the run-1 gate on the Voidborn AP bonus,
+ * the casino route into the void prize, and the save/load round trip.
  */
 import { test, expect } from '../_harness/game-fixture.mjs';
 
@@ -181,23 +190,6 @@ test.describe('Philosophies — choosing one', () => {
     const philosophy = await game.withMods((m) => m.cg.getPlayerPhilosophy());
     // Falsy in whichever form the game left it — the modal gate is `!philosophy`.
     expect(philosophy).toBeFalsy();
-  });
-
-  test('each of the four choices is reachable and records the philosophy', async ({ game }) => {
-    await game.boot();
-
-    const result = await game.withMods((m, philosophies) => {
-      const outcomes = {};
-      for (const philosophy of philosophies) {
-        m.cg.setPlayerPhilosophy(philosophy);
-        outcomes[philosophy] = m.cg.getPlayerPhilosophy();
-      }
-      return outcomes;
-    }, PHILOSOPHIES);
-
-    for (const philosophy of PHILOSOPHIES) {
-      expect(result[philosophy]).toBe(philosophy);
-    }
   });
 
   test('the choice modal offers all four paths and only appears while none is set', async ({ game }) => {
@@ -397,101 +389,6 @@ test.describe('Philosophies — effects', () => {
     await game.prepareRunForStarshipLaunch();
   });
 
-  test('Constructor repeatables cut autobuyer, compound recipe and building prices', async ({ game }) => {
-    const result = await game.withMods((m) => {
-      const read = () => ({
-        autobuyer: m.rdo.getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier1', 'price']),
-        building: m.rdo.getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'price']),
-        research: m.rdo.getResourceDataObject('research', ['upgrades', 'scienceKit', 'price'])
-      });
-
-      const before = read();
-      m.game.setResourceAutobuyerPricesAfterRepeatables();
-      const afterAutobuyer = read();
-      m.game.setEnergyAndResearchBuildingPricesAfterRepeatables();
-      return { before, afterAutobuyer, afterBuildings: read() };
-    });
-
-    // Every price repeatable is a 5% reduction, applied multiplicatively.
-    expect(result.afterAutobuyer.autobuyer).toBeCloseTo(result.before.autobuyer * 0.95, 6);
-    // The autobuyer pass must not touch buildings, and vice versa.
-    expect(result.afterAutobuyer.building).toBe(result.before.building);
-    expect(result.afterBuildings.building).toBeCloseTo(result.before.building * 0.95, 6);
-    expect(result.afterBuildings.research).toBeCloseTo(result.before.research * 0.95, 6);
-  });
-
-  test('Voidborn repeatables raise initial impression and shorten telescope work', async ({ game }) => {
-    const result = await game.withMods((m) => {
-      const impressionBefore = m.cg.getInitialImpression();
-      const starStudyBefore = m.cg.getBaseInvestigateStarTimerDuration();
-      const asteroidBefore = m.cg.getBaseSearchAsteroidTimerDuration();
-
-      m.game.setInitialImpressionBaseAfterRepeatables();
-      m.game.setStarStudyEfficiencyAfterRepeatables();
-      m.game.setAsteroidSearchEfficiencyAfterRepeatables();
-
-      return {
-        impressionBefore,
-        impressionAfter: m.cg.getInitialImpression(),
-        starStudyBefore,
-        starStudyAfter: m.cg.getBaseInvestigateStarTimerDuration(),
-        asteroidBefore,
-        asteroidAfter: m.cg.getBaseSearchAsteroidTimerDuration()
-      };
-    });
-
-    // Impression is a flat +1; the two telescope timers are a 1% reduction each.
-    expect(result.impressionAfter).toBe(result.impressionBefore + 1);
-    expect(result.starStudyAfter).toBeCloseTo(result.starStudyBefore * 0.99, 6);
-    expect(result.asteroidAfter).toBeCloseTo(result.asteroidBefore * 0.99, 6);
-  });
-
-  test('Expansionist repeatables cut rocket and starship part costs', async ({ game }) => {
-    const result = await game.withMods((m) => {
-      // The two passes are scoped by key prefix: "ss" for starship modules and
-      // "rocket" for rockets, which is why each must leave the other untouched.
-      const read = () => ({
-        starshipPart: m.rdo.getResourceDataObject('space', ['upgrades', 'ssStructural', 'price']),
-        rocketPart: m.rdo.getResourceDataObject('space', ['upgrades', 'rocket1', 'price'])
-      });
-
-      const before = read();
-      m.game.setStarshipPartPricesAfterRepeatables();
-      const afterStarship = read();
-      m.game.setRocketPartPricesAfterRepeatables();
-      return { before, afterStarship, afterRocket: read() };
-    });
-
-    expect(result.afterStarship.starshipPart).toBeCloseTo(result.before.starshipPart * 0.95, 6);
-    expect(result.afterStarship.rocketPart).toBe(result.before.rocketPart);
-    expect(result.afterRocket.rocketPart).toBeCloseTo(result.before.rocketPart * 0.95, 6);
-  });
-
-  test('Supremacist repeatables are the fleet ones, and they leave other paths alone', async ({ game }) => {
-    const result = await game.withMods((m) => {
-      const read = () => ({
-        fleetPrice: m.rdo.getResourceDataObject('space', ['upgrades', 'fleetScout', 'price']),
-        fleetAttack: m.rdo.getResourceDataObject('space', ['upgrades', 'fleetScout', 'baseAttackStrength']),
-        unitHealth: m.cg.getPlayerStartingUnitHealth(),
-        impression: m.cg.getInitialImpression(),
-        rocketPart: m.rdo.getResourceDataObject('space', ['upgrades', 'rocket1', 'price'])
-      });
-
-      const before = read();
-      m.game.setFleetPricesAfterRepeatables();
-      m.game.setFleetAttackDamageAfterRepeatables();
-      m.game.setFleetArmorBuffsAfterRepeatables();
-      return { before, after: read() };
-    });
-
-    expect(result.after.fleetPrice).toBeCloseTo(result.before.fleetPrice * 0.95, 6);
-    expect(result.after.fleetAttack).toBeCloseTo(result.before.fleetAttack * 1.05, 6);
-    expect(result.after.unitHealth).toBeCloseTo(result.before.unitHealth * 1.05, 6);
-    // Nothing belonging to another philosophy may move.
-    expect(result.after.impression).toBe(result.before.impression);
-    expect(result.after.rocketPart).toBe(result.before.rocketPart);
-  });
-
   test('the Voidborn AP bonus only applies from run 2 onwards', async ({ game }) => {
     const result = await game.withMods((m) => {
       const originalPhilosophy = m.cg.getPlayerPhilosophy();
@@ -511,51 +408,6 @@ test.describe('Philosophies — effects', () => {
     // on run 1 the base value is returned untouched for every philosophy.
     expect(result.asVoidbornRun1).toBe(10);
     expect(result.asConstructor).toBe(10);
-  });
-
-  test('the Supremacist ability guarantees vassalization where other paths must roll for it', async ({ game }) => {
-    const result = await game.withMods((m) => {
-      const starData = (() => {
-        for (let i = 0; i < 40; i++) {
-          m.cg.setDestinationStar('sirius');
-          m.game.generateDestinationStarData();
-          const data = m.rdo.getStarSystemDataObject('stars', ['destinationStar']);
-          const enemySum = data.enemyFleets.air + data.enemyFleets.land + data.enemyFleets.sea;
-          if (data.civilizationLevel !== 'None' && data.civilizationLevel !== 'Unsentient' && enemySum > 0) return data;
-        }
-        return null;
-      })();
-
-      const originalPhilosophy = m.cg.getPlayerPhilosophy();
-      const originalAbility = m.cg.getPhilosophyAbilityActive();
-
-      m.cg.setPlayerPhilosophy('supremacist');
-      m.cg.setPhilosophyAbilityActive(true);
-      const guaranteed = [];
-      for (let i = 0; i < 10; i++) {
-        m.rdo.setStarSystemDataObject('Neutral', 'stars', ['destinationStar', 'attitude']);
-        m.game.updateDiplomacySituation('vassalize', starData);
-        guaranteed.push(m.rdo.getStarSystemDataObject('stars', ['destinationStar', 'attitude']));
-      }
-
-      // The same ability flag on another path must not carry the exemption.
-      m.cg.setPlayerPhilosophy('constructor');
-      const withoutSupremacist = [];
-      for (let i = 0; i < 30; i++) {
-        m.rdo.setStarSystemDataObject('Neutral', 'stars', ['destinationStar', 'attitude']);
-        m.game.updateDiplomacySituation('vassalize', starData);
-        withoutSupremacist.push(m.rdo.getStarSystemDataObject('stars', ['destinationStar', 'attitude']));
-      }
-
-      m.cg.setPlayerPhilosophy(originalPhilosophy);
-      m.cg.setPhilosophyAbilityActive(originalAbility);
-      return { guaranteed, withoutSupremacist };
-    });
-
-    expect(result.guaranteed).toEqual(Array(10).fill('Surrendered'));
-    // Without the supremacist exemption the 75% roll must produce both outcomes.
-    expect(result.withoutSupremacist).toContain('Surrendered');
-    expect(result.withoutSupremacist).toContain('Neutral');
   });
 
   test('the Voidborn philosophy is what unlocks the void-pillage casino prize', async ({ game }) => {

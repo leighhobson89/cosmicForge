@@ -2,26 +2,30 @@
 
 | | |
 |---|---|
-| **Status** | 🔴 RED |
+| **Status** | 🟠 AMBER |
 | **Risk if broken** | Medium |
 | **Group** | Space Operations |
 | **Spec folder** | `tests/e2e/space-telescope/` |
 | **Existing coverage** | _none_ |
 
-The three telescope actions — star study, asteroid search, void pillage — and their auto-repeat.
+The three telescope actions - star study, asteroid search, void pillage - the one instrument they share, and their auto-repeat.
 
 ## What should be tested
 
-- [ ] Each of the three actions starts, runs its timer and delivers its reward
-- [ ] Actions are blocked when power is insufficient
-- [ ] Auto-telescope repeats the selected action indefinitely
-- [ ] Voidborn philosophy improves study speed and yield as documented
-- [ ] Casino prizes that instantly finish a telescope action work for all three
-- [ ] Timer state survives save/load mid-action
+- [ ] The telescope is bought through its own button and charges cash, iron, glass and silicon at the listed prices
+- [ ] Buying it opens the Scan Asteroids and Study Stars rows on the pane the player is standing on (fails: known-issues #22)
+- [ ] An unaffordable telescope is gated by red-disabled-text, and the gate lifts when the cash arrives
+- [ ] A search run to completion adds a real asteroid record - name, distance, rarity, quantity - and reveals the Asteroids pane
+- [ ] Every asteroid found makes the next search 7% longer, and a missed search costs nothing
+- [ ] A search in flight makes no progress while the grid is down, and resumes when power returns
+- [ ] A star study run to completion extends the vision range by one increment and puts more systems on the star map
+- [ ] The three actions share one instrument: starting any of them shuts the gate on the other two
+- [ ] Voidborn's Void Seers adds the pillage row and takes the same lock; without the ability the row stays hidden
+- [ ] The auto-telescope perk's row repeats the selected mode with no further presses
 
 ## Status meaning
 
-🔴 **RED** — No spec file exists for this area at all. A regression here ships unnoticed.
+🟠 **AMBER** — A spec file exists, but the area has not yet been through the integration upgrade — some of its coverage is still function-level rather than played through the UI.
 
 ---
 

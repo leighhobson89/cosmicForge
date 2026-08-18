@@ -1,8 +1,8 @@
 # e2e / space-telescope
 
-**Space Telescope** — 🔴 RED
+**Space Telescope** — 🟠 AMBER
 
-The three telescope actions — star study, asteroid search, void pillage — and their auto-repeat.
+The three telescope actions - star study, asteroid search, void pillage - the one instrument they share, and their auto-repeat.
 
 Specs for this area go in this folder, named `<scenario>.spec.js`.
 

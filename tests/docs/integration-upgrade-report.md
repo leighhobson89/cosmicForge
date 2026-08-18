@@ -544,6 +544,178 @@ is written up in [`docs/making-a-build.md`](../../docs/making-a-build.md).
 
 ---
 
+## 🟢 Rebirth & Philosophies — the second pass: deduplication and the endgame
+
+The two `-live` files had already been written. This pass finished the job in two
+ways.
+
+### The endgame rebirth, and where a spec has to stop
+
+`rebirth-live.spec.js` gained a third scenario: **the run played to the point
+where the rip is one button-press from closed, and a rebirth taken instead.**
+
+That boundary is deliberate and it is a design fact, not a limitation of the
+harness. Closing the rip hands the page to the end-credits cinematic, and that
+cinematic is *designed* to leave its overlay up for ever — the run is over and
+only a browser refresh gets the game back. So the last thing any spec can assert
+about the endgame is the state immediately before the press. The rebirth specs
+are therefore the right place for it, and the shape of the test is: prove the
+button is genuinely lit, deliberately do not press it, and rebirth instead.
+
+What it plays, in order:
+
+```
+run 1 -> conquest -> Rebirth pane -> run 2         galactic points start accruing
+  -> restore the Near Space Scanner Array          its own button, 10 GP
+  -> locate the rip                                scanCosmicRipSector, the fn the grid calls
+  -> research all five stabilisation techs         their own buttons, one delta timer each
+  -> assert Close The Rip is green and clickable   pointer-events: auto, row visible
+  -> press Rebirth instead                         run 3
+```
+
+The payload is what survives. `resetResourceDataObjectOnRebirthAndAddApAndPermanentBuffsBack`
+snapshots the whole `cosmicRip` branch and lays it back over the fresh state, and
+`cosmicRipTechUnlockedArray` is never cleared at all — so the spec asserts that
+after the rebirth the five techs, the restored array and the located rip are all
+still there, and the button is still lit on run 3. That is what makes taking the
+rebirth a *deferral* rather than a forfeit, and it is the kind of claim only a
+played test can make.
+
+One thing the spec had to learn the hard way: the restore button's real gate is
+`!scannerRestored && gp >= 10 && miaplacidusSettled`. Galactic points alone are
+not enough — settling the home system is what opens the chapter, which is also
+the event that plays the win cinematic and grants the `cosmicRip` tech.
+
+### Removing the duplicates the `-live` files made redundant
+
+With the `-live` files playing the same ground through the UI, the older specs
+were asserting the same facts twice — the weaker way. Removed:
+
+| Removed from | Cases | Why |
+|---|---|---|
+| `rebirth-reset.spec.js` | the whole file, 13 specs | every one of them called `m.game.rebirth()` and re-read a field. `rebirth-live` audits three whole rebirths against a fresh-boot baseline, which is a strictly stronger claim than "smaller than it was" |
+| `rebirth.spec.js` | 6 of 10 specs | the completion path, the console cleanliness, the refusal, the consumed destination record, the confirm branch and the perk/philosophy survival are all played through the pane in `rebirth-live` |
+| `philosophies.spec.js` | 5 of 20 specs | the four per-path effect specs called `set…AfterRepeatables()` directly; `philosophies-live` buys the upgrade through its button and then measures the effect. The Supremacist vassalization spec was superseded by the live one, which uses the ability toggle as its own control |
+
+What deliberately stayed: the localized refusal notice, the button's transition
+from disabled to ready, the cancel branch of the confirmation modal, a rebirth
+with the rip already closed, the catalogue's shape, the choice modal and its five
+languages, the run-1 gate on the Voidborn AP bonus, the casino route into the
+void prize, and the save/load round trip. None of those is reachable from the
+`-live` files.
+
+Net: 24 specs removed, 1 added, no coverage lost.
+
+---
+
+## 🟡 Space Telescope — `space-telescope.spec.js`, 10 specs, 9 passing
+
+A new area. There was no spec file at all before this.
+
+**What is different from what a function-level version would have been.** The
+telescope is one building with three jobs, and the interlock between them is not
+a property of any handler — `setAsteroidTimerCanContinue`,
+`setStarInvestigationTimerCanContinue` and `setPillageVoidTimerCanContinue` are
+all re-derived on **every frame** from the same three facts: the grid is up, and
+neither of the other two actions is running. A spec that called
+`startSearchAsteroidTimer()` and `startInvestigateStarTimer()` in turn would find
+both "working" and would never touch the rule that actually matters.
+
+So the specs press the buttons and let the loop decide:
+
+- with a search running, pressing **Study Stars** does nothing at all, and the
+  study gate reopens by itself the moment the search completes;
+- with the grid down, a search in flight makes *no* progress across 200 seconds
+  of driven time, is held open rather than cancelled, and resumes on power;
+- Voidborn's **Void Seers** adds a third job to the same instrument, and a
+  pillage locks out both of the others until it finishes.
+
+**Two measured rules rather than field reads.** A search that finds an asteroid
+raises the base search duration by 7% — so the spec runs five searches, counts
+the asteroids that actually appeared, and asserts
+`base × 1.07^found`, bounded above by `base × 1.07^searches`. A star study
+extends the vision range by one increment — so the spec counts `.star` against
+`.star-uninteresting` on the real star map before and after, which is the player's
+own view of "more stars are in reach now".
+
+**Two things that shape every spec in the file.** `discoverAsteroid` rolls a 7%
+miss by design, so nothing here demands a find from one press; and both durations
+carry a ±20% random offset, so every assertion is about the *base* duration and
+every timer is driven well past its widest roll.
+
+**The one failure is a live bug — known-issues #22.** Buying the telescope
+through its own button throws, and the throw aborts the rest of the click
+handler, so the pane the player is standing on never updates. The purchase is
+charged in full. Only the spec that presses the real Build button meets it; every
+other spec in the file stages the telescope through the debug menu's *Build Launch
+Pad, Scanner and All Rockets*, which takes the `debug` branch that skips the
+faulty code — so the failure stays pointed at the defect instead of spreading
+across ten specs.
+
+---
+
+## 🟢 Starship — `starship.spec.js`, 8 specs, all passing
+
+Also a new area, and the one with the most wiring hidden between the click and
+the result.
+
+**Three facts about the build path that only an integration test can reach.**
+
+1. **`gain` does not deduct anything.** It writes the bill into `itemsToDeduct`
+   and the frame loop settles it — and `setItemsToDeduct` *overwrites* a
+   resource's entry rather than adding to it. Twenty clicks inside one frame are
+   charged once. Every build loop here waits two `requestAnimationFrame` hops
+   between presses, which is also what a real player's fastest clicking does.
+2. **A module is `finished` by the pane, not by the purchase.** Nothing in the
+   click handler sets it; `handleSpaceUpgradeResourceType` does, on the frame
+   loop, and only for rows that are currently rendered. The Star Ship pane has to
+   stay open for a module to complete at all.
+3. **The ship deciding it exists is a frame-loop decision too.**
+   `starShipUiChecks` sets `readyForTravel` once every `ss` module except the
+   scanner reports `finished`, and moves the sidebar to the Star Ship pane itself.
+
+The spec builds all 47 mandatory parts through their own buttons, checks the
+first part of each module against its exact advertised bill, and then checks the
+price rise — `Math.ceil(price × 1.13)` — that makes the next one dearer.
+
+**The optional module, tested both ways.** The Stellar Scanner is the fifth
+module and the ship flies without it. Two specs fly the same journey with and
+without it: with it, the system scan names the civilization and the population;
+without it, both read `???` and the pane says so in the game's own words
+(`tab5ScanResultsNoScanner` rather than `tab5ScanResultsAnalyse`). The point the
+pair makes together is that its absence never stopped the journey — only the
+knowledge.
+
+**Distance is the only input.** A star's antimatter cost and its flight time are
+both functions of its distance and nothing else, so the spec re-runs
+`calculateAntimatterRequired` and `calculateAscendencyPoints` against the record
+the star map generated and asserts they agree — if the record ever drifts from
+the formula, that is where it shows. It also walks the curve at 1, 10, 25, 50, 75
+and 100 light years to pin that it is monotonic and bounded at 5,000 and 155,000
+antimatter.
+
+**Fuel is the real constraint on where a run can reach**, because antimatter is
+the one resource that cannot be bought. One unit short of a star's fuel leaves
+the Travel button red; exactly the fuel lights it green; and launching spends
+exactly that much and not a unit more, so the tank is empty on arrival.
+
+**The flight, driven rather than skipped.** The clock is asserted to be set from
+`calculateStarTravelDurationWithModifiers` rather than from a constant, advanced
+a tenth of the way and checked to have moved by exactly that much — allowing for
+the page's own frame loop still driving the same timer in real time — and then
+run out. Arrival puts the ship in `['orbiting', destination]`, opens the system
+scan row, closes the travel row, and on run 1 grants `apAwardedThisRun`, which is
+what unlocks the Galactic tab.
+
+**One staging note worth keeping.** Materials cannot be measured to the unit
+without first emptying every autobuyer, and even then exactly one compound still
+drifts: whichever the current system rains. Precipitation accrues on its own,
+outside the autobuyers, and it is drawn per star system — so the spec reads
+`precipitationType` from the current star and gives that one bill a bounded
+window while every other bill is asserted to the unit.
+
+---
+
 ## The general rule this establishes
 
 Drive the game's own buttons, panes and debug menu. Reserve direct `withMods`

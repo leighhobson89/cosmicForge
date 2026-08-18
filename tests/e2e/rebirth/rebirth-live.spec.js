@@ -2,12 +2,14 @@
  * Area: Rebirth — three rebirths, played through the Rebirth pane
  * Plan: tests/docs/areas/rebirth.md
  *
- * `rebirth.spec.js` covers the refusal path and the button's honesty;
- * `rebirth-reset.spec.js` samples three resources and a handful of flags. Both
- * of them reach the reset by calling `m.game.rebirth()` from `withMods`, which
- * skips the two things most likely to break: the button's own enable rule, and
- * the confirmation modal that stands between a player and the single most
- * destructive operation in the game.
+ * `rebirth.spec.js` keeps the cases this file does not reach — the localized
+ * refusal notice, the button going from disabled to ready, and the cancel branch
+ * of the confirmation modal. Everything else it used to hold reached the reset
+ * by calling `m.game.rebirth()` from `withMods`, which skips the two things most
+ * likely to break: the button's own enable rule, and the confirmation modal that
+ * stands between a player and the single most destructive operation in the game.
+ * Those cases, and the whole of the old `rebirth-reset.spec.js`, are covered
+ * here instead and have been removed rather than asserted twice.
  *
  * This file presses the button. It covers the three rebirths that behave
  * differently from one another:
@@ -16,7 +18,7 @@
  * |---|---|
  * | The first rebirth, run 1 -> 2 | takes the `rebirthCalledOnRun1` branch: reveals the Philosophy row, and is the only rebirth that runs against a run built by `initialise` rather than by a previous reset |
  * | A later rebirth, run 2 -> 3 | runs against a board that a reset already produced, replays philosophy repeatables and permanent perks, and must not compound anything |
- * | A rebirth after the cosmic rip is closed | the end-game state: `closeCosmicRip`/`completeGame` earned, a galactic point spent, the credits played, and `cosmicRip` the one tech `resetAllVariablesOnRebirth` deliberately carries over |
+ * | A rebirth taken at the brink of closing the cosmic rip | the end-game state: the scanner array restored, the rip located, all five stabilisation techs researched and the Close The Rip button lit. It is the furthest the endgame can be played, because pressing that button starts the credits and the credits are designed never to hand the game back — so the rebirth is taken instead, and `cosmicRip` is the one tech `resetAllVariablesOnRebirth` deliberately carries over |
  *
  * Each of the three is audited the same way, against one shared contract:
  *
@@ -38,8 +40,9 @@
  */
 import { test, expect } from '../_harness/game-fixture.mjs';
 
-/** Reaching run 3 costs three debug setups and two rebirths, plus a 22s cinematic. */
-test.describe.configure({ timeout: 300_000 });
+/** Reaching run 3 costs three debug setups and two rebirths; the endgame case
+ * additionally plays the whole cosmic rip chapter on top of that. */
+test.describe.configure({ timeout: 420_000 });
 
 // --------------------------------------------------------------------- helpers
 
@@ -497,5 +500,204 @@ test.describe('Rebirth — a later one, run 2 to 3', () => {
     expect(afterRebirth.storageMultiple).toBeGreaterThan(2);
 
     expect(game.significantErrors()).toEqual([]);
+  });
+});
+// ------------------------------------------------------- the endgame rebirth
+
+/** The five techs that between them make the rip closable. */
+const RIP_TECHS = [
+  'stabilizerArray',
+  'quantumContainmentField',
+  'dimensionalAnchorMatrix',
+  'singularityStabilizer',
+  'realityWeaveRegulator'
+];
+
+/**
+ * Systems a long-running account would have settled, which is where the
+ * galactic points the rip chapter is paid for come from.
+ *
+ * None of them may be a destination this spec later rebirths into, because
+ * `setSettledStars` deduplicates: a rebirth into an already-settled system would
+ * add nothing to the ledger, and `expectMetaSurvived` would read that as a lost
+ * conquest rather than a refused duplicate.
+ */
+const PRIOR_CONQUESTS = [
+  // Miaplacidus is not decoration. The frame loop's own gate on the restore
+  // button is `!scannerRestored && gp >= 10 && miaplacidusSettled`, so settling
+  // the home system is what opens the rip chapter at all — which is the same
+  // event that plays the win cinematic and grants the `cosmicRip` tech.
+  'miaplacidus',
+  ...Array.from({ length: 30 }, (_, i) => `endgamesystem${i + 1}`)
+];
+
+/** Open one of the Cosmic Rip tab's panes by its side-menu row id. */
+async function openRipPane(game, page, optionId) {
+  await dismissAnyOpenModal(page);
+  await game.openTab(8);
+  await page.evaluate((id) => {
+    const el = document.getElementById(id);
+    el?.classList.remove('invisible');
+    el?.closest('.row-side-menu')?.classList.remove('invisible');
+    el?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+  }, optionId);
+  await page.waitForTimeout(700);
+}
+
+/** The Close The Rip button's state, as the frame loop leaves it. */
+async function closeRipButtonState(page) {
+  return page.evaluate(() => {
+    const row = document.getElementById('closeCosmicRipRow');
+    const button = row?.querySelector('.cosmic-rip-close-rip-button');
+    return {
+      rowPresent: Boolean(row),
+      rowVisible: Boolean(row) && !row.classList.contains('invisible'),
+      ready: Boolean(button?.classList.contains('green-ready-text')),
+      blocked: Boolean(button?.classList.contains('red-disabled-text')),
+      pointerEvents: button ? getComputedStyle(button).pointerEvents : null
+    };
+  });
+}
+
+/**
+ * Play the cosmic rip chapter as far as the game will go without ending itself:
+ * restore the scanner array, locate the rip, and research all five stabilisation
+ * techs, leaving the Close The Rip button lit.
+ *
+ * Two preconditions are staged rather than played, because neither is what this
+ * spec measures. `cosmicRip` is the tech the Miaplacidus win cinematic grants,
+ * which is a fourteen-second cutscene belonging to another area; and the settled
+ * ledger is the accumulated work of many runs, which is what pays for the
+ * chapter — restoring the array alone costs ten galactic points, then one per
+ * sector scanned and one per tech researched.
+ */
+async function playTheRipToTheBrinkOfClosing(game, page) {
+  await game.withMods((m, conquests) => {
+    m.cg.setTechUnlockedArray('cosmicRip');
+    for (const star of conquests) m.cg.setSettledStars(star);
+    m.cg.setGalacticPointsSpent(0);
+    // Telemetry is the chapter's own research currency, gathered by the sensor
+    // buoys; the five techs cost 150,000 of it between them.
+    m.rdo.setResourceDataObject(1000000, 'cosmicRip', ['ripTelemetryData']);
+  }, PRIOR_CONQUESTS);
+  await page.waitForTimeout(600);
+
+  // 1. Restore the near-space scanner array through its own button.
+  await openRipPane(game, page, 'cosmicRipSituationOption');
+  const restoreButton = await page.evaluate(() => {
+    const button = document.querySelector('.cosmic-rip-restore-scanner-array-button');
+    if (!button) return null;
+    return { disabled: button.disabled, ready: button.classList.contains('green-ready-text') };
+  });
+  expect(restoreButton, 'the Situation pane should offer the restore button').not.toBeNull();
+  expect(restoreButton.disabled, 'thirty settled systems is more than the ten GP this costs').toBe(false);
+
+  await page.evaluate(() => document.querySelector('.cosmic-rip-restore-scanner-array-button')?.click());
+  await page.waitForTimeout(700);
+  await dismissAnyOpenModal(page);
+  expect(await game.withMods((m) => m.rdo.getCosmicRipNearSpaceScannerArrayRestored())).toBe(true);
+
+  // 2. Locate the rip. The sector grid is a canvas overlay whose click handler
+  // only fires for a sector its own scan label has already lit, so the scan goes
+  // through `scanCosmicRipSector` — the exact function that handler calls.
+  const located = await game.withMods((m) => {
+    const ripIndex = m.rip.ensureCosmicRipLocationSeeded();
+    const outcome = m.rip.scanCosmicRipSector(ripIndex);
+    return { outcome, found: m.rdo.getCosmicRipRipFound() };
+  });
+  expect(located.outcome.ok, 'the scan should be affordable and in range').toBe(true);
+  expect(located.found, 'scanning the seeded sector locates the rip').toBe(true);
+  await page.waitForTimeout(700);
+  await dismissAnyOpenModal(page);
+
+  // 3. Research the five techs, in prereq order, through their own buttons.
+  await openRipPane(game, page, 'cosmicRipCosmicRipOption');
+  for (const tech of RIP_TECHS) {
+    const clicked = await page.evaluate((name) => {
+      const button = document.getElementById(`cosmicRipTechResearchButton_${name}`);
+      if (!button) return false;
+      button.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      return true;
+    }, tech);
+    expect(clicked, `the Cosmic Rip pane should carry a research button for ${tech}`).toBe(true);
+
+    // Each tech runs a delta timer of one to five minutes; driving the delta
+    // manager runs it out at once rather than waiting it down in real time.
+    await game.advanceTimers(400000);
+    await page.waitForTimeout(400);
+
+    const unlocked = await game.withMods((m) => [...(m.cg.getCosmicRipTechUnlockedArray() ?? [])]);
+    expect(unlocked, `${tech} should finish researching`).toContain(tech);
+  }
+
+  await dismissAnyOpenModal(page);
+}
+
+test.describe('Rebirth — at the brink of closing the cosmic rip', () => {
+  test('the rip is left one button-press from closed, and the rebirth taken instead keeps it there', async ({ game, page }) => {
+    // The furthest a spec can play the endgame. Closing the rip hands the page
+    // to the credits, and that cinematic is designed to hold its overlay for
+    // ever — the run is over and only a refresh gets the game back — so the last
+    // thing a rebirth spec can assert is the state *immediately before* the
+    // press: the button lit, and a rebirth taken instead of the ending.
+    await game.boot();
+    const pristine = await readRunBoard(game);
+
+    // Run 1 -> 2 first: the chapter's currency is galactic points, and the
+    // ledger they are counted from only starts paying after a conquest.
+    await playRunToRebirthReady(game, page, 'vega');
+    expect(await rebirthThroughTheUI(game, page)).toBe(2);
+
+    // Run 2 is played out in full again, and this time the rip is played too.
+    await playRunToRebirthReady(game, page, 'rigel');
+    await playTheRipToTheBrinkOfClosing(game, page);
+
+    await openRipPane(game, page, 'cosmicRipSituationOption');
+    const ready = await closeRipButtonState(page);
+    expect(ready.rowPresent, 'the Situation pane builds the close row for every run').toBe(true);
+    expect(ready.rowVisible, 'all five techs researched is what reveals the row').toBe(true);
+    expect(ready.ready, 'and a galactic point in hand is what lights the button').toBe(true);
+    expect(ready.blocked).toBe(false);
+    // The button is genuinely pressable. It is deliberately not pressed.
+    expect(ready.pointerEvents).toBe('auto');
+
+    const runBefore = await readRunBoard(game);
+    const metaBefore = await readMetaBoard(game);
+    expect(metaBefore.run).toBe(2);
+
+    await openRebirthPane(game, page);
+    expect(await rebirthThroughTheUI(game, page)).toBe(3);
+
+    // `cosmicRip` is the one tech `resetAllVariablesOnRebirth` carries over, so
+    // the new run keeps the chapter rather than having to earn it again.
+    expectRunWasReset(pristine, runBefore, await readRunBoard(game), {
+      expectedTechs: ['apAwardedThisRun', 'cosmicRip']
+    });
+    expectFlagsWereReset(await readRunFlags(game));
+    expectMetaSurvived(metaBefore, await readMetaBoard(game), { destination: 'rigel' });
+
+    // The whole point of taking the rebirth instead: the chapter is exactly
+    // where it was left. `resetResourceDataObjectOnRebirthAndAddApAndPermanentBuffsBack`
+    // snapshots the `cosmicRip` branch and puts it back over the fresh state,
+    // and the rip tech array is never cleared, so nothing has to be re-bought.
+    const ripAfter = await game.withMods((m) => ({
+      techs: [...(m.cg.getCosmicRipTechUnlockedArray() ?? [])].sort(),
+      scannerRestored: m.rdo.getCosmicRipNearSpaceScannerArrayRestored(),
+      ripFound: m.rdo.getCosmicRipRipFound(),
+      telemetry: m.rdo.getResourceDataObject('cosmicRip', ['ripTelemetryData'])
+    }));
+    expect(ripAfter.techs).toEqual([...RIP_TECHS].sort());
+    expect(ripAfter.scannerRestored, 'the ten GP restoration must not be charged twice').toBe(true);
+    expect(ripAfter.ripFound).toBe(true);
+    expect(ripAfter.telemetry).toBeGreaterThan(0);
+
+    // And the button is still lit on run 3, which is what makes taking the
+    // rebirth a deferral rather than a forfeit.
+    await openRipPane(game, page, 'cosmicRipSituationOption');
+    const stillReady = await closeRipButtonState(page);
+    expect(stillReady.rowVisible).toBe(true);
+    expect(stillReady.ready, 'the rebirth paid a galactic point back, so it is still affordable').toBe(true);
+
+    await expectRunIsPlayable(game, page);
   });
 });

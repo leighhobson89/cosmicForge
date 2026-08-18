@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | 🟠 AMBER |
+| **Status** | 🟢 GREEN |
 | **Risk if broken** | High |
 | **Group** | Meta Progression |
 | **Spec folder** | `tests/e2e/rebirth/` |
@@ -12,24 +12,20 @@ The prestige reset. The single most destructive operation in the game if it misb
 
 ## What should be tested
 
-- [ ] Rebirth refuses a state it cannot complete rather than throwing part-way through the reset
-- [ ] A rebirth with a scanned destination completes, increments the run and rebuilds the star system around it
-- [ ] A refused rebirth leaves the run byte-for-byte unchanged and writes nothing to the console
-- [ ] The refusal is reported to the player through the catalogue, in the active language
-- [ ] The rebirth button is genuinely disabled — not merely coloured red — until a rebirth is both earned and completable
-- [ ] The run counter increments by exactly one
-- [ ] Resources and compounds are emptied back to their starting stock
-- [ ] The destination record is consumed, so a second rebirth without a fresh scan is refused
-- [ ] Ascendency points carry over and are never reduced
-- [ ] Achievements, perks and the chosen philosophy survive the reset
-- [ ] Settled stars accumulate rather than resetting, since galactic points derive from that list
-- [ ] Cancelling the rebirth modal changes nothing, and confirming it performs the rebirth
-- [ ] Closing the cosmic rip does not block a later rebirth
-- [ ] The frame loop, resource production and the current tab are all live immediately afterwards
+- [ ] Three whole rebirths are played through the Rebirth pane's own button and confirmation modal
+- [ ] Every rebirth is audited against a fresh-boot baseline: stores, prices, techs, built things and flags all return to their starting position
+- [ ] Nothing earned across runs is lost - the run counter moves by exactly one and no perk, achievement, philosophy or settled star goes backwards
+- [ ] The run is playable immediately afterwards: the frame loop ticks, production accrues, every unlocked tab draws and the console stays clean
+- [ ] The run-1 rebirth is the one that reveals the Philosophy pane
+- [ ] An ascendency perk bought on run 2 is still owned and still applied on run 3
+- [ ] The destination record is consumed, so a second rebirth without a fresh scan is refused and the button goes genuinely disabled
+- [ ] The endgame is played to the point where the rip is one press from closed, and a rebirth is taken instead - the credits are a terminal state by design, so that is the furthest a spec can go
+- [ ] A rebirth taken at that point keeps the whole rip chapter: the five techs, the restored scanner array and the located rip all survive
+- [ ] The refusal is reported through the catalogue in the active language, and cancelling the modal changes nothing
 
 ## Status meaning
 
-🟠 **AMBER** — A spec file exists, but the area has not yet been through the integration upgrade — some of its coverage is still function-level rather than played through the UI.
+🟢 **GREEN** — Signed off as done: the area is driven through its real controls, its rules are asserted by measurement rather than by field reads, and the whole suite passes.
 
 ---
 
