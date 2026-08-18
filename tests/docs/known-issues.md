@@ -1201,3 +1201,95 @@ without triggering a rebuild.
 
 The spec reads the rendered option list, switches language through
 `relocalizeAll`, reopens the pane and asserts the list changed.
+
+---
+
+## 21. Closing the cosmic rip permanently freezes the game — 🔴 OPEN
+
+**Severity:** critical — the game becomes unplayable, and it happens at the one
+moment the player is most likely to be paying attention: the ending.
+
+**Found by:** `tests/e2e/rebirth/rebirth-live.spec.js` →
+*"the rip is closed through its own button and a rebirth still completes cleanly"*.
+
+### What happens
+
+Close the cosmic rip, confirm the end-game modal, and watch the credits. About
+23 seconds in, when the cinematic should fade out and hand the game back, it
+does not. `#winCinematic2Overlay` stays on screen forever and the game beneath it
+is unreachable: every pointer event is swallowed, and — worse — the two
+document-level key blockers are never removed, so **the entire keyboard is dead
+for the rest of the session**. The page's `overflow: hidden` is never restored
+either.
+
+Reproduced directly:
+
+```
+OVERLAY STILL PRESENT: true
+ERRORS: [ "PAGEERROR: cleanup is not defined" ]
+```
+
+There is a second consequence. `activeWinCinematic2Promise` is never cleared and
+its `resolve()` is never called, so the promise `playWinCinematic2()` handed back
+stays pending forever and any later call returns that same dead promise. The
+cinematic can therefore never play again in that session, and anything that
+awaits it waits for ever.
+
+### Cause
+
+`playWinCinematic2()` schedules its own teardown but has no teardown to schedule.
+`ui.js`:
+
+```js
+const end = () => {
+    overlay.classList.add('win-cinematic2-out');
+    setTimeout(cleanup, 950);          // <- `cleanup` is not defined here
+};
+```
+
+`playWinCinematic2` spans `ui.js:14405-14576`. The only `cleanup` in the file is
+declared at `ui.js:14303`, inside `playWinCinematic()` — the *other*, Miaplacidus
+cinematic, which runs from 13698 to 14401. It is a `const` local to that
+function, so it is not in scope at 14561 and there is none at module scope. The
+reference therefore throws `ReferenceError: cleanup is not defined` from inside
+the `setTimeout` callback, where nothing catches it.
+
+The second cinematic looks like it was written by copying the first: it sets up
+the same overlay, the same `previousOverflow`, the same `blockedPointerEvents`
+list, the same `stopEvent` and `keyBlocker` handlers — everything the missing
+function was supposed to undo — and then reaches for a teardown that was left
+behind.
+
+Nothing surfaces the failure at runtime. The throw happens on a timer, long after
+the click, and the symptom a player sees is simply that the credits never end.
+
+### Proposed fix
+
+Give `playWinCinematic2` its own `cleanup`, mirroring the one `playWinCinematic`
+already has, declared before `end` uses it:
+
+```js
+const cleanup = () => {
+    blockedPointerEvents.forEach(type => overlay.removeEventListener(type, stopEvent, { capture: true }));
+    overlay.removeEventListener('wheel', stopEvent, { capture: true });
+    document.removeEventListener('keydown', keyBlocker, true);
+    document.removeEventListener('keyup', keyBlocker, true);
+    document.documentElement.style.overflow = previousOverflow;
+    blackOverlay.remove();
+    overlay.remove();
+    activeWinCinematic2Promise = null;
+    resolve();
+};
+```
+
+`blackOverlay` needs removing explicitly because it is appended to `document.body`
+rather than to the overlay, one second before the end.
+
+**Not yet applied — awaiting a decision on whether to change the game source.**
+
+### Coverage
+
+The spec closes the rip through `.cosmic-rip-close-rip-button`, confirms the real
+end-game modal, waits for `#winCinematic2Overlay` to appear and then to be
+removed, and goes on to perform another rebirth and audit it. It currently fails
+at the wait for the overlay to be removed, which is the correct place to fail.
