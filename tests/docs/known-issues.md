@@ -1810,3 +1810,624 @@ returns **33** where it returned 0. `stat_cash` reads `$1.0B` in condensed and
 `$1,000,000,010` in plain.
 
 ---
+
+## 28. A supply chain disruption always cut production by 75%, whatever the modal promised — ✅ FIXED
+
+**Severity was: moderate — the number the player was shown was not the number applied.**
+
+### Reproduction
+
+1. Reach a run with at least one autobuyer tier owned for some material.
+2. Trigger **Supply Chain Disruption** from the debug menu.
+3. Read the modal, or the Events screen's effect column. Both say
+   *"{itemName} production reduced by -{percentDown}%"*, where `percentDown` is a
+   fresh roll between 60 and 80.
+4. Measure the material's actual production. It is reduced by exactly 75%, every
+   time, whatever number was shown.
+
+### Cause
+
+The trigger rolls a percentage and stores it on the effect:
+
+```js
+// events.js — supplyChainDisruption.trigger()
+const percentDown = Math.floor(Math.random() * (80 - 60 + 1)) + 60;
+startTimedEffect('supplyChainDisruption', 15 * 60 * 1000, { category, key, percentDown });
+```
+
+`percentDown` is then used for display only — by `buildTimedEffectUiDescription`
+for the Events screen and by `showEventModal` for the popup. The production path
+never reads it:
+
+```js
+// game.js
+function getSupplyChainDisruptionMultiplier(category, key) {
+    …
+    return 0.25;
+}
+```
+
+That constant is applied in `gainResource`, `gainCompound`, the compound rate
+calculation and `addPrecipitationResource`. So the effect is always ×0.25 — a flat
+75% cut — while the player is told anything from 60% to 80%.
+
+### Fix
+
+`getSupplyChainDisruptionMultiplier()` in `game.js` now derives the cut from the
+effect's own roll, which was already being stored and already travelling with the
+save:
+
+```js
+const percentDown = Number(state.percentDown);
+if (!Number.isFinite(percentDown)) {
+    // Effects restored from a save written before the roll was stored keep
+    // the original flat 75% cut.
+    return 0.25;
+}
+
+return Math.max(0, 1 - (Math.min(100, Math.max(0, percentDown)) / 100));
+```
+
+The `0.25` survives as the fallback for effects restored from a save written
+before the roll was stored, so a mid-flight disruption loaded from an older save
+behaves exactly as it did rather than silently becoming a no-op.
+
+The alternative — stop rolling and tell the player a flat -75% — was a design
+decision rather than a bug fix, and would have made the roll dead code.
+
+### Coverage
+
+`tests/e2e/random-events/random-events-live.spec.js` → *"a supply chain
+disruption names a material the run automates and throttles its production"*. It
+automates exactly one material so the event has one possible target, measures
+production over a driven window before and after, and compares the measured drop
+against the percentage the effect advertised.
+
+---
+
+## 29. Zeroing the trade quantity left a stale summary and a live Confirm button — ✅ FIXED
+
+**Severity was: low — misleading UI; the trade itself moved nothing.**
+
+### Reproduction
+
+1. Open the Galactic Market and choose both sides of a trade.
+2. Set the quantity selector to **Enter quantity** and type a real amount. The
+   summary fills in and **Confirm** turns green.
+3. Clear the field, or type `0`.
+4. The outgoing line correctly drops to `0` — but the incoming line and the
+   commission line keep the figures from the previous amount, and Confirm stays
+   green and clickable.
+
+Pressing Confirm in that state moves nothing (the commission-adjusted quantity
+works out to zero through an `Infinity` division), so there is no loss. The pane
+is simply showing a trade that is not on offer.
+
+### Cause
+
+`galacticMarketChecks()` only refreshes the summary while the outgoing quantity is
+positive:
+
+```js
+if (document.getElementById('galacticMarketOutgoingQuantityText').innerHTML !== 'N/A'
+    && parseNumber(document.getElementById('galacticMarketOutgoingQuantityText').innerHTML) > 0) {
+    calculateIncomingQuantity();
+    …
+    document.getElementById('galacticMarketComissionQuantitySummaryText').innerHTML = …;
+    document.getElementById('galacticMarketIncomingQuantityText').innerHTML = …;
+}
+```
+
+With the quantity at zero the block is skipped, so both figures keep their last
+values and `galacticMarketIncomingQuantity` keeps its last value too. The Confirm
+button is armed from exactly that stale variable:
+
+```js
+if (getGalacticMarketIncomingQuantity() !== null && getGalacticMarketIncomingQuantity() > 0) {
+    galacticMarketTradeConfirmButton.classList.add('green-ready-text');
+```
+
+### Fix
+
+The `> 0` test in `galacticMarketChecks()` gained an `else` that clears what the
+block would otherwise have written, so the summary and the button both track an
+emptied field:
+
+```js
+} else if (document.getElementById('galacticMarketOutgoingQuantityText').innerHTML !== 'N/A') {
+    setGalacticMarketIncomingQuantity(0);
+    document.getElementById('galacticMarketIncomingQuantityText').innerHTML = 0;
+    document.getElementById('galacticMarketComissionQuantitySummaryText').innerHTML = 0;
+}
+```
+
+The `!== 'N/A'` guard keeps the branch off the "nothing selected yet" state, which
+the lines just above deliberately render as `N/A` rather than as zero.
+
+### Coverage
+
+`tests/e2e/galactic-market/galactic-market-live.spec.js` → *"the Confirm button is
+armed only while the staged trade would actually return something"*.
+
+---
+
+## 30. A severe market bias made the market status tooltip unreachable — ✅ FIXED
+
+**Severity was: low — information was withheld exactly when it mattered most.**
+
+### Reproduction
+
+1. Open the Galactic Market and choose both sides of a trade.
+2. While the bias on either side is inside ±10, hover the **Bias** line in the
+   side menu. The shared tooltip appears with the item, its bias, its base price,
+   its bias-adjusted price and its trade volume.
+3. Trade enough to push a bias past ±10 — or set one directly — so the line turns
+   red.
+4. Hover it again. Nothing appears.
+
+### Cause
+
+`buildGalacticMarketSidebarStatus()` returns a severity class and
+`updateSidebarStatusDisplays()` applies it to `#galacticMarketOption2`. Past a
+magnitude of 10 that class is `red-disabled-text`, and the stylesheet says:
+
+```css
+.red-disabled-text {
+    color: var(--disabled-text);
+    font-weight: bold;
+    pointer-events: none;
+}
+```
+
+The tooltip is bound with `mouseenter` / `mousemove` on that same element, so the
+colour that signals "this bias is serious" also stops the element receiving the
+pointer.
+
+The intent is visible elsewhere in the same file: the lockdown path explicitly
+re-enables this one element after adding the very same class —
+`el.style.pointerEvents = (option2 && el === option2) ? 'auto' : 'none'` — and the
+stylesheet already carries a `.notation.red-disabled-text { pointer-events: auto
+!important }` escape hatch for the same collision.
+
+### Fix
+
+The existing escape hatch was extended to the status line in `styles.css`, beside
+the `.notation.red-disabled-text` rule it mirrors:
+
+```css
+#galacticMarketOption2.red-disabled-text,
+#galacticMarketOption2.warning-orange-text {
+    pointer-events: auto;
+}
+```
+
+The orange band is listed too, so the rule holds whichever severity the line is
+currently showing rather than only the one that happened to be broken. The
+lockdown path still sets `pointerEvents = 'auto'` inline on this element, and an
+inline style outranks the rule, so that behaviour is unchanged.
+
+### Coverage
+
+`tests/e2e/galactic-market/galactic-market-live.spec.js` → *"hovering the market
+status shows the base price, the bias-adjusted price and the trade volume"*. It
+hovers with a real pointer at a calm bias and again at a severe one, and asserts
+the computed `pointer-events` on the element as well as the tooltip appearing —
+so the rule being dropped from the stylesheet fails the spec, not just the tooltip
+happening to be missing.
+
+Closing this changed the spec once. It had pinned the rendered figures (`+2.0%`,
+`6.12`), and the ten-second bias decay walks a pinned bias towards zero, so a
+single tick landing mid-spec turned `+2.0%` into `+1.9%`. It now parses the
+tooltip's own numbers and checks them against each other — adjusted price is base
+price scaled by the bias printed beside it — which is the relationship the tooltip
+exists to show and cannot drift. The sidebar severity spec next to it was pinned
+the same way and got the same treatment, deriving its expected text from the live
+bias through the pane's own formatting rule.
+
+---
+
+## 31. Six description labels lost their ids in the localisation refactor — ✅ FIXED
+
+**Severity was: high — one of the six was dereferenced unguarded on every frame,
+and the rest silently stopped several progress readouts from ever updating.**
+
+### Reproduction
+
+1. Start a run with the Launch Pad and a rocket built.
+2. Open a rocket's pane in the Space Mining tab and press **Fuel Rocket**.
+3. Watch the "Fuel:" row. It never changed to *Fuelling…*, and when the tank
+   filled it never changed to *Ready For Launch…* — the Launch button never
+   turned green either.
+4. With that pane still open once the rocket was fuelled,
+   `handleRocketFuellingChecksAndOneOffPurchases` — which the frame loop calls
+   from its cost-check sweep — threw on every frame.
+
+The same shape was visible elsewhere without the throw:
+
+- the asteroid scan's progress bar never advanced, and its row never counted down;
+- the star study and Void Seers rows never counted down either;
+- a rocket's Travel row never showed *Ready To Travel*, *Mining Antimatter at …*,
+  *Not Launched* or its travel progress bar;
+- the starship's *Travelling To:* row never counted down.
+
+### Cause
+
+`createOptionRow` used to give the description label an id derived from the
+**visible label text**:
+
+```js
+description.id = generateElementId(labelText, resourceString, null);
+```
+
+`generateElementId` strips a trailing colon and camel-cases what is left, so
+`"Fuel:"` became `#fuelDescription` and `"Travel To:"` became
+`#travelToDescription`. Commit `6930310`, during the localisation work, changed
+the argument to the row's **id** instead — the label text is now translated, so
+deriving a DOM id from it was no longer safe:
+
+```js
+description.id = generateElementId(labelId, resourceString, null);
+```
+
+That was the right call. What did not happen alongside it was renaming the
+consumers. Six lookups then returned `null` for the whole life of a run:
+
+| Id asked for | The row it belongs to |
+|---|---|
+| `fuelDescription` | `space<Rocket>AutoBuyerRow` |
+| `travelToDescription` | `space<Rocket>TravelRow` |
+| `travellingToDescription` | `spaceStarShipTravelRow` |
+| `scanAsteroidsDescription` | `spaceTelescopeSearchAsteroidRow` |
+| `studyStarsDescription` | `spaceTelescopeInvestigateStarRow` |
+| `pillageTheVoidDescription` | `spaceTelescopePhilosophyBoostResourcesAndCompoundsRow` |
+
+The `*RowDescription` names in the same family — `receptionStatusRowDescription`,
+the three black hole ones, `galacticMarketLiquidateForAPRowDescription` — were
+already written as row ids, which is why those still resolved and the breakage
+went unnoticed. `#starDestinationDescription` looks like one of these but is not:
+it is written by hand into `elementRow.innerHTML` in `ui.js`, and was never
+affected.
+
+Most of the dead lookups were stored into a variable and guarded, so they failed
+silently — and took whatever else was inside the same guard with them:
+
+```js
+const searchTimerDescriptionElement = document.getElementById('scanAsteroidsDescription');
+...
+} else if (searchTimerDescriptionElement) {
+    searchTimerDescriptionElement.innerText = ...;
+    document.getElementById('spaceTelescopeSearchAsteroidProgressBar').style.width = `${pct}%`;
+}
+```
+
+which is why the scan bar never moved. `travelToAsteroidChecks` returned early
+from its whole first block for the same reason.
+
+Two sites were **not** guarded, and both threw:
+
+- `game.js`, in `handleRocketFuellingChecksAndOneOffPurchases`, called from the
+  frame loop for every cost-checked element;
+- `drawTab6Content.js`, in `setFuellingVisibility`. Because it threw at the top of
+  the function, the `fuelledUpState` block below it never ran, so the Launch
+  button kept the `red-disabled-text` it was created with and a real click on it
+  was swallowed by `pointer-events: none`.
+
+### Fix — applied
+
+`getRowMainDescriptionLabel(rowId)` already existed in `game.js` for exactly this
+problem, with a comment explaining that a row's cost label cannot be addressed by
+its own id (the row's flavour container claims the same `<labelId>Description`
+name and comes first in document order). It is now exported, with two wrappers for
+the per-rocket rows:
+
+```js
+export const getRocketFuelDescriptionLabel = (rocket) =>
+    getRowMainDescriptionLabel(`space${capitaliseString(rocket)}AutoBuyerRow`);
+
+export const getRocketTravelDescriptionLabel = (rocket) =>
+    getRowMainDescriptionLabel(`space${capitaliseString(rocket)}TravelRow`);
+```
+
+Every one of the six lookups now goes through a row id, which is the one
+identifier that is stable across languages, and every site is null-guarded —
+including the two that were not, so that a future id change degrades to a stale
+label rather than to a dead frame loop.
+
+Two consequences of the block in `travelToAsteroidChecks` becoming reachable
+again had to be handled:
+
+- the block is now `break`-ed out of by label rather than `return`-ed from, because
+  the Travel button's own colour gate lives below it in the same function and had
+  been working all along — an early return would have broken it;
+- `getRocketTravelDuration()` takes no key and returns the whole map, but the
+  progress-bar maths inside the block called it as `getRocketTravelDuration(rocketName)`
+  and subtracted a number from an object. That had been latent for as long as the
+  block was dead; it now reads `getRocketTravelDuration()[rocketName]` and guards
+  against a zero total.
+
+### Coverage
+
+- `tests/e2e/weather/weather-live.spec.js` → *"rain grounds a fuelled rocket and
+  says why"*, *"the same rocket is cleared for launch the moment the sky clears"*
+  and *"a volcano grounds a fuelled rocket just as rain does"*. All three read the
+  Fuel row's label and the Launch button's colour class, which is exactly what a
+  player looks at before pressing Launch.
+
+---
+
+## 32. A megastructure star's weather was re-rolled every time the star map was drawn — ✅ FIXED
+
+**Severity was: medium — silently rewrote a forecast and a precipitation compound
+the player had already planned around.**
+
+### Reproduction
+
+1. Study stars until a manuscript is generated and travel to it, so a factory star
+   is revealed on the map.
+2. Open the **Star Data** pane and note the megastructure star's weather tendency
+   and precipitation type.
+3. Open the **Star Map** pane, then the Star Data pane again.
+4. Both had changed. Repeating the two clicks changed them again, every time.
+
+### Cause
+
+`generateStarfield` in `ui.js` creates star data down two branches, and only one
+of them checked whether the star had been recorded already:
+
+```js
+} else if (isFactoryStar) {
+    ...
+    generateStarDataAndAddToDataObject(starElement, distance);   // unconditional
+} else if (isInteresting) {
+    ...
+    if (!checkIfInterestingStarIsInStarDataAlready(starElement.id.toLowerCase())) {
+        generateStarDataAndAddToDataObject(starElement, distance);   // guarded
+    }
+```
+
+`generateStarDataAndAddToDataObject` builds a whole new record — four fresh
+weather probabilities, a fresh tendency, a fresh `calculatePrecipitationType()`
+roll — and writes it with `setStarSystemDataObject(newStarData, 'stars', [id])`,
+which replaces the entry rather than merging into it.
+
+This was not cosmetic. `changeWeather()` draws every weather window for a system
+out of that table, and `addPrecipitationResource()` reads `precipitationType` from
+it, so once a player settled a megastructure star the numbers they researched were
+not the numbers they got — and they changed again each time the map was opened.
+The branch is reached on any draw where the star is a known factory star with a
+reported manuscript, which is every draw after the manuscript is found.
+
+### Fix — applied
+
+The factory-star branch now carries the same guard as the interesting-star branch
+beside it, so the record is created once and left alone thereafter.
+
+### Coverage
+
+- `tests/e2e/star-map/star-data-weather.spec.js` → *"a revealed megastructure star
+  keeps its weather across repeated redraws"*, *"a redraw never changes what a
+  system precipitates"* and *"a star that is already recorded is not regenerated at
+  all"*. The last of those stamps each existing record with a marker the generator
+  does not write, so it fails on the regeneration itself rather than on two random
+  rolls happening to differ.
+
+---
+
+## 33. The variable debugger destroyed the live weather when its row was edited — ✅ FIXED
+
+**Severity was: low — debug tooling only, but it corrupted state the whole energy
+economy reads.**
+
+### Reproduction
+
+1. Open the variable debugger (Numpad `*`) and search for
+   `currentStarSystemWeatherEfficiency`. It shows the live triple, for example
+   `spica,0.4,rain`.
+2. Click the value and submit it unchanged.
+3. The weather became `NaN`. Solar generation became `NaN`, the system stat stopped
+   resolving, and nothing recovered it short of the next weather window.
+
+### Cause
+
+`currentStarSystemWeatherEfficiency` is an array — `[system, efficiency, type]` —
+but the debugger's setter map coerced it to a number:
+
+```js
+currentStarSystemWeatherEfficiency: (v) => { currentStarSystemWeatherEfficiency = Number(v); },
+```
+
+The matching reader does `String(currentStarSystemWeatherEfficiency)`, which
+renders the array as `"spica,0.4,rain"`, so what the editor showed back could not
+be parsed by the setter that received it. Every consumer then indexed into a
+number: `getCurrentStarSystemWeatherEfficiency()[1]` is `undefined`, and
+`purchasedRate * undefined` is `NaN`.
+
+### Fix — applied
+
+The setter parses the triple back, accepts an array as well as the rendered
+string, and **rejects** anything that does not parse rather than writing a broken
+value — which matters because the energy tick reads this variable on every frame.
+
+### Coverage
+
+- `tests/e2e/weather/weather-live.spec.js` → *"editing the live weather through the
+  debugger keeps it a usable triple"*. It writes the row back at exactly the value
+  it was already showing, which is the weakest thing that can be asked of an
+  editor, and asserts the state is still an array naming a state with an
+  efficiency.
+
+---
+
+## 34. The antimatter boost sound never played — ✅ FIXED
+
+**Severity was: low — audio only, but the feature was completely dead rather than
+quiet.**
+
+### Reproduction
+
+1. Turn sound effects on in Settings.
+2. Reach a run with a rocket mining an asteroid, and open the **Mining** pane.
+3. Press and hold the rate bar on the right of the diagram. The boost applies —
+   extraction doubles and the bar recolours — but no sound plays, ever.
+
+### Cause
+
+An ordering bug in `setIsAntimatterBoostActive`:
+
+```js
+export function setIsAntimatterBoostActive(value) {
+    if (getSfx() && value) {
+        boostSoundManager.startBoostLoop();
+    }
+    if (!value) {
+        boostSoundManager.stopBoostLoop();
+    }
+    isAntimatterBoostActive = value;   // written last
+}
+```
+
+`startBoostLoop()` plays its first sound synchronously, and that first play opens
+with a guard against the boost having already ended:
+
+```js
+const playBoostSound = () => {
+    if (!getIsAntimatterBoostActive()) {
+        this.stopBoostLoop();
+        return;
+    }
+    ...
+};
+playBoostSound();
+this.boostInterval = setInterval(playBoostSound, 500);
+```
+
+Because the flag was assigned *after* the loop was started, that first call read
+the old value — `false` — concluded the boost was over, and stopped the loop it
+had just started. `boostSoundStarted` went back to `false` before the caller's
+next statement, so the interval never fired either.
+
+The guard itself is right: it is what stops the loop when the player releases the
+bar. It was the write order around it that was wrong.
+
+### Fix — applied
+
+`isAntimatterBoostActive = value;` now happens first, before either the start or
+the stop, so the loop's own guard sees the state it is being started for.
+
+### Coverage
+
+- `tests/e2e/space-mining/space-mining-live.spec.js` → *"the boost sound loops
+  while the boost is held and stops when it ends"* and *"the boost stays silent
+  when sound effects are turned off"*. The first is what failed; the second is its
+  companion, and proves the fix did not simply make the loop unconditional.
+
+This one was found by the spec run rather than by reading the code — the boost
+gesture is driven for real, and the sound is asserted separately from the effect,
+so "the boost works but is silent" was distinguishable from "the boost does not
+work".
+
+---
+
+## 35. A star is two different distances away depending on which code path asks — 🔴 OPEN
+
+**Severity: low-medium — no crash and no lost progress, but "is this star studied"
+can be answered two ways, and star distances depend on the size of a DOM element.**
+
+### Reproduction
+
+1. Play into a run with stars studied, and open the **Star Map** so the star data
+   is populated.
+2. Read a star's `distance` out of the star data object — that is the figure its
+   fuel and AP were computed from.
+3. Call `getStarDataAndDistancesToAllStarsFromSettledStar(getCurrentStarSystem())`
+   and read the same star's distance out of the result.
+4. They differ. In a sample run, Avior was recorded at `0.87` ly and calculated at
+   `0.84` ly.
+
+### Cause
+
+`generateStarfield` derives each star's coordinates from the **measured size of
+the container it is being drawn into**:
+
+```js
+const containerRect = starfieldContainer.getBoundingClientRect();
+const containerWidth = containerRect.width;
+const containerHeight = containerRect.height;
+...
+const x = getSeededRandomInRange(seed + i + numberOfStars, 0, containerWidth - 30) + containerLeft;
+const y = getSeededRandomInRange(seed + i + numberOfStars * 2, 0, containerHeight) + containerTop;
+const z = getSeededRandomInRange(seed + i + numberOfStars * 3, 10, 100000);
+```
+
+and `calculate3DDistance` then combines all three axes.
+
+The seed makes the *proportions* reproducible, but not the *scale*: `x` and `y`
+are in pixels of whatever box the field was drawn into. Two callers draw into
+different boxes:
+
+| Caller | Container | Effect on x and y |
+|---|---|---|
+| The Star Map pane | `#optionContentTab5`, a real panel | spread across the panel |
+| Everything in `calculationMode` | `document.createElement('div')`, never attached | width and height are `0`, so **every star collapses to the same x and y** |
+
+`containerLeft` / `containerTop` cancel out in a difference, so they do not
+matter — but the width and height do. In the dummy container the x/y term
+vanishes entirely and only `z` survives, which is why the calculated distance is
+always the smaller of the two. The gap is bounded by
+`sqrt(width² + height²) / 1000`, roughly 1.3 ly at the shipped panel size.
+
+The two paths are not interchangeable, but they are used interchangeably. The
+drawn map decides whether a star is *studied* (`distance <= getStarVisionDistance()`)
+and writes the record the player's fuel and AP come from. The dummy-container
+path is read by:
+
+- the star-map search's result colouring (`isStudied`);
+- `rollForAncientManuscriptGeneration`, which picks a manuscript star by
+  `distance > oldRange && distance <= newRange`;
+- the rapid-expansion filter after a conquest (`distanceFromSettledStar <= 10`);
+- `hasStudiedAllOTypeStars`, which gates an achievement.
+
+So a star can be inside the range for one and outside it for the other: a search
+result coloured as studied that the map still draws as a faint twinkle, a
+manuscript placed on a star the map has not revealed, or the "studied every
+O-type" achievement granted early.
+
+There is a second consequence of the same line: because the panel is measured
+rather than fixed, **a star's distance depends on the window size**. Existing
+records are not regenerated, so a resize does not rewrite a run's fuel costs —
+but a star first studied after a resize gets a different distance than it would
+have before.
+
+### Suggested fix — needs a decision, not applied
+
+The clean fix is to stop deriving simulation coordinates from layout: generate
+`x` and `y` over a **fixed nominal field** and use the real container only to
+place the elements on screen. That makes a star's distance one number, stable
+across window size, tab state and calculation mode.
+
+It is not applied here because it is a balance decision as much as a bug fix:
+changing the x/y scale moves every newly generated star's distance, and distance
+feeds fuel cost and AP reward. The options, in increasing order of disruption:
+
+1. **Leave the records canonical and fix the calculation path** — have
+   `calculationMode` use the same measured container as the drawn map when one is
+   available. Smallest change, keeps every existing number, but the fallback when
+   the Interstellar tab has never been drawn is still wrong.
+2. **Fix the scale to a constant** (the shipped panel size), so both paths agree
+   and nothing depends on layout. Existing star records are untouched — they are
+   only generated once — so live saves keep their fuel costs, and only newly
+   studied stars use the stable figure.
+3. **Normalise coordinates to 0..1** and drop the pixel scale from the distance
+   maths entirely. Cleanest, but rescales every distance in the game.
+
+Option 2 looks like the best trade: one stable number per star, no change to any
+save already in flight, and the shift for new stars is under 1.3 ly.
+
+### Coverage
+
+- `tests/e2e/star-map/star-map-live.spec.js` → *"a star is the same distance away
+  whichever code path asks"*. It compares every studied star's recorded distance
+  against the calculated one and lists the ones that disagree, so the failure
+  names the stars rather than just asserting a number.
+
+---

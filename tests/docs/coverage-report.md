@@ -4,24 +4,18 @@ _Generated from `functional-areas.json`. Re-run `node tests/docs/generate-report
 
 ## Coverage at a glance
 
-One line per functional area, worst first. 29 green, 10 amber, 4 red, out of 43.
+One line per functional area, worst first. 35 green, 8 amber, 0 red, out of 43.
 
 | | Area | Group | Risk | Specs | Where it stands |
 |:--:|---|---|:--:|--:|---|
-| 🔴 | [Space Mining & Asteroids](areas/space-mining.md) | Space Operations | Medium | — | No spec file yet. |
-| 🔴 | [Star Map & Star Data](areas/star-map.md) | Interstellar | Medium | — | No spec file yet. |
-| 🔴 | [Star Type Bonuses](areas/star-types.md) | Interstellar | Medium | — | No spec file yet. |
-| 🔴 | [Weather](areas/weather.md) | Simulation & Ambience | Low | — | No spec file yet. |
 | 🟠 | [Achievements](areas/achievements.md) | Meta Progression | Low | 12 | 12 specs written; not yet upgraded to integration. |
 | 🟠 | [Ascendency Points & Perks](areas/ascendency.md) | Meta Progression | High | 12 | 12 specs written; not yet upgraded to integration. |
 | 🟠 | [Colonisation](areas/colonise.md) | Interstellar | High | 19 | 19 specs written; not yet upgraded to integration. |
 | 🟠 | [Diplomacy](areas/diplomacy.md) | Interstellar | High | 12 | 12 specs written; not yet upgraded to integration. |
 | 🟠 | [Fleet Hangar](areas/fleet-hangar.md) | Interstellar | High | 14 | 14 specs written; not yet upgraded to integration. |
-| 🟠 | [Galactic Casino](areas/galactic-casino.md) | Meta Progression | Medium | 46 | 46 specs written; not yet upgraded to integration. |
-| 🟠 | [Galactic Market](areas/galactic-market.md) | Meta Progression | Medium | 17 | 17 specs written; not yet upgraded to integration. |
 | 🟠 | [Megastructures](areas/megastructures.md) | Endgame | Medium | 18 | 18 specs written; not yet upgraded to integration. |
-| 🟠 | [Random Events](areas/random-events.md) | Simulation & Ambience | Medium | 21 | 21 specs written; not yet upgraded to integration. |
 | 🟠 | [Rockets & Launch Pad](areas/rockets.md) | Space Operations | Medium | 20 | 20 specs written; not yet upgraded to integration. |
+| 🟠 | [Star Map & Star Data](areas/star-map.md) | Interstellar | Medium | 62 | Fully covered and 61 of its 62 specs pass. The one failure is deliberate: “a star is the same distance away whichever code path asks” has found known-issues #35, where the drawn map and the calculation-mode path disagree because star coordinates are derived from the measured size of the container they are drawn into. Goes green when that is resolved. |
 | 🟢 | [Antimatter](areas/antimatter.md) | Space Operations | Medium | 26 | Done — driven through its own controls, 26 specs passing. |
 | 🟢 | [Application Boot](areas/app-boot.md) | Foundation | High | 11 | Done — driven through its own controls, 11 specs passing. |
 | 🟢 | [Audio](areas/audio.md) | Simulation & Ambience | Low | 13 | Done — driven through its own controls, 13 specs passing. |
@@ -34,6 +28,8 @@ One line per functional area, worst first. 29 green, 10 amber, 4 red, out of 43.
 | 🟢 | [Cosmicopedia & Help](areas/cosmicopedia.md) | Presentation & Shell | Low | 6 | Done — driven through its own controls, 6 specs passing. |
 | 🟢 | [Demo Build Lockdowns](areas/demo-build.md) | Presentation & Shell | High | 19 | Done — driven through its own controls, 19 specs passing. |
 | 🟢 | [Energy & Power Grid](areas/energy.md) | Core Economy | High | 26 | Done — driven through its own controls, 26 specs passing. |
+| 🟢 | [Galactic Casino](areas/galactic-casino.md) | Meta Progression | Medium | 69 | Done — driven through its own controls, 69 specs passing. |
+| 🟢 | [Galactic Market](areas/galactic-market.md) | Meta Progression | Medium | 35 | Done — driven through its own controls, 35 specs passing. |
 | 🟢 | [Local Save & Load](areas/save-load-local.md) | Foundation | High | 10 | Done — driven through its own controls, 10 specs passing. |
 | 🟢 | [Localization](areas/localization.md) | Foundation | High | 91 | Done — driven through its own controls, 91 specs passing. |
 | 🟢 | [News Ticker](areas/news-ticker.md) | Simulation & Ambience | Low | 26 | Done — driven through its own controls, 26 specs passing. |
@@ -41,16 +37,20 @@ One line per functional area, worst first. 29 green, 10 amber, 4 red, out of 43.
 | 🟢 | [Onboarding & Tutorial](areas/onboarding.md) | Presentation & Shell | High | 13 | Done — driven through its own controls, 13 specs passing. |
 | 🟢 | [Performance & Frame Budget](areas/performance.md) | Presentation & Shell | High | 10 | Done — driven through its own controls, 10 specs passing. |
 | 🟢 | [Philosophies](areas/philosophies.md) | Meta Progression | High | 42 | Done — driven through its own controls, 42 specs passing. |
+| 🟢 | [Random Events](areas/random-events.md) | Simulation & Ambience | Medium | 52 | Done — driven through its own controls, 52 specs passing. |
 | 🟢 | [Rebirth](areas/rebirth.md) | Meta Progression | High | 10 | Done — driven through its own controls, 10 specs passing. |
 | 🟢 | [Research](areas/research.md) | Core Economy | High | 25 | Done — driven through its own controls, 25 specs passing. |
 | 🟢 | [Resources](areas/resources.md) | Core Economy | High | 21 | Done — driven through its own controls, 21 specs passing. |
 | 🟢 | [Save Migration](areas/save-migration.md) | Foundation | High | 11 | Done — driven through its own controls, 11 specs passing. |
 | 🟢 | [Settings & Preferences](areas/settings.md) | Foundation | Medium | 20 | Done — driven through its own controls, 20 specs passing. |
+| 🟢 | [Space Mining & Asteroids](areas/space-mining.md) | Space Operations | Medium | 44 | Done — the survey, both panels, the boost gesture and a full outbound-and-home journey driven through their own controls, 44 specs passing. Found and closed known-issues #31 and #34. |
 | 🟢 | [Space Telescope](areas/space-telescope.md) | Space Operations | Medium | 10 | Done — driven through its own controls, 10 specs passing. |
+| 🟢 | [Star Type Bonuses](areas/star-types.md) | Interstellar | Medium | 25 | Done — the B, F and O effects are measured off the stores, the grid and the rocks rather than read off a multiplier, and A, G, K and M are each proven inert against the same three measurements. K has no mechanic in the game; the specs pin that rather than leave it unsaid. |
 | 🟢 | [Starship](areas/starship.md) | Interstellar | High | 8 | Done — driven through its own controls, 8 specs passing. |
 | 🟢 | [Statistics](areas/statistics.md) | Simulation & Ambience | Low | 16 | Done — driven through its own controls, 16 specs passing. |
 | 🟢 | [Tech Tree](areas/technology.md) | Core Economy | High | 18 | Done — driven through its own controls, 18 specs passing. |
 | 🟢 | [UI Navigation](areas/ui-navigation.md) | Presentation & Shell | Medium | 24 | Done — driven through its own controls, 24 specs passing. |
+| 🟢 | [Weather](areas/weather.md) | Simulation & Ambience | Low | 31 | Done — every state reached through the game's own weighted draw and the solar penalty measured off the grid, 31 specs passing. Found and closed known-issues #31 and #33. |
 
 ---
 
@@ -74,12 +74,12 @@ when an area is upgraded.
 
 | | Areas | Share |
 |---|---:|---:|
-| 🔴 Red — no spec file | 4 | 9% |
-| 🟠 Amber — spec written, not yet upgraded | 10 | 23% |
-| 🟢 Green — signed off | 29 | 67% |
+| 🔴 Red — no spec file | 0 | 0% |
+| 🟠 Amber — spec written, not yet upgraded | 8 | 19% |
+| 🟢 Green — signed off | 35 | 81% |
 | **Total functional areas** | **43** | |
 
-488 individual test cases are identified across all areas. **791 Playwright specs are implemented** across 39 areas, and all of them pass except where an area's note says otherwise — a spec that fails on a live defect is left failing on purpose, and the defect is written up in [known-issues.md](known-issues.md).
+555 individual test cases are identified across all areas. **1025 Playwright specs are implemented** across 43 areas, and all of them pass except where an area's note says otherwise — a spec that fails on a live defect is left failing on purpose, and the defect is written up in [known-issues.md](known-issues.md).
 
 Run them with `npm run test:e2e` (all areas) or `node tests/run-e2e.mjs <area>`. Each area writes its own HTML report to `test-reports/e2e/<area>/index.html`, with a summary index at `test-reports/e2e/index.html`.
 
@@ -124,7 +124,7 @@ Mid-game expansion off-planet — asteroids, rockets, antimatter and the telesco
 
 | Status | Area | Risk | Planned | Specs | Existing coverage |
 |:--:|---|:--:|--:|--:|---|
-| 🔴 | [Space Mining & Asteroids](areas/space-mining.md) | Medium | 6 | — | — |
+| 🟢 | [Space Mining & Asteroids](areas/space-mining.md) | Medium | 18 | **44** | — |
 | 🟠 | [Rockets & Launch Pad](areas/rockets.md) | Medium | 15 | **20** | — |
 | 🟢 | [Antimatter](areas/antimatter.md) | Medium | 26 | **26** | spaceAntimatter.test.js |
 | 🟢 | [Space Telescope](areas/space-telescope.md) | Medium | 10 | **10** | — |
@@ -135,8 +135,8 @@ Travel, conquest and settlement. The most stateful and branch-heavy part of the 
 
 | Status | Area | Risk | Planned | Specs | Existing coverage |
 |:--:|---|:--:|--:|--:|---|
-| 🔴 | [Star Map & Star Data](areas/star-map.md) | Medium | 5 | — | — |
-| 🔴 | [Star Type Bonuses](areas/star-types.md) | Medium | 6 | — | — |
+| 🟠 | [Star Map & Star Data](areas/star-map.md) | Medium | 27 | **62** | — |
+| 🟢 | [Star Type Bonuses](areas/star-types.md) | Medium | 15 | **25** | — |
 | 🟢 | [Starship](areas/starship.md) | High | 10 | **8** | — |
 | 🟠 | [Fleet Hangar](areas/fleet-hangar.md) | High | 9 | **14** | — |
 | 🟠 | [Diplomacy](areas/diplomacy.md) | High | 6 | **12** | — |
@@ -149,9 +149,9 @@ Cross-run systems. Bugs here destroy player progress permanently, which makes th
 
 | Status | Area | Risk | Planned | Specs | Existing coverage |
 |:--:|---|:--:|--:|--:|---|
-| 🟠 | [Galactic Market](areas/galactic-market.md) | Medium | 7 | **17** | — |
+| 🟢 | [Galactic Market](areas/galactic-market.md) | Medium | 13 | **35** | — |
 | 🟠 | [Ascendency Points & Perks](areas/ascendency.md) | High | 6 | **12** | — |
-| 🟠 | [Galactic Casino](areas/galactic-casino.md) | Medium | 8 | **46** | — |
+| 🟢 | [Galactic Casino](areas/galactic-casino.md) | Medium | 11 | **69** | — |
 | 🟢 | [Rebirth](areas/rebirth.md) | High | 10 | **10** | — |
 | 🟢 | [Philosophies](areas/philosophies.md) | High | 13 | **42** | — |
 | 🟠 | [Achievements](areas/achievements.md) | Low | 8 | **12** | — |
@@ -172,8 +172,8 @@ Background systems that modify the economy or the presentation without direct pl
 
 | Status | Area | Risk | Planned | Specs | Existing coverage |
 |:--:|---|:--:|--:|--:|---|
-| 🔴 | [Weather](areas/weather.md) | Low | 6 | — | — |
-| 🟠 | [Random Events](areas/random-events.md) | Medium | 8 | **21** | — |
+| 🟢 | [Weather](areas/weather.md) | Low | 16 | **31** | — |
+| 🟢 | [Random Events](areas/random-events.md) | Medium | 13 | **52** | — |
 | 🟢 | [News Ticker](areas/news-ticker.md) | Low | 12 | **26** | — |
 | 🟢 | [Audio](areas/audio.md) | Low | 5 | **13** | — |
 | 🟢 | [Statistics](areas/statistics.md) | Low | 16 | **16** | — |

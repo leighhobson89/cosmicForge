@@ -5816,7 +5816,17 @@ export function generateStarfield(starfieldContainer, numberOfStars = 70, seed =
             starElement.style.height = `${star.height * 2}px`;
             starElement.classList.add('star');
 
-            generateStarDataAndAddToDataObject(starElement, distance);
+            // Guarded exactly as the interesting-star branch below is.
+            // `generateStarDataAndAddToDataObject` builds a whole new record —
+            // four fresh weather probabilities, a fresh tendency and a fresh
+            // precipitation roll — and `setStarSystemDataObject` replaces the
+            // entry rather than merging into it. Unguarded, every redraw of the
+            // map re-rolled a revealed megastructure star's forecast and the
+            // compound its system precipitates, both of which the player has
+            // already planned around by the time they can see it.
+            if (!checkIfInterestingStarIsInStarDataAlready(starElement.id.toLowerCase())) {
+                generateStarDataAndAddToDataObject(starElement, distance);
+            }
             if (mapMode === 'distance') {
                 starElement.style.backgroundColor = getStarColorForDistanceFilterButton(distance);
             } else if (mapMode === 'in range') {

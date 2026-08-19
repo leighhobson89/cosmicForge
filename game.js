@@ -1931,7 +1931,18 @@ function getSupplyChainDisruptionMultiplier(category, key) {
         return 1;
     }
 
-    return 0.25;
+    // The event rolls its own severity (60-80%) and stores it on the effect, and
+    // both the modal and the Events screen quote that roll to the player — so the
+    // production cut has to come from the same number rather than from a
+    // constant, or the figure shown is not the figure applied.
+    const percentDown = Number(state.percentDown);
+    if (!Number.isFinite(percentDown)) {
+        // Effects restored from a save written before the roll was stored keep
+        // the original flat 75% cut.
+        return 0.25;
+    }
+
+    return Math.max(0, 1 - (Math.min(100, Math.max(0, percentDown)) / 100));
 }
 
 function grantNonExhaustiveResourcesAfterRebirth() {
@@ -5630,10 +5641,36 @@ function getAllElements(resourcesArray, compoundsArray) {
 // `generateElementId` gives the cost label, and the flavour container comes first
 // in document order, so `getElementById` always returns the wrong one. Every cost
 // label is therefore addressed through its row, which is uniquely `labelId`.
-const getRowMainDescriptionLabel = (rowId) => {
+export const getRowMainDescriptionLabel = (rowId) => {
     const rowEl = document.getElementById(rowId);
     if (!rowEl) return null;
     return rowEl.querySelector('.description-container .notation');
+};
+
+// The cost labels below used to be reachable by a short id — `#fuelDescription`,
+// `#travelToDescription` and so on — because `createOptionRow` derived the id from
+// the row's *visible label*: "Fuel:" became `fuelDescription`. The localisation
+// work changed that derivation to use the row's id instead, which was necessary
+// (a translated label cannot be a DOM id) but left every consumer asking for a
+// name nothing carries any more. These resolve the same labels through their rows,
+// which is the one identifier that is stable across languages.
+export const getRocketFuelDescriptionLabel = (rocket) =>
+    getRowMainDescriptionLabel(`space${capitaliseString(rocket)}AutoBuyerRow`);
+
+export const getRocketTravelDescriptionLabel = (rocket) =>
+    getRowMainDescriptionLabel(`space${capitaliseString(rocket)}TravelRow`);
+
+/**
+ * The Fuel row's label for whichever rocket pane is currently open.
+ *
+ * Only one rocket pane exists in the DOM at a time, which is why a single shared
+ * id worked here before; resolving from the open pane keeps that behaviour.
+ */
+const getOpenRocketFuelDescriptionLabel = () => {
+    const pane = getCurrentOptionPane();
+    return (typeof pane === 'string' && /^rocket\d+$/.test(pane))
+        ? getRocketFuelDescriptionLabel(pane)
+        : null;
 };
 
 function getAllDynamicDescriptionElements(resourceTierPairs, compoundTierPairs) {
@@ -6797,12 +6834,17 @@ export function checkPowerForSpaceTelescopeTimer(timers) {
 }
 
 function travelToAsteroidChecks(element) {
-    const accompanyingLabel = document.getElementById('travelToDescription');  
-
-    if (accompanyingLabel) { //travelTo description
+    travelRowDescription: { //travelTo description
         const rocketClass = [...element.classList].find(cls => cls.startsWith('rocket') && cls.match(/^rocket\d+/));
         if (rocketClass) {
             const rocketName = rocketClass.match(/^rocket\d+/)[0];
+            // Per rocket, and addressed through its row: the old shared
+            // `#travelToDescription` id no longer exists on any element. The
+            // block is broken out of rather than returned from, because the
+            // Travel button's own colour gate lives below it and does not
+            // depend on this label.
+            const accompanyingLabel = getRocketTravelDescriptionLabel(rocketName);
+            if (!accompanyingLabel) break travelRowDescription;
             const travelToProgressBarElement = document.getElementById(`spaceTravelToAsteroidProgressBar${capitaliseString(rocketName)}Container`);
             const travelToDropdown = document.getElementById(`${rocketName}TravelDropdown`);
             const destinationAsteroidTextElement = document.getElementById(`${rocketName}DestinationAsteroid`);
@@ -6859,8 +6901,9 @@ function travelToAsteroidChecks(element) {
                     travelToDropdown.querySelector('div.dropdown span').innerHTML = getCurrentDestinationDropdownText();
                 }
 
-                const elapsedTime = getRocketTravelDuration(rocketName) - getTimeLeftUntilRocketTravelToAsteroidTimerFinishes(rocketName);
-                const progressBarPercentage = (elapsedTime / getRocketTravelDuration(rocketName)) * 100;
+                const totalTravelDuration = getRocketTravelDuration()[rocketName];
+                const elapsedTime = totalTravelDuration - getTimeLeftUntilRocketTravelToAsteroidTimerFinishes(rocketName);
+                const progressBarPercentage = totalTravelDuration ? (elapsedTime / totalTravelDuration) * 100 : 0;
                 document.getElementById(`spaceTravelToAsteroidProgressBar${capitaliseString(rocketName)}`).style.width = `${progressBarPercentage}%`;
             }
         }
@@ -8006,24 +8049,34 @@ function handleRocketFuellingChecksAndOneOffPurchases(element, price) {
         }        
     } else if (filteredRockets.includes(rocket)) {
         element.classList.add('invisible');
-        accompanyingLabel.textContent = 'Fuelling...';
+        accompanyingLabel.textContent = localize('textFuelling', getLanguage());
         accompanyingLabel.classList.remove('red-disabled-text');
         accompanyingLabel.classList.add('green-ready-text');
     } else {
         element.classList.add('red-disabled-text');
     }
 
+    // The Fuel row's own label, addressed through its row rather than by the
+    // pre-localisation `#fuelDescription` id, which nothing carries any more. It
+    // is read once and null-guarded: this runs from the frame loop's cost-check
+    // sweep, so a missing element here would take the whole loop down with it.
+    const fuelDescriptionElement = getRocketFuelDescriptionLabel(rocket);
+
     if (rocketsFuellerStartedArray.includes(`${rocket}FuelledUp`) && getCurrentStarSystemWeatherEfficiency()[2] !== 'rain' && getCurrentStarSystemWeatherEfficiency()[2] !== 'volcano' && getCurrentOptionPane() === rocket) {
-        document.getElementById('fuelDescription').textContent = localize('textReadyForLaunch', getLanguage());
-        document.getElementById('fuelDescription').classList.add('green-ready-text');
-        document.getElementById('fuelDescription').classList.remove('red-disabled-text');
+        if (fuelDescriptionElement) {
+            fuelDescriptionElement.textContent = localize('textReadyForLaunch', getLanguage());
+            fuelDescriptionElement.classList.add('green-ready-text');
+            fuelDescriptionElement.classList.remove('red-disabled-text');
+        }
         setCheckRocketFuellingStatus(rocket, false);
         launchButton.classList.add('green-ready-text');
         launchButton.classList.remove('red-disabled-text');
     } else if (rocketsFuellerStartedArray.includes(`${rocket}FuelledUp`) && (getCurrentStarSystemWeatherEfficiency()[2] === 'rain' || getCurrentStarSystemWeatherEfficiency()[2] === 'volcano') && getCurrentOptionPane() === rocket) {
-        document.getElementById('fuelDescription').textContent = localize('textBadWeather', getLanguage());
-        document.getElementById('fuelDescription').classList.remove('green-ready-text');
-        document.getElementById('fuelDescription').classList.add('red-disabled-text');
+        if (fuelDescriptionElement) {
+            fuelDescriptionElement.textContent = localize('textBadWeather', getLanguage());
+            fuelDescriptionElement.classList.remove('green-ready-text');
+            fuelDescriptionElement.classList.add('red-disabled-text');
+        }
         launchButton.classList.remove('green-ready-text');
         launchButton.classList.add('red-disabled-text');
     }
@@ -8825,6 +8878,14 @@ function galacticMarketChecks() {
                 const commissionAdjustedIncomingQuantity = Math.max(0, Math.floor(incomingQuantity - (commissionQuantity * (incomingQuantity / parseNumber(document.getElementById('galacticMarketOutgoingQuantityText').innerHTML)))));
                 document.getElementById('galacticMarketComissionQuantitySummaryText').innerHTML = Math.floor((getCurrentGalacticMarketCommission() / 100) * parseNumber(document.getElementById('galacticMarketOutgoingQuantityText').innerHTML));
                 document.getElementById('galacticMarketIncomingQuantityText').innerHTML = commissionAdjustedIncomingQuantity;
+            } else if (document.getElementById('galacticMarketOutgoingQuantityText').innerHTML !== 'N/A') {
+                // Nothing is going out, so nothing can come back. Without this the
+                // incoming and commission lines keep the figures from the last
+                // amount the player typed, and the Confirm button below stays
+                // armed off the stale incoming quantity.
+                setGalacticMarketIncomingQuantity(0);
+                document.getElementById('galacticMarketIncomingQuantityText').innerHTML = 0;
+                document.getElementById('galacticMarketComissionQuantitySummaryText').innerHTML = 0;
             }
 
         } else {
@@ -10667,7 +10728,7 @@ export function startTravelToAndFromAsteroidTimer(adjustment, rocket, direction)
             timeRemaining = Math.max(timeRemaining - deltaMs, 0);
             setTimeLeftUntilRocketTravelToAsteroidTimerFinishes(rocket, timeRemaining);
 
-            const travelTimerDescriptionElement = document.getElementById('travelToDescription');
+            const travelTimerDescriptionElement = getRocketTravelDescriptionLabel(rocket);
             const timeLeftUI = Math.max(Math.floor(timeRemaining / 1000), 0);
 
             if (timeRemaining <= 0) {
@@ -10822,7 +10883,7 @@ export function startTravelToDestinationStarTimer(adjustment) {
             timeRemaining = Math.max(timeRemaining - deltaMs, 0);
             setTimeLeftUntilTravelToDestinationStarTimerFinishes(timeRemaining);
 
-            const travelTimerDescriptionElement = document.getElementById('travellingToDescription');
+            const travelTimerDescriptionElement = getRowMainDescriptionLabel('spaceStarShipTravelRow');
             const timeLeftUI = Math.max(Math.floor(timeRemaining / 1000), 0);
             const starData = getStarSystemDataObject('stars', [destination]);
             const distance = starData.distance;
@@ -11020,7 +11081,7 @@ export function startPillageVoidTimer(adjustment) {
 
             timeRemaining = Math.max(timeRemaining - deltaMs, 0);
             setTimeLeftUntilPillageVoidTimerFinishes(timeRemaining);
-            const pillageVoidTimerDescriptionElement = document.getElementById('pillageTheVoidDescription');
+            const pillageVoidTimerDescriptionElement = getRowMainDescriptionLabel('spaceTelescopePhilosophyBoostResourcesAndCompoundsRow');
             const timeLeftUI = Math.max(Math.floor(timeRemaining / 1000), 0);
 
             if (timeRemaining <= 0) {
@@ -11082,7 +11143,7 @@ export function startInvestigateStarTimer(adjustment) {
             timeRemaining = Math.max(timeRemaining - deltaMs, 0);
             setTimeLeftUntilStarInvestigationTimerFinishes(timeRemaining);
 
-            const searchTimerDescriptionElement = document.getElementById('studyStarsDescription');
+            const searchTimerDescriptionElement = getRowMainDescriptionLabel('spaceTelescopeInvestigateStarRow');
             const timeLeftUI = Math.max(Math.floor(timeRemaining / 1000), 0);
 
             if (timeRemaining <= 0) {
@@ -11209,7 +11270,7 @@ export function startSearchAsteroidTimer(adjustment) {
 
             timeRemaining = Math.max(timeRemaining - deltaMs, 0);
             setTimeLeftUntilAsteroidScannerTimerFinishes(timeRemaining);
-            const searchTimerDescriptionElement = document.getElementById('scanAsteroidsDescription');
+            const searchTimerDescriptionElement = getRowMainDescriptionLabel('spaceTelescopeSearchAsteroidRow');
             const timeLeftUI = Math.max(Math.floor(timeRemaining / 1000), 0);
 
             if (timeRemaining <= 0) {
@@ -12733,9 +12794,12 @@ export function fuelRockets() {
                 rocketLaunchButton.classList.add('red-disabled-text');
                 rocketLaunchButton.textContent = `${Math.floor(progressBarPercentage)}%`;
                 rocketLaunchButton.classList.add('no-interaction');
-                document.getElementById('fuelDescription').textContent = localize('textRequiresPower', getLanguage());
-                document.getElementById('fuelDescription').classList.remove('green-ready-text');
-                document.getElementById('fuelDescription').classList.add('red-disabled-text');
+                const noPowerDescription = getRocketFuelDescriptionLabel(rocket);
+                if (noPowerDescription) {
+                    noPowerDescription.textContent = localize('textRequiresPower', getLanguage());
+                    noPowerDescription.classList.remove('green-ready-text');
+                    noPowerDescription.classList.add('red-disabled-text');
+                }
             }
         }
     });
@@ -12743,7 +12807,7 @@ export function fuelRockets() {
     const rockets = ['rocket1', 'rocket2', 'rocket3', 'rocket4'];
 
     if (!getCanFuelRockets()) {
-        const fuelDescriptionElement = document.getElementById('fuelDescription');
+        const fuelDescriptionElement = getOpenRocketFuelDescriptionLabel();
         rockets.forEach(rocket => {
             const fuelRocketButton = document.querySelector(`button.${rocket}`);
             if (fuelRocketButton) {
@@ -12758,10 +12822,10 @@ export function fuelRockets() {
         });
 
     } else {
-        const fuelDescriptionElement = document.getElementById('fuelDescription');
+        const fuelDescriptionElement = getOpenRocketFuelDescriptionLabel();
         
         if (fuelDescriptionElement) {
-            fuelDescriptionElement.textContent = 'Fuelling...';
+            fuelDescriptionElement.textContent = localize('textFuelling', getLanguage());
             fuelDescriptionElement.classList.add('green-ready-text');
             fuelDescriptionElement.classList.remove('red-disabled-text');
         }
@@ -12804,7 +12868,10 @@ export function updateRocketDescription() {
 
     for (const rocket of launchedRockets) {
         if (rocket === currentScreen) {
-            document.getElementById('fuelDescription').textContent = localize('textLaunchedExclaim', getLanguage());
+            const launchedDescription = getRocketFuelDescriptionLabel(rocket);
+            if (launchedDescription) {
+                launchedDescription.textContent = localize('textLaunchedExclaim', getLanguage());
+            }
             break;
         }
     }

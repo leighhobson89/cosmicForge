@@ -124,6 +124,11 @@ class GameHarness {
         audio: await import('/audioManager.js'),
         loc: await import('/localization.js'),
         desc: await import('/descriptions.js'),
+        // Shared string/number helpers. `capitaliseWordsWithRomanNumerals` in
+        // particular is how the game turns a star data key back into the DOM id
+        // the map drew it with, and multi-word names make naive capitalisation
+        // wrong.
+        util: await import('/utilityFunctions.js'),
         timers: await import('/timerManagerDelta.js'),
         // The non-delta timerManager schedules wall-clock work such as the news
         // ticker, and is a different instance from `timers` above.

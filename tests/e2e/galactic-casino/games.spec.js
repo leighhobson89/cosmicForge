@@ -621,8 +621,8 @@ test.describe('Galactic Casino — Game 4: Visiting Void Seer', () => {
         spentAfter: m.cg.statFunctionsGets.stat_casinoPointsSpentThisRun(),
         spinning: container.getAttribute('data-spinning'),
         gamesWon: m.rdo.getGalacticCasinoDataObject('casinoGamesWon'),
-        wonStat: m.cg.statFunctionsGets.stat_voidseerWonThisRun(),
-        playedStat: m.cg.statFunctionsGets.stat_voidseerPlayedThisRun()
+        wonStat: m.cg.statFunctionsGets.stat_voidSeerWonThisRun(),
+        playedStat: m.cg.statFunctionsGets.stat_voidSeerPlayedThisRun()
       };
     });
 

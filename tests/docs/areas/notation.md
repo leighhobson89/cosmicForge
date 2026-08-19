@@ -31,7 +31,7 @@ Formatting of every displayed number across notation modes — touches every scr
 
 ## Status meaning
 
-🟢 **GREEN** — Signed off as done: the area is driven through its real controls, its rules are asserted by measurement rather than by field reads, and the whole suite passes.
+🟢 **GREEN** — Upgraded to integration — the setting is driven through its own dropdown and every screen is swept in both modes. The 3 specs that were failing found known-issues #26 and #27, both now fixed at source.
 
 ---
 

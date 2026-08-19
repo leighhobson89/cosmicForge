@@ -1,8 +1,8 @@
 # e2e / star-map
 
-**Star Map & Star Data** — 🔴 RED
+**Star Map & Star Data** — 🟠 AMBER
 
-Galaxy map rendering, star selection, study results and the star data panel.
+The seeded starfield and how each star is drawn, the four map modes, the search and its ping, the connection lines, orbits and arrows, the travel gate, and the Star Data table with its six sortable columns.
 
 Specs for this area go in this folder, named `<scenario>.spec.js`.
 

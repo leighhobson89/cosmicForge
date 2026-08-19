@@ -4033,6 +4033,14 @@ export function getIsAntimatterBoostActive() {
 }
 
 export function setIsAntimatterBoostActive(value) {
+    // The flag has to be written before the loop is started. `startBoostLoop`
+    // plays its first sound synchronously, and that first play checks
+    // `getIsAntimatterBoostActive()` to decide whether the boost is still on —
+    // so starting the loop first meant it read the *old* value, concluded the
+    // boost had ended, and stopped itself again immediately. The boost sound
+    // never played at all.
+    isAntimatterBoostActive = value;
+
     if (getSfx() && value) {
         boostSoundManager.startBoostLoop();
     }
@@ -4040,8 +4048,6 @@ export function setIsAntimatterBoostActive(value) {
     if (!value) {
         boostSoundManager.stopBoostLoop();
     }
-
-    isAntimatterBoostActive = value;
 }
 
 export function getAntimatterSvgEventListeners() {
@@ -7190,7 +7196,22 @@ function getVariableDebuggerSetterForLabel(label) {
         // Weather
         weatherEffectOn: (v) => { weatherEffectOn = v === 'true' || v === true; },
         weatherEfficiencyApplied: (v) => { weatherEfficiencyApplied = v === 'true' || v === true; },
-        currentStarSystemWeatherEfficiency: (v) => { currentStarSystemWeatherEfficiency = Number(v); },
+        // `[system, efficiency, type]`, not a number. The reader below renders it
+        // as "spica,0.4,rain", so coercing what comes back with Number() turned
+        // the live weather into NaN — and the energy tick reads index 1 of it on
+        // every frame. A value that does not parse is rejected rather than
+        // written, for the same reason.
+        currentStarSystemWeatherEfficiency: (v) => {
+            if (Array.isArray(v) && v.length === 3) {
+                currentStarSystemWeatherEfficiency = [String(v[0]), Number(v[1]), String(v[2])];
+                return;
+            }
+            const parts = String(v).split(',').map((part) => part.trim());
+            if (parts.length !== 3) return;
+            const efficiency = Number(parts[1]);
+            if (!Number.isFinite(efficiency)) return;
+            currentStarSystemWeatherEfficiency = [parts[0], efficiency, parts[2]];
+        },
         currentPrecipitationRate: (v) => { currentPrecipitationRate = Number(v); },
 
         // Space Telescope

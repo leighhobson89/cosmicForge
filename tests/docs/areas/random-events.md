@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | 🟠 AMBER |
+| **Status** | 🟢 GREEN |
 | **Risk if broken** | Medium |
 | **Group** | Simulation & Ambience |
 | **Spec folder** | `tests/e2e/random-events/` |
@@ -12,18 +12,23 @@ Instant and timed events, their probability model, effects and history tracking.
 
 ## What should be tested
 
-- [ ] Every event is registered, uniquely named, localized and offered by the debug menu
-- [ ] Every instant event applies its effect exactly once and is recorded in history
-- [ ] Every timed effect applies, counts down, cannot restart while running and cleanly expires
-- [ ] Probability decays by 0.9 per trigger and never falls below the 0.01 floor
-- [ ] Events with unmet preconditions refuse to fire, and an unknown id is refused without throwing
-- [ ] Supply chain disruption only fires once an autobuyer exists and targets one the player owns
-- [ ] Stock loss removes 40-80% of exactly one held stock
-- [ ] Event history is capped, ordered newest first, and active timed effects survive save/load with their remaining time
+- [ ] Every event is fired against a run that cannot take it and one that can, so both halves of its guard are exercised
+- [ ] An open guard is distinguished from an event that happens: stockLoss is offered on a bare run but declines when there is nothing to take
+- [ ] Instant effects are measured, not read back: one plant lost, the highest battery, half the research, a doubled pile, one stock down 40-80%
+- [ ] An antimatter reaction returns exactly what that rocket had mined, destroys the rock and unbuilds the rocket
+- [ ] Losing the starship clears the ship, its five modules, the fleet and the destination
+- [ ] A broken-down miner stops that rocket dead and no other, measured per rocket
+- [ ] A supply chain disruption names a material the run automates and throttles its production by the percentage it advertised
+- [ ] Black hole instability shifts the power by a stored 0.5-1.5 roll and hands the original values back on expiry
+- [ ] Timed effects run their advertised duration, count down, refuse to restart, and expire through the frame loop into the completed log
+- [ ] Probability decays 0.9 per trigger to a 0.01 floor, for that event only, and survives a save with the running effect
+- [ ] The Events screen lists running effects with a live countdown, colours good and bad, and orders by what ends soonest
+- [ ] The completed log shows instant events as "Instant" with the figures they moved, newest first
+- [ ] Every event renders a real name and effect line on the screen in all five languages
 
 ## Status meaning
 
-🟠 **AMBER** — A spec file exists, but the area has not yet been through the integration upgrade — some of its coverage is still function-level rather than played through the UI.
+🟢 **GREEN** — Signed off as done: the area is driven through its real controls, its rules are asserted by measurement rather than by field reads, and the whole suite passes.
 
 ---
 

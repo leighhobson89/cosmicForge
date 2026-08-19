@@ -58,7 +58,7 @@ ${area.tests.map((t) => `- [ ] ${t}`).join('\n')}
 
 ## Status meaning
 
-${LIGHT[area.status]} **${area.status.toUpperCase()}** — ${statusLegend[area.status]}
+${LIGHT[area.status]} **${area.status.toUpperCase()}** — ${area.note || statusLegend[area.status]}
 
 ---
 

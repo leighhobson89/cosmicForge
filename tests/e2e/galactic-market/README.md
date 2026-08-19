@@ -1,6 +1,6 @@
 # e2e / galactic-market
 
-**Galactic Market** — 🟠 AMBER
+**Galactic Market** — 🟢 GREEN
 
 Material-for-material trading, bias-driven pricing, AP liquidation and the lockdown event.
 

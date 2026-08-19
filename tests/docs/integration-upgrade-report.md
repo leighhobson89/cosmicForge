@@ -23,6 +23,7 @@ Rewriting one of them to fight an actual battle found a live crash within an hou
 |:--:|---|
 | 🟢 | Upgraded and green |
 | 🟡 | Upgraded, some specs still failing |
+| 🟠 | Upgraded, failing only on live defects that are open in known-issues.md |
 | ⚪ | Not started |
 
 ---
@@ -1294,6 +1295,547 @@ condensed floors rather than rounds, so 1999 reads `1.9K` — stays in the contr
 file. Proving it on screen needs a value whose two renderings differ, and every
 figure a run can be driven to deterministically is round. Asserting it against a
 live, moving number would be pinning a race rather than a rule.
+
+---
+
+## 🟢 Galactic Market — `galactic-market-live.spec.js`, 18 specs, all passing
+
+**What is different.** The old file already drove the dropdowns, but it called
+`galacticMarketSellApForCash()` and `galacticMarketLiquidateForAp()` outright and
+never pressed the **Liquidate** button at all. The new file calls no market
+function: every trade, both AP routes and the whole liquidation go through the
+controls, and each assertion is made against what the pane rendered.
+
+Why that matters here more than in most areas: **the trade reads its own inputs
+back out of the DOM.**
+
+```
+galacticMarketChecks()      outgoing text  <- the quantity field
+  -> calculateIncomingQuantity()           incoming <- bias-adjusted price ratio
+  -> commission text        <- floor(commission% x outgoing)
+  -> incoming text          <- incoming less its share of the commission
+Confirm -> galacticMarketTrade()
+  -> parseNumber(outgoing text)            the rendered string is the input
+  -> moves both holdings, shifts both biases
+```
+
+`galacticMarketChecks()` only runs while the Galactic tab is open *and* the market
+pane is current, so a trade staged from anywhere else has no summary and moves
+nothing. No function-level test can see that interlock.
+
+**Covered.** All fourteen materials traded in one sweep, each paired with the next
+round the ring so every material appears on both sides; the incoming quantity
+pinned to the bias-adjusted ratio less the commission share; demand proven to move
+the price in both directions; the bias shift after a trade pinned to the traded
+quantity over that material's `tradeVolume`; the ten-second decay watched walking
+a bias back towards zero from both signs; the sidebar bias line and its three
+severity colours; the tooltip's base price, adjusted price and trade volume; the
+quantity selector's lock, "all stock" and clamp; the self-trade exclusion; the
+commission walked from 10 to its 80 cap over a dozen real trades; all three AP
+sale quantities; and the liquidation authorised, quoted, pressed and refused a
+second time.
+
+**Two things about time that shaped every spec in the file.**
+
+- **Plain notation is staged, deliberately.** The trade parses the *rendered*
+  string, so in condensed mode entering 12345 deducts 12300, and the incoming line
+  is a rounded-down version of the exact figure credited. "The pane's promise
+  equals the transaction" is not checkable in that mode — the two legitimately
+  differ by the rounding. Plain notation groups in thousands and loses nothing.
+- **Read and press in the same synchronous block.** Three clocks move underneath
+  a split read: production adds stock, the ten-second bias decay moves the
+  conversion, and a trade's own commission rise changes the next frame's summary.
+  Every quantity comparison here snapshots, dispatches and re-snapshots inside one
+  `page.evaluate`, which is the only way the sweep is exact rather than
+  approximately right. The same fix was applied to the pre-existing bias spec in
+  `galactic-market.spec.js`, which had been flaking by exactly one 0.05 decay step.
+
+**And never pin a bias in the expectation.** The decay makes any figure derived
+from one a moving target, which cost three separate red runs: the demand spec
+pinned `3999`, the sidebar spec pinned `O:+1.5%`, and the tooltip spec pinned
+`+2.0%`. All three now read the live bias in the same round trip as the rendering
+and derive the expectation from it — through the pane's own formatting rule for
+the sidebar, and by checking the tooltip's numbers against each other (adjusted
+price is base price scaled by the bias printed beside it) for the tooltip. Those
+are the relationships the pane exists to show, and unlike a pinned figure they
+cannot drift.
+
+Also worth recording: **both sides of a trade are floored on write** —
+`Math.floor(held - previewed)` going out, `Math.floor(held + previewed)` coming in
+— so a holding carrying a fraction of a unit loses it to the trade. The sweep
+compares against the floored post-state rather than chasing that remainder with a
+tolerance.
+
+**Two live defects, both found and fixed** (known-issues #29 and #30):
+
+1. **Zeroing the quantity left a stale summary and a live Confirm button.** The
+   summary was only refreshed while the outgoing quantity was positive, so at zero
+   the incoming and commission lines kept the previous amount and the button
+   stayed green off a stale `galacticMarketIncomingQuantity`. Pressing it moved
+   nothing, so it was misleading rather than harmful. `galacticMarketChecks()` now
+   has an `else` that zeroes both lines and the stored quantity.
+2. **A severe bias made the market status tooltip unhoverable.** Past ±10 the
+   status line is painted `red-disabled-text`, whose CSS is `pointer-events: none`
+   — and the tooltip carrying the base price, adjusted price and trade volume is
+   bound to that element's own mouse events, so the reading vanished exactly when
+   the bias was worth looking at. The stylesheet's existing
+   `.notation.red-disabled-text` escape hatch now covers `#galacticMarketOption2`
+   in both the red and orange bands. The spec asserts the computed
+   `pointer-events` as well as the tooltip appearing, so removing the rule fails
+   it rather than merely making the tooltip absent.
+
+---
+
+## 🟢 Galactic Casino — `galactic-casino-live.spec.js`, 23 specs, all passing
+
+**What is different.** `games.spec.js` and `cp-economy.spec.js` reach into the
+module and call `playDoubleOrNothing()`, `playWheelOfFortune()` and
+`claimCasinoSpecialPrizeByKey()`. That proves the payout maths and nothing else.
+The intricate part of the casino is not the maths — it is that **all four games
+are armed and disarmed by `galacticCasinoChecks()` on the frame loop**, and each
+game is armed by a different rule:
+
+| Game | What decides whether it can be played |
+|---|---|
+| 1 Double or Nothing | the stake field's *own input handler*, not the loop; the field clamps to the CP balance |
+| 2 Wheel of Fortune | the loop refuses to arm Spin while an unclaimed special waits, and greys each prize whose target does not exist |
+| 3 Higher or Lower | one button in three states — Play, Cash Out, dead — with the prize tier re-rolled from the reveal count |
+| 4 Visiting Void Seer | the loop arms Spin from the selected prize's cost against the balance, and greys prizes with nothing to point at |
+
+The new file calls no casino function. Every game is played by typing into its
+field, choosing in its dropdown and pressing its buttons.
+
+**Determinism without stubbing.** Five shipped levers do the work —
+`setBaseProbabilityCasino()`, the `wheelForceSpecial`, `casinoGame4AlwaysWin` and
+`casinoGame5VoidSeerAlwaysMatch` variable-debugger flags, and the wheel's own
+`globalThis.__wheelForceIndex` hook. `Math.random` is never patched, so every path
+taken is a path the game can genuinely take.
+
+**Disabled means disabled here**, unlike everywhere else in the game. The casino's
+controls go through `setButtonState`, which sets a real `disabled` attribute, and
+a disabled `<button>` swallows even a dispatched click. So refusals are tested by
+*pressing the button* rather than only by reading a class — which is the stronger
+claim, and is not available in areas gated by `red-disabled-text` alone.
+
+**What the payouts are checked against.** Every prize is measured on the balance it
+is supposed to move: CP purchases against `cpBaseCost / valueOfOneCP` for cash,
+hydrogen and titanium; a Double or Nothing win as +stake on an already-debited
+balance; the wheel's flat 100 CP, its 100,000 research and a doubling, each
+claimed through the real dropdown and Claim button; ten forced winning segments
+proving no winning segment can pay nothing and that more than one prize family
+comes up; and five Higher or Lower hands cashed out at five different depths, each
+one's offered prize key resolved to the balance it names and checked there —
+exact for the flat CP tiers, positive for the percentage and top-up families.
+
+**Three traps found while writing it.**
+
+- **The spinner strips render every face they can show, forty times over.** Reading
+  `textContent` off the two Void Seer reels returns the whole strip, so comparing
+  them "proves" a match on every spin including losses. Win and loss are read from
+  the `voidSeerWon` stat instead, and the reel's size is its count of *distinct*
+  `data-value`s.
+- **Four casino statistics were being read under names that do not exist.**
+  `stat_voidseerWon`, `stat_voidseerWonThisRun` and `stat_voidseerPlayedThisRun`
+  are `stat_voidSeerWon`, `stat_voidSeerWonThisRun` and `stat_voidSeerPlayedThisRun`
+  — capital S. Two pre-existing specs threw a `TypeError` on them, and are fixed.
+- **The CP cost preview carries the `notation` class**, so the quoted cost is
+  abbreviated before it can be compared with the charge. That spec stages plain
+  notation for the same reason the market specs do.
+
+**One pre-existing spec was de-flaked on the way.** *"the asteroid-search prize
+finishes the scan and yields an asteroid"* demanded a find from a single claim,
+but `discoverAsteroid` rolls a **7% miss by design** — so it failed roughly one
+run in fourteen. The prize's own contract is that the scan *finishes*, and that
+half is now asserted on every one of five claims; the finding half only has to
+come good once, which turns a 1-in-14 flake into a 1-in-600,000 one without
+weakening the claim.
+
+---
+
+## 🟢 Random Events — `random-events-live.spec.js` (21 specs) and `events-screen-live.spec.js` (10 specs), all passing
+
+**What is different.** The existing file covers the registry, the probability curve
+and the history plumbing, largely by setting state and reading a field back. The
+new pair plays the run into the state each event needs and then measures what the
+event did.
+
+### Every event tested from both sides of its own guard
+
+Each event carries a `canTrigger()` and a `trigger()`, so each is fired twice:
+
+1. **when it cannot occur** — against a run that does not satisfy the guard, and
+   nothing must happen: no history entry, no effect, no balance moved;
+2. **when it can occur** — after the run has been played into shape, and the bonus
+   or penalty is measured.
+
+Both halves are needed, and they fail differently: a guard stuck open fires an
+event on a run it has no business touching, a guard stuck shut means the event
+never happens at all. On a fresh boot nine events are proven to refuse.
+
+The preconditions are reached by playing: power plants and batteries bought on
+their own purchase buttons, rockets sent from the Space Mining pane's dropdown and
+**Travel** button and flown by running the real travel timer, the black hole
+researched on `#blackHoleResearchButton`.
+
+**One distinction worth its own spec.** `stockLoss` declares `canTrigger: () =>
+true`, so it is always *offered* — but its trigger looks for a stock to take and
+gives up when the stores are empty, and an event that gives up is not logged. The
+guard being open is not the same as the event happening, and a bare run is exactly
+where that shows.
+
+**What each effect is measured against**, rather than asserted as a flag:
+
+- a power plant explosion takes exactly one unit, and only from a type the run
+  owns; a battery explosion takes the highest tier held;
+- science theft takes `ceil(current / 2)`, a breakthrough doubles;
+- stock loss hits exactly one stock, in the 40-80% band, and the percentage in the
+  log matches the percentage actually taken;
+- an antimatter reaction gives back exactly what that rocket had mined, destroys
+  the rock and unbuilds the rocket;
+- losing the starship clears the ship, all five modules, the fleet and the
+  destination;
+- a broken-down miner stops **that** rocket dead and no other — measured per
+  rocket, off the rock each one is parked on;
+- black hole instability multiplies the power by a stored 0.5-1.5 roll and hands
+  the original value back on expiry.
+
+**Timer mechanics** are driven, never shortcut: a spec that wants an expiry seeds a
+short remainder and lets the per-frame effects timer run it out, which is what puts
+the restoration handlers and the history entry under test. Durations are pinned —
+30 minutes for the lockdown, 40-50 for endless summer, 15 for the miner and the
+supply chain, 15-25 for the black hole — and re-triggering a running effect is
+proven to be refused rather than to restart it. The logged duration is the effect's
+full advertised length, not the sliver it was wound down to.
+
+**Two traps.** Flying two rockets one after the other leaves the first mining
+through the second one's whole journey, and three million milliseconds of game
+time is enough to empty a rock — which ends its mining and leaves nothing to
+compare against; both journeys are launched before either is flown. And the
+antimatter figures are accumulated in fractional ticks, so conservation holds to
+floating-point noise rather than to the bit.
+
+### The log and the screen a player reads it on
+
+`events-screen-live.spec.js` asserts nothing against a snapshot function. Every
+claim is made against the two tables the Events pane renders on the Help tab, and
+the pane is left open while events fire, because `updateTimedEventsPanel()` runs
+from the frame loop and the tables are supposed to be live.
+
+What it pins: the localized empty state for both tables; a row appearing *without
+the pane being reopened*, carrying the event's localized name, its effect line and
+an `mm:ss` countdown that is then watched ticking down on screen; good and bad
+events coloured green and red on the same table; the active table ordered by what
+ends soonest; an instant event logged with duration "Instant" and the figure it
+moved; a finished effect moving from the active table to the completed one with
+its full duration; the completed log ordered newest first; and every event in the
+catalogue rendering a real name and a real effect line **in all five languages** —
+which is the assertion that would catch a row rendering its own localization key.
+
+**A live defect, found and fixed** (known-issues #28): **a supply chain disruption
+always cut production by 75%, whatever the modal said.** The trigger rolls
+`percentDown` between 60 and 80 and stores it, and both the modal and the Events
+screen render that roll — while `getSupplyChainDisruptionMultiplier()` returned a
+hardcoded `0.25`. So the player was told -64% and got -75%. The multiplier is now
+derived from the stored roll, with the old constant kept as the fallback for
+effects restored from a save written before the roll was stored.
+
+This was found only because the penalty was **measured** rather than read off the
+effect's own state. A spec that asserted `percentDown` was between 60 and 80 would
+have passed against the broken game, because the field it checked was the field
+that was right — it was the field nothing downstream read.
+
+---
+
+## 🟢 Space Mining, Weather and Star Data — three new files, 86 specs, all passing
+
+**Four live defects, all fixed at source** (known-issues #31 to #34) — three found
+by reading the code while writing the specs, and one, a dead boost sound, found
+only by running them. The largest of the three had been sitting in
+plain sight since the localisation work: six description labels were being looked
+up by ids that no element had carried since `createOptionRow` stopped deriving
+them from the visible label text, and one of those lookups was dereferenced
+unguarded from the frame loop. That is written up in full in known-issues #31; the
+short version is that the rocket Fuel row never updated, the Launch button never
+turned green, and several progress readouts had been dead for as long.
+
+### `space-mining/space-mining-live.spec.js`, 44 specs
+
+**What is different.** The area had no spec file at all. The arithmetic of
+extraction already lives in `antimatter/antimatter.spec.js` — the complexity
+formula, conservation between rock and store, the F-type and Enhanced Mining
+multipliers — so this file deliberately covers everything *around* it: the objects
+the telescope creates, the two panels that display them, the gesture the player
+makes to boost, and the far end of a rocket's journey.
+
+**The survey is tested as a distribution, not a sample.** Rarity, distance,
+complexity and antimatter are all rolls, and the *bands* they fall into are the
+contract. Each of those specs discovers sixty rocks through the game's own
+discovery path and asserts every one of them lands inside its documented band —
+Common 700-1200, Uncommon 1200-2000, Rare 2000-4000, Legendary 4000-10000,
+complexity an integer 1-6, distance 30,000-570,000 — and that the colour class
+each field carries is the one its own percentile implies. A single sample would
+pass against a band that had been widened by a digit.
+
+Two properties are asserted that are easy to lose and hard to notice:
+
+- **the colour never oversells the rock.** `generateAsteroidData` demotes a
+  green quantity class on Common and Uncommon rocks after computing it, so a
+  Common rock can never read as a good haul however high in its own band it fell;
+- **the survey is capped.** 150 discoveries leave exactly 100 records, and a rock
+  under a drill is never the one culled to make room.
+
+**The panels are read as a player reads them.** The Asteroids pane is asserted row
+by row against the records behind it, including the flooring — a player is never
+shown a fractional rock — and all four legend columns are clicked, with the
+`sort-by`/`no-sort` pair checked on every column each time so that "sorting by
+distance" cannot quietly leave two columns claiming to sort. Rocks being mined and
+rocks worked out are asserted to be labelled, coloured, dimmed and sorted last.
+The Mining pane's SVG is asserted to draw a box per rocket and to label each
+rocket's arrow with the rate its rock's complexity implies — `0.004` per tick at
+complexity 1, `× 100` for the per-second figure, `×` whatever the star system
+contributes — which is the same number the player uses to choose between rocks.
+
+**The boost is a gesture, and it found a fourth defect** (known-issues #34: the
+boost sound never played, because `setIsAntimatterBoostActive` started the sound
+loop before writing the flag that loop immediately checks). `boostAntimatterRate`
+is not called anywhere in the file. The boost is started by dispatching `mousedown` at `#svgRateBarOuter` and
+ended by `mouseup` or by `mouseleave`, because those are the three listeners on
+`document` that actually decide whether the boost happens, and all three refuse
+while `antimatter.rate` is zero — which is its own spec. The doubling is
+**measured off the rock** across a hundred thousand milliseconds of driven game
+time, boosted against unboosted, rather than read off `getIsAntimatterBoostActive`;
+the bar's fill is asserted to double and recolour while held; and the boost sound
+loop is asserted to run only while held and to stay silent with sound effects off.
+
+**The journey is flown.** A rocket is sent from its own destination dropdown and
+**Travel** button, the flight is asserted to be exactly `distance / speed` long,
+and the delta manager is driven until it lands. A rock is then worked dry and the
+turn for home is asserted as a *sequence* — the rock reaches exactly zero, the
+direction flips, the mining slot clears, a real return timer exists, the boost is
+dropped — and the return leg is flown out too, so that `resetRocketForNextJourney`
+is under test rather than assumed: empty tank, unlaunched, no destination held
+over, ready to travel, timer torn down. Afterwards the spent rock is asserted to
+have dropped out of the destination dropdown, as is a rock another rocket has
+already claimed.
+
+### `weather/weather-live.spec.js`, 31 specs
+
+**What is different.** The area had no spec file. Weather is a background
+simulation, so the temptation is to set `currentStarSystemWeatherEfficiency` and
+read it back — which would prove nothing, because the interesting part is the
+*draw* and the *consequences*.
+
+**States are reached through the game's own draw.** To land on a state, the file
+rewrites that star's weather **probabilities** so only the state under test can be
+drawn, then runs the game's own `forceWeatherCycle()`. The efficiencies, symbols
+and colour classes are left exactly as the star published them — those are the
+contract being tested, and a spec that wrote them would be asserting its own
+input. Every spec then waits a beat of real time, because `changeWeather()` arms a
+one-second interval and it is that interval, not the draw, which starts the
+particles and rolls the precipitation rate.
+
+**The solar penalty is measured, not read.** Ten solar plants are bought through
+the plant's own purchase button, the other two plants are switched off so that
+`buildings.energy.rate` is pure solar generation, and the grid rate is then read
+under each of the four states. The assertion is the absolute figure —
+`quantity × 0.2 × efficiency × the O-type multiplier the run reports` — *and* the
+ratios between the four, so a broken efficiency table and a broken multiplication
+fail differently. Two further specs pin the two ways this is easy to get wrong:
+
+- **applied once per window, not per frame.** `weatherEfficiencyApplied` is a
+  latch, and the rate after sixty seconds of driven frames must equal the rate
+  after one tick. Without this spec a compounding bug would look like weather
+  simply being harsh.
+- **plants bought mid-window are rained on too.** `addBuildingPotentialRate`
+  applies the multiplier itself for exactly this case; five more plants bought
+  during a shower must land at the rainy rate, not the fair-weather one.
+
+And the control: the carbon plant's output is asserted to be identical under a
+volcano and a clear sky, so "weather affects power" cannot pass by affecting
+everything.
+
+**One trap worth writing down.** Marking a rocket fuelled by pushing
+`rocket1FuelledUp` into the fueller array is *not* the same as filling its tank.
+`fuelRockets()` runs every frame over the rockets not yet marked fuelled, and if
+the tank is empty it puts the Launch button back into its "NN% loaded" state —
+`no-interaction`, neither red nor green — which masks the bad-weather gate
+entirely. The three launch-hold specs fill the tank through the row's own **Fuel
+Rocket** button and run the fuel timer out, which is both more honest and the only
+way the assertion means anything.
+
+**Presentation and consequence are separated.** Rain is asserted to run raindrops
+and the rain ambience with no lava and no other track; a volcano the mirror image.
+The particle setting is turned off mid-shower and the overlay asserted empty and
+hidden — while the *weather itself* is asserted to keep running, still collecting
+precipitation and still cutting solar, because a display toggle that silently
+turned the simulation off would otherwise look identical. Precipitation is read
+from the star's own `precipitationType` rather than assumed to be water, because
+what falls is a property of the system.
+
+### `star-map/star-data-weather.spec.js`, 11 specs
+
+**What is different.** This is a slice of a red area, not the whole of it: it
+covers where a system's weather comes from, and whether looking at the map again
+rewrites it. Map rendering, star selection and destination gating remain
+uncovered.
+
+A star's weather is decided the first time the star map draws that star.
+`generateStarDataAndAddToDataObject` rolls four probabilities, scales them to 100,
+takes the most likely as the star's *tendency*, rolls a precipitation compound and
+writes the record; `changeWeather()` then draws every weather window for that
+system out of exactly that table. So the star data is the **source** of the
+weather, and the property that matters most is that it survives being looked at
+again — the map is redrawn on every pane open, every mode change and every
+completed study.
+
+The file asserts the property rather than the branch: whatever kind of star it is,
+a redraw must not change what the star said last time. The sharpest of the three
+redraw specs stamps every existing record with a marker the generator does not
+write and asserts the marker survives — which fails on the regeneration itself
+rather than on two random rolls happening to differ.
+
+**A live defect, found and fixed** (known-issues #32): `generateStarfield` guarded
+the interesting-star branch with `checkIfInterestingStarIsInStarDataAlready` but
+called `generateStarDataAndAddToDataObject` **unconditionally** in the factory-star
+branch. Every draw of the map re-rolled a revealed megastructure star's weather
+table and its precipitation compound — so once a player settled one, the forecast
+they researched was not the forecast they got, and it changed again each time they
+opened the map. The factory-star branch now carries the same guard.
+
+---
+
+## 🟠 Star Map, Star Data and Star Types — the rest of the interstellar shell
+
+Three more files finishing what the weather pass started: the map itself, the
+table a run is planned from, and what a star's spectral type is worth.
+
+### `star-map/star-map-live.spec.js` — the field, the modes, the search, the drawings
+
+**The map is a pure function of a constant seed**, and the first spec exists to
+keep it that way. `generateStarfield` places all hundred stars with
+`getSeededRandomInRange(seed + i, …)` over `STAR_FIELD_SEED = 80`, taking names
+from a fresh copy of the name table each call, so the same star is in the same
+place on every draw forever. The spec fingerprints every star's id, position and
+size, bounces through the Star Data pane three times, and requires the
+fingerprint to be identical — a map that quietly re-rolled would move a player's
+studied stars around between visits.
+
+**How a star is drawn is a precedence, and it is tested as one.** Miaplacidus
+first, then a reported megastructure star, then settled, then in-study-range with
+`o-star` for an O-type, then out of range. Each branch has a spec, including the
+two negative cases that are easy to lose: an *unreported* megastructure star is
+not drawn at all, and Miaplacidus refuses selection outright until the final
+milestone — clicking it must leave no destination row behind.
+
+**The four modes are pressed, not set.** Each mode button is clicked by its
+localized label and asserted to light itself while dimming the other three.
+Distance mode is checked against the published ramp — every tint is a full-red
+`rgb(255, …)` triple, and the nearest star keeps more blue than the furthest,
+which is the direction the ramp drains. In-range mode is checked by moving the
+antimatter on hand across a star's fuel cost and requiring the tint to change.
+Studied and in-range are checked to hide the out-of-reach stars and normal to
+show them again.
+
+**The search is driven through its own input.** Two characters to open, a
+localized "no matches" line, result colouring per star kind, and the mode gate —
+the box is live only in normal and distance, and says so in the other two. The
+selection ping is asserted to appear on the map and then to clear itself, which is
+the half a snapshot test would miss.
+
+**The drawings are checked as geometry, not as presence.** The connection line's
+width has to equal the pixel gap between the two stars' centres and its rotation
+the bearing between them; the label has to carry the star's real antimatter and AP
+cost, coloured by whether the run can afford it; a travelling ship draws a dashed
+line with an arrowhead that measurably moves along it as the progress fraction
+changes; an orbiting ship draws a circle three star-widths across, centred on the
+star it is orbiting.
+
+**Two traps, both worth recording.**
+
+The **Interstellar tab has to be selected, not just the pane**. Several frame-loop
+gates test `getCurrentTab()[1].includes('Interstellar')` — the orbit circle is one
+— and `checkOrderOfTabs` rearranges the tab bar at runtime, so `#tab5` is not a
+reliable handle. The specs select the tab by its `data-name` and assert the
+selection took.
+
+**A ship in orbit is still flagged as travelling.** `setStarShipTravelling(true)`
+is called in exactly one place and nothing ever sets it back, and that is
+load-bearing: `starShipUiChecks` forces the status back to `readyForTravel` on the
+next frame whenever the ship is *not* travelling and its modules are all finished.
+Staging orbit without the travelling flag is a state the game cannot hold for even
+one frame, which is why the orbit spec sets both.
+
+### `star-map/star-data-table.spec.js` — six columns and a colour precedence
+
+Every column is asserted against the record behind it, every one of the six sorts
+is pressed and checked (including the compound weather sort: forecast quality
+first, then likelihood), and the name-colour precedence is pinned in the order the
+code applies it. The sharpest of those is **affordability outranking everything
+else**: a megastructure star the run cannot fuel is drawn as unreachable rather
+than as a prize, and the spec proves that by moving the antimatter across the fuel
+cost and watching the same row change colour.
+
+The settled row is checked to be dimmed, sorted last under every sort, and to have
+its planning cells blanked; the unreported megastructure star is checked to be
+absent from the table entirely, the same rule the map and the search apply.
+
+**One trap:** the fuel and AP cells carry the `notation` class, so the frame loop
+abbreviates them — `5000` renders as `5K`, or `5,000` in plain mode. The specs set
+plain notation and strip the separators, and check sort *order* against the
+records the sort actually reads. The abbreviations themselves belong to the
+notation area.
+
+### `star-types/star-types.spec.js` — three types that do something, four that do not
+
+The game implements exactly three star-type effects, and its own help text
+publishes all three: a B-type system adds a flat rate to every *resource*
+autobuyer tier (+2/s, +8/s, +25/s, +80/s), an F-type multiplies antimatter
+extraction by 1.5, and a settled O-type amplifies one power-plant type eightfold.
+
+The condition differs between them, and that is what most of the file is about. B
+and F are properties of *where the run currently is* and vanish on leaving; O is a
+property of *what the run owns* and is carried between systems.
+`getOTypePowerPlantBoostMultiplierForCurrentSystem` is named as though it were the
+former and reads `getSettledStars()`, which is the latter — that matches the help
+text ("each one you control"), so it is pinned as designed rather than reported.
+
+**Nothing is asserted as a multiplier.** Every claim is a measurement: resource
+throughput off the stores, extraction off the rock, generation off the grid, in
+one system and then another.
+
+**A, G, K and M grant nothing, and that is asserted rather than left unsaid.**
+There is no K-type mechanic anywhere in the source. Each inert type goes through
+the same three measurements the live types do and has to come back at the neutral
+figure — the alternative to a spec here is a future bonus being wired to the wrong
+letter and nobody noticing.
+
+**The measurement trap this file ran into twice.** The frame loop keeps producing
+between the driven windows, so *dividing one measured window by another* turns
+that shared overhead into an apparent shortfall in the multiplier under test: the
+F-type bonus measured 1.467 instead of 1.5, and a four-times-the-autobuyers case
+measured 3.75 instead of 4. Worse, subtracting two large windows to isolate a small
+bonus puts the answer inside the noise entirely — a tier-1 bonus is a twenty-fifth
+of its base rate. Every throughput assertion now compares a window against what the
+formula says that window should produce, and the one case that genuinely needs to
+separate "added" from "replaced" uses a span ten times longer so the driven ticks
+dominate. That is a stronger statement than the ratio was, not a weaker one.
+
+### One live defect, left open on purpose
+
+[known-issues #35](known-issues.md) — **a star is two different distances away
+depending on which code path asks.** `generateStarfield` derives x and y from the
+measured size of the container it draws into; the Star Map pane passes a real
+panel and everything in `calculationMode` passes a detached `div` whose width and
+height are zero, so the x/y term collapses and only z survives. The drawn map
+decides whether a star is studied and writes the record the player's fuel and AP
+come from, while the calculation path is read by the search colouring, manuscript
+placement, the rapid-expansion filter and an achievement gate — so a star can be
+in range for one and out of range for the other.
+
+It is not fixed here because the fix is a balance decision as much as a bug fix:
+the x/y scale feeds distance, and distance feeds fuel cost and AP reward. The
+options are set out in the known-issues entry. The spec that found it is left
+failing, which is what keeps it visible.
 
 ---
 

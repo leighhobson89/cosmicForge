@@ -1,8 +1,8 @@
 # e2e / weather
 
-**Weather** — 🔴 RED
+**Weather** — 🟢 GREEN
 
-Per-system weather states, their efficiency modifiers and the precipitation resource path.
+The weather cycle, the solar penalty each state applies, the particle overlay and ambience, the precipitation path and the launch hold.
 
 Specs for this area go in this folder, named `<scenario>.spec.js`.
 

@@ -4,7 +4,7 @@ import { getCurrentlyPillagingVoid, getTimeLeftUntilPillageVoidTimerFinishes, ge
 
 import { getRocketPartsNeededInTotalPerRocket, getRocketParts, getResourceDataObject, setResourceDataObject } from './resourceDataObject.js';
 
-import { startTravelToAndFromAsteroidTimer, startInvestigateStarTimer, startSearchAsteroidTimer, launchRocket, gain, startUpdateTimersAndRates, addBuildingPotentialRate, buildSpaceMiningBuilding, addToResourceAllTimeStat, startPillageVoidTimer } from './game.js';
+import { startTravelToAndFromAsteroidTimer, startInvestigateStarTimer, startSearchAsteroidTimer, launchRocket, gain, startUpdateTimersAndRates, addBuildingPotentialRate, buildSpaceMiningBuilding, addToResourceAllTimeStat, startPillageVoidTimer, getRocketFuelDescriptionLabel } from './game.js';
 
 import { timerManagerDelta } from './timerManagerDelta.js';
 
@@ -1185,6 +1185,14 @@ export function drawTab6Content(heading, optionContentElement) {
 
 function setFuellingVisibility(rocket, params) {
 
+    // The Fuel row's own label. It used to be reachable as `#fuelDescription`,
+    // because createOptionRow derived the id from the row's visible label
+    // ("Fuel:"); the localisation work moved that derivation onto the row id, so
+    // the short name no longer exists on any element and every lookup of it came
+    // back null. This threw here, before the fuelled-up branch below could colour
+    // the Launch button.
+    const fuelDescriptionElement = getRocketFuelDescriptionLabel(rocket);
+
     const [fuellingState, fuelledUpState, launchedState] = params;
 
     if (fuellingState || fuelledUpState) {
@@ -1201,9 +1209,10 @@ function setFuellingVisibility(rocket, params) {
 
         launchButton.textContent = localize('buttonLaunch', getLanguage());
 
-        document.getElementById('fuelDescription').textContent = localize('textFuelling', getLanguage())
-
-        document.getElementById('fuelDescription').classList.remove('red-disabled-text');
+        if (fuelDescriptionElement) {
+            fuelDescriptionElement.textContent = localize('textFuelling', getLanguage());
+            fuelDescriptionElement.classList.remove('red-disabled-text');
+        }
 
     }
 
@@ -1221,9 +1230,11 @@ function setFuellingVisibility(rocket, params) {
 
             launchButton.textContent = localize('buttonLaunch', getLanguage());
 
-            document.getElementById('fuelDescription').textContent = localize('textReadyForLaunch', getLanguage())
-
-            document.getElementById('fuelDescription').classList.add('green-ready-text');
+            if (fuelDescriptionElement) {
+                fuelDescriptionElement.textContent = localize('textReadyForLaunch', getLanguage());
+                fuelDescriptionElement.classList.add('green-ready-text');
+                fuelDescriptionElement.classList.remove('red-disabled-text');
+            }
 
         } else {
 
@@ -1233,11 +1244,11 @@ function setFuellingVisibility(rocket, params) {
 
             launchButton.textContent = localize('buttonLaunch', getLanguage());
 
-            document.getElementById('fuelDescription').textContent = localize('textBadWeather', getLanguage())
-
-            document.getElementById('fuelDescription').classList.remove('green-ready-text');
-
-            document.getElementById('fuelDescription').classList.add('red-disabled-text');
+            if (fuelDescriptionElement) {
+                fuelDescriptionElement.textContent = localize('textBadWeather', getLanguage());
+                fuelDescriptionElement.classList.remove('green-ready-text');
+                fuelDescriptionElement.classList.add('red-disabled-text');
+            }
 
         }
 

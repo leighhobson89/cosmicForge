@@ -245,7 +245,7 @@ test.describe('Galactic Casino — CP economy', () => {
         wheelWonAll: m.cg.statFunctionsGets.stat_wheelOfFortuneWon(),
         specialRun: m.cg.statFunctionsGets.stat_wheelSpecialWonThisRun(),
         hiloPlayedRun: m.cg.statFunctionsGets.stat_higherLowerPlayedThisRun(),
-        seerWonAll: m.cg.statFunctionsGets.stat_voidseerWon()
+        seerWonAll: m.cg.statFunctionsGets.stat_voidSeerWon()
       });
 
       const before = read();

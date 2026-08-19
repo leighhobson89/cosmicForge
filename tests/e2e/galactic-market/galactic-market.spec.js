@@ -269,28 +269,31 @@ test.describe('Galactic Market', () => {
     });
     await stageTrade(game, { outgoing: 'hydrogen', incoming: 'diesel', quantity: 10000 });
 
-    const before = await game.withMods((m) => ({
-      outVolume: m.rdo.getGalacticMarketDataObject('resources', ['hydrogen', 'tradeVolume']),
-      inVolume: m.rdo.getGalacticMarketDataObject('compounds', ['diesel', 'tradeVolume']),
-      outBias: m.rdo.getGalacticMarketDataObject('resources', ['hydrogen', 'marketBias']),
-      inBias: m.rdo.getGalacticMarketDataObject('compounds', ['diesel', 'marketBias'])
-    }));
     const summary = await readSummary(game);
 
-    await game.page.evaluate(() => document.querySelector('.galactic-market-confirm-trade-button').click());
+    // Read, press and re-read in one synchronous block. `adjustMarketBiases()`
+    // runs on its own ten-second interval and walks every bias towards zero, so
+    // a before-read taken as a separate round trip can be a tick stale and the
+    // measured shift comes out 0.05 short of the traded proportion.
+    const shift = await game.page.evaluate(() => {
+      const m = globalThis.__mods;
+      const read = () => ({
+        outBias: m.rdo.getGalacticMarketDataObject('resources', ['hydrogen', 'marketBias']),
+        inBias: m.rdo.getGalacticMarketDataObject('compounds', ['diesel', 'marketBias'])
+      });
+      const outVolume = m.rdo.getGalacticMarketDataObject('resources', ['hydrogen', 'tradeVolume']);
+      const before = read();
+      document.querySelector('.galactic-market-confirm-trade-button').click();
+      return { outVolume, before, after: read() };
+    });
     await game.page.waitForTimeout(400);
-
-    const after = await game.withMods((m) => ({
-      outBias: m.rdo.getGalacticMarketDataObject('resources', ['hydrogen', 'marketBias']),
-      inBias: m.rdo.getGalacticMarketDataObject('compounds', ['diesel', 'marketBias'])
-    }));
 
     // Selling floods the market with hydrogen and drains diesel: the bias shift
     // is the traded quantity as a percentage of that material's trade volume.
-    const expectedOutShift = (summary.outgoing / before.outVolume) * 100;
-    expect(after.outBias).toBeLessThan(before.outBias);
-    expect(before.outBias - after.outBias).toBeCloseTo(expectedOutShift, 4);
-    expect(after.inBias).toBeGreaterThan(before.inBias);
+    const expectedOutShift = (summary.outgoing / shift.outVolume) * 100;
+    expect(shift.after.outBias).toBeLessThan(shift.before.outBias);
+    expect(shift.before.outBias - shift.after.outBias).toBeCloseTo(expectedOutShift, 4);
+    expect(shift.after.inBias).toBeGreaterThan(shift.before.inBias);
   });
 
   test('commission climbs 6 to 13 points per trade and never exceeds 80', async ({ game }) => {

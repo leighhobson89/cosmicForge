@@ -1,6 +1,6 @@
 # e2e / random-events
 
-**Random Events** — 🟠 AMBER
+**Random Events** — 🟢 GREEN
 
 Instant and timed events, their probability model, effects and history tracking.
 

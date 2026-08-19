@@ -152,29 +152,48 @@ test.describe('Galactic Casino — special prizes', () => {
   });
 
   test('the asteroid-search prize finishes the scan and yields an asteroid', async ({ game }) => {
-    const result = await game.withMods((m) => {
-      const asteroidsBefore = (m.cg.getAsteroidArray() || []).length;
-      m.cg.setCurrentlySearchingAsteroid(true);
-      m.cg.setTimeLeftUntilAsteroidScannerTimerFinishes(120000);
+    // The prize's own contract is that the scan *finishes*; whether that scan
+    // then finds anything belongs to `discoverAsteroid`, which rolls a 7% miss by
+    // design. So the finishing half is asserted on every claim, and the finding
+    // half only has to come good once — five consecutive misses is a one in six
+    // hundred thousand event, where demanding a find from a single claim fails
+    // roughly one run in fourteen.
+    const attempts = await game.withMods((m) => {
+      const rounds = [];
+      for (let i = 0; i < 5; i++) {
+        const asteroidsBefore = (m.cg.getAsteroidArray() || []).length;
+        m.cg.setCurrentlySearchingAsteroid(true);
+        m.cg.setTimeLeftUntilAsteroidScannerTimerFinishes(120000);
 
-      const awarded = m.casino.claimCasinoSpecialPrizeByKey('special_telescope_finish_asteroid_search', { notify: false });
+        const awarded = m.casino.claimCasinoSpecialPrizeByKey('special_telescope_finish_asteroid_search', { notify: false });
 
-      return {
-        asteroidsBefore,
-        awarded,
-        asteroidsAfter: (m.cg.getAsteroidArray() || []).length,
-        stillSearching: m.cg.getCurrentlySearchingAsteroid(),
-        msLeft: m.cg.getTimeLeftUntilAsteroidScannerTimerFinishes(),
-        telescopeReady: m.cg.getTelescopeReadyToSearch()
-      };
+        rounds.push({
+          asteroidsBefore,
+          awarded,
+          asteroidsAfter: (m.cg.getAsteroidArray() || []).length,
+          stillSearching: m.cg.getCurrentlySearchingAsteroid(),
+          msLeft: m.cg.getTimeLeftUntilAsteroidScannerTimerFinishes(),
+          telescopeReady: m.cg.getTelescopeReadyToSearch()
+        });
+      }
+      return rounds;
     });
 
-    expect(result.awarded?.type).toBe('telescope_finish_asteroid_search');
-    expect(result.awarded?.asteroid).toBeTruthy();
-    expect(result.asteroidsAfter).toBe(result.asteroidsBefore + 1);
-    expect(result.stillSearching).toBe(false);
-    expect(result.msLeft).toBe(0);
-    expect(result.telescopeReady).toBe(true);
+    for (const [index, round] of attempts.entries()) {
+      expect(round.awarded?.type, `claim ${index + 1}`).toBe('telescope_finish_asteroid_search');
+      expect(round.awarded?.asteroid, `claim ${index + 1}`).toBeTruthy();
+      expect(round.stillSearching, `claim ${index + 1}`).toBe(false);
+      expect(round.msLeft, `claim ${index + 1}`).toBe(0);
+      expect(round.telescopeReady, `claim ${index + 1}`).toBe(true);
+      // A claim can miss, but it can never lose an asteroid.
+      expect(round.asteroidsAfter, `claim ${index + 1}`)
+        .toBeGreaterThanOrEqual(round.asteroidsBefore);
+      expect(round.asteroidsAfter, `claim ${index + 1}`)
+        .toBeLessThanOrEqual(round.asteroidsBefore + 1);
+    }
+
+    const found = attempts.filter((round) => round.asteroidsAfter === round.asteroidsBefore + 1).length;
+    expect(found, `${found} of 5 claims found an asteroid`).toBeGreaterThan(0);
   });
 
   test('the star-study prize finishes the investigation and frees the telescope', async ({ game }) => {

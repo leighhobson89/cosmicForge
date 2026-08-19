@@ -2853,6 +2853,17 @@ button.red-disabled-text {
     pointer-events: auto !important;
 }
 
+/* The galactic market status line is coloured by how far the bias has moved, and
+   past a magnitude of 10 that colour is red-disabled-text. It is a readout, not a
+   control: the tooltip carrying the base price, the bias-adjusted price and the
+   trade volume hangs off this element's own mouseenter/mousemove, so inheriting
+   the class's pointer-events: none hides that reading exactly when the bias is
+   worth looking at. Keep the colour, keep the pointer. */
+#galacticMarketOption2.red-disabled-text,
+#galacticMarketOption2.warning-orange-text {
+    pointer-events: auto;
+}
+
 .select-container.dropdown-disabled-red {
   border: 2px solid red;
   background-color: rgba(255, 0, 0, 0.1);
