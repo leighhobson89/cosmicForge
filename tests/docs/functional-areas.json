@@ -136,6 +136,27 @@
       "specCount": 11
     },
     {
+      "id": "offline-gains",
+      "title": "Offline Gains",
+      "group": "foundation",
+      "status": "green",
+      "risk": "high",
+      "legacy": [],
+      "summary": "What the game pays a player for the time they were away: the nerfed catch-up applied when a save is loaded and when the window regains focus.",
+      "tests": [
+        "An hour away pays floor(rate x TIMER_RATE_RATIO x seconds x OFFLINE_GAINS_RATE) into the store",
+        "The nerf is a flat 0.334, applied to the whole payment and floored, so a trickle pays nothing",
+        "The payment is capped by the store, and fuel already burned is netted off the rate first",
+        "Resources, compounds, research, rip telemetry and mined antimatter are all paid on the same formula",
+        "Energy is only paid once a battery exists to hold it",
+        "Countdown timers lose the whole time away at 1:1 — time passing is not a gain, so it is not nerfed",
+        "Loading a save announces the payment; returning focus applies it silently",
+        "Leaving and returning pays once, and a save written a moment ago pays nothing",
+        "A run that has never been saved does not pay NaN into every store when the window is focused"
+      ],
+      "specCount": 18
+    },
+    {
       "id": "localization",
       "title": "Localization",
       "group": "foundation",
@@ -778,19 +799,24 @@
       "id": "ascendency",
       "title": "Ascendency Points & Perks",
       "group": "meta",
-      "status": "amber",
+      "status": "green",
       "risk": "high",
       "legacy": [],
-      "summary": "The AP economy and permanent perk purchases. Errors here permanently corrupt cross-run progress.",
+      "summary": "The AP economy and permanent perk purchases, played through the Ascendency Perks pane. Errors here permanently corrupt cross-run progress.",
       "tests": [
-        "AP awarded on conquest and settlement matches the documented formula",
-        "Each perk applies its stated effect and cannot be bought twice",
-        "AP spend is atomic — a failed purchase refunds fully",
-        "AP cannot go negative under any sequence of purchases",
-        "Perks persist across rebirth (they are the point of rebirth)",
-        "Buff stacking with philosophies and star types produces documented totals"
+        "Every perk in the catalogue gets a row quoting its catalogue price, and a fresh save can afford none of them",
+        "The pane lights up exactly the perks the balance can pay for, at every balance the run passes through",
+        "Buying greedily until nothing is affordable never overdraws the balance and charges each quoted price exactly",
+        "A rebuyable perk doubles in price each purchase, caps at timesRebuyable, and stays capped however rich the player is",
+        "A one-shot perk can only ever be bought once",
+        "Spending AP for the first time earns the Spend Ascendency Points achievement",
+        "Smart Auto Buyers and Optimized Power Grids are measured — throughput and energy accrual move by the perk multiplier",
+        "Compound Automation, Robotic Research Automation, Auto Space Telescope and Non Exhaustive Resources land their unlocks",
+        "Every perk bought is still bought, still paid for and still applied after a rebirth taken through the real button",
+        "The hydrogen bag and Non Exhaustive Resources pay their starting stock into the next run",
+        "Every buff description resolves to real copy in every shipped language"
       ],
-      "specCount": 12
+      "specCount": 20
     },
     {
       "id": "galactic-casino",

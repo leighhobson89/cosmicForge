@@ -2036,7 +2036,13 @@ export function startGame() {
     if (!getRunStartTime()) {
         setRunStartTime();
     }
-    setLastSavedTimeStamp(getGameStartTime().toISOString);
+    // `getGameStartTime()` hands back a `Date.now()` number, which has no
+    // `toISOString` of its own. Seeding the stamp with the bare property left it
+    // `undefined` until the first blur or load wrote a real one, and any focus
+    // before that made `offlineGains()` compute a NaN elapsed time and put NaN
+    // into the play-time clock. Reachable by opening the game in a background
+    // tab and clicking into it, where `focus` fires with no `blur` before it.
+    setLastSavedTimeStamp(new Date(getGameStartTime()).toISOString());
     setGameState(getGameVisibleActive());
     updateContent('Resources', `tab1`, 'intro');
     updateTabHotkeys();
@@ -12426,6 +12432,18 @@ export function offlineGains(switchedFocus) {
             rocket4: 0,
         };
 
+        // Rocket fuel is accumulated here, before the nerf, so it is discounted
+        // and floored like every other offline gain. It used to be added after
+        // nerfOfflineGains() had already walked the zeroed rocket1..4 fields,
+        // which paid fuel at the full online rate.
+        const currentFuelQuantityRockets = getRocketsFuellerStartedArray().filter(rocket => !rocket.includes('FuelledUp'));
+        currentFuelQuantityRockets.forEach(rocket => {
+            const rocketDetails = getResourceDataObject('space', ['upgrades', rocket]);
+            const fuelUpgradeRate = rocketDetails.autoBuyer.tier1.rate;
+            const offlineFuelGain = (fuelUpgradeRate * timeDifferenceInSeconds) * getTimerRateRatio();
+            offlineGains[rocket] += offlineFuelGain;
+        });
+
         nerfOfflineGains(offlineGains);
     
         Object.entries(offlineGains.resources).forEach(([resource, gain]) => {
@@ -12457,14 +12475,6 @@ export function offlineGains(switchedFocus) {
         setResourceDataObject(currentRipTelemetryQuantity + offlineGains.ripTelemetryData, 'cosmicRip', ['ripTelemetryData']);
         addToAllTimeRipTelemetryDataEarned(offlineGains.ripTelemetryData);
 
-        const currentFuelQuantityRockets = getRocketsFuellerStartedArray().filter(rocket => !rocket.includes('FuelledUp'));
-        currentFuelQuantityRockets.forEach(rocket => {
-            const rocketDetails = getResourceDataObject('space', ['upgrades', rocket]);
-            const fuelUpgradeRate = rocketDetails.autoBuyer.tier1.rate;
-            const offlineFuelGain = (fuelUpgradeRate * timeDifferenceInSeconds) * getTimerRateRatio();
-            offlineGains[rocket] += offlineFuelGain;
-        });
-    
         currentFuelQuantityRockets.forEach(rocket => {
             const currentRocketFuelQuantity = getResourceDataObject('space', ['upgrades', rocket, 'fuelQuantity']);
             setResourceDataObject(Math.min(currentRocketFuelQuantity + offlineGains[rocket], getResourceDataObject('space', ['upgrades', rocket, 'fuelQuantityToLaunch'])), 'space', ['upgrades', rocket, 'fuelQuantity']);

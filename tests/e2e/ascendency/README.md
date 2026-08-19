@@ -1,8 +1,8 @@
 # e2e / ascendency
 
-**Ascendency Points & Perks** — 🟠 AMBER
+**Ascendency Points & Perks** — 🟢 GREEN
 
-The AP economy and permanent perk purchases. Errors here permanently corrupt cross-run progress.
+The AP economy and permanent perk purchases, played through the Ascendency Perks pane. Errors here permanently corrupt cross-run progress.
 
 Specs for this area go in this folder, named `<scenario>.spec.js`.
 

@@ -223,43 +223,260 @@ test.describe('Localization — catalogue integrity', () => {
     expect(malformed).toEqual([]);
   });
 
-  test('the raw file declares each key exactly once per language', async () => {
-    // JSON.parse silently keeps the last of a duplicated key, so parity checks
-    // cannot see a duplicate at all. Count declarations in the raw text instead.
-    const duplicates = [];
+test("the raw file declares each key exactly once per language", async () => {
+  const duplicates = [];
 
-    for (const lang of LANGUAGES) {
-      const start = RAW.indexOf(`"${lang}": {`);
-      expect(start, `language block "${lang}" not found in raw JSON`).toBeGreaterThan(-1);
+  /**
+   * Scan one JSON object and return its direct property declarations.
+   *
+   * This is deliberately a lightweight JSON scanner rather than JSON.parse(),
+   * because JSON.parse() removes duplicate properties.
+   *
+   * It understands:
+   * - JSON strings
+   * - escaped quotes
+   * - escaped backslashes
+   * - nested objects
+   * - nested arrays
+   *
+   * It only records keys belonging directly to the object being scanned.
+   */
+  function scanObjectKeys(text, openBrace) {
+    const seen = new Map();
 
-      // Walk braces from the opening one to find this language's block exactly.
-      const open = RAW.indexOf('{', start);
-      let depth = 0;
-      let end = open;
-      for (let i = open; i < RAW.length; i++) {
-        if (RAW[i] === '{') depth++;
-        else if (RAW[i] === '}') {
-          depth--;
-          if (depth === 0) { end = i; break; }
-        }
+    let i = openBrace + 1;
+
+    function skipWhitespace() {
+      while (i < text.length && /\s/.test(text[i])) {
+        i++;
       }
-
-      const block = RAW.slice(open, end);
-      const seen = new Map();
-      for (const match of block.matchAll(/^\s*"([A-Za-z][A-Za-z0-9_]*)"\s*:/gm)) {
-        seen.set(match[1], (seen.get(match[1]) ?? 0) + 1);
-      }
-      for (const [key, count] of seen) {
-        if (count > 1) duplicates.push(`${lang}:${key} declared ${count} times`);
-      }
-
-      // Sanity: the walk must have found the whole block, not a fragment.
-      expect(seen.size, `raw scan of "${lang}" found too few keys`)
-        .toBe(Object.keys(CATALOGUE[lang]).length);
     }
 
-    expect(duplicates).toEqual([]);
-  });
+    function readString() {
+      if (text[i] !== '"') {
+        throw new Error(`Expected string at position ${i}`);
+      }
+
+      i++; // opening quote
+
+      let value = "";
+
+      while (i < text.length) {
+        const char = text[i];
+
+        if (char === "\\") {
+          // Preserve escaped characters while skipping them correctly.
+          value += char;
+
+          i++;
+
+          if (i < text.length) {
+            value += text[i];
+            i++;
+          }
+
+          continue;
+        }
+
+        if (char === '"') {
+          i++; // closing quote
+          return value;
+        }
+
+        value += char;
+        i++;
+      }
+
+      throw new Error("Unterminated JSON string");
+    }
+
+    function skipString() {
+      if (text[i] !== '"') {
+        throw new Error(`Expected string at position ${i}`);
+      }
+
+      i++;
+
+      while (i < text.length) {
+        if (text[i] === "\\") {
+          i += 2;
+          continue;
+        }
+
+        if (text[i] === '"') {
+          i++;
+          return;
+        }
+
+        i++;
+      }
+
+      throw new Error("Unterminated JSON string");
+    }
+
+    function skipValue() {
+      skipWhitespace();
+
+      const char = text[i];
+
+      // String
+      if (char === '"') {
+        skipString();
+        return;
+      }
+
+      // Object
+      if (char === "{") {
+        let depth = 1;
+        i++;
+
+        while (i < text.length && depth > 0) {
+          if (text[i] === '"') {
+            skipString();
+            continue;
+          }
+
+          if (text[i] === "{") depth++;
+          else if (text[i] === "}") depth--;
+
+          i++;
+        }
+
+        return;
+      }
+
+      // Array
+      if (char === "[") {
+        let depth = 1;
+        i++;
+
+        while (i < text.length && depth > 0) {
+          if (text[i] === '"') {
+            skipString();
+            continue;
+          }
+
+          if (text[i] === "[") depth++;
+          else if (text[i] === "]") depth--;
+
+          i++;
+        }
+
+        return;
+      }
+
+      // Primitive: true, false, null, number
+      while (i < text.length && !",}]".includes(text[i])) {
+        i++;
+      }
+    }
+
+    while (i < text.length) {
+      skipWhitespace();
+
+      // End of object
+      if (text[i] === "}") {
+        return seen;
+      }
+
+      // Read property name
+      if (text[i] !== '"') {
+        throw new Error(`Expected property name at position ${i}`);
+      }
+
+      const key = readString();
+
+      skipWhitespace();
+
+      if (text[i] !== ":") {
+        throw new Error(`Expected ':' after key "${key}" at position ${i}`);
+      }
+
+      i++;
+
+      skipWhitespace();
+
+      // This is a direct property of this object.
+      seen.set(key, (seen.get(key) ?? 0) + 1);
+
+      // Skip its entire value, including nested objects.
+      skipValue();
+
+      skipWhitespace();
+
+      if (text[i] === ",") {
+        i++;
+        continue;
+      }
+
+      if (text[i] === "}") {
+        return seen;
+      }
+
+      throw new Error(
+        `Expected ',' or '}' after key "${key}" at position ${i}`,
+      );
+    }
+
+    throw new Error("Unterminated JSON object");
+  }
+
+  /**
+   * Find a language block safely.
+   *
+   * We search for the quoted language property, then verify that
+   * the following non-whitespace character is '{'.
+   */
+  function findLanguageObject(text, lang) {
+    const propertyPattern = new RegExp(
+      `"${lang.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"\\s*:`,
+      "g",
+    );
+
+    let match;
+
+    while ((match = propertyPattern.exec(text)) !== null) {
+      let pos = match.index + match[0].length;
+
+      while (pos < text.length && /\s/.test(text[pos])) {
+        pos++;
+      }
+
+      if (text[pos] === "{") {
+        return pos;
+      }
+    }
+
+    return -1;
+  }
+
+  for (const lang of LANGUAGES) {
+    const open = findLanguageObject(RAW, lang);
+
+    expect(
+      open,
+      `language block "${lang}" not found in raw JSON`,
+    ).toBeGreaterThan(-1);
+
+    const seen = scanObjectKeys(RAW, open);
+
+    for (const [key, count] of seen) {
+      if (count > 1) {
+        duplicates.push(`${lang}:${key} declared ${count} times`);
+      }
+    }
+
+    /*
+     * Compare the number of direct raw declarations against
+     * the number of parsed properties.
+     */
+    expect(seen.size, `raw scan of "${lang}" found too few keys`).toBe(
+      Object.keys(CATALOGUE[lang]).length,
+    );
+  }
+
+  expect(duplicates).toEqual([]);
+});
 
   test('every key referenced literally in shipped source exists in the catalogue', async () => {
     // A missing key does not throw: localize() returns the key itself, so the

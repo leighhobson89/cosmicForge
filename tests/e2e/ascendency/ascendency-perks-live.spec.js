@@ -3,8 +3,8 @@
  * Plan: tests/docs/areas/ascendency.md
  *
  * `ascendency.spec.js` keeps the catalogue checks that have no UI to drive —
- * the shape of each buff record, and whether its description resolves in all
- * five languages. Everything that a player can actually *do* lives here, and is
+ * the shape of each buff record, and whether its description resolves in every
+ * shipped language. Everything that a player can actually *do* lives here, and is
  * done through the real pane: the Buy buttons on tab 7 → Ascendency Perks, the
  * frame loop that colours them, and the debug menu's AP grant.
  *
@@ -173,6 +173,27 @@ async function readPerkRows(game) {
 async function buyPerk(game, key, { slug = null } = {}) {
   const token = slug ?? key.replace(/([A-Z])/g, '-$1').toLowerCase();
   await clickElement(game, `button.ascendency-buff-button.buff-class-${token}`);
+}
+
+/**
+ * Buy the cheapest perk and wait for the achievement that first spend earns.
+ *
+ * `spendAP` pays a permanent 1.1x multiplier on every resource, granted a frame
+ * or two after the purchase. Any throughput measured across a *first* purchase
+ * therefore moves by the perk's multiplier and the achievement's together —
+ * which is how a 1.5x perk measures 1.65x. Banking the achievement up front puts
+ * it in the baseline instead, so what is measured afterwards is the perk alone.
+ */
+async function spendOnceSoTheAchievementIsBanked(game) {
+  await openPerksPane(game);
+  await buyPerk(game, 'littleBagOfHydrogen');
+  await game.page.waitForFunction(
+    () => globalThis.__mods.rdo.getAchievementDataObject('spendAP', ['active']) === true,
+    undefined,
+    { timeout: 20000 }
+  );
+  // Let the reward's own multiplier settle before anything is timed.
+  await game.page.waitForTimeout(800);
 }
 
 /** Measure a resource's accrual per real second — the only honest proof of a rate. */
@@ -391,12 +412,22 @@ test.describe('Ascendency Perks — the pane a player opens', () => {
     expect(bought.ready, 'a non-rebuyable perk is spent').toBe(false);
     expect(bought.blocked).toBe(true);
 
-    // A second attempt must not be reachable *and* must not settle: the button
-    // is gated, and the underlying handler refuses a perk already at its cap.
-    await buyPerk(game, 'littleBagOfHydrogen');
-    await game.page.waitForTimeout(500);
-    expect(await game.withMods((m) => m.rdo.getAscendencyBuffDataObject().littleBagOfHydrogen.boughtYet),
-      'the count must not climb past one').toBe(1);
+    // The refusal is the gate, and the gate is the class: `red-disabled-text`
+    // carries `pointer-events: none`, so a player cannot reach the button at all.
+    // It stays that way however much AP is thrown at it, which is the part worth
+    // proving — a dispatched click would go straight through the CSS and buy a
+    // second copy, so it would be measuring the test harness, not the game.
+    await grantAp(game, 3);
+    await openPerksPane(game);
+
+    const stillSpent = (await readPerkRows(game)).find((r) => r.key === 'littleBagOfHydrogen');
+    expect(stillSpent.ready, 'money cannot buy a second one').toBe(false);
+    expect(stillSpent.blocked).toBe(true);
+    expect(await game.page.evaluate(() =>
+      getComputedStyle(document.querySelector(
+        'button.ascendency-buff-button.buff-class-little-bag-of-hydrogen')).pointerEvents),
+      'the disabled colour is what makes the button unclickable').toBe('none');
+    expect(stillSpent.boughtYet, 'and the count stays at one').toBe(1);
   });
 
   test('spending AP for the first time earns the Spend Ascendency Points achievement', async ({ game }) => {
@@ -428,6 +459,7 @@ test.describe('Ascendency Perks — the effect, measured', () => {
     await game.openDebugMenu();
     await game.debugClick('unlockAllTabsButton');
     await grantAp(game, 1);
+    await spendOnceSoTheAchievementIsBanked(game);
   });
 
   test('Smart Auto Buyers makes an autobuyer measurably faster', async ({ game }) => {
@@ -582,7 +614,13 @@ test.describe('Ascendency Perks — carrying over a rebirth', () => {
   // reset itself; the button is pressed through its confirmation modal.
   test.setTimeout(420000);
 
-  /** Put the run in the state a scanned, conquerable destination leaves behind. */
+  /**
+   * Put the run in the state a scanned, conquerable destination leaves behind.
+   *
+   * `starName` is the star's *key*, which is its name lower-cased —
+   * `copyStarDataToDestinationStarField` indexes the star table with it directly
+   * and throws on a miss rather than returning nothing.
+   */
   async function scanDestinationSystem(game, starName) {
     const staged = await game.withMods((m, name) => {
       m.game.generateStarDataAndAddToDataObject({ id: name }, 12);
@@ -668,7 +706,7 @@ test.describe('Ascendency Perks — carrying over a rebirth', () => {
         perks,
         ap: m.cg.getAscendencyPoints(),
         autoBuyerRate: m.rdo.getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier1', 'rate']),
-        plantRate: m.rdo.getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'purchasedRate']),
+        plantRate: m.rdo.getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'rate']),
         run: m.cg.getStatRun()
       };
     });
@@ -676,7 +714,7 @@ test.describe('Ascendency Perks — carrying over a rebirth', () => {
     expect(before.perks.smartAutoBuyers, 'the basket should have been bought').toBe(1);
     expect(before.perks.efficientStorage, 'the rebuyable one twice').toBe(2);
 
-    await scanDestinationSystem(game, 'Aludra');
+    await scanDestinationSystem(game, 'vega');
     await game.withMods((m) => m.cg.setBattleResolved(true, 'player'));
     const newRun = await rebirthThroughTheUI(game, page);
 
@@ -695,7 +733,7 @@ test.describe('Ascendency Perks — carrying over a rebirth', () => {
         ap: m.cg.getAscendencyPoints(),
         run: m.cg.getStatRun(),
         autoBuyerRate: m.rdo.getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier1', 'rate']),
-        plantRate: m.rdo.getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'purchasedRate']),
+        plantRate: m.rdo.getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'rate']),
         nonExhaustive: m.cg.getNonExhaustiveResources(),
         hasCompoundMachining: techs.includes('compoundMachining'),
         missingCheapTechs: cheapTechs.filter((key) => !techs.includes(key)),
@@ -715,15 +753,24 @@ test.describe('Ascendency Perks — carrying over a rebirth', () => {
     //    perk once per purchase — so the new run's rate must carry the perk.
     const pristine = await game.withMods((m) => ({
       autoBuyerRate: m.rdo.resourceDataRebirthCopy?.resources?.hydrogen?.upgrades?.autoBuyer?.tier1?.rate ?? null,
-      plantRate: m.rdo.resourceDataRebirthCopy?.buildings?.energy?.upgrades?.powerPlant1?.purchasedRate ?? null
+      plantRate: m.rdo.resourceDataRebirthCopy?.buildings?.energy?.upgrades?.powerPlant1?.rate ?? null,
+      // Achievements pay permanent resource multipliers, and the reset re-applies
+      // those to the same tier rates the perk multiplies. Both land, so the
+      // expected rate is the product — leaving the achievement out is what makes
+      // a correct 1.5x perk look like a 1.95x one.
+      permanentResourceMultiplier: m.cg.getMultiplierPermanentResources()
     }));
+
     expect(pristine.autoBuyerRate, 'the baseline copy should hold a rate to compare against').toBeGreaterThan(0);
-    expect(after.autoBuyerRate / pristine.autoBuyerRate,
-      'Smart Auto Buyers should be re-applied to the new run')
-      .toBeCloseTo(SMART_AUTO_BUYERS_MULTIPLIER, 5);
+    expect(after.autoBuyerRate,
+      'Smart Auto Buyers should be re-applied to the new run, once, alongside the achievement modifier')
+      .toBeCloseTo(
+        pristine.autoBuyerRate * SMART_AUTO_BUYERS_MULTIPLIER * pristine.permanentResourceMultiplier,
+        6);
+    // Power plants carry no achievement modifier, so the perk is the whole story.
     expect(after.plantRate / pristine.plantRate,
       'Optimized Power Grids should be re-applied to the new run')
-      .toBeCloseTo(OPTIMIZED_POWER_GRIDS_MULTIPLIER, 5);
+      .toBeCloseTo(OPTIMIZED_POWER_GRIDS_MULTIPLIER, 6);
 
     // 3. The unlocks are handed back.
     expect(after.hasCompoundMachining, 'Compound Automation is permanent').toBe(true);
@@ -751,7 +798,7 @@ test.describe('Ascendency Perks — carrying over a rebirth', () => {
     const apAfterPurchase = await currentAp(game);
     expect(apAfterPurchase).toBe(DEBUG_AP_GRANT - 3);
 
-    await scanDestinationSystem(game, 'Suhail');
+    await scanDestinationSystem(game, 'rigel');
     await game.withMods((m) => m.cg.setBattleResolved(true, 'player'));
     await rebirthThroughTheUI(game, page);
 

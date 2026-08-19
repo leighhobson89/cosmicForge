@@ -2908,3 +2908,123 @@ One stray English literal was fixed at the same time:
 branch while localizing on both others.
 
 ---
+
+## 43. Rocket fuel earned offline escapes the offline-gains nerf — ✅ FIXED
+
+**Severity was: low-to-medium — a balance leak, not a crash. Every other store
+paid 33.4% of its online rate for time away; rocket fuel paid 100%.**
+
+### Reproduction
+
+1. Start a rocket fuelling, so `rocketsFuellerStartedArray` holds it.
+2. Save, and load a save whose `timeStamp` is an hour old.
+3. Compare the fuel added against `rate × TIMER_RATE_RATIO × seconds × 0.334`.
+
+At a tier-1 fuel rate of 0.05 across one hour the game pays **18000** — exactly
+`0.05 × 100 × 3600`, the un-nerfed figure — where every other gain in the same
+payment would have paid **6012**.
+
+Covered by `tests/e2e/offline-gains/offline-gains.spec.js` →
+_"rocket fuel accrued while away is nerfed like every other gain"_.
+
+### Cause
+
+`offlineGains()` in `game.js` builds one gains object, nerfs the whole of it, and
+only *then* accumulates the rocket fuel:
+
+```js
+let offlineGains = {
+    resources: …, compounds: …, energy: …, research: …, ripTelemetryData: …,
+    rocket1: 0, rocket2: 0, rocket3: 0, rocket4: 0,   // ← zero at this point
+};
+
+nerfOfflineGains(offlineGains);                        // walks rocket1..4, all still 0
+
+currentFuelQuantityRockets.forEach(rocket => {
+    const offlineFuelGain = (fuelUpgradeRate * timeDifferenceInSeconds) * getTimerRateRatio();
+    offlineGains[rocket] += offlineFuelGain;           // ← added after the nerf
+});
+```
+
+The `rocket1: 0 … rocket4: 0` placeholders exist precisely so `nerfOfflineGains`
+walks them, which is what makes this look like an ordering slip rather than a
+deliberate exemption: the fields were put there to be nerfed, and are then filled
+in one step too late. The fuel is also never floored, unlike every other gain.
+
+### Fix — applied
+
+The fuel accumulation was moved above the nerf, so `rocket1..4` hold their real
+figures when `nerfOfflineGains` walks them:
+
+```js
+const currentFuelQuantityRockets = getRocketsFuellerStartedArray().filter(r => !r.includes('FuelledUp'));
+currentFuelQuantityRockets.forEach(rocket => {
+    const fuelUpgradeRate = getResourceDataObject('space', ['upgrades', rocket]).autoBuyer.tier1.rate;
+    offlineGains[rocket] += (fuelUpgradeRate * timeDifferenceInSeconds) * getTimerRateRatio();
+});
+
+nerfOfflineGains(offlineGains);
+```
+
+The second `forEach`, which banks the fuel into each rocket against its
+`fuelQuantityToLaunch` cap, is unchanged and still runs after the nerf.
+
+---
+
+## 44. A first focus on a never-saved run sets the play-time clock to NaN — ✅ FIXED
+
+**Severity was: medium — silent corruption of a saved value, on a path any
+player who opens the game in a background tab takes.**
+
+### Reproduction
+
+1. Start a brand new game and do not save or load.
+2. Give the window a `focus` event without a preceding `blur` — which is what the
+   browser does when the game was loaded in a background tab, or in a window that
+   never had focus, and the player then clicks into it.
+3. Read `getGameActiveCountTime()`. Both entries are `NaN`.
+
+Covered by `tests/e2e/offline-gains/offline-gains.spec.js` →
+_"a brand new game that has never been saved pays nothing rather than NaN"_,
+which asserts the departure stamp is a real ISO string before it goes near the
+arithmetic.
+
+### Cause
+
+`startGame()` at `game.js:2039` seeds the departure stamp with
+
+```js
+setLastSavedTimeStamp(getGameStartTime().toISOString);
+```
+
+Two things are wrong in one line. The call parentheses are missing, and
+`getGameStartTime()` returns `Date.now()` — a **number**, which has no
+`toISOString` at all. The expression is therefore `undefined`, and the stamp stays
+`undefined` until the first `blur` or the first load writes a real one.
+
+`offlineGains()` then computes
+
+```js
+const lastSavedTime = new Date(getLastSavedTimeStamp()).getTime();   // NaN
+const diff = now - lastSavedTime;                                    // NaN
+setGameActiveCountTime(null, getGameActiveCountTime()[1] + diff);    // NaN
+```
+
+Resource quantities escape because `setResourceDataObject` refuses non-finite
+writes and preserves the previous value. `gameActiveCountTime` is a plain module
+variable with no such guard, so it takes the NaN — and it is captured into every
+save from then on, and feeds the Statistics screen's play-time figures.
+
+### Fix — applied
+
+```js
+setLastSavedTimeStamp(new Date(getGameStartTime()).toISOString());
+```
+
+A brand-new run now carries a usable departure stamp from `startGame()` onwards,
+so the first focus computes a near-zero elapsed time instead of `NaN`. Still worth
+considering separately: a guard in `offlineGains()` that returns early when the
+elapsed time is not finite, so a bad stamp from any other source could not reach
+the arithmetic either.
+
+---

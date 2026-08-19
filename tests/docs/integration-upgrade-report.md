@@ -2308,6 +2308,112 @@ details about the shell drive its shape:
 
 ---
 
+## 🟢 Ascendency Perks — `ascendency-perks-live.spec.js`, 15 specs, all passing
+
+**What is different.** The old file settled purchases by hand. Its "a purchase
+deducts exactly the advertised cost" test read `baseCostAp`, subtracted it from
+the balance itself, wrote `boughtYet` itself, and then asserted on the two values
+it had just written — inside a single `withMods` block. It would have passed with
+`purchaseBuff` deleted from the game. Six cases in that shape have been removed
+rather than kept alongside the new ones.
+
+The new file opens **tab 7 → Ascendency Perks** and plays it:
+
+- **AP is earned through the debug menu's own grant button**, not written into the
+  data object.
+- **Perks are bought by pressing their Buy buttons**, and the balance is checked
+  to the point after each press.
+- **"How many can I buy" is answered by buying them.** One spec walks the pane
+  cheapest-first until nothing is affordable, asserting each purchase charges
+  exactly the price the row was quoting and that the balance never goes negative;
+  another compares the frame loop's own green/red classification, perk by perk,
+  against the affordability rule at three balances the run genuinely passes
+  through.
+- **Price escalation is walked up the ladder.** Efficient Storage is bought to its
+  cap — 10, 20, 40 AP — with the quoted price, the charged price and
+  `baseCost × multiple^boughtYet` held equal at each step, then proved to stay
+  capped however much AP is thrown at it afterwards.
+- **Effects are measured, not read.** Smart Auto Buyers is checked by timing a
+  resource's accrual before and after the purchase; Optimized Power Grids by
+  timing energy accrual from a plant that is actually burning fuel. Reading
+  `effectCategoryMagnitude` back would pass with the whole effect chain deleted.
+- **The carry-over is a real rebirth.** A basket of six perks — a rate multiplier,
+  a grid multiplier, a tech unlock, a flag, a starting-stock grant and a rebuyable
+  bought twice — is bought, then the Rebirth button is pressed and its
+  confirmation answered, and each perk is checked to have been re-applied to the
+  new run rather than merely remembered.
+
+**Two traps this area sets, both now documented in the spec.**
+
+*The first spend pays an achievement.* `spendAP` grants a permanent 1.1× on every
+resource, a frame or two after the purchase. Timing throughput across a *first*
+purchase therefore measures the perk and the achievement together, which is how a
+1.5× perk reads as 1.65×. The effect specs bank that achievement up front so the
+baseline already carries it.
+
+*The reset applies two multipliers, not one.* After a rebirth an autobuyer's rate
+is `pristine × perk × permanentResourceMultiplier`, because
+`addPermanentBuffsBackInAfterRebirth()` and `addPermanentResourcesModifiersBackIn()`
+both run. Comparing against the perk alone reads 1.95× and looks like compounding.
+
+**Refusals are asserted as the class, never as a click.** Affordability and the
+purchase cap are both enforced by `red-disabled-text` and its
+`pointer-events: none`, which is by design in this game. A dispatched click goes
+straight through that gate and *will* buy a second copy of a one-shot perk — so
+the spec asserts the gate is up and the computed `pointer-events` is `none`,
+rather than clicking and asserting nothing happened.
+
+What is left in `ascendency.spec.js` is the part with no UI to drive: catalogue
+shape, copy resolving in every shipped language, and the two structural rules that
+let perks survive a rebirth at all.
+
+---
+
+## 🟢 Offline Gains — `offline-gains/offline-gains.spec.js`, 18 specs, all passing
+
+A new area rather than an upgrade. `offlineGains()` had no coverage at all,
+despite being the one function in the game that writes to every store at once.
+
+**How it is driven.** Both of the function's triggers are exercised through the
+real thing. The load path exports a genuine save through the **Saving / Loading**
+pane, rewrites its `timeStamp` to the moment the player is supposed to have left,
+and imports it back through the **Import** button. The focus path dispatches the
+window's own `blur` and `focus` events — the same ones the browser fires when a
+player alt-tabs — and backdates the departure stamp between them.
+
+Rewriting the timestamp is the one concession, and it is not a workaround: the
+save file *is* this feature's input, and a save that says it was written an hour
+ago is exactly what an hour offline looks like. Everything downstream — the
+arithmetic, the caps, the timers, the notification — is the shipped path.
+
+A few specs also state a production rate in the exported payload. That is forced:
+the frame loop recomputes every aggregate rate each tick, so a rate staged in the
+source run is zero again by the time the save is taken. Where a rate can be
+*earned* instead — the focus specs stage a tier-1 autobuyer and read back the rate
+the game settles on — it is.
+
+**What is pinned.** The formula
+`floor(rate × TIMER_RATE_RATIO × seconds × OFFLINE_GAINS_RATE)` at the shipped
+0.334; the floor, so a trickle pays nothing; the storage cap; fuel already burned
+netted off the rate first; resources, compounds, research, rip telemetry, battery
+energy and mined antimatter all paid on the same formula; energy paid only once a
+battery exists; countdown timers losing the whole time away at 1:1, because time
+passing is not a gain and must not be nerfed; the notification on load and the
+silence on focus; and paying once rather than twice for one absence.
+
+**Two live defects found, both fixed at source rather than worked around.**
+Known-issues #43: rocket fuel escaped the nerf entirely, because the fuel was
+accumulated one step *after* `nerfOfflineGains` had already walked the zeroed
+`rocket1..4` placeholders — an hour of fuelling paid 18000 where every other gain
+in the same payment paid 6012. Known-issues #44: `startGame()` seeded the
+departure stamp with `getGameStartTime().toISOString`, missing both the call
+parentheses and the fact that the getter returns a `Date.now()` number, so the
+stamp stayed `undefined` and a first focus on a never-saved run put `NaN` into the
+play-time clock — which is then captured into every save. Resource quantities
+escaped that one only because `setResourceDataObject` refuses non-finite writes.
+
+---
+
 ## The general rule this establishes
 
 Drive the game's own buttons, panes and debug menu. Reserve direct `withMods`

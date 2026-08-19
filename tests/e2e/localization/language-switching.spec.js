@@ -16,12 +16,12 @@ import { test, expect } from '../_harness/game-fixture.mjs';
 const STORAGE_KEY = 'cosmicForgeLanguage';
 
 const LANGUAGE_OPTIONS = [
-  { value: 'en', text: 'English', label: 'Language:', resources: 'Resources' },
-  { value: 'es', text: 'Español', label: 'Idioma:', resources: 'Recursos' },
-  { value: 'de', text: 'Deutsch', label: 'Sprache:', resources: 'Ressourcen' },
-  { value: 'pt', text: 'Português', label: 'Idioma:', resources: 'Recursos' },
-  { value: 'it', text: 'Italiano', label: 'Lingua:', resources: 'Risorse' },
-  { value: 'fr', text: 'Français', label: 'Langue :', resources: 'Ressources' }
+  { value: "en", text: "English", label: "Language:", resources: "Resources" },
+  { value: "es", text: "Español", label: "Idioma:", resources: "Recursos" },
+  { value: "pt", text: "Português", label: "Idioma:", resources: "Recursos" },
+  { value: "de", text: "Deutsch", label: "Sprache:", resources: "Ressourcen" },
+  { value: "it", text: "Italiano", label: "Lingua:", resources: "Risorse" },
+  { value: "fr", text: "Français", label: "Langue :", resources: "Ressources" },
 ];
 
 /**

@@ -191,6 +191,29 @@ rebuyable perk may legitimately have a flat cost if it has a low purchase cap.
 When a test fails, establish whether the game or the assumption is wrong before
 changing either.
 
+**Aggregate rates cannot be staged; they are recomputed every frame.** Writing to
+`resources.<key>.rate` looks like it works and is back to zero a tick later,
+because the frame loop rebuilds it from the autobuyers that own it. To have a
+rate, *earn* one — stage a tier-1 autobuyer (it needs no power, so the grid
+cannot disturb the measurement) and read back the figure the game settles on,
+which also picks up the home star's per-tier bonus. The one place a rate can be
+stated outright is inside a save payload, because the load applies it before the
+next frame runs; `offline-gains` uses that deliberately and says so.
+
+**Time away is stated in the save, not waited for.** Anything driven by elapsed
+wall-clock time — offline gains above all — is reachable by exporting a real save
+through the Saving/Loading pane, rewriting its `timeStamp`, and importing it back
+through the real Import button. Allow a generous slack in the expected figure:
+building the payload, booting a fresh session and pressing Import all take real
+seconds, and every one of them counts as more time away.
+
+**The first AP spend pays an achievement that multiplies every resource.**
+`spendAP` grants a permanent 1.1x, a frame or two after the purchase, so any
+throughput timed across a *first* purchase moves by the perk and the achievement
+together — which is how a 1.5x perk measures 1.65x. Bank the achievement before
+the baseline measurement. The same trap sits on the other side of a rebirth,
+where an autobuyer's rate is `pristine x perk x permanentResourceMultiplier`.
+
 **Reach for the debug menu before writing setup code.** Anything the debug window
 can do, it should do — that exercises the real wiring and keeps specs short. Only
 seed state directly via `withMods` when no debug action covers it.

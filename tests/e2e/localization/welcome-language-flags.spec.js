@@ -3,8 +3,8 @@
  * Plan: tests/docs/areas/localization.md
  * Feature status: docs/localization/status.md (item 11)
  *
- * The five-flag language selector on the welcome modal — the row of flags above
- * the pioneer-name field that lets a new player choose their language before the
+ * The language selector on the welcome modal — the row of flags above the
+ * pioneer-name field that lets a new player choose their language before the
  * game starts.
  *
  * These specs never touch `relocalizeAll` or `initLocalization`: the whole point
@@ -14,11 +14,17 @@
  * press the button — and only reads state back through the modules.
  *
  * The bar's contract, as specified:
- *   - five flags (en, es, de, it, fr) drawn from images/flags/<code>.png,
- *   - laid out as nine grid columns, four of which are spacers,
+ *   - one flag per shipped language, drawn from images/flags/<code>.png,
+ *   - laid out as one grid row of flags interleaved with spacer columns, so the
+ *     run is flag, gap, flag, gap ... flag — `2n - 1` columns for `n` languages,
  *   - over two rows, the second carrying the language code centred under its flag,
  *   - the whole run 40% of the width of the modal, each flag 50px tall,
+ *   - the chosen flag carries a white glow; the others are left plain,
  *   - clicking is free and repeatable; the language is applied exactly once, on confirm.
+ *
+ * The counts below are derived from `CODES` rather than written out, because the
+ * shipped set grows — Portuguese was added after this file was first written,
+ * and every hard-coded "five" and "nine" in here had to be found by hand.
  */
 import { test, expect } from '../_harness/game-fixture.mjs';
 
@@ -26,15 +32,20 @@ const STORAGE_KEY = 'cosmicForgeLanguage';
 const CODES = ['en', 'es', 'pt', 'de', 'it', 'fr'];
 
 // The bar's authored geometry, kept here so a deliberate retune is one edit in the
-// spec rather than a hunt through assertions: the nine columns together occupy this
+// spec rather than a hunt through assertions: the columns together occupy this
 // share of the modal's content width, and each flag is this tall.
 const BAR_WIDTH_FRACTION = 0.4;
 const FLAG_HEIGHT_PX = 50;
+
+/** Flags interleaved with spacers: n flags need n - 1 gaps between them. */
+const COLUMN_COUNT = CODES.length * 2 - 1;
+const SPACER_COUNT = (CODES.length - 1) * 2;
 
 /** Header of the welcome modal in each language — the proof a choice landed. */
 const INTRO_HEADER = {
   en: 'Welcome to the Cosmic Forge!',
   es: '¡Bienvenido a la Fragua Cósmica!',
+  pt: 'Bem-vindo à Forja Cósmica!',
   de: 'Willkommen in der Kosmischen Schmiede!',
   it: 'Benvenuto nella Forgia Cosmica!',
   fr: 'Bienvenue à la Forge Cosmique!'
@@ -101,7 +112,7 @@ test.describe('Localization — welcome-modal language flags', () => {
       await openWelcomeModal(page);
     });
 
-    test('the bar sits above the pioneer-name field and offers all five languages', async ({ page }) => {
+    test('the bar sits above the pioneer-name field and offers every shipped language', async ({ page }) => {
       const layout = await page.evaluate(() => {
         const bar = document.getElementById('languageFlagBar');
         const field = document.getElementById('pioneerCodeName');
@@ -136,7 +147,7 @@ test.describe('Localization — welcome-modal language flags', () => {
       expect(images.filter((i) => !i.loaded)).toEqual([]);
     });
 
-    test('the bar is nine columns over two rows, four of the columns spacers', async ({ page }) => {
+    test('the bar is one column per flag and gap, over two rows', async ({ page }) => {
       const grid = await page.evaluate(() => {
         const bar = document.getElementById('languageFlagBar');
         const style = getComputedStyle(bar);
@@ -152,13 +163,16 @@ test.describe('Localization — welcome-modal language flags', () => {
       });
 
       expect(grid.display).toBe('grid');
-      expect(grid.columns).toBe(9);
+      // The CSS has to declare a column for every cell the markup puts in the
+      // grid, or the row wraps and the labels stop lining up under their flags.
+      expect(grid.columns, 'the CSS column count must track the shipped languages')
+        .toBe(COLUMN_COUNT);
       expect(grid.rows).toBe(2);
-      // Nine cells per row: five of content and four spacers between them.
-      expect(grid.flags).toBe(5);
-      expect(grid.labels).toBe(5);
-      expect(grid.spacers).toBe(8);
-      expect(grid.children).toBe(18);
+      expect(grid.flags).toBe(CODES.length);
+      expect(grid.labels).toBe(CODES.length);
+      // Spacers are drawn on both rows, which is what keeps the two aligned.
+      expect(grid.spacers).toBe(SPACER_COUNT);
+      expect(grid.children).toBe(CODES.length * 2 + SPACER_COUNT);
     });
 
     test('flag, gap, flag … spans 40% of the modal, and each flag is 50px tall', async ({ page }) => {
@@ -192,9 +206,9 @@ test.describe('Localization — welcome-modal language flags', () => {
       });
 
       expect(measured.barWidth).toBeCloseTo(measured.parentContentWidth * BAR_WIDTH_FRACTION, 0);
-      // No leftover: the nine columns tile the whole width they were given.
+      // No leftover: the columns tile the whole width they were given.
       expect(measured.runWidth).toBeCloseTo(measured.barWidth, 0);
-      expect(measured.heights).toEqual(Array(5).fill(FLAG_HEIGHT_PX));
+      expect(measured.heights).toEqual(Array(CODES.length).fill(FLAG_HEIGHT_PX));
       // The flags stretch to their holding container rather than letterboxing:
       // no slack in either axis, whatever the source image's aspect ratio is.
       for (const box of measured.imageBoxes) {
@@ -246,6 +260,38 @@ test.describe('Localization — welcome-modal language flags', () => {
       }
 
       expect(seen).toEqual(['es', 'pt', 'de', 'it', 'fr', 'en', 'de']);
+    });
+
+    test('the chosen flag glows white, and only the chosen one does', async ({ page }) => {
+      await openWelcomeModal(page);
+
+      // The glow is how the selection reads at a glance: a flag cannot be tinted
+      // to show it is active without ruining the flag, so the marker sits around
+      // it instead. Unselected flags must stay completely plain, or the row
+      // stops communicating which one is chosen.
+      const shadows = async () => page.evaluate(() =>
+        Array.from(document.querySelectorAll('.language-flag-cell')).map((cell) => ({
+          code: cell.dataset.language,
+          selected: cell.classList.contains('language-flag-selected'),
+          boxShadow: getComputedStyle(cell).boxShadow
+        })));
+
+      for (const code of ['fr', 'pt', 'en']) {
+        await clickFlag(page, code);
+        const cells = await shadows();
+
+        const chosen = cells.find((c) => c.code === code);
+        expect(chosen.selected, `${code} should be the chosen flag`).toBe(true);
+        expect(chosen.boxShadow, `${code} should be glowing`).not.toBe('none');
+        // White, not the theme's accent: the welcome modal is seen before a
+        // theme is picked, and white is the one colour that lifts every flag.
+        expect(chosen.boxShadow).toMatch(/rgba?\(\s*255,\s*255,\s*255/);
+
+        for (const other of cells.filter((c) => c.code !== code)) {
+          expect(other.selected, `${other.code} should not be marked`).toBe(false);
+          expect(other.boxShadow, `${other.code} should be left plain`).toBe('none');
+        }
+      }
     });
 
     test('clicking flags does not change the language until the modal is confirmed', async ({ page }) => {

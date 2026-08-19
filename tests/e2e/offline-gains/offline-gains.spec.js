@@ -60,13 +60,13 @@ const HOUR_SECONDS = 3600;
  * Slack, in seconds, between the timestamp this spec writes and the moment the
  * game reads the clock. Building the payload, booting a fresh session and
  * pressing Import all take real time, and every second of it is counted as more
- * time away. Six seconds against an hour is 0.17% — nowhere near enough to blur
- * the 3× gap between a nerfed payment and an un-nerfed one.
+ * time away. Twenty seconds against an hour is half a percent — nowhere near
+ * enough to blur the 3× gap between a nerfed payment and an un-nerfed one, which
+ * is what every assertion here actually turns on.
  */
-const CLOCK_SLACK_SECONDS = 8;
+const CLOCK_SLACK_SECONDS = 20;
 
 const SAVING_PANE_TOKEN = 'tab9.option2';
-const VISUAL_PANE_TOKEN = 'tab9.option1';
 const IMPORT_CODE_BUTTON = '#importSaveRow button.save-load-button';
 
 // ------------------------------------------------------------------- the pane
@@ -101,13 +101,6 @@ async function openSavingPane(game) {
     null,
     { timeout: 30000 }
   );
-}
-
-/** Leave the pane and come back, so the game captures a fresh save. */
-async function revisitSavingPane(game) {
-  await openPaneByToken(game, VISUAL_PANE_TOKEN);
-  await game.page.waitForTimeout(400);
-  await openSavingPane(game);
 }
 
 /** The compressed code currently sitting in the export box. */
@@ -171,11 +164,10 @@ async function importCode(game, code) {
  * Returns the decoded save so a spec can measure the return against exactly what
  * was banked, rather than against a value it assumed.
  */
-async function playSaveAndReturn(game, { awayMs = HOUR_MS, patch = null, prepare = null } = {}) {
+async function playSaveAndReturn(game, { awayMs = HOUR_MS, patch = null, onImport = null } = {}) {
   await game.boot();
   await game.openDebugMenu();
   await game.debugClick('unlockAllTabsButton');
-  if (prepare) await prepare(game);
 
   await openSavingPane(game);
   const code = await exportedCode(game);
@@ -188,10 +180,16 @@ async function playSaveAndReturn(game, { awayMs = HOUR_MS, patch = null, prepare
 
   await clearNotifications(game);
   await importCode(game, rewound);
+
+  // The offline-gains notice is raised *inside* the restore, so it is shown
+  // first and has usually been and gone by the time the load notice appears.
+  // A spec that wants to see it has to look before this wait, not after.
+  const early = onImport ? await onImport(game) : null;
+
   const loaded = await waitForNotification(game, /loaded successfully/i);
   expect(loaded, 'the rewound save must import cleanly').toBeTruthy();
 
-  return { saved, code: rewound };
+  return { saved, code: rewound, early };
 }
 
 /**
@@ -249,13 +247,13 @@ test.describe('Offline gains — paid when a save is loaded', () => {
   });
 
   test('loading a save tells the player the offline gains were added', async ({ game }) => {
-    await playSaveAndReturn(game, {
+    const { early } = await playSaveAndReturn(game, {
       awayMs: HOUR_MS,
-      patch: (state) => { state.resourceData.resources.hydrogen.rate = 0.5; }
+      patch: (state) => { state.resourceData.resources.hydrogen.rate = 0.5; },
+      onImport: (g) => waitForNotification(g, /offline gains/i, { timeout: 15000 })
     });
 
-    const announced = await waitForNotification(game, /offline gains/i);
-    expect(announced, 'a load must say the time away was paid for').toBeTruthy();
+    expect(early, 'a load must say the time away was paid for').toBeTruthy();
   });
 
   test('a save written a moment ago pays nothing', async ({ game }) => {
@@ -286,6 +284,48 @@ test.describe('Offline gains — paid when the window comes back', () => {
   test.setTimeout(180000);
 
   /**
+   * Stage a tier-1 autobuyer and report the rate the game settles on.
+   *
+   * The rate has to be *earned* rather than written: the frame loop recomputes
+   * every aggregate rate each tick from the autobuyers that own it, so a rate
+   * poked straight into `resources.hydrogen.rate` is back to zero a frame later
+   * and the return payment is nothing. The settled figure is read back rather
+   * than assumed, because the home system's star type adds a per-tier bonus of
+   * its own on top of the tier's rate.
+   *
+   * Tier 1 is deliberate: it runs whether or not the grid is up, so the
+   * measurement cannot be disturbed by the power tripping part way through.
+   */
+  async function stageEarningAutobuyer(game) {
+    await game.withMods((m) => {
+      m.rdo.setResourceDataObject(true, 'resources', ['hydrogen', 'revealedYet']);
+      m.rdo.setResourceDataObject(1e12, 'resources', ['hydrogen', 'storageCapacity']);
+      m.rdo.setResourceDataObject(0, 'resources', ['hydrogen', 'usedForFuelPerSec']);
+      m.rdo.setResourceDataObject(true, 'resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier1', 'active']);
+      m.rdo.setResourceDataObject(0.01, 'resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier1', 'rate']);
+      m.rdo.setResourceDataObject(50, 'resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier1', 'quantity']);
+      m.rdo.setResourceDataObject(1, 'resources', ['hydrogen', 'upgrades', 'autoBuyer', 'currentTierLevel']);
+    });
+    await game.page.waitForTimeout(1200);
+
+    const rate = await game.withMods((m) =>
+      m.rdo.getResourceDataObject('resources', ['hydrogen', 'rate']));
+    expect(rate, 'the staged autobuyer must be earning before the window is left')
+      .toBeGreaterThan(0);
+    return rate;
+  }
+
+  /** Empty the store, so what is read back afterwards is the payment itself. */
+  async function emptyStore(game) {
+    await game.withMods((m) =>
+      m.rdo.setResourceDataObject(0, 'resources', ['hydrogen', 'quantity']));
+  }
+
+  function hydrogenHeld(game) {
+    return game.withMods((m) => m.rdo.getResourceDataObject('resources', ['hydrogen', 'quantity']));
+  }
+
+  /**
    * Leave the window and come back.
    *
    * `blur` is the event the browser fires when the player alt-tabs away, and the
@@ -309,32 +349,29 @@ test.describe('Offline gains — paid when the window comes back', () => {
   }
 
   test('alt-tabbing away for an hour and back pays the same nerfed hour', async ({ game }) => {
-    const RATE = 0.5;
     await game.boot();
-
-    // No autobuyer is bought, so nothing produces live and the only thing that
-    // can move the store is the return payment.
-    await game.withMods((m, rate) => {
-      m.rdo.setResourceDataObject(0, 'resources', ['hydrogen', 'quantity']);
-      m.rdo.setResourceDataObject(1e12, 'resources', ['hydrogen', 'storageCapacity']);
-      m.rdo.setResourceDataObject(rate, 'resources', ['hydrogen', 'rate']);
-    }, RATE);
+    const rate = await stageEarningAutobuyer(game);
+    await emptyStore(game);
 
     await leaveAndReturn(game, HOUR_MS);
 
-    const hydrogen = await game.withMods((m) =>
-      m.rdo.getResourceDataObject('resources', ['hydrogen', 'quantity']));
-    const band = nerfedGainBand(RATE, HOUR_SECONDS);
+    const paid = await hydrogenHeld(game);
+    // The autobuyer keeps producing across the handful of seconds the return
+    // takes, so the upper bound carries an allowance for it.
+    const band = nerfedGainBand(rate, HOUR_SECONDS, {
+      livePerSecond: rate * TIMER_RATE_RATIO,
+      liveSeconds: 5
+    });
 
-    expect(hydrogen).toBeGreaterThanOrEqual(band.min);
-    expect(hydrogen).toBeLessThanOrEqual(band.max);
-    expect(hydrogen, 'coming back pays the nerfed rate, not the full one')
+    expect(paid).toBeGreaterThanOrEqual(band.min);
+    expect(paid).toBeLessThanOrEqual(band.max);
+    expect(paid, 'coming back pays the nerfed rate, not the full one')
       .toBeLessThan(band.unnerfed * 0.5);
   });
 
   test('coming back is silent — the notification belongs to loading a save', async ({ game }) => {
     await game.boot();
-    await game.withMods((m) => m.rdo.setResourceDataObject(0.5, 'resources', ['hydrogen', 'rate']));
+    await stageEarningAutobuyer(game);
     await clearNotifications(game);
 
     await leaveAndReturn(game, HOUR_MS);
@@ -345,13 +382,9 @@ test.describe('Offline gains — paid when the window comes back', () => {
   });
 
   test('two focus events in quick succession pay once, not twice', async ({ game }) => {
-    const RATE = 0.5;
     await game.boot();
-    await game.withMods((m, rate) => {
-      m.rdo.setResourceDataObject(0, 'resources', ['hydrogen', 'quantity']);
-      m.rdo.setResourceDataObject(1e12, 'resources', ['hydrogen', 'storageCapacity']);
-      m.rdo.setResourceDataObject(rate, 'resources', ['hydrogen', 'rate']);
-    }, RATE);
+    const rate = await stageEarningAutobuyer(game);
+    await emptyStore(game);
 
     await game.page.evaluate(() => window.dispatchEvent(new Event('blur')));
     await game.withMods((m, away) => {
@@ -367,25 +400,32 @@ test.describe('Offline gains — paid when the window comes back', () => {
     });
     await game.page.waitForTimeout(700);
 
-    const hydrogen = await game.withMods((m) =>
-      m.rdo.getResourceDataObject('resources', ['hydrogen', 'quantity']));
-    const band = nerfedGainBand(RATE, HOUR_SECONDS);
+    const paid = await hydrogenHeld(game);
+    const band = nerfedGainBand(rate, HOUR_SECONDS, {
+      livePerSecond: rate * TIMER_RATE_RATIO,
+      liveSeconds: 5
+    });
 
-    expect(hydrogen, 'the hour should have been paid').toBeGreaterThanOrEqual(band.min);
-    expect(hydrogen, 'and paid only once').toBeLessThanOrEqual(band.max);
+    expect(paid, 'the hour should have been paid').toBeGreaterThanOrEqual(band.min);
+    expect(paid, 'and paid only once').toBeLessThanOrEqual(band.max);
   });
 
   test('a brand new game that has never been saved pays nothing rather than NaN', async ({ game }) => {
     // The reachable case: the game is opened in a background tab, or in a window
     // that never had focus, and the player clicks into it. `focus` fires with no
-    // `blur` ever having happened, so the departure stamp is whatever `startGame`
-    // left behind — and every quantity in the run is about to be added to.
+    // `blur` ever having happened, so the departure stamp is whatever
+    // `startGame()` left behind — and every store in the run is about to be
+    // added to against it.
     await game.boot();
+
+    const stamp = await game.withMods((m) => typeof m.cg.getLastSavedTimeStamp());
+    expect(stamp,
+      'a run that has never been saved should still hold a usable departure stamp')
+      .toBe('string');
 
     await game.withMods((m) => {
       m.rdo.setResourceDataObject(0, 'resources', ['hydrogen', 'quantity']);
       m.rdo.setResourceDataObject(1e12, 'resources', ['hydrogen', 'storageCapacity']);
-      m.rdo.setResourceDataObject(0.5, 'resources', ['hydrogen', 'rate']);
     });
 
     await game.page.evaluate(() => window.dispatchEvent(new Event('focus')));
@@ -395,14 +435,18 @@ test.describe('Offline gains — paid when the window comes back', () => {
       hydrogen: m.rdo.getResourceDataObject('resources', ['hydrogen', 'quantity']),
       research: m.rdo.getResourceDataObject('research', ['quantity']),
       energy: m.rdo.getResourceDataObject('buildings', ['energy', 'quantity']),
-      activeTime: m.cg.getGameActiveCountTime()
+      // JSON cannot carry NaN, so this crosses the bridge as strings.
+      activeTime: m.cg.getGameActiveCountTime().map((v) => String(v))
     }));
 
     expect(Number.isFinite(state.hydrogen), `hydrogen became ${state.hydrogen}`).toBe(true);
     expect(Number.isFinite(state.research), `research became ${state.research}`).toBe(true);
     expect(Number.isFinite(state.energy), `energy became ${state.energy}`).toBe(true);
-    expect(state.activeTime.every((v) => Number.isFinite(v)),
-      `the active/inactive clock became ${JSON.stringify(state.activeTime)}`).toBe(true);
+    // The play-time clock has no non-finite guard of its own — unlike
+    // `setResourceDataObject`, which silently refuses a NaN write — so it is the
+    // value that records the damage when the elapsed time cannot be computed.
+    expect(state.activeTime, 'the active/inactive clock should still hold numbers')
+      .not.toContain('NaN');
   });
 });
 
@@ -533,16 +577,16 @@ test.describe('Offline gains — what is paid, and what is not', () => {
 
     const after = await game.withMods((m) => ({
       research: m.rdo.getResourceDataObject('research', ['quantity']),
-      allTime: m.cg.getResourceAllTimeStat?.('researchPoints') ?? null
+      // The lifetime total has no exported getter; the save capture is where it
+      // is legible, and it is the same variable `addToResourceAllTimeStat` writes.
+      allTime: m.cg.captureGameStatusForSaving('initialise').allTimeTotalResearchPoints
     }));
     const band = nerfedGainBand(RATE, HOUR_SECONDS);
 
     expect(after.research).toBeGreaterThanOrEqual(band.min);
     expect(after.research).toBeLessThanOrEqual(band.max);
-    if (after.allTime !== null) {
-      expect(after.allTime, 'offline research counts towards the lifetime total')
-        .toBeGreaterThanOrEqual(band.min);
-    }
+    expect(after.allTime, 'offline research counts towards the lifetime total')
+      .toBeGreaterThanOrEqual(band.min);
   });
 
   test('energy is only paid once a battery exists to hold it', async ({ game }) => {

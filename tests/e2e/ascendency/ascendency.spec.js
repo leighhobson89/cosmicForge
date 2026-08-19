@@ -1,43 +1,27 @@
 /**
- * Area: Ascendency Points & Perks
+ * Area: Ascendency Points & Perks — the catalogue behind the pane
  * Plan: tests/docs/areas/ascendency.md
  *
- * The AP economy is cross-run permanent progress — errors here corrupt player
- * state irreversibly, which is why the arithmetic and bounds are covered hard.
+ * What is left in this file is the part of the area with no UI to drive: the
+ * shape of the perk catalogue, whether every perk's copy resolves in every
+ * shipped language, and the two structural rules that let perks survive a
+ * rebirth at all.
+ *
+ * Everything a player *does* — reading a price, seeing which perks the balance
+ * can pay for, pressing Buy, watching the effect land, and finding it all still
+ * there on the next run — lives in `ascendency-perks-live.spec.js`, driven
+ * through the real pane.
+ *
+ * The purchase cases that used to be here have been removed rather than kept
+ * alongside it. They settled purchases by hand — deducting the cost and setting
+ * `boughtYet` in the same `withMods` block that then asserted on them — so they
+ * would have passed with `purchaseBuff` deleted from the game.
  */
 import { test, expect } from '../_harness/game-fixture.mjs';
 
 test.describe('Ascendency Points & Perks', () => {
   test.beforeEach(async ({ game }) => {
     await game.boot();
-  });
-
-  test('a fresh save starts with zero AP and no perks bought', async ({ game }) => {
-    const state = await game.withMods((m) => {
-      const buffs = m.rdo.getAscendencyBuffDataObject() || {};
-      const bought = Object.entries(buffs)
-        .filter(([k, v]) => k !== 'version' && v && typeof v === 'object' && (v.boughtYet ?? 0) > 0)
-        .map(([k]) => k);
-      return { ap: m.cg.getAscendencyPoints(), bought };
-    });
-
-    expect(state.ap).toBe(0);
-    expect(state.bought).toEqual([]);
-  });
-
-  test('AP can be set and read back exactly', async ({ game }) => {
-    const values = await game.withMods((m) => {
-      const results = [];
-      for (const v of [1, 42, 1000, 999999]) {
-        m.cg.setAscendencyPoints(v);
-        results.push({ set: v, got: m.cg.getAscendencyPoints() });
-      }
-      return results;
-    });
-
-    for (const { set, got } of values) {
-      expect(got).toBe(set);
-    }
   });
 
   test('every ascendency buff has coherent cost and rebuy metadata', async ({ game }) => {
@@ -80,12 +64,14 @@ test.describe('Ascendency Points & Perks', () => {
     expect(problems).toEqual([]);
   });
 
-  test('every buff description resolves to real copy in all five languages', async ({ game }) => {
+  test('every buff description resolves to real copy in every shipped language', async ({ game }) => {
     // A buff's `description` is a key into optionDescriptions in descriptions.js,
     // which is rebuilt per language — not a localization.json key itself.
     const unresolved = await game.withMods(async (m) => {
       const buffs = m.rdo.getAscendencyBuffDataObject() || {};
-      const languages = ['en', 'es', 'pt', 'de', 'it', 'fr'];
+      // Taken from the game rather than written out, so adding a language to
+      // localization.js brings it under this check automatically.
+      const languages = m.loc.getSupportedLanguages();
       const problems = [];
       const original = m.cg.getLanguage();
 
@@ -115,141 +101,11 @@ test.describe('Ascendency Points & Perks', () => {
     expect(unresolved).toEqual([]);
   });
 
-  test('a purchase deducts exactly the advertised cost', async ({ game }) => {
-    const result = await game.withMods((m) => {
-      const buffs = m.rdo.getAscendencyBuffDataObject();
-      const key = 'littleBagOfHydrogen';
-      const cost = buffs[key].baseCostAp;
-
-      m.cg.setAscendencyPoints(cost + 7);
-      const apBefore = m.cg.getAscendencyPoints();
-
-      // Simulate the purchase settlement: deduct cost, mark bought.
-      m.cg.setAscendencyPoints(apBefore - cost);
-      m.rdo.setAscendencyBuffDataObject(1, key, ['boughtYet']);
-
-      return {
-        cost,
-        apBefore,
-        apAfter: m.cg.getAscendencyPoints(),
-        boughtYet: m.rdo.getAscendencyBuffDataObject()[key].boughtYet
-      };
-    });
-
-    expect(result.apAfter).toBe(result.apBefore - result.cost);
-    expect(result.apAfter).toBe(7);
-    expect(result.boughtYet).toBe(1);
-  });
-
-  test('AP never goes negative across a long sequence of purchases', async ({ game }) => {
-    const result = await game.withMods((m) => {
-      const buffs = m.rdo.getAscendencyBuffDataObject();
-      const keys = Object.keys(buffs).filter((k) => k !== 'version');
-
-      m.cg.setAscendencyPoints(100);
-      let rejected = 0;
-      let purchased = 0;
-
-      // Greedily attempt every perk repeatedly; only affordable ones may settle.
-      for (let pass = 0; pass < 5; pass++) {
-        for (const key of keys) {
-          const buff = buffs[key];
-          const cost = buff.baseCostAp;
-          const ap = m.cg.getAscendencyPoints();
-          if (ap >= cost) {
-            m.cg.setAscendencyPoints(ap - cost);
-            purchased++;
-          } else {
-            rejected++;
-          }
-        }
-      }
-
-      return { finalAp: m.cg.getAscendencyPoints(), purchased, rejected };
-    });
-
-    expect(result.finalAp).toBeGreaterThanOrEqual(0);
-    expect(Number.isFinite(result.finalAp)).toBe(true);
-    expect(result.purchased).toBeGreaterThan(0);
-    expect(result.rejected).toBeGreaterThan(0);
-  });
-
-  test('an unaffordable purchase leaves AP and perk state untouched', async ({ game }) => {
-    const result = await game.withMods((m) => {
-      const buffs = m.rdo.getAscendencyBuffDataObject();
-      const key = 'nonExhaustiveResources';
-      const cost = buffs[key].baseCostAp;
-
-      m.cg.setAscendencyPoints(cost - 1);
-      const apBefore = m.cg.getAscendencyPoints();
-      const boughtBefore = buffs[key].boughtYet;
-
-      const canAfford = m.cg.getAscendencyPoints() >= cost;
-      if (canAfford) m.cg.setAscendencyPoints(apBefore - cost);
-
-      return {
-        canAfford,
-        apBefore,
-        apAfter: m.cg.getAscendencyPoints(),
-        boughtBefore,
-        boughtAfter: m.rdo.getAscendencyBuffDataObject()[key].boughtYet
-      };
-    });
-
-    expect(result.canAfford).toBe(false);
-    expect(result.apAfter).toBe(result.apBefore);
-    expect(result.boughtAfter).toBe(result.boughtBefore);
-  });
-
-  test('a non-rebuyable perk cannot exceed one purchase', async ({ game }) => {
-    const result = await game.withMods((m) => {
-      const buffs = m.rdo.getAscendencyBuffDataObject();
-      const nonRebuyable = Object.entries(buffs)
-        .filter(([k, v]) => k !== 'version' && v?.rebuyable === false)
-        .map(([k]) => k);
-
-      const violations = [];
-      for (const key of nonRebuyable) {
-        // Attempt to over-purchase, clamped by timesRebuyable.
-        const limit = buffs[key].timesRebuyable;
-        const attempted = Math.min(3, limit);
-        m.rdo.setAscendencyBuffDataObject(attempted, key, ['boughtYet']);
-        const actual = m.rdo.getAscendencyBuffDataObject()[key].boughtYet;
-        if (actual > limit) violations.push(`${key}: ${actual} > limit ${limit}`);
-      }
-
-      return { count: nonRebuyable.length, violations };
-    });
-
-    expect(result.count).toBeGreaterThan(0);
-    expect(result.violations).toEqual([]);
-  });
-
-  test('AP and perk purchases survive a save/load round trip', async ({ game }) => {
-    const result = await game.withMods((m) => {
-      m.cg.setAscendencyPoints(321);
-      m.rdo.setAscendencyBuffDataObject(1, 'littleBagOfHydrogen', ['boughtYet']);
-
-      const captured = m.cg.captureGameStatusForSaving('initialise');
-      const restored = JSON.parse(JSON.stringify(captured));
-
-      return {
-        ap: restored.resourceData?.ascendencyPoints?.quantity,
-        bought: restored.ascendencyBuffs?.littleBagOfHydrogen?.boughtYet
-      };
-    });
-
-    expect(result.ap).toBe(321);
-    expect(result.bought).toBe(1);
-  });
-
-  // NOTE: the full rebirth reset
-  // (resetResourceDataObjectOnRebirthAndAddApAndPermanentBuffsBack) requires
-  // late-game state that a fresh boot does not have — it reads the compound
-  // create-dropdown recipe text, which only exists once those panes have been
-  // drawn. Exercising the whole reset therefore belongs to the `rebirth` area
-  // against a progressed fixture. What is asserted here is the part that is
-  // genuinely ascendency's contract: AP and perks live outside per-run state.
+  // The full rebirth reset is exercised for real in
+  // `ascendency-perks-live.spec.js`, which buys a basket of perks, presses the
+  // Rebirth button and checks each one was re-applied to the new run. What is
+  // asserted here is only the structural precondition that makes that possible:
+  // AP and perks live outside per-run state.
 
   test('AP and perks are stored outside per-run resource state', async ({ game }) => {
     const result = await game.withMods((m) => {
