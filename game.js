@@ -11595,7 +11595,25 @@ function formatAllNotationElements(element, notationType) {
 
         const formatNormalNumber = (num) => formatGroupedNumber(num);
 
-        const formattedContent = originalContent.replace(/-?\d+(?:[.,]\d+)*/g, match => {
+        const formattedContent = originalContent.replace(/-?\d+(?:[.,]\d+)*/g, (match, offset, whole) => {
+            // A digit run glued to a letter is part of a name, not a figure.
+            // Asteroid names are minted as `SPC-6154R`, and every description
+            // label carries the `notation` class, so the Travel row's
+            // "Mining Antimatter at SPC-6154R" was being rewritten to
+            // "SPC-6.1KR" under abbreviated notation and "SPC-4,811D" under
+            // plain - and a leading zero was lost outright, `SPC-0278T`
+            // becoming `SPC-278T`, because Number('0278') is 278.
+            //
+            // Every real figure in a notation element is preceded by a space, a
+            // currency symbol, a tag boundary or the start of the string, so
+            // this leaves all of them alone. It also stops the formatter
+            // chewing on attribute text such as id="rocket1BuiltPartsQuantity",
+            // which it previously rewrote harmlessly by luck rather than design.
+            const precedingCharacter = whole[offset - 1];
+            if (precedingCharacter && /[A-Za-z]/.test(precedingCharacter)) {
+                return match;
+            }
+
             let number = parseDisplayNumber(match);
 
             if (isNaN(number)) {

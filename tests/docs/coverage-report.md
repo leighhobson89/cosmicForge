@@ -4,18 +4,15 @@ _Generated from `functional-areas.json`. Re-run `node tests/docs/generate-report
 
 ## Coverage at a glance
 
-One line per functional area, worst first. 35 green, 8 amber, 0 red, out of 43.
+One line per functional area, worst first. 39 green, 4 amber, 0 red, out of 43.
 
 | | Area | Group | Risk | Specs | Where it stands |
 |:--:|---|---|:--:|--:|---|
-| 🟠 | [Achievements](areas/achievements.md) | Meta Progression | Low | 12 | 12 specs written; not yet upgraded to integration. |
 | 🟠 | [Ascendency Points & Perks](areas/ascendency.md) | Meta Progression | High | 12 | 12 specs written; not yet upgraded to integration. |
 | 🟠 | [Colonisation](areas/colonise.md) | Interstellar | High | 19 | 19 specs written; not yet upgraded to integration. |
 | 🟠 | [Diplomacy](areas/diplomacy.md) | Interstellar | High | 12 | 12 specs written; not yet upgraded to integration. |
 | 🟠 | [Fleet Hangar](areas/fleet-hangar.md) | Interstellar | High | 14 | 14 specs written; not yet upgraded to integration. |
-| 🟠 | [Megastructures](areas/megastructures.md) | Endgame | Medium | 18 | 18 specs written; not yet upgraded to integration. |
-| 🟠 | [Rockets & Launch Pad](areas/rockets.md) | Space Operations | Medium | 20 | 20 specs written; not yet upgraded to integration. |
-| 🟠 | [Star Map & Star Data](areas/star-map.md) | Interstellar | Medium | 62 | Fully covered and 61 of its 62 specs pass. The one failure is deliberate: “a star is the same distance away whichever code path asks” has found known-issues #35, where the drawn map and the calculation-mode path disagree because star coordinates are derived from the measured size of the container they are drawn into. Goes green when that is resolved. |
+| 🟢 | [Achievements](areas/achievements.md) | Meta Progression | Low | 33 | Upgraded to integration and swept end to end: all seventy achievements are earned at their own condition and their reward audited against the arithmetic the data promises, the playable scenarios are played and granted by the frame loop, two rebirths audit what persists, and the pane is checked across 630 artwork files and five languages. The area found known-issues #37, now fixed at source: the pane installed a fresh tooltip element and three more document listeners on every visit. |
 | 🟢 | [Antimatter](areas/antimatter.md) | Space Operations | Medium | 26 | Done — driven through its own controls, 26 specs passing. |
 | 🟢 | [Application Boot](areas/app-boot.md) | Foundation | High | 11 | Done — driven through its own controls, 11 specs passing. |
 | 🟢 | [Audio](areas/audio.md) | Simulation & Ambience | Low | 13 | Done — driven through its own controls, 13 specs passing. |
@@ -32,6 +29,7 @@ One line per functional area, worst first. 35 green, 8 amber, 0 red, out of 43.
 | 🟢 | [Galactic Market](areas/galactic-market.md) | Meta Progression | Medium | 35 | Done — driven through its own controls, 35 specs passing. |
 | 🟢 | [Local Save & Load](areas/save-load-local.md) | Foundation | High | 10 | Done — driven through its own controls, 10 specs passing. |
 | 🟢 | [Localization](areas/localization.md) | Foundation | High | 91 | Done — driven through its own controls, 91 specs passing. |
+| 🟢 | [Megastructures](areas/megastructures.md) | Endgame | Medium | 51 | Done — the manuscripts are rolled by studying stars through the game's own tooling, the stages are bought through the real Technology rows, and every bonus is measured off the store, the grid or the rock rather than read back off a multiplier. The battle at a factory star is not re-fought here; that belongs to the Battle area, and this file drives the conquest handler every access point funnels into. |
 | 🟢 | [News Ticker](areas/news-ticker.md) | Simulation & Ambience | Low | 26 | Done — driven through its own controls, 26 specs passing. |
 | 🟢 | [Number Notation](areas/notation.md) | Presentation & Shell | Medium | 22 | Upgraded to integration — the setting is driven through its own dropdown and every screen is swept in both modes. The 3 specs that were failing found known-issues #26 and #27, both now fixed at source. |
 | 🟢 | [Onboarding & Tutorial](areas/onboarding.md) | Presentation & Shell | High | 13 | Done — driven through its own controls, 13 specs passing. |
@@ -41,11 +39,13 @@ One line per functional area, worst first. 35 green, 8 amber, 0 red, out of 43.
 | 🟢 | [Rebirth](areas/rebirth.md) | Meta Progression | High | 10 | Done — driven through its own controls, 10 specs passing. |
 | 🟢 | [Research](areas/research.md) | Core Economy | High | 25 | Done — driven through its own controls, 25 specs passing. |
 | 🟢 | [Resources](areas/resources.md) | Core Economy | High | 21 | Done — driven through its own controls, 21 specs passing. |
+| 🟢 | [Rockets & Launch Pad](areas/rockets.md) | Space Operations | Medium | 57 | Done — the launch pad and all four rockets are bought part by part through their own buttons, renamed in the header field, fuelled by pressing Fuel and flown twice over, so the reset is proved by the second journey rather than by reading state back. The area found known-issues #36, now fixed at source: the notation formatter was rewriting the digits inside an asteroid's name. |
 | 🟢 | [Save Migration](areas/save-migration.md) | Foundation | High | 11 | Done — driven through its own controls, 11 specs passing. |
 | 🟢 | [Settings & Preferences](areas/settings.md) | Foundation | Medium | 20 | Done — driven through its own controls, 20 specs passing. |
 | 🟢 | [Space Mining & Asteroids](areas/space-mining.md) | Space Operations | Medium | 44 | Done — the survey, both panels, the boost gesture and a full outbound-and-home journey driven through their own controls, 44 specs passing. Found and closed known-issues #31 and #34. |
 | 🟢 | [Space Telescope](areas/space-telescope.md) | Space Operations | Medium | 10 | Done — driven through its own controls, 10 specs passing. |
-| 🟢 | [Star Type Bonuses](areas/star-types.md) | Interstellar | Medium | 25 | Done — the B, F and O effects are measured off the stores, the grid and the rocks rather than read off a multiplier, and A, G, K and M are each proven inert against the same three measurements. K has no mechanic in the game; the specs pin that rather than leave it unsaid. |
+| 🟢 | [Star Map & Star Data](areas/star-map.md) | Interstellar | Medium | 62 | Done — the map, the search, the drawings and the Star Data table are all driven through their own controls, and the drawings are checked as geometry rather than as presence. The distance spec found known-issues #35, which is now fixed at source: star coordinates come from a fixed nominal field instead of the measured container, so the drawn map and the calculation path agree. |
+| 🟢 | [Star Type Bonuses](areas/star-types.md) | Interstellar | Medium | 25 | Done — the B, F and O effects are measured off the stores, the grid and the rocks rather than read off a multiplier, and A, G, K and M are each proven inert against the same three measurements so a future bonus cannot be wired to the wrong letter unnoticed. |
 | 🟢 | [Starship](areas/starship.md) | Interstellar | High | 8 | Done — driven through its own controls, 8 specs passing. |
 | 🟢 | [Statistics](areas/statistics.md) | Simulation & Ambience | Low | 16 | Done — driven through its own controls, 16 specs passing. |
 | 🟢 | [Tech Tree](areas/technology.md) | Core Economy | High | 18 | Done — driven through its own controls, 18 specs passing. |
@@ -75,11 +75,11 @@ when an area is upgraded.
 | | Areas | Share |
 |---|---:|---:|
 | 🔴 Red — no spec file | 0 | 0% |
-| 🟠 Amber — spec written, not yet upgraded | 8 | 19% |
-| 🟢 Green — signed off | 35 | 81% |
+| 🟠 Amber — spec written, not yet upgraded | 4 | 9% |
+| 🟢 Green — signed off | 39 | 91% |
 | **Total functional areas** | **43** | |
 
-555 individual test cases are identified across all areas. **1025 Playwright specs are implemented** across 43 areas, and all of them pass except where an area's note says otherwise — a spec that fails on a live defect is left failing on purpose, and the defect is written up in [known-issues.md](known-issues.md).
+618 individual test cases are identified across all areas. **1116 Playwright specs are implemented** across 43 areas, and all of them pass except where an area's note says otherwise — a spec that fails on a live defect is left failing on purpose, and the defect is written up in [known-issues.md](known-issues.md).
 
 Run them with `npm run test:e2e` (all areas) or `node tests/run-e2e.mjs <area>`. Each area writes its own HTML report to `test-reports/e2e/<area>/index.html`, with a summary index at `test-reports/e2e/index.html`.
 
@@ -125,7 +125,7 @@ Mid-game expansion off-planet — asteroids, rockets, antimatter and the telesco
 | Status | Area | Risk | Planned | Specs | Existing coverage |
 |:--:|---|:--:|--:|--:|---|
 | 🟢 | [Space Mining & Asteroids](areas/space-mining.md) | Medium | 18 | **44** | — |
-| 🟠 | [Rockets & Launch Pad](areas/rockets.md) | Medium | 15 | **20** | — |
+| 🟢 | [Rockets & Launch Pad](areas/rockets.md) | Medium | 43 | **57** | — |
 | 🟢 | [Antimatter](areas/antimatter.md) | Medium | 26 | **26** | spaceAntimatter.test.js |
 | 🟢 | [Space Telescope](areas/space-telescope.md) | Medium | 10 | **10** | — |
 
@@ -135,7 +135,7 @@ Travel, conquest and settlement. The most stateful and branch-heavy part of the 
 
 | Status | Area | Risk | Planned | Specs | Existing coverage |
 |:--:|---|:--:|--:|--:|---|
-| 🟠 | [Star Map & Star Data](areas/star-map.md) | Medium | 27 | **62** | — |
+| 🟢 | [Star Map & Star Data](areas/star-map.md) | Medium | 27 | **62** | — |
 | 🟢 | [Star Type Bonuses](areas/star-types.md) | Medium | 15 | **25** | — |
 | 🟢 | [Starship](areas/starship.md) | High | 10 | **8** | — |
 | 🟠 | [Fleet Hangar](areas/fleet-hangar.md) | High | 9 | **14** | — |
@@ -154,7 +154,7 @@ Cross-run systems. Bugs here destroy player progress permanently, which makes th
 | 🟢 | [Galactic Casino](areas/galactic-casino.md) | Medium | 11 | **69** | — |
 | 🟢 | [Rebirth](areas/rebirth.md) | High | 10 | **10** | — |
 | 🟢 | [Philosophies](areas/philosophies.md) | High | 13 | **42** | — |
-| 🟠 | [Achievements](areas/achievements.md) | Low | 8 | **12** | — |
+| 🟢 | [Achievements](areas/achievements.md) | Low | 14 | **33** | — |
 
 ### Endgame
 
@@ -163,7 +163,7 @@ Late systems reached by few players but heavily interlinked with everything befo
 | Status | Area | Risk | Planned | Specs | Existing coverage |
 |:--:|---|:--:|--:|--:|---|
 | 🟢 | [Black Hole Time Warp](areas/black-hole.md) | High | 7 | **19** | — |
-| 🟠 | [Megastructures](areas/megastructures.md) | Medium | 7 | **18** | captureMegaStructureTest.test.js |
+| 🟢 | [Megastructures](areas/megastructures.md) | Medium | 36 | **51** | captureMegaStructureTest.test.js |
 | 🟢 | [Cosmic Rip](areas/cosmic-rip.md) | Medium | 17 | **28** | — |
 
 ### Simulation & Ambience

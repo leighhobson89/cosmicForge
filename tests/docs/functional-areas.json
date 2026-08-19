@@ -434,10 +434,10 @@
       "id": "rockets",
       "title": "Rockets & Launch Pad",
       "group": "space",
-      "status": "amber",
+      "status": "green",
       "risk": "medium",
       "legacy": [],
-      "summary": "Rocket construction, fuelling, naming and the launch lifecycle across all four rockets.",
+      "summary": "The launch pad and the four rockets from purchase to landing: module pricing, assembly, naming, fuelling, launch, destination choice, the travel timer and the reset that lets a rocket fly again.",
       "tests": [
         "All four rockets exist with parts, price and a fuel requirement",
         "Every rocket is paid for in three real compounds",
@@ -453,9 +453,38 @@
         "A renamed rocket keeps its name, renaming one does not rename another, and names survive serialisation",
         "Resetting a rocket for its next journey empties its tank",
         "The rocket direction flag round-trips per rocket",
-        "Launch notifications resolve from the catalogue in all five languages with a {rocketName} placeholder"
+        "Launch notifications resolve from the catalogue in all five languages with a {rocketName} placeholder",
+        "The Launch Pad quotes four prices, is unbuilt on a fresh run, and its row is on offer",
+        "Building the pad pays cash, iron, titanium and concrete out of the run, marks it bought and withdraws the offer",
+        "The pad announces itself and is what puts the four airframe rows on the workbench",
+        "The pad's Build button is colour-gated while the run cannot afford it, and the gate lifts when it can",
+        "Each airframe needs its own strictly larger number of parts, and its row counter says so",
+        "Every part is paid for in cash and three real compounds, deducted by the frame loop",
+        "Each part fitted multiplies all four prices by the game cost multiplier, compounding rather than stepping",
+        "One rocket getting dearer leaves the other three on their opening price",
+        "Fitting the last part completes the rocket, closes the row and registers it in the fleet",
+        "A rocket cannot be built past its part count, and is registered once rather than repeatedly",
+        "A finished rocket gets a side-menu pane of its own; an unfinished one does not",
+        "All four can be built by hand, and each costs the geometric total its part count implies",
+        "A rocket pane is headed by an editable name field capped at twelve characters, plus a Rename button",
+        "Renaming through the button or with Enter reaches the record, the side menu and the redrawn pane",
+        "Renaming one rocket leaves the other three alone",
+        "Each rocket has its own tank size, pump price, pump rate and energy draw, all ascending",
+        "Pressing Fuel starts the pump, hides the button, and the Launch button reports the level loaded",
+        "The pump is colour-gated on holding its price in cash, and stops with an explanation when the grid goes down",
+        "A full tank turns the Launch button green, says Ready For Launch, and stops at its own capacity",
+        "Launching hides the fuel row, records the flight and announces it by the player's chosen name",
+        "Each rocket is fuelled and launched on its own rather than as a fleet",
+        "The destination dropdown offers the free rocks nearest first, carrying each one's real distance, rarity and antimatter",
+        "Choosing a rock records it as the rocket's destination",
+        "The flight is timed by distance over speed, and the row counts it down in seconds while the bar fills in proportion",
+        "Arriving names the rock in the row and announces the rocket by name",
+        "The return leg reports itself differently from the outbound one, and landing empties the tank",
+        "A rocket that has come home can be fuelled, launched and flown to a second rock",
+        "Two rockets fly independent journeys with their own timers, destinations and arrivals"
       ],
-      "specCount": 20
+      "specCount": 57,
+      "note": "Done — the launch pad and all four rockets are bought part by part through their own buttons, renamed in the header field, fuelled by pressing Fuel and flown twice over, so the reset is proved by the second journey rather than by reading state back. The area found known-issues #36, now fixed at source: the notation formatter was rewriting the digits inside an asteroid's name."
     },
     {
       "id": "antimatter",
@@ -523,7 +552,7 @@
       "id": "star-map",
       "title": "Star Map & Star Data",
       "group": "interstellar",
-      "status": "amber",
+      "status": "green",
       "risk": "medium",
       "legacy": [],
       "summary": "The seeded starfield and how each star is drawn, the four map modes, the search and its ping, the connection lines, orbits and arrows, the travel gate, and the Star Data table with its six sortable columns.",
@@ -556,7 +585,7 @@
         "Name colour follows a strict precedence, with affordability outranking the O-type and megastructure colours",
         "A settled star is dimmed, named in the settled colour and has its planning cells blanked"
       ],
-      "note": "Fully covered and 61 of its 62 specs pass. The one failure is deliberate: “a star is the same distance away whichever code path asks” has found known-issues #35, where the drawn map and the calculation-mode path disagree because star coordinates are derived from the measured size of the container they are drawn into. Goes green when that is resolved.",
+      "note": "Done — the map, the search, the drawings and the Star Data table are all driven through their own controls, and the drawings are checked as geometry rather than as presence. The distance spec found known-issues #35, which is now fixed at source: star coordinates come from a fixed nominal field instead of the measured container, so the drawn map and the calculation path agree.",
       "specCount": 62
     },
     {
@@ -585,7 +614,7 @@
         "Standing in an O-type system is not the same as owning one"
       ],
       "specCount": 25,
-      "note": "Done — the B, F and O effects are measured off the stores, the grid and the rocks rather than read off a multiplier, and A, G, K and M are each proven inert against the same three measurements. K has no mechanic in the game; the specs pin that rather than leave it unsaid."
+      "note": "Done — the B, F and O effects are measured off the stores, the grid and the rocks rather than read off a multiplier, and A, G, K and M are each proven inert against the same three measurements so a future bonus cannot be wired to the wrong letter unnoticed."
     },
     {
       "id": "starship",
@@ -803,21 +832,28 @@
       "id": "achievements",
       "title": "Achievements",
       "group": "meta",
-      "status": "amber",
+      "status": "green",
       "risk": "low",
       "legacy": [],
-      "summary": "Unlock conditions, notifications, icons and tooltip descriptions across the full achievement set.",
+      "summary": "Unlock conditions, rewards, notifications, artwork and tooltips across all seventy achievements, plus what a rebirth clears and what it must never clear.",
       "tests": [
-        "Each achievement fires exactly once when its condition is met",
-        "No achievement fires prematurely on a fresh save",
-        "Notifications are localized and show the correct icon",
-        "Tooltip descriptions refresh with live values",
-        "Achievement state survives rebirth and save/load",
-        "The achievement flag array does not grow unbounded",
-        "Discovering an asteroid on run 1 does not stop the frame loop",
-        "The compound recipe table is a real object before any rebirth"
+        "All seventy achievements fire on their own condition and none fires early",
+        "Each achievement pays exactly the reward its gives block describes, and pays it once",
+        "Repeated frame-loop checks never re-apply a reward",
+        "Every achievement raises its own resolved notification",
+        "Scenarios that can be played are played, and the frame loop does the granting",
+        "Every achievement that is not reset on rebirth survives every rebirth",
+        "Every achievement that is reset on rebirth is handed back, bar the three auto-granted with infinite power",
+        "A permanent multiplier belongs to a permanent achievement, and is re-applied to the board after every rebirth",
+        "Achievement state and its special checkers survive a real export/import round trip",
+        "The pane draws one tile per achievement, each in its own grid cell",
+        "Every achievement has artwork on disk for all nine themes, and the grid repaints when the theme changes",
+        "Tooltips resolve in all five languages and their status line flips live",
+        "Reopening the pane does not stack tooltips or listeners (known-issues #37, fixed)",
+        "Discovering an asteroid on run 1 does not stop the frame loop"
       ],
-      "specCount": 12
+      "specCount": 33,
+      "note": "Upgraded to integration and swept end to end: all seventy achievements are earned at their own condition and their reward audited against the arithmetic the data promises, the playable scenarios are played and granted by the frame loop, two rebirths audit what persists, and the pane is checked across 630 artwork files and five languages. The area found known-issues #37, now fixed at source: the pane installed a fresh tooltip element and three more document listeners on every visit."
     },
     {
       "id": "black-hole",
@@ -842,12 +878,12 @@
       "id": "megastructures",
       "title": "Megastructures",
       "group": "endgame",
-      "status": "amber",
+      "status": "green",
       "risk": "medium",
       "legacy": [
         "captureMegaStructureTest.test.js"
       ],
-      "summary": "Ancient manuscripts, megastructure capture and the Miaplacidean force field.",
+      "summary": "Ancient manuscripts and the factory stars they point at, conquering those stars, the five research stages of each structure and the bonuses they stack, the diagram and force field, the table that fills in, and Miaplacidus at the end.",
       "tests": [
         "Manuscripts are discoverable at the documented vision thresholds and cap at four",
         "Manuscript stars never repeat and never fall on Miaplacidus, a settled star, the home system or an O-type",
@@ -855,9 +891,39 @@
         "Each megastructure gates on a five-stage prerequisite chain with rising prices",
         "Each stage applies its documented bonus: batteries, power plants, autobuyer rates, storage and infinite power",
         "Stage 3 of every structure lowers the force field one level and permanently unlocks antimatter",
-        "Progress survives save/load"
+        "Progress survives save/load",
+        "Studying stars out to five light years turns up the first manuscript through the game's own roll",
+        "A manuscript records its star, the star it points at, its position and that nobody has read it",
+        "The four manuscripts point at four different stars, are numbered one to four, and there is never a fifth",
+        "Settling the manuscript star is what flips it to reported and registers the factory star for real",
+        "Reading a manuscript sets the achievement that records the find",
+        "A read manuscript is no longer a subject the news ticker will hint at",
+        "Conquering a factory star takes possession of exactly one structure and unlocks the Megastructures pane",
+        "The Megastructures side-menu row appears only once a structure is held",
+        "A factory star pays double the ascendency an ordinary conquest does",
+        "Holding a structure is not enough: the run has to be standing in that system for its stages to be offered",
+        "A megastructure run offers its own structure's five stages and no other structure's",
+        "Dyson Sphere stage 1 doubles every battery and the energy store; stage 2 raises every power plant a quarter",
+        "Dyson Sphere stage 3 lowers the field, unlocks antimatter for good and starts the structure producing it",
+        "Dyson Sphere stages 4 and 5 switch the grid on permanently",
+        "Plasma Forge stages multiply every resource autobuyer tier cumulatively to 6.5625x, skipping solar",
+        "The Plasma Forge multiplier is measured in the store, not read off a rate",
+        "Galactic Memory Archive stages add 100K, 1M, 1B and 10B of storage on top of one another",
+        "The Celestial Processing Core grants nothing but its stage 3, and its stages are still recorded",
+        "The diagram draws the field, the home system and all four structures, each with an image",
+        "A structure lights up when its own stage 3 is taken, and only that structure",
+        "The force field image is indexed by how many structures are disconnected, zero through four",
+        "The home system only lights up when all four are disconnected",
+        "Every diagram image follows the theme the player has chosen, and re-swaps when it changes",
+        "The table lists four structures with five stages and five effects each, drawn from the catalogue",
+        "A table cell is red until it is earned and green afterwards, name cells following possession",
+        "A structure finished outright has its whole row tinted",
+        "The force field falls one level per structure and no faster, whatever the other stages do",
+        "Taking the field to its last level flags the endgame achievement",
+        "Miaplacidus stays locked at three structures and becomes a destination at four"
       ],
-      "specCount": 18
+      "specCount": 51,
+      "note": "Done — the manuscripts are rolled by studying stars through the game's own tooling, the stages are bought through the real Technology rows, and every bonus is measured off the store, the grid or the rock rather than read back off a multiplier. The battle at a factory star is not re-fought here; that belongs to the Battle area, and this file drives the conquest handler every access point funnels into."
     },
     {
       "id": "cosmic-rip",

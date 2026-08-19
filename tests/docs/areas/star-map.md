@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | 🟠 AMBER |
+| **Status** | 🟢 GREEN |
 | **Risk if broken** | Medium |
 | **Group** | Interstellar |
 | **Spec folder** | `tests/e2e/star-map/` |
@@ -42,7 +42,7 @@ The seeded starfield and how each star is drawn, the four map modes, the search 
 
 ## Status meaning
 
-🟠 **AMBER** — Fully covered and 61 of its 62 specs pass. The one failure is deliberate: “a star is the same distance away whichever code path asks” has found known-issues #35, where the drawn map and the calculation-mode path disagree because star coordinates are derived from the measured size of the container they are drawn into. Goes green when that is resolved.
+🟢 **GREEN** — Done — the map, the search, the drawings and the Star Data table are all driven through their own controls, and the drawings are checked as geometry rather than as presence. The distance spec found known-issues #35, which is now fixed at source: star coordinates come from a fixed nominal field instead of the measured container, so the drawn map and the calculation path agree.
 
 ---
 

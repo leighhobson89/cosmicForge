@@ -30,7 +30,7 @@ Per-star-type effects: the flat autobuyer bonus of a B-type system, the antimatt
 
 ## Status meaning
 
-🟢 **GREEN** — Done — the B, F and O effects are measured off the stores, the grid and the rocks rather than read off a multiplier, and A, G, K and M are each proven inert against the same three measurements. K has no mechanic in the game; the specs pin that rather than leave it unsaid.
+🟢 **GREEN** — Done — the B, F and O effects are measured off the stores, the grid and the rocks rather than read off a multiplier, and A, G, K and M are each proven inert against the same three measurements so a future bonus cannot be wired to the wrong letter unnoticed.
 
 ---
 

@@ -61,6 +61,14 @@ export const STARTING_STAR_SYSTEM = 'spica';
 export const STAR_SEED = 53;
 export const STAR_FIELD_SEED = 80;
 export const NUMBER_OF_STARS = 100;
+// The star field is a simulation, not a picture of a panel. Star coordinates are
+// generated over this fixed nominal field and the drawn map scales it onto
+// whatever container it is given, so a star's distance is one number regardless
+// of window size, tab state, or whether the caller passed a real panel or the
+// detached div used in calculation mode. These figures are the shipped star-map
+// panel at a 1280x720 desktop viewport, so distances keep the balance they had.
+export const STAR_FIELD_NOMINAL_WIDTH = 1200;
+export const STAR_FIELD_NOMINAL_HEIGHT = 450;
 export const STELLAR_SCANNER_RANGE = 0.75;
 export const OFFLINE_GAINS_RATE = 0.334;
 export const ENEMY_FLEET_SPEED_AIR = 5;

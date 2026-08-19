@@ -1,8 +1,8 @@
 # e2e / achievements
 
-**Achievements** — 🟠 AMBER
+**Achievements** — 🟢 GREEN
 
-Unlock conditions, notifications, icons and tooltip descriptions across the full achievement set.
+Unlock conditions, rewards, notifications, artwork and tooltips across all seventy achievements, plus what a rebirth clears and what it must never clear.
 
 Specs for this area go in this folder, named `<scenario>.spec.js`.
 

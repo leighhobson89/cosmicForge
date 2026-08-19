@@ -2328,26 +2328,28 @@ work".
 
 ---
 
-## 35. A star is two different distances away depending on which code path asks — 🔴 OPEN
+## 35. A star was two different distances away depending on which code path asked — ✅ FIXED
 
-**Severity: low-medium — no crash and no lost progress, but "is this star studied"
-can be answered two ways, and star distances depend on the size of a DOM element.**
+**Severity was: low-medium — no crash and no lost progress, but “is this star
+studied” could be answered two ways, and star distances depended on the size of a
+DOM element.**
 
 ### Reproduction
 
 1. Play into a run with stars studied, and open the **Star Map** so the star data
    is populated.
-2. Read a star's `distance` out of the star data object — that is the figure its
+2. Read a star’s `distance` out of the star data object — that is the figure its
    fuel and AP were computed from.
 3. Call `getStarDataAndDistancesToAllStarsFromSettledStar(getCurrentStarSystem())`
-   and read the same star's distance out of the result.
-4. They differ. In a sample run, Avior was recorded at `0.87` ly and calculated at
-   `0.84` ly.
+   and read the same star’s distance out of the result.
+4. They differed. In a sample run, Avior was recorded at `0.87` ly and calculated
+   at `0.84` ly; Sterope at `1.34` against `1.27`; Barnard’s Star at `3.7` against
+   `3.65`.
 
 ### Cause
 
-`generateStarfield` derives each star's coordinates from the **measured size of
-the container it is being drawn into**:
+`generateStarfield` derived each star’s coordinates from the **measured size of
+the container it was being drawn into**:
 
 ```js
 const containerRect = starfieldContainer.getBoundingClientRect();
@@ -2359,75 +2361,261 @@ const y = getSeededRandomInRange(seed + i + numberOfStars * 2, 0, containerHeigh
 const z = getSeededRandomInRange(seed + i + numberOfStars * 3, 10, 100000);
 ```
 
-and `calculate3DDistance` then combines all three axes.
+and `calculate3DDistance` then combined all three axes.
 
-The seed makes the *proportions* reproducible, but not the *scale*: `x` and `y`
-are in pixels of whatever box the field was drawn into. Two callers draw into
-different boxes:
+The seed made the *proportions* reproducible, but not the *scale*: `x` and `y`
+were in pixels of whatever box the field was drawn into, and two callers draw
+into very different boxes.
 
 | Caller | Container | Effect on x and y |
 |---|---|---|
 | The Star Map pane | `#optionContentTab5`, a real panel | spread across the panel |
-| Everything in `calculationMode` | `document.createElement('div')`, never attached | width and height are `0`, so **every star collapses to the same x and y** |
+| Everything in `calculationMode` | `document.createElement('div')`, never attached | width and height are `0`, so **every star collapsed to the same x and y** |
 
-`containerLeft` / `containerTop` cancel out in a difference, so they do not
-matter — but the width and height do. In the dummy container the x/y term
-vanishes entirely and only `z` survives, which is why the calculated distance is
-always the smaller of the two. The gap is bounded by
+`containerLeft` / `containerTop` cancel out in a difference, so they did not
+matter — but the width and height did. In the dummy container the planar term
+vanished entirely and only `z` survived, which is why the calculated distance was
+always the smaller of the two. The gap was bounded by
 `sqrt(width² + height²) / 1000`, roughly 1.3 ly at the shipped panel size.
 
-The two paths are not interchangeable, but they are used interchangeably. The
+The two paths were not interchangeable, but they were used interchangeably. The
 drawn map decides whether a star is *studied* (`distance <= getStarVisionDistance()`)
-and writes the record the player's fuel and AP come from. The dummy-container
+and writes the record the player’s fuel and AP come from. The dummy-container
 path is read by:
 
-- the star-map search's result colouring (`isStudied`);
+- the star-map search’s result colouring (`isStudied`);
 - `rollForAncientManuscriptGeneration`, which picks a manuscript star by
   `distance > oldRange && distance <= newRange`;
 - the rapid-expansion filter after a conquest (`distanceFromSettledStar <= 10`);
 - `hasStudiedAllOTypeStars`, which gates an achievement.
 
-So a star can be inside the range for one and outside it for the other: a search
-result coloured as studied that the map still draws as a faint twinkle, a
-manuscript placed on a star the map has not revealed, or the "studied every
-O-type" achievement granted early.
+So a star could be inside the range for one and outside it for the other: a
+search result coloured as studied that the map still drew as a faint twinkle, a
+manuscript placed on a star the map had not revealed, or the “studied every
+O-type” achievement granted early. A second consequence of the same line was that
+**a star’s distance depended on the window size** — a star first studied after a
+resize got a different distance than it would have before.
 
-There is a second consequence of the same line: because the panel is measured
-rather than fixed, **a star's distance depends on the window size**. Existing
-records are not regenerated, so a resize does not rewrite a run's fuel costs —
-but a star first studied after a resize gets a different distance than it would
-have before.
+### Fix
 
-### Suggested fix — needs a decision, not applied
+Simulation coordinates no longer come from layout. `x` and `y` are generated over
+a **fixed nominal field**, and the real container is used only to place the
+elements on screen:
 
-The clean fix is to stop deriving simulation coordinates from layout: generate
-`x` and `y` over a **fixed nominal field** and use the real container only to
-place the elements on screen. That makes a star's distance one number, stable
-across window size, tab state and calculation mode.
+```js
+// constantsAndGlobalVars.js
+export const STAR_FIELD_NOMINAL_WIDTH = 1200;
+export const STAR_FIELD_NOMINAL_HEIGHT = 450;
 
-It is not applied here because it is a balance decision as much as a bug fix:
-changing the x/y scale moves every newly generated star's distance, and distance
-feeds fuel cost and AP reward. The options, in increasing order of disruption:
+// ui.js — generateStarfield
+const drawScaleX = containerRect.width > 30 ? (containerRect.width - 30) / (fieldWidth - 30) : 1;
+const drawScaleY = containerRect.height > 0 ? containerRect.height / fieldHeight : 1;
+...
+const x = getSeededRandomInRange(seed + i + numberOfStars, 0, fieldWidth - 30);
+const y = getSeededRandomInRange(seed + i + numberOfStars * 2, 0, fieldHeight);
+stars.push({ name, x, y, z, size, ..., left: x * drawScaleX + containerLeft, top: y * drawScaleY + containerTop });
+```
 
-1. **Leave the records canonical and fix the calculation path** — have
-   `calculationMode` use the same measured container as the drawn map when one is
-   available. Smallest change, keeps every existing number, but the fallback when
-   the Interstellar tab has never been drawn is still wrong.
-2. **Fix the scale to a constant** (the shipped panel size), so both paths agree
-   and nothing depends on layout. Existing star records are untouched — they are
-   only generated once — so live saves keep their fuel costs, and only newly
-   studied stars use the stable figure.
-3. **Normalise coordinates to 0..1** and drop the pixel scale from the distance
-   maths entirely. Cleanest, but rescales every distance in the game.
+`x`/`y`/`z` are the star’s place in the field and feed distance; `left`/`top` are
+where that place lands on screen and feed nothing but CSS. `calculate3DDistance`
+now reads `x`/`y` rather than `left`/`top`, so the detached container in
+calculation mode produces exactly the same figure the drawn map does.
 
-Option 2 looks like the best trade: one stable number per star, no change to any
-save already in flight, and the shift for new stars is under 1.3 ly.
+The nominal figures are the shipped star-map panel at a 1280×720 desktop viewport,
+chosen so the balance the distances feed — fuel cost and AP reward — stays where
+it was. Star records are generated once and never regenerated, so saves already in
+flight keep the fuel costs they were planned around; only newly studied stars use
+the stable figure, and the shift for those is under 1.3 ly.
+
+Two options were considered and rejected: making `calculationMode` borrow the
+drawn map’s measured container (smaller, but still wrong whenever the Interstellar
+tab has never been drawn, and still layout-dependent), and normalising coordinates
+to 0..1 (cleanest, but it rescales every distance in the game).
 
 ### Coverage
 
-- `tests/e2e/star-map/star-map-live.spec.js` → *"a star is the same distance away
-  whichever code path asks"*. It compares every studied star's recorded distance
-  against the calculated one and lists the ones that disagree, so the failure
-  names the stars rather than just asserting a number.
+- `tests/e2e/star-map/star-map-live.spec.js` → *“a star is the same distance away
+  whichever code path asks”*. It compares every studied star’s recorded distance
+  against the calculated one and lists any that disagree, so a regression names the
+  stars rather than just asserting a number.
+
+---
+
+## 36. The notation formatter rewrote the digits inside an asteroid’s name — ✅ FIXED
+
+**Severity was: low — cosmetic, but the game told the player its rocket was
+mining a rock that does not exist, and the name it printed changed with the
+notation setting.**
+
+### Reproduction
+
+1. Play into a run with the launch pad, a rocket and a surveyed asteroid.
+2. Send the rocket to a rock and let it arrive.
+3. Read the Travel row’s status label on that rocket’s pane.
+
+Observed, against rocks actually named `SPC-6154R`, `SPC-0278T` and `SPC-4811D`:
+
+| Notation setting | Label reads |
+|---|---|
+| Abbreviated (the shipped default) | `Mining Antimatter at SPC-6.1KR` |
+| Plain | `Mining Antimatter at SPC-4,811D` |
+| Plain, name with a leading zero | `Mining Antimatter at SPC-278T` — the `0` is **lost** |
+
+### Cause
+
+`formatAllNotationElements` rewrites *every* digit run inside the `innerHTML` of
+any element carrying the `notation` class:
+
+```js
+const formattedContent = originalContent.replace(/-?\d+(?:[.,]\d+)*/g, match => {
+    let number = parseDisplayNumber(match);
+    ...
+    if (notationType === 'normal') return formatNormalNumber(number);
+    // abbreviated branch: >= 1e3 becomes `6.1K`, and so on
+});
+```
+
+It has no way of telling a figure from a digit run that is part of a word. Every
+description label `createOptionRow` builds carries `notation`, and the Travel
+row’s status label is one of them — so when
+`startTravelToAndFromAsteroidTimer` writes
+`localize('textMiningAntimatterAt').replace('{asteroid}', destination)` into it,
+the destination’s name goes through the number formatter with everything else.
+
+Asteroid names are minted as `<system code>-<four digits><letter>`, so **every**
+asteroid name contains a four-digit run and every one of them is rewritten. The
+leading-zero case is the worst of the three, because `Number('0278')` is `278`
+and the character is gone rather than merely reformatted.
+
+### Fix
+
+A digit run glued to a letter is skipped, which is what distinguishes a name from
+a figure. `String.prototype.replace` already hands the callback the offset:
+
+```js
+const formattedContent = originalContent.replace(/-?\d+(?:[.,]\d+)*/g, (match, offset, whole) => {
+    // A digit run attached to a letter is part of a name, not a figure: asteroid
+    // names are minted as `SPC-6154R`, and formatting one renamed the rock.
+    const precedingCharacter = whole[offset - 1];
+    if (precedingCharacter && /[A-Za-z]/.test(precedingCharacter)) {
+        return match;
+    }
+    ...
+});
+```
+
+Every real figure in a `notation` element is preceded by a space, a currency
+symbol, a tag boundary or the start of the string, so the guard leaves them
+alone. It additionally stops the formatter chewing on `id="rocket1…"` and
+similar attribute text, which it currently rewrites harmlessly by luck rather
+than by design.
+
+The change touches a formatter every priced, rated and stored figure in the game
+passes through, so the whole Number Notation area was re-run alongside Rockets:
+22 of 22 still pass, including *“condensed: no screen renders an un-abbreviated
+number”* and *“formatting is stable: re-running the formatter on its own output
+changes nothing”*, which between them sweep every screen in both modes.
+
+### Coverage
+
+- `tests/e2e/rockets/rockets-live.spec.js` → *“arriving names the rock in the row
+  and starts the drill”*. It reads the label under both notation modes and
+  compares it against the catalogue string with the destination substituted, so a
+  regression prints the mangled name beside the real one.
+- `tests/e2e/notation/notation-live.spec.js` — the whole area, as the regression
+  net for the formatter itself.
+
+---
+
+## 37. The achievements pane appended a new tooltip and three more listeners every time it was opened — ✅ FIXED
+
+**Severity was: low — nothing visibly broke, but it was an unbounded leak of DOM
+nodes and document-level event handlers on a pane players revisit.**
+
+### Reproduction
+
+1. Boot a run and open **tab 9 → Achievements**.
+2. Leave to any other tab 9 pane, then come back. Repeat twice more.
+3. In the console:
+
+```js
+document.querySelectorAll('#achievement-tooltip').length   // 4
+```
+
+One element after the first visit, and one more for every visit after that. The
+`id` is duplicated, so `document.getElementById('achievement-tooltip')` now
+answers with the *oldest* of them while the most recently bound handlers are
+writing to the *newest*.
+
+Measured over three extra visits, document-level listeners grew by 167 against a
+control of 149 for the same number of redraws of another tab 9 pane — the excess
+being the three handlers each visit adds.
+
+### Cause
+
+`createAchievementsSectionRow()` in `drawTab9Content.js` ends with an
+unconditional call:
+
+```js
+optionContentElement.appendChild(achievementsRow);
+setupAchievementTooltip();
+```
+
+and `setupAchievementTooltip()` in `ui.js` has no guard of its own. Every call
+builds a fresh element, appends it to `document.body`, and binds three more
+listeners to `document`:
+
+```js
+export function setupAchievementTooltip() {
+    const tooltip = document.createElement('div');
+    tooltip.id = 'achievement-tooltip';
+    ...
+    document.body.appendChild(tooltip);
+    ...
+    document.addEventListener('mouseover', ...);
+    document.addEventListener('mousemove',  ...);
+    document.addEventListener('mouseout',   ...);
+}
+```
+
+The pane is rebuilt from scratch on every visit — `updateContent` clears the
+content column and `drawTab9Content` runs again — so the count rises once per
+visit and nothing ever removes the previous one. The tooltips are absolutely
+positioned and each set of handlers writes to the element its own closure
+captured, so on the *n*th visit *n* elements are being positioned and filled on
+every mouse move, stacked on top of one another.
+
+It has not shown as a visual defect because they all receive the same content at
+the same coordinates. It is still a leak, and it is the kind the performance
+specs are written to catch.
+
+### Fix — applied
+
+The installer is now idempotent, which is what its name always implied:
+
+```js
+export function setupAchievementTooltip() {
+    // The pane is rebuilt on every visit, and this binds to `document` rather
+    // than to anything the rebuild removes — so installing it twice leaks the
+    // element and its three handlers.
+    if (document.getElementById('achievement-tooltip')) return;
+
+    const tooltip = document.createElement('div');
+    ...
+}
+```
+
+The early return is safe because the handlers already bound close over the
+element that is still in the document, so the existing tooltip keeps working
+exactly as it did. Nothing anywhere removes that element — `achievement-tooltip`
+appears in exactly two places in the codebase, both of them inside this function —
+so there is no path that needs the installer to run a second time.
+
+### Coverage
+
+- `tests/e2e/achievements/achievements-pane.spec.js` → *"reopening the pane does
+  not stack a second tooltip on the document"*. It visits the pane, records the
+  count, visits three more times and asserts the count is still one, reporting
+  the listener growth against a control in the failure message.
 
 ---

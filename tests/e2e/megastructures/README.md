@@ -1,8 +1,8 @@
 # e2e / megastructures
 
-**Megastructures** — 🟠 AMBER
+**Megastructures** — 🟢 GREEN
 
-Ancient manuscripts, megastructure capture and the Miaplacidean force field.
+Ancient manuscripts and the factory stars they point at, conquering those stars, the five research stages of each structure and the bonuses they stack, the diagram and force field, the table that fills in, and Miaplacidus at the end.
 
 Specs for this area go in this folder, named `<scenario>.spec.js`.
 

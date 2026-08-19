@@ -1704,7 +1704,7 @@ opened the map. The factory-star branch now carries the same guard.
 
 ---
 
-## 🟠 Star Map, Star Data and Star Types — the rest of the interstellar shell
+## 🟢 Star Map, Star Data and Star Types — the rest of the interstellar shell
 
 Three more files finishing what the weather pass started: the map itself, the
 table a run is planned from, and what a star's spectral type is worth.
@@ -1804,10 +1804,9 @@ throughput off the stores, extraction off the rock, generation off the grid, in
 one system and then another.
 
 **A, G, K and M grant nothing, and that is asserted rather than left unsaid.**
-There is no K-type mechanic anywhere in the source. Each inert type goes through
-the same three measurements the live types do and has to come back at the neutral
-figure — the alternative to a spec here is a future bonus being wired to the wrong
-letter and nobody noticing.
+Each inert type goes through the same three measurements the live types do and has
+to come back at the neutral figure — the alternative to a spec here is a future
+bonus being wired to the wrong letter and nobody noticing.
 
 **The measurement trap this file ran into twice.** The frame loop keeps producing
 between the driven windows, so *dividing one measured window by another* turns
@@ -1820,22 +1819,355 @@ formula says that window should produce, and the one case that genuinely needs t
 separate "added" from "replaced" uses a span ten times longer so the driven ticks
 dominate. That is a stronger statement than the ratio was, not a weaker one.
 
-### One live defect, left open on purpose
+### The live defect this pass found, now fixed at source
 
-[known-issues #35](known-issues.md) — **a star is two different distances away
-depending on which code path asks.** `generateStarfield` derives x and y from the
-measured size of the container it draws into; the Star Map pane passes a real
-panel and everything in `calculationMode` passes a detached `div` whose width and
-height are zero, so the x/y term collapses and only z survives. The drawn map
-decides whether a star is studied and writes the record the player's fuel and AP
-come from, while the calculation path is read by the search colouring, manuscript
-placement, the rapid-expansion filter and an achievement gate — so a star can be
-in range for one and out of range for the other.
+[known-issues #35](known-issues.md) — **a star was two different distances away
+depending on which code path asked.** `generateStarfield` derived x and y from the
+measured size of the container it drew into; the Star Map pane passes a real panel
+and everything in `calculationMode` passes a detached `div` whose width and height
+are zero, so the planar term collapsed and only z survived. The drawn map decides
+whether a star is studied and writes the record the player's fuel and AP come
+from, while the calculation path is read by the search colouring, manuscript
+placement, the rapid-expansion filter and an achievement gate — so a star could be
+in range for one and out of range for the other. It also meant a star's distance
+depended on the size of the browser window.
 
-It is not fixed here because the fix is a balance decision as much as a bug fix:
-the x/y scale feeds distance, and distance feeds fuel cost and AP reward. The
-options are set out in the known-issues entry. The spec that found it is left
-failing, which is what keeps it visible.
+The fix stops deriving simulation coordinates from layout. `x` and `y` are now
+generated over a fixed nominal field — `STAR_FIELD_NOMINAL_WIDTH` and
+`STAR_FIELD_NOMINAL_HEIGHT`, the shipped panel at a 1280x720 desktop viewport —
+and the real container is used only to scale `left`/`top` for placement.
+`calculate3DDistance` reads `x`/`y` rather than `left`/`top`, so both callers get
+the same figure. Star records are generated once and never regenerated, so saves
+already in flight keep the fuel costs they were planned around.
+
+The spec that found it, *“a star is the same distance away whichever code path
+asks”*, is what proves the fix: it compares every studied star's recorded distance
+against the calculated one and names any that disagree.
+
+---
+
+## 🟢 Rockets & Launch Pad, and 🟢 Megastructures — the two chapters either side of the interstellar shell
+
+Two more files, and both deliberately narrow: each area already had a
+neighbouring live suite covering half its ground, so the new work is what those
+neighbours do *not* touch.
+
+### `rockets/rockets-live.spec.js` — the machine, not the mining run
+
+`space-mining/space-mining-live.spec.js` already flies rockets: it proves a rocket
+parks on the rock it was sent to, that a rock worked dry turns its rocket round,
+that the return leg leaves the run's state clean, and that a claimed or spent rock
+drops out of the dropdown. None of that is repeated. This file owns **what the
+machine costs, what it is called, and what it says while it is working.**
+
+**The pad and the airframes are bought by hand.** `prepareRunForStarshipLaunch`
+is deliberately not used, because its chain includes
+`buildLaunchPadScannerAndAllRocketsButton` — the very purchase under test. The run
+is stocked with money, materials and the ordinary techs, and then the launch pad
+is built with its own button, and all seventy-eight rocket parts are fitted one
+press at a time.
+
+That is what makes the pricing provable. Each part costs $1,000, 1,000 glass, 700
+titanium and 3,000 steel to begin with, and every purchase multiplies **all four**
+by `GAME_COST_MULTIPLIER`. A rocket's true cost is therefore a geometric series
+over its own part count, and the specs compare what the run actually spent
+against that series rather than against a hard-coded total. Rockets differ only
+in part count — 12, 17, 22, 27 — but the 1.13 curve turns that into rocket 4
+costing over four times rocket 1.
+
+**Purchases are deferred and the specs respect it.** A rocket part calls `gain()`,
+which spends nothing: it files the bill with `setItemsToDeduct` and the price rise
+with `setItemsToIncreasePrice`, and the frame loop settles both on its next pass.
+Every purchase here is followed by real time rather than an immediate read. The
+launch pad is the exception — `buildSpaceMiningBuilding` spends on the spot.
+
+**Naming is typed, not set.** The pane's header is a `contenteditable` field with
+a twelve-character cap enforced by an `input` listener, and a Rename button beside
+it. The specs type into the field, commit with the button *and* with Enter, and
+then check the name reached three places: the record, the side-menu row the frame
+loop repaints, and the redrawn pane — that last one matters because
+`drawTab6Content` selects a rocket's pane by matching the heading against the
+rocket's *user* name, so a rename that failed to reach the draw path would open an
+empty pane.
+
+**Fuel is a rate.** `handleRocketFuelTick` adds `rate x (deltaMs / 10) x 100` per
+driven tick while the grid is up — 0.2 units a millisecond, so 50,000ms fills
+rocket 1's 10,000-unit tank. The specs press Fuel and drive the timer: part-full
+gives a `no-interaction` Launch button captioned with the percentage, full turns
+it green and the row reads *Ready For Launch*, and pulling the grid down stops the
+pump dead and says *Requires Power!*.
+
+**The second journey is the point of the reset.** Space Mining proves the state is
+clean when a rocket lands. Nothing anywhere proved a landed rocket could be flown
+again — so this file refuels it, launches it, picks a different rock and flies it
+there.
+
+**Three measurement traps, all the same shape.** The frame loop keeps running
+between a driven span and the read that follows it, so any two figures fetched in
+separate round trips disagree slightly: the fuel level against the percentage on
+the button, the countdown against the timer behind it, the gauge against both.
+Each is now read in the *same* `page.evaluate` as the control it is checked
+against, reaching into `globalThis.__mods` for the record. Where a value genuinely
+cannot be co-read, the assertion allows the one second or one percent the gap can
+cost, and says so.
+
+**A fourth trap worth naming: notifications queue.** `showNotification` shows one
+entry per classification at a time for its full duration, so the message a spec
+raised is routinely sitting behind another one when the action returns. Reading
+the container once misses it. There is now an `expectNotification` helper that
+polls, and it is not papering over anything — the notification really does appear,
+just later.
+
+**A fifth trap: the weather is a roll.** Rain and a volcano both hold a fuelled
+rocket on the pad — correctly, and the Weather area proves it — so a run that
+happened to roll one left the Launch button reading *Bad Weather!* and every
+readiness assertion measuring the wrong hold. The helper that fills a tank now
+clears the weather through the game's own debug control first, so the state under
+test is set deliberately rather than hoped for.
+
+**One live defect, found and fixed at source.** [known-issues
+#36](known-issues.md) — the notation formatter was rewriting the digits inside an
+asteroid's *name*. Every description label carries the `notation` class, and
+`formatAllNotationElements` rewrites every digit run inside one, so the Travel
+row's *"Mining Antimatter at SPC-6154R"* rendered as `SPC-6.1KR` under the shipped
+abbreviated notation and `SPC-4,811D` under plain — and a name with a leading zero
+lost the character altogether, `SPC-0278T` becoming `SPC-278T`, because
+`Number('0278')` is `278`.
+
+The fix skips a digit run that is glued to a letter, which is what separates a
+name from a figure; every real figure in a notation element is preceded by a
+space, a currency symbol, a tag boundary or the start of the string. Because that
+formatter is on the path of every priced, rated and stored figure in the game, the
+whole Number Notation area was re-run beside Rockets and still passes 22 of 22 —
+including the two sweeps that walk every screen in both modes. The spec that found
+it reads the label under *both* notation modes, so a regression prints the mangled
+name beside the real one.
+
+### `megastructures/megastructures-live.spec.js` — the whole chapter
+
+`megastructures.spec.js` covers the data and the accessors. This file plays the
+chapter end to end, and its structure follows the chapter's own:
+
+**Manuscripts are rolled, not written.** The run studies stars through the game's
+own Add Star button — which is `extendStarDataRange`, the same call the Space
+Telescope's Study Stars timer makes — and the specs watch the manuscripts arrive.
+The first is guaranteed the moment vision reaches five light years, the second at
+twenty, the third at thirty-five, the fourth at forty-five, and there is never a
+fifth. Each record is checked to be `[star, factoryStar, position, false]`, and
+every manuscript star is checked against all four exclusions: never Miaplacidus,
+never the system the run is standing in, never one already settled, never an
+O-type, and never the same star twice.
+
+This is also why the file does **not** use `prepareRunForStarshipLaunch`: its
+chain clicks Add Star five times, which takes vision to exactly five light years
+and hands the run its first manuscript before a single spec has run.
+
+**A factory star is a rumour until the manuscript is read.** Settling the
+manuscript star is what flips `reported` and registers the star for real, and the
+specs prove the sequence rather than asserting the end state. Which structure sits
+at that star turns out to be decided at *conquest* rather than at reveal —
+`activateFactoryStar` can only stamp a star that already has a record, and
+`ensureFactoryStarMegaStructureAssigned` fills the gap when the run arrives. That
+is recorded as behaviour rather than reported as a bug, because both routes end at
+the same four names.
+
+**Conquest is driven, the battle is not re-fought.** Factory stars are hard mode
+by design — `isHardModeDestinationStar` forces life, an aggressive/mechanized/
+armored trait set and a real fleet — so who wins is a roll, and
+`battle/battle-live.spec.js` already fights a real engagement to a decision. This
+file drives `settleSystemAfterBattle`, the single handler all three access points
+funnel into once the fighting is over, and then plays everything after that moment
+for real. The AP spec measures the doubling that a factory star adds on top of the
+doubling a won battle already pays: two times base against four.
+
+One thing that shaped the helper: `settleSystemAfterBattle` **awaits real
+confirmation modals**, so awaiting its promise from inside `page.evaluate` would
+block the very round trip that has to click Confirm. The call is fired rather than
+awaited, a flag is set on completion, and the modals are cleared from outside.
+
+**The stages are bought on the Technology pane, and only from inside the system.**
+The five stage rows are *built* in `drawTab3Content`'s Research branch but appended
+to the **Technology** pane's container — opening Research shows the science
+upgrades and none of the stages, which cost this file a debugging pass. And they
+appear only when `getCurrentRunIsMegaStructureRun()` is set *and* the current
+system's `factoryStar` matches: holding a structure is not enough, the run has to
+be standing in it. Both halves have their own spec, including that a Plasma Forge
+run is offered five Plasma Forge rows and no Dyson Sphere row at all.
+
+**Every bonus is measured off the thing it changes.**
+
+| Structure | What the specs measure |
+|---|---|
+| Dyson Sphere | battery capacities and the energy store before and after; the three power plants' rate, purchased rate and ceiling; `infinitePower` with the grid deliberately switched off first |
+| Plasma Forge | every resource autobuyer tier, and separately the hydrogen that actually lands in the store over a driven window |
+| Galactic Memory Archive | total storage summed across every resource and compound, stage by stage |
+| Celestial Processing Core | the three measurements the others move, proved *unmoved* |
+
+The Forge and the Archive are where "more conquered, better bonuses" is pinned:
+their stages compound rather than replace, so the specs carry a running expectation
+through the chain — x1.25, then x1.5 on top, then x1.75, then x2, arriving at
+6.5625 times the rate a run starts with. The Archive does the same additively.
+Both skip `solar`, which is generation rather than production, and that exclusion
+is asserted rather than assumed.
+
+**The pane is checked as a picture.** The diagram's five boxes are read image by
+image: a structure switches to its Active art when *its own* stage 3 is taken and
+not before, the force field is indexed `ForceField0` through `ForceField4` by how
+many are disconnected, the home system only lights at four, and every image is
+checked to come from the folder of the theme the player has chosen — and to
+re-swap when the theme changes. The table is read cell by cell: red until earned,
+green afterwards, name cells following possession rather than research, and a
+structure finished outright getting its whole row tinted.
+
+**Miaplacidus is approached and not entered.** Three structures leaves the home
+star drawn `home-star`; the fourth turns it `home-star-accessible` and selecting it
+produces a real destination row. The journey is deliberately not taken — arriving
+plays the end-credits cinematic, which blocks interaction permanently by design.
+
+---
+
+## 🟢 Achievements — four files, 33 specs, all passing
+
+**What is different.** The old file had nine specs. Eight of them were about
+`collect50Hydrogen`: it fired at fifty, it did not pay twice, its notification
+was not a raw key. The other sixty-nine achievements were covered by one spec
+that checked they all had an `id` and a `gives` block. Nothing anywhere asserted
+that an achievement's *reward* was the reward its data promised.
+
+The area is now four files with distinct jobs.
+
+### `achievement-catalogue.spec.js` — the whole catalogue, condition by condition
+
+Walks all seventy. For each it establishes the real condition the game's own code
+establishes when the player earns it, lets `checkForAchievements()` — the exact
+entry point `gameLoop` calls every frame — grant it, and then audits the reward
+against the arithmetic `addAchievementBonus` is supposed to perform:
+
+| `gives1` | Asserted |
+|---|---|
+| `cash` / `antimatter` / `ascendencyPoints` | the balance rose by exactly `floor(before + quantity)` |
+| `compound` | the named compound rose by the quantity, clamped at its own cap |
+| `multiplier` + `allResources` | every resource's four tier rates scaled, `solar` untouched |
+| `multiplierPermanent` + `allResources` | the same, and the permanent multiplier advanced by the quantity |
+| `…` + `createCostCompounds` | every recipe ratio rescaled, at least one genuinely cheaper, and the dropdown recipe text rebuilt to match |
+| `multiplier` + `cash` | every resource *and* compound sale value scaled |
+| `doubleAll…ToStorageCap` | every stock doubled, clamped at its cap |
+| `rewardString` | nothing in the economy moved at all |
+
+Three things about its shape are worth knowing before editing it.
+
+- **The order of the catalogue is load-bearing.** `checkForAchievements()`
+  re-tests every inactive achievement on every call, so a stage satisfying more
+  than one condition grants several at once and the reward measurement stops
+  being about any of them. Threshold families ascend, and cash and stock
+  thresholds come first because fifteen later rewards pay cash and two double
+  every stock. The sweep *asserts* that held rather than assuming it: any step
+  that turns on more than one achievement is reported as an ordering failure.
+- **Each achievement is measured inside one synchronous evaluation.** `gameLoop`
+  moves cash, stock and rates every frame, so a reward measured across three
+  round trips is a measurement of production. Stage, snapshot, check, snapshot —
+  all in one block the frame loop cannot interleave with.
+- **Two of the seventy are staged outside that block**, because `runNumber` has
+  no exported setter and the variable debugger is the game's own way in. Driving
+  that editor takes about a second of real time and the frame loop grants the
+  achievement while it is still being driven — so those two capture their
+  baseline *before* the debugger opens, or the reward would be measured against a
+  board that already contains it. That was the first thing this file found about
+  itself, and it is why the phase argument exists.
+
+**A guard against passing vacuously.** A multiplier reward applied to a board of
+zeroes satisfies every `0 * 1.1 === 0` check while nothing has happened, so the
+sweep also requires that at least one rate, sale value or recipe ratio genuinely
+moved.
+
+### `achievements-live.spec.js` — earned by playing, granted by the frame loop
+
+Never calls `checkForAchievements()` at all. It buys a tier 1 hydrogen autobuyer
+and waits for *real extraction* to carry the stock past fifty; buys a power plant
+through `button.building-purchase-button`; researches Knowledge Sharing from its
+row; and cycles all nine themes through the Settings dropdown, asserting after
+each of the first eight that `tryAllThemes` has **not** fired. What is under test
+is that `gameLoop` notices — which no spec that calls the checker itself can
+show.
+
+**What it found.** `grantAllTechsButton` deliberately skips the megastructure
+techs, so it cannot earn `researchAllTechnologies`, whose checker requires every
+key in `techs`. The first draft asserted it did, and failed. That is the debug
+button's design rather than a defect, and the spec now asserts the more
+interesting thing: the ordinary tree earns the other three tech achievements and
+leaves "all technologies" correctly outstanding — with the outstanding list
+asserted non-empty, so the claim cannot go vacuous.
+
+### `achievements-rebirth.spec.js` — what survives, over two rebirths
+
+Takes two rebirths through the Rebirth pane's own button and confirmation modal,
+having earned the whole catalogue before each, and audits the `resetOnRebirth`
+split *read from the game* rather than hard-coded. Two rebirths rather than one,
+because a reset that only spared the permanent achievements on the first pass
+would pass a one-rebirth test and still erase a player's record on their third
+run.
+
+It also pins the design invariant the reset depends on, which nothing had stated
+anywhere: **every achievement paying a per-run `multiplier` is
+`resetOnRebirth: true`, and every `multiplierPermanent` is `false`.** A per-run
+multiplier acts on rates the reset throws away, so its achievement has to be
+re-earnable; a permanent one is re-applied to the new board by
+`addPermanentResourcesModifiersBackIn()`, so its achievement must never be
+re-earnable or the player compounds it. An achievement added on the wrong side of
+that line silently either loses a permanent bonus or hands one out twice.
+
+The permanent multipliers are then followed *through* a rebirth: earned at
+exactly 1.5 (1 + 0.2 from See All News Tickers + 0.3 from Rebirth) and 0.8 for
+compounds, carried across unchanged, and — the part that matters — actually
+applied to the rebuilt board rather than merely remembered.
+
+The three achievements `autoGrantAchievementsOnRebirth()` hands straight back on
+a run with infinite power are accounted for explicitly, because they are
+`resetOnRebirth: true` and are cleared and re-earned within the same rebirth. A
+naive "everything resettable is off afterwards" check reports that as a defect.
+
+### `achievements-pane.spec.js` — the grid, the artwork and the tooltips
+
+The only place an achievement is *visible*. Seventy tiles, each asserted into its
+own grid cell against `achievementPositionDataLinker` — two sharing a cell means
+one is drawn underneath the other and can never be hovered, the same class of
+defect as known-issues #15. All **630** artwork files (nine themes × seventy) are
+requested over HTTP and required to answer 200, with the URLs asked of the game
+rather than assembled by the spec, so a change to the naming scheme is caught
+instead of silently mirrored. The theme is then changed through the Settings
+dropdown and the grid required to repaint from the new folder.
+
+The tooltips are hovered for real. One spec asserts all four things a tooltip
+promises — the description, the reward line with the currency symbol, the
+rebirth policy and the status — and another earns the achievement *while the
+pointer is still on the tile* and requires the status to flip from "not achieved"
+to "achieved" without the pane being reopened, which is what
+`refreshAchievementTooltipDescriptions()` running every frame is for.
+
+**What it found.** `setupAchievementTooltip()` was called unconditionally every
+time the pane was drawn, and it appended a fresh element and bound three more
+document-level listeners each time. Three extra visits left four elements sharing
+the id `achievement-tooltip`, and document listeners up 163 against a control of
+149 for the same number of redraws of another tab 9 pane. That is known-issues
+**#37**, now fixed at source with a one-line idempotence guard — safe because the
+handlers already bound close over the element that stays in the document, and
+because nothing anywhere removes it: `achievement-tooltip` appears in exactly two
+places in the codebase, both inside that function.
+
+### Two things about notification text
+
+Both cost a debugging pass and are worth writing down.
+
+- **An achievement notification is HTML.** It is written with `<br>` separators
+  and rendered with `innerHTML`, so the raw string sitting in the queue and the
+  `textContent` of the rendered element are not the same characters — and `<br>`
+  contributes **no** whitespace, so `ACHIEVEMENT:<br>You have…` reads back as
+  `ACHIEVEMENT:You have…`. Comparisons strip tags *without* substituting a space
+  and then drop whitespace entirely, so one expectation matches either.
+- **One notification per burst does not queue.** With an empty tray
+  `showNotification` shifts the message straight back out and renders it, so a
+  synchronous read of the queue finds every message except that one. The sweep
+  checks the queue first and the tray second.
 
 ---
 

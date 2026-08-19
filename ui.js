@@ -58,6 +58,8 @@ import {
     STAR_SEED,
     STAR_FIELD_SEED,
     NUMBER_OF_STARS,
+    STAR_FIELD_NOMINAL_WIDTH,
+    STAR_FIELD_NOMINAL_HEIGHT,
     getStarMapMode,
     setRocketUserName,
     setCurrentDestinationDropdownText,
@@ -4218,6 +4220,16 @@ export function createHtmlTextAreaProse(id, classList = [], headerText = '', bod
 
 
 export function setupAchievementTooltip() {
+    //the achievements pane is rebuilt from scratch on every visit, and this installs
+    //an element on document.body plus three listeners on document - none of which the
+    //rebuild removes. without this guard every visit left another tooltip sharing the
+    //same id, and another three handlers running on every mouse move.
+    //the early return is safe because the handlers already bound close over the
+    //element that is still in the document, so the existing tooltip keeps working.
+    if (document.getElementById('achievement-tooltip')) {
+        return;
+    }
+
     const tooltip = document.createElement('div');
     tooltip.id = 'achievement-tooltip';
     tooltip.style.position = 'absolute';
@@ -5627,10 +5639,23 @@ export function generateStarfield(starfieldContainer, numberOfStars = 70, seed =
     const minSize = 2;
     const maxSize = 6;
     const containerRect = starfieldContainer.getBoundingClientRect();
-    const containerWidth = containerRect.width;
-    const containerHeight = containerRect.height;
     const containerLeft = containerRect.left;
     const containerTop = containerRect.top;
+    // Star coordinates are simulation data, not layout. They are generated over a
+    // fixed nominal field so that a star is the same distance away no matter who
+    // asks: the drawn map passes a real panel, everything in calculation mode
+    // passes a detached div whose width and height are zero. Deriving x and y from
+    // the measured container made those two disagree — the planar term collapsed
+    // for the detached one — so a star could be studied for the map and unstudied
+    // for the search, the manuscript roll and the O-type achievement gate. It also
+    // made a star's distance depend on the size of the browser window.
+    const fieldWidth = STAR_FIELD_NOMINAL_WIDTH;
+    const fieldHeight = STAR_FIELD_NOMINAL_HEIGHT;
+    // The map still fills whatever box it is drawn into: the nominal field is
+    // scaled onto the real container for placement only. A zero-sized container
+    // (calculation mode) never draws, so its scale is irrelevant.
+    const drawScaleX = containerRect.width > 30 ? (containerRect.width - 30) / (fieldWidth - 30) : 1;
+    const drawScaleY = containerRect.height > 0 ? containerRect.height / fieldHeight : 1;
     const starNames = getStarNames();
     const settledStarsList = getSettledStars();
     const currentStarSystemLower = String(getCurrentStarSystem() || '').toLowerCase();
@@ -5640,10 +5665,22 @@ export function generateStarfield(starfieldContainer, numberOfStars = 70, seed =
     for (let i = 0; i < numberOfStars; i++) {
         const name = starNames.length > 0 ? starNames.splice(Math.floor(seededRandom(seed - i * 1.2) * starNames.length), 1)[0] : `Star${i}`;
         const size = getSeededRandomInRange(seed + i, minSize, maxSize);
-        const x = getSeededRandomInRange(seed + i + numberOfStars, 0, containerWidth - 30) + containerLeft;
-        const y = getSeededRandomInRange(seed + i + numberOfStars * 2, 0, containerHeight) + containerTop;
+        const x = getSeededRandomInRange(seed + i + numberOfStars, 0, fieldWidth - 30);
+        const y = getSeededRandomInRange(seed + i + numberOfStars * 2, 0, fieldHeight);
         const z = getSeededRandomInRange(seed + i + numberOfStars * 3, 10, 100000);
-        stars.push({ name, x, y, z, size, width: size * 1.1, height: size * 1.1, left: x, top: y });
+        // x/y/z are the star's place in the field and feed distance; left/top are
+        // where that place lands on screen and feed nothing but CSS.
+        stars.push({
+            name,
+            x,
+            y,
+            z,
+            size,
+            width: size * 1.1,
+            height: size * 1.1,
+            left: x * drawScaleX + containerLeft,
+            top: y * drawScaleY + containerTop
+        });
     }
 
 
@@ -5662,11 +5699,11 @@ export function generateStarfield(starfieldContainer, numberOfStars = 70, seed =
     if (currentStar) {
         stars.forEach(star => {
             starDistanceData[star.name] = calculate3DDistance(
-                currentStar.left + currentStar.width / 2,
-                currentStar.top + currentStar.height / 2,
+                currentStar.x + currentStar.width / 2,
+                currentStar.y + currentStar.height / 2,
                 currentStar.z,
-                star.left + star.width / 2,
-                star.top + star.height / 2,
+                star.x + star.width / 2,
+                star.y + star.height / 2,
                 star.z
             );
         });

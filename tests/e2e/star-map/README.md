@@ -1,6 +1,6 @@
 # e2e / star-map
 
-**Star Map & Star Data** — 🟠 AMBER
+**Star Map & Star Data** — 🟢 GREEN
 
 The seeded starfield and how each star is drawn, the four map modes, the search and its ping, the connection lines, orbits and arrows, the travel gate, and the Star Data table with its six sortable columns.
 

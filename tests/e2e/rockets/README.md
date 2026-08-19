@@ -1,8 +1,8 @@
 # e2e / rockets
 
-**Rockets & Launch Pad** — 🟠 AMBER
+**Rockets & Launch Pad** — 🟢 GREEN
 
-Rocket construction, fuelling, naming and the launch lifecycle across all four rockets.
+The launch pad and the four rockets from purchase to landing: module pricing, assembly, naming, fuelling, launch, destination choice, the travel timer and the reset that lets a rocket fly again.
 
 Specs for this area go in this folder, named `<scenario>.spec.js`.
 
