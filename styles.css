@@ -4491,8 +4491,18 @@ body.debug-window-open {
     border-color: var(--text-hover-color);
 }
 
+/* The chosen flag announces itself with a glow, the same treatment a button
+   carrying `green-ready-text` gets, rather than by recolouring - a flag's own
+   colours are the point of it and cannot be tinted without ruining it.
+
+   The glow is authored white rather than taken from `--ui-glow`, because that
+   token is themed and the welcome modal is the one screen a player sees before
+   picking a theme; white is also the only colour that lifts all five flags
+   equally. Unselected flags are left exactly as they are, so the row still reads
+   as one choice among five. */
 .language-flag-cell.language-flag-selected {
     border-color: var(--text-focus-color);
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.85), 0 0 24px rgba(255, 255, 255, 0.45);
 }
 
 .language-flag-label.language-flag-selected {
