@@ -1098,6 +1098,227 @@ rather than pinning a value that is environment-dependent.
 
 ---
 
+## 🟢 UI Navigation — `ui-navigation-live.spec.js`, 12 specs, all passing
+
+**What is different.** The area previously had one file covering one behaviour —
+the ⚠️ marker clearing when a row is opened. Nothing walked the shell. The new
+file plays the run out with the debug scenario and then navigates all of it:
+nine tabs, fifty-nine option rows, the two endgame chapters, and the hotkeys.
+
+The claim it makes about a pane is deliberately stronger than "a click handler
+ran". Every row in the sweep has to satisfy four things at once:
+
+1. the pane name changed, and no two rows on a tab land on the same pane;
+2. `#headerContentTabN` **names the row** — every heading in the game either is
+   the row's label or begins with it, so a row wired to the wrong pane is caught
+   by name rather than by id;
+3. `#optionContentTabN` has children, which separates "routed correctly" from
+   "routed correctly and drew nothing";
+4. the clicked row is the one carrying `row-side-menu-selected`.
+
+**The two endgame chapters are reached the way the game reaches them.**
+Megastructures is opened by flipping `currentRunIsMegaStructureRun` through the
+game's own variable debugger and then letting `megastructureUIChecks` reveal the
+row on the next frame — the assertion is that the row was hidden before and is
+offered after, not that a flag was written. The Cosmic Rip is opened by staging
+the settled ledger and then paying ten galactic points through the real **Restore
+Near Space Scanner Array** button, after which the spec checks that the two
+previously hidden rows are on the menu and that the telescope really built its
+nine-sector grid rather than an empty shell. As everywhere else in the suite, it
+stops short of **Close The Rip**, which starts a cinematic that never hands the
+game back.
+
+**Three things worth knowing, found while writing it.**
+
+1. **`unlockAllTabsButton` deliberately leaves `cosmicRip` out.** It unlocks the
+   other five tab techs, and the frame loop's `showTabsUponUnlock` re-locks tab 8
+   within a frame and relabels it `???`. The tech is granted by the Miaplacidus
+   win cinematic, so the spec stages it the same way `cosmic-rip-live.spec.js`
+   does and navigates everything downstream for real.
+2. **Ten rows are legitimately still off the menu on a fully progressed run**,
+   and they are listed by name in the spec with a reason each — Colonise wants a
+   destination star, Rebirth wants a rebirth to be possible, Exit Game is Electron
+   only, and so on. Routing and heading are still checked for those rows; only
+   the "drew content" claim is not made, because the game is not offering them.
+   Writing the list out rather than counting it means a row *newly* falling off
+   the menu fails the spec.
+3. **The tab order is not the markup order.** `checkOrderOfTabs` sorts unlocked
+   tabs by a priority table, so a fully unlocked run reads
+   `1, 4, 3, 2, 6, 5, 7, 8, 9` and the number-key hotkeys address *positions*,
+   not tab ids. The hotkey spec is written against position for that reason, and
+   it is the assertion that would catch the ordering and the hotkey binding
+   drifting apart.
+
+---
+
+## 🟢 News Ticker — `news-ticker-live.spec.js`, 8 specs, all passing
+
+**What is different.** The existing file calls `showNewsTickerMessage()` directly.
+The new one never does. Every headline in it arrives because the ticker's own
+timer fired:
+
+```
+debug menu -> News Ticker row      forced category + 10s interval override
+Settings -> Game Options toggle    off, then on
+  -> setNewsTickerSetting(false/true)
+  -> startNewsTickerTimer()        removes the old timer, schedules at the override
+  -> timerManager fires            showNewsTickerMessage()
+  -> displayNewsTickerMessage()    .news-ticker-text built and scrolled
+```
+
+That middle step is the part that is easy to get wrong and is worth recording:
+**the debug row does not reschedule anything.** `setNewsTickerDebugButton` stores
+the category and interval and nothing else, so a spec that sets a ten-second
+interval and waits will sit through the 20–35 seconds the boot-time timer was
+already scheduled for. The toggle on the Game Options pane is the only control a
+player has that rebuilds the timer, and it is what the specs use.
+
+`startNewsTickerTimer` runs on the **non-delta** `timerManager`, which is a plain
+`setInterval` on the wall clock. There is no fast-forwarding it: a cycle costs a
+real ten seconds and these specs are paced accordingly.
+
+**Reading the right message.** `displayNewsTickerMessage` replaces
+`.news-ticker-text` wholesale and leaves the previous one on screen for the forty
+seconds it takes to scroll. Each cycle therefore stamps the current headline and
+waits for one that has not been stamped. Nothing is cleared or synthesised — the
+element the game builds is the element that gets read.
+
+**All four families, each recognised by what it puts on screen.**
+
+- **wackyEffects** — forced from the debug menu. The spec asserts the headline is
+  one of the current language's wacky bodies, then clicks the `data-effect-item`
+  span and asserts the ticker changed. Which effect fires is random and each one
+  reaches for a different target, so the assertion is that *something* moved
+  rather than which animation was added.
+- **prize** — forced. The spec first empties the stores through the real **Sell
+  All** button, because a prize is only offered when the resource it gifts has
+  room for it and the debug scenario fills every store to its cap. It then clicks
+  the prize, asserts the resource grew by at least the promised amount and that
+  `newsTickerPrizesCollected` went up by exactly one, and clicks again to prove a
+  claimed prize pays nothing the second time.
+- **manuscriptClues** — forced, after surveying stars with the **Study a Star**
+  debug button until the guaranteed manuscript at five light years appears. Two
+  cycles: the first must name the star, the second must name it too and must use
+  a different template.
+- **noPrize** — *cannot* be forced; there is no debug option for it, because it is
+  the fallback the roll lands on past 0.28. It is reached by leaving the category
+  unforced and cycling up to six times, identifying it by the absence of any
+  interactive span, and checking the headline against the no-prize catalogue.
+
+**Languages are asserted by catalogue membership, not by string inequality.** The
+language is changed through the debug menu's own **Set** button, which runs
+`relocalizeAll` and rebuilds `descriptions.js`. The spec then requires the
+rendered headline to be in *that language's* catalogue. That is the assertion
+that would fail if the change never reached the ticker: an English headline is
+not in the German catalogue. Comparing two renderings for inequality would prove
+nothing, because the family picks a different entry each spin anyway.
+
+One wrinkle that cost a first red run: `specialMessageBuilder` splices a
+multi-line `<span>` around the link word, so `textContent` carries whitespace the
+catalogue entry does not — the Spanish wacky line reads `¡ Boo!` on screen and
+`¡Boo!` in `descriptions.js`. The comparison drops whitespace entirely and keeps
+every other character.
+
+---
+
+## 🟠 Number Notation — `notation-live.spec.js`, 11 specs, 8 passing
+
+**What is different.** `notation.spec.js` proves what `formatNumber()` returns.
+All eleven of its specs would still pass if the frame loop never applied the
+formatter to a single element on screen. The new file checks the screen: it
+changes the mode through the real dropdown on the Visual pane and then walks
+every option row on all nine tabs, reading back what each pane renders.
+
+**The grammar is stated as a rule, not a value list.** A pane's numbers move
+while it is open — production ticks, autobuyers spend — so pinning exact strings
+would be flaky by construction. What does not move is the shape the formatter
+owes:
+
+| Mode | Rule |
+|---|---|
+| `normalCondensed` | no thousands separator anywhere, and nothing past four integer digits without a K/M/B/e suffix |
+| `normal` | no `1.5K`-style abbreviation, and every value past a thousand comma-grouped |
+
+Both rules can only be broken by a number the formatter never reached, which is
+exactly what the file exists to catch. Two details keep it honest: the number
+token requires `,\d{3}` for grouping, because several cost rows read
+`$300, 100 Carbon` and a looser pattern reads the list separator as a thousands
+separator; and a plain-mode suffix only counts as an abbreviation when a decimal
+precedes it, because some descriptions carry a literal `$5K` in their authored
+text.
+
+**Three surfaces, three code paths.** The frame loop routes `.notation` elements
+three ways and they share no code, so each is covered separately:
+`.sell-fuse-money` → `complexSellStringFormatter`, `.building-purchase` →
+`complexPurchaseBuildingFormatter`, everything else →
+`formatAllNotationElements`. That split is what localised both defects below.
+
+**Two live defects, found by three specs — both now fixed at source.**
+
+1. **Price descriptions ignored the plain mode** (known-issues #26, closed).
+   `complexPurchaseBuildingFormatter` returned immediately unless the mode was
+   `normalCondensed`, and because the `else if` had already claimed the element it
+   never reached `formatAllNotationElements`. So in Normal every purchase row in
+   the game showed raw, ungrouped costs — `$500000, 25000 Titanium` — under a stat
+   bar reading `$1,999,952,765`. Found by: *"plain: every value past a thousand is
+   grouped"* (the whole-game sweep, which named all 26 offending numbers) and
+   *"plain: every cost on a purchase row is grouped in thousands"*. The span walk
+   is now shared by both modes and only the number formatter differs.
+2. **The Statistics screen was never formatted at all** (known-issues #27, closed).
+   `createHtmlTableStatistics` compared a capitalised, localized heading against a
+   list of lowercase English keys, so the `notation` class was never added: the
+   pane rendered 111 rows and zero `.notation` elements, and cash read
+   `$1999952765.00` in both modes. A `localizedNotationHeaders` table was built
+   directly above the check and never read, which is what marked it as an
+   unfinished change rather than an omission. Found by: *"the statistics screen
+   follows the notation setting"*. The match is now on the resolved English key,
+   and the same DOM check returns 33 `.notation` elements rather than 0.
+
+Both were left failing until they were fixed in the game rather than in the test,
+per the suite's standing rule. The matching **condensed** specs passed throughout,
+which is what localised the first defect to the plain-mode path rather than to
+price rows generally — and what proved, once the walk became shared, that the mode
+which already worked had not regressed.
+
+Closing #27 also changed two specs, because both had been written against the
+un-formatted screen. The statistics sweep in this file counted only cells that
+were *wholly digits*, a shape that disappears the moment condensed mode
+abbreviates, so its own floor assertion became unsatisfiable; it now accepts a
+magnitude suffix as part of a figure and asserts positively that cash abbreviates
+in condensed and groups in plain. `tests/e2e/statistics/statistics.spec.js` read
+the cash cell by stripping every non-digit, so `$1.0B` came back as `1`; its
+`asNumber()` helper now expands the suffix.
+
+**One thing the file deliberately does not do.** The truncation rule — that
+condensed floors rather than rounds, so 1999 reads `1.9K` — stays in the contract
+file. Proving it on screen needs a value whose two renderings differ, and every
+figure a run can be driven to deterministically is round. Asserting it against a
+live, moving number would be pinning a race rather than a rule.
+
+---
+
+## The shared navigation helper
+
+All three of these walk the same structure, so the walk was factored into
+`tests/e2e/_harness/navigation.mjs` rather than written three times. It exposes
+`listOptionRows`, `openOptionRow`, `paneRender` and `walkAllPanes`, and three
+details about the shell drive its shape:
+
+- **The class token is the identity, not the id.** Several rows have no id at all
+  — the three settings panes are `tab9.option1` … `tab9.option3` — and
+  `querySelector('[class~="tab9.option1"]')` is the only selector that will not
+  also match `option10` upwards.
+- **Rows are hidden by unlock state, and the walk reveals them.** That is a test
+  affordance, not a claim about unlocks: `listOptionRows` reports `hidden` so a
+  spec can assert unlock rules explicitly, which is what the ui-navigation sweep
+  does.
+- **Clicks are dispatched rather than driven through the mouse**, because rows sit
+  under overlays on several tabs. That bypasses CSS gating, which is safe here —
+  none of these rows are gated on affordability — but it is the reason a spec that
+  wants to test a gate must assert the class rather than dispatch a click.
+
+---
+
 ## The general rule this establishes
 
 Drive the game's own buttons, panes and debug menu. Reserve direct `withMods`

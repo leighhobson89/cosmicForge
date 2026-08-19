@@ -426,7 +426,17 @@ test.describe('Statistics — the overview and run figures', () => {
     await game.page.waitForTimeout(1200);
     const after = await game.page.locator('#stat_cash').textContent();
 
-    const asNumber = (text) => Number(String(text).replace(/[^\d.]/g, ''));
+    // The cell obeys the notation setting, so a billion reads "$1.0B" in the
+    // shipped condensed mode. Stripping the non-digits would turn that into 1 and
+    // make the grant look like a loss, so the magnitude suffix has to be expanded
+    // rather than discarded.
+    const asNumber = (text) => {
+      const match = String(text ?? '').match(/([\d.,]+)\s*(K|M|B|e(\d+))?/);
+      if (!match) return NaN;
+      const value = Number(match[1].replace(/,/g, ''));
+      if (match[3]) return value * Math.pow(10, Number(match[3]));
+      return value * ({ K: 1e3, M: 1e6, B: 1e9 }[match[2]] ?? 1);
+    };
 
     expect(after).not.toBe(before);
     expect(asNumber(after), 'a billion granted should show as a bigger figure')

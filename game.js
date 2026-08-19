@@ -7499,7 +7499,9 @@ function handleCosmicRipUpgradeResourceType(element) {
             return String(value ?? '');
         }
         if (getNotationType?.() === 'normal') {
-            return String(Math.floor(num));
+            //grouped, like every other price row - these labels are built here rather than by
+            //complexPurchaseBuildingFormatter, so they have to apply the plain grammar themselves
+            return formatGroupedNumber(Math.floor(num));
         }
         return formatNumber?.(num) ?? String(Math.floor(num));
     };
@@ -11530,22 +11532,7 @@ function formatAllNotationElements(element, notationType) {
             return Number.isFinite(n) ? n : NaN;
         };
 
-        const formatNormalNumber = (num) => {
-            if (!Number.isFinite(num)) {
-                return String(num);
-            }
-
-            const roundedInt = Math.round(num);
-            if (Math.abs(num - roundedInt) < 1e-6) {
-                return roundedInt.toLocaleString('en-US');
-            }
-
-            const rounded = Math.round(num * 1e6) / 1e6;
-            return rounded.toLocaleString('en-US', {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 6,
-            });
-        };
+        const formatNormalNumber = (num) => formatGroupedNumber(num);
 
         const formattedContent = originalContent.replace(/-?\d+(?:[.,]\d+)*/g, match => {
             let number = parseDisplayNumber(match);
@@ -11612,43 +11599,79 @@ function formatAllNotationElements(element, notationType) {
 }
 
 function complexPurchaseBuildingFormatter(element, notationType) {
+    //cosmic rip rows write their own description in handleCosmicRipUpgradeResourceType,
+    //and their spans carry no ", " prefix, so the walk below would mangle them in either mode
+    if (element?.dataset?.type === 'cosmicRip') {
+        return;
+    }
+
+    //a price row is not one number: it is a cash cost whose currency symbol has to stay on the
+    //correct side, followed by a comma separated list of resource costs, each in its own span.
+    //both modes walk the same spans - only the number formatter differs
+    let formatValue;
     if (notationType === 'normalCondensed') {
-        if (element?.dataset?.type === 'cosmicRip') {
-            return;
+        formatValue = formatNumber;
+    } else if (notationType === 'normal') {
+        formatValue = formatGroupedNumber;
+    } else {
+        return;
+    }
+
+    const spans = element.querySelectorAll("span");
+
+    spans.forEach((span, index) => {
+        const content = span.textContent.trim();
+        const parts = content.split(' ');
+
+        let numberPart;
+        
+        if (index !== 0) {
+            numberPart = parts[1]?.replace(/[^0-9.]/g, '');
+        } else {
+        numberPart = parts[0].replace(/[^0-9.]/g, '');
         }
-        const spans = element.querySelectorAll("span");
-    
-        spans.forEach((span, index) => {
-            const content = span.textContent.trim();
-            const parts = content.split(' ');
-    
-            let numberPart;
-            
-            if (index !== 0) {
-                numberPart = parts[1]?.replace(/[^0-9.]/g, '');
+        
+        const formattedNumber = formatValue(numberPart);
+
+        if (index === 0) {
+            if (getCurrencySymbol() === '€') {
+                span.textContent = formattedNumber + getCurrencySymbol();
             } else {
-            numberPart = parts[0].replace(/[^0-9.]/g, '');
+                span.textContent = getCurrencySymbol() + formattedNumber;
             }
             
-            const formattedNumber = formatNumber(numberPart);
-    
-            if (index === 0) {
-                if (getCurrencySymbol() === '€') {
-                    span.textContent = formattedNumber + getCurrencySymbol();
-                } else {
-                    span.textContent = getCurrencySymbol() + formattedNumber;
-                }
-                
-                if (parts.length > 1) {
-                    span.textContent += ' ' + parts.slice(1).join(' ');
-                }
-            } else {
-                const prefix = content.startsWith(",") ? ", " : "";
-                const remainingText = parts.slice(2).join(' ');
-                span.textContent = `${prefix}${formattedNumber}${remainingText ? " " + remainingText : ""}`;
+            if (parts.length > 1) {
+                span.textContent += ' ' + parts.slice(1).join(' ');
             }
-        });
-    }    
+        } else {
+            const prefix = content.startsWith(",") ? ", " : "";
+            const remainingText = parts.slice(2).join(' ');
+            span.textContent = `${prefix}${formattedNumber}${remainingText ? " " + remainingText : ""}`;
+        }
+    });
+}
+
+/**
+ * The plain ('normal') counterpart to formatNumber: grouped in thousands, with a
+ * pointless decimal tail dropped. Kept beside it so the two notation modes are
+ * read from one place - formatAllNotationElements and the purchase price rows
+ * both format through this, which is what stops one screen grouping while
+ * another shows a raw run of digits.
+ */
+export function formatGroupedNumber(value) {
+    const number = typeof value === 'number' ? value : parseFloat(String(value ?? '').replace(/,/g, ''));
+    if (!Number.isFinite(number)) return value;
+
+    const roundedInt = Math.round(number);
+    if (Math.abs(number - roundedInt) < 1e-6) {
+        return roundedInt.toLocaleString('en-US');
+    }
+
+    const rounded = Math.round(number * 1e6) / 1e6;
+    return rounded.toLocaleString('en-US', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 6,
+    });
 }
 
 export function formatNumber(value) {

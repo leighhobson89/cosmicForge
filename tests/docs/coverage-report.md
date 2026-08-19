@@ -4,7 +4,7 @@ _Generated from `functional-areas.json`. Re-run `node tests/docs/generate-report
 
 ## Coverage at a glance
 
-One line per functional area, worst first. 26 green, 13 amber, 4 red, out of 43.
+One line per functional area, worst first. 29 green, 10 amber, 4 red, out of 43.
 
 | | Area | Group | Risk | Specs | Where it stands |
 |:--:|---|---|:--:|--:|---|
@@ -20,11 +20,8 @@ One line per functional area, worst first. 26 green, 13 amber, 4 red, out of 43.
 | 🟠 | [Galactic Casino](areas/galactic-casino.md) | Meta Progression | Medium | 46 | 46 specs written; not yet upgraded to integration. |
 | 🟠 | [Galactic Market](areas/galactic-market.md) | Meta Progression | Medium | 17 | 17 specs written; not yet upgraded to integration. |
 | 🟠 | [Megastructures](areas/megastructures.md) | Endgame | Medium | 18 | 18 specs written; not yet upgraded to integration. |
-| 🟠 | [News Ticker](areas/news-ticker.md) | Simulation & Ambience | Low | 18 | 18 specs written; not yet upgraded to integration. |
-| 🟠 | [Number Notation](areas/notation.md) | Presentation & Shell | Medium | 11 | 11 specs written; not yet upgraded to integration. |
 | 🟠 | [Random Events](areas/random-events.md) | Simulation & Ambience | Medium | 21 | 21 specs written; not yet upgraded to integration. |
 | 🟠 | [Rockets & Launch Pad](areas/rockets.md) | Space Operations | Medium | 20 | 20 specs written; not yet upgraded to integration. |
-| 🟠 | [UI Navigation](areas/ui-navigation.md) | Presentation & Shell | Medium | 5 | 5 specs written; not yet upgraded to integration. |
 | 🟢 | [Antimatter](areas/antimatter.md) | Space Operations | Medium | 26 | Done — driven through its own controls, 26 specs passing. |
 | 🟢 | [Application Boot](areas/app-boot.md) | Foundation | High | 11 | Done — driven through its own controls, 11 specs passing. |
 | 🟢 | [Audio](areas/audio.md) | Simulation & Ambience | Low | 13 | Done — driven through its own controls, 13 specs passing. |
@@ -39,6 +36,8 @@ One line per functional area, worst first. 26 green, 13 amber, 4 red, out of 43.
 | 🟢 | [Energy & Power Grid](areas/energy.md) | Core Economy | High | 26 | Done — driven through its own controls, 26 specs passing. |
 | 🟢 | [Local Save & Load](areas/save-load-local.md) | Foundation | High | 10 | Done — driven through its own controls, 10 specs passing. |
 | 🟢 | [Localization](areas/localization.md) | Foundation | High | 91 | Done — driven through its own controls, 91 specs passing. |
+| 🟢 | [News Ticker](areas/news-ticker.md) | Simulation & Ambience | Low | 26 | Done — driven through its own controls, 26 specs passing. |
+| 🟢 | [Number Notation](areas/notation.md) | Presentation & Shell | Medium | 22 | Upgraded to integration — the setting is driven through its own dropdown and every screen is swept in both modes. The 3 specs that were failing found known-issues #26 and #27, both now fixed at source. |
 | 🟢 | [Onboarding & Tutorial](areas/onboarding.md) | Presentation & Shell | High | 13 | Done — driven through its own controls, 13 specs passing. |
 | 🟢 | [Performance & Frame Budget](areas/performance.md) | Presentation & Shell | High | 10 | Done — driven through its own controls, 10 specs passing. |
 | 🟢 | [Philosophies](areas/philosophies.md) | Meta Progression | High | 42 | Done — driven through its own controls, 42 specs passing. |
@@ -51,6 +50,7 @@ One line per functional area, worst first. 26 green, 13 amber, 4 red, out of 43.
 | 🟢 | [Starship](areas/starship.md) | Interstellar | High | 8 | Done — driven through its own controls, 8 specs passing. |
 | 🟢 | [Statistics](areas/statistics.md) | Simulation & Ambience | Low | 16 | Done — driven through its own controls, 16 specs passing. |
 | 🟢 | [Tech Tree](areas/technology.md) | Core Economy | High | 18 | Done — driven through its own controls, 18 specs passing. |
+| 🟢 | [UI Navigation](areas/ui-navigation.md) | Presentation & Shell | Medium | 24 | Done — driven through its own controls, 24 specs passing. |
 
 ---
 
@@ -75,11 +75,11 @@ when an area is upgraded.
 | | Areas | Share |
 |---|---:|---:|
 | 🔴 Red — no spec file | 4 | 9% |
-| 🟠 Amber — spec written, not yet upgraded | 13 | 30% |
-| 🟢 Green — signed off | 26 | 60% |
+| 🟠 Amber — spec written, not yet upgraded | 10 | 23% |
+| 🟢 Green — signed off | 29 | 67% |
 | **Total functional areas** | **43** | |
 
-464 individual test cases are identified across all areas. **753 Playwright specs are implemented** across 39 areas, and all of them pass except where an area's note says otherwise — a spec that fails on a live defect is left failing on purpose, and the defect is written up in [known-issues.md](known-issues.md).
+488 individual test cases are identified across all areas. **791 Playwright specs are implemented** across 39 areas, and all of them pass except where an area's note says otherwise — a spec that fails on a live defect is left failing on purpose, and the defect is written up in [known-issues.md](known-issues.md).
 
 Run them with `npm run test:e2e` (all areas) or `node tests/run-e2e.mjs <area>`. Each area writes its own HTML report to `test-reports/e2e/<area>/index.html`, with a summary index at `test-reports/e2e/index.html`.
 
@@ -174,7 +174,7 @@ Background systems that modify the economy or the presentation without direct pl
 |:--:|---|:--:|--:|--:|---|
 | 🔴 | [Weather](areas/weather.md) | Low | 6 | — | — |
 | 🟠 | [Random Events](areas/random-events.md) | Medium | 8 | **21** | — |
-| 🟠 | [News Ticker](areas/news-ticker.md) | Low | 4 | **18** | — |
+| 🟢 | [News Ticker](areas/news-ticker.md) | Low | 12 | **26** | — |
 | 🟢 | [Audio](areas/audio.md) | Low | 5 | **13** | — |
 | 🟢 | [Statistics](areas/statistics.md) | Low | 16 | **16** | — |
 
@@ -184,8 +184,8 @@ Navigation, tutorial, formatting and build variants. Highly visible, cheap to te
 
 | Status | Area | Risk | Planned | Specs | Existing coverage |
 |:--:|---|:--:|--:|--:|---|
-| 🟠 | [Number Notation](areas/notation.md) | Medium | 7 | **11** | — |
-| 🟠 | [UI Navigation](areas/ui-navigation.md) | Medium | 11 | **5** | launch-app.test.js |
+| 🟢 | [Number Notation](areas/notation.md) | Medium | 16 | **22** | — |
+| 🟢 | [UI Navigation](areas/ui-navigation.md) | Medium | 18 | **24** | launch-app.test.js |
 | 🟢 | [Onboarding & Tutorial](areas/onboarding.md) | High | 7 | **13** | launchAndOnboard.test.js |
 | 🟢 | [Cosmicopedia & Help](areas/cosmicopedia.md) | Low | 5 | **6** | — |
 | 🟢 | [Demo Build Lockdowns](areas/demo-build.md) | High | 9 | **19** | — |

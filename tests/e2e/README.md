@@ -136,6 +136,34 @@ Modules available inside `withMods`: `cg` (constantsAndGlobalVars), `rdo`
 the wall-clock manager behind the news ticker, a different instance from
 `timers`), `ui`, `rip` (cosmicRip), `saveLoad`, `casino`, `onboarding`, `events`.
 
+### Walking the tabs and panes: `_harness/navigation.mjs`
+
+Three areas need to walk the side-menu structure, so the walk lives in one place
+rather than being written out per spec:
+
+| Export | Purpose |
+|---|---|
+| `ALL_TABS` | `[1..9]`, the tab indices the shell ships |
+| `listOptionRows(page, tab)` | Every option row on a tab: its `tabN.optionM` class token, id, label and whether the unlock system is currently hiding it |
+| `openOptionRow(game, tab, token)` | Reveal a row and click it; returns false when the tab has no such token |
+| `paneRender(page, tab)` | The content column's heading, description, child count and text |
+| `walkAllPanes(game, { tabs, onPane })` | Open every row on every listed tab, awaiting `onPane` while each pane is on screen |
+
+Three things about the shell drive their shape, and they are worth knowing before
+writing a selector of your own:
+
+- **The class token is the identity, not the id.** Several rows have no id at all
+  — the three settings panes are `tab9.option1` … `tab9.option3` — and
+  `[class~="tab9.option1"]` is the only selector that will not also match
+  `option10` upwards.
+- **Rows are hidden by unlock state, and the walk reveals them.** That is a test
+  affordance rather than a claim about unlocks: `listOptionRows` reports `hidden`
+  so a spec can assert unlock rules explicitly.
+- **Clicks are dispatched, not driven through the mouse**, because rows sit under
+  overlays on several tabs — which also means they bypass CSS gating. Safe for
+  these rows, none of which are gated on affordability, but see the affordability
+  note in `known-issues.md` #17 before using the same trick on a purchase button.
+
 ## Conventions learned the hard way
 
 **Boot fresh; do not use the legacy cloud fixtures.** The `smoke_save_*` saves in

@@ -16,34 +16,36 @@ Planning, reporting and how-to for the Cosmic Forge E2E test suite.
 
 ## Current state
 
-26 of 43 functional areas are green — **753 specs**: `antimatter`, `app-boot`,
+28 of 43 functional areas are green — **791 specs**: `antimatter`, `app-boot`,
 `audio`, `autobuyers`, `battle`, `black-hole`, `compounds`, `cosmic-rip`,
-`cosmicopedia`, `demo-build`, `energy`, `localization`, `onboarding`,
-`performance`, `philosophies`, `rebirth`, `research`, `resources`,
+`cosmicopedia`, `demo-build`, `energy`, `localization`, `news-ticker`,
+`onboarding`, `performance`, `philosophies`, `rebirth`, `research`, `resources`,
 `save-load-cloud`, `save-load-local`, `save-migration`, `settings`,
-`space-telescope`, `starship`, `statistics`, `technology`.
+`space-telescope`, `starship`, `statistics`, `technology`, `ui-navigation`.
 
-The three save areas are the most recent to land, and together they close the
-last of the Foundation group's high-risk gaps: `save-load-local` (10 specs),
-`save-load-cloud` (8) and `save-migration` (11). What is different about them is
-written up in
-[integration-upgrade-report.md](integration-upgrade-report.md) — in particular
-`save-migration`, which reaches the version ladder by *ageing* saves the game
-itself produced and importing them through the real button, and which covers
-adding a new version by serving a rewritten module through route interception
-rather than editing the source on disk.
+The Presentation & Shell group is the most recent to be worked: `ui-navigation`
+(24 specs) and `news-ticker` (26) both went green, and `notation` (22) was
+upgraded but is held amber by three specs failing on live defects. What is
+different about all three is written up in
+[integration-upgrade-report.md](integration-upgrade-report.md) — `ui-navigation`
+now walks all nine tabs and every one of the fifty-nine option rows and requires
+each pane to *name the row that opened it*; `news-ticker` never calls
+`showNewsTickerMessage()` and instead waits for the ticker's own wall-clock timer
+to scroll a headline in; and `notation` sweeps every screen in both modes against
+a stated grammar rather than checking what the formatter returns in isolation.
 
-Thirteen areas are amber — partial coverage, or specs that are still
-function-level rather than driven through the game's own controls. Four are red:
-`space-mining`, `star-map`, `star-types` and `weather`. The remaining high-risk
-gaps are all amber rather than red — `ascendency`, `colonise`, `diplomacy` and
-`fleet-hangar` — and all are tracked in
+Eleven areas are amber — partial coverage, specs that are still function-level
+rather than driven through the game's own controls, or (in `notation`'s case) an
+upgraded area whose specs are failing on a defect that has not been fixed yet.
+Four are red: `space-mining`, `star-map`, `star-types` and `weather`. The
+remaining high-risk gaps are all amber rather than red — `ascendency`,
+`colonise`, `diplomacy` and `fleet-hangar` — and all are tracked in
 [coverage-report.md](coverage-report.md).
 
 **A live bug is expected to make the suite fail.** Specs are written against the
 behaviour the game should have, not the behaviour it currently has, and defects
 found this way are fixed in the source rather than absorbed by the test.
-Twenty-three have been found and fixed, two entries record behaviour that turned
+Twenty-four have been found and fixed, two entries record behaviour that turned
 out to be by design, and one remains open; see
 [known-issues.md](known-issues.md), where each closed entry names the regression
 spec that now guards it.

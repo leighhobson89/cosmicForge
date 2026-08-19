@@ -1,5 +1,5 @@
 import { initLocalization, localize, localizeMaterialName, reverseLocalizeForCompounds } from './localization.js';
-import { getStatisticsContent, getStatKeyFromLocalizedName, statisticsContent } from './descriptions.js';
+import { getStatisticsContent, getStatKeyFromLocalizedName } from './descriptions.js';
 import {
     invalidateCompoundCreateDropdownRecipeText,
     setLastFocusOfflineGainsAppliedAt,
@@ -4585,19 +4585,23 @@ export function createHtmlTableStatistics(id, classList = [], mainHeadings, subH
         `;
 
 
-        const notationHeaders = ['cash', 'hydrogen', 'helium', 'carbon', 'neon', 'oxygen', 'sodium', 'silicon', 'iron', 'diesel', 'glass', 'concrete', 'steel', 'water', 'titanium', 'researchPoints'];
-        
-        const localizedNotationHeaders = notationHeaders.map(key => {
-            for (const section of Object.values(statisticsContent || {})) {
-                for (let k = 1; k <= 20; k++) {
-                    const headingValue = section[`subHeading${k}`];
-                    if (headingValue && getStatKeyFromLocalizedName(headingValue.replace(':', '').trim()) === key) {
-                        return headingValue.replace(':', '').trim();
-                    }
-                }
-            }
-            return key;
-        });
+        //the stats whose value is a bare unit-free figure, and so is worth putting through the
+        //notation setting. matched on the resolved english key, never on the displayed heading -
+        //the heading is capitalised and localized, so comparing it against these keys never matches.
+        //deliberately left out: anything carrying a unit ('12 ly', '450 KW / s'), anything that is
+        //a yes/no or a name, and totalEnergy, which reads the stat bar's already formatted text and
+        //would therefore be condensed a second time
+        const notationHeaders = [
+            'cash', 'antimatter', 'antimatterMined',
+            'hydrogen', 'helium', 'carbon', 'neon', 'oxygen', 'sodium', 'silicon', 'iron',
+            'diesel', 'glass', 'concrete', 'steel', 'water', 'titanium',
+            'researchPoints', 'scienceKits', 'scienceClubs', 'scienceLabs', 'techsUnlocked',
+            'casinoPointsSpent', 'ripTelemetryDataGained', 'galacticPointsEarned', 'galacticPointsSpent',
+            'powerPlantExplosion', 'batteryExplosion', 'scienceTheft', 'researchBreakthrough',
+            'rocketInstantArrival', 'starshipLostInSpace', 'antimatterReaction', 'stockLoss',
+            'galacticMarketLockdown', 'endlessSummer', 'minerBrokeDown', 'supplyChainDisruption',
+            'blackHoleInstability'
+        ];
 
 
         for (let j = 0; j < subHeadings[i].length; j++) {
@@ -4606,17 +4610,18 @@ export function createHtmlTableStatistics(id, classList = [], mainHeadings, subH
             const isAllTimeHeader = header.endsWith(' ');
             const headerClasses = [...subHeaderClasses];
             const bodyClasses = [...subBodyClasses];
+            //resolved once here rather than per branch below: the class list needs it too
+            const englishKey = getStatKeyFromLocalizedName(header.replace(':', '').trim());
 
 
             if (header) {
-                if (notationHeaders.includes(header)) {
+                if (notationHeaders.includes(englishKey)) {
                     bodyClasses.push('notation');
                 }
                 header += ':';
             }
 
             if (i === 0 || i === 1) {
-                const englishKey = getStatKeyFromLocalizedName(header.replace(':', '').trim());
                 const statIdBase = englishKey || toCamelCase(header.replace(':', '').trim());
                 innerTextString += `
                     <tr data-stat-key="${englishKey || ''}">
@@ -4628,7 +4633,6 @@ export function createHtmlTableStatistics(id, classList = [], mainHeadings, subH
                     </tr>
                 `;
             } else {
-                const englishKey = getStatKeyFromLocalizedName(header.replace(':', '').trim());
                 const statIdBase = englishKey || toCamelCase(header.replace(':', '').trim());
 
 

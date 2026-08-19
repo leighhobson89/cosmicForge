@@ -1520,3 +1520,293 @@ assertion is what pins the unhandled rejection, and it is the one that stayed re
 after the first half of the fix was applied.
 
 ---
+
+## 26. Purchase price descriptions ignore the Normal notation setting — ✅ FIXED
+
+**Severity was: medium — cosmetic, but it is the one place a player reads a price
+before spending, and it was wrong on every purchase row in the game whenever the
+Normal notation mode was chosen.**
+
+### Reproduction
+
+1. Open **Settings → Visual** and set **Notation** to **Normal**.
+2. Open **Energy → Energy Storage**.
+3. The three battery rows read
+
+   ```
+   $5000, 500 Sodium, 1000 Carbon
+   $50000, 3000 Steel, 1500 Glass, 2000 Sodium
+   $500000, 25000 Titanium, 12000 Neon, 18000 Silicon
+   ```
+
+   while the cash figure in the stat bar directly above them reads
+   `$1,999,952,765`. Every number on screen is grouped except the prices.
+
+4. The same rows in **Normal Condensed** read `$5.0K`, `$50.0K`, `$500.0K`, so
+   the condensed mode is fine. It is only the plain mode that is untouched.
+
+Also affected: the four **Fleet Hangar** build rows, the **Solar Power Plant**
+row, and every other row whose `rowCategory` is `building`,
+`spaceMiningPurchase`, `starShipPurchase`, `fleetPurchase` or `cosmicRipPurchase`
+— those are the categories `createOptionRow` gives the `building-purchase` class.
+
+### Cause
+
+The per-frame notation sweep in `gameLoop` (`game.js`) routes `.notation`
+elements three ways, and the purchase branch has no plain-mode path:
+
+```js
+if (element.classList.contains('sell-fuse-money')) {
+    complexSellStringFormatter(element, getNotationType());
+} else if (element.classList.contains('building-purchase')) {
+    complexPurchaseBuildingFormatter(element, getNotationType());
+} else {
+    formatAllNotationElements(element, getNotationType());
+}
+```
+
+`complexPurchaseBuildingFormatter` (`game.js`) opens with
+
+```js
+function complexPurchaseBuildingFormatter(element, notationType) {
+    if (notationType === 'normalCondensed') {
+        ...
+    }
+}
+```
+
+so in `normal` it returns having done nothing at all. Because the `else if`
+already claimed the element, it never reaches `formatAllNotationElements`, which
+is where `formatNormalNumber`'s `toLocaleString('en-US')` grouping lives. The
+result is not "formatted differently" but "never formatted": the raw description
+text is what the player sees.
+
+### Suggested fix
+
+The condensed branch exists because a price row is not one number — it is a cash
+cost that has to keep its currency symbol on the correct side, followed by a
+comma-separated list of resource costs, each split across its own `<span>`. Plain
+mode needs the same span walk with a different formatter, not a fall-through.
+
+The smallest change that keeps that structure is to hoist the per-number
+formatting out of the condensed branch:
+
+```js
+function complexPurchaseBuildingFormatter(element, notationType) {
+    if (element?.dataset?.type === 'cosmicRip') return;
+
+    // Both modes walk the same spans; only the number formatter differs.
+    const formatValue = notationType === 'normal'
+        ? (raw) => {
+            const n = Number(String(raw).replace(/,/g, ''));
+            return Number.isFinite(n) ? n.toLocaleString('en-US') : raw;
+        }
+        : formatNumber;
+
+    const spans = element.querySelectorAll('span');
+    ...   // unchanged, calling formatValue(numberPart) instead of formatNumber(numberPart)
+}
+```
+
+Note the guard order: the existing `cosmicRip` early return sits *inside* the
+condensed branch today, so it has to move out with the rest, or cosmic-rip
+purchase rows would start being rewritten in plain mode when they are
+deliberately left alone in condensed.
+
+### Resolution
+
+Closed by the suggested fix, in `game.js`. `complexPurchaseBuildingFormatter` no
+longer has a mode-shaped body: the `cosmicRip` early return moved out to the top
+of the function, the span walk moved out of the condensed branch, and the mode now
+chooses only which formatter each number goes through —
+
+```js
+let formatValue;
+if (notationType === 'normalCondensed') {
+    formatValue = formatNumber;
+} else if (notationType === 'normal') {
+    formatValue = formatGroupedNumber;
+} else {
+    return;
+}
+```
+
+`formatGroupedNumber()` is new, and sits beside `formatNumber()` as its plain
+counterpart: grouped in thousands, with a pointless decimal tail dropped. It is
+the *same* function `formatAllNotationElements` now uses for its own plain path —
+that grammar was previously duplicated inside that function, and hoisting it is
+what stops one screen grouping while another shows a raw run of digits.
+
+Two related paths were fixed alongside it, because leaving them would have moved
+the defect rather than closed it:
+
+- `handleCosmicRipUpgradeResourceType` builds its own price labels, and is the
+  reason the `cosmicRip` guard exists at all. Its plain branch returned
+  `String(Math.floor(num))` — ungrouped — so cosmic rip rows would have become the
+  last unformatted price rows in the game. It goes through `formatGroupedNumber`
+  too now.
+- The `else { return; }` arm is deliberate. A mode this function does not know how
+  to render leaves the row alone rather than rewriting its spans with `undefined`.
+
+### Coverage
+
+`tests/e2e/notation/notation-live.spec.js`, both of the specs that were failing:
+*"plain: every value past a thousand is grouped, and nothing is abbreviated"* (the
+whole-game sweep, which reported all 26 offending numbers across the Energy and
+Fleet Hangar panes) and *"plain: every cost on a purchase row is grouped in
+thousands"*. Both pass, and the matching condensed specs still pass — which is
+what proves the shared span walk did not regress the mode that already worked.
+
+---
+
+## 27. The Statistics screen never applies the notation setting at all — ✅ FIXED
+
+**Severity was: medium — the screen whose entire job is showing the player their
+numbers was the one screen that showed them unformatted, in both modes.**
+
+### Reproduction
+
+1. Play far enough to hold a large amount of cash — the debug menu's **Give $1B**
+   is enough.
+2. Open **Settings → Statistics**.
+3. The Cash row reads
+
+   ```
+   Cash: $1999952765.00
+   ```
+
+4. Switch **Notation** to **Normal** and reopen the screen. It still reads
+   `$1999952765.00`. Switch back to **Normal Condensed**: still
+   `$1999952765.00`, where the stat bar at the top of the same screen reads
+   `$2.0B`.
+
+Antimatter behaves the same way, showing `80000` rather than `80.0K` or `80,000`.
+
+### Cause
+
+`createHtmlTableStatistics` (`ui.js`) means to tag the numeric stats with the
+`notation` class, which is the only thing the frame-loop sweep looks for. The
+tag is never applied, because the check compares a capitalised — and localized —
+heading against a list of lowercase English keys:
+
+```js
+const notationHeaders = ['cash', 'hydrogen', 'helium', ... , 'researchPoints'];
+...
+let header = capitaliseString(subHeadings[i][j] || '');
+...
+if (notationHeaders.includes(header)) {   // 'Cash' is never === 'cash'
+    bodyClasses.push('notation');
+}
+```
+
+`'Cash'` is not in the list, and in any non-English run the heading is not even
+English, so the branch is dead in every language including this one. Confirming
+that this is an unfinished change rather than a deliberate omission: the function
+already builds
+
+```js
+const localizedNotationHeaders = notationHeaders.map(key => { ... });
+```
+
+directly above — a table that resolves each key to its localized heading — and
+then never reads it.
+
+A DOM check makes the consequence concrete: the Statistics pane renders 111 rows
+and `document.querySelectorAll('#statisticsRowTextArea .notation')` returns **0**.
+
+### Suggested fix
+
+Use the lookup that is already being built, and compare on the resolved English
+key rather than on display text:
+
+```js
+const englishKey = getStatKeyFromLocalizedName(header.replace(':', '').trim());
+if (notationHeaders.includes(englishKey)) {
+    bodyClasses.push('notation');
+}
+```
+
+`englishKey` is already computed a few lines below for the row's `data-stat-key`,
+so this needs it hoisted above the class list rather than introducing anything
+new, and `localizedNotationHeaders` can then be deleted.
+
+Worth checking alongside the fix: `Cash` is rendered as `$1999952765.00`, so the
+underlying value reaches the DOM with two decimal places. Once the `notation`
+class is applied, `formatAllNotationElements` will condense that to `$2.0B`, but
+in plain mode it becomes `$1,999,952,765.00` — grouped, and still carrying the
+cents. Whether the stat screen should show cents at all is a separate question
+from whether it should be formatted.
+
+### Resolution
+
+Closed by the suggested fix, in `ui.js`. `createHtmlTableStatistics` now resolves
+the English stat key **once**, above the class list rather than twice below it, and
+matches `notationHeaders` against that instead of against the displayed heading:
+
+```js
+const englishKey = getStatKeyFromLocalizedName(header.replace(':', '').trim());
+
+if (header) {
+    if (notationHeaders.includes(englishKey)) {
+        bodyClasses.push('notation');
+    }
+    header += ':';
+}
+```
+
+The unread `localizedNotationHeaders` table is deleted, along with the now-unused
+`statisticsContent` import it was the only consumer of. Because the match is on
+the resolved key rather than on display text, the branch works in every language
+rather than in none.
+
+`notationHeaders` also grew. The original list covered cash, the resources, the
+compounds and research points; `antimatter` and `antimatterMined` were added
+because they are named in the reproduction above, and then the unit-free counters
+that can pass ten thousand in a long save — the science buildings, techs unlocked,
+casino points spent, rip telemetry, galactic points, and the thirteen random-event
+counters.
+
+What was deliberately **not** added, and why the list stays a whitelist rather
+than "every numeric stat":
+
+- stats carrying a unit — `starShipDistanceTravelled` renders `12 ly`,
+  `totalProduction` renders `450 KW / s` — where condensing the number is
+  defensible but is a separate decision;
+- yes/no and name stats, which have no number to format;
+- `totalEnergy`, which is the interesting one: `getStatTotalEnergy()` returns
+  `document.getElementById('stat2').textContent`, and that cell has *already* been
+  through the notation sweep. Tagging it would condense `1.5K` a second time into
+  `2K`, every frame. Formatting it correctly means giving it a real getter first.
+
+Left open on purpose: the underlying value still reaches the DOM with two decimal
+places. Plain mode reads `$1,999,952,765` rather than `$1,999,952,765.00` only
+because the shared formatter drops a fractional tail below 1e-6. Whether the stat
+screen should carry cents at all is a display question rather than a notation one.
+
+### Coverage
+
+`tests/e2e/notation/notation-live.spec.js` → *"the statistics screen follows the
+notation setting"*. It opens the screen through its real side-menu row in both
+modes and reports each offender by its row label.
+
+The fix changed that spec, and the change is worth recording. Its cell filter
+accepted only cells that were *wholly digits*, which is the shape the screen had
+while it was broken — so the moment the formatter reached it, `$1.0B` stopped
+matching and the sweep's own floor assertion became unsatisfiable. The filter now
+accepts a magnitude suffix as part of a figure, and counts a cell as large enough
+if it carries four digits *or* a suffix. Two positive assertions were added
+underneath so the sweep cannot pass vacuously: cash must abbreviate in condensed
+and be grouped in plain.
+
+One spec in another area was written against the same broken rendering.
+`tests/e2e/statistics/statistics.spec.js` → *"the cash figure follows the run's
+actual cash"* stripped every non-digit, so `$1.0B` read as `1` and a granted
+billion looked like a loss. Its `asNumber()` helper now expands the magnitude
+suffix instead of discarding it.
+
+A DOM check makes the fix as concrete as the defect was: the pane renders the same
+111 rows, and `document.querySelectorAll('#statisticsRowTextArea .notation')` now
+returns **33** where it returned 0. `stat_cash` reads `$1.0B` in condensed and
+`$1,000,000,010` in plain.
+
+---
