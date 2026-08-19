@@ -2619,3 +2619,292 @@ so there is no path that needs the installer to run a second time.
   the listener growth against a control in the failure message.
 
 ---
+
+## 38. The vassalize gate compared a trait *array* to a trait name, so aggressive races could be vassalized — ✅ FIXED
+
+**Severity was: medium — it silently removed one of the four conditions on the
+game's most powerful diplomatic outcome. An aggressive race that is supposed to
+refuse vassalage would accept it, taking a system that was meant to be fought
+for.**
+
+### Reproduction
+
+1. Boot a run, prepare it for launch, fly to a star and scan it.
+2. Roll the system until its primary lifeform trait is **Aggressive** and it has
+   a fleet.
+3. Give the player a fleet more than 1.5× the defenders', and set the system's
+   `currentImpression` to 100.
+4. Open **Colonise**. The **Vassalize** button is green.
+
+It should not be. `checkDiplomacyButtons()` in `game.js` states the rule as
+*"a fleet half again their size, they are not an aggressive people, and they
+admire you"*, and the middle clause was never evaluated.
+
+### Cause
+
+`lifeformTraits[0]` is the `[name, cssClass, locKey]` triple, not the name:
+
+```js
+const enemyTraitMain = starData.lifeformTraits[0];   // ['Aggressive', 'red-disabled-text', …]
+…
+case (classList.contains('vassalize')
+      && playerAttackPower > (enemyPower * 1.5)
+      && enemyTraitMain !== 'Aggressive'             // an array is never === a string
+      && currentImpression >= 95):
+```
+
+An array is never strictly equal to a string, so `enemyTraitMain !== 'Aggressive'`
+is **always true** and the condition it was carrying disappeared. Every other
+reader of the same field — `bullyEnemy()`, `chatAndExchangePleasantries()` — takes
+`lifeformTraits[0][0]`, which is what makes this one the outlier rather than a
+different convention.
+
+### Fix — applied
+
+```js
+// `lifeformTraits[0]` is the `[name, cssClass, locKey]` triple, not the name.
+const enemyTraitMain = starData.lifeformTraits[0][0];
+```
+
+Guarded by `tests/e2e/diplomacy/diplomacy-journey.spec.js`, *"an aggressive race
+is never offered vassalage, however strong the fleet"*: it rolls an aggressive
+armed system, gives the player an overwhelming fleet and maximum admiration, and
+asserts the button stays disabled — the only combination in which the dropped
+clause is the deciding one.
+
+---
+
+## 39. Taking offence at a passive approach did not actually end their patience — ✅ FIXED
+
+**Severity was: medium — the one reply that is meant to close the conversation
+left the system willing to keep talking, so a player could keep making approaches
+to a race that had already decided it was done with them.**
+
+### Reproduction
+
+1. Reach a scanned, inhabited, armed system with the Colonise pane open.
+2. Note the system's `patience`.
+3. Press **Passive** until the reply is **Belligerent** — the outcome that
+   bolsters their defenses and wipes the goodwill out.
+4. Read `patience` back.
+
+It is the previous value minus one, not zero. The same insult reached through
+**Bully** leaves it at zero, and so does the one reached through **Harmony**, so
+the three paths that express the same intent disagreed.
+
+### Cause
+
+`chatAndExchangePleasantries()` in `game.js` set patience to zero inside the
+branch and then overwrote it in the unconditional tail:
+
+```js
+} else if (outcome === "Belligerent") {
+    …
+    setStarSystemDataObject(0, 'stars', ['destinationStar', 'patience']);   // ← intent
+    colonisePrepareWarUI('insulted');
+}
+
+setStarSystemDataObject(currentImpression, 'stars', ['destinationStar', 'currentImpression']);
+setStarSystemDataObject(Math.floor(patience + patienceModifier), …'patience']);   // ← overwrote it
+```
+
+The tail runs on every branch, so the zero written a few lines above it was dead
+code. `bullyEnemy()`'s "attack" branch has no such tail and its zero sticks;
+`tryToImproveImpression()` writes its zero *after* everything else and its zero
+sticks too.
+
+### Fix — applied
+
+The branch now decides the value and the tail writes it once:
+
+```js
+let newPatience = Math.floor(patience + patienceModifier);
+…
+} else if (outcome === "Belligerent") {
+    …
+    newPatience = 0;
+    colonisePrepareWarUI('insulted');
+}
+…
+setStarSystemDataObject(newPatience, 'stars', ['destinationStar', 'patience']);
+```
+
+Guarded by `tests/e2e/diplomacy/diplomacy-journey.spec.js`, *"passive contact
+reaches every attitude its branch table allows"*, which asserts the consequences
+of whichever attitude each iteration produced — including that a Belligerent
+reply leaves no patience behind.
+
+---
+
+## 40. A power plant could not be switched on in any language but English — ✅ FIXED
+
+**Severity was: high — it broke the core economy loop for four of the five
+shipped languages. A player who chose anything but English could buy a power
+plant and then had no way to turn it on.**
+
+### Reproduction
+
+1. Boot a run, unlock the tabs, and stock it with cash and materials.
+2. Open **tab 2 → Power Plant** and buy one through its Build button.
+3. Switch the game to German (Settings → Game Options, or the welcome-modal flag).
+4. Press the plant's toggle, which now reads **Aktivieren**.
+
+Nothing happens. The plant stays off, and the power-*off* sound plays. In the
+console:
+
+```js
+(await import('/constantsAndGlobalVars.js')).getBuildingTypeOnOff('powerPlant1')  // false
+```
+
+Switching back to English makes the same button work, because the frame loop
+overwrites the label with the English word.
+
+### Cause
+
+The toggle's *state* rode on its own label text, and
+`addOrRemoveUsedPerSecForFuelRate()` in `game.js` read it back:
+
+```js
+switch (activateButtonElement.textContent) {
+    case 'Activate':   … break;
+    case 'Deactivate': … break;
+}
+```
+
+The row is drawn with `localize('buttonActivate', …)` in `drawTab2Content.js`, so
+outside English the switch matched neither case. `newState` was left `undefined`,
+the function fell through to its "deactivating" branch, returned `false`, and the
+caller then did `toggleBuildingTypeOnOff('powerPlant1', false)`.
+
+It half-worked in English-adjacent states only because `plantToggleChecks()` in
+the frame loop wrote `element.textContent = 'Activate'` / `'Deactivate'` in
+hardcoded English, repairing the label a frame later — but only in the two states
+that branch covers. An idle plant with fuel is not one of them, which is exactly
+the state a newly bought plant is in.
+
+This is the same defect class as #6: keying behaviour off rendered text.
+
+### Fix — applied
+
+The state moved onto the element, and the text became only its display:
+
+```js
+function setPowerToggleLabel(element, active) {
+    if (!element) return;
+    element.dataset.toggleState = active ? 'active' : 'inactive';
+    element.textContent = active
+        ? localize('buttonDeactivate', getLanguage())
+        : localize('buttonActivate', getLanguage());
+}
+```
+
+`addOrRemoveUsedPerSecForFuelRate()` now reads `dataset.toggleState`, falling
+back to `getBuildingTypeOnOff(buildingToCheck)` for a button that has not been
+through the helper yet. The two frame-loop writes go through the same helper, so
+the label is localized there too.
+
+Guarded by `tests/e2e/localization/hardcoded-strings.spec.js`, *"a power plant
+can still be switched on in a language other than English"*: it buys a plant
+through its own Build button, switches to German, asserts the button reads
+`Aktivieren`, clicks it, and asserts the plant is on and the button now offers
+`Deaktivieren`.
+
+---
+
+## 41. The Settle button and the trade summary were English literals read back as text — ✅ FIXED
+
+**Severity was: medium — two player-facing labels were hardcoded English, and in
+both cases the game read the rendered text back to decide what to do, so they
+could not be translated without breaking the behaviour that depended on them.**
+
+### Reproduction
+
+1. Reach a scanned system with no life, or one whose defenders are gone, and open
+   **Colonise**. The only armed control reads **Settle**, in English, whatever the
+   player's language.
+2. Open **tab 7 → Galactic Market** without selecting a stock type. All three
+   trade summary lines read **N/A**, in English.
+
+Neither could simply be localized: `checkDiplomacyButtons()` decided whether the
+conquest button was armed with `element.innerHTML === 'Settle'`, and the market
+checks reset their own summary lines with
+`document.getElementById(…).innerHTML === 'N/A'`. Translating either label would
+have left the comparison matching nothing — the market summary in particular
+would then keep whichever figures the player last typed after clearing the
+selection.
+
+### Cause
+
+State expressed as display text, in three places:
+
+```js
+conquestButton.innerHTML = 'Settle';                              // game.js
+if (playerAttackPower > 0 || element.innerHTML === 'Settle' …)    // game.js
+document.getElementById('galacticMarketOutgoingQuantityText').innerHTML = 'N/A';
+```
+
+### Fix — applied
+
+Both moved onto the element. `setConquestButtonToSettle()` sets
+`dataset.conquestMode = 'settle'` and renders `localize('buttonSettle', …)`, and
+the armed check reads the dataset. The three market summary lines got
+`setMarketQuantityField()` / `setMarketQuantityFieldNotApplicable()` /
+`marketQuantityFieldIsNotApplicable()`, which carry `dataset.notApplicable` and
+render `localize('textNotApplicable', …)`.
+
+A new catalogue key, `buttonSettle`, was added in all five languages.
+
+Guarded by `tests/e2e/diplomacy/diplomacy-journey.spec.js`, *"an empty system
+offers Settle in the player's own language"*, and by
+`tests/e2e/localization/hardcoded-strings.spec.js`, *"the trade summary keeps
+working when its not-applicable marker is translated"*.
+
+---
+
+## 42. Every statistic read as green outside English — ✅ FIXED
+
+**Severity was: low — nothing broke, but the Statistics screen's colour coding
+was meaningless in four of five languages: values that should have been red or
+orange were drawn green.**
+
+### Reproduction
+
+1. Boot, switch to German, and open **tab 9 → Statistics**.
+2. Find a statistic whose value is `Nein`, `AUS` or `K.A.`
+
+All are drawn with `green-ready-text`. In English the same values — `No`, `OFF`,
+`N/A` — are drawn red.
+
+### Cause
+
+`determineStatClassColor()` in `ui.js` matched a fixed list of English words:
+
+```js
+if (normalized === 'FALSE' || normalized === 'NO' || normalized === '0'
+    || normalized === 'OFF' || normalized === 'N/A' …) return 'red-disabled-text';
+```
+
+The values reaching it are *already localized* — the stat accessors in
+`constantsAndGlobalVars.js` return `localize('textNo', …)`,
+`localize('textNotApplicable', …)` and so on — so outside English nothing matched
+and every value fell through to the green default.
+
+### Fix — applied
+
+The comparison sets are built from the catalogue in the player's current
+language, with the English forms kept alongside for the few values that still
+arrive as bare literals:
+
+```js
+const negative = localizedForms('textNo', 'textOff', 'textNotApplicable');
+['FALSE', 'NO', 'OFF', 'N/A', '0'].forEach((form) => negative.add(form));
+
+const warning = localizedForms('textTrippedIndicator');
+warning.add('TRIPPED');
+```
+
+One stray English literal was fixed at the same time:
+`getStatCosmicRipStabilisedAllTime()` returned a bare `'No'` on its zero-total
+branch while localizing on both others.
+
+---

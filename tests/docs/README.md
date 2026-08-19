@@ -11,44 +11,44 @@ Planning, reporting and how-to for the Cosmic Forge E2E test suite.
   covered and what isn't.
 - **[areas/](areas/)** — one detailed test plan per functional area, with a
   checklist of what should be tested.
-- **[known-issues.md](known-issues.md)** — live game bugs the suite found, with
-  root cause and the harness workaround in place until each is fixed.
+- **[known-issues.md](known-issues.md)** — live game bugs the suite found, each
+  with a reproduction, the root cause, and the fix or the reason it is by design.
+  Open entries are *not* worked around: the spec that meets a live bug fails.
 
 ## Current state
 
-28 of 43 functional areas are green — **791 specs**: `antimatter`, `app-boot`,
-`audio`, `autobuyers`, `battle`, `black-hole`, `compounds`, `cosmic-rip`,
-`cosmicopedia`, `demo-build`, `energy`, `localization`, `news-ticker`,
-`onboarding`, `performance`, `philosophies`, `rebirth`, `research`, `resources`,
-`save-load-cloud`, `save-load-local`, `save-migration`, `settings`,
-`space-telescope`, `starship`, `statistics`, `technology`, `ui-navigation`.
+**42 of 43 functional areas are green, across 80 spec files and 1,177 specs.**
+The one exception is `ascendency`, which is amber: its 12 specs are written and
+passing but are still function-level rather than driven through the perk screen.
+No area is red.
 
-The Presentation & Shell group is the most recent to be worked: `ui-navigation`
-(24 specs) and `news-ticker` (26) both went green, and `notation` (22) was
-upgraded but is held amber by three specs failing on live defects. What is
-different about all three is written up in
-[integration-upgrade-report.md](integration-upgrade-report.md) — `ui-navigation`
-now walks all nine tabs and every one of the fifty-nine option rows and requires
-each pane to *name the row that opened it*; `news-ticker` never calls
-`showNewsTickerMessage()` and instead waits for the ticker's own wall-clock timer
-to scroll a headline in; and `notation` sweeps every screen in both modes against
-a stated grammar rather than checking what the formatter returns in isolation.
+The suite is maintained area by area, and every green area has been through the
+*integration upgrade* — the rule that a spec should play the game rather than
+call its functions. What changed in each area, and what each upgrade found, is
+written up in [integration-upgrade-report.md](integration-upgrade-report.md).
 
-Eleven areas are amber — partial coverage, specs that are still function-level
-rather than driven through the game's own controls, or (in `notation`'s case) an
-upgraded area whose specs are failing on a defect that has not been fixed yet.
-Four are red: `space-mining`, `star-map`, `star-types` and `weather`. The
-remaining high-risk gaps are all amber rather than red — `ascendency`,
-`colonise`, `diplomacy` and `fleet-hangar` — and all are tracked in
-[coverage-report.md](coverage-report.md).
+The most recent work was the interstellar endgame — `fleet-hangar` (29),
+`diplomacy` (29) and `colonise` (23) — which are one continuous journey in the
+game and are now tested as one: build the hangar, buy the ships, fly to a star,
+scan it three quarters of the way there, negotiate with whoever lives in it and,
+if that fails, take it, settle it and rebirth into it. Before that, `achievements`
+(33) earned all seventy achievements at their own conditions and audited every
+reward.
 
 **A live bug is expected to make the suite fail.** Specs are written against the
 behaviour the game should have, not the behaviour it currently has, and defects
-found this way are fixed in the source rather than absorbed by the test.
-Twenty-four have been found and fixed, two entries record behaviour that turned
-out to be by design, and one remains open; see
-[known-issues.md](known-issues.md), where each closed entry names the regression
-spec that now guards it.
+found this way are fixed in the source rather than absorbed by the test. Of the
+42 entries in [known-issues.md](known-issues.md), **39 are fixed** and each names
+the regression spec that now guards it, **2 record behaviour that turned out to
+be by design** (CSS-only affordability gating, and the terminal end-credits
+overlay), and **1 remains open** — `analytics.js` reading localStorage unguarded.
+
+The most severe of the recent finds is #40: a power plant could not be switched
+on in any language but English, because the toggle's state rode on its own label
+text and the handler read that text back against the English words. Three
+defects in that family were closed together — see #40, #41 and #42 — and the
+lesson they share is the one #6 first taught: **never key behaviour off rendered
+text.** State belongs on the element.
 
 `localization` is the one green area covering a feature that is still only half
 built. Its specs deliberately mix absolute assertions with *ratchets* — recorded
@@ -56,6 +56,26 @@ baselines that may fall but must never rise — so the outstanding localization
 work can land incrementally without losing ground. The feature's own roadmap and
 the current ratchet values live in
 [`docs/localization/status.md`](../../docs/localization/status.md).
+
+### Where the specs are
+
+| Group | Areas | Green | Specs |
+|---|--:|--:|--:|
+| Foundation | 6 | 6 | 174 |
+| Core Economy | 6 | 6 | 140 |
+| Space Operations | 4 | 4 | 137 |
+| Interstellar | 7 | 7 | 195 |
+| Meta Progression | 6 | 5 | 201 |
+| Endgame | 3 | 3 | 98 |
+| Simulation & Ambience | 5 | 5 | 138 |
+| Presentation & Shell | 6 | 6 | 94 |
+| **Total** | **43** | **42** | **1,177** |
+
+[coverage-report.md](coverage-report.md) carries the per-area breakdown: status,
+risk, spec count, and a one-line note on what each area's specs actually do. It
+is generated from `functional-areas.json`, so it is never out of step with the
+source of truth — but the totals in this section are hand-written and want
+refreshing whenever an area's `specCount` changes.
 
 ## How the coverage plan is maintained
 

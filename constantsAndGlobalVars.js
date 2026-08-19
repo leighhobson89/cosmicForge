@@ -5414,7 +5414,7 @@ function getStatCosmicRipStabilisedAllTime() {
     const techs = getResourceDataObject('cosmicRip', ['techs']) || {};
     const total = Object.keys(techs).length;
     const unlocked = (getCosmicRipTechUnlockedArray?.() || []).length;
-    if (!total) return 'No';
+    if (!total) return localize('textNo', getLanguage());
     return unlocked >= total ? localize('textYes', getLanguage()) : localize('textNo', getLanguage());
 }
 

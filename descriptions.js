@@ -185,13 +185,57 @@ export let cosmicRipStatusMessages;
 
 export let randomEventTriggerDescriptions;
 
+/**
+ * The five shipped languages, in the order the flag row shows them, paired with
+ * the endonym used as the flag's hover title. The endonyms deliberately match
+ * the Settings dropdown in drawTab9Content.js: a name written in its own
+ * language is the one label that does not need translating.
+ */
+const LANGUAGE_FLAGS = [
+    { code: 'en', name: 'English' },
+    { code: 'es', name: 'Espanol' },
+    { code: 'de', name: 'Deutsch' },
+    { code: 'it', name: 'Italiano' },
+    { code: 'fr', name: 'Francais' }
+];
+
+/**
+ * Markup for the flag row that sits above the pioneer-name field on the welcome
+ * modal, letting a new player pick the language before the game starts.
+ *
+ * The bar is one grid of nine columns laid out over two rows - flag, spacer,
+ * flag, spacer ... - so the language code in the second row lands directly under
+ * the flag it belongs to without a nested container per language. The spacers
+ * are real cells rather than `gap`, because the gaps have to be part of the
+ * measured width: flag + gap + flag + gap + flag + gap + flag + gap + flag is
+ * what adds up to half the modal.
+ *
+ * Clicking a flag only records a pending choice; ui.js applies it once, when the
+ * modal is confirmed.
+ */
+function buildLanguageFlagBar() {
+    const flagCells = LANGUAGE_FLAGS
+        .map(({ code, name }) => `
+            <div class="language-flag-cell" data-language="${code}" role="button" tabindex="0" title="${name}">
+                <img class="language-flag-image" src="images/flags/${code}.png" alt="${name}">
+            </div>`)
+        .join('<div class="language-flag-spacer"></div>');
+
+    const labelCells = LANGUAGE_FLAGS
+        .map(({ code }) => `<div class="language-flag-label" data-language-label="${code}">${code}</div>`)
+        .join('<div class="language-flag-spacer"></div>');
+
+    return `<div class="language-flag-bar" id="languageFlagBar">${flagCells}${labelCells}</div>`;
+}
+
 export function initialiseDescriptions() {
     gameIntroHeader = localize('gameIntroHeader', getLanguage());
     gameSaveNameCollect = `
         ${localize('gameSaveNameCollect', getLanguage())}<br><br>
+        ${buildLanguageFlagBar()}
         <textarea 
             id="pioneerCodeName"  
-            class="save-name save-name-height save-name-modal-width">${getSaveName()}</textarea><br><br>You can load a previous game by changing this name to a previous one.
+            class="save-name save-name-height save-name-modal-width">${getSaveName()}</textarea><br><br>${localize('gameSaveNameLoadHint', getLanguage())}
     `;
     gameIntroText = localize('gameIntroText', getLanguage());
     onboardingModalHeader = localize('onboardingModalHeader', getLanguage());

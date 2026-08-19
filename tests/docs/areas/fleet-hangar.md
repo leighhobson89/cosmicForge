@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | 🟠 AMBER |
+| **Status** | 🟢 GREEN |
 | **Risk if broken** | High |
 | **Group** | Interstellar |
 | **Spec folder** | `tests/e2e/fleet-hangar/` |
@@ -21,10 +21,16 @@ Fleet construction, ship classes and the aggregate strength calculation that fee
 - [ ] Attack power buffs apply only to newly built ships, as documented
 - [ ] Building a ship flags the fleet as changed for diplomacy
 - [ ] Fleet composition survives save/load
+- [ ] The Fleet Hangar is unreachable, and no ship can be built, until the hangar module is finished
+- [ ] Every ship class charges its advertised cash and all three of its advertised materials, to the unit
+- [ ] Every purchase makes that class 13% dearer in every line, and three bought in a row are charged three times
+- [ ] The envoy is capped at one, and the frame loop disables its own Build button once it exists
+- [ ] The five classes are five different jobs: the envoy fights nothing, and the combat classes cover air, land and sea at different speeds and prices
+- [ ] A hand-built mixed fleet reports the attack and defense it was bought, and the pane agrees with the data object
 
 ## Status meaning
 
-🟠 **AMBER** — A spec file exists, but the area has not yet been through the integration upgrade — some of its coverage is still function-level rather than played through the UI.
+🟢 **GREEN** — Upgraded to integration: the hangar module is proved to be the gate on shipbuilding by finishing the other three starship modules and leaving it out, then every class is bought through its own Build button and its bill and price escalation measured to the unit. The envoy cap is asserted as the CSS gate it is rather than by clicking a disabled button. 29 specs passing.
 
 ---
 

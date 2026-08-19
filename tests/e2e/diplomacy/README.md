@@ -1,6 +1,6 @@
 # e2e / diplomacy
 
-**Diplomacy** — 🟠 AMBER
+**Diplomacy** — 🟢 GREEN
 
 Impression mechanics and every negotiation outcome branch before conquest.
 

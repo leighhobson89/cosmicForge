@@ -1,6 +1,6 @@
 # e2e / fleet-hangar
 
-**Fleet Hangar** — 🟠 AMBER
+**Fleet Hangar** — 🟢 GREEN
 
 Fleet construction, ship classes and the aggregate strength calculation that feeds battle.
 

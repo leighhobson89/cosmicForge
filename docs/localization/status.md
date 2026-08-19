@@ -6,10 +6,10 @@ Status as of HEAD `a193a44` + in-session work. Five languages: **en, es, de, it,
 
 | | Items | Share |
 |---|---:|---:|
-| 🟢 Done | 9 | 90% |
-| 🟠 Partial | 1 | 10% |
+| 🟢 Done | 10 | 91% |
+| 🟠 Partial | 1 | 9% |
 | 🔴 Not started | 0 | 0% |
-| **Total tracked items** | **10** | |
+| **Total tracked items** | **11** | |
 
 The catalogue is **2,591 keys × 5 languages, complete parity, zero keys referenced in code that are
 missing from the JSON, and zero keys that nothing in the source can reach**. Item 5 — the string
@@ -24,10 +24,10 @@ before, and the ratchet that tracked them is now an absolute. What is left is th
 measure catches: wrapping quality, overlapping absolute positioning and truncated modals, which
 still want a human play-through in German.
 
-The area has **91 automated specs** in `tests/e2e/localization/`, covering catalogue integrity, the
+The area has **114 automated specs** in `tests/e2e/localization/`, covering catalogue integrity, the
 resolution chain, runtime switching, tab identity and intro pages, the reverse lookup, the extraction
-backlog, the frame-loop cost labels, and a five-language sweep of every tab at a late-game state. All
-91 pass. The remaining open item is held in place by *ratchets* in those specs — a recorded baseline
+backlog, the frame-loop cost labels, the welcome-modal flag selector, and a five-language sweep of
+every tab at a late-game state. All 114 pass. The remaining open item is held in place by *ratchets* in those specs — a recorded baseline
 that may fall but must never rise. See [Test coverage](#test-coverage) at the foot of this document.
 
 ## Status at a glance
@@ -44,6 +44,7 @@ that may fall but must never rise. See [Test coverage](#test-coverage) at the fo
 | 8 | [Translation quality pass](#8-translation-quality-pass) | 🟢 Done | — |
 | 9 | [Layout under translation](#9-layout-under-translation) | 🟠 Partial | Low — no control is clipped in any language; wrapping quality still wants a human pass |
 | 10 | [Frame-loop tab gates compare English names](#10-frame-loop-tab-gates-compare-english-names) | 🟢 Done | — |
+| 11 | [Language chosen on the welcome modal](#11-language-chosen-on-the-welcome-modal) | 🟢 Done | — |
 
 ---
 
@@ -689,6 +690,46 @@ translated.
 
 ---
 
+## 11. Language chosen on the welcome modal
+
+**🟢 Done**
+
+Until now the only way to pick a language was Settings → Game Options, which a new player reaches
+several minutes after their first screen. Everything before that — the welcome modal, the intro
+text, and the whole onboarding tutorial — was drawn in whatever the resolution chain produced, and
+a player who wanted German had to sit through the tutorial in English first.
+
+**Added:** a row of five flags on the welcome modal, directly above the pioneer-name field.
+
+- `descriptions.js` — `buildLanguageFlagBar()` emits the row into `gameSaveNameCollect`. It is one
+  grid of **nine columns over two rows**: flag, spacer, flag, spacer … on the first row and the
+  language code under each flag on the second. The spacers are real grid cells rather than a `gap`,
+  because the gaps are part of the measured width — the whole run adds up to **40% of the modal**.
+- `styles.css` — `.language-flag-bar` and friends. Flags are **50px tall** and the images are
+  `object-fit: fill`, so each stretches to its cell rather than letterboxing inside it.
+- `ui.js` — `initialiseLanguageFlagSelector()` records a **pending** choice only. The player may
+  click every flag in turn; nothing relocalizes under them. `getUserSaveName()`'s confirm handler
+  commits the choice **once**, before it does anything else, so the intro modal, the cloud-load
+  notifications and the onboarding prompt are all already in the chosen language.
+- `ui.js` — the intro modal now reads `gameIntroHeader` at the point it is shown instead of a
+  `const` snapshotted before the choice, which would otherwise have stranded that one header in the
+  previous language.
+
+Two deliberate limits, both as specified:
+
+- **The starting selection is whatever `initLocalization()` already resolved** — English for a new
+  player, and a returning player's stored preference otherwise. Highlighting English unconditionally
+  would silently reset a returning Italian player who confirmed the modal without looking.
+- **The feature is for new games.** A save that carries its own language still wins when it loads;
+  the flags choose the language the *game* starts in, not the language a loaded save is displayed in.
+
+Guarded by `tests/e2e/localization/welcome-language-flags.spec.js`: the bar's geometry measured
+against the modal, the images actually decoding, one-at-a-time selection across repeated clicks, the
+language staying put until confirm, and a full boot in each of the five languages through to the
+onboarding prompt.
+
+---
+
 ## Suggested order
 
 1. ~~Language resolution and persistence~~ 🟢
@@ -703,6 +744,7 @@ translated.
 10. ~~Harden the checker and wire it into the build~~ 🟢 (item 7)
 11. ~~Translation quality pass~~ 🟢 (item 8)
 12. ~~The measurable half of the layout pass~~ 🟢 (item 9 — clipping is now zero and asserted absolutely)
+13. ~~Language chosen on the welcome modal~~ 🟢 (item 11)
 
 What is left of item 9 is not an engineering task: it is a human play-through in German checking
 wrapping and truncation. Item 4's remaining note — eagerly refreshing inactive tabs and open modals on
@@ -710,7 +752,7 @@ a language change — is the natural companion to it.
 
 ## Test coverage
 
-91 specs in `tests/e2e/localization/`, all passing. Run them with
+114 specs in `tests/e2e/localization/`, all passing. Run them with
 `node tests/run-e2e.mjs localization`. Run the whole E2E suite with `node tests/run-e2e.mjs`. The
 catalogue checker can also be run on its own, without Playwright, with `bun run check:localization`
 (add `:report` for the full key classification).
@@ -722,9 +764,10 @@ catalogue checker can also be run on its own, without Playwright, with `bun run 
 | `language-switching.spec.js` | 15 | The Settings selector, the debug switcher, `relocalizeAll` return contract, round trips, all twenty category-header transitions, the `data-loc` sweep. |
 | `compound-reverse-lookup.spec.js` | 12 | Item 2 — the behavioural contract, the frame budget, and the stored internal key. |
 | `tab-intro.spec.js` | 8 | Item 10 — every tab's intro page in all five languages, canonical tab identity, the `???` marker. |
-| `hardcoded-strings.spec.js` | 8 | Item 5 — the `data-loc` annotations, the tutorial, the needle map, and the extraction ratchet. |
+| `hardcoded-strings.spec.js` | 12 | Item 5 — the `data-loc` annotations, the tutorial, the needle map, the extraction ratchet, and the four controls whose *state* used to ride on their English label (known-issues #40–#42). |
 | `translated-ui.spec.js` | 7 | Five languages × nine tabs at a late-game state: raw-key leaks, viewport overflow, translation-caused clipping, constructed keys, frame-loop survival. |
 | `cost-labels.spec.js` | 4 | The purchase-row cost labels the frame loop rewrites: address resolution past the id collision, the rewrite itself, `normalCondensed` reaching them, and their material names following a language change. |
+| `welcome-language-flags.spec.js` | 19 | Item 11 — the flag bar on the welcome modal: its nine-column geometry against the modal width, the flag images decoding, deferred selection across repeated clicks, and a real boot in each of the five languages. |
 
 ### Ratchets
 
@@ -760,19 +803,34 @@ credit lines, which are proper nouns.
 
 ### Residual English in shipped source
 
-An audit over the 22 shipped `.js` files finds **698** remaining English prose literals. The figure
-moved with the four in-play fixes above, and netted out roughly where it started: the eight
-`'Researched'` literals and the 57 `capitaliseString(…resourceNPrice[1])` price names left `game.js`,
-while `drawTab5Content.js` gained the eleven canonical trait names as the *keys* of `TRAIT_NAME_KEYS`
-and `game.js` gained the anomaly catalogue's ten `name`/`effect` pairs, which moved rather than
-appeared — they were already in the function that generated them. All of the additions are canonical
-identifiers, exactly as the civilization-level and threat-level maps beside them are. None are
-player-facing; they break down as the three sanctioned groups under item 5, concentrated in
-`ui.js` (~174, mostly the `headingToLocalizationKey` map keys and the status class maps),
-`resourceDataObject.js` (165, tech prerequisite lists and unused `name` fallbacks),
+An audit over the 22 shipped `.js` files finds roughly **680** remaining English prose literals,
+concentrated in `ui.js` (~174, mostly the `headingToLocalizationKey` map keys and the status class
+maps), `resourceDataObject.js` (165, tech prerequisite lists and unused `name` fallbacks),
 `drawTab3Content.js` (77, the tech prereq arrays), `patches.js` (73, legacy migration values) and
 `constantsAndGlobalVars.js` (46, variable-debugger *variable names*, which name code identifiers and
-must stay as written).
+must stay as written). Those are canonical identifiers, exactly as the civilization-level and
+threat-level maps beside them are, and they stay as written.
+
+**A sweep in this session corrected the claim this section used to make.** It said none of the
+remainder was player-facing. Eighteen of them were, and four of those were not merely untranslated
+but *load-bearing* — the game read its own rendered English back to decide what to do:
+
+| What | Where | Now |
+|---|---|---|
+| The power-plant toggle | `game.js` `addOrRemoveUsedPerSecForFuelRate` | State on `dataset.toggleState`; known-issues #40 |
+| The Settle button | `game.js` `checkDiplomacyButtons` | State on `dataset.conquestMode`, label from `buttonSettle`; #41 |
+| The trade summary's `N/A` | `game.js` galactic market checks | State on `dataset.notApplicable`, label from `textNotApplicable`; #41 |
+| The statistics colour coding | `ui.js` `determineStatClassColor` | Comparison set built from the catalogue; #42 |
+
+The other fourteen were straight swaps onto keys that already existed — `textBought`,
+`buttonActivate`/`buttonDeactivate`, `textOn`/`textOff`, `buttonBlackHoleCharge`,
+`buttonBlackHoleCharging`, `textOrbitingStar`, `textStarTagMegastructure`, sixteen
+`confirmLabel: 'CONFIRM'` sites — plus six new keys: `buttonSettle`, `textOrbitingEllipsis`,
+`textRestored`, `buttonOk`, `textFeedbackPlaceholder` and `gameSaveNameLoadHint`.
+
+The 21 `CHEAT!` notifications in the debug handlers are **deliberately left in English**: they are
+only reachable through the debug menu, which is gated on a `Test1981` pioneer name or the cheats
+flag, and translating developer tooling buys nothing.
 
 ## Related
 

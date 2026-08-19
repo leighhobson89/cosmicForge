@@ -1384,7 +1384,7 @@ function cosmicRipChecks() {
     const situationScannerStatusText = document.getElementById('cosmicRipNearSpaceScannerArraySituationStatusText');
     if (situationScannerStatusText) {
         if (scannerRestored) {
-            situationScannerStatusText.textContent = 'Restored';
+            situationScannerStatusText.textContent = localize('textRestored', getLanguage());
             situationScannerStatusText.classList.remove('red-disabled-text');
             situationScannerStatusText.classList.add('green-ready-text');
         } else {
@@ -3812,7 +3812,7 @@ function blackHoleUIChecks() {
             statusIndicatorElement.textContent = localize('textReadyExclaim', getLanguage());
             statusIndicatorElement.classList.add('green-ready-text');
         } else if (charging && researchDone && !timeWarping) {
-            statusIndicatorElement.textContent = 'Charging...';
+            statusIndicatorElement.textContent = localize('buttonBlackHoleCharging', getLanguage());
             statusIndicatorElement.classList.add('warning-orange-text');
         } else {
             statusIndicatorElement.textContent = '';
@@ -3887,7 +3887,7 @@ function blackHoleUIChecks() {
         secondaryButtons.forEach(button => {
             setButtonState(button, { enabled: false, ready: false, removeClasses: ['black-hole-charge-ready-button'] });
             if (button === chargeButton) {
-                button.textContent = 'Charge';
+                button.textContent = localize('buttonBlackHoleCharge', getLanguage());
             }
         });
         return;
@@ -7069,7 +7069,7 @@ function powerGenerationFuelChecks(element) {
             const shouldDisableForFuel = fuelQuantity <= 0 && buildingNameString !== 'powerPlant2';
 
             if (shouldDisableForFuel) {
-                element.textContent = 'Activate';
+                setPowerToggleLabel(element, false);
                 element.classList.add('red-disabled-text');
                 fuelTypeElement.classList.add('red-disabled-text');
                 fuelQuantityElement.classList.add('red-disabled-text');
@@ -7077,7 +7077,7 @@ function powerGenerationFuelChecks(element) {
                 fuelQuantityElement.classList.remove('green-ready-text');
             } else {
                 if (getBuildingTypeOnOff(buildingNameString)) {                
-                    element.textContent = 'Deactivate';
+                    setPowerToggleLabel(element, true);
                 }
                 element.classList.remove('red-disabled-text');
                 fuelTypeElement.classList.remove('red-disabled-text');
@@ -7135,10 +7135,31 @@ function energyChecks(element) {
     }
 }
 
+/**
+ * Set a power-plant toggle's label, and record on the element which state that
+ * label represents.
+ *
+ * The state used to ride on the label text itself, and
+ * `addOrRemoveUsedPerSecForFuelRate` read it back with
+ * `switch (button.textContent)` against the English words. The rows are drawn
+ * with `localize('buttonActivate')`, so outside English that switch matched
+ * nothing and an idle power plant could not be switched on at all — see
+ * tests/docs/known-issues.md #40. The state now rides on a dataset flag and the
+ * text is only ever its display.
+ */
+function setPowerToggleLabel(element, active) {
+    if (!element) return;
+    element.dataset.toggleState = active ? 'active' : 'inactive';
+    element.textContent = active
+        ? localize('buttonDeactivate', getLanguage())
+        : localize('buttonActivate', getLanguage());
+}
+
+
 function powerOnOrOffChecks(element) {
     if (!getResourceDataObject('buildings', ['energy', 'batteryBoughtYet'])) {
         if (getInfinitePower() || getResourceDataObject('buildings', ['energy', 'rate']) > 0) {
-            element.textContent = '• ON';
+            element.textContent = `• ${localize('textOn', getLanguage())}`;
             element.classList.remove('red-disabled-text');
             element.classList.add('green-ready-text');
             element.classList.remove('warning-orange-text');
@@ -7148,14 +7169,14 @@ function powerOnOrOffChecks(element) {
             element.classList.remove('green-ready-text');
             element.classList.remove('red-disabled-text');
         } else {
-            element.textContent = '• OFF';
+            element.textContent = `• ${localize('textOff', getLanguage())}`;
             element.classList.add('red-disabled-text');
             element.classList.remove('green-ready-text');
             element.classList.remove('warning-orange-text');
         }
     } else {
         if (getInfinitePower() || getResourceDataObject('buildings', ['energy', 'quantity']) > 0.00001) {
-            element.textContent = '• ON';
+            element.textContent = `• ${localize('textOn', getLanguage())}`;
             element.classList.remove('red-disabled-text');
             element.classList.add('green-ready-text');
             element.classList.remove('warning-orange-text');
@@ -7165,7 +7186,7 @@ function powerOnOrOffChecks(element) {
             element.classList.remove('green-ready-text');
             element.classList.remove('red-disabled-text');
         } else {
-            element.textContent = '• OFF';
+            element.textContent = `• ${localize('textOff', getLanguage())}`;
             element.classList.remove('warning-orange-text');
             element.classList.add('red-disabled-text');
             element.classList.remove('green-ready-text');
@@ -8450,12 +8471,18 @@ export function getNavigatorLanguage() {
 
 
 function disableTabsLinksAndAutoSaveDuringBattle(battleStart) {
-    for (let i = 1; i <= 8; i++) {
-        let tab = document.getElementById(`tab${i}`);
-        if (tab) {
-            tab.classList.toggle("tab-not-yet", battleStart);
-        }
-    }
+    // Every tab, not a hardcoded 1..8. Settings (tab 9) used to be left live,
+    // and it was the one way out of a battle in progress: clicking it changes
+    // the option pane, `coloniseChecks()` only fights while the pane is
+    // 'colonise', so the engagement never resolves and the call that re-enables
+    // everything — `disableTabsLinksAndAutoSaveDuringBattle(false)` — is never
+    // reached. The run is then left with every other tab permanently disabled.
+    //
+    // Iterating the tab elements rather than counting also means a tab added
+    // later is covered without anyone remembering to raise the bound.
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.toggle("tab-not-yet", battleStart);
+    });
 
     document.querySelectorAll("[id*='Option'], #starMapOption").forEach(element => {
         element.classList.toggle("tab-not-yet", battleStart);
@@ -8707,7 +8734,7 @@ function updateAscendencyRowTextFields() {
                 costTextElement.classList.add("green-ready-text");
                 costTextElement.classList.remove("red-disabled-text");
             } else if (!buff.rebuyable && buff.boughtYet > 0) {
-                costTextElement.innerHTML = 'Bought';
+                costTextElement.innerHTML = localize('textBought', getLanguage());
                 costTextElement.classList.add("green-ready-text");
                 costTextElement.classList.remove("red-disabled-text");
             } else {
@@ -8732,6 +8759,37 @@ function ascendencyBuffChecks() {
         updateAscendencyRowTextFields();
     }
 }
+
+/**
+ * The trade summary's three quantity lines hold either a figure or a
+ * "not applicable" marker.
+ *
+ * The marker used to be the literal string 'N/A', written in one place and read
+ * back as text in another. That works only while the marker is English: the
+ * moment it is translated, `innerHTML === 'N/A'` stops matching and the summary
+ * keeps whichever figures were last typed. The state rides on a dataset flag
+ * instead, and the text is only ever the display of that flag.
+ */
+function setMarketQuantityField(id, value) {
+    const element = document.getElementById(id);
+    if (!element) return;
+    delete element.dataset.notApplicable;
+    element.innerHTML = value;
+}
+
+
+function setMarketQuantityFieldNotApplicable(id) {
+    const element = document.getElementById(id);
+    if (!element) return;
+    element.dataset.notApplicable = 'true';
+    element.innerHTML = localize('textNotApplicable', getLanguage());
+}
+
+
+function marketQuantityFieldIsNotApplicable(id) {
+    return document.getElementById(id)?.dataset.notApplicable === 'true';
+}
+
 
 function galacticMarketChecks() {
     if (getTechUnlockedArray().includes('apAwardedThisRun') && !getGalacticCasinoUnlocked()) {
@@ -8829,9 +8887,9 @@ function galacticMarketChecks() {
                 
                 if (parseInt(quantityValue) > playerQuantity) {
                     document.getElementById('galacticMarketQuantityTextArea').value = playerQuantity;
-                    document.getElementById('galacticMarketOutgoingQuantityText').innerHTML = playerQuantity;
+                    setMarketQuantityField('galacticMarketOutgoingQuantityText', playerQuantity);
                 } else {
-                    document.getElementById('galacticMarketOutgoingQuantityText').innerHTML = quantityValue === '' ? '0' : quantityValue;
+                    setMarketQuantityField('galacticMarketOutgoingQuantityText', quantityValue === '' ? '0' : quantityValue);
                 }
             }
         } else {
@@ -8845,7 +8903,7 @@ function galacticMarketChecks() {
                     const playerQuantity = getResourceDataObject(dataType, [getGalacticMarketOutgoingStockType(), 'quantity']);
                     
                     document.getElementById('galacticMarketQuantityTextArea').value = playerQuantity;
-                    document.getElementById('galacticMarketOutgoingQuantityText').innerHTML = playerQuantity;
+                    setMarketQuantityField('galacticMarketOutgoingQuantityText', playerQuantity);
                 }
             }
         }          
@@ -8853,39 +8911,39 @@ function galacticMarketChecks() {
         if (getGalacticMarketOutgoingStockType() !== 'select' && getGalacticMarketIncomingStockType() !== 'select') {
             populateSummaryStockType();
             galacticMarketQuantityToTradeDropDown.classList.remove('dropdown-disabled');
-            if (document.getElementById('galacticMarketOutgoingQuantityText').innerHTML === 'N/A') {
-                document.getElementById('galacticMarketOutgoingQuantityText').innerHTML = 0;
+            if (marketQuantityFieldIsNotApplicable('galacticMarketOutgoingQuantityText')) {
+                setMarketQuantityField('galacticMarketOutgoingQuantityText', 0);
             }
-            if (document.getElementById('galacticMarketIncomingQuantityText').innerHTML === 'N/A') {
-                document.getElementById('galacticMarketIncomingQuantityText').innerHTML = 0;
+            if (marketQuantityFieldIsNotApplicable('galacticMarketIncomingQuantityText')) {
+                setMarketQuantityField('galacticMarketIncomingQuantityText', 0);
             }
-            if (document.getElementById('galacticMarketComissionQuantitySummaryText').innerHTML === 'N/A') {
-                document.getElementById('galacticMarketComissionQuantitySummaryText').innerHTML = 0;
+            if (marketQuantityFieldIsNotApplicable('galacticMarketComissionQuantitySummaryText')) {
+                setMarketQuantityField('galacticMarketComissionQuantitySummaryText', 0);
             }
 
             if (getGalacticMarketOutgoingQuantitySelectionType() === 'select') {
-                document.getElementById('galacticMarketOutgoingQuantityText').innerHTML = 'N/A';
-                document.getElementById('galacticMarketIncomingQuantityText').innerHTML = 'N/A';
-                document.getElementById('galacticMarketComissionQuantitySummaryText').innerHTML = 'N/A';
+                setMarketQuantityFieldNotApplicable('galacticMarketOutgoingQuantityText');
+                setMarketQuantityFieldNotApplicable('galacticMarketIncomingQuantityText');
+                setMarketQuantityFieldNotApplicable('galacticMarketComissionQuantitySummaryText');
             }
             
             document.getElementById('galacticMarketComissionQuantityStockTypeText').innerHTML = capitaliseString(getGalacticMarketOutgoingStockType());
 
-            if (document.getElementById('galacticMarketOutgoingQuantityText').innerHTML !== 'N/A' && parseNumber(document.getElementById('galacticMarketOutgoingQuantityText').innerHTML) > 0) {
+            if (!marketQuantityFieldIsNotApplicable('galacticMarketOutgoingQuantityText') && parseNumber(document.getElementById('galacticMarketOutgoingQuantityText').innerHTML) > 0) {
                 calculateIncomingQuantity();
                 const incomingQuantity = getGalacticMarketIncomingQuantity();
                 const commissionQuantity = parseNumber(document.getElementById('galacticMarketComissionQuantitySummaryText').innerHTML);
                 const commissionAdjustedIncomingQuantity = Math.max(0, Math.floor(incomingQuantity - (commissionQuantity * (incomingQuantity / parseNumber(document.getElementById('galacticMarketOutgoingQuantityText').innerHTML)))));
-                document.getElementById('galacticMarketComissionQuantitySummaryText').innerHTML = Math.floor((getCurrentGalacticMarketCommission() / 100) * parseNumber(document.getElementById('galacticMarketOutgoingQuantityText').innerHTML));
-                document.getElementById('galacticMarketIncomingQuantityText').innerHTML = commissionAdjustedIncomingQuantity;
-            } else if (document.getElementById('galacticMarketOutgoingQuantityText').innerHTML !== 'N/A') {
+                setMarketQuantityField('galacticMarketComissionQuantitySummaryText', Math.floor((getCurrentGalacticMarketCommission() / 100) * parseNumber(document.getElementById('galacticMarketOutgoingQuantityText').innerHTML)));
+                setMarketQuantityField('galacticMarketIncomingQuantityText', commissionAdjustedIncomingQuantity);
+            } else if (!marketQuantityFieldIsNotApplicable('galacticMarketOutgoingQuantityText')) {
                 // Nothing is going out, so nothing can come back. Without this the
                 // incoming and commission lines keep the figures from the last
                 // amount the player typed, and the Confirm button below stays
                 // armed off the stale incoming quantity.
                 setGalacticMarketIncomingQuantity(0);
-                document.getElementById('galacticMarketIncomingQuantityText').innerHTML = 0;
-                document.getElementById('galacticMarketComissionQuantitySummaryText').innerHTML = 0;
+                setMarketQuantityField('galacticMarketIncomingQuantityText', 0);
+                setMarketQuantityField('galacticMarketComissionQuantitySummaryText', 0);
             }
 
         } else {
@@ -8893,12 +8951,12 @@ function galacticMarketChecks() {
             galacticMarketQuantityToTradeDropDown.querySelector('.dropdown-text').textContent = localize('dropdownSelectQuantity', getLanguage());
             setGalacticMarketOutgoingQuantitySelectionType('select');
             galacticMarketQuantityTextArea.classList.add('invisible');
-            document.getElementById('galacticMarketOutgoingStockTypeText').innerHTML = 'N/A';
-            document.getElementById('galacticMarketIncomingStockTypeText').innerHTML = 'N/A';
-            document.getElementById('galacticMarketOutgoingQuantityText').innerHTML = 'N/A';
-            document.getElementById('galacticMarketIncomingQuantityText').innerHTML = 'N/A';
-            document.getElementById('galacticMarketComissionQuantitySummaryText').innerHTML = 'N/A';
-            document.getElementById('galacticMarketComissionQuantityStockTypeText').innerHTML = 'N/A';
+            document.getElementById('galacticMarketOutgoingStockTypeText').innerHTML = localize('textNotApplicable', getLanguage());
+            document.getElementById('galacticMarketIncomingStockTypeText').innerHTML = localize('textNotApplicable', getLanguage());
+            setMarketQuantityFieldNotApplicable('galacticMarketOutgoingQuantityText');
+            setMarketQuantityFieldNotApplicable('galacticMarketIncomingQuantityText');
+            setMarketQuantityFieldNotApplicable('galacticMarketComissionQuantitySummaryText');
+            document.getElementById('galacticMarketComissionQuantityStockTypeText').innerHTML = localize('textNotApplicable', getLanguage());
         }
 
         if (getGalacticMarketIncomingQuantity() !== null && getGalacticMarketIncomingQuantity() > 0) {
@@ -9314,7 +9372,7 @@ async function coloniseChecks() {
                 });
                 const conquestButton = document.querySelector('button.conquest');
                 if (conquestButton) {
-                    conquestButton.innerHTML = 'Settle';
+                    setConquestButtonToSettle(conquestButton);
                     conquestButton.classList.remove('red-disabled-text');
                     conquestButton.classList.add('green-ready-text');
                 }
@@ -9435,6 +9493,20 @@ async function colonisePrepareWarUI(reason) {
     } 
 }
 
+/**
+ * Relabel the Conquest button as Settle, and record that it is in that mode.
+ *
+ * The mode used to be inferred by reading the button's own text back, which
+ * pins the label to English for good. It rides on the element instead, so the
+ * label is free to be whatever the player's language calls it.
+ */
+function setConquestButtonToSettle(element) {
+    if (!element) return;
+    element.dataset.conquestMode = 'settle';
+    element.innerHTML = localize('buttonSettle', getLanguage());
+}
+
+
 function checkDiplomacyButtons(element) {
     const starData = getStarSystemDataObject('stars', ['destinationStar']);
     if (!starData) {
@@ -9445,14 +9517,20 @@ function checkDiplomacyButtons(element) {
 
     const civilizationLevel = starData.civilizationLevel;
 
-    const enemyTraitMain = starData.lifeformTraits[0];
+    // `lifeformTraits[0]` is the `[name, cssClass, locKey]` triple, not the name.
+    // Comparing the array to 'Aggressive' was never true, so the vassalize gate
+    // below silently dropped its "not an aggressive race" condition and offered
+    // vassalage to the one kind of neighbour that is supposed to refuse it.
+    // Every other reader of this field — bullyEnemy, chatAndExchangePleasantries
+    // — takes `[0][0]`.
+    const enemyTraitMain = starData.lifeformTraits[0][0];
     const playerAttackPower = getResourceDataObject('fleets', ['attackPower']);
     const enemyPower = Math.floor(starData.enemyFleets.air + starData.enemyFleets.land + starData.enemyFleets.sea);
     const currentImpression = starData.currentImpression;
 
     if (civilizationLevel === 'None' || civilizationLevel === 'Unsentient' || enemyPower === 0) {
         if (element.classList.contains('conquest')) {
-            element.innerHTML = 'Settle';
+            setConquestButtonToSettle(element);
             element.classList.remove('red-disabled-text');
             element.classList.add('green-ready-text');
         } else {
@@ -9466,7 +9544,10 @@ function checkDiplomacyButtons(element) {
 
     if (element.classList.contains('conquest')) {
         const enemyFleetSum = Math.floor(starData.enemyFleets.air + starData.enemyFleets.land + starData.enemyFleets.sea);
-        if (playerAttackPower > 0 || element.innerHTML === 'Settle' || enemyFleetSum === 0) {
+        // `dataset.conquestMode`, not the label: the button reads "Settle" only
+        // while the system is undefended, and comparing its rendered text would
+        // stop being true the moment that label is translated.
+        if (playerAttackPower > 0 || element.dataset.conquestMode === 'settle' || enemyFleetSum === 0) {
             active = true;
         }
     }
@@ -9549,9 +9630,9 @@ function checkTravelToStarElements(element) {
             removeOrbitCircle();
             spaceTravelButtonHideAndShowDescription();
         } else if (getCurrentTab()[1].includes('Interstellar') && getStarShipStatus()[0] === 'orbiting') {
-            labelElement.textContent = 'Orbiting...'
+            labelElement.textContent = localize('textOrbitingEllipsis', getLanguage());
             drawStarConnectionDrawings(getCurrentStarSystem(), getDestinationStar(), 'orbiting');
-            document.getElementById('starDestinationDescription').textContent = 'Orbiting...';
+            document.getElementById('starDestinationDescription').textContent = localize('textOrbitingEllipsis', getLanguage());
         }
     }
 }
@@ -10596,7 +10677,7 @@ export function purchaseBuff(buff) {
                 onCancel: null,
                 onExtra1: null,
                 onExtra2: null,
-                confirmLabel: 'CONFIRM',
+                confirmLabel: localize('buttonConfirmUpper', getLanguage()),
                 cancelLabel: null,
                 extra1Label: null,
                 extra2Label: null,
@@ -10895,7 +10976,8 @@ export function startTravelToDestinationStarTimer(adjustment) {
                 sfxPlayer.playAudio('starShipArrive', false);
 
                 if (travelTimerDescriptionElement) {
-                    travelTimerDescriptionElement.innerText = 'Orbiting ' + capitaliseWordsWithRomanNumerals(destination);
+                    travelTimerDescriptionElement.innerText = localize('textOrbitingStar', getLanguage())
+                        .replace('{star}', capitaliseWordsWithRomanNumerals(destination));
                 }
 
                 setTimeLeftUntilTravelToDestinationStarTimerFinishes(0);
@@ -10919,7 +11001,7 @@ export function startTravelToDestinationStarTimer(adjustment) {
                         onCancel: null,
                         onExtra1: null,
                         onExtra2: null,
-                        confirmLabel: 'CONFIRM',
+                        confirmLabel: localize('buttonConfirmUpper', getLanguage()),
                         cancelLabel: null,
                         extra1Label: null,
                         extra2Label: null,
@@ -10960,7 +11042,7 @@ export function startTravelToDestinationStarTimer(adjustment) {
                         onCancel: null,
                         onExtra1: null,
                         onExtra2: null,
-                        confirmLabel: 'CONFIRM',
+                        confirmLabel: localize('buttonConfirmUpper', getLanguage()),
                         cancelLabel: null,
                         extra1Label: null,
                         extra2Label: null,
@@ -10990,7 +11072,7 @@ export function startTravelToDestinationStarTimer(adjustment) {
                         onCancel: null,
                         onExtra1: null,
                         onExtra2: null,
-                        confirmLabel: 'CONFIRM',
+                        confirmLabel: localize('buttonConfirmUpper', getLanguage()),
                         cancelLabel: null,
                         extra1Label: null,
                         extra2Label: null,
@@ -11380,7 +11462,7 @@ export function startCosmicRipTechResearchTimer(techName, adjustment = [0, 'norm
                         onCancel: null,
                         onExtra1: null,
                         onExtra2: null,
-                        confirmLabel: 'CONFIRM',
+                        confirmLabel: localize('buttonConfirmUpper', getLanguage()),
                         cancelLabel: null,
                         extra1Label: null,
                         extra2Label: null,
@@ -11398,7 +11480,7 @@ export function startCosmicRipTechResearchTimer(techName, adjustment = [0, 'norm
                         onCancel: null,
                         onExtra1: null,
                         onExtra2: null,
-                        confirmLabel: 'CONFIRM',
+                        confirmLabel: localize('buttonConfirmUpper', getLanguage()),
                         cancelLabel: null,
                         extra1Label: null,
                         extra2Label: null,
@@ -11416,7 +11498,7 @@ export function startCosmicRipTechResearchTimer(techName, adjustment = [0, 'norm
                         onCancel: null,
                         onExtra1: null,
                         onExtra2: null,
-                        confirmLabel: 'CONFIRM',
+                        confirmLabel: localize('buttonConfirmUpper', getLanguage()),
                         cancelLabel: null,
                         extra1Label: null,
                         extra2Label: null,
@@ -11434,7 +11516,7 @@ export function startCosmicRipTechResearchTimer(techName, adjustment = [0, 'norm
                         onCancel: null,
                         onExtra1: null,
                         onExtra2: null,
-                        confirmLabel: 'CONFIRM',
+                        confirmLabel: localize('buttonConfirmUpper', getLanguage()),
                         cancelLabel: null,
                         extra1Label: null,
                         extra2Label: null,
@@ -11452,7 +11534,7 @@ export function startCosmicRipTechResearchTimer(techName, adjustment = [0, 'norm
                         onCancel: null,
                         onExtra1: null,
                         onExtra2: null,
-                        confirmLabel: 'CONFIRM',
+                        confirmLabel: localize('buttonConfirmUpper', getLanguage()),
                         cancelLabel: null,
                         extra1Label: null,
                         extra2Label: null,
@@ -12220,20 +12302,26 @@ export function addOrRemoveUsedPerSecForFuelRate(fuelType, activateButtonElement
     const currentFuelRate = getResourceDataObject(fuelCategory, [fuelType, 'rate']);
 
     if (activateButtonElement) { //if clicked
-        switch(activateButtonElement.textContent) { //toggle text
-            case 'Activate':
-                currentState = false;
-                activateButtonElement.textContent = 'Deactivate';
-                activateButtonElement.classList.remove('red-disabled-text');
-                activateButtonElement.classList.add('green-ready-text');
-                newState = !currentState;
-                break;
-            case 'Deactivate':
-                currentState = true;
-                activateButtonElement.textContent = 'Activate';
-                activateButtonElement.classList.remove('green-ready-text');
-                newState = !currentState;
-                break;
+        // Read the state off the element rather than off its label. A row drawn
+        // in any language but English carries a translated label, and the switch
+        // this replaced matched neither case — so the click fell through with
+        // `newState` undefined, the plant stayed off, and the power-off sound
+        // played. A button that has never been through setPowerToggleLabel has
+        // no flag; the row is drawn showing Deactivate only when the plant is
+        // already on, so that is what an unflagged button means.
+        const wasActive = activateButtonElement.dataset.toggleState
+            ? activateButtonElement.dataset.toggleState === 'active'
+            : getBuildingTypeOnOff(buildingToCheck);
+
+        currentState = wasActive;
+        newState = !currentState;
+        setPowerToggleLabel(activateButtonElement, newState);
+
+        if (newState) {
+            activateButtonElement.classList.remove('red-disabled-text');
+            activateButtonElement.classList.add('green-ready-text');
+        } else {
+            activateButtonElement.classList.remove('green-ready-text');
         }
     } else {
         if (!trippedStatus) {
@@ -12531,7 +12619,7 @@ export function offlineGains(switchedFocus) {
                         onCancel: null,
                         onExtra1: null,
                         onExtra2: null,
-                        confirmLabel: 'CONFIRM',
+                        confirmLabel: localize('buttonConfirmUpper', getLanguage()),
                         cancelLabel: null,
                         extra1Label: null,
                         extra2Label: null,
@@ -12550,7 +12638,7 @@ export function offlineGains(switchedFocus) {
                         onCancel: null,
                         onExtra1: null,
                         onExtra2: null,
-                        confirmLabel: 'CONFIRM',
+                        confirmLabel: localize('buttonConfirmUpper', getLanguage()),
                         cancelLabel: null,
                         extra1Label: null,
                         extra2Label: null,
@@ -12569,7 +12657,7 @@ export function offlineGains(switchedFocus) {
                         onCancel: null,
                         onExtra1: null,
                         onExtra2: null,
-                        confirmLabel: 'CONFIRM',
+                        confirmLabel: localize('buttonConfirmUpper', getLanguage()),
                         cancelLabel: null,
                         extra1Label: null,
                         extra2Label: null,
@@ -12588,7 +12676,7 @@ export function offlineGains(switchedFocus) {
                         onCancel: null,
                         onExtra1: null,
                         onExtra2: null,
-                        confirmLabel: 'CONFIRM',
+                        confirmLabel: localize('buttonConfirmUpper', getLanguage()),
                         cancelLabel: null,
                         extra1Label: null,
                         extra2Label: null,
@@ -12607,7 +12695,7 @@ export function offlineGains(switchedFocus) {
                         onCancel: null,
                         onExtra1: null,
                         onExtra2: null,
-                        confirmLabel: 'CONFIRM',
+                        confirmLabel: localize('buttonConfirmUpper', getLanguage()),
                         cancelLabel: null,
                         extra1Label: null,
                         extra2Label: null,
@@ -14544,6 +14632,12 @@ async function chatAndExchangePleasantries(starData) {
     setStarSystemDataObject(outcome, 'stars', ['destinationStar', 'attitude']);
 
     const patienceModifier = -1;
+    // Decided here and written once, at the end. The Belligerent branch used to
+    // write patience 0 itself and then have the unconditional tail below
+    // overwrite it with `patience - 1`, so taking offence never actually ended
+    // their patience — unlike the identical intent in bullyEnemy's "attack"
+    // branch and tryToImproveImpression's, both of which stick.
+    let newPatience = Math.floor(patience + patienceModifier);
 
     if (outcome === "Receptive") {
         currentImpression = Math.floor(Math.random() * (100 - 65 + 1)) + 65;
@@ -14561,12 +14655,12 @@ async function chatAndExchangePleasantries(starData) {
         currentImpression = 0;
         setStarSystemDataObject(Math.ceil(starData.defenseRating * 1.1), 'stars', ['destinationStar', 'defenseRating']);
         setStarSystemDataObject(-starData.currentImpression, 'stars', ['destinationStar', 'latestDifferenceInImpression']);
-        setStarSystemDataObject(0, 'stars', ['destinationStar', 'patience']);
+        newPatience = 0;
         colonisePrepareWarUI('insulted');
     }
 
     setStarSystemDataObject(currentImpression, 'stars', ['destinationStar', 'currentImpression']);
-    setStarSystemDataObject(Math.floor(patience + patienceModifier), 'stars', ['destinationStar', 'patience']);
+    setStarSystemDataObject(newPatience, 'stars', ['destinationStar', 'patience']);
 
     const optionContentElement = document.getElementById(`optionContentTab5`);
     optionContentElement.innerHTML = '';
@@ -15144,7 +15238,7 @@ export async function settleSystemAfterBattle(accessPoint) {
                 onCancel: null,
                 onExtra1: null,
                 onExtra2: null,
-                confirmLabel: 'CONFIRM',
+                confirmLabel: localize('buttonConfirmUpper', getLanguage()),
                 cancelLabel: null,
                 extra1Label: null,
                 extra2Label: null,
@@ -15409,7 +15503,7 @@ export function rebirth() {
                 onCancel: null,
                 onExtra1: null,
                 onExtra2: null,
-                confirmLabel: 'CONFIRM',
+                confirmLabel: localize('buttonConfirmUpper', getLanguage()),
                 cancelLabel: null,
                 extra1Label: null,
                 extra2Label: null,

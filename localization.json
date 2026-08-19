@@ -2594,7 +2594,13 @@
     "buttonItShallBeDone": "IT SHALL BE DONE",
     "modalAncientManuscriptHeader": "ANCIENT MANUSCRIPT!",
     "modalAncientManuscriptText": "Exploring a habitable Planet in the {star} System after your victory, you discover<br>an Ancient Manuscript!  It seems to point out about strange activities<br>in a previously undiscovered System, the {factoryStar} System! Its location has also<br>been revealed to us!",
-    "modalStarshipArrivedFactoryStarText": "Your Starship arrived at the {star} System!<br>You gasp at what you see! The main star has been completely enveloped by a gigantic structure!<br>It looks to be some kind of {structure}<br>No wonder we didn't discover this System before,<br>the star is not visible due to the size of this structure!<br>This system is going to be heavily defended for sure, but if we can conquer it,<br>for sure it will open up vast opportunities for us..."
+    "modalStarshipArrivedFactoryStarText": "Your Starship arrived at the {star} System!<br>You gasp at what you see! The main star has been completely enveloped by a gigantic structure!<br>It looks to be some kind of {structure}<br>No wonder we didn't discover this System before,<br>the star is not visible due to the size of this structure!<br>This system is going to be heavily defended for sure, but if we can conquer it,<br>for sure it will open up vast opportunities for us...",
+    "buttonSettle": "Settle",
+    "textOrbitingEllipsis": "Orbiting...",
+    "textRestored": "Restored",
+    "buttonOk": "OK",
+    "textFeedbackPlaceholder": "Leave your thoughts here...",
+    "gameSaveNameLoadHint": "You can load a previous game by changing this name to a previous one."
   },
   "es": {
     "newGame": "Nuevo Juego",
@@ -5191,7 +5197,13 @@
     "buttonItShallBeDone": "ASÍ SE HARÁ",
     "modalAncientManuscriptHeader": "¡MANUSCRITO ANTIGUO!",
     "modalAncientManuscriptText": "Explorando un planeta habitable del sistema {star} tras tu victoria, ¡descubres<br>un manuscrito antiguo! Parece señalar actividades extrañas<br>en un sistema no descubierto hasta ahora, ¡el sistema {factoryStar}! También se nos ha<br>revelado su ubicación.",
-    "modalStarshipArrivedFactoryStarText": "¡Tu nave estelar ha llegado al sistema {star}!<br>¡Te quedas boquiabierto! ¡La estrella principal está completamente envuelta por una estructura gigantesca!<br>Parece ser una especie de {structure}<br>Con razón no habíamos descubierto este sistema antes:<br>¡la estrella no se ve debido al tamaño de esta estructura!<br>Seguro que este sistema estará fuertemente defendido, pero si logramos conquistarlo,<br>sin duda nos abrirá enormes oportunidades..."
+    "modalStarshipArrivedFactoryStarText": "¡Tu nave estelar ha llegado al sistema {star}!<br>¡Te quedas boquiabierto! ¡La estrella principal está completamente envuelta por una estructura gigantesca!<br>Parece ser una especie de {structure}<br>Con razón no habíamos descubierto este sistema antes:<br>¡la estrella no se ve debido al tamaño de esta estructura!<br>Seguro que este sistema estará fuertemente defendido, pero si logramos conquistarlo,<br>sin duda nos abrirá enormes oportunidades...",
+    "buttonSettle": "Colonizar",
+    "textOrbitingEllipsis": "En órbita...",
+    "textRestored": "Restaurado",
+    "buttonOk": "OK",
+    "textFeedbackPlaceholder": "Deja aquí tus comentarios...",
+    "gameSaveNameLoadHint": "Puedes cargar una partida anterior cambiando este nombre por uno que ya hayas usado."
   },
   "de": {
     "newGame": "Neues Spiel",
@@ -7788,7 +7800,13 @@
     "buttonItShallBeDone": "ES WIRD GESCHEHEN",
     "modalAncientManuscriptHeader": "ANTIKES MANUSKRIPT!",
     "modalAncientManuscriptText": "Bei der Erkundung eines bewohnbaren Planeten im System {star} nach deinem Sieg entdeckst du<br>ein antikes Manuskript! Es scheint auf seltsame Aktivitäten<br>in einem bisher unentdeckten System hinzuweisen, dem System {factoryStar}! Auch seine Position<br>wurde uns offenbart!",
-    "modalStarshipArrivedFactoryStarText": "Dein Raumschiff hat das System {star} erreicht!<br>Du staunst über das, was du siehst! Der Hauptstern ist vollständig von einer gigantischen Struktur umhüllt!<br>Es scheint sich um eine Art {structure} zu handeln<br>Kein Wunder, dass wir dieses System bisher nicht entdeckt haben,<br>der Stern ist wegen der Größe dieser Struktur nicht sichtbar!<br>Dieses System wird sicher stark verteidigt sein, aber wenn wir es erobern können,<br>eröffnet es uns ganz sicher gewaltige Möglichkeiten..."
+    "modalStarshipArrivedFactoryStarText": "Dein Raumschiff hat das System {star} erreicht!<br>Du staunst über das, was du siehst! Der Hauptstern ist vollständig von einer gigantischen Struktur umhüllt!<br>Es scheint sich um eine Art {structure} zu handeln<br>Kein Wunder, dass wir dieses System bisher nicht entdeckt haben,<br>der Stern ist wegen der Größe dieser Struktur nicht sichtbar!<br>Dieses System wird sicher stark verteidigt sein, aber wenn wir es erobern können,<br>eröffnet es uns ganz sicher gewaltige Möglichkeiten...",
+    "buttonSettle": "Besiedeln",
+    "textOrbitingEllipsis": "Im Orbit...",
+    "textRestored": "Wiederhergestellt",
+    "buttonOk": "OK",
+    "textFeedbackPlaceholder": "Hinterlasse hier deine Gedanken...",
+    "gameSaveNameLoadHint": "Du kannst ein früheres Spiel laden, indem du diesen Namen in einen bereits verwendeten änderst."
   },
   "it": {
     "newGame": "Nuovo gioco",
@@ -10385,7 +10403,13 @@
     "buttonItShallBeDone": "SARÀ FATTO",
     "modalAncientManuscriptHeader": "MANOSCRITTO ANTICO!",
     "modalAncientManuscriptText": "Esplorando un pianeta abitabile nel sistema {star} dopo la tua vittoria, scopri<br>un manoscritto antico! Sembra indicare strane attività<br>in un sistema finora sconosciuto, il sistema {factoryStar}! Ci è stata rivelata<br>anche la sua posizione!",
-    "modalStarshipArrivedFactoryStarText": "La tua astronave è arrivata al sistema {star}!<br>Resti a bocca aperta! La stella principale è completamente avvolta da una struttura gigantesca!<br>Sembra essere una specie di {structure}<br>Non c'è da stupirsi che non avessimo scoperto prima questo sistema:<br>la stella non è visibile a causa delle dimensioni di questa struttura!<br>Questo sistema sarà sicuramente ben difeso, ma se riusciamo a conquistarlo,<br>ci aprirà di certo enormi opportunità..."
+    "modalStarshipArrivedFactoryStarText": "La tua astronave è arrivata al sistema {star}!<br>Resti a bocca aperta! La stella principale è completamente avvolta da una struttura gigantesca!<br>Sembra essere una specie di {structure}<br>Non c'è da stupirsi che non avessimo scoperto prima questo sistema:<br>la stella non è visibile a causa delle dimensioni di questa struttura!<br>Questo sistema sarà sicuramente ben difeso, ma se riusciamo a conquistarlo,<br>ci aprirà di certo enormi opportunità...",
+    "buttonSettle": "Colonizza",
+    "textOrbitingEllipsis": "In orbita...",
+    "textRestored": "Ripristinato",
+    "buttonOk": "OK",
+    "textFeedbackPlaceholder": "Lascia qui i tuoi pensieri...",
+    "gameSaveNameLoadHint": "Puoi caricare una partita precedente cambiando questo nome con uno già usato."
   },
   "fr": {
     "newGame": "Nouveau jeu",
@@ -12982,6 +13006,12 @@
     "buttonItShallBeDone": "IL EN SERA AINSI",
     "modalAncientManuscriptHeader": "MANUSCRIT ANCIEN!",
     "modalAncientManuscriptText": "En explorant une planète habitable du système {star} après votre victoire, vous découvrez<br>un manuscrit ancien! Il semble signaler d'étranges activités<br>dans un système jusqu'ici inconnu, le système {factoryStar}! Sa position nous a<br>également été révélée!",
-    "modalStarshipArrivedFactoryStarText": "Votre vaisseau est arrivé dans le système {star}!<br>Vous restez bouche bée! L'étoile principale est entièrement enveloppée par une structure gigantesque!<br>Cela semble être une sorte de {structure}<br>Pas étonnant que nous n'ayons pas découvert ce système plus tôt,<br>l'étoile est invisible à cause de la taille de cette structure!<br>Ce système sera sûrement lourdement défendu, mais si nous parvenons à le conquérir,<br>il nous ouvrira à coup sûr d'immenses opportunités..."
+    "modalStarshipArrivedFactoryStarText": "Votre vaisseau est arrivé dans le système {star}!<br>Vous restez bouche bée! L'étoile principale est entièrement enveloppée par une structure gigantesque!<br>Cela semble être une sorte de {structure}<br>Pas étonnant que nous n'ayons pas découvert ce système plus tôt,<br>l'étoile est invisible à cause de la taille de cette structure!<br>Ce système sera sûrement lourdement défendu, mais si nous parvenons à le conquérir,<br>il nous ouvrira à coup sûr d'immenses opportunités...",
+    "buttonSettle": "Coloniser",
+    "textOrbitingEllipsis": "En orbite...",
+    "textRestored": "Restauré",
+    "buttonOk": "OK",
+    "textFeedbackPlaceholder": "Laissez vos impressions ici...",
+    "gameSaveNameLoadHint": "Vous pouvez charger une partie précédente en remplaçant ce nom par un nom déjà utilisé."
   }
 }

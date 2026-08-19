@@ -166,9 +166,18 @@
         "Every constructed key family resolves from source, so no catalogue key is unreachable and none the source asks for is missing",
         "No catalogue value is empty except the three sanctioned casino suffixes",
         "Purchase-row cost labels resolve to the label rather than the flavour-text container that shares their id",
-        "Cost labels are rewritten into priced spans, so the notation formatter reaches them and their material names follow a language change"
+        "Cost labels are rewritten into priced spans, so the notation formatter reaches them and their material names follow a language change",
+        "The welcome modal offers five clickable flags above the pioneer-name field, drawn from images/flags/",
+        "The flag bar is nine grid columns over two rows, 40% of the modal wide, with each flag 50px tall and its code centred beneath it",
+        "Clicking flags is free: the language is committed once, when the welcome modal is confirmed",
+        "A new game started from a flag runs in that language throughout, onboarding prompt included",
+        "The flag bar opens on the language already resolved for a returning player, and English by default",
+        "A power plant can still be switched on when the game is in a language other than English",
+        "Controls that carry state do so on the element, not in their own rendered text",
+        "The trade summary's not-applicable marker is translated and still drives the summary",
+        "The pioneer-name modal's load hint is translated"
       ],
-      "specCount": 91
+      "specCount": 114
     },
     {
       "id": "settings",
@@ -642,7 +651,7 @@
       "id": "fleet-hangar",
       "title": "Fleet Hangar",
       "group": "interstellar",
-      "status": "amber",
+      "status": "green",
       "risk": "high",
       "legacy": [],
       "summary": "Fleet construction, ship classes and the aggregate strength calculation that feeds battle.",
@@ -655,27 +664,44 @@
         "Supremacist laser intensity, engine miniaturization and synthetic plating raise attack, speed and unit health by 5% each",
         "Attack power buffs apply only to newly built ships, as documented",
         "Building a ship flags the fleet as changed for diplomacy",
-        "Fleet composition survives save/load"
+        "Fleet composition survives save/load",
+        "The Fleet Hangar is unreachable, and no ship can be built, until the hangar module is finished",
+        "Every ship class charges its advertised cash and all three of its advertised materials, to the unit",
+        "Every purchase makes that class 13% dearer in every line, and three bought in a row are charged three times",
+        "The envoy is capped at one, and the frame loop disables its own Build button once it exists",
+        "The five classes are five different jobs: the envoy fights nothing, and the combat classes cover air, land and sea at different speeds and prices",
+        "A hand-built mixed fleet reports the attack and defense it was bought, and the pane agrees with the data object"
       ],
-      "specCount": 14
+      "specCount": 29,
+      "note": "Upgraded to integration: the hangar module is proved to be the gate on shipbuilding by finishing the other three starship modules and leaving it out, then every class is bought through its own Build button and its bill and price escalation measured to the unit. The envoy cap is asserted as the CSS gate it is rather than by clicking a disabled button. 29 specs passing."
     },
     {
       "id": "diplomacy",
       "title": "Diplomacy",
       "group": "interstellar",
-      "status": "amber",
+      "status": "green",
       "risk": "high",
       "legacy": [],
       "summary": "Impression mechanics and every negotiation outcome branch before conquest.",
-      "specCount": 12,
+      "specCount": 30,
       "tests": [
         "Each diplomacy action shifts impression in the documented direction",
         "All outcome branches reachable and correct: surrender, vassalize, insulted, scared, laugh, neutral, reserved, patience",
         "Disengaging diplomacy permanently closes it for that system",
         "Voidborn philosophy improves diplomatic outcomes",
         "Fleet-strength ratio correctly enables guaranteed vassalization where the ascendency perk is owned",
-        "Diplomacy state survives save/load"
-      ]
+        "Diplomacy state survives save/load",
+        "The system scan is offered at three quarters of the journey and not before, and again on arrival",
+        "Scanning is what unlocks the Colonise pane; without the scanner module the life signs read ??? ",
+        "Every civilization level gets the reception it should: empty and unsentient systems are settled, inhabited ones negotiated with",
+        "A disarmed system is settled rather than fought",
+        "Every documented outcome of Bully, Passive, Harmony and Vassalize is reachable, and each one has the consequence it promises",
+        "An aggressive race is never offered vassalage, however strong the fleet or high the admiration",
+        "Courting a system into admiration is what unlocks vassalization at all",
+        "Running a system out of patience ends the talking and puts the fleet on offer instead",
+        "The conquest button reads Settle in the player's own language, and records that mode on the element"
+      ],
+      "note": "Upgraded to integration: a real starship flies to a real star, the scan gate is crossed at three quarters of the journey, and every conversation is held through the pane's own buttons. The outcome coverage is written as sweeps that repeat a press until every documented outcome is reached and assert the consequences of each one along the way. The area found known-issues #38 and #39, both fixed at source: the vassalize gate compared a trait array to a trait name, and taking offence at a passive approach never actually ended the system's patience. 29 specs passing."
     },
     {
       "id": "battle",
@@ -691,15 +717,16 @@
         "Defeat destroys the fleet and leaves the system conquerable again",
         "Systems with no sentient life skip battle and settle directly",
         "Autosave is correctly suppressed while a battle is ongoing",
-        "Battle outcome modals display correct localized text and substituted values"
+        "Battle outcome modals display correct localized text and substituted values",
+        "Every tab, Settings included, is locked for the duration of a battle and unlocked when it ends"
       ],
-      "specCount": 17
+      "specCount": 18
     },
     {
       "id": "colonise",
       "title": "Colonisation",
       "group": "interstellar",
-      "status": "amber",
+      "status": "green",
       "risk": "high",
       "legacy": [],
       "summary": "Settling a conquered system and the state transition into the new run context.",
@@ -711,9 +738,16 @@
         "Settlement is idempotent — a system cannot be settled twice",
         "Settling the same star twice, or under different casing, awards only one galactic point",
         "Blank and non-string values are refused rather than counted",
-        "A save carrying duplicate settled stars is normalised on restore"
+        "A save carrying duplicate settled stars is normalised on restore",
+        "A battle won settles the system, and the win is real on the canvas rather than a flag",
+        "The victory grants settleSystem and conquerEnemy, and a hive-mind defender grants its own",
+        "A conquest pays twice the star's ascendency points, plus whatever the achievements it unlocked pay",
+        "Winning the run is what makes rebirth possible",
+        "The rebirth is what grows the settled list, moves the run to the conquered system and turns it into a galactic point",
+        "The system left behind is drawn on the star map as a settled star and tagged as owned"
       ],
-      "specCount": 19
+      "specCount": 23,
+      "note": "Upgraded to integration: a real battle is won on the canvas and followed all the way through a rebirth — the achievements granted, the ascendency points paid (twice the star's, plus what the achievements it unlocked pay), the settled list growing at rebirth rather than at victory, the galactic point earned, and the system left behind drawn on the star map as settled. 23 specs passing."
     },
     {
       "id": "galactic-market",

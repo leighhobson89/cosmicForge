@@ -2171,6 +2171,121 @@ Both cost a debugging pass and are worth writing down.
 
 ---
 
+## 🟢 Fleet Hangar, Diplomacy and Colonisation — the interstellar endgame, played end to end
+
+Three new files, 36 specs, all passing:
+`fleet-hangar/fleet-hangar-live.spec.js` (15), `diplomacy/diplomacy-journey.spec.js` (17),
+`colonise/colonise-live.spec.js` (4). Each area's original file stays: those cover the
+data shapes and the buff maths cheaply, and the new files cover the wiring.
+
+**What is different.** The three areas are one continuous journey in the game, and
+they are now tested as one: build the hangar, buy the ships, fly to a star, scan it
+three quarters of the way there, talk to whoever is living in it, and — if the talking
+fails — take it, settle it and rebirth into it.
+
+### Fleet Hangar — the gate, the bill and the roster
+
+The gate is the headline. The spec finishes the three *other* mandatory starship
+modules and leaves `ssFleetHangar` alone, then asserts that the Fleet Hangar row is
+still hidden and no build row exists anywhere on the page; finishing the hangar is
+what makes `checkIfStarShipBuilt()` conclude the ship exists and the pane appear.
+That is a claim about the hangar specifically, which "build the ship and check the
+pane opens" never was.
+
+Every class is then bought through its own Build button and checked twice: the cash
+and all three materials that left the stores match the advertised bill to the unit,
+and the next one is dearer by `GAME_COST_MULTIPLIER` in every line. Two details make
+those measurements possible at all, and both are lessons the starship pass learned:
+
+- **Purchases must be a frame apart.** `gain()` only queues a bill, and the queue
+  holds one entry per resource — so three clicks in one frame are charged once.
+  There is a spec whose whole job is that three bought in a row cost three prices.
+- **Production has to be silenced first.** The autobuyers are emptied *and* the
+  weather is forced sunny through the debug menu, because titanium is a possible
+  precipitation compound and is a bill line for every ship class.
+
+The envoy cap is asserted as what it is: a CSS gate. Nothing in `gain()` enforces
+`maxCanBuild`; the frame loop puts `red-disabled-text` on the button and its
+`pointer-events: none` is the whole mechanism. The spec reads the class and the
+computed `pointer-events` rather than dispatching a second click, which would bypass
+the gate and buy a second envoy.
+
+### Diplomacy — the journey, and a sweep over every outcome
+
+The journey half flies a real starship. It launches through the star map, advances
+the game's own travel timer to 40% and asserts the scan control is hidden, crosses
+`STELLAR_SCANNER_RANGE` and asserts it is offered, and scans. It then does the flight
+again without the stellar scanner module to show the same scan reading `???` where
+the life signs should be — which is the distinction the "conquered without scanning"
+achievement is keyed on.
+
+The conversation half is written as **sweeps**. Who lives at a star and how a
+conversation goes are both rolled, so a spec that expected one outcome from one press
+would fail whenever the dice went the other way. Instead each sweep repeats a real
+button press until every documented outcome for that button has been seen, and
+asserts the consequences of whichever outcome came up on *every* iteration — the
+halved fleet of a scared defender, the 10% defense bolster of an insult, the
+impression band each attitude names. A sweep that never reaches an outcome fails
+naming the one it missed.
+
+Two live defects fell out of this, both fixed at source:
+
+1. **The vassalize gate compared a trait array to a trait name** (known-issues #38),
+   so its "not an aggressive people" clause had never been evaluated and aggressive
+   races could be vassalized.
+2. **Taking offence at a passive approach did not end their patience**
+   (known-issues #39): the branch wrote zero and the unconditional tail below it
+   overwrote the zero, so the one reply meant to close the conversation left the
+   system willing to keep talking.
+
+A third finding was left alone deliberately and is recorded in the spec rather than
+in known-issues: re-entering the Colonise pane during a war runs `setWarUI` (which
+clears `diplomacyPossible`) and then `calculateModifiedAttitude` (which recomputes it
+and sets it back), so the flag is stale for a returning player. It is inert — the row
+it would enable is hidden by the same `setWarUI` call — so the spec pins the row
+rather than the flag.
+
+### Colonisation — a battle won, and everything downstream of it
+
+`battle-live.spec.js` fights a randomly-composed defender and asserts only what holds
+for either outcome. These specs need a *win* to have anything to follow, so they
+choose the engagement: the destination is rolled until its garrison is small, trimmed
+to a dozen ships if it is not, and the debug scenario's hundred and twenty go up
+against it. The battle is entirely real — same canvas, same frame loop, same Attack
+button — only the matchup is chosen, exactly as a player picking a soft target does.
+
+What the win is then followed through:
+
+- **The achievements are read as granted, not flagged.** The flag array is a queue
+  the frame loop empties as it awards, so a flag assertion passes or fails on timing.
+  A hive-mind defender is rolled separately to show `conquerHiveMindEnemy` is added
+  on top of `conquerEnemy`.
+- **The payment is checked in both halves.** A conquest pays twice the star's own
+  ascendency points, *plus* whatever the achievements it unlocked pay — `conquerEnemy`
+  carries an AP reward of its own. The total is the only observable, so both halves
+  are computed; asserting the settlement alone silently absorbed the achievement's
+  contribution, which is how the first version of the spec went wrong. Factory stars
+  and O-types are excluded when picking the destination, because both double the
+  payout again and pull the megastructure branch in with them.
+- **The settled list does not move on a victory.** Both callers of `setSettledStars`
+  are inside `rebirth()`. The spec asserts the list is unchanged after the win and
+  grows by exactly the conquered system after the rebirth.
+- **The rebirth is driven through its real button**, confirmation modal included, and
+  the run afterwards is checked all the way out: the conquered system is the current
+  one, ascendency points carried over, the conquest is worth one galactic point, and
+  the `rebirth` achievement is granted.
+- **The star map is checked, not assumed.** The system the run came from is drawn
+  with the `settled-star` class and a `settledStar…` id, its hover label carries the
+  localized SETTLED tag, and the conquered system now carries `current-star`.
+
+One thing the colonise specs cannot shortcut: `rebirth()` refuses to run without a
+destination record carrying a `starCode`, and only the scan writes that field. A run
+that pointed `destinationStar` at a name without flying there settles happily and
+then fails to rebirth — which is precisely the half of the flow these specs exist to
+follow, so they fly.
+
+---
+
 ## The shared navigation helper
 
 All three of these walk the same structure, so the walk was factored into

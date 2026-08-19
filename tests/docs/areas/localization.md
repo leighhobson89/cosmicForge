@@ -35,6 +35,15 @@ Language resolution, switching, persistence and full-catalogue integrity across 
 - [ ] No catalogue value is empty except the three sanctioned casino suffixes
 - [ ] Purchase-row cost labels resolve to the label rather than the flavour-text container that shares their id
 - [ ] Cost labels are rewritten into priced spans, so the notation formatter reaches them and their material names follow a language change
+- [ ] The welcome modal offers five clickable flags above the pioneer-name field, drawn from images/flags/
+- [ ] The flag bar is nine grid columns over two rows, 40% of the modal wide, with each flag 50px tall and its code centred beneath it
+- [ ] Clicking flags is free: the language is committed once, when the welcome modal is confirmed
+- [ ] A new game started from a flag runs in that language throughout, onboarding prompt included
+- [ ] The flag bar opens on the language already resolved for a returning player, and English by default
+- [ ] A power plant can still be switched on when the game is in a language other than English
+- [ ] Controls that carry state do so on the element, not in their own rendered text
+- [ ] The trade summary's not-applicable marker is translated and still drives the summary
+- [ ] The pioneer-name modal's load hint is translated
 
 ## Status meaning
 

@@ -18,6 +18,7 @@ Combat resolution, win/loss consequences and the AP award. High branch count, ze
 - [ ] Systems with no sentient life skip battle and settle directly
 - [ ] Autosave is correctly suppressed while a battle is ongoing
 - [ ] Battle outcome modals display correct localized text and substituted values
+- [ ] Every tab, Settings included, is locked for the duration of a battle and unlocked when it ends
 
 ## Status meaning
 

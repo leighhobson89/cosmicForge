@@ -275,4 +275,59 @@ test.describe('Battle — a real engagement, fought to a decision', () => {
     expect(after.ongoing).toBeFalsy();
     expect(after.autoSaveAllowed, 'autosave must resume once the battle ends').toBe(true);
   });
+  test('every tab is locked for the duration of the battle, Settings included', async ({ game, page }) => {
+    await game.boot();
+    await game.prepareRunForStarshipLaunch();
+
+    const readTabs = () => page.evaluate(() =>
+      Array.from(document.querySelectorAll('.tab')).map((tab) => ({
+        id: tab.id,
+        locked: tab.classList.contains('tab-not-yet'),
+        pointerEvents: getComputedStyle(tab).pointerEvents
+      })));
+
+    const beforeWar = await readTabs();
+    expect(beforeWar.length, 'the shell should have all nine tabs').toBe(9);
+    expect(beforeWar.find((t) => t.id === 'tab9').locked,
+      'Settings is reachable before a battle').toBe(false);
+
+    await declareWarOnArmedSystem(game);
+
+    // Sampled while the battle is genuinely being fought, not by setting a flag.
+    expect(await game.withMods((m) => m.cg.getBattleOngoing()),
+      'the battle should be in progress at this point').toBe(true);
+
+    const during = await readTabs();
+    const stillOpen = during.filter((t) => !t.locked).map((t) => t.id);
+
+    // Settings was the hole. Leaving it live let a player change the option pane
+    // mid-battle, and `coloniseChecks()` only fights while the pane is
+    // 'colonise' — so the engagement never resolved, the call that re-enables
+    // everything was never reached, and the run was left with every other tab
+    // disabled for good. Naming the open tabs in the failure message is what
+    // makes a regression here readable.
+    expect(stillOpen, 'no tab may stay clickable while a battle is running').toEqual([]);
+    for (const tab of during) {
+      expect(tab.pointerEvents, `${tab.id} is still clickable`).toBe('none');
+    }
+
+    // The side-menu options go with them, or the same escape exists one level down.
+    const openOptions = await page.evaluate(() =>
+      Array.from(document.querySelectorAll("[id*='Option'], #starMapOption"))
+        .filter((el) => !el.classList.contains('tab-not-yet'))
+        .map((el) => el.id));
+    expect(openOptions, 'no side-menu option may stay clickable either').toEqual([]);
+
+    await waitForBattleDecision(game);
+    await page.waitForTimeout(1200);
+
+    // And the lock has to lift, or winning is as bad as the bug it replaced.
+    const after = await readTabs();
+    expect(after.find((t) => t.id === 'tab1').locked,
+      'the run is playable again once the battle is decided').toBe(false);
+    expect(after.find((t) => t.id === 'tab9').locked,
+      'Settings included').toBe(false);
+
+    expect(game.significantErrors()).toEqual([]);
+  });
 });

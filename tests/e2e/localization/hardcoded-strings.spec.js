@@ -202,4 +202,144 @@ test.describe('Localization — hardcoded string extraction', () => {
     expect(buttonTexts).toContain(CATALOGUE.de.buttonResearch);
     expect(buttonTexts).not.toContain('Research');
   });
+  test('a power plant can still be switched on in a language other than English', async ({ game, page }) => {
+    // The regression this guards is known-issues #40, and it was reachable by
+    // any non-English player from their first power plant: the toggle's state
+    // rode on its own label, and `addOrRemoveUsedPerSecForFuelRate` read it back
+    // with `switch (button.textContent)` against the English words. The row is
+    // drawn with `localize('buttonActivate')`, so outside English the switch
+    // matched neither case, the click fell through, and the plant stayed off.
+    await game.boot();
+    await game.debugClick('unlockAllTabsButton');
+    await game.debugClick('give1BButton');
+    await game.debugClick('give1MAllResourcesAndCompounds');
+    await game.debugClick('grantAllTechsButton');
+    await page.waitForTimeout(500);
+
+    await game.openTab(2);
+    await page.evaluate(() => {
+      const target = document.getElementById('powerPlant1Option');
+      target?.classList.remove('invisible');
+      target?.closest('.row-side-menu')?.classList.remove('invisible');
+      target?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+    await page.waitForTimeout(500);
+
+    // Buy one through its own Build button, so the toggle is drawn the way a
+    // player's first plant draws it.
+    await page.evaluate(() => {
+      document.querySelector('#energyPowerPlant1Row button.building-purchase-button')
+        ?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+    await page.waitForTimeout(600);
+
+    expect(await game.withMods((m) => m.rdo.getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'quantity'])),
+      'a plant should have been bought').toBeGreaterThan(0);
+    expect(await game.withMods((m) => m.cg.getBuildingTypeOnOff('powerPlant1')),
+      'a freshly bought plant is off').toBeFalsy();
+
+    await game.withMods((m) => m.ui.relocalizeAll('de'));
+    await page.waitForTimeout(600);
+
+    const toggle = await page.evaluate(() => {
+      const button = document.querySelector('#optionContentTab2 button.toggle-timer');
+      return button ? { text: button.textContent.trim(), found: true } : { found: false };
+    });
+    expect(toggle.found, 'the plant should have a toggle button').toBe(true);
+    expect(toggle.text, 'and it should be asking, in German, to be switched on')
+      .toBe(CATALOGUE.de.buttonActivate);
+
+    await page.evaluate(() => {
+      document.querySelector('#optionContentTab2 button.toggle-timer')
+        ?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+    await page.waitForTimeout(600);
+
+    expect(await game.withMods((m) => m.cg.getBuildingTypeOnOff('powerPlant1')),
+      'clicking Aktivieren must switch the plant on, exactly as Activate does').toBe(true);
+    expect(await page.evaluate(() =>
+      document.querySelector('#optionContentTab2 button.toggle-timer')?.textContent?.trim()),
+      'and the button must now offer to switch it back off').toBe(CATALOGUE.de.buttonDeactivate);
+  });
+
+  test('the power indicator reads ON and OFF in the player\'s language', async ({ game, page }) => {
+    await game.boot();
+    await game.debugClick('unlockAllTabsButton');
+    await page.waitForTimeout(300);
+
+    for (const language of ['de', 'fr']) {
+      await game.withMods((m, l) => m.ui.relocalizeAll(l), language);
+      await page.waitForTimeout(400);
+
+      const indicator = await page.evaluate(() =>
+        document.getElementById('stat3')?.textContent?.trim() ?? '');
+
+      // The indicator is a bullet plus one of three words. Whichever state the
+      // grid is in, the word has to be that language's word.
+      const expected = [
+        CATALOGUE[language].textOn,
+        CATALOGUE[language].textOff,
+        CATALOGUE[language].textTrippedIndicator.replace(/^•\s*/, '')
+      ];
+      expect(expected.some((word) => indicator.includes(word)),
+        `${language}: power indicator read "${indicator}"`).toBe(true);
+    }
+  });
+
+  test('the trade summary keeps working when its not-applicable marker is translated', async ({ game, page }) => {
+    // The three summary lines used to hold the literal 'N/A' and be compared
+    // back as text. Translating the marker without moving the state onto the
+    // element would leave the comparison matching nothing, and the summary
+    // stuck on whichever figures were last typed.
+    await game.boot();
+    await game.debugClick('unlockAllTabsButton');
+    await game.debugClick('give1BButton');
+    await page.waitForTimeout(400);
+
+    await game.openTab(7);
+    await page.evaluate(() => {
+      const target = document.getElementById('galacticMarketOption');
+      target?.classList.remove('invisible');
+      target?.closest('.row-side-menu')?.classList.remove('invisible');
+      target?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+    await page.waitForTimeout(700);
+
+    await game.withMods((m) => m.ui.relocalizeAll('de'));
+    await page.waitForTimeout(700);
+
+    const summary = await page.evaluate(() => {
+      const ids = ['galacticMarketOutgoingQuantityText', 'galacticMarketIncomingQuantityText',
+        'galacticMarketComissionQuantitySummaryText'];
+      return ids.map((id) => {
+        const el = document.getElementById(id);
+        return el ? { id, text: el.textContent.trim(), flagged: el.dataset.notApplicable === 'true' } : null;
+      }).filter(Boolean);
+    });
+
+    expect(summary.length, 'the trade summary should be on screen').toBe(3);
+    for (const line of summary) {
+      // Nothing has been selected yet, so every line is not-applicable — and the
+      // state is on the element, with the German wording as its display.
+      expect(line.flagged, `${line.id} should carry the not-applicable flag`).toBe(true);
+      expect(line.text, `${line.id} should read the German marker`).toBe(CATALOGUE.de.textNotApplicable);
+      expect(line.text, 'and not the English one').not.toBe(CATALOGUE.en.textNotApplicable);
+    }
+  });
+
+  test('the pioneer-name modal explains itself in the chosen language', async ({ page }) => {
+    // Boot only as far as the welcome modal: this hint sits under the name field
+    // and was the last hardcoded sentence on the first screen a player sees.
+    await page.addInitScript(() => {
+      try { window.localStorage.setItem('cosmicForgeLanguage', 'fr'); } catch { /* storage blocked */ }
+    });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector('#pioneerCodeName', { timeout: 60000 });
+
+    const text = await page.evaluate(() =>
+      (document.querySelector('.modal-content p')?.innerText ?? '').trim());
+
+    expect(text).toContain(CATALOGUE.fr.gameSaveNameLoadHint);
+    expect(text).not.toContain(CATALOGUE.en.gameSaveNameLoadHint);
+  });
 });

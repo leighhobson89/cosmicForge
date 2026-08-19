@@ -4,31 +4,31 @@ _Generated from `functional-areas.json`. Re-run `node tests/docs/generate-report
 
 ## Coverage at a glance
 
-One line per functional area, worst first. 39 green, 4 amber, 0 red, out of 43.
+One line per functional area, worst first. 42 green, 1 amber, 0 red, out of 43.
 
 | | Area | Group | Risk | Specs | Where it stands |
 |:--:|---|---|:--:|--:|---|
 | 🟠 | [Ascendency Points & Perks](areas/ascendency.md) | Meta Progression | High | 12 | 12 specs written; not yet upgraded to integration. |
-| 🟠 | [Colonisation](areas/colonise.md) | Interstellar | High | 19 | 19 specs written; not yet upgraded to integration. |
-| 🟠 | [Diplomacy](areas/diplomacy.md) | Interstellar | High | 12 | 12 specs written; not yet upgraded to integration. |
-| 🟠 | [Fleet Hangar](areas/fleet-hangar.md) | Interstellar | High | 14 | 14 specs written; not yet upgraded to integration. |
 | 🟢 | [Achievements](areas/achievements.md) | Meta Progression | Low | 33 | Upgraded to integration and swept end to end: all seventy achievements are earned at their own condition and their reward audited against the arithmetic the data promises, the playable scenarios are played and granted by the frame loop, two rebirths audit what persists, and the pane is checked across 630 artwork files and five languages. The area found known-issues #37, now fixed at source: the pane installed a fresh tooltip element and three more document listeners on every visit. |
 | 🟢 | [Antimatter](areas/antimatter.md) | Space Operations | Medium | 26 | Done — driven through its own controls, 26 specs passing. |
 | 🟢 | [Application Boot](areas/app-boot.md) | Foundation | High | 11 | Done — driven through its own controls, 11 specs passing. |
 | 🟢 | [Audio](areas/audio.md) | Simulation & Ambience | Low | 13 | Done — driven through its own controls, 13 specs passing. |
 | 🟢 | [Auto Buyers](areas/autobuyers.md) | Core Economy | High | 19 | Done — driven through its own controls, 19 specs passing. |
-| 🟢 | [Battle & Conquest](areas/battle.md) | Interstellar | High | 17 | Done — driven through its own controls, 17 specs passing. |
+| 🟢 | [Battle & Conquest](areas/battle.md) | Interstellar | High | 18 | Done — driven through its own controls, 18 specs passing. |
 | 🟢 | [Black Hole Time Warp](areas/black-hole.md) | Endgame | High | 19 | Done — driven through its own controls, 19 specs passing. |
 | 🟢 | [Cloud Save & Load](areas/save-load-cloud.md) | Foundation | High | 8 | Done — driven through its own controls, 8 specs passing. |
+| 🟢 | [Colonisation](areas/colonise.md) | Interstellar | High | 23 | Upgraded to integration: a real battle is won on the canvas and followed all the way through a rebirth — the achievements granted, the ascendency points paid (twice the star's, plus what the achievements it unlocked pay), the settled list growing at rebirth rather than at victory, the galactic point earned, and the system left behind drawn on the star map as settled. 23 specs passing. |
 | 🟢 | [Compounds & Crafting](areas/compounds.md) | Core Economy | High | 31 | Done — driven through its own controls, 31 specs passing. |
 | 🟢 | [Cosmic Rip](areas/cosmic-rip.md) | Endgame | Medium | 28 | Done — driven through its own controls, 28 specs passing. |
 | 🟢 | [Cosmicopedia & Help](areas/cosmicopedia.md) | Presentation & Shell | Low | 6 | Done — driven through its own controls, 6 specs passing. |
 | 🟢 | [Demo Build Lockdowns](areas/demo-build.md) | Presentation & Shell | High | 19 | Done — driven through its own controls, 19 specs passing. |
+| 🟢 | [Diplomacy](areas/diplomacy.md) | Interstellar | High | 30 | Upgraded to integration: a real starship flies to a real star, the scan gate is crossed at three quarters of the journey, and every conversation is held through the pane's own buttons. The outcome coverage is written as sweeps that repeat a press until every documented outcome is reached and assert the consequences of each one along the way. The area found known-issues #38 and #39, both fixed at source: the vassalize gate compared a trait array to a trait name, and taking offence at a passive approach never actually ended the system's patience. 29 specs passing. |
 | 🟢 | [Energy & Power Grid](areas/energy.md) | Core Economy | High | 26 | Done — driven through its own controls, 26 specs passing. |
+| 🟢 | [Fleet Hangar](areas/fleet-hangar.md) | Interstellar | High | 29 | Upgraded to integration: the hangar module is proved to be the gate on shipbuilding by finishing the other three starship modules and leaving it out, then every class is bought through its own Build button and its bill and price escalation measured to the unit. The envoy cap is asserted as the CSS gate it is rather than by clicking a disabled button. 29 specs passing. |
 | 🟢 | [Galactic Casino](areas/galactic-casino.md) | Meta Progression | Medium | 69 | Done — driven through its own controls, 69 specs passing. |
 | 🟢 | [Galactic Market](areas/galactic-market.md) | Meta Progression | Medium | 35 | Done — driven through its own controls, 35 specs passing. |
 | 🟢 | [Local Save & Load](areas/save-load-local.md) | Foundation | High | 10 | Done — driven through its own controls, 10 specs passing. |
-| 🟢 | [Localization](areas/localization.md) | Foundation | High | 91 | Done — driven through its own controls, 91 specs passing. |
+| 🟢 | [Localization](areas/localization.md) | Foundation | High | 114 | Done — driven through its own controls, 114 specs passing. |
 | 🟢 | [Megastructures](areas/megastructures.md) | Endgame | Medium | 51 | Done — the manuscripts are rolled by studying stars through the game's own tooling, the stages are bought through the real Technology rows, and every bonus is measured off the store, the grid or the rock rather than read back off a multiplier. The battle at a factory star is not re-fought here; that belongs to the Battle area, and this file drives the conquest handler every access point funnels into. |
 | 🟢 | [News Ticker](areas/news-ticker.md) | Simulation & Ambience | Low | 26 | Done — driven through its own controls, 26 specs passing. |
 | 🟢 | [Number Notation](areas/notation.md) | Presentation & Shell | Medium | 22 | Upgraded to integration — the setting is driven through its own dropdown and every screen is swept in both modes. The 3 specs that were failing found known-issues #26 and #27, both now fixed at source. |
@@ -75,11 +75,11 @@ when an area is upgraded.
 | | Areas | Share |
 |---|---:|---:|
 | 🔴 Red — no spec file | 0 | 0% |
-| 🟠 Amber — spec written, not yet upgraded | 4 | 9% |
-| 🟢 Green — signed off | 39 | 91% |
+| 🟠 Amber — spec written, not yet upgraded | 1 | 2% |
+| 🟢 Green — signed off | 42 | 98% |
 | **Total functional areas** | **43** | |
 
-618 individual test cases are identified across all areas. **1116 Playwright specs are implemented** across 43 areas, and all of them pass except where an area's note says otherwise — a spec that fails on a live defect is left failing on purpose, and the defect is written up in [known-issues.md](known-issues.md).
+649 individual test cases are identified across all areas. **1177 Playwright specs are implemented** across 43 areas, and all of them pass except where an area's note says otherwise — a spec that fails on a live defect is left failing on purpose, and the defect is written up in [known-issues.md](known-issues.md).
 
 Run them with `npm run test:e2e` (all areas) or `node tests/run-e2e.mjs <area>`. Each area writes its own HTML report to `test-reports/e2e/<area>/index.html`, with a summary index at `test-reports/e2e/index.html`.
 
@@ -102,7 +102,7 @@ Boot, persistence and the machinery every other area depends on. A failure here 
 | 🟢 | [Local Save & Load](areas/save-load-local.md) | High | 8 | **10** | — |
 | 🟢 | [Cloud Save & Load](areas/save-load-cloud.md) | High | 8 | **8** | autobuyer.test.js, earlyLoop.test.js, energyMid.test.js, researchTech.test.js, spaceAntimatter.test.js |
 | 🟢 | [Save Migration](areas/save-migration.md) | High | 9 | **11** | — |
-| 🟢 | [Localization](areas/localization.md) | High | 23 | **91** | — |
+| 🟢 | [Localization](areas/localization.md) | High | 32 | **114** | — |
 | 🟢 | [Settings & Preferences](areas/settings.md) | Medium | 20 | **20** | — |
 
 ### Core Economy
@@ -138,10 +138,10 @@ Travel, conquest and settlement. The most stateful and branch-heavy part of the 
 | 🟢 | [Star Map & Star Data](areas/star-map.md) | Medium | 27 | **62** | — |
 | 🟢 | [Star Type Bonuses](areas/star-types.md) | Medium | 15 | **25** | — |
 | 🟢 | [Starship](areas/starship.md) | High | 10 | **8** | — |
-| 🟠 | [Fleet Hangar](areas/fleet-hangar.md) | High | 9 | **14** | — |
-| 🟠 | [Diplomacy](areas/diplomacy.md) | High | 6 | **12** | — |
-| 🟢 | [Battle & Conquest](areas/battle.md) | High | 6 | **17** | — |
-| 🟠 | [Colonisation](areas/colonise.md) | High | 8 | **19** | — |
+| 🟢 | [Fleet Hangar](areas/fleet-hangar.md) | High | 15 | **29** | — |
+| 🟢 | [Diplomacy](areas/diplomacy.md) | High | 15 | **30** | — |
+| 🟢 | [Battle & Conquest](areas/battle.md) | High | 7 | **18** | — |
+| 🟢 | [Colonisation](areas/colonise.md) | High | 14 | **23** | — |
 
 ### Meta Progression
 

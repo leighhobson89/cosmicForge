@@ -1,4 +1,4 @@
-import { initLocalization, localize, localizeMaterialName, reverseLocalizeForCompounds } from './localization.js';
+import { initLocalization, isSupportedLanguage, localize, localizeMaterialName, reverseLocalizeForCompounds, DEFAULT_LANGUAGE } from './localization.js';
 import { getStatisticsContent, getStatKeyFromLocalizedName } from './descriptions.js';
 import {
     invalidateCompoundCreateDropdownRecipeText,
@@ -3077,7 +3077,9 @@ function buildFuelConsumptionLines(resourceKey, category, timerRatio) {
 
 
     content = gameIntroText;
-    populateModal(headerText, content);
+    // Not `headerText`: that snapshotted the header before the flag selector had
+    // a chance to change the language, and would strand it in the old one.
+    populateModal(gameIntroHeader, content);
     getElements().modalContainer.style.display = 'flex';
     document.querySelector('.fullScreenContainer').style.display = 'flex';
     getElements().overlay.style.display = 'flex';
@@ -5833,7 +5835,7 @@ export function generateStarfield(starfieldContainer, numberOfStars = 70, seed =
         } else if (starElement.classList.contains("star-uninteresting") || starElement.id === capitaliseString(getCurrentStarSystem())) {
             starElement.setAttribute("titler", `${star.name}`);
         } else if (starElement.classList.contains("factory-star")) {
-            starElement.setAttribute("titler", `${star.name} (MEGASTRUCTURE)`);
+            starElement.setAttribute("titler", `${star.name} ${localize('textStarTagMegastructure', getLanguage())}`);
         } else {
             starElement.setAttribute("titler", `${star.name} (${distance}ly)`);
         }        
@@ -6299,9 +6301,9 @@ export async function triggerFeedBackModal(feedback) {
 
 
     if (feedback === 'good') {
-        content = modalFeedbackContentTextGood + `<br><br><textarea id="feedbackArea" class="text-area-style text-area-width text-area-height" placeholder="Leave your thoughts here..."></textarea>`;
+        content = modalFeedbackContentTextGood + `<br><br><textarea id="feedbackArea" class="text-area-style text-area-width text-area-height" placeholder="${localize('textFeedbackPlaceholder', getLanguage())}"></textarea>`;
     } else {
-        content = modalFeedbackContentTextBad + `<br><br><textarea id="feedbackArea" class="text-area-style text-area-width text-area-height" placeholder="Leave your thoughts here..."></textarea>`;
+        content = modalFeedbackContentTextBad + `<br><br><textarea id="feedbackArea" class="text-area-style text-area-width text-area-height" placeholder="${localize('textFeedbackPlaceholder', getLanguage())}"></textarea>`;
     }
 
 
@@ -6320,7 +6322,7 @@ export async function triggerFeedBackModal(feedback) {
         setFeedbackValueAndSaveGame('accepted', document.getElementById('feedbackArea').value);
         headerText = modalFeedbackThanksHeaderText;
         content = modalFeedbackContentThanks;
-        sendFeedBackConfirmButton.innerText = 'OK';
+        sendFeedBackConfirmButton.innerText = localize('buttonOk', getLanguage());
         sendFeedBackCancelButton.classList.add('invisible');
         populateModal(headerText, content);
 
@@ -6891,6 +6893,63 @@ function populateModal(headerText, content) {
 }
 
 
+/**
+ * Wire the flag row that sits above the pioneer-name field on the welcome modal.
+ *
+ * Clicking a flag records a *pending* choice and nothing more: the player can
+ * try every flag in turn and the language is only committed when they confirm
+ * the modal, which is what stops the dialog relocalizing under them mid-decision
+ * and keeps the choice to a single application per boot.
+ *
+ * The starting selection is whatever `initLocalization` already resolved -
+ * English for a brand new player, and a returning player's stored preference
+ * otherwise - so leaving the flags alone never changes the language.
+ *
+ * Returns a reader for the pending choice rather than exposing the variable,
+ * because the only caller needs its value once, at confirm time.
+ */
+function initialiseLanguageFlagSelector() {
+    const active = getLanguage();
+    let selected = isSupportedLanguage(active) ? active : DEFAULT_LANGUAGE;
+
+    const bar = document.getElementById('languageFlagBar');
+    if (!bar) return () => selected;
+
+    const cells = [...bar.querySelectorAll('[data-language]')];
+    const labels = [...bar.querySelectorAll('[data-language-label]')];
+
+    const paint = () => {
+        cells.forEach(cell => {
+            cell.classList.toggle('language-flag-selected', cell.dataset.language === selected);
+        });
+        labels.forEach(label => {
+            label.classList.toggle('language-flag-selected', label.dataset.languageLabel === selected);
+        });
+    };
+
+    const choose = (code) => {
+        if (!isSupportedLanguage(code) || code === selected) return;
+        selected = code;
+        paint();
+    };
+
+    cells.forEach(cell => {
+        cell.addEventListener('click', () => choose(cell.dataset.language));
+        // The flags are the first control on the modal, so a player tabbing to
+        // the name field passes through them; keep them operable from there.
+        cell.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                choose(cell.dataset.language);
+            }
+        });
+    });
+
+    paint();
+    return () => selected;
+}
+
+
 async function getUserSaveName() {
     return new Promise((resolve) => {
         const saveNameButton = document.getElementById('modalConfirm');
@@ -6899,9 +6958,23 @@ async function getUserSaveName() {
         saveNameButton.innerText = localize('buttonConfirmUpper', getLanguage());
 
 
+        const readSelectedLanguage = initialiseLanguageFlagSelector();
+
+
         const handleSaveNameClick = async () => {
             const userName = saveNameField.value.trim();
             if (userName) {
+                // Commit the flag choice before anything else runs: the button
+                // relabel below, the cloud-load notifications, the intro text and
+                // the onboarding tutorial all read the language after this point.
+                const chosenLanguage = readSelectedLanguage();
+                if (chosenLanguage !== getLanguage()) {
+                    await initLocalization(chosenLanguage);
+                    initialiseDescriptions();
+                    initialiseStaticButtonLabels();
+                }
+
+
                 setSaveName(userName);
                 localStorage.setItem('saveName', getSaveName());
                 setOnboardingMode(false);
@@ -12001,19 +12074,39 @@ export function getStats(statFunctions) {
 }
 
 
+/**
+ * Uppercased catalogue values for the given keys, for matching against a value
+ * that has already been through `localize`.
+ */
+function localizedForms(...keys) {
+    return new Set(keys.map((key) => String(localize(key, getLanguage())).trim().toUpperCase()));
+}
+
+
 function determineStatClassColor(value) {
     const isString = typeof value === 'string';
     const rawString = isString ? value.trim() : '';
     const normalized = isString ? rawString.replace(/^•/, '').trim().toUpperCase() : value;
 
 
+    // The values arriving here are already localized — the stat accessors in
+    // constantsAndGlobalVars.js return `localize('textNo')`,
+    // `localize('textNotApplicable')` and so on, and the power indicator returns
+    // `localize('textOff')` — so the words being matched have to be looked up in
+    // the player's language too. Matching a fixed English list left every one of
+    // these stats reading green outside English. The English forms are kept
+    // alongside because a few values still arrive as bare literals.
+    const negative = localizedForms('textNo', 'textOff', 'textNotApplicable');
+    ['FALSE', 'NO', 'OFF', 'N/A', '0'].forEach((form) => negative.add(form));
+
+
+    const warning = localizedForms('textTrippedIndicator');
+    warning.add('TRIPPED');
+
+
     if (
-        normalized === 'FALSE' ||
-        normalized === 'NO' ||
-        normalized === '0' ||
-        normalized === 'OFF' ||
+        (isString && negative.has(normalized)) ||
         rawString === '⛰' ||
-        normalized === 'N/A' ||
         value === false ||
         value === 0
     ) {
@@ -12024,7 +12117,7 @@ function determineStatClassColor(value) {
     if (
         rawString === '☁' ||
         rawString === '☂' ||
-        normalized === 'TRIPPED'
+        (isString && warning.has(normalized))
     ) {
         return 'warning-orange-text';
     }
@@ -14846,7 +14939,7 @@ setRandomEventUiHandlers({
             onCancel: null,
             onExtra1: null,
             onExtra2: null,
-            confirmLabel: 'OK',
+            confirmLabel: localize('buttonOk', getLanguage()),
             cancelLabel: null,
             extra1Label: null,
             extra2Label: null,
