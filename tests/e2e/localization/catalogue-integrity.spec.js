@@ -27,7 +27,7 @@ const CATALOGUE_PATH = path.join(ROOT, 'localization.json');
 
 const require = createRequire(import.meta.url);
 
-const LANGUAGES = ['en', 'es', 'de', 'it', 'fr'];
+const LANGUAGES = ['en', 'es', 'pt', 'de', 'it', 'fr'];
 const REFERENCE = 'en';
 
 const RAW = fs.readFileSync(CATALOGUE_PATH, 'utf8');

@@ -31,7 +31,7 @@ const UI_PANES = [
   ['Philosophies', 'tab9PhilosophiesOption', 'philosophiesTextArea']
 ];
 
-const LANGUAGES = ['en', 'es', 'de', 'it', 'fr'];
+const LANGUAGES = ['en', 'es', 'pt', 'de', 'it', 'fr'];
 
 test.describe('Cosmicopedia & Help', () => {
   test.beforeEach(async ({ game }) => {

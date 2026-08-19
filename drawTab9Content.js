@@ -430,6 +430,7 @@ export function drawTab9Content(heading, optionContentElement) {
                 createDropdown('languageSelect', [
                     { value: 'en', text: 'English' },
                     { value: 'es', text: 'Español' },
+                    { value: 'pt', text: 'Português' },
                     { value: 'de', text: 'Deutsch' },
                     { value: 'it', text: 'Italiano' },
                     { value: 'fr', text: 'Français' },

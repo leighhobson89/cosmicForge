@@ -5826,23 +5826,12 @@ export function getSettledStars() {
     return settledStars;
 }
 
-/**
- * Normalise a settled-star name to the form the whole codebase compares against.
- * Every consumer already lowercases on read, and galactic points are derived from
- * `settledStars.length`, so a name that differs only by case or whitespace would
- * be counted twice while matching nothing.
- */
 function normaliseSettledStarName(value) {
     if (typeof value !== 'string') return null;
     const normalised = value.trim().toLowerCase();
     return normalised === '' ? null : normalised;
 }
 
-/**
- * Normalise a whole settled-star list, dropping blanks and duplicates while
- * keeping first-seen order. Used when restoring a save, which assigns the list
- * directly and so would otherwise bypass `setSettledStars`'s validation.
- */
 function normaliseSettledStarsList(value) {
     const source = Array.isArray(value) ? value : [];
     const seen = new Set();
@@ -5858,17 +5847,6 @@ function normaliseSettledStarsList(value) {
     return result.length > 0 ? result : [STARTING_STAR_SYSTEM];
 }
 
-/**
- * Add a star to the settled list.
- *
- * Deliberately validating rather than a bare push: `settledStars.length` is the
- * sole source of galactic points, and galactic points buy permanent upgrades. A
- * duplicate, a blank, or a non-string reaching this list awards a point that was
- * never earned, with nothing downstream able to detect it. Callers currently
- * lowercase before calling, but that is a convention rather than a guarantee.
- *
- * Returns true when the list actually grew.
- */
 export function setSettledStars(value) {
     const name = normaliseSettledStarName(value);
     if (name === null) return false;
@@ -7460,15 +7438,6 @@ export function setCompoundCreateDropdownRecipeText(compound, newOptions) {
     ensureCompoundCreateDropdownRecipeText()[compound] = newOptions;
 }
 
-/**
- * Drop the cached recipe table so the next read rebuilds it.
- *
- * Every entry is produced by `localize(..., getLanguage())`, so the table is
- * frozen in whatever language was current the first time anything read it.
- * Without this, changing language left the compound create dropdown reading in
- * the language the player had just left, while everything around it relocalized.
- * See known-issues #20.
- */
 export function invalidateCompoundCreateDropdownRecipeText() {
     compoundCreateDropdownRecipeText = null;
 }

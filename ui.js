@@ -1770,21 +1770,6 @@ export function initialiseStaticButtonLabels() {
     fitSideMenuLabels();
 }
 
-
-/**
- * Shrink one label's font until its text fits the box it was given, stopping at
- * a floor rather than shrinking without limit.
- *
- * Used where the box cannot grow and the text cannot wrap out of trouble: a
- * side-menu column is a fixed share of a fixed-width panel, and German supplies
- * single words — "Energiespeicher", "Solarkraftwerk" — that are longer than the
- * column and have nowhere to break. The alternative, breaking inside the word,
- * is harder to read than a slightly smaller one.
- *
- * The authored size is restored first, so calling this repeatedly (every
- * language change does) measures against the real size instead of ratcheting
- * down from the last result.
- */
 export function fitLabelToWidth(element, { minFontPx = 11 } = {}) {
     if (!element) return;
 
@@ -1803,12 +1788,6 @@ export function fitLabelToWidth(element, { minFontPx = 11 } = {}) {
     }
 }
 
-
-/**
- * Fit every side-menu option label. Called after the static labels are written
- * (boot and every language change) and on a tab change, which is when a label's
- * text or its visibility can have changed.
- */
 export function fitSideMenuLabels() {
     document
         .querySelectorAll('.row-side-menu-item p[class*="tab"]')
@@ -3247,28 +3226,6 @@ function buildFuelConsumptionLines(resourceKey, category, timerRatio) {
     });
 });
 
-
-/**
- * Clear the "new option" marker from the side-menu row a player just opened.
- *
- * Each `drawTab*Content` used to do this for itself by rebuilding the row's
- * element id from the pane name — `'near space scanner array'` →
- * `#nearSpaceScannerArrayOption` — which only works while every pane name
- * camel-cases into its own id. 25 of the 59 pane names no longer did: the real
- * ids are `#cosmicRipNearSpaceScannerArrayOption`, `#blackholeOption`,
- * `#tab9StoryOption` and so on, so those rows kept their marker forever. All
- * three Cosmic Rip options were in that group, which is why that tab never
- * cleared at all.
- *
- * Working from the clicked element removes the derivation entirely. The whole
- * row is swept rather than just the clicked `<p>`, because a row's label,
- * notation and status paragraphs share one click handler and the marker may sit
- * on any of them.
- *
- * Only `⚠️` is cleared. `🌀` marks the black hole's charge state rather than
- * novelty; the frame loop owns it and re-adds it every tick, so removing it here
- * would fight that.
- */
 export function clearOptionRowAttentionIndicator(clickedItem) {
     if (!clickedItem) return;
     const row = clickedItem.closest?.('.row-side-menu') ?? clickedItem;
@@ -6892,22 +6849,6 @@ function populateModal(headerText, content) {
     modalContent.innerHTML = content;
 }
 
-
-/**
- * Wire the flag row that sits above the pioneer-name field on the welcome modal.
- *
- * Clicking a flag records a *pending* choice and nothing more: the player can
- * try every flag in turn and the language is only committed when they confirm
- * the modal, which is what stops the dialog relocalizing under them mid-decision
- * and keeps the choice to a single application per boot.
- *
- * The starting selection is whatever `initLocalization` already resolved -
- * English for a brand new player, and a returning player's stored preference
- * otherwise - so leaving the flags alone never changes the language.
- *
- * Returns a reader for the pending choice rather than exposing the variable,
- * because the only caller needs its value once, at confirm time.
- */
 function initialiseLanguageFlagSelector() {
     const active = getLanguage();
     let selected = isSupportedLanguage(active) ? active : DEFAULT_LANGUAGE;
@@ -9717,26 +9658,6 @@ function normalizeTabName(tabName) {
         .trimEnd();
 }
 
-
-/**
- * The option-pane key a side-menu row stands for — the same string its click
- * handler passes to `setCurrentOptionPane` and `setFirstAccessArray`, and
- * therefore the key `showTabsUponUnlock` tests against `firstAccessArray` to
- * decide whether the row still deserves its "something new here" marker.
- *
- * Rebuilding that key from the element id only works while every id camel-cases
- * back into its own pane name, and 13 of them do not: `#cosmicRipSituationOption`
- * is the pane `situation`, `#blackholeOption` is `black hole`, and every tab 9
- * row is prefixed `tab9`. Those 13 never matched, so they were permanently
- * "first access" and the sweep re-added their marker every time it ran —
- * however many times the player opened them. All three Cosmic Rip options were
- * in that group, which is why that tab never cleared.
- *
- * `data-option-pane` in index.html declares the key for those rows rather than
- * guessing it, following the `data-loc` convention that closed the same drift
- * for the localization ids. The derivation below stays as the fallback for the
- * 39 rows whose ids do line up.
- */
 function optionPaneKeyFromOptionElement(optionEl) {
     const id = String(optionEl?.id ?? '');
     if (!id.endsWith('Option')) {
@@ -12073,11 +11994,6 @@ export function getStats(statFunctions) {
     });
 }
 
-
-/**
- * Uppercased catalogue values for the given keys, for matching against a value
- * that has already been through `localize`.
- */
 function localizedForms(...keys) {
     return new Set(keys.map((key) => String(localize(key, getLanguage())).trim().toUpperCase()));
 }

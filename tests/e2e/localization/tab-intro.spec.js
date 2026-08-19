@@ -27,7 +27,7 @@ const ROOT = path.resolve(HERE, '..', '..', '..');
 const CATALOGUE = JSON.parse(fs.readFileSync(path.join(ROOT, 'localization.json'), 'utf8'));
 
 const STORAGE_KEY = 'cosmicForgeLanguage';
-const LANGUAGES = ['en', 'es', 'de', 'it', 'fr'];
+const LANGUAGES = ['en', 'es', 'pt', 'de', 'it', 'fr'];
 
 /** Canonical `data-name` per tab, and the key its heading is localized from. */
 const TABS = [

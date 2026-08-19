@@ -13,7 +13,7 @@
 import { test, expect } from '../_harness/game-fixture.mjs';
 
 const STORAGE_KEY = 'cosmicForgeLanguage';
-const SUPPORTED = ['en', 'es', 'de', 'it', 'fr'];
+const SUPPORTED = ['en', 'es', 'pt', 'de', 'it', 'fr'];
 
 /** Seed a stored language preference before any page script runs. */
 async function seedStoredLanguage(page, value) {

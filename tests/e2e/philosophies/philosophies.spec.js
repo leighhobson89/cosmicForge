@@ -33,7 +33,7 @@ import { test, expect } from '../_harness/game-fixture.mjs';
 
 const PHILOSOPHIES = ['constructor', 'supremacist', 'voidborn', 'expansionist'];
 
-const LANGUAGES = ['en', 'es', 'de', 'it', 'fr'];
+const LANGUAGES = ['en', 'es', 'pt', 'de', 'it', 'fr'];
 
 /** The four modal buttons, in the order the choice modal assigns the paths. */
 const PHILOSOPHY_BUTTON_IDS = ['#modalConfirm', '#modalCancel', '#modalExtraChoice1', '#modalExtraChoice2'];
@@ -337,7 +337,7 @@ test.describe('Philosophies — choosing one', () => {
       await m.loc.initLocalization(original);
       m.desc.initialiseDescriptions();
       return issues;
-    }, { philosophies: PHILOSOPHIES, languages: ['en', 'es', 'de', 'it', 'fr'] });
+    }, { philosophies: PHILOSOPHIES, languages: ['en', 'es', 'pt', 'de', 'it', 'fr'] });
 
     expect(problems).toEqual([]);
   });

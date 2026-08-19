@@ -571,7 +571,7 @@ test.describe('Settings — language and full screen', () => {
     const values = await game.page.evaluate(() =>
       Array.from(document.querySelectorAll('#languageSelect div.dropdown-option'))
         .map((option) => option.getAttribute('data-value')));
-    expect(values).toEqual(['en', 'es', 'de', 'it', 'fr']);
+    expect(values).toEqual(["en", "es", "pt", "de", "it", "fr"]);
 
     const failures = [];
     for (const value of values) {

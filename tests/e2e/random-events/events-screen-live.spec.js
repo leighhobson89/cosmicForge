@@ -293,7 +293,7 @@ test.describe('Random Events — the Events screen', () => {
     await openEventsScreen(game);
 
     const problems = [];
-    for (const language of ['en', 'es', 'de', 'it', 'fr']) {
+    for (const language of ['en', 'es', 'pt', 'de', 'it', 'fr']) {
       await game.withMods(async (m, lang) => {
         await m.loc.initLocalization(lang);
         m.desc.initialiseDescriptions();

@@ -749,7 +749,7 @@ test.describe('Resources — catalogue invariants', () => {
 
       await m.loc.initLocalization(original);
       return issues;
-    }, { resources: ALL_RESOURCES, languages: ['en', 'es', 'de', 'it', 'fr'] });
+    }, { resources: ALL_RESOURCES, languages: ['en', 'es', 'pt', 'de', 'it', 'fr'] });
 
     expect(problems).toEqual([]);
   });

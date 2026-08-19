@@ -280,7 +280,7 @@ test.describe('Onboarding & Tutorial', () => {
       await m.loc.initLocalization(original);
       m.desc.initialiseDescriptions();
       return issues;
-    }, ['en', 'es', 'de', 'it', 'fr']);
+    }, ['en', 'es', 'pt', 'de', 'it', 'fr']);
 
     expect(problems).toEqual([]);
   });

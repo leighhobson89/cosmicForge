@@ -23,7 +23,7 @@
 import { test, expect } from '../_harness/game-fixture.mjs';
 
 const STORAGE_KEY = 'cosmicForgeLanguage';
-const CODES = ['en', 'es', 'de', 'it', 'fr'];
+const CODES = ['en', 'es', 'pt', 'de', 'it', 'fr'];
 
 // The bar's authored geometry, kept here so a deliberate retune is one edit in the
 // spec rather than a hunt through assertions: the nine columns together occupy this
@@ -237,7 +237,7 @@ test.describe('Localization — welcome-modal language flags', () => {
       await openWelcomeModal(page);
 
       const seen = [];
-      for (const code of ['es', 'de', 'it', 'fr', 'en', 'de']) {
+      for (const code of ['es', 'pt', 'de', 'it', 'fr', 'en', 'de']) {
         await clickFlag(page, code);
         seen.push(await selectedFlag(page));
         // Exactly one flag is ever marked, so a mis-wired handler that adds
@@ -245,7 +245,7 @@ test.describe('Localization — welcome-modal language flags', () => {
         expect(await page.locator('.language-flag-cell.language-flag-selected').count()).toBe(1);
       }
 
-      expect(seen).toEqual(['es', 'de', 'it', 'fr', 'en', 'de']);
+      expect(seen).toEqual(['es', 'pt', 'de', 'it', 'fr', 'en', 'de']);
     });
 
     test('clicking flags does not change the language until the modal is confirmed', async ({ page }) => {

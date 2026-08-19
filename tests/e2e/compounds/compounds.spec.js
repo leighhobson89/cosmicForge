@@ -74,7 +74,7 @@ const PRECIPITATION_WEIGHTS = {
   titanium: 4, water: 40, glass: 19, diesel: 30, concrete: 0, steel: 7
 };
 
-const LANGUAGES = ['en', 'es', 'de', 'it', 'fr'];
+const LANGUAGES = ['en', 'es', 'pt', 'de', 'it', 'fr'];
 
 /** Every value the create dropdown offers, in the order it lists them. */
 const CREATE_OPTIONS = [

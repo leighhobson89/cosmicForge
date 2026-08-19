@@ -330,7 +330,7 @@ test.describe('Achievements — the pane', () => {
       const issues = [];
       const original = m.cg.getLanguage();
 
-      for (const language of ['en', 'es', 'de', 'it', 'fr']) {
+      for (const language of ['en', 'es', 'pt', 'de', 'it', 'fr']) {
         await m.loc.initLocalization(language);
         m.desc.initialiseDescriptions();
         m.desc.refreshAchievementTooltipDescriptions();

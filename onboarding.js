@@ -594,16 +594,6 @@ function getHighlightTargetWithRect(element) {
     return { target: null, rect: null };
 }
 
-/**
- * Onboarding steps address some targets by the text the player can see rather
- * than by id (mode 0). Those needles are authored in English, so once the UI is
- * translated none of them match and the tutorial stalls on the first step.
- *
- * This maps each authored needle to the catalogue key the UI renders it from,
- * so the step table stays readable in English while matching happens in whatever
- * language is active. A needle with no entry is searched for as written, which
- * is correct for the handful that are ids or language-independent.
- */
 const ONBOARDING_NEEDLE_KEYS = {
     'Hydrogen': 'resourceHydrogen',
     'Gain': 'buttonGain',
@@ -622,10 +612,6 @@ const ONBOARDING_NEEDLE_KEYS = {
     'Concepts - Late': 'headerMainConceptsLate'
 };
 
-/**
- * Auto-buyer buttons are built from the `buttonAddPerSecond` template, so their
- * needles have to be rebuilt the same way rather than looked up whole.
- */
 const ONBOARDING_RATE_NEEDLES = {
     'Add 4 Hydrogen /s': { rate: '4', resourceKey: 'resourceHydrogen' },
     'Add 0.5 Research /s': { rate: '0.5', resourceKey: 'headerMainResearch' },

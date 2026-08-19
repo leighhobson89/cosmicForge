@@ -16,7 +16,7 @@
 import { test, expect } from '../_harness/game-fixture.mjs';
 
 const CATEGORIES = ['wackyEffects', 'oneOff', 'prize', 'manuscriptClues', 'noPrize'];
-const LANGUAGES = ['en', 'es', 'de', 'it', 'fr'];
+const LANGUAGES = ['en', 'es', 'pt', 'de', 'it', 'fr'];
 
 /** Set the debug News Ticker category and interval through the real controls. */
 async function setTickerDebug(game, { category = '', interval = '' } = {}) {

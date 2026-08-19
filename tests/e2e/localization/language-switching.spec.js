@@ -19,6 +19,7 @@ const LANGUAGE_OPTIONS = [
   { value: 'en', text: 'English', label: 'Language:', resources: 'Resources' },
   { value: 'es', text: 'Español', label: 'Idioma:', resources: 'Recursos' },
   { value: 'de', text: 'Deutsch', label: 'Sprache:', resources: 'Ressourcen' },
+  { value: 'pt', text: 'Português', label: 'Idioma:', resources: 'Recursos' },
   { value: 'it', text: 'Italiano', label: 'Lingua:', resources: 'Risorse' },
   { value: 'fr', text: 'Français', label: 'Langue :', resources: 'Ressources' }
 ];
@@ -227,7 +228,7 @@ test.describe('Localization — runtime language switching', () => {
       tab4: document.getElementById('tab4Intro')?.innerText?.trim()
     }));
 
-    for (const lang of ['es', 'de', 'it', 'fr', 'en']) {
+    for (const lang of ['es', 'pt', 'de', 'it', 'fr', 'en']) {
       await game.withMods((m, l) => m.ui.relocalizeAll(l), lang);
     }
 
@@ -390,7 +391,7 @@ test.describe('Localization — runtime language switching', () => {
     await openGameOptions(game);
 
     const leaked = [];
-    for (const lang of ['es', 'de', 'it', 'fr', 'en']) {
+    for (const lang of ['es', 'pt', 'de', 'it', 'fr', 'en']) {
       await selectLanguageInUi(game, lang);
       const suspects = await page.evaluate(() => {
         const text = document.body.innerText || '';

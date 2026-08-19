@@ -452,7 +452,7 @@ test.describe('Autobuyers — energy cost and rate accounting', () => {
 
       await m.loc.initLocalization(original);
       return issues;
-    }, { resources: RESOURCES, compounds: COMPOUNDS, tiers: TIERS, languages: ['en', 'es', 'de', 'it', 'fr'] });
+    }, { resources: RESOURCES, compounds: COMPOUNDS, tiers: TIERS, languages: ['en', 'es', 'pt', 'de', 'it', 'fr'] });
 
     expect(problems).toEqual([]);
   });

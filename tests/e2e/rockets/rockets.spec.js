@@ -372,7 +372,7 @@ test.describe('Rockets — stability', () => {
 
       await m.loc.initLocalization(original);
       return issues;
-    }, ['en', 'es', 'de', 'it', 'fr']);
+    }, ['en', 'es', 'pt', 'de', 'it', 'fr']);
 
     expect(problems).toEqual([]);
   });

@@ -85,7 +85,7 @@ test.describe('Ascendency Points & Perks', () => {
     // which is rebuilt per language — not a localization.json key itself.
     const unresolved = await game.withMods(async (m) => {
       const buffs = m.rdo.getAscendencyBuffDataObject() || {};
-      const languages = ['en', 'es', 'de', 'it', 'fr'];
+      const languages = ['en', 'es', 'pt', 'de', 'it', 'fr'];
       const problems = [];
       const original = m.cg.getLanguage();
 

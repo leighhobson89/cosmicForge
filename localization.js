@@ -1,6 +1,6 @@
 import { getLanguage, setLanguage } from './constantsAndGlobalVars.js';
 
-const SUPPORTED_LANGUAGES = ['en', 'es', 'de', 'it', 'fr'];
+const SUPPORTED_LANGUAGES = ['en', 'es', 'pt', 'de', 'it', 'fr'];
 const DEFAULT_LANGUAGE = 'en';
 const LANGUAGE_STORAGE_KEY = 'cosmicForgeLanguage';
 
@@ -161,18 +161,6 @@ function getCompoundReverseIndex(language) {
     return index;
 }
 
-/**
- * Translated material name -> internal key, across **both** sections.
- *
- * `getCompoundReverseIndex` deliberately covers only `compound*` keys, because
- * its caller resolves compound names specifically. Crafting needs the wider
- * mapping: a recipe's ingredients are usually resources ("Wasserstoff" ->
- * "hydrogen"), and looking those up in the compound-only index silently returns
- * the translated name unchanged.
- *
- * Compounds are indexed first so that a name shared by both sections resolves the
- * same way it always has — see known-issues #8.
- */
 function getMaterialReverseIndex(language) {
     const cached = materialReverseIndex.get(language);
     if (cached) return cached;
@@ -196,7 +184,6 @@ function getMaterialReverseIndex(language) {
     return index;
 }
 
-/** Turn a displayed material name back into the key the data object uses. */
 function reverseLocalizeMaterialName(localizedValue, language) {
     if (typeof localizedValue !== 'string') return localizedValue;
 
@@ -207,11 +194,6 @@ function reverseLocalizeMaterialName(localizedValue, language) {
     return resolved === undefined ? localizedValue : resolved;
 }
 
-// Resource and compound display names are stored in the catalogue under
-// `resource<Name>` / `compound<Name>`, but the game data holds the internal key
-// plus the section it lives in ('resources' / 'compounds'). Several draw
-// functions and the frame loop need to turn that pair into a display name, so
-// the mapping lives here rather than being re-derived at each call site.
 function localizeMaterialName(name, section, language) {
     if (typeof name !== 'string' || !name) return name;
     const prefix = section === 'compounds' ? 'compound' : 'resource';

@@ -54,7 +54,7 @@ const DEBUG_INTERVAL_MS = 10000;
 const MESSAGE_TIMEOUT_MS = 30000;
 
 /** The five shipped languages, in the order the debug select lists them. */
-const LANGUAGES = ['en', 'es', 'de', 'it', 'fr'];
+const LANGUAGES = ['en', 'es', 'pt', 'de', 'it', 'fr'];
 
 // --------------------------------------------------------------------- helpers
 

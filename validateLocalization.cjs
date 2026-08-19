@@ -29,14 +29,9 @@ const path = require('path');
 
 const ROOT = __dirname;
 const LOCALIZATION_FILE = path.join(ROOT, 'localization.json');
-const LANGUAGES = ['en', 'es', 'de', 'it', 'fr'];
+const LANGUAGES = ['en', 'es', 'pt', 'de', 'it', 'fr'];
 const REFERENCE = 'en';
 
-/**
- * Keys that are intentionally empty in every language: casino special-prize
- * notifications whose suffix is supplied at runtime. Any other empty value is a
- * translation someone forgot.
- */
 const SANCTIONED_EMPTY_KEYS = [
     'casinoNotificationSpecialPrizeRocketWarpedSuffix',
     'casinoNotificationSpecialPrizeStarshipFinishedSuffix',
@@ -50,7 +45,6 @@ function readCatalogue() {
     return JSON.parse(content);
 }
 
-/** The `.js` and `.html` files the shipped game actually loads. */
 function shippedSourceFiles() {
     return fs
         .readdirSync(ROOT)
@@ -67,12 +61,6 @@ function readSources() {
     return sources;
 }
 
-/**
- * The body of a named object literal, so a family can be resolved from the one
- * declaration that defines it rather than from a loose match over the whole file.
- * Returns '' when the declaration is absent, which surfaces as the family
- * producing nothing — a loud failure rather than a silent pass.
- */
 function objectLiteralBody(source, declaration) {
     const start = source.indexOf(declaration);
     if (start === -1) return '';
@@ -91,7 +79,6 @@ function objectLiteralBody(source, declaration) {
     return '';
 }
 
-/** Top-level property names of an object literal body. */
 function topLevelKeys(body) {
     const keys = [];
     let depth = 0;
@@ -108,12 +95,6 @@ function topLevelKeys(body) {
     return keys;
 }
 
-/**
- * The key families the game builds by concatenation. `owns` recognises a
- * catalogue key as belonging to the family; `produce` returns every key the
- * construction can actually generate. A key that `owns` accepts but `produce`
- * does not generate is dead.
- */
 const CONSTRUCTED_KEY_FAMILIES = [
     {
         name: 'starShipModule*',
@@ -147,17 +128,11 @@ const CONSTRUCTED_KEY_FAMILIES = [
     {
         name: 'resource* / compound* (localizeMaterialName)',
         builtBy: "localization.js: localize(prefix + capitalised) over the price and fuel tuples in resourceDataObject.js",
-        // Only the material names the tuples reach; the rest of the
-        // resource*/compound* family is referenced literally elsewhere and is
-        // resolved by the literal scan.
         owns: () => false,
         produce: (sources) => {
             const source = sources['resourceDataObject.js'] || '';
             const materialKey = (name, section) => (section === 'compounds' ? `compound${capitalise(name)}` : `resource${capitalise(name)}`);
 
-            // Price tuples are [quantity, key, section]; fuel tuples put the key
-            // first, [key, ratePerTick, section]. `solar` only ever appears as a
-            // fuel, which is why it reaches the catalogue by no other route.
             const prices = [...source.matchAll(/\[\s*\d+(?:\.\d+)?\s*,\s*'([a-z][A-Za-z0-9]*)'\s*,\s*'(resources|compounds)'\s*\]/g)]
                 .map((m) => materialKey(m[1], m[2]));
             const fuels = [...source.matchAll(/fuel:\s*\[\s*'([a-z][A-Za-z0-9]*)'\s*,\s*\d+(?:\.\d+)?\s*,\s*'(resources|compounds)'\s*\]/g)]
@@ -168,7 +143,6 @@ const CONSTRUCTED_KEY_FAMILIES = [
     }
 ];
 
-/** Every key the constructed families can produce, with the family that owns it. */
 function resolveConstructedKeys(sources = readSources()) {
     const produced = new Map();
     const families = [];
@@ -184,7 +158,6 @@ function resolveConstructedKeys(sources = readSources()) {
     return { produced, families };
 }
 
-/** Every catalogue key that appears as a quoted string literal in shipped source. */
 function literalKeys(sources = readSources()) {
     const literals = new Set();
     for (const match of sources.__all.matchAll(/['"`]([A-Za-z][A-Za-z0-9_]*)['"`]/g)) {
@@ -236,7 +209,6 @@ function checkLocalizationConsistency(data = readCatalogue(), { quiet = false } 
     return !hasErrors;
 }
 
-/** Empty values, excluding the sanctioned few — which must also still exist. */
 function checkEmptyValues(data = readCatalogue()) {
     const unexpectedEmpty = [];
     const missingSanctioned = [];
@@ -255,12 +227,6 @@ function checkEmptyValues(data = readCatalogue()) {
     return { unexpectedEmpty, missingSanctioned, ok: unexpectedEmpty.length === 0 && missingSanctioned.length === 0 };
 }
 
-/**
- * Classify every key, in both directions:
- *
- *   missing      — the source asks for it and the catalogue has not got it.
- *   unreferenced — the catalogue has it and nothing can ever ask for it.
- */
 function auditKeyReferences(data = readCatalogue(), sources = readSources()) {
     const catalogueKeys = Object.keys(data[REFERENCE] || {});
     const catalogueKeySet = new Set(catalogueKeys);

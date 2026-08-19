@@ -5660,12 +5660,6 @@ export const getRocketFuelDescriptionLabel = (rocket) =>
 export const getRocketTravelDescriptionLabel = (rocket) =>
     getRowMainDescriptionLabel(`space${capitaliseString(rocket)}TravelRow`);
 
-/**
- * The Fuel row's label for whichever rocket pane is currently open.
- *
- * Only one rocket pane exists in the DOM at a time, which is why a single shared
- * id worked here before; resolving from the open pane keeps that behaviour.
- */
 const getOpenRocketFuelDescriptionLabel = () => {
     const pane = getCurrentOptionPane();
     return (typeof pane === 'string' && /^rocket\d+$/.test(pane))
@@ -7135,18 +7129,6 @@ function energyChecks(element) {
     }
 }
 
-/**
- * Set a power-plant toggle's label, and record on the element which state that
- * label represents.
- *
- * The state used to ride on the label text itself, and
- * `addOrRemoveUsedPerSecForFuelRate` read it back with
- * `switch (button.textContent)` against the English words. The rows are drawn
- * with `localize('buttonActivate')`, so outside English that switch matched
- * nothing and an idle power plant could not be switched on at all — see
- * tests/docs/known-issues.md #40. The state now rides on a dataset flag and the
- * text is only ever its display.
- */
 function setPowerToggleLabel(element, active) {
     if (!element) return;
     element.dataset.toggleState = active ? 'active' : 'inactive';
@@ -8760,16 +8742,6 @@ function ascendencyBuffChecks() {
     }
 }
 
-/**
- * The trade summary's three quantity lines hold either a figure or a
- * "not applicable" marker.
- *
- * The marker used to be the literal string 'N/A', written in one place and read
- * back as text in another. That works only while the marker is English: the
- * moment it is translated, `innerHTML === 'N/A'` stops matching and the summary
- * keeps whichever figures were last typed. The state rides on a dataset flag
- * instead, and the text is only ever the display of that flag.
- */
 function setMarketQuantityField(id, value) {
     const element = document.getElementById(id);
     if (!element) return;
@@ -9493,13 +9465,6 @@ async function colonisePrepareWarUI(reason) {
     } 
 }
 
-/**
- * Relabel the Conquest button as Settle, and record that it is in that mode.
- *
- * The mode used to be inferred by reading the button's own text back, which
- * pins the label to English for good. It rides on the element instead, so the
- * label is free to be whatever the player's language calls it.
- */
 function setConquestButtonToSettle(element) {
     if (!element) return;
     element.dataset.conquestMode = 'settle';
@@ -11678,19 +11643,6 @@ function formatAllNotationElements(element, notationType) {
         const formatNormalNumber = (num) => formatGroupedNumber(num);
 
         const formattedContent = originalContent.replace(/-?\d+(?:[.,]\d+)*/g, (match, offset, whole) => {
-            // A digit run glued to a letter is part of a name, not a figure.
-            // Asteroid names are minted as `SPC-6154R`, and every description
-            // label carries the `notation` class, so the Travel row's
-            // "Mining Antimatter at SPC-6154R" was being rewritten to
-            // "SPC-6.1KR" under abbreviated notation and "SPC-4,811D" under
-            // plain - and a leading zero was lost outright, `SPC-0278T`
-            // becoming `SPC-278T`, because Number('0278') is 278.
-            //
-            // Every real figure in a notation element is preceded by a space, a
-            // currency symbol, a tag boundary or the start of the string, so
-            // this leaves all of them alone. It also stops the formatter
-            // chewing on attribute text such as id="rocket1BuiltPartsQuantity",
-            // which it previously rewrote harmlessly by luck rather than design.
             const precedingCharacter = whole[offset - 1];
             if (precedingCharacter && /[A-Za-z]/.test(precedingCharacter)) {
                 return match;
@@ -11812,13 +11764,6 @@ function complexPurchaseBuildingFormatter(element, notationType) {
     });
 }
 
-/**
- * The plain ('normal') counterpart to formatNumber: grouped in thousands, with a
- * pointless decimal tail dropped. Kept beside it so the two notation modes are
- * read from one place - formatAllNotationElements and the purchase price rows
- * both format through this, which is what stops one screen grouping while
- * another shows a raw run of digits.
- */
 export function formatGroupedNumber(value) {
     const number = typeof value === 'number' ? value : parseFloat(String(value ?? '').replace(/,/g, ''));
     if (!Number.isFinite(number)) return value;

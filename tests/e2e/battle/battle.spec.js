@@ -199,7 +199,7 @@ test.describe('Battle & Conquest', () => {
 
   test('battle outcome modal copy resolves in all five languages', async ({ game }) => {
     const unresolved = await game.withMods(async (m) => {
-      const languages = ['en', 'es', 'de', 'it', 'fr'];
+      const languages = ['en', 'es', 'pt', 'de', 'it', 'fr'];
       const original = m.cg.getLanguage();
       const problems = [];
 

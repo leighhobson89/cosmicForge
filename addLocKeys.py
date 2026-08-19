@@ -22,7 +22,7 @@ def add_keys_to_localization(json_path, keys_data):
     # Parse as JSON to verify structure
     data = json.loads(content)
     
-    languages = ['en', 'es', 'de', 'it', 'fr']
+    languages = ['en', 'es', 'pt', 'de', 'it', 'fr']
     
     # Add keys to each language section
     for lang in languages:

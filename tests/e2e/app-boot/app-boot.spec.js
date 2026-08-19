@@ -117,7 +117,7 @@ test.describe('Application Boot', () => {
     const lang = await game.page.evaluate(() => localStorage.getItem('cosmicForgeLanguage'));
     const active = await game.withMods((m) => m.cg.getLanguage());
 
-    expect(['en', 'es', 'de', 'it', 'fr']).toContain(lang);
+    expect(['en', 'es', 'pt', 'de', 'it', 'fr']).toContain(lang);
     expect(active).toBe(lang);
   });
 
