@@ -1768,6 +1768,12 @@ body {
     transform: translateY(4px);
 }
 
+/* Applied by updateWrappedTabStyles only when a multi-word tab label wraps. */
+.tab.tab-wrapped {
+    padding: 1px 10px;
+    line-height: 1.1;
+}
+
 .tab.selected {
     background-color: var(--tab-selected-bg-color);
     color: var(--text-focus-color);

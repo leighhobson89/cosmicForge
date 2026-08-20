@@ -9560,6 +9560,68 @@ function localizeTabLabels() {
     });
 }
 
+function getUnwrappedTabLabelLineCount(tab, label) {
+    const measurementTab = tab.cloneNode(false);
+    measurementTab.removeAttribute('id');
+    measurementTab.classList.remove('tab-wrapped');
+    measurementTab.textContent = label;
+    measurementTab.style.cssText = [
+        'position: fixed !important',
+        'visibility: hidden !important',
+        'pointer-events: none !important',
+        'left: -10000px !important',
+        'top: 0 !important',
+        'width: ' + tab.getBoundingClientRect().width + 'px !important',
+        'height: auto !important',
+        'min-height: 0 !important',
+        'flex: none !important',
+        'transform: none !important'
+    ].join('; ');
+    document.body.appendChild(measurementTab);
+
+    const range = document.createRange();
+    range.selectNodeContents(measurementTab);
+    const lineCount = Array.from(range.getClientRects())
+        .filter(rect => rect.width > 0 && rect.height > 0)
+        .length;
+
+    measurementTab.remove();
+    return lineCount;
+}
+
+export function updateWrappedTabStyles() {
+    const tabs = document.querySelectorAll('#tabsContainer .tab');
+
+    tabs.forEach(tab => {
+        const labelNode = Array.from(tab.childNodes).find(node =>
+            node.nodeType === Node.TEXT_NODE && node.textContent.trim()
+        );
+        const label = labelNode?.textContent.trim() ?? '';
+        const hasMultipleWords = label.split(/\s+/).filter(Boolean).length > 1;
+
+        if (!hasMultipleWords || !labelNode) {
+            tab.classList.remove('tab-wrapped');
+            delete tab.dataset.tabWrapMeasurementKey;
+            return;
+        }
+
+        // Re-measure only when the input that can affect wrapping changes. This
+        // keeps the per-frame call read-only during normal gameplay.
+        const measurementKey = [
+            label,
+            Math.round(tab.getBoundingClientRect().width * 100),
+            tab.classList.contains('selected')
+        ].join('|');
+        if (tab.dataset.tabWrapMeasurementKey === measurementKey) {
+            return;
+        }
+
+        const lineCount = getUnwrappedTabLabelLineCount(tab, label);
+        tab.classList.toggle('tab-wrapped', lineCount > 1);
+        tab.dataset.tabWrapMeasurementKey = measurementKey;
+    });
+}
+
 
 export function showTabsUponUnlock() {
     const cosmicRipEnabled = typeof window !== 'undefined' && window.__COSMIC_RIP_ENABLED__ === true;

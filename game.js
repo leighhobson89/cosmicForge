@@ -486,6 +486,7 @@ import {
     showNotificationWithAction,
     disableStorageNotificationActionIfShowing,
     showTabsUponUnlock,
+    updateWrappedTabStyles,
     getTimeInStatCell,
     statToolBarCustomizations,
     updateDynamicUiContent,
@@ -2227,6 +2228,7 @@ export async function gameLoop() {
         updateDynamicUiContent();
         showTabsUponUnlock();
         checkOrderOfTabs();
+        updateWrappedTabStyles();
         
         setEnergyUse();
 
