@@ -1,7 +1,7 @@
 # Cosmic Forge — Game Design Document (GDD)
 
 **Project:** Cosmic Forge  
-**Build target:** v0.81 (save versioning via `GAME_VERSION_FOR_SAVES` in `constantsAndGlobalVars.js`)  
+**Build target:** v0.98 (save versioning via `GAME_VERSION_FOR_SAVES` in `constantsAndGlobalVars.js`)
 **Genre:** Single‑player incremental / idle + strategy meta-progression  
 **Platform:** Web (HTML/JS). (Project structure supports packaging; see repo tooling.)  
 

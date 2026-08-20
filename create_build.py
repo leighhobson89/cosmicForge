@@ -19,7 +19,9 @@ IGNORE_LIST = [
     "icons", ".git", "powerDiagram.png", "techtree.graphml",
     "TEST_POWER.xlsx", "watch_and_run.py", "graph.py",
     "create_build.py", "bugs.txt", "node_modules",
-    "temp_build", "html-report", "tools", "tests","cosmicForgeTrailer.mp4"
+    "temp_build", "html-report", "tools", "tests", 
+    "test-results", "test-reports", "docs", 
+    "cosmicForgeTrailer.mp4", "playwright-report"
 ]
 
 # InfinityFree FTP Config

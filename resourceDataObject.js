@@ -14,7 +14,7 @@ import { capitaliseString } from "./utilityFunctions.js";
 
 export let achievementImageUrls;
 export let resourceData = {
-    version: 0.979, //update this whenever changes are made to the structure
+    version: 0.98, //update this whenever changes are made to the structure
     resources: {
         solar: {
             autoSell: false,
@@ -1022,7 +1022,7 @@ export const miaplacidus = {
 
 
 export let starSystems = {
-    version: 0.979,
+    version: 0.98,
     stars: {
         spica: {
             mapSize: 5.504440179536064, //might need to add this to star object when added dynamically for after rebirth
@@ -1041,14 +1041,14 @@ export let starSystems = {
 };
 
 export let oTypePowerPlantBuffs = {
-    version: 0.979,
+    version: 0.98,
     basicPowerPlantStar: { starName: null, settled: false },
     solarPowerPlantStar: { starName: null, settled: false },
     advancedPowerPlantStar: { starName: null, settled: false }
 };
 
 export let galacticCasino = {
-    version: 0.979,
+    version: 0.98,
     settings: {
         baseProbabilityCasino: 0.4,
     },
@@ -1080,7 +1080,7 @@ export let galacticCasino = {
 };
 
 export let galacticMarket = {
-    version: 0.979,
+    version: 0.98,
     resources: {
         hydrogen: { 
             name: "Hydrogen", 
@@ -1186,7 +1186,7 @@ export let galacticMarket = {
 };
 
 export let ascendencyBuffs = {
-    version: 0.979,
+    version: 0.98,
     "littleBagOfHydrogen": {
         name: "Little Bag Of Hydrogen",
         description: "buffLittleBagOfHydrogenRow",

@@ -1,6 +1,6 @@
 # Cosmic Forge Project Documentation
 
-> Build target: **v0.81** (see `GAME_VERSION_FOR_SAVES` in `constantsAndGlobalVars.js`).@constantsAndGlobalVars.js#24-30
+> Build target: **v0.98** (see `GAME_VERSION_FOR_SAVES` in `constantsAndGlobalVars.js`).@constantsAndGlobalVars.js#24-30
 
 ---
 

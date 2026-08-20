@@ -537,6 +537,12 @@ export function migrateResourceData(saveData, objectType, options = {}) {
 
             saveData.version = 0.979;
         }
+        if (saveData.version < 0.98) {
+            // Release 0.98 does not change any saved structure. Keep this rung
+            // nevertheless: a save made by 0.979 must be explicitly carried to
+            // the new schema version, just like every later structural release.
+            saveData.version = 0.98;
+        }
     }
     return saveData;
 }
