@@ -222,7 +222,7 @@ are easy to mistake for build tooling.
 
 | Script | Usage | What it does |
 |---|---|---|
-| `addLocKeys.py` | `python addLocKeys.py key1 "en" "es" "de" "it" "fr" [key2 ...]` | Adds one or more keys to all five language sections of `localization.json` at once, keeping them in parity. Arguments come in groups of six: the key, then its value in English, Spanish, German, Italian and French. |
+| `addLocKeys.py` | `python addLocKeys.py key1 "en" "es" "de" "it" "fr" [key2 ...]` | Adds one or more keys to all language sections of `localization.json` at once, keeping them in parity. Arguments come in groups of six: the key, then its value in English, Spanish, German, Italian and French. |
 | `graph.py` | `python graph.py` | Renders `resources/techData.json` as a Graphviz tech-tree diagram (`resources/graph.png`). Needs the `graphviz` Python package **and** the Graphviz binaries on `PATH`. |
 | `watch_and_run.py` | `python watch_and_run.py` | Watches `resources/techData.json` and re-runs `graph.py` whenever it changes. Runs until interrupted. |
 

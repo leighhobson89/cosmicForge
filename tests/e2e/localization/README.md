@@ -2,7 +2,7 @@
 
 **Localization** — 🟢 GREEN
 
-Language resolution, switching, persistence and full-catalogue integrity across five languages.
+Language resolution, switching, persistence and full-catalogue integrity across six languages.
 
 Specs for this area go in this folder, named `<scenario>.spec.js`.
 

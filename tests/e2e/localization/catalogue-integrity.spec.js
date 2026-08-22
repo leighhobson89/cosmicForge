@@ -155,7 +155,7 @@ test.describe('Localization — catalogue integrity', () => {
     expect(checkLocalizationConsistency()).toBe(true);
   });
 
-  test('all five languages have byte-identical key sets', async () => {
+  test('all six languages have byte-identical key sets', async () => {
     // Duplicates validateLocalization.cjs deliberately: this reports the actual
     // differing keys in the failure message, which the script only prints.
     const referenceKeys = new Set(Object.keys(CATALOGUE[REFERENCE]));
@@ -608,7 +608,7 @@ test("the raw file declares each key exactly once per language", async () => {
     expect(missing).toEqual([]);
   });
 
-  test('the autoBuyerName family is complete across all five languages', async () => {
+  test('the autoBuyerName family is complete across all six languages', async () => {
     const englishAutoBuyerKeys = Object.keys(CATALOGUE[REFERENCE]).filter((k) => k.startsWith('autoBuyerName'));
     expect(englishAutoBuyerKeys.length).toBeGreaterThan(20);
 

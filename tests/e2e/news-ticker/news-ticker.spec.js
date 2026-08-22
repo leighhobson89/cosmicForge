@@ -336,7 +336,7 @@ test.describe('News Ticker', () => {
     expect(result.cluesShown[String(seeded[0]).toLowerCase()]?.length).toBeGreaterThan(0);
   });
 
-  test('ticker content resolves in all five shipped languages', async ({ game }) => {
+  test('ticker content resolves in all six shipped languages', async ({ game }) => {
     const problems = await game.withMods(async (m, config) => {
       const { languages, categories } = config;
       const original = m.cg.getLanguage();

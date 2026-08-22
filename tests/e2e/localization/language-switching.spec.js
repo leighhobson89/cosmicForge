@@ -84,7 +84,7 @@ test.describe('Localization — runtime language switching', () => {
     await game.boot();
   });
 
-  test('Game Options offers all five languages, each named in its own language', async ({ game }) => {
+  test('Game Options offers all six languages, each named in its own language', async ({ game }) => {
     await openGameOptions(game);
 
     const dropdown = await game.page.evaluate(() => {

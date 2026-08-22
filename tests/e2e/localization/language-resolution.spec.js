@@ -35,7 +35,7 @@ test.describe('Localization — language resolution', () => {
       await game.boot();
     });
 
-    test('the supported-language list is exactly the five shipped languages', async ({ game }) => {
+    test('the supported-language list is exactly the six shipped languages', async ({ game }) => {
       const supported = await game.withMods((m) => m.loc.getSupportedLanguages());
       expect([...supported].sort()).toEqual([...SUPPORTED].sort());
     });

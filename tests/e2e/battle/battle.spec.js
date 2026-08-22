@@ -197,7 +197,7 @@ test.describe('Battle & Conquest', () => {
     expect(result.restored).toBeFalsy();
   });
 
-  test('battle outcome modal copy resolves in all five languages', async ({ game }) => {
+  test('battle outcome modal copy resolves in all six languages', async ({ game }) => {
     const unresolved = await game.withMods(async (m) => {
       const languages = ['en', 'es', 'pt', 'de', 'it', 'fr'];
       const original = m.cg.getLanguage();

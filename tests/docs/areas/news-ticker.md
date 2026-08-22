@@ -18,10 +18,10 @@ Rotating flavour content by category and interval, left to fire on its own timer
 - [ ] A forced prize can be collected off the ticker, and the collection is recorded and cannot be repeated
 - [ ] Left unforced, the ticker falls to a no-prize headline and records it as seen
 - [ ] A forced manuscript clue names the outstanding star and never repeats a template
-- [ ] A wacky headline arrives in whichever of the five languages the game is set to
+- [ ] A wacky headline arrives in whichever of the six languages the game is set to
 - [ ] A manuscript clue is told in the current language and still names its star
 - [ ] Each category produces only its own content
-- [ ] Content is localized in all five languages and rebuilt on a language change
+- [ ] Content is localized in all six languages and rebuilt on a language change
 - [ ] The ticker does not leak timers when the setting is toggled
 - [ ] A forced category with nothing eligible to say falls back instead of recursing
 

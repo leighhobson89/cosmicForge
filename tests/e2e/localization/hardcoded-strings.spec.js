@@ -72,7 +72,7 @@ test.describe('Localization — hardcoded string extraction', () => {
     ).toBeLessThanOrEqual(UNANNOTATED_HTML_TEXT_CEILING);
   });
 
-  test('every onboarding instruction is translated in all five languages', async () => {
+  test('every onboarding instruction is translated in all six languages', async () => {
     // The tutorial is the first thing a new player reads, which is why it sits
     // at the top of the item 5 priority list.
     expect(ONBOARDING_STEP_KEYS.length).toBeGreaterThanOrEqual(40);

@@ -26,7 +26,7 @@ The launch pad and the four rockets from purchase to landing: module pricing, as
 - [ ] A renamed rocket keeps its name, renaming one does not rename another, and names survive serialisation
 - [ ] Resetting a rocket for its next journey empties its tank
 - [ ] The rocket direction flag round-trips per rocket
-- [ ] Launch notifications resolve from the catalogue in all five languages with a {rocketName} placeholder
+- [ ] Launch notifications resolve from the catalogue in all six languages with a {rocketName} placeholder
 - [ ] The Launch Pad quotes four prices, is unbuilt on a fresh run, and its row is on offer
 - [ ] Building the pad pays cash, iron, titanium and concrete out of the run, marks it bought and withdraws the offer
 - [ ] The pad announces itself and is what puts the four airframe rows on the workbench

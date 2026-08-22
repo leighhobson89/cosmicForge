@@ -8,7 +8,7 @@ One line per functional area, worst first. 44 green, 0 amber, 0 red, out of 44.
 
 | | Area | Group | Risk | Specs | Where it stands |
 |:--:|---|---|:--:|--:|---|
-| 🟢 | [Achievements](areas/achievements.md) | Meta Progression | Low | 33 | Upgraded to integration and swept end to end: all seventy achievements are earned at their own condition and their reward audited against the arithmetic the data promises, the playable scenarios are played and granted by the frame loop, two rebirths audit what persists, and the pane is checked across 630 artwork files and five languages. The area found known-issues #37, now fixed at source: the pane installed a fresh tooltip element and three more document listeners on every visit. |
+| 🟢 | [Achievements](areas/achievements.md) | Meta Progression | Low | 33 | Upgraded to integration and swept end to end: all seventy achievements are earned at their own condition and their reward audited against the arithmetic the data promises, the playable scenarios are played and granted by the frame loop, two rebirths audit what persists, and the pane is checked across 630 artwork files and six languages. The area found known-issues #37, now fixed at source: the pane installed a fresh tooltip element and three more document listeners on every visit. |
 | 🟢 | [Antimatter](areas/antimatter.md) | Space Operations | Medium | 26 | Done — driven through its own controls, 26 specs passing. |
 | 🟢 | [Application Boot](areas/app-boot.md) | Foundation | High | 11 | Done — driven through its own controls, 11 specs passing. |
 | 🟢 | [Ascendency Points & Perks](areas/ascendency.md) | Meta Progression | High | 20 | Done — driven through its own controls, 20 specs passing. |

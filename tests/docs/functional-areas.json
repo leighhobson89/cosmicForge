@@ -163,7 +163,7 @@
       "status": "green",
       "risk": "high",
       "legacy": [],
-      "summary": "Language resolution, switching, persistence and full-catalogue integrity across five languages.",
+      "summary": "Language resolution, switching, persistence and full-catalogue integrity across six languages.",
       "tests": [
         "Boot resolves language in the correct order: explicit > stored > navigator > English",
         "Chosen language persists across a full restart",
@@ -262,7 +262,7 @@
         "Buying a tier 1 autobuyer charges the resource, raises the price and starts extraction",
         "A higher tier bought through its own button out-produces tier 1",
         "Each tier extracts faster and costs more than the one below it",
-        "Every resource name resolves to real copy in all five languages",
+        "Every resource name resolves to real copy in all six languages",
         "Driving every resource pane raises no console or page errors"
       ],
       "specCount": 21
@@ -284,7 +284,7 @@
         "Crafting past the cap is clamped and the waste is called out",
         "Crafting with too few ingredients makes nothing and takes nothing",
         "Every compound can be crafted through its own pane",
-        "Every phrase the create dropdown is built from resolves in all five languages",
+        "Every phrase the create dropdown is built from resolves in all six languages",
         "Every compound offers the full set of create options, each with text",
         "Switching language relabels the create dropdown on screen",
         "Crafting in another language still charges the right resources",
@@ -299,7 +299,7 @@
         "The Sell button sells exactly the previewed amount and pays for it",
         "The quantity selector decides how much the Sell button sells",
         "Sell All empties every unlocked compound and then disables itself",
-        "Every compound name is localized in all five languages",
+        "Every compound name is localized in all six languages",
         "Driving every compound pane raises no console or page errors",
         "The star system rains one compound, drawn from the shipped weighted table",
         "With the weather clear, nothing arrives from the sky",
@@ -337,7 +337,7 @@
         "Owning tier 4 autobuyers raises total energy use",
         "The displayed production rate never renders NaN",
         "Quantities and toggle states survive serialisation",
-        "Autobuyer names localize in all five languages"
+        "Autobuyer names localize in all six languages"
       ],
       "specCount": 19
     },
@@ -483,7 +483,7 @@
         "A renamed rocket keeps its name, renaming one does not rename another, and names survive serialisation",
         "Resetting a rocket for its next journey empties its tank",
         "The rocket direction flag round-trips per rocket",
-        "Launch notifications resolve from the catalogue in all five languages with a {rocketName} placeholder",
+        "Launch notifications resolve from the catalogue in all six languages with a {rocketName} placeholder",
         "The Launch Pad quotes four prices, is unbuilt on a fresh run, and its row is on offer",
         "Building the pad pays cash, iron, titanium and concrete out of the run, marks it bought and withdraws the offer",
         "The pad announces itself and is what puts the four airframe rows on the workbench",
@@ -883,7 +883,7 @@
         "The choice modal appears at its real trigger and only while no philosophy is set",
         "The Philosophy row is hidden on run 1 and revealed by the run-1 rebirth; repeatables bought on run 2 are replayed into run 3",
         "The Voidborn AP bonus applies only from run 2, as documented",
-        "Every philosophy name resolves from the catalogue in all five languages and no button clips its translated label",
+        "Every philosophy name resolves from the catalogue in all six languages and no button clips its translated label",
         "The choice survives save/load, and the debug scenario defaults run 1 to Voidborn"
       ],
       "specCount": 42
@@ -908,12 +908,12 @@
         "Achievement state and its special checkers survive a real export/import round trip",
         "The pane draws one tile per achievement, each in its own grid cell",
         "Every achievement has artwork on disk for all nine themes, and the grid repaints when the theme changes",
-        "Tooltips resolve in all five languages and their status line flips live",
+        "Tooltips resolve in all six languages and their status line flips live",
         "Reopening the pane does not stack tooltips or listeners (known-issues #37, fixed)",
         "Discovering an asteroid on run 1 does not stop the frame loop"
       ],
       "specCount": 33,
-      "note": "Upgraded to integration and swept end to end: all seventy achievements are earned at their own condition and their reward audited against the arithmetic the data promises, the playable scenarios are played and granted by the frame loop, two rebirths audit what persists, and the pane is checked across 630 artwork files and five languages. The area found known-issues #37, now fixed at source: the pane installed a fresh tooltip element and three more document listeners on every visit."
+      "note": "Upgraded to integration and swept end to end: all seventy achievements are earned at their own condition and their reward audited against the arithmetic the data promises, the playable scenarios are played and granted by the frame loop, two rebirths audit what persists, and the pane is checked across 630 artwork files and six languages. The area found known-issues #37, now fixed at source: the pane installed a fresh tooltip element and three more document listeners on every visit."
     },
     {
       "id": "black-hole",
@@ -1064,7 +1064,7 @@
         "Probability decays 0.9 per trigger to a 0.01 floor, for that event only, and survives a save with the running effect",
         "The Events screen lists running effects with a live countdown, colours good and bad, and orders by what ends soonest",
         "The completed log shows instant events as \"Instant\" with the figures they moved, newest first",
-        "Every event renders a real name and effect line on the screen in all five languages"
+        "Every event renders a real name and effect line on the screen in all six languages"
       ],
       "specCount": 52
     },
@@ -1083,10 +1083,10 @@
         "A forced prize can be collected off the ticker, and the collection is recorded and cannot be repeated",
         "Left unforced, the ticker falls to a no-prize headline and records it as seen",
         "A forced manuscript clue names the outstanding star and never repeats a template",
-        "A wacky headline arrives in whichever of the five languages the game is set to",
+        "A wacky headline arrives in whichever of the six languages the game is set to",
         "A manuscript clue is told in the current language and still names its star",
         "Each category produces only its own content",
-        "Content is localized in all five languages and rebuilt on a language change",
+        "Content is localized in all six languages and rebuilt on a language change",
         "The ticker does not leak timers when the setting is toggled",
         "A forced category with nothing eligible to say falls back instead of recursing"
       ],
@@ -1215,7 +1215,7 @@
         "Leaving the required tab prompts a return and recovers correctly",
         "Onboarding can be exited early and the game remains playable",
         "Re-enabling the tutorial restarts it from the first step",
-        "All tutorial text is localized in all five languages, and the tutorial runs end to end in a second language"
+        "All tutorial text is localized in all six languages, and the tutorial runs end to end in a second language"
       ],
       "specCount": 13
     },

@@ -31,7 +31,7 @@ The eight extractable base resources plus solar, driven through the Resources ta
 - [ ] Buying a tier 1 autobuyer charges the resource, raises the price and starts extraction
 - [ ] A higher tier bought through its own button out-produces tier 1
 - [ ] Each tier extracts faster and costs more than the one below it
-- [ ] Every resource name resolves to real copy in all five languages
+- [ ] Every resource name resolves to real copy in all six languages
 - [ ] Driving every resource pane raises no console or page errors
 
 ## Status meaning

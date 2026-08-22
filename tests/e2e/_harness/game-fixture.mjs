@@ -83,7 +83,7 @@ class GameHarness {
 
     if (promptShown) {
       const text = (await cancel.textContent())?.trim().toUpperCase();
-      promptShown = ['NO', 'NEIN', 'NON'].includes(text);
+      promptShown = ['NO', 'NEIN', 'NON', 'NÃO'].includes(text);
     }
 
     if (promptShown) {

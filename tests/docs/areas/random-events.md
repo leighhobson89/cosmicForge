@@ -24,7 +24,7 @@ Instant and timed events, their probability model, effects and history tracking.
 - [ ] Probability decays 0.9 per trigger to a 0.01 floor, for that event only, and survives a save with the running effect
 - [ ] The Events screen lists running effects with a live countdown, colours good and bad, and orders by what ends soonest
 - [ ] The completed log shows instant events as "Instant" with the figures they moved, newest first
-- [ ] Every event renders a real name and effect line on the screen in all five languages
+- [ ] Every event renders a real name and effect line on the screen in all six languages
 
 ## Status meaning
 

@@ -2,7 +2,7 @@
 //
 // Three checks, in the order a broken catalogue tends to break:
 //
-//   1. parity    — all five languages declare exactly the same key set.
+//   1. parity    — all languages declare exactly the same key set.
 //   2. values    — no value is empty, except the sanctioned few.
 //   3. wiring    — every key is reachable from the shipped source, and every key
 //                  the source asks for exists.

@@ -23,7 +23,7 @@ The four permanent player paths chosen once and affecting the whole account ther
 - [ ] The choice modal appears at its real trigger and only while no philosophy is set
 - [ ] The Philosophy row is hidden on run 1 and revealed by the run-1 rebirth; repeatables bought on run 2 are replayed into run 3
 - [ ] The Voidborn AP bonus applies only from run 2, as documented
-- [ ] Every philosophy name resolves from the catalogue in all five languages and no button clips its translated label
+- [ ] Every philosophy name resolves from the catalogue in all six languages and no button clips its translated label
 - [ ] The choice survives save/load, and the debug scenario defaults run 1 to Voidborn
 
 ## Status meaning

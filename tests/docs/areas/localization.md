@@ -8,7 +8,7 @@
 | **Spec folder** | `tests/e2e/localization/` |
 | **Existing coverage** | _none_ |
 
-Language resolution, switching, persistence and full-catalogue integrity across five languages.
+Language resolution, switching, persistence and full-catalogue integrity across six languages.
 
 ## What should be tested
 

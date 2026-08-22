@@ -470,7 +470,7 @@ test.describe('Compounds — the create dropdown is localized', () => {
     await prepareCraftingRun(game);
   });
 
-  test('every phrase the create dropdown is built from resolves in all five languages', async ({ game }) => {
+  test('every phrase the create dropdown is built from resolves in all six languages', async ({ game }) => {
     // The dropdown text is assembled from two families of catalogue keys: the
     // proportional options, and the short material names that spell each recipe
     // out. Either one going missing leaves a raw key on screen.
@@ -589,6 +589,50 @@ test.describe('Compounds — the create dropdown is localized', () => {
     expect(after.quantity - before.quantity).toBe(5);
     expect(before.ingredients.hydrogen - after.ingredients.hydrogen).toBe(130);
     expect(before.ingredients.carbon - after.ingredients.carbon).toBe(60);
+  });
+
+  test('the Create button crafts diesel and deducts its ingredients in every supported language', async ({ game }) => {
+    // The Create handler parses the localized preview back into canonical
+    // resource keys.  Keep the supported-language list in the game rather than
+    // duplicating a (historically stale) "six languages" test constant here.
+    const languages = await game.withMods((m) => m.loc.getSupportedLanguages());
+    expect(languages, 'the game must expose at least one supported language').not.toEqual([]);
+
+    const outcomes = [];
+    for (const language of languages) {
+      // This is the same real redraw path the Settings language dropdown uses.
+      await game.withMods(async (m, lang) => { await m.ui.relocalizeAll(lang); }, language);
+      await game.page.waitForTimeout(900);
+
+      // Reset every moving input for this language. In particular, no rain,
+      // auto-create or autobuyer may make a successful click look successful.
+      await clearWeather(game);
+      await openCompound(game, 'diesel');
+      await stageIngredients(game, 'diesel', { each: 100000, capacity: 1e6, compoundQuantity: 0 });
+      await chooseDropdown(game, 'dieselCreateSelectQuantity', '5');
+
+      const before = await readCraftState(game, 'diesel');
+      await clickRowButton(game, 'dieselCreateRow', 'button.create');
+      const after = await readCraftState(game, 'diesel');
+
+      outcomes.push({
+        language,
+        dieselMade: after.quantity - before.quantity,
+        hydrogenSpent: before.ingredients.hydrogen - after.ingredients.hydrogen,
+        carbonSpent: before.ingredients.carbon - after.ingredients.carbon,
+        cashChanged: after.cash - before.cash
+      });
+    }
+
+    expect(outcomes).toEqual(languages.map((language) => ({
+      language,
+      dieselMade: 5,
+      hydrogenSpent: 130,
+      carbonSpent: 60,
+      // Crafting must not be accidentally satisfied by a sale or another
+      // economy action while the localized preview is being exercised.
+      cashChanged: 0
+    })));
   });
 });
 
@@ -998,7 +1042,7 @@ test.describe('Compounds — selling', () => {
     );
   });
 
-  test('every compound name is localized in all five languages', async ({ game }) => {
+  test('every compound name is localized in all six languages', async ({ game }) => {
     const problems = await game.withMods(async (m, config) => {
       const { compounds, languages } = config;
       const original = m.cg.getLanguage();

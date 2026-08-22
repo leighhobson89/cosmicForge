@@ -23,13 +23,13 @@ Unlock conditions, rewards, notifications, artwork and tooltips across all seven
 - [ ] Achievement state and its special checkers survive a real export/import round trip
 - [ ] The pane draws one tile per achievement, each in its own grid cell
 - [ ] Every achievement has artwork on disk for all nine themes, and the grid repaints when the theme changes
-- [ ] Tooltips resolve in all five languages and their status line flips live
+- [ ] Tooltips resolve in all six languages and their status line flips live
 - [ ] Reopening the pane does not stack tooltips or listeners (known-issues #37, fixed)
 - [ ] Discovering an asteroid on run 1 does not stop the frame loop
 
 ## Status meaning
 
-🟢 **GREEN** — Upgraded to integration and swept end to end: all seventy achievements are earned at their own condition and their reward audited against the arithmetic the data promises, the playable scenarios are played and granted by the frame loop, two rebirths audit what persists, and the pane is checked across 630 artwork files and five languages. The area found known-issues #37, now fixed at source: the pane installed a fresh tooltip element and three more document listeners on every visit.
+🟢 **GREEN** — Upgraded to integration and swept end to end: all seventy achievements are earned at their own condition and their reward audited against the arithmetic the data promises, the playable scenarios are played and granted by the frame loop, two rebirths audit what persists, and the pane is checked across 630 artwork files and six languages. The area found known-issues #37, now fixed at source: the pane installed a fresh tooltip element and three more document listeners on every visit.
 
 ---
 

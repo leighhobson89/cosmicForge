@@ -226,7 +226,7 @@ test.describe('Philosophies — choosing one', () => {
     }
   });
 
-  test('every philosophy name resolves from the catalogue in all five languages', async ({ game }) => {
+  test('every philosophy name resolves from the catalogue in all six languages', async ({ game }) => {
     await game.boot();
 
     // known-issues.md #13: these four labels used to be hardcoded English
@@ -311,7 +311,7 @@ test.describe('Philosophies — choosing one', () => {
     expect(clipped).toEqual([]);
   });
 
-  test('each choice has its own localized confirmation notification in all five languages', async ({ game }) => {
+  test('each choice has its own localized confirmation notification in all six languages', async ({ game }) => {
     await game.boot();
 
     const problems = await game.withMods(async (m, config) => {

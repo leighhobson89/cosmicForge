@@ -20,7 +20,7 @@ Crafting driven through the Compounds tab: the create dropdown and what it actua
 - [ ] Crafting past the cap is clamped and the waste is called out
 - [ ] Crafting with too few ingredients makes nothing and takes nothing
 - [ ] Every compound can be crafted through its own pane
-- [ ] Every phrase the create dropdown is built from resolves in all five languages
+- [ ] Every phrase the create dropdown is built from resolves in all six languages
 - [ ] Every compound offers the full set of create options, each with text
 - [ ] Switching language relabels the create dropdown on screen
 - [ ] Crafting in another language still charges the right resources
@@ -35,7 +35,7 @@ Crafting driven through the Compounds tab: the create dropdown and what it actua
 - [ ] The Sell button sells exactly the previewed amount and pays for it
 - [ ] The quantity selector decides how much the Sell button sells
 - [ ] Sell All empties every unlocked compound and then disables itself
-- [ ] Every compound name is localized in all five languages
+- [ ] Every compound name is localized in all six languages
 - [ ] Driving every compound pane raises no console or page errors
 - [ ] The star system rains one compound, drawn from the shipped weighted table
 - [ ] With the weather clear, nothing arrives from the sky

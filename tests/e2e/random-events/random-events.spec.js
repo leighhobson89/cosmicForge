@@ -75,7 +75,7 @@ test.describe('Random Events — catalogue and probability model', () => {
     }
   });
 
-  test('every event name and description localizes in all five languages', async ({ game }) => {
+  test('every event name and description localizes in all six languages', async ({ game }) => {
     const problems = await game.withMods(async (m, languages) => {
       const ids = m.events.getRandomEventIds();
       const original = m.cg.getLanguage();

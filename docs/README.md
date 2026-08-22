@@ -8,7 +8,7 @@ Everything written about the game itself lives in this folder.
 | [GDD.md](GDD.md) | The game design document — the high-level design, progression arc and system write-ups, including the Tab 7 systems (Galactic Market, Galactic Casino). |
 | [making-a-build.md](making-a-build.md) | How to produce a release: the Python web/itch packager and the Electron stamper, every parameter each takes, what the three build flags do, and what a demo build withholds. |
 | [buildUpgradeable.md](buildUpgradeable.md) | Step-by-step guide to adding a repeatable or upgradable item (autobuyers, batteries, power plants) end to end. |
-| [localization/status.md](localization/status.md) | State of the five shipped languages and what is outstanding. |
+| [localization/status.md](localization/status.md) | State of all the shipped languages and what is outstanding. |
 
 ## What is *not* here
 

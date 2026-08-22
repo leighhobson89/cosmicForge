@@ -430,7 +430,7 @@ test.describe('Autobuyers — energy cost and rate accounting', () => {
     expect(issues).toEqual([]);
   });
 
-  test('every autobuyer name resolves in all five languages', async ({ game }) => {
+  test('every autobuyer name resolves in all six languages', async ({ game }) => {
     const problems = await game.withMods(async (m, config) => {
       const { resources, compounds, tiers, languages } = config;
       const original = m.cg.getLanguage();

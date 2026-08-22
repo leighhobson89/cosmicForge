@@ -29,7 +29,7 @@ Automation for all resources and compounds across four tiers, measured as throug
 - [ ] Owning tier 4 autobuyers raises total energy use
 - [ ] The displayed production rate never renders NaN
 - [ ] Quantities and toggle states survive serialisation
-- [ ] Autobuyer names localize in all five languages
+- [ ] Autobuyer names localize in all six languages
 
 ## Status meaning
 

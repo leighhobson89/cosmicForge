@@ -179,7 +179,7 @@ test.describe('Achievements — catalogue integrity', () => {
     expect(problems).toEqual([]);
   });
 
-  test('every achievement notification resolves to real copy in all five languages', async ({ game }) => {
+  test('every achievement notification resolves to real copy in all six languages', async ({ game }) => {
     // An achievement's `notification` field is a lookup key into the
     // `achievementNotifications` map in descriptions.js, which is rebuilt per
     // language — it is not itself a localization key. Rebuild per language and

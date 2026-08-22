@@ -320,7 +320,7 @@ test.describe('Achievements — the pane', () => {
     expect(after).toContain(`${labels.status}: ${labels.achieved}`);
   });
 
-  test('every achievement has a tooltip that resolves, in all five languages', async ({ game }) => {
+  test('every achievement has a tooltip that resolves, in all six languages', async ({ game }) => {
     // The tooltip body is built from `achievementTooltipDescriptionTexts`, which
     // is rebuilt per language by `initialiseDescriptions()`. An achievement
     // missing from that map renders a tooltip with a hole in it and a console

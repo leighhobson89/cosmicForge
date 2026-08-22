@@ -732,7 +732,7 @@ test.describe('Resources — catalogue invariants', () => {
     expect(inversions).toEqual([]);
   });
 
-  test('every resource name resolves to real copy in all five languages', async ({ game }) => {
+  test('every resource name resolves to real copy in all six languages', async ({ game }) => {
     const problems = await game.withMods(async (m, config) => {
       const { resources, languages } = config;
       const original = m.cg.getLanguage();

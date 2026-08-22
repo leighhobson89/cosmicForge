@@ -18,7 +18,7 @@ The guided first-run tutorial. Every new player’s first experience, and fully 
 - [ ] Leaving the required tab prompts a return and recovers correctly
 - [ ] Onboarding can be exited early and the game remains playable
 - [ ] Re-enabling the tutorial restarts it from the first step
-- [ ] All tutorial text is localized in all five languages, and the tutorial runs end to end in a second language
+- [ ] All tutorial text is localized in all six languages, and the tutorial runs end to end in a second language
 
 ## Status meaning
 

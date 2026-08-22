@@ -53,7 +53,7 @@ const DEBUG_INTERVAL_MS = 10000;
 /** How long to wait for a headline the timer has been asked to produce. */
 const MESSAGE_TIMEOUT_MS = 30000;
 
-/** The five shipped languages, in the order the debug select lists them. */
+/** The six shipped languages, in the order the debug select lists them. */
 const LANGUAGES = ['en', 'es', 'pt', 'de', 'it', 'fr'];
 
 // --------------------------------------------------------------------- helpers
@@ -435,7 +435,7 @@ test.describe('News Ticker — the language the ticker speaks', () => {
     expect(applied, `the debug menu should have switched to ${language}`).toBe(language);
   }
 
-  test('a wacky headline arrives in whichever of the five languages the game is set to', async ({ game }) => {
+  test('a wacky headline arrives in whichever of the six languages the game is set to', async ({ game }) => {
     await game.boot();
 
     const rendered = {};

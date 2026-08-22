@@ -1,6 +1,6 @@
 # Localization Status
 
-Status as of HEAD `a193a44` + in-session work. Five languages: **en, es, de, it, fr**.
+Status as of HEAD `a193a44` + in-session work. Six languages: **en, es, de, it, fr**.
 
 ## Summary
 
@@ -15,18 +15,18 @@ The catalogue is **2,591 keys × 5 languages, complete parity, zero keys referen
 missing from the JSON, and zero keys that nothing in the source can reach**. Item 5 — the string
 extraction — is **done**: every player-facing literal in every shipped source file resolves through
 the catalogue. Item 7 — the checker — is **done** too: `validateLocalization.cjs` now resolves the
-five constructed key families from source, which is what finally made the 20 genuinely dead keys
+six constructed key families from source, which is what finally made the 20 genuinely dead keys
 safe to delete, and it gates every build.
 
 Item 9, the layout pass, moved from 🔴 to 🟠 this session: the measurable half is closed — **no
-control anywhere is clipped by its translated label in any language**, which was five controls
+control anywhere is clipped by its translated label in any language**, which was six controls
 before, and the ratchet that tracked them is now an absolute. What is left is the part no automated
 measure catches: wrapping quality, overlapping absolute positioning and truncated modals, which
 still want a human play-through in German.
 
 The area has **114 automated specs** in `tests/e2e/localization/`, covering catalogue integrity, the
 resolution chain, runtime switching, tab identity and intro pages, the reverse lookup, the extraction
-backlog, the frame-loop cost labels, the welcome-modal flag selector, and a five-language sweep of
+backlog, the frame-loop cost labels, the welcome-modal flag selector, and a six-language sweep of
 every tab at a late-game state. All 114 pass. The remaining open item is held in place by *ratchets* in those specs — a recorded baseline
 that may fall but must never rise. See [Test coverage](#test-coverage) at the foot of this document.
 
@@ -122,7 +122,7 @@ caller, since most description lines name no second compound.
 
 Guarded by `tests/e2e/localization/compound-reverse-lookup.spec.js`: twelve specs covering the
 behavioural contract, a 150ms budget for 2,000 calls, and a DOM-level assertion that the storage
-row stores `concrete` rather than `Beton` / `Hormigón` / `Cemento` / `Béton` in all five languages.
+row stores `concrete` rather than `Beton` / `Hormigón` / `Cemento` / `Béton` in all six languages.
 
 ---
 
@@ -139,7 +139,7 @@ using the same custom `createDropdown` component as the theme switcher. Options 
 own language (English, Español, Deutsch, Italiano, Français), and selecting one applies
 immediately with no confirm button, matching the theme switcher's behaviour.
 
-Two new keys were added across all five languages (`settingsLanguageRowLabel`,
+Two new keys were added across all six languages (`settingsLanguageRowLabel`,
 `settingsLanguageRowDescription`), keeping parity at 1,626 keys each.
 
 The debug panel switcher now routes through the same `relocalizeAll()` instead of duplicating the
@@ -356,7 +356,7 @@ that predates the key slot beside it.
 the literal `'Researched'` onto the row's button *and* onto its description label from the frame
 loop, at eight sites across the core research tab (`handleTechnologyScreenButtonAndDescriptionStates`
 and `setSellFuseCreateTextDescriptionClassesBasedOnButtonStates`) and the cosmic-rip technology
-screen. All eight now resolve `textResearchedState`, a new key added in all five languages
+screen. All eight now resolve `textResearchedState`, a new key added in all six languages
 (`Researched` / `Investigado` / `Erforscht` / `Ricercato` / `Recherché`). It is deliberately separate
 from the existing `textResearched`, which is the tech tree's uppercase status tag.
 
@@ -445,7 +445,7 @@ than debt:
 **🟢 Done**
 
 `interpolateTemplateLiteral()` ran `eval()` on any localized string containing `${…}`. No value in
-the catalogue used it — all 2,587 entries in all five languages checked, count was zero — so the
+the catalogue used it — all 2,587 entries in all six languages checked, count was zero — so the
 path was dead, but it re-armed the moment a translator typed `${` into a string, and it evaluated
 content from a data file.
 
@@ -547,7 +547,7 @@ untranslated placeholders.
 German runs 20–35% longer than English, and the UI is built from fixed-width panels and fixed
 percentage columns, so overflow and bad wrapping surface there first.
 
-Across all five languages and all nine tabs, at a late-game state:
+Across all six languages and all nine tabs, at a late-game state:
 
 - **No tab overflows the viewport horizontally** in any language.
 - **No control is clipped by its translated label.** This was five controls; all five are fixed and
@@ -622,7 +622,7 @@ The Black Hole charge button is written by the frame loop in four states, and al
 literals — `ACTIVE`, `Charging...`, `ACTIVATE`, `Charge`. They are the same class the four
 "misses found in play" under item 5 belong to: written over the draw function's work a frame later,
 so no sweep of the draw functions could have caught them. `buttonBlackHoleChargeActive`,
-`buttonBlackHoleCharging` and `buttonBlackHoleActivate` were added across all five languages, and
+`buttonBlackHoleCharging` and `buttonBlackHoleActivate` were added across all six languages, and
 the fourth state now reuses the existing `buttonBlackHoleCharge`.
 
 Two more layout bugs went with them, both on the Black Hole interaction description:
@@ -725,7 +725,7 @@ Two deliberate limits, both as specified:
 
 Guarded by `tests/e2e/localization/welcome-language-flags.spec.js`: the bar's geometry measured
 against the modal, the images actually decoding, one-at-a-time selection across repeated clicks, the
-language staying put until confirm, and a full boot in each of the five languages through to the
+language staying put until confirm, and a full boot in each of the six languages through to the
 onboarding prompt.
 
 ---
@@ -763,11 +763,11 @@ catalogue checker can also be run on its own, without Playwright, with `bun run 
 | `language-resolution.spec.js` | 19 | The full resolution chain against real browser locales, regional tag normalisation, corrupt and unsupported values, persistence across restart, storage failure. |
 | `language-switching.spec.js` | 15 | The Settings selector, the debug switcher, `relocalizeAll` return contract, round trips, all twenty category-header transitions, the `data-loc` sweep. |
 | `compound-reverse-lookup.spec.js` | 12 | Item 2 — the behavioural contract, the frame budget, and the stored internal key. |
-| `tab-intro.spec.js` | 8 | Item 10 — every tab's intro page in all five languages, canonical tab identity, the `???` marker. |
+| `tab-intro.spec.js` | 8 | Item 10 — every tab's intro page in all six languages, canonical tab identity, the `???` marker. |
 | `hardcoded-strings.spec.js` | 12 | Item 5 — the `data-loc` annotations, the tutorial, the needle map, the extraction ratchet, and the four controls whose *state* used to ride on their English label (known-issues #40–#42). |
-| `translated-ui.spec.js` | 7 | Five languages × nine tabs at a late-game state: raw-key leaks, viewport overflow, translation-caused clipping, constructed keys, frame-loop survival. |
+| `translated-ui.spec.js` | 7 | six languages × nine tabs at a late-game state: raw-key leaks, viewport overflow, translation-caused clipping, constructed keys, frame-loop survival. |
 | `cost-labels.spec.js` | 4 | The purchase-row cost labels the frame loop rewrites: address resolution past the id collision, the rewrite itself, `normalCondensed` reaching them, and their material names following a language change. |
-| `welcome-language-flags.spec.js` | 19 | Item 11 — the flag bar on the welcome modal: its nine-column geometry against the modal width, the flag images decoding, deferred selection across repeated clicks, and a real boot in each of the five languages. |
+| `welcome-language-flags.spec.js` | 19 | Item 11 — the flag bar on the welcome modal: its nine-column geometry against the modal width, the flag images decoding, deferred selection across repeated clicks, and a real boot in each of the six languages. |
 
 ### Ratchets
 

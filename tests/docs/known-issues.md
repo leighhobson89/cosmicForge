@@ -156,7 +156,7 @@ collapses to `['spica', 'vega']`.
 ## 3. Every frame-loop tab gate breaks outside English — ✅ FIXED
 
 **Severity was: critical — large parts of the UI stopped updating in four of the
-five shipped languages.**
+six shipped languages.**
 
 ### Reproduction
 
@@ -243,7 +243,7 @@ Two symptoms went with it, both reported from play:
 
 Regression specs: `tests/e2e/localization/tab-intro.spec.js` (identity, the `???`
 marker, the rendered label) and the secondary-cost assertion in
-`compound-reverse-lookup.spec.js`, now widened to all five languages.
+`compound-reverse-lookup.spec.js`, now widened to all six languages.
 
 ---
 
@@ -387,7 +387,7 @@ language pairs and asserts the expected form after each.
 
 ## 7. Five controls clip their translated label — ✅ FIXED
 
-**Severity: low — cosmetic, but present in four of five languages.**
+**Severity: low — cosmetic, but present in four of six languages.**
 
 All five are fixed and the allowlist in
 `tests/e2e/localization/translated-ui.spec.js` is now **empty**, which is itself
@@ -487,7 +487,7 @@ behaviour and would fail if one were added.
 
 **Severity was: low — cosmetic.**
 
-All five languages ended this value with a `</span>` that had no opening tag,
+All six languages ended this value with a `</span>` that had no opening tag,
 left behind when the string was extracted out of a hardcoded literal. The value
 is rendered through `innerHTML` in the philosophy-choice modal; browsers discard
 an unmatched closing tag, so nothing was visibly broken.
@@ -706,7 +706,7 @@ extra2Label:  'EXPANSIONIST',
 Everything else about the modal is localized — `modalPlayerLeaderPhilosophyHeaderText`,
 `modalPlayerLeaderPhilosophyContentText`, and the four
 `notificationPhilosophy*` confirmations that follow the choice all resolve
-through the catalogue in all five languages. Only the button labels were missed,
+through the catalogue in all six languages. Only the button labels were missed,
 and there is no key for them: searching the catalogue for a philosophy *name*
 returns descriptions and tech content but nothing that renders as a bare label.
 
@@ -736,7 +736,7 @@ invented, and are the two most worth a native reviewer's eye.
 
 `tests/e2e/philosophies/philosophies.spec.js`:
 
-- every name resolves from the catalogue in all five languages;
+- every name resolves from the catalogue in all six languages;
 - the **real** modal — raised through `startInvestigateStarTimer` rather than by
   calling `callPopupModal` with labels of the spec's own — renders the French
   names, French being the only language where all four differ from English, so
@@ -1046,7 +1046,7 @@ rather than the test.
 
 ## 19. Crafting a compound in any language but English is free — ✅ FIXED
 
-**Severity:** high — an economy exploit, live in four of the five shipped languages.
+**Severity:** high — an economy exploit, live in four of the six shipped languages.
 
 **Found by:** `tests/e2e/compounds/compounds.spec.js` →
 *"crafting in another language still charges the right resources"*.
@@ -2852,7 +2852,7 @@ the armed check reads the dataset. The three market summary lines got
 `marketQuantityFieldIsNotApplicable()`, which carry `dataset.notApplicable` and
 render `localize('textNotApplicable', …)`.
 
-A new catalogue key, `buttonSettle`, was added in all five languages.
+A new catalogue key, `buttonSettle`, was added in all six languages.
 
 Guarded by `tests/e2e/diplomacy/diplomacy-journey.spec.js`, *"an empty system
 offers Settle in the player's own language"*, and by
@@ -2864,7 +2864,7 @@ working when its not-applicable marker is translated"*.
 ## 42. Every statistic read as green outside English — ✅ FIXED
 
 **Severity was: low — nothing broke, but the Statistics screen's colour coding
-was meaningless in four of five languages: values that should have been red or
+was meaningless in four of six languages: values that should have been red or
 orange were drawn green.**
 
 ### Reproduction

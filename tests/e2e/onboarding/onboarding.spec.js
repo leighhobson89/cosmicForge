@@ -232,7 +232,7 @@ test.describe('Onboarding & Tutorial', () => {
     expect(restarted).toContain(firstStep);
   });
 
-  test('every tutorial step string is present in all five languages', async ({ game }) => {
+  test('every tutorial step string is present in all six languages', async ({ game }) => {
     await game.boot();
 
     const problems = await game.withMods(async (m, languages) => {

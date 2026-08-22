@@ -1528,7 +1528,7 @@ events coloured green and red on the same table; the active table ordered by wha
 ends soonest; an instant event logged with duration "Instant" and the figure it
 moved; a finished effect moving from the active table to the completed one with
 its full duration; the completed log ordered newest first; and every event in the
-catalogue rendering a real name and a real effect line **in all five languages** —
+catalogue rendering a real name and a real effect line **in all six languages** —
 which is the assertion that would catch a row rendering its own localization key.
 
 **A live defect, found and fixed** (known-issues #28): **a supply chain disruption

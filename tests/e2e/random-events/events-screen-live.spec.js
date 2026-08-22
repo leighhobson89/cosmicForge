@@ -284,7 +284,7 @@ test.describe('Random Events — the Events screen', () => {
     expect(tables.history[0].cells[0]).toBe(firstName);
   });
 
-  test('every event in the catalogue renders a real name and a real effect line, in all five languages', async ({ game }) => {
+  test('every event in the catalogue renders a real name and a real effect line, in all six languages', async ({ game }) => {
     // Fire the lot, so the log holds one row of every kind the pane can build.
     const ids = await game.withMods((m) => m.events.getRandomEventIds());
     for (const id of ids) {
