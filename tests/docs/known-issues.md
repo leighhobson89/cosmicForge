@@ -3028,3 +3028,151 @@ elapsed time is not finite, so a bad stamp from any other source could not reach
 the arithmetic either.
 
 ---
+
+## 45. The Create button does nothing in Spanish, Portuguese and French — ✅ FIXED
+
+**Severity was: high — the Compounds tab, the whole point of which is crafting,
+was inert in three of the six shipped languages. Nothing warned the player: the
+button rendered enabled, the click was accepted, and no notification appeared.**
+
+Reported by Leigh from live play: *"you cannot click create in the compounds tab
+for any option like diesel water etc to create that compound even if all the
+conditions are right. This happens in french, portuguese and spanish but NOT in
+english german or italian."*
+
+**Found by:** `tests/e2e/compounds/compounds.spec.js` →
+*"the Create button crafts diesel and deducts its ingredients in every supported
+language"* (which caught three of the seventeen broken combinations), and
+`tests/e2e/localization/dialog-missing-subkey.spec.js` →
+*"every available option pane opens without Missing subKey warnings in fr"*
+(which caught the second cause).
+
+### Reproduction
+
+1. Switch the game to Spanish, Portuguese or French.
+2. Open the Compounds tab, pick any compound, stock its ingredients well past
+   what the recipe needs, and put the grid up.
+3. Choose any amount in the create dropdown. The preview reads correctly and the
+   button is not greyed out.
+4. Press **Create**. Nothing happens — no compound, no deduction, no notification.
+
+The same sequence in English, German or Italian works.
+
+### The full failure map, measured
+
+The cross-product spec was run against the unfixed source. `made 0` means the
+button did nothing at all:
+
+| | diesel | glass | steel | concrete | water | titanium |
+|---|---|---|---|---|---|---|
+| en | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| de | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| it | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| es | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| pt | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| fr | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+
+That shape is the whole diagnosis. It is not "these three languages are broken" —
+it is "these three languages happen to spell some ingredient names with a letter
+outside `a-z`", plus one extra French-only case.
+
+### Cause 1 — the ingredient parser stopped at the first accent
+
+Since known-issues #19, the ingredients to charge are recovered by parsing the
+**rendered, localized** preview sentence, and the parsed display name is mapped
+back to an internal key. `getConstituentComponents` captured that name with
+
+```js
+const regexConstituentPart1 = /\((\d[\d,]*(?:\.\d+)?(?:[KMBGTPE]?)?)\s*([a-zA-Z]+)/;
+```
+
+`[a-zA-Z]+` is ASCII-only, so it stops dead at the first accented character.
+Probe output, one line per language, asking for 5 diesel:
+
+```
+en   "5 Diesel (130 Hydrogen, 60 Carbon)"       -> hydrogen  ✅
+de   "5 Diesel (130 Wasserstoff, 60 Kohlenstoff)" -> hydrogen ✅
+it   "5 Diesel (130 Idrogeno, 60 Carbonio)"     -> hydrogen  ✅
+es   "5 Diesel (130 Hidrógeno, 60 Carbono)"     -> hidr      ❌
+pt   "5 Diesel (130 Hidrogénio, 60 Carbono)"    -> hidrog    ❌
+fr   "5 Diesel (130 Hydrogène, 60 Carbone)"     -> hydrog    ❌
+```
+
+English, German and Italian escaped by luck alone: their ingredient names are
+pure ASCII. Spanish, Portuguese and French spell hydrogen, oxygen and neon with
+diacritics.
+
+A fragment like `hidr` is not a material, so `createCompound` hits the
+known-issues #19 guard, warns and abandons the craft — which is the correct
+behaviour for an unresolvable ingredient, and is why the failure is silent rather
+than an exploit this time. Steel survives in Spanish and Portuguese because it is
+the one recipe in those languages whose ingredients (`Hierro`/`Ferro` and
+`Carbono`) are both spelled in ASCII.
+
+The button is not greyed out because `checkStatusAndSetTextClasses` gates on
+
+```js
+const currentQuantity = getResourceDataObject('resources', [requiredName, 'quantity']);
+if (currentQuantity < requiredQuantity) { /* disable */ }
+```
+
+and for a bogus name that read is `undefined`. `undefined < 130` is `false`, so
+the affordability gate concluded the player *could* afford it. The player is left
+with an enabled button that does nothing — exactly what was reported.
+
+### Cause 2 — in French, "Fer" is both the iron abbreviation and iron
+
+French titanium and steel failed even though `Fer`, `Sodium` and `Carbone` parse
+out of the sentence intact. The catalogue is the problem:
+
+```
+fr   resourceShortIron  (key #1347) = "Fer"
+fr   resourceIron       (key #1409) = "Fer"
+```
+
+`getMaterialReverseIndex` indexes every `resource*` and `compound*` key by its
+lowercased value, first declaration wins — so `"fer"` mapped to **`shortiron`**,
+not `iron`. `shortiron` is not a material, so the craft was abandoned the same
+way, and the frame loop logged `Missing subKey: shortiron` on every tick the
+titanium pane was open.
+
+No other language collides: `Irn`/`Iron`, `Hie`/`Hierro`, `Fer`/`Ferro`,
+`Eis`/`Eisen` are all distinct. French is the only one where the natural
+abbreviation *is* the full word.
+
+### The fix — applied
+
+1. **`game.js`, `getConstituentComponents`** — every ingredient-name class is now
+   `\p{L}+` under the `u` flag instead of `[a-zA-Z]+`, so the parser reads any
+   letter a translator can write. The five patterns were also lifted to module
+   scope as named constants, since the parser is called from the frame loop and
+   was rebuilding them on every call.
+
+2. **`localization.js`, `getMaterialReverseIndex`** — keys matching
+   `/^(?:resource|compound)Short[A-Z]/` are excluded from the index. Those seven
+   keys are three-letter abbreviations for cramped labels, never material
+   identities, and the index's only consumer is holding a *full* name parsed out
+   of a preview built by `localizeMaterialName`, which never renders a short key.
+   With them out, `"fer"` reaches `resourceIron` and resolves to `iron`.
+
+Neither change touches English, German or Italian behaviour.
+
+### Coverage
+
+A new spec, `tests/e2e/compounds/compounds.spec.js` →
+*"every compound crafts in every language, whatever letters its ingredients are
+spelled with"*, drives the full 6 × 6 cross product through the real pane: it
+opens each compound, chooses 5 in the create dropdown, clears the weather so the
+measurement is exact, presses **Create**, and asserts both that five were made
+and that **every** ingredient was charged its exact ratio. The exact-ratio half
+matters as much as the count: it also catches a name that resolved to the *wrong*
+material, which would quietly drain the wrong stockpile.
+
+The diesel-only language spec that already existed could not have found either
+cause on its own — diesel's ingredients do not include iron, so cause 2 was
+invisible to it, and it only ever proved one of six recipes.
+
+Verified in both directions: the new spec reproduces the table above against the
+unfixed source, and passes against the fixed source.
+
+---

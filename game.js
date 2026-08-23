@@ -12091,6 +12091,27 @@ function updateEnergyStat(element) {
     }
 }
 
+/**
+ * The create preview is a *localized* sentence — "5 Diesel (130 Hidrogeno, 60 Carbono)"
+ * — and these patterns read the ingredient names back out of it so the craft can
+ * be charged. The name class must therefore be every letter a translator can
+ * write, not just the ASCII ones: `[a-zA-Z]+` stopped dead at the first accented
+ * character, so "Hidrogeno" parsed as "Hidr" and "Hydrogene" as "Hydrog". Those
+ * fragments resolve to no material, so the craft was abandoned and the Create
+ * button did nothing at all in Spanish, Portuguese and French while working
+ * normally in English, German and Italian, whose ingredient names happen to be
+ * pure ASCII. See tests/docs/known-issues.md #45.
+ *
+ * `\p{L}` with the `u` flag is the Unicode-aware equivalent; it also covers any
+ * future language whose material names carry diacritics. Built once at module
+ * scope, because `getConstituentComponents` is called from the frame loop.
+ */
+const REGEX_COMPOUND_TO_CREATE = /(\d[\d,]*(?:\.\d+)?(?:[KMBGTPE]?)?)\s*/u;
+const REGEX_CONSTITUENT_PART_1 = /\((\d[\d,]*(?:\.\d+)?(?:[KMBGTPE]?)?)\s*(\p{L}+)/u;
+const REGEX_CONSTITUENT_PART_2 = /, (\d[\d,]*(?:\.\d+)?(?:[KMBGTPE]?)?)\s*(\p{L}+)/u;
+const REGEX_CONSTITUENT_PART_3 = /(?:, \d[\d,]*(?:\.\d+)?(?:[KMBGTPE]?)?\s*\p{L}+){1}\s*,\s*(\d[\d,]*(?:\.\d+)?(?:[KMBGTPE]?)?)\s*(\p{L}+)/u;
+const REGEX_CONSTITUENT_PART_4 = /(?:, \d[\d,]*(?:\.\d+)?(?:[KMBGTPE]?)?\s*\p{L}+){2}\s*,\s*(\d[\d,]*(?:\.\d+)?(?:[KMBGTPE]?)?)\s*(\p{L}+)/u;
+
 function getConstituentComponents(createCompoundDescriptionString) {
     let compoundToCreateQuantity = 0;
     let constituentPartQuantity1 = 0;
@@ -12102,35 +12123,30 @@ function getConstituentComponents(createCompoundDescriptionString) {
     let constituentPartQuantity4 = 0;
     let constituentPartName4 = '';
 
-    const regexCompoundToCreate = /(\d[\d,]*(?:\.\d+)?(?:[KMBGTPE]?)?)\s*/;
-    const matchCompound = createCompoundDescriptionString.match(regexCompoundToCreate);
+    const matchCompound = createCompoundDescriptionString.match(REGEX_COMPOUND_TO_CREATE);
     if (matchCompound) {
         compoundToCreateQuantity = matchCompound[1];
     }
 
-    const regexConstituentPart1 = /\((\d[\d,]*(?:\.\d+)?(?:[KMBGTPE]?)?)\s*([a-zA-Z]+)/;
-    const matchConstituentPart1 = createCompoundDescriptionString.match(regexConstituentPart1);
+    const matchConstituentPart1 = createCompoundDescriptionString.match(REGEX_CONSTITUENT_PART_1);
     if (matchConstituentPart1) {
         constituentPartQuantity1 = matchConstituentPart1[1];
         constituentPartName1 = matchConstituentPart1[2];
     }
 
-    const regexConstituentPart2 = /, (\d[\d,]*(?:\.\d+)?(?:[KMBGTPE]?)?)\s*([a-zA-Z]+)/
-    const matchConstituentPart2 = createCompoundDescriptionString.match(regexConstituentPart2);
+    const matchConstituentPart2 = createCompoundDescriptionString.match(REGEX_CONSTITUENT_PART_2);
     if (matchConstituentPart2) {
         constituentPartQuantity2 = matchConstituentPart2[1];
         constituentPartName2 = matchConstituentPart2[2];
     }
 
-    const regexConstituentPart3 = /(?:, \d[\d,]*(?:\.\d+)?(?:[KMBGTPE]?)?\s*[a-zA-Z]+){1}\s*,\s*(\d[\d,]*(?:\.\d+)?(?:[KMBGTPE]?)?)\s*([a-zA-Z]+)/;                               
-    const matchConstituentPart3 = createCompoundDescriptionString.match(regexConstituentPart3);
+    const matchConstituentPart3 = createCompoundDescriptionString.match(REGEX_CONSTITUENT_PART_3);
     if (matchConstituentPart3) {
         constituentPartQuantity3 = matchConstituentPart3[1];
         constituentPartName3 = matchConstituentPart3[2];
     }
 
-    const regexConstituentPart4 = /(?:, \d[\d,]*(?:\.\d+)?(?:[KMBGTPE]?)?\s*[a-zA-Z]+){2}\s*,\s*(\d[\d,]*(?:\.\d+)?(?:[KMBGTPE]?)?)\s*([a-zA-Z]+)/;
-    const matchConstituentPart4 = createCompoundDescriptionString.match(regexConstituentPart4);
+    const matchConstituentPart4 = createCompoundDescriptionString.match(REGEX_CONSTITUENT_PART_4);
     if (matchConstituentPart4) {
         constituentPartQuantity4 = matchConstituentPart4[1];
         constituentPartName4 = matchConstituentPart4[2];

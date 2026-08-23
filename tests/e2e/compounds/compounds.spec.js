@@ -634,6 +634,68 @@ test.describe('Compounds — the create dropdown is localized', () => {
       cashChanged: 0
     })));
   });
+
+  test('every compound crafts in every language, whatever letters its ingredients are spelled with', async ({ game }) => {
+    // The diesel-only test above cannot see either half of known-issues #45,
+    // because diesel is made of hydrogen and carbon and *both* of those bugs
+    // need a particular ingredient name to trip:
+    //
+    //   - the ingredient name is parsed out of the rendered preview sentence, so
+    //     a name containing a letter outside a-z used to be truncated at the
+    //     first accent ("Hidrógeno" -> "hidr"). That is why Spanish, Portuguese
+    //     and French were broken and English, German and Italian were not —
+    //     the working three happen to spell every ingredient in pure ASCII.
+    //   - the truncated fragment resolves to no material, so the craft is
+    //     abandoned: the button looks perfectly enabled and clicking it does
+    //     nothing at all, charges nothing and makes nothing.
+    //
+    // Titanium in French adds the second half: its ingredient names survive the
+    // parse intact, and "Fer" still failed to resolve, because the catalogue
+    // spells *both* `resourceShortIron` and `resourceIron` "Fer" and the short
+    // key wins the reverse lookup.
+    //
+    // So the only coverage that actually holds the line is the full cross
+    // product — every compound, every language.
+    test.setTimeout(900_000);
+
+    const languages = await game.withMods((m) => m.loc.getSupportedLanguages());
+    const failures = [];
+
+    for (const language of languages) {
+      await game.withMods(async (m, lang) => { await m.ui.relocalizeAll(lang); }, language);
+      await game.page.waitForTimeout(900);
+
+      for (const compound of COMPOUNDS) {
+        await openCompound(game, compound);
+        const parts = await stageIngredients(game, compound, { each: 1000000, capacity: 1e6, compoundQuantity: 0 });
+        await chooseDropdown(game, `${compound}CreateSelectQuantity`, '5');
+        // Whatever this system rains would otherwise land in one compound's
+        // quantity mid-measurement and make an exact assertion impossible.
+        await clearWeather(game);
+
+        const before = await readCraftState(game, compound);
+        await clickRowButton(game, `${compound}CreateRow`, 'button.create');
+        const after = await readCraftState(game, compound);
+
+        const made = after.quantity - before.quantity;
+        if (made !== 5) failures.push(`${language}/${compound}: made ${made}, expected 5`);
+
+        // Every ingredient must be charged its exact ratio. A name that failed
+        // to resolve is charged nothing, which is the bug's signature — and
+        // asserting the exact figure also catches a name that resolved to the
+        // *wrong* material, which would charge the wrong stockpile.
+        for (const { name, ratio } of parts) {
+          const spent = before.ingredients[name] - after.ingredients[name];
+          if (spent !== ratio * 5) {
+            failures.push(`${language}/${compound}: spent ${spent} ${name}, expected ${ratio * 5}`);
+          }
+        }
+      }
+    }
+
+    expect(failures).toEqual([]);
+    expect(game.significantErrors()).toEqual([]);
+  });
 });
 
 test.describe('Compounds — automatic creation behind the perk', () => {

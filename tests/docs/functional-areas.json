@@ -288,6 +288,8 @@
         "Every compound offers the full set of create options, each with text",
         "Switching language relabels the create dropdown on screen",
         "Crafting in another language still charges the right resources",
+        "The Create button crafts diesel and deducts its ingredients in every supported language",
+        "Every compound crafts in every language, whatever letters its ingredients are spelled with",
         "The auto-create toggle is hidden until the compoundAutomation perk is bought",
         "Switching auto-create on crafts continuously and consumes the ingredients",
         "Auto-create needs the grid, and stops at the storage cap",

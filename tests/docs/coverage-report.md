@@ -80,7 +80,7 @@ when an area is upgraded.
 | 🟢 Green — signed off | 44 | 100% |
 | **Total functional areas** | **44** | |
 
-663 individual test cases are identified across all areas. **1203 Playwright specs are implemented** across 44 areas, and all of them pass except where an area's note says otherwise — a spec that fails on a live defect is left failing on purpose, and the defect is written up in [known-issues.md](known-issues.md).
+665 individual test cases are identified across all areas. **1203 Playwright specs are implemented** across 44 areas, and all of them pass except where an area's note says otherwise — a spec that fails on a live defect is left failing on purpose, and the defect is written up in [known-issues.md](known-issues.md).
 
 Run them with `npm run test:e2e` (all areas) or `node tests/run-e2e.mjs <area>`. Each area writes its own HTML report to `test-reports/e2e/<area>/index.html`, with a summary index at `test-reports/e2e/index.html`.
 
@@ -114,7 +114,7 @@ The minute-to-minute loop: extract, craft, power, research. Where players spend 
 | Status | Area | Risk | Planned | Specs | Existing coverage |
 |:--:|---|:--:|--:|--:|---|
 | 🟢 | [Resources](areas/resources.md) | High | 21 | **21** | earlyLoop.test.js |
-| 🟢 | [Compounds & Crafting](areas/compounds.md) | High | 30 | **31** | — |
+| 🟢 | [Compounds & Crafting](areas/compounds.md) | High | 32 | **31** | — |
 | 🟢 | [Auto Buyers](areas/autobuyers.md) | High | 18 | **19** | autobuyer.test.js |
 | 🟢 | [Energy & Power Grid](areas/energy.md) | High | 7 | **26** | energyMid.test.js |
 | 🟢 | [Research](areas/research.md) | High | 21 | **25** | researchTech.test.js |

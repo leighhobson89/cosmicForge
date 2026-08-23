@@ -161,6 +161,19 @@ function getCompoundReverseIndex(language) {
     return index;
 }
 
+// `resourceShortIron` and friends are three-letter abbreviations for cramped
+// labels, not material identities, and they are never what a caller is holding:
+// the only consumer maps a *full* name out of the create preview, which is built
+// from `localizeMaterialName` and so only ever renders the full keys.
+//
+// They still have to be kept out of the index, because a translator is free to
+// abbreviate to the full word. French does exactly that — `resourceShortIron`
+// and `resourceIron` are both "Fer" — and since the short key is declared first
+// and first declaration wins, "Fer" resolved to `shortiron`. That is not a
+// material, so crafting titanium in French charged nothing and silently
+// abandoned the craft. See tests/docs/known-issues.md #45.
+const SHORT_NAME_KEY = /^(?:resource|compound)Short[A-Z]/;
+
 function getMaterialReverseIndex(language) {
     const cached = materialReverseIndex.get(language);
     if (cached) return cached;
@@ -173,6 +186,7 @@ function getMaterialReverseIndex(language) {
     for (const prefix of ['compound', 'resource']) {
         for (const [key, value] of Object.entries(table)) {
             if (!key.startsWith(prefix) || typeof value !== 'string') continue;
+            if (SHORT_NAME_KEY.test(key)) continue;
             const name = value.toLowerCase();
             if (!index.has(name)) {
                 index.set(name, key.slice(prefix.length).toLowerCase());
