@@ -51,7 +51,7 @@ One line per functional area, worst first. 44 green, 0 amber, 0 red, out of 44.
 | 🟢 | [Statistics](areas/statistics.md) | Simulation & Ambience | Low | 16 | Done — driven through its own controls, 16 specs passing. |
 | 🟢 | [Tech Tree](areas/technology.md) | Core Economy | High | 18 | Done — driven through its own controls, 18 specs passing. |
 | 🟢 | [UI Navigation](areas/ui-navigation.md) | Presentation & Shell | Medium | 24 | Done — driven through its own controls, 24 specs passing. |
-| 🟢 | [Weather](areas/weather.md) | Simulation & Ambience | Low | 31 | Done — every state reached through the game's own weighted draw and the solar penalty measured off the grid, 31 specs passing. Found and closed known-issues #31 and #33. |
+| 🟢 | [Weather](areas/weather.md) | Simulation & Ambience | Low | 34 | Done — every state reached through the game's own weighted draw and the solar penalty measured off the grid, 34 specs passing. Found and closed known-issues #31, #33 and #46. |
 
 ---
 
@@ -80,7 +80,7 @@ when an area is upgraded.
 | 🟢 Green — signed off | 44 | 100% |
 | **Total functional areas** | **44** | |
 
-665 individual test cases are identified across all areas. **1203 Playwright specs are implemented** across 44 areas, and all of them pass except where an area's note says otherwise — a spec that fails on a live defect is left failing on purpose, and the defect is written up in [known-issues.md](known-issues.md).
+667 individual test cases are identified across all areas. **1206 Playwright specs are implemented** across 44 areas, and all of them pass except where an area's note says otherwise — a spec that fails on a live defect is left failing on purpose, and the defect is written up in [known-issues.md](known-issues.md).
 
 Run them with `npm run test:e2e` (all areas) or `node tests/run-e2e.mjs <area>`. Each area writes its own HTML report to `test-reports/e2e/<area>/index.html`, with a summary index at `test-reports/e2e/index.html`.
 
@@ -174,7 +174,7 @@ Background systems that modify the economy or the presentation without direct pl
 
 | Status | Area | Risk | Planned | Specs | Existing coverage |
 |:--:|---|:--:|--:|--:|---|
-| 🟢 | [Weather](areas/weather.md) | Low | 16 | **31** | — |
+| 🟢 | [Weather](areas/weather.md) | Low | 18 | **34** | — |
 | 🟢 | [Random Events](areas/random-events.md) | Medium | 13 | **52** | — |
 | 🟢 | [News Ticker](areas/news-ticker.md) | Low | 12 | **26** | — |
 | 🟢 | [Audio](areas/audio.md) | Low | 5 | **13** | — |

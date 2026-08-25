@@ -25,6 +25,14 @@
  * When the window runs out the interval calls `changeWeather()` again, so the
  * cycle is self-perpetuating and there is no separate scheduler to test.
  *
+ * The one exception to the one-to-three minute window is the severe-weather
+ * relief window. Rain and volcanoes both ground a fuelled rocket, and a star's
+ * table can legitimately be weighted almost entirely towards them, so the cycle
+ * counts consecutive severe windows: three may run, and the draw after them is
+ * turned into a cloudy window of a fixed one minute. That streak is per star
+ * system and is saved state — see the block of specs under "the severe-weather
+ * streak".
+ *
  * ## Forcing a state without faking one
  *
  * The draw is weighted by the numbers in the star's table, so a state is forced
@@ -79,13 +87,59 @@ async function openOptionById(game, optionId) {
 }
 
 /**
- * Land the current system on a named weather state through the game's own draw.
+ * Copy the run's save code out of the real Saving / Loading pane.
  *
- * Only the probabilities are rewritten — the efficiency, the symbol and the
- * colour class stay exactly as the star published them, because those are what
- * the specs below are checking.
+ * The export box is not filled by opening the pane: `gameLoop` notices the pane
+ * is open and calls `saveGame('onSaveScreen')` once, and that is what writes the
+ * value - so the wait is on the value appearing, not on the pane rendering.
  */
-async function forceWeather(game, type) {
+async function exportSaveCode(game) {
+  await game.openTab(9);
+  const opened = await game.page.evaluate(() => {
+    const row = document.querySelector('p.inset-paragraph[class~="tab9.option2"]');
+    if (!row) return false;
+    row.closest('.row-side-menu')?.classList.remove('invisible');
+    row.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    return true;
+  });
+  if (!opened) throw new Error('No Saving / Loading row in the tab 9 side menu');
+
+  await game.page.waitForFunction(
+    () => {
+      const area = document.getElementById('exportSaveArea');
+      return !!area && typeof area.value === 'string' && area.value.length > 50;
+    },
+    null,
+    { timeout: 30000 }
+  );
+
+  return game.page.evaluate(() => document.getElementById('exportSaveArea')?.value ?? '');
+}
+
+/** Paste a save code into the import box and press the pane's real Import button. */
+async function importSaveCode(game, code) {
+  await game.openTab(9);
+  await game.page.evaluate(() => {
+    const row = document.querySelector('p.inset-paragraph[class~="tab9.option2"]');
+    row?.closest('.row-side-menu')?.classList.remove('invisible');
+    row?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+  });
+  await game.page.waitForSelector('#importSaveArea', { timeout: 30000 });
+  await game.page.evaluate((c) => {
+    const area = document.getElementById('importSaveArea');
+    if (area) area.value = c;
+  }, code);
+  await game.page.click('#importSaveRow button.save-load-button');
+}
+
+/**
+ * Weight the current system's own weather table so only `type` can be drawn.
+ *
+ * Only the probabilities are touched. The efficiency, the symbol and the colour
+ * class stay exactly as the star published them, because those are what the
+ * specs are checking — a spec that wrote them would be asserting its own input.
+ */
+async function weightTableTo(game, type) {
   await game.withMods((m, weatherType) => {
     const system = m.cg.getCurrentStarSystem();
     const table = m.rdo.getStarSystemWeather(system);
@@ -95,6 +149,64 @@ async function forceWeather(game, type) {
     }
     m.rdo.setStarSystemWeather(system, rewritten);
   }, type);
+}
+
+/**
+ * Let one weather window run out so the game re-rolls the next one itself.
+ *
+ * `setWeatherCycleSecondsRemaining` is the game's own hook — Endless Summer uses
+ * it to cut the running window short — so seeding a one-second remainder and
+ * waiting is the weather cycle turning over for real, rather than a spec
+ * reaching in and calling the draw. That distinction matters here: the relief
+ * window is only ever granted against weather the cycle drew for itself.
+ *
+ * The wait is on the *new* window being armed. A full window is one to three
+ * minutes and the relief window is a fixed one minute, so anything at 60 seconds
+ * or more means the countdown expired and `changeWeather()` has already run.
+ */
+async function runOneWeatherWindow(game) {
+  await game.withMods((m) => m.game.setWeatherCycleSecondsRemaining(1));
+  await game.page.waitForFunction(
+    () => globalThis.__mods.game.getCurrentWeatherWindowSeconds() >= 60,
+    null,
+    { timeout: 20000 }
+  );
+  // The one-second interval is what starts the particles and rolls the
+  // precipitation rate, so give the new window a beat of real time to turn.
+  await game.page.waitForTimeout(1200);
+
+  return game.withMods((m) => {
+    const live = m.cg.getCurrentStarSystemWeatherEfficiency();
+    return {
+      type: live?.[2],
+      efficiency: live?.[1],
+      windowSeconds: m.game.getCurrentWeatherWindowSeconds(),
+      streak: m.cg.getConsecutiveSevereWeatherPeriods(),
+      streakSystem: m.cg.getConsecutiveSevereWeatherSystem()
+    };
+  });
+}
+
+/**
+ * Put the run on a clean footing: one fair-weather window, so whatever the boot
+ * happened to roll is not still counted against the severe-weather streak.
+ */
+async function settleOnFairWeather(game) {
+  await weightTableTo(game, 'sunny');
+  const settled = await runOneWeatherWindow(game);
+  expect(settled.type, 'the run should be starting from fair weather').toBe('sunny');
+  expect(settled.streak, 'with no severe-weather streak standing').toBe(0);
+}
+
+/**
+ * Land the current system on a named weather state through the game's own draw.
+ *
+ * Only the probabilities are rewritten — the efficiency, the symbol and the
+ * colour class stay exactly as the star published them, because those are what
+ * the specs below are checking.
+ */
+async function forceWeather(game, type) {
+  await weightTableTo(game, type);
 
   await game.withMods((m) => m.game.forceWeatherCycle());
   // The one-second interval is what starts the particles and rolls the
@@ -328,55 +440,154 @@ test.describe('Weather — the cycle', () => {
     expect(after.effectOn, 'and cleared the effect the old state was running').toBe(false);
   });
 
-  test('a third severe weather window becomes a short cloudy launch window', async ({ game }) => {
-    await game.withMods((m) => {
-      const system = m.cg.getCurrentStarSystem();
-      const table = m.rdo.getStarSystemWeather(system);
-      const rewrite = (type) => Object.fromEntries(Object.entries(table).map(([key, entry]) => [
-        key,
-        [key === type ? 100 : 0, entry[1], entry[2], entry[3]]
-      ]));
+  // ------------------------------------------------ the severe-weather streak
+  //
+  // A climate weighted heavily towards rain and volcanoes could otherwise ground
+  // a fuelled rocket indefinitely, so the cycle counts how many severe windows
+  // have run back to back. Three are allowed; the draw straight after them is
+  // never severe again. It is turned into a cloudy window of a fixed one minute
+  // - long enough to launch, short enough that the climate is not neutered - and
+  // the streak restarts from there.
+  //
+  // The counter belongs to the star system it was accrued in, and is a piece of
+  // saved state: moving away from the keyboard or reloading a save must not hand
+  // the player a fresh three windows of grace, nor throw away the ones already
+  // served.
 
-      // Reset any weather that occurred while the run was booting, then make
-      // each ordinary draw severe. The third draw must grant a cloudy window.
-      m.rdo.setStarSystemWeather(system, rewrite('sunny'));
-      m.game.forceWeatherCycle();
-      m.rdo.setStarSystemWeather(system, rewrite('rain'));
-      m.game.forceWeatherCycle();
-      m.game.forceWeatherCycle();
-      m.game.forceWeatherCycle();
-    });
+  test('three severe windows may run back to back, and the fourth is a fixed one-minute cloudy launch window', async ({ game }) => {
+    await settleOnFairWeather(game);
+    await weightTableTo(game, 'rain');
 
-    const state = await weatherState(game);
-    expect(state.type, 'the third consecutive severe draw grants a launch window').toBe('cloudy');
-    expect(state.efficiency, 'the launch window uses normal cloudy efficiency').toBe(0.6);
+    // Five windows: three severe, the relief window, and the one after it that
+    // shows severe weather is allowed straight back once the streak has reset.
+    const windows = [];
+    for (let i = 0; i < 5; i++) {
+      windows.push(await runOneWeatherWindow(game));
+    }
+
+    expect(
+      windows.slice(0, 3).map((w) => w.type),
+      'three severe windows in a row are allowed to run'
+    ).toEqual(['rain', 'rain', 'rain']);
+    expect(
+      windows.slice(0, 3).map((w) => w.streak),
+      'and each one is counted'
+    ).toEqual([1, 2, 3]);
+
+    for (const window of windows.slice(0, 3)) {
+      expect(
+        [60, 120, 180],
+        'an ordinary window is still the usual one-to-three minute draw'
+      ).toContain(window.windowSeconds);
+    }
+
+    expect(windows[3].type, 'the fourth severe draw is granted as a launch window instead')
+      .toBe('cloudy');
+    expect(windows[3].efficiency, 'carrying the efficiency the star publishes for cloudy')
+      .toBe(WEATHER_EFFICIENCY.cloudy);
+    expect(windows[3].windowSeconds, 'and lasting a fixed minute, not a one-to-three minute draw')
+      .toBe(60);
+    expect(windows[3].streak, 'the streak restarts once the launch window has been granted')
+      .toBe(0);
+
+    expect(windows[4].type, 'after which severe weather is free to run again').toBe('rain');
+    expect(windows[4].streak, 'counting from one').toBe(1);
   });
 
-  test('the severe-weather streak survives focus changes and save restoration', async ({ game }) => {
-    const result = await game.withMods(async (m) => {
-      const system = m.cg.getCurrentStarSystem();
-      m.cg.setConsecutiveSevereWeatherPeriods(2);
-      m.cg.setConsecutiveSevereWeatherSystem(system);
+  test('the severe-weather streak is not thrown away when the player clicks away and back', async ({ game }) => {
+    await settleOnFairWeather(game);
+    await weightTableTo(game, 'rain');
 
+    for (let i = 0; i < 3; i++) {
+      await runOneWeatherWindow(game);
+    }
+    expect(await game.withMods((m) => m.cg.getConsecutiveSevereWeatherPeriods()))
+      .toBe(3);
+
+    // Click away and come back. A headless browser never gives a page real
+    // window focus - `page.bringToFront()` leaves the game's handlers untouched,
+    // which was checked - so the round trip is driven by firing the very events
+    // the browser would deliver, at the very targets the game listens on:
+    // `blur` and `visibilitychange` on the way out, `visibilitychange` and
+    // `focus` on the way back. The assertion below is what keeps that honest: it
+    // fails if the game's own focus handler did not actually run.
+    const focusBefore = await game.withMods((m) => m.cg.getLastFocusOfflineGainsAppliedAt());
+
+    await game.page.evaluate(() => {
+      Object.defineProperty(document, 'hidden', { configurable: true, get: () => true });
+      document.dispatchEvent(new Event('visibilitychange'));
       window.dispatchEvent(new Event('blur'));
-      window.dispatchEvent(new Event('focus'));
-
-      const saved = JSON.parse(JSON.stringify(m.cg.captureGameStatusForSaving('initialise')));
-      m.cg.setConsecutiveSevereWeatherPeriods(0);
-      m.cg.setConsecutiveSevereWeatherSystem(null);
-      await m.cg.restoreGameStatus(saved, 'textImport');
-
-      return {
-        savedPeriods: saved.consecutiveSevereWeatherPeriods,
-        savedSystem: saved.consecutiveSevereWeatherSystem,
-        periods: m.cg.getConsecutiveSevereWeatherPeriods(),
-        system: m.cg.getConsecutiveSevereWeatherSystem()
-      };
     });
+    await game.page.waitForTimeout(1500);
+    await game.page.evaluate(() => {
+      Object.defineProperty(document, 'hidden', { configurable: true, get: () => false });
+      document.dispatchEvent(new Event('visibilitychange'));
+      window.dispatchEvent(new Event('focus'));
+    });
+    await game.page.waitForTimeout(1500);
 
-    expect(result.savedPeriods).toBe(2);
-    expect(result.periods).toBe(2);
-    expect(result.system).toBe(result.savedSystem);
+    const focusAfter = await game.withMods((m) => m.cg.getLastFocusOfflineGainsAppliedAt());
+    expect(focusAfter, 'the game should have run its focus handler on the way back')
+      .toBeGreaterThan(focusBefore);
+
+    const streak = await game.withMods((m) => ({
+      periods: m.cg.getConsecutiveSevereWeatherPeriods(),
+      system: m.cg.getConsecutiveSevereWeatherSystem(),
+      currentSystem: m.cg.getCurrentStarSystem()
+    }));
+    expect(streak.periods, 'the three windows already served still count').toBe(3);
+    expect(streak.system, 'and are still attributed to the system they ran in')
+      .toBe(streak.currentSystem);
+
+    // The proof that matters is not the number but what it does next.
+    const relief = await runOneWeatherWindow(game);
+    expect(relief.type, 'so the very next severe draw is still the promised launch window')
+      .toBe('cloudy');
+    expect(relief.windowSeconds, 'of the promised fixed minute').toBe(60);
+  });
+
+  test('the severe-weather streak comes back with a saved game', async ({ game }) => {
+    await settleOnFairWeather(game);
+    await weightTableTo(game, 'rain');
+
+    for (let i = 0; i < 3; i++) {
+      await runOneWeatherWindow(game);
+    }
+    expect(await game.withMods((m) => m.cg.getConsecutiveSevereWeatherPeriods()))
+      .toBe(3);
+
+    // Take the save the way a player does - the Saving / Loading pane's export
+    // box, which the frame loop fills by calling saveGame('onSaveScreen').
+    const code = await exportSaveCode(game);
+    expect(code.length, 'the export box should hold a real save code').toBeGreaterThan(50);
+
+    // Boot a completely different run over the top. Loading into the same
+    // session would pass even if the streak were never saved at all. The fresh
+    // run rolls its own weather while it boots, so settle it on fair weather
+    // first - that is the run's streak genuinely standing at zero, not a spec
+    // assuming a boot never draws rain.
+    await game.boot();
+    await settleOnFairWeather(game);
+
+    await importSaveCode(game, code);
+    await game.page.waitForFunction(
+      () => globalThis.__mods.cg.getConsecutiveSevereWeatherPeriods() === 3,
+      null,
+      { timeout: 20000 }
+    );
+
+    const restored = await game.withMods((m) => ({
+      periods: m.cg.getConsecutiveSevereWeatherPeriods(),
+      system: m.cg.getConsecutiveSevereWeatherSystem(),
+      currentSystem: m.cg.getCurrentStarSystem()
+    }));
+    expect(restored.periods, 'the loaded run carries on from three windows served').toBe(3);
+    expect(restored.system, 'in the system they were served in').toBe(restored.currentSystem);
+
+    const relief = await runOneWeatherWindow(game);
+    expect(relief.type, 'so the next severe draw is the launch window the save was owed')
+      .toBe('cloudy');
+    expect(relief.windowSeconds, 'of the promised fixed minute').toBe(60);
   });
 
   test('the debug menu’s Clear Weather button puts the system back to full sun', async ({ game }) => {

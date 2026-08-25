@@ -28,10 +28,12 @@ The weather cycle, the solar penalty each state applies, the particle overlay an
 - [ ] Turning the particle setting off stops the effect at once without stopping the weather, and back on resumes it
 - [ ] The overlay is emptied when the weather turns fair, and no ambience plays at all with background audio off
 - [ ] The variable debugger's weather row survives a no-op edit
+- [ ] Three severe windows may run back to back; the fourth severe draw is turned into a cloudy window of a fixed one minute, and the streak restarts
+- [ ] The severe-weather streak is kept across a focus change and comes back with a saved game, and still grants the launch window it was owed
 
 ## Status meaning
 
-🟢 **GREEN** — Done — every state reached through the game's own weighted draw and the solar penalty measured off the grid, 31 specs passing. Found and closed known-issues #31 and #33.
+🟢 **GREEN** — Done — every state reached through the game's own weighted draw and the solar penalty measured off the grid, 34 specs passing. Found and closed known-issues #31, #33 and #46.
 
 ---
 

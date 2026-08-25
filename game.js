@@ -257,6 +257,8 @@ import {
     getCurrentPrecipitationRate,
     getCurrentStarSystemWeatherEfficiency,
     setCurrentStarSystemWeatherEfficiency,
+    SEVERE_WEATHER_STREAK_BEFORE_RELIEF,
+    SEVERE_WEATHER_RELIEF_WINDOW_MINUTES,
     getConsecutiveSevereWeatherPeriods,
     setConsecutiveSevereWeatherPeriods,
     getConsecutiveSevereWeatherSystem,
@@ -839,6 +841,17 @@ import { handleTechnologyButtonClick } from './drawTab3Content.js';
 import { drawTab6Content } from './drawTab6Content.js';
 
 let weatherCountDownToChangeInterval = null;
+
+// How long the window the weather system is currently running was armed for.
+// The countdown itself is a closure over a local `timeLeft`, so without this the
+// only way to tell a one-to-three-minute draw apart from the fixed one-minute
+// relief window granted after a severe streak is to sit and watch the clock.
+let currentWeatherWindowSeconds = 0;
+
+/** Seconds the current weather window was armed for. */
+export function getCurrentWeatherWindowSeconds() {
+    return currentWeatherWindowSeconds;
+}
 
 export function getOTypePowerPlantBoostMultiplierForCurrentSystem(powerPlantKey) {
     if (!powerPlantKey) return 1;
@@ -10253,12 +10266,22 @@ function changeWeather(forcedWeatherType = null) {
             selectedWeatherType = 'sunny';
         }
 
-        // Three severe windows may happen back-to-back, but never a third. This
-        // gives a player with a fuelled rocket a short, reliable launch window
-        // without removing hostile climates from the weather tables.
+        // SEVERE_WEATHER_STREAK_BEFORE_RELIEF severe windows may run back to
+        // back, but the draw straight after them is never severe again: it is
+        // turned into a cloudy window so a player with a fuelled rocket always
+        // gets a short, reliable launch window, without taking hostile climates
+        // out of the weather tables.
+        //
+        // The streak counts the windows that actually ran, however they were
+        // chosen: a fair window breaks it whether it was drawn or forced by the
+        // debug menu's Sunny button or by Endless Summer, because from the
+        // player's side the sky did clear. What is reserved for drawn weather is
+        // the *diversion* — a state the game was explicitly told to use is left
+        // alone, so the debug menu stays authoritative.
         const selectedWeatherIsSevere = selectedWeatherType === 'rain' || selectedWeatherType === 'volcano';
-        const forceShortCloudyWindow = selectedWeatherIsSevere
-            && getConsecutiveSevereWeatherPeriods() >= 3
+        const forceShortCloudyWindow = !forcedWeatherType
+            && selectedWeatherIsSevere
+            && getConsecutiveSevereWeatherPeriods() >= SEVERE_WEATHER_STREAK_BEFORE_RELIEF
             && Boolean(weatherTable?.cloudy);
 
         if (forceShortCloudyWindow) {
@@ -10311,12 +10334,15 @@ function changeWeather(forcedWeatherType = null) {
 
     const forceShortCloudyWindow = selectNewWeather();
 
-    const randomDurationInMinutes = forceShortCloudyWindow ? 1 : Math.floor(Math.random() * 3) + 1;
+    const randomDurationInMinutes = forceShortCloudyWindow
+        ? SEVERE_WEATHER_RELIEF_WINDOW_MINUTES
+        : Math.floor(Math.random() * 3) + 1;
     const randomDurationInMs = randomDurationInMinutes * 60 * 1000;
 
     //const randomDurationInMs = 10000; //DEBUG For Testing Weather
 
     const durationInSeconds = randomDurationInMs / 1000;
+    currentWeatherWindowSeconds = durationInSeconds;
 
     if (weatherCountDownToChangeInterval) {
         clearInterval(weatherCountDownToChangeInterval);
@@ -10381,6 +10407,7 @@ export function forceWeatherCycle() {
 
 export function setWeatherCycleSecondsRemaining(secondsRemaining = 10) {
     const seconds = Math.max(0, Math.floor(Number(secondsRemaining) || 0));
+    currentWeatherWindowSeconds = seconds;
 
     if (weatherCountDownToChangeInterval) {
         clearInterval(weatherCountDownToChangeInterval);
@@ -15583,7 +15610,11 @@ export function rebirth() {
     resetUIElementsOnRebirth();
     setCurrentRunIsMegaStructureRun(getFactoryStarsArray().includes(getCurrentStarSystem()));
     initialiseDescriptions();
-    changeWeather(1000);
+    // `changeWeather` takes a weather type, not a duration. The stray 1000 was
+    // never a state in any table so it always fell through to the fair draw, but
+    // it also reads as "the game was told to use this state", which would hold
+    // the rebirth draw back from the severe-weather relief window.
+    changeWeather();
     setRunStartTime();
 
     if (rebirthCalledOnRun1) {

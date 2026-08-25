@@ -3176,3 +3176,118 @@ Verified in both directions: the new spec reproduces the table above against the
 unfixed source, and passes against the fixed source.
 
 ---
+
+## 46. The severe-weather relief window could never be granted — the streak counter was clamped below its own threshold — ✅ FIXED
+
+**Severity was: medium — a hostile climate could ground a fuelled rocket
+indefinitely, which is exactly what the guard was added to prevent.**
+
+### What the feature promises
+
+A star system's weather table is generated with random weights, so a system can
+legitimately be weighted heavily towards rain and volcanoes. Both of those states
+ground a fuelled rocket. Left alone, such a system can refuse a launch for window
+after window.
+
+The guard is meant to bound that: three severe windows (rain or volcano) may run
+back to back, but the draw straight after them is never severe again. It is
+turned into a **cloudy** window of a **fixed one minute** — long enough to
+launch, short enough that the climate keeps its character — after which the
+streak restarts. The streak belongs to the star system it was accrued in, and is
+saved state: it must survive the player clicking away and coming back, and must
+come back with a loaded save.
+
+### Reproduction
+
+1. Weight the current system's weather table so only rain can be drawn.
+2. Let the weather cycle turn four times.
+3. Every window is rain. The fourth is rain too, and so is the fortieth.
+
+### Cause
+
+Two lines, in two files, that had to agree and did not.
+
+`game.js`, `changeWeather()` tested the streak against 3:
+
+```js
+const forceShortCloudyWindow = selectedWeatherIsSevere
+    && getConsecutiveSevereWeatherPeriods() >= 3
+    && Boolean(weatherTable?.cloudy);
+```
+
+while `constantsAndGlobalVars.js` clamped the streak at 2 on every write:
+
+```js
+consecutiveSevereWeatherPeriods = Number.isFinite(periods)
+    ? Math.max(0, Math.min(2, periods))
+    : 0;
+```
+
+Every increment ran through that setter, so the counter saturated at 2 and the
+`>= 3` test could never be true. The relief window was unreachable, and so was
+the one-minute duration that hangs off the same flag. The clamp also truncated
+the value on the way out of a save, so a run that had somehow reached 3 would
+have come back at 2.
+
+Nothing about the focus or save wiring was wrong — both paths carried the
+number faithfully. There was simply never a number above 2 to carry, which is why
+the behaviour read as "persistence is broken" from the outside.
+
+### The fix — applied
+
+1. **`constantsAndGlobalVars.js`** — the threshold and the relief window's
+   length are now two exported constants,
+   `SEVERE_WEATHER_STREAK_BEFORE_RELIEF` (3) and
+   `SEVERE_WEATHER_RELIEF_WINDOW_MINUTES` (1). The setter clamps to the former
+   rather than to a hard-coded 2, so the counter can reach the value the guard
+   tests for and cannot drift past it.
+
+2. **`game.js`, `changeWeather()`** — reads both constants instead of
+   repeating the numbers, and reserves the diversion for weather the cycle
+   **drew for itself**: a state the game was explicitly *told* to use — the
+   debug menu's Sunny button, or Endless Summer — is left exactly as asked, so
+   the debug menu stays authoritative. The streak itself still counts every
+   window that runs, forced or drawn, because from the player's side a forced
+   sunny window is a sky that genuinely cleared.
+
+   The same rebirth path called `changeWeather(1000)`. The argument is a weather
+   *type*, not a duration, so 1000 never matched a state and always fell through
+   to the fair draw — but it did read as "the game was told to use this state",
+   which would have held the rebirth draw back from the relief window. It is now
+   an argumentless call.
+
+3. **`game.js`** — `getCurrentWeatherWindowSeconds()` publishes how long the
+   running window was armed for. The countdown is a closure over a local
+   `timeLeft`, so without it there is no way to tell a one-to-three minute draw
+   apart from the fixed one-minute relief window except by watching the clock.
+
+4. **`constantsAndGlobalVars.js`** — `consecutiveSevereWeatherPeriods` and
+   `consecutiveSevereWeatherSystem` are now rows in the variable debugger's
+   Weather section, readable and editable like the rest of the weather state.
+
+### Coverage
+
+Three specs in `tests/e2e/weather/weather-live.spec.js`, all of which drive the
+game's own cycle — they seed a one-second remainder through
+`setWeatherCycleSecondsRemaining` (the hook Endless Summer uses) and let the
+countdown expire, so the draw is one the weather system made for itself:
+
+- *three severe windows may run back to back, and the fourth is a fixed
+  one-minute cloudy launch window* — runs five windows against a rain-only
+  table and pins the whole shape: rain, rain, rain, a 60-second cloudy window at
+  the star's own cloudy efficiency, then rain again with the streak counting from
+  one.
+- *the severe-weather streak is not thrown away when the player clicks away and
+  back* — serves three windows, fires the browser's own blur /
+  visibilitychange / focus sequence at the targets the game listens on, asserts
+  the game's focus handler actually ran, and then proves the point by taking the
+  relief window it was owed.
+- *the severe-weather streak comes back with a saved game* — serves three
+  windows, exports the save through the real Saving / Loading pane, boots a
+  different run over the top, imports it back through the real Import button, and
+  again proves the point by taking the relief window.
+
+Verified in both directions: all three fail against the unfixed source and pass
+against the fixed source.
+
+---

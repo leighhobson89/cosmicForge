@@ -57,6 +57,13 @@ export const GAME_COST_MULTIPLIER = 1.13;
 export const ASTEROID_COST_MULTIPLIER = 1.07;
 export const NORMAL_MAX_ANTIMATTER_RATE = 0.004;
 export const BOOST_ANTIMATTER_RATE_MULTIPLIER = 2;
+// A run of severe weather (rain or volcano) is capped: once this many severe
+// windows have run back to back, the next severe draw is turned into a cloudy
+// window of SEVERE_WEATHER_RELIEF_WINDOW_MINUTES so a fuelled rocket always gets
+// a reliable chance to launch. The streak is counted per star system and is
+// carried through focus changes and saved games.
+export const SEVERE_WEATHER_STREAK_BEFORE_RELIEF = 3;
+export const SEVERE_WEATHER_RELIEF_WINDOW_MINUTES = 1;
 export const STARTING_STAR_SYSTEM = 'spica';
 export const STAR_SEED = 53;
 export const STAR_FIELD_SEED = 80;
@@ -3430,8 +3437,11 @@ export function getConsecutiveSevereWeatherPeriods() {
 
 export function setConsecutiveSevereWeatherPeriods(value) {
     const periods = Math.floor(Number(value));
+    // The streak has to be able to reach SEVERE_WEATHER_STREAK_BEFORE_RELIEF,
+    // because that is the value changeWeather() tests before it grants the
+    // cloudy launch window. Clamping any lower silently disables the guard.
     consecutiveSevereWeatherPeriods = Number.isFinite(periods)
-        ? Math.max(0, Math.min(2, periods))
+        ? Math.max(0, Math.min(SEVERE_WEATHER_STREAK_BEFORE_RELIEF, periods))
         : 0;
 }
 
@@ -6499,6 +6509,8 @@ export function populateVariableDebugger() {
         { label: "weatherEfficiencyApplied", value: weatherEfficiencyApplied },
         { label: "currentStarSystemWeatherEfficiency", value: currentStarSystemWeatherEfficiency },
         { label: "currentPrecipitationRate", value: currentPrecipitationRate },
+        { label: "consecutiveSevereWeatherPeriods", value: consecutiveSevereWeatherPeriods },
+        { label: "consecutiveSevereWeatherSystem", value: consecutiveSevereWeatherSystem },
 
         { label: "", value: "" },
         { label: "Space Telescope:", labelKey: 'debuggerSectionSpaceTelescope', value: "" },
@@ -7226,6 +7238,8 @@ function getVariableDebuggerSetterForLabel(label) {
             currentStarSystemWeatherEfficiency = [parts[0], efficiency, parts[2]];
         },
         currentPrecipitationRate: (v) => { currentPrecipitationRate = Number(v); },
+        consecutiveSevereWeatherPeriods: (v) => { setConsecutiveSevereWeatherPeriods(v); },
+        consecutiveSevereWeatherSystem: (v) => { setConsecutiveSevereWeatherSystem(v); },
 
         // Space Telescope
         currentlySearchingAsteroid: (v) => { currentlySearchingAsteroid = v === 'true' || v === true; },
@@ -7606,6 +7620,8 @@ function getCurrentVariableDebuggerValueForLabel(label) {
     if (label === 'weatherEfficiencyApplied') return String(weatherEfficiencyApplied);
     if (label === 'currentStarSystemWeatherEfficiency') return String(currentStarSystemWeatherEfficiency);
     if (label === 'currentPrecipitationRate') return String(currentPrecipitationRate);
+    if (label === 'consecutiveSevereWeatherPeriods') return String(consecutiveSevereWeatherPeriods);
+    if (label === 'consecutiveSevereWeatherSystem') return String(consecutiveSevereWeatherSystem);
 
     if (label === 'currentlySearchingAsteroid') return String(currentlySearchingAsteroid);
     if (label === 'currentlyInvestigatingStar') return String(currentlyInvestigatingStar);
