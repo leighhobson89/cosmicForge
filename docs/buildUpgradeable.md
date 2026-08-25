@@ -158,7 +158,7 @@ The button handles the actual purchase click event.
 
 ```javascript
 const buyButton = createButton({
-    text: `Add ${Math.floor(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery1', 'capacity']) / 1000)} MWh`,
+    text: `Add ${Math.floor(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery1', 'capacity']) / 1000)} MJ`,
     classNames: [
         'option-button',                    // Base button style
         'red-disabled-text',               // Initial disabled state color
@@ -432,7 +432,7 @@ const battery1Row = createOptionRow({
     labelText: 'Sodium Ion Battery:',
     inputElements: [
         createButton({
-            text: `Add ${Math.floor(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery1', 'capacity']) / 1000)} MWh`,
+            text: `Add ${Math.floor(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery1', 'capacity']) / 1000)} MJ`,
             classNames: ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check'],
             onClick: () => {
                 gain(1, 'battery1Quantity', 'battery1', false, null, 'energy', 'resources');
@@ -508,7 +508,7 @@ const powerPlant1Row = createOptionRow({
             rowCategory: 'building'
         }),
         createButton({
-            text: `Add ${Math.round(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'rate']) * getTimerRateRatio())} KW /s`,
+            text: `Add ${Math.round(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'rate']) * getTimerRateRatio())} KJ /s`,
             classNames: ['option-button', 'building-purchase-button', 'red-disabled-text', 'resource-cost-sell-check'],
             onClick: () => {
                 gain(1, 'powerPlant1Quantity', 'powerPlant1', false, null, 'energy', 'resources');

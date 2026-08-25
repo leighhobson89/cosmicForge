@@ -5163,7 +5163,7 @@ function getStatTotalProduction() {//
     return Math.floor((resourceData.buildings.energy.upgrades.powerPlant1.quantity * resourceData.buildings.energy.upgrades.powerPlant1.rate 
         + resourceData.buildings.energy.upgrades.powerPlant2.quantity * resourceData.buildings.energy.upgrades.powerPlant2.rate
         + resourceData.buildings.energy.upgrades.powerPlant3.quantity * resourceData.buildings.energy.upgrades.powerPlant3.rate) 
-        * getTimerRateRatio()) + ' KW / s';
+        * getTimerRateRatio()) + ' KJ / s';
 }
 
 function getStatTotalProductionAllTime() {
@@ -5171,7 +5171,7 @@ function getStatTotalProductionAllTime() {
 }
 
 function getStatTotalConsumption() {//
-    return Math.floor(getTotalEnergyUse() * getTimerRateRatio()) + ' KW / s';
+    return Math.floor(getTotalEnergyUse() * getTimerRateRatio()) + ' KJ / s';
 }
 
 function getStatTotalConsumptionAllTime() {
@@ -5179,7 +5179,7 @@ function getStatTotalConsumptionAllTime() {
 }
 
 function getStatTotalBatteryStorage() {//
-    return Math.floor(getResourceDataObject('buildings', ['energy', 'storageCapacity']) / 1000)  + ' MWh';
+    return Math.floor(getResourceDataObject('buildings', ['energy', 'storageCapacity']) / 1000)  + ' MJ';
 }
 
 function getStatTotalBatteryStorageAllTime() {

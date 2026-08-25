@@ -33,7 +33,7 @@ export function drawTab2Content(heading, optionContentElement) {
             labelText: localize('tab2Battery1RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: localize('buttonAddCapacityMwh', getLanguage()).replace('{capacity}', Math.floor(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery1', 'capacity']) / 1000)),
+                    text: localize('buttonAddCapacityMj', getLanguage()).replace('{capacity}', Math.floor(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery1', 'capacity']) / 1000)),
                     classNames: ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check', ...demoExtraClasses],
                     onClick: () => {
                         gain(1, 'battery1Quantity', 'battery1', false, null, 'energy', 'resources');
@@ -75,7 +75,7 @@ export function drawTab2Content(heading, optionContentElement) {
             labelText: localize('tab2Battery2RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: localize('buttonAddCapacityMwh', getLanguage()).replace('{capacity}', Math.floor(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery2', 'capacity']) / 1000)),
+                    text: localize('buttonAddCapacityMj', getLanguage()).replace('{capacity}', Math.floor(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery2', 'capacity']) / 1000)),
                     classNames: ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check', ...demoExtraClasses],
                     onClick: () => {
                         gain(1, 'battery2Quantity', 'battery2', false, null, 'energy', 'resources');
@@ -117,7 +117,7 @@ export function drawTab2Content(heading, optionContentElement) {
             labelText: localize('tab2Battery3RowLabel', getLanguage()),
             inputElements: [
                 createButton({
-                    text: localize('buttonAddCapacityMwh', getLanguage()).replace('{capacity}', Math.floor(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery3', 'capacity']) / 1000)),
+                    text: localize('buttonAddCapacityMj', getLanguage()).replace('{capacity}', Math.floor(getResourceDataObject('buildings', ['energy', 'upgrades', 'battery3', 'capacity']) / 1000)),
                     classNames: ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check', ...demoExtraClasses],
                     onClick: () => {
                         gain(1, 'battery3Quantity', 'battery3', false, null, 'energy', 'resources');
@@ -184,7 +184,7 @@ export function drawTab2Content(heading, optionContentElement) {
                     rowCategory: 'building'
                 }),
                 createButton({
-                    text: localize('buttonAddRateKwPerSecond', getLanguage()).replace('{rate}', Math.round(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'rate']) * getOTypePowerPlantBoostMultiplierForCurrentSystem('powerPlant1') * getTimerRateRatio())),
+                    text: localize('buttonAddRateKjPerSecond', getLanguage()).replace('{rate}', Math.round(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'rate']) * getOTypePowerPlantBoostMultiplierForCurrentSystem('powerPlant1') * getTimerRateRatio())),
                     classNames: ['option-button', 'building-purchase-button', 'red-disabled-text', 'resource-cost-sell-check'],
                     onClick: () => {
                         gain(1, 'powerPlant1Quantity', 'powerPlant1', false, null, 'energy', 'resources');
@@ -274,7 +274,7 @@ export function drawTab2Content(heading, optionContentElement) {
                     rowCategory: 'building'
                 }),
                 createButton({
-                    text: localize('buttonAddMaxRateKwPerSecond', getLanguage()).replace('{rate}', Math.round(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'rate']) * getOTypePowerPlantBoostMultiplierForCurrentSystem('powerPlant2') * getTimerRateRatio())),
+                    text: localize('buttonAddMaxRateKjPerSecond', getLanguage()).replace('{rate}', Math.round(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'rate']) * getOTypePowerPlantBoostMultiplierForCurrentSystem('powerPlant2') * getTimerRateRatio())),
                     classNames: ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check', ...demoExtraClasses],
                     onClick: () => {
                         gain(1, 'powerPlant2Quantity', 'powerPlant2', false, null, 'energy', 'resources');
@@ -364,7 +364,7 @@ export function drawTab2Content(heading, optionContentElement) {
                     rowCategory: 'building'
                 }),
                 createButton({
-                    text: localize('buttonAddRateKwPerSecond', getLanguage()).replace('{rate}', Math.round(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant3', 'rate']) * getOTypePowerPlantBoostMultiplierForCurrentSystem('powerPlant3') * getTimerRateRatio())),
+                    text: localize('buttonAddRateKjPerSecond', getLanguage()).replace('{rate}', Math.round(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant3', 'rate']) * getOTypePowerPlantBoostMultiplierForCurrentSystem('powerPlant3') * getTimerRateRatio())),
                     classNames: ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check', ...demoExtraClasses],
                     onClick: () => {
                         gain(1, 'powerPlant3Quantity', 'powerPlant3', false, null, 'energy', 'resources');

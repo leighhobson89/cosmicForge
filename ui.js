@@ -4559,7 +4559,7 @@ export function createHtmlTableStatistics(id, classList = [], mainHeadings, subH
         //the stats whose value is a bare unit-free figure, and so is worth putting through the
         //notation setting. matched on the resolved english key, never on the displayed heading -
         //the heading is capitalised and localized, so comparing it against these keys never matches.
-        //deliberately left out: anything carrying a unit ('12 ly', '450 KW / s'), anything that is
+        //deliberately left out: anything carrying a unit ('12 ly', '450 KJ / s'), anything that is
         //a yes/no or a name, and totalEnergy, which reads the stat bar's already formatted text and
         //would therefore be condensed a second time
         const notationHeaders = [
@@ -7131,10 +7131,10 @@ function buildAutoBuyerConsumptionLines(timerRatio) {
 
 
     return tierData.map(({ tier, count, usage }) => {
-        const usageKw = usage * timerRatio;
-        const usageClass = usageKw > 0 ? 'red-disabled-text' : 'green-ready-text';
+        const usageKj = usage * timerRatio;
+        const usageClass = usageKj > 0 ? 'red-disabled-text' : 'green-ready-text';
         const countClass = count > 0 ? 'green-ready-text' : 'red-disabled-text';
-        return `<div>${localize('tooltipTierAutobuyers', getLanguage()).replace('{tier}', tier).replace('{value}', `<span class="${usageClass}">${formatEnergyValue(-usageKw)}</span>`).replace('{count}', count.toLocaleString())}</div>`;
+        return `<div>${localize('tooltipTierAutobuyers', getLanguage()).replace('{tier}', tier).replace('{value}', `<span class="${usageClass}">${formatEnergyValue(-usageKj)}</span>`).replace('{count}', count.toLocaleString())}</div>`;
     }).join('');
 }
 
@@ -7174,9 +7174,9 @@ function buildSpaceTelescopeConsumptionLine(timerRatio) {
     }
 
 
-    const usageKw = usage * timerRatio;
-    const className = usageKw > 0 ? 'red-disabled-text' : 'green-ready-text';
-    const usageText = usageKw > 0 ? formatEnergyValue(-usageKw) : '0 KW / s';
+    const usageKj = usage * timerRatio;
+    const className = usageKj > 0 ? 'red-disabled-text' : 'green-ready-text';
+    const usageText = usageKj > 0 ? formatEnergyValue(-usageKj) : '0 KJ / s';
 
 
     return `<div>${localize('tooltipSpaceTelescopeStatus', getLanguage()).replace('{status}', status).replace('{value}', `<span class="${className}">${usageText}</span>`)}</div>`;
@@ -7196,9 +7196,9 @@ function buildRocketRefuelLines(timerRatio) {
     return activeRockets.map(rocketKey => {
         const rocket = getResourceDataObject('space', ['upgrades', rocketKey]);
         const energyUsePerTick = rocket?.autoBuyer?.tier1?.energyUse || 0;
-        const usageKw = energyUsePerTick * timerRatio;
+        const usageKj = energyUsePerTick * timerRatio;
         const label = getRocketUserName(rocketKey);
-        return `<div><span class="green-ready-text">${localize('tooltipRefuelLabel', getLanguage()).replace('{label}', label)}</span> <span class="red-disabled-text">${formatEnergyValue(-usageKw)}</span></div>`;
+        return `<div><span class="green-ready-text">${localize('tooltipRefuelLabel', getLanguage()).replace('{label}', label)}</span> <span class="red-disabled-text">${formatEnergyValue(-usageKj)}</span></div>`;
     }).join('');
 }
 
@@ -7208,7 +7208,7 @@ function formatEnergyValue(value, isGeneration = false) {
         return '∞ DYSON ∞';
     }
     const rounded = Math.round(Math.abs(value));
-    const formatted = `${rounded.toLocaleString()} KW / s`;
+    const formatted = `${rounded.toLocaleString()} KJ / s`;
     if (rounded === 0) {
         return formatted;
     }
@@ -7284,8 +7284,8 @@ function buildBatteryTooltipContent() {
     });
 
 
-    const capacityMwh = Math.floor(totalCapacity / 1000);
-    const totalCapacityLine = `<div>${localize('tooltipTotalBatteryCapacity', getLanguage()).replace('{value}', `<span class="green-ready-text">${capacityMwh.toLocaleString()}</span>`)}</div>`;
+    const capacityMj = Math.floor(totalCapacity / 1000);
+    const totalCapacityLine = `<div>${localize('tooltipTotalBatteryCapacity', getLanguage()).replace('{value}', `<span class="green-ready-text">${capacityMj.toLocaleString()}</span>`)}</div>`;
 
 
     const depletionInfo = getBatteryDepletionInfo(energyRate, consumption, totalCapacity, energyQuantity, hasBattery);
@@ -11348,7 +11348,7 @@ function addOneOffEventListeners() {
 
                    
                     if (buyBuildingButtonElement)  {
-                        buyBuildingButtonElement.innerHTML = localize('buttonAddMaxMwh', getLanguage()).replace('{amount}', Math.floor(getResourceDataObject('buildings', [item[0], 'upgrades', item[1], 'capacity']) / 1000));
+                        buyBuildingButtonElement.innerHTML = localize('buttonAddMaxMj', getLanguage()).replace('{amount}', Math.floor(getResourceDataObject('buildings', [item[0], 'upgrades', item[1], 'capacity']) / 1000));
                     }
                 }
             });
@@ -11389,13 +11389,13 @@ function addOneOffEventListeners() {
 
         
                     if (buyBuildingButtonElement) {
-                        buyBuildingButtonElement.innerHTML = `${localize('textAdd', getLanguage())} ${Math.floor(newRateOfBuilding * getTimerRateRatio())} KW ${localize('textPerSecond', getLanguage())}`;
+                        buyBuildingButtonElement.innerHTML = `${localize('textAdd', getLanguage())} ${Math.floor(newRateOfBuilding * getTimerRateRatio())} KJ ${localize('textPerSecond', getLanguage())}`;
                     }
 
 
                     if (rateElement) {
                         const quantityOfBuilding = getResourceDataObject('buildings', [item[0], 'upgrades', item[1], 'quantity']);
-                        rateElement.innerHTML = `${Math.floor((newRateOfBuilding * getTimerRateRatio()) * quantityOfBuilding)} KW / s`;
+                        rateElement.innerHTML = `${Math.floor((newRateOfBuilding * getTimerRateRatio()) * quantityOfBuilding)} KJ / s`;
                     }
                 }
             });

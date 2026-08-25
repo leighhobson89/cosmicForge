@@ -1770,7 +1770,7 @@ What was deliberately **not** added, and why the list stays a whitelist rather
 than "every numeric stat":
 
 - stats carrying a unit — `starShipDistanceTravelled` renders `12 ly`,
-  `totalProduction` renders `450 KW / s` — where condensing the number is
+  `totalProduction` renders `450 KJ / s` — where condensing the number is
   defensible but is a separate decision;
 - yes/no and name stats, which have no number to format;
 - `totalEnergy`, which is the interesting one: `getStatTotalEnergy()` returns

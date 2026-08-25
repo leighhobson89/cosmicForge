@@ -830,17 +830,17 @@ export function initialiseDescriptions() {
             updateAt: ""
         },
         hydrogenAutoBuyer2Row: {
-            content1: localize('optionDescHydrogenAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescHydrogenAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
         hydrogenAutoBuyer3Row: {
-            content1: localize('optionDescHydrogenAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescHydrogenAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
         hydrogenAutoBuyer4Row: {
-            content1: localize('optionDescHydrogenAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescHydrogenAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
@@ -850,17 +850,17 @@ export function initialiseDescriptions() {
             updateAt: ""
         },
         heliumAutoBuyer2Row: {
-            content1: localize('optionDescHeliumAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescHeliumAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
         heliumAutoBuyer3Row: {
-            content1: localize('optionDescHeliumAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescHeliumAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
         heliumAutoBuyer4Row: {
-            content1: localize('optionDescHeliumAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescHeliumAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['helium', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
@@ -870,17 +870,17 @@ export function initialiseDescriptions() {
             updateAt: ""
         },
         carbonAutoBuyer2Row: {
-            content1: localize('optionDescCarbonAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescCarbonAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
         carbonAutoBuyer3Row: {
-            content1: localize('optionDescCarbonAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescCarbonAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
         carbonAutoBuyer4Row: {
-            content1: localize('optionDescCarbonAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescCarbonAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['carbon', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
@@ -890,17 +890,17 @@ export function initialiseDescriptions() {
             updateAt: ""
         },
         neonAutoBuyer2Row: {
-            content1: localize('optionDescNeonAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescNeonAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
         neonAutoBuyer3Row: {
-            content1: localize('optionDescNeonAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescNeonAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
         neonAutoBuyer4Row: {
-            content1: localize('optionDescNeonAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescNeonAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['neon', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
@@ -910,17 +910,17 @@ export function initialiseDescriptions() {
             updateAt: ""
         },
         oxygenAutoBuyer2Row: {
-            content1: localize('optionDescOxygenAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescOxygenAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
         oxygenAutoBuyer3Row: {
-            content1: localize('optionDescOxygenAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescOxygenAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
         oxygenAutoBuyer4Row: {
-            content1: localize('optionDescOxygenAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescOxygenAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['oxygen', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
@@ -930,17 +930,17 @@ export function initialiseDescriptions() {
             updateAt: ""
         },
         sodiumAutoBuyer2Row: {
-            content1: localize('optionDescSodiumAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescSodiumAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
         sodiumAutoBuyer3Row: {
-            content1: localize('optionDescSodiumAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescSodiumAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
         sodiumAutoBuyer4Row: {
-            content1: localize('optionDescSodiumAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescSodiumAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['sodium', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
@@ -950,17 +950,17 @@ export function initialiseDescriptions() {
             updateAt: ""
         },
         siliconAutoBuyer2Row: {
-            content1: localize('optionDescSiliconAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescSiliconAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
         siliconAutoBuyer3Row: {
-            content1: localize('optionDescSiliconAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescSiliconAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
         siliconAutoBuyer4Row: {
-            content1: localize('optionDescSiliconAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescSiliconAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['silicon', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
@@ -970,17 +970,17 @@ export function initialiseDescriptions() {
             updateAt: ""
         },
         ironAutoBuyer2Row: {
-            content1: localize('optionDescIronAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescIronAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
         ironAutoBuyer3Row: {
-            content1: localize('optionDescIronAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescIronAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
         ironAutoBuyer4Row: {
-            content1: localize('optionDescIronAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescIronAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('resources', ['iron', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
@@ -990,17 +990,17 @@ export function initialiseDescriptions() {
             updateAt: ""
         },
         dieselAutoBuyer2Row: {
-            content1: localize('optionDescDieselAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescDieselAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
         dieselAutoBuyer3Row: {
-            content1: localize('optionDescDieselAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescDieselAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
         dieselAutoBuyer4Row: {
-            content1: localize('optionDescDieselAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescDieselAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
@@ -1010,17 +1010,17 @@ export function initialiseDescriptions() {
             updateAt: ""
         },
         glassAutoBuyer2Row: {
-            content1: localize('optionDescGlassAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['glass', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescGlassAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['glass', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
         glassAutoBuyer3Row: {
-            content1: localize('optionDescGlassAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['glass', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescGlassAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['glass', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
         glassAutoBuyer4Row: {
-            content1: localize('optionDescGlassAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['glass', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescGlassAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['glass', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
@@ -1030,17 +1030,17 @@ export function initialiseDescriptions() {
             updateAt: ""
         },
         steelAutoBuyer2Row: {
-            content1: localize('optionDescSteelAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['steel', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescSteelAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['steel', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
         steelAutoBuyer3Row: {
-            content1: localize('optionDescSteelAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['steel', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescSteelAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['steel', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
         steelAutoBuyer4Row: {
-            content1: localize('optionDescSteelAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['steel', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescSteelAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['steel', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
@@ -1050,17 +1050,17 @@ export function initialiseDescriptions() {
             updateAt: ""
         },
         waterAutoBuyer2Row: {
-            content1: localize('optionDescWaterAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['water', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescWaterAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['water', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
         waterAutoBuyer3Row: {
-            content1: localize('optionDescWaterAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['water', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescWaterAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['water', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
         waterAutoBuyer4Row: {
-            content1: localize('optionDescWaterAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['water', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescWaterAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['water', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
@@ -1070,17 +1070,17 @@ export function initialiseDescriptions() {
             updateAt: ""
         },
         concreteAutoBuyer2Row: {
-            content1: localize('optionDescConcreteAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['concrete', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescConcreteAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['concrete', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
         concreteAutoBuyer3Row: {
-            content1: localize('optionDescConcreteAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['concrete', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescConcreteAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['concrete', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
         concreteAutoBuyer4Row: {
-            content1: localize('optionDescConcreteAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['concrete', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescConcreteAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['concrete', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
@@ -1090,17 +1090,17 @@ export function initialiseDescriptions() {
             updateAt: ""
         },
         titaniumAutoBuyer2Row: {
-            content1: localize('optionDescTitaniumAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['titanium', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescTitaniumAutoBuyer2Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['titanium', 'upgrades', 'autoBuyer', 'tier2', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
         titaniumAutoBuyer3Row: {
-            content1: localize('optionDescTitaniumAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['titanium', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescTitaniumAutoBuyer3Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['titanium', 'upgrades', 'autoBuyer', 'tier3', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
         titaniumAutoBuyer4Row: {
-            content1: localize('optionDescTitaniumAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['titanium', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescTitaniumAutoBuyer4Content1', getLanguage()) + ` ${Math.floor(getResourceDataObject('compounds', ['titanium', 'upgrades', 'autoBuyer', 'tier4', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },
@@ -1160,7 +1160,7 @@ export function initialiseDescriptions() {
             updateAt: ""
         },
         researchScienceLabRow: {
-            content1: localize('optionDescResearchScienceLabContent1', getLanguage()) + ` ${Math.floor(getResourceDataObject('research', ['upgrades', 'scienceLab', 'energyUse']) * getTimerRateRatio())}KW / s`,
+            content1: localize('optionDescResearchScienceLabContent1', getLanguage()) + ` ${Math.floor(getResourceDataObject('research', ['upgrades', 'scienceLab', 'energyUse']) * getTimerRateRatio())}KJ / s`,
             content2: "",
             updateAt: ""
         },

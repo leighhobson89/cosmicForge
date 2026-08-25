@@ -2798,7 +2798,7 @@ function updateEnergyDelta(deltaMs) {
             if (getInfinitePower()) {
                 energyRateElement.textContent = `∞ DYSON ∞`;
             } else {
-                energyRateElement.textContent = `${Math.floor(totalRate * getTimerRateRatio())} KW / s`;
+                energyRateElement.textContent = `${Math.floor(totalRate * getTimerRateRatio())} KJ / s`;
             }
 
             if (totalRate > 0 || getInfinitePower()) {
@@ -2812,7 +2812,7 @@ function updateEnergyDelta(deltaMs) {
             getElements().energyQuantity.classList.remove('red-disabled-text');
             getElements().energyQuantity.classList.remove('green-ready-text');
             const energyRateElement = getElements().energyRate;
-            energyRateElement.textContent = `0 KW / s`;
+            energyRateElement.textContent = `0 KJ / s`;
             energyRateElement.classList.add('red-disabled-text');
             energyRateElement.classList.remove('green-ready-text');
         }
@@ -4428,7 +4428,7 @@ function updateAllPowerPlantRates() {
                 totalRate *= getCurrentStarSystemWeatherEfficiency()[1];
             }
             totalRate *= getTimerRateRatio();
-            energyRateElement.innerHTML = `${Math.floor(totalRate)} KW / s`;
+            energyRateElement.innerHTML = `${Math.floor(totalRate)} KJ / s`;
 
             if (totalRate > 0) {
                 energyRateElement.classList.add('green-ready-text');
@@ -4500,8 +4500,8 @@ function updateRocketFuelAutoBuyerDescriptions() {
             continue;
         }
 
-        const powerKwPerSecond = Math.floor((getResourceDataObject('space', ['upgrades', rocketKey, 'autoBuyer', 'tier1', 'energyUse']) ?? 0) * getTimerRateRatio());
-        descElement.innerHTML = localize('tab6RocketDescriptionWithPower', getLanguage()).replace('{power}', powerKwPerSecond) + buildRocketFuelCostSuffix(rocketKey);
+        const powerKjPerSecond = Math.floor((getResourceDataObject('space', ['upgrades', rocketKey, 'autoBuyer', 'tier1', 'energyUse']) ?? 0) * getTimerRateRatio());
+        descElement.innerHTML = localize('tab6RocketDescriptionWithPower', getLanguage()).replace('{power}', powerKjPerSecond) + buildRocketFuelCostSuffix(rocketKey);
     }
 }
 
@@ -7129,7 +7129,7 @@ if (weather === 'rain' || weather === 'cloudy') {
 
 function energyChecks(element) {
     const valueText = element.textContent;
-    const match = valueText.match(/(-?\d+(\.\d+)?) KW \/ s/);
+    const match = valueText.match(/(-?\d+(\.\d+)?) KJ \/ s/);
 
     if (match) {
         const number = parseFloat(match[1]);
@@ -9841,7 +9841,7 @@ export function sellBuilding(quantityToSell, building) {
             totalRate *= getCurrentStarSystemWeatherEfficiency()[1];
         }
         totalRate *= getTimerRateRatio();
-        energyRateElement.innerHTML = `${Math.floor(totalRate)} KW / s`;
+        energyRateElement.innerHTML = `${Math.floor(totalRate)} KJ / s`;
     }
 
     const priceKeys = [
@@ -11624,12 +11624,12 @@ function startUpdateEnergyTimers(elementName, action) {
         
         if (action === 'toggle') {
             if (getBuildingTypeOnOff(elementName)) {
-                getElements()[elementName + 'Rate'].textContent = `${Math.floor(powerBuildingPotentialPower * getTimerRateRatio())} KW / s`;
+                getElements()[elementName + 'Rate'].textContent = `${Math.floor(powerBuildingPotentialPower * getTimerRateRatio())} KJ / s`;
             } else {
-                getElements()[elementName + 'Rate'].textContent = `0 KW / s`;
+                getElements()[elementName + 'Rate'].textContent = `0 KJ / s`;
             }
         } else if (action === 'buy') {
-            getElements()[elementName + 'Rate'].textContent = `${Math.floor(powerBuildingPotentialPower * getTimerRateRatio())} KW / s`;
+            getElements()[elementName + 'Rate'].textContent = `${Math.floor(powerBuildingPotentialPower * getTimerRateRatio())} KJ / s`;
         }
 
         if (getInfinitePower()) {
@@ -12114,9 +12114,9 @@ function updateEnergyStat(element) {
     }
     const totalRate = (getResourceDataObject('buildings', ['energy', 'rate']) * getTimerRateRatio()) - (getTotalEnergyUse() * getTimerRateRatio());
     if (getPowerOnOff()) {
-        element.textContent = `${Math.floor(totalRate)} KW / s`;
+        element.textContent = `${Math.floor(totalRate)} KJ / s`;
     } else {
-        element.textContent = `0 KW / s`;
+        element.textContent = `0 KJ / s`;
     }
 }
 
