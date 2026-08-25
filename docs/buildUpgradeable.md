@@ -508,7 +508,7 @@ const powerPlant1Row = createOptionRow({
             rowCategory: 'building'
         }),
         createButton({
-            text: `Add ${Math.round(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'rate']) * getTimerRateRatio())} KJ /s`,
+            text: `Add ${Math.round(getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'rate']) * getTimerRateRatio())} kJ /s`,
             classNames: ['option-button', 'building-purchase-button', 'red-disabled-text', 'resource-cost-sell-check'],
             onClick: () => {
                 gain(1, 'powerPlant1Quantity', 'powerPlant1', false, null, 'energy', 'resources');

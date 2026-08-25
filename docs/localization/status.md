@@ -227,7 +227,7 @@ functions now resolves through the catalogue. By tab:
 | File | Keys | Covers |
 |---|--:|---|
 | `drawTab1Content.js` | 1 | Only the *Already Increased!* storage tooltip was left; the rest was already done |
-| `drawTab2Content.js` | 13 | Battery and power-plant rows, the *Add N MJ* / *Add N KJ /s* buttons, Activate/Deactivate |
+| `drawTab2Content.js` | 13 | Battery and power-plant rows, the *Add N MJ* / *Add N kJ /s* buttons, Activate/Deactivate |
 | `drawTab3Content.js` | 89 | **The `techName*` family** — all 58 tech display names — plus the megastructure rows, the Research pane, the philosophy abilities and their 19 effect notifications |
 | `drawTab4Content.js` | — | Reused tab 1's keys; two stragglers fixed |
 | `drawTab5Content.js` | 76 | Star map modes and search, the star table, star-ship modules, the lifeform scan panel, fleet hangar, diplomacy |

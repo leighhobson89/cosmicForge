@@ -4559,7 +4559,7 @@ export function createHtmlTableStatistics(id, classList = [], mainHeadings, subH
         //the stats whose value is a bare unit-free figure, and so is worth putting through the
         //notation setting. matched on the resolved english key, never on the displayed heading -
         //the heading is capitalised and localized, so comparing it against these keys never matches.
-        //deliberately left out: anything carrying a unit ('12 ly', '450 KJ / s'), anything that is
+        //deliberately left out: anything carrying a unit ('12 ly', '450 kJ / s'), anything that is
         //a yes/no or a name, and totalEnergy, which reads the stat bar's already formatted text and
         //would therefore be condensed a second time
         const notationHeaders = [
@@ -7176,7 +7176,7 @@ function buildSpaceTelescopeConsumptionLine(timerRatio) {
 
     const usageKj = usage * timerRatio;
     const className = usageKj > 0 ? 'red-disabled-text' : 'green-ready-text';
-    const usageText = usageKj > 0 ? formatEnergyValue(-usageKj) : '0 KJ / s';
+    const usageText = usageKj > 0 ? formatEnergyValue(-usageKj) : '0 kJ / s';
 
 
     return `<div>${localize('tooltipSpaceTelescopeStatus', getLanguage()).replace('{status}', status).replace('{value}', `<span class="${className}">${usageText}</span>`)}</div>`;
@@ -7208,7 +7208,7 @@ function formatEnergyValue(value, isGeneration = false) {
         return '∞ DYSON ∞';
     }
     const rounded = Math.round(Math.abs(value));
-    const formatted = `${rounded.toLocaleString()} KJ / s`;
+    const formatted = `${rounded.toLocaleString()} kJ / s`;
     if (rounded === 0) {
         return formatted;
     }
@@ -11389,13 +11389,13 @@ function addOneOffEventListeners() {
 
         
                     if (buyBuildingButtonElement) {
-                        buyBuildingButtonElement.innerHTML = `${localize('textAdd', getLanguage())} ${Math.floor(newRateOfBuilding * getTimerRateRatio())} KJ ${localize('textPerSecond', getLanguage())}`;
+                        buyBuildingButtonElement.innerHTML = `${localize('textAdd', getLanguage())} ${Math.floor(newRateOfBuilding * getTimerRateRatio())} kJ ${localize('textPerSecond', getLanguage())}`;
                     }
 
 
                     if (rateElement) {
                         const quantityOfBuilding = getResourceDataObject('buildings', [item[0], 'upgrades', item[1], 'quantity']);
-                        rateElement.innerHTML = `${Math.floor((newRateOfBuilding * getTimerRateRatio()) * quantityOfBuilding)} KJ / s`;
+                        rateElement.innerHTML = `${Math.floor((newRateOfBuilding * getTimerRateRatio()) * quantityOfBuilding)} kJ / s`;
                     }
                 }
             });

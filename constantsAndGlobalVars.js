@@ -5163,7 +5163,7 @@ function getStatTotalProduction() {//
     return Math.floor((resourceData.buildings.energy.upgrades.powerPlant1.quantity * resourceData.buildings.energy.upgrades.powerPlant1.rate 
         + resourceData.buildings.energy.upgrades.powerPlant2.quantity * resourceData.buildings.energy.upgrades.powerPlant2.rate
         + resourceData.buildings.energy.upgrades.powerPlant3.quantity * resourceData.buildings.energy.upgrades.powerPlant3.rate) 
-        * getTimerRateRatio()) + ' KJ / s';
+        * getTimerRateRatio()) + ' kJ / s';
 }
 
 function getStatTotalProductionAllTime() {
@@ -5171,7 +5171,7 @@ function getStatTotalProductionAllTime() {
 }
 
 function getStatTotalConsumption() {//
-    return Math.floor(getTotalEnergyUse() * getTimerRateRatio()) + ' KJ / s';
+    return Math.floor(getTotalEnergyUse() * getTimerRateRatio()) + ' kJ / s';
 }
 
 function getStatTotalConsumptionAllTime() {
