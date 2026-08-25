@@ -196,6 +196,22 @@ test.describe('Star Data — the weather a star is born with', () => {
     }
   });
 
+  test('an all-zero weather roll becomes a valid neutral forecast', async ({ game }) => {
+    const weather = await game.withMods((m) => {
+      const originalRandom = Math.random;
+      try {
+        Math.random = () => 0;
+        m.game.generateStarDataAndAddToDataObject({ id: 'weather-zero-test' }, 12);
+        return m.rdo.getStarSystemDataObject('stars', ['weather-zero-test'])?.weather;
+      } finally {
+        Math.random = originalRandom;
+      }
+    });
+
+    expect(Object.fromEntries(Object.entries(weather).map(([state, entry]) => [state, entry[0]])))
+      .toEqual({ sunny: 25, cloudy: 25, rain: 25, volcano: 25 });
+  });
+
   test('the tendency a star advertises is its most likely state', async ({ game }) => {
     const records = (await starRecords(game)).filter((r) => r.weather && r.weatherTendency);
     expect(records.length).toBeGreaterThan(0);

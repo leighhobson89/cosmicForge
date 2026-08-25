@@ -257,6 +257,10 @@ import {
     getCurrentPrecipitationRate,
     getCurrentStarSystemWeatherEfficiency,
     setCurrentStarSystemWeatherEfficiency,
+    getConsecutiveSevereWeatherPeriods,
+    setConsecutiveSevereWeatherPeriods,
+    getConsecutiveSevereWeatherSystem,
+    setConsecutiveSevereWeatherSystem,
     getCurrentStarSystem,
     setCurrentStarSystem,
     getTrippedStatus,
@@ -10222,6 +10226,12 @@ function changeWeather(forcedWeatherType = null) {
         const totalProbability = weatherProbabilities.reduce((acc, val) => acc + val, 0);
         const randomSelection = totalProbability > 0 ? (Math.random() * totalProbability) : 0;
 
+        const currentSystem = getCurrentStarSystem();
+        if (getConsecutiveSevereWeatherSystem() !== currentSystem) {
+            setConsecutiveSevereWeatherPeriods(0);
+            setConsecutiveSevereWeatherSystem(currentSystem);
+        }
+
         let cumulativeProbability = 0;
         let selectedWeatherType = '';
 
@@ -10241,6 +10251,24 @@ function changeWeather(forcedWeatherType = null) {
 
         if (!selectedWeatherType || !weatherTable?.[selectedWeatherType]) {
             selectedWeatherType = 'sunny';
+        }
+
+        // Three severe windows may happen back-to-back, but never a third. This
+        // gives a player with a fuelled rocket a short, reliable launch window
+        // without removing hostile climates from the weather tables.
+        const selectedWeatherIsSevere = selectedWeatherType === 'rain' || selectedWeatherType === 'volcano';
+        const forceShortCloudyWindow = selectedWeatherIsSevere
+            && getConsecutiveSevereWeatherPeriods() >= 3
+            && Boolean(weatherTable?.cloudy);
+
+        if (forceShortCloudyWindow) {
+            selectedWeatherType = 'cloudy';
+        }
+
+        if (selectedWeatherType === 'rain' || selectedWeatherType === 'volcano') {
+            setConsecutiveSevereWeatherPeriods(getConsecutiveSevereWeatherPeriods() + 1);
+        } else {
+            setConsecutiveSevereWeatherPeriods(0);
         }
 
         const [, symbolWeather, efficiencyWeather] = weatherTable[selectedWeatherType] || [1, '☀', 1];
@@ -10278,11 +10306,12 @@ function changeWeather(forcedWeatherType = null) {
             statValueSpan.textContent = `${Math.floor(efficiencyWeather * 100)}% ${symbolWeather}`;
         }
         setCurrentStarSystemWeatherEfficiency([getCurrentStarSystem(), efficiencyWeather, selectedWeatherType]);
+        return forceShortCloudyWindow;
     }
 
-    selectNewWeather();
+    const forceShortCloudyWindow = selectNewWeather();
 
-    const randomDurationInMinutes = Math.floor(Math.random() * 3) + 1;
+    const randomDurationInMinutes = forceShortCloudyWindow ? 1 : Math.floor(Math.random() * 3) + 1;
     const randomDurationInMs = randomDurationInMinutes * 60 * 1000;
 
     //const randomDurationInMs = 10000; //DEBUG For Testing Weather
@@ -13696,20 +13725,40 @@ export function generateStarDataAndAddToDataObject(starElement, distance) {
         volcano: 0
     };
 
-    let totalProbability = 0;
     Object.keys(weatherProbabilities).forEach(type => {
         weatherProbabilities[type] = Math.floor(Math.random() * 25);
-        totalProbability += weatherProbabilities[type];
     });
 
-    const scalingFactor = 100 / totalProbability;
-    Object.keys(weatherProbabilities).forEach(type => {
-        weatherProbabilities[type] = Math.round(weatherProbabilities[type] * scalingFactor);
-    });
+    const totalProbability = Object.values(weatherProbabilities).reduce((acc, val) => acc + val, 0);
+    if (totalProbability === 0) {
+        // A one-in-390,625 all-zero roll used to divide by zero and save NaN
+        // probabilities. Give that otherwise valid star a neutral climate.
+        Object.keys(weatherProbabilities).forEach(type => {
+            weatherProbabilities[type] = 25;
+        });
+    } else {
+        // Allocate the rounded percentages by largest remainder. Unlike adding
+        // all rounding drift to sunny, this always produces non-negative whole
+        // numbers that total exactly 100.
+        const scaledProbabilities = Object.entries(weatherProbabilities).map(([type, weight], index) => {
+            const exactProbability = (weight / totalProbability) * 100;
+            const probability = Math.floor(exactProbability);
+            return { type, index, probability, remainder: exactProbability - probability };
+        });
 
-    const difference = 100 - Object.values(weatherProbabilities).reduce((acc, val) => acc + val, 0);
-    if (difference !== 0) {
-        weatherProbabilities.sunny += difference;
+        let unallocatedPercentage = 100 - scaledProbabilities.reduce((acc, entry) => acc + entry.probability, 0);
+        scaledProbabilities
+            .sort((a, b) => b.remainder - a.remainder || a.index - b.index)
+            .forEach(entry => {
+                if (unallocatedPercentage > 0) {
+                    entry.probability += 1;
+                    unallocatedPercentage -= 1;
+                }
+            });
+
+        scaledProbabilities.forEach(({ type, probability }) => {
+            weatherProbabilities[type] = probability;
+        });
     }
 
     let weatherTendency = [];

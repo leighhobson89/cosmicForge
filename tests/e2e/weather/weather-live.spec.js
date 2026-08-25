@@ -328,6 +328,57 @@ test.describe('Weather — the cycle', () => {
     expect(after.effectOn, 'and cleared the effect the old state was running').toBe(false);
   });
 
+  test('a third severe weather window becomes a short cloudy launch window', async ({ game }) => {
+    await game.withMods((m) => {
+      const system = m.cg.getCurrentStarSystem();
+      const table = m.rdo.getStarSystemWeather(system);
+      const rewrite = (type) => Object.fromEntries(Object.entries(table).map(([key, entry]) => [
+        key,
+        [key === type ? 100 : 0, entry[1], entry[2], entry[3]]
+      ]));
+
+      // Reset any weather that occurred while the run was booting, then make
+      // each ordinary draw severe. The third draw must grant a cloudy window.
+      m.rdo.setStarSystemWeather(system, rewrite('sunny'));
+      m.game.forceWeatherCycle();
+      m.rdo.setStarSystemWeather(system, rewrite('rain'));
+      m.game.forceWeatherCycle();
+      m.game.forceWeatherCycle();
+      m.game.forceWeatherCycle();
+    });
+
+    const state = await weatherState(game);
+    expect(state.type, 'the third consecutive severe draw grants a launch window').toBe('cloudy');
+    expect(state.efficiency, 'the launch window uses normal cloudy efficiency').toBe(0.6);
+  });
+
+  test('the severe-weather streak survives focus changes and save restoration', async ({ game }) => {
+    const result = await game.withMods(async (m) => {
+      const system = m.cg.getCurrentStarSystem();
+      m.cg.setConsecutiveSevereWeatherPeriods(2);
+      m.cg.setConsecutiveSevereWeatherSystem(system);
+
+      window.dispatchEvent(new Event('blur'));
+      window.dispatchEvent(new Event('focus'));
+
+      const saved = JSON.parse(JSON.stringify(m.cg.captureGameStatusForSaving('initialise')));
+      m.cg.setConsecutiveSevereWeatherPeriods(0);
+      m.cg.setConsecutiveSevereWeatherSystem(null);
+      await m.cg.restoreGameStatus(saved, 'textImport');
+
+      return {
+        savedPeriods: saved.consecutiveSevereWeatherPeriods,
+        savedSystem: saved.consecutiveSevereWeatherSystem,
+        periods: m.cg.getConsecutiveSevereWeatherPeriods(),
+        system: m.cg.getConsecutiveSevereWeatherSystem()
+      };
+    });
+
+    expect(result.savedPeriods).toBe(2);
+    expect(result.periods).toBe(2);
+    expect(result.system).toBe(result.savedSystem);
+  });
+
   test('the debug menu’s Clear Weather button puts the system back to full sun', async ({ game }) => {
     await forceWeather(game, 'rain');
     expect((await weatherState(game)).type).toBe('rain');

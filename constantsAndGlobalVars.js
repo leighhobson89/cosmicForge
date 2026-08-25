@@ -377,6 +377,8 @@ let autoSaveFrequency = 300000;
 let currentStarSystem = getStartingStarSystem();
 let currentStarSystemWeatherEfficiency = [];
 let currentPrecipitationRate = 0;
+let consecutiveSevereWeatherPeriods = 0;
+let consecutiveSevereWeatherSystem = null;
 let techRenderCounter = 0;
 let tempRowValue = null;
 let currencySymbol = '$';
@@ -1405,6 +1407,8 @@ export function resetAllVariablesOnRebirth() {
     launchedRockets = [];
     currentStarSystemWeatherEfficiency = [];
     currentPrecipitationRate = 0;
+    consecutiveSevereWeatherPeriods = 0;
+    consecutiveSevereWeatherSystem = null;
     techRenderCounter = 0;
     tempRowValue = null;
     sortAsteroidMethod = 'rarity';
@@ -1725,6 +1729,8 @@ export function captureGameStatusForSaving(type) {
     gameState.themesTriedArray = themesTriedArray;
     gameState.autoSaveFrequency = getAutoSaveFrequency();
     gameState.currentStarSystem = getCurrentStarSystem();
+    gameState.consecutiveSevereWeatherPeriods = getConsecutiveSevereWeatherPeriods();
+    gameState.consecutiveSevereWeatherSystem = getConsecutiveSevereWeatherSystem();
     gameState.currencySymbol = getCurrencySymbol();
     gameState.constituentPartsObject = getConstituentPartsObject();
     gameState.techUnlockedArray = techUnlockedArray;
@@ -2043,6 +2049,8 @@ export function restoreGameStatus(gameState, type) {
             const savedAutoSaveFrequency = Number(gameState.autoSaveFrequency);
             setAutoSaveFrequency(Number.isFinite(savedAutoSaveFrequency) && savedAutoSaveFrequency > 0 ? savedAutoSaveFrequency : 300000);
             setCurrentStarSystem(gameState.currentStarSystem);
+            setConsecutiveSevereWeatherPeriods(gameState.consecutiveSevereWeatherPeriods);
+            setConsecutiveSevereWeatherSystem(gameState.consecutiveSevereWeatherSystem);
             setCurrencySymbol(gameState.currencySymbol);
             setConstituentPartsObject(gameState.constituentPartsObject);
             blackHoleDiscovered = gameState.blackHoleDiscovered ?? false;
@@ -3414,6 +3422,25 @@ export function getCurrentPrecipitationRate() {
 
 export function setCurrentPrecipitationRate(value) {
     currentPrecipitationRate = value;
+}
+
+export function getConsecutiveSevereWeatherPeriods() {
+    return consecutiveSevereWeatherPeriods;
+}
+
+export function setConsecutiveSevereWeatherPeriods(value) {
+    const periods = Math.floor(Number(value));
+    consecutiveSevereWeatherPeriods = Number.isFinite(periods)
+        ? Math.max(0, Math.min(2, periods))
+        : 0;
+}
+
+export function getConsecutiveSevereWeatherSystem() {
+    return consecutiveSevereWeatherSystem;
+}
+
+export function setConsecutiveSevereWeatherSystem(value) {
+    consecutiveSevereWeatherSystem = typeof value === 'string' ? value.toLowerCase() : null;
 }
 
 export function getSaveData() {
