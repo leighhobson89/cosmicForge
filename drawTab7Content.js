@@ -1757,14 +1757,27 @@ export function drawTab7Content(heading, optionContentElement) {
                 ? buffNameLocalized
                 : (typeof buff?.name === 'string' ? buff.name : capitaliseString(buffKey));
             const buffName = typeof buffNameRaw === 'string' ? buffNameRaw : capitaliseString(buffKey);
-            const buffNameSlug = String(buffName).replace(/\s+/g, '-').toLowerCase();
-            const buffNameId = String(buffName).replace(/\s+/g, '').replace(/^./, str => str.toLowerCase());
+            // UI text is translated, but the perk catalogue is not. Keep DOM
+            // identifiers tied to the catalogue key so a translated name can
+            // never become part of the game logic.
+            const buffNameSlug = buffKey.replace(/([A-Z])/g, '-$1').toLowerCase();
     
             const buffRowDescription = `buff${capitaliseString(buffKey)}Row`;
             const cost = buff.rebuyable ? buff.baseCostAp * Math.pow(buff.rebuyableIncreaseMultiple, buff.boughtYet) : buff.baseCostAp;
             const buyStatus = buff.boughtYet > 0
                 ? (buff.rebuyable ? localize('textBoughtTimes', getLanguage()).replace('{count}', buff.boughtYet) : localize('textPurchased', getLanguage()))
                 : localize('textNotBought', getLanguage());
+
+            const buyButton = createButton({
+                text: localize('buttonBuy', getLanguage()),
+                classNames: ['option-button', 'red-disabled-text', 'ascendency-buff-button', `buff-class-${buffNameSlug}`],
+                onClick: () => {
+                    purchaseBuff(buffKey, cost);
+                },
+                disableKeyboardForButton: true,
+                rowCategory: 'ascendency'
+            });
+            buyButton.dataset.buffKey = buffKey;
     
             const buffRow = createOptionRow({
                 labelId: buffRowDescription,
@@ -1779,17 +1792,9 @@ export function drawTab7Content(heading, optionContentElement) {
                         ['buff-value']
                     ),                
                     createTextElement(buyStatus, `buff${capitaliseString(buffKey)}BuyStatusText`, ['buff-value']),
-                    createButton({
-                        text: localize('buttonBuy', getLanguage()),
-                        classNames: ['option-button', 'red-disabled-text', 'ascendency-buff-button', `buff-class-${buffNameSlug}`],
-                        onClick: () => {
-                            purchaseBuff(buffKey, cost);
-                        },
-                        disableKeyboardForButton: true,
-                        rowCategory: 'ascendency'
-                    }),
+                    buyButton,
                     createTextElement(
-                        `<span id="${buffNameId}CostText" class="green-ready-text">${Math.floor(cost)} AP</span>`,
+                        `<span id="${buffKey}CostText" class="green-ready-text">${Math.floor(cost)} AP</span>`,
                         'buffCost',
                         ['buff-value']
                     ),

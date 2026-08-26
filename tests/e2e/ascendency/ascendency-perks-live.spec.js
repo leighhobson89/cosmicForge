@@ -29,6 +29,7 @@ import { test, expect } from '../_harness/game-fixture.mjs';
 
 /** The AP the debug menu's grant button pays, per click. */
 const DEBUG_AP_GRANT = 100;
+const SHIPPED_LANGUAGES = ['en', 'es', 'pt', 'de', 'it', 'fr'];
 
 /** The perks whose effect is measured rather than read back. */
 const SMART_AUTO_BUYERS_MULTIPLIER = 1.5;
@@ -116,9 +117,8 @@ function currentAp(game) {
  * Every perk row as the pane is currently showing it, paired with the catalogue
  * record behind it.
  *
- * The key is reconstructed from the button's `buff-class-` token exactly the way
- * `checkAscendencyButtons()` does it, so a row this helper cannot resolve is a
- * row the game cannot resolve either.
+ * The DOM carries the catalogue key separately from the translated display
+ * name. This is the identity `checkAscendencyButtons()` uses as well.
  */
 async function readPerkRows(game) {
   return game.withMods((m) => {
@@ -126,14 +126,7 @@ async function readPerkRows(game) {
     const ap = m.cg.getAscendencyPoints();
 
     return Array.from(document.querySelectorAll('button.ascendency-buff-button')).map((button) => {
-      const token = Array.from(button.classList).find((c) => c.startsWith('buff-class-')) || '';
-      const key = token
-        .replace('buff-class-', '')
-        .split('-')
-        .map((word, index) => (index === 0
-          ? word.toLowerCase()
-          : word.charAt(0).toUpperCase() + word.slice(1)))
-        .join('');
+      const key = button.dataset.buffKey || '';
 
       const buff = buffs[key] || null;
       const capitalised = key.charAt(0).toUpperCase() + key.slice(1);
@@ -313,6 +306,57 @@ test.describe('Ascendency Perks — the pane a player opens', () => {
     expect(seen[1].affordable, 'a grant should open several perks up').toBeGreaterThan(0);
     expect(seen[1].ap).toBe(DEBUG_AP_GRANT);
     expect(seen[2].ap).toBe(DEBUG_AP_GRANT - cheapest.price);
+  });
+
+  test('translated perk names retain their catalogue identity in every language and can be bought', async ({ game }) => {
+    await openPerksPane(game);
+    await grantAp(game, 1);
+
+    const localizationProblems = [];
+    for (const language of SHIPPED_LANGUAGES) {
+      await game.withMods((m, lang) => m.ui.relocalizeAll(lang), language);
+      await game.page.waitForTimeout(350);
+
+      const rows = await readPerkRows(game);
+      for (const row of rows) {
+        if (!row.resolved) localizationProblems.push(`${language}/${row.key || 'missing key'} did not resolve`);
+        if (row.ready !== row.shouldBeReady) localizationProblems.push(`${language}/${row.key} has the wrong affordability state`);
+      }
+    }
+    expect(localizationProblems, 'translated rows must retain their catalogue identity and live affordability state')
+      .toEqual([]);
+
+    await game.withMods((m) => m.ui.relocalizeAll('de'));
+    await game.page.waitForTimeout(350);
+
+    const hydrogenBag = (await readPerkRows(game)).find((row) => row.key === 'littleBagOfHydrogen');
+    expect(hydrogenBag?.ready, 'an affordable perk should be enabled in German').toBe(true);
+
+    await buyPerk(game, 'littleBagOfHydrogen');
+    expect(await currentAp(game)).toBe(DEBUG_AP_GRANT - 3);
+  });
+
+  test('the pane AP balance updates after a purchase and after redrawing the pane', async ({ game }) => {
+    await grantAp(game, 1);
+    await openPerksPane(game);
+
+    expect(await game.page.locator('#ascendencyPerksApBalance').textContent()).toBe(String(DEBUG_AP_GRANT));
+
+    await buyPerk(game, 'littleBagOfHydrogen');
+    await game.page.waitForFunction(
+      () => document.getElementById('ascendencyPerksApBalance')?.textContent === '97',
+      undefined,
+      { timeout: 10000 }
+    );
+
+    await game.withMods((m) => {
+      m.ui.updateContent('Galactic Market', 'tab7', 'content');
+      m.ui.updateContent('Ascendency Perks', 'tab7', 'content');
+    });
+
+    expect(await game.page.locator('#ascendencyPerksApBalance').textContent(),
+      'redrawing must read the current AP balance, not the balance loaded with the save')
+      .toBe('97');
   });
 
   test('buying the affordable perks one at a time never overdraws the balance', async ({ game }) => {

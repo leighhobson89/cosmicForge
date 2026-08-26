@@ -8669,16 +8669,7 @@ function resetFleetPrices() {
 function checkAscendencyButtons() {
     const buttons = document.querySelectorAll('.ascendency-buff-button');
     buttons.forEach(button => {
-        const buffClass = Array.from(button.classList).find(cls => cls.startsWith('buff-class-'));
-
-        const buffName = buffClass ? buffClass.replace('buff-class-', '').split('-')
-            .map((word, index) => index === 0 
-            ? word.toLowerCase()
-            : word.charAt(0).toUpperCase() + word.slice(1)
-            )
-            .join('')
-            : '';
-        
+        const buffName = button.dataset.buffKey;
         const buff = getAscendencyBuffDataObject()[buffName];
 
         if (!buff) return;
@@ -8704,6 +8695,11 @@ function checkAscendencyButtons() {
 
 function updateAscendencyRowTextFields() {
     const ascendencyBuffs = Object.fromEntries(Object.entries(getAscendencyBuffDataObject()).filter(([key]) => key !== "version"));
+    const balanceElement = document.getElementById('ascendencyPerksApBalance');
+
+    if (balanceElement) {
+        balanceElement.textContent = getAscendencyPoints();
+    }
 
     Object.keys(ascendencyBuffs).forEach(buffKey => {
         const capitalizedBuffKey = capitaliseString(buffKey);

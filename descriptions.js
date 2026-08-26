@@ -486,7 +486,7 @@ export function initialiseDescriptions() {
 
         'galactic market': localize('headerDescGalacticMarket', getLanguage()),
         'galactic casino': localize('headerDescGalacticCasino', getLanguage()),
-        'ascendency perks': localize('headerDescAscendencyPerks', getLanguage()) + `<span class="green-ready-text">${getResourceDataObject('ascendencyPoints', ['quantity'])}</span>`,
+        'ascendency perks': getAscendencyPerksHeaderDescription(),
         'megastructures': localize('headerDescMegastructures', getLanguage()),
         'black hole': localize('headerDescBlackHole', getLanguage()),
 
@@ -3896,7 +3896,16 @@ export function setOptionDescription(key1, value) {
 }
 
 export function getHeaderDescriptions(key) {
-    return headerDescriptions[key];
+    const headerKey = Array.isArray(key) ? key[0] : key;
+    if (String(headerKey).toLowerCase() === 'ascendency perks') {
+        return getAscendencyPerksHeaderDescription();
+    }
+    return headerDescriptions[headerKey];
+}
+
+function getAscendencyPerksHeaderDescription() {
+    return localize('headerDescAscendencyPerks', getLanguage())
+        + `<span id="ascendencyPerksApBalance" class="green-ready-text">${getResourceDataObject('ascendencyPoints', ['quantity'])}</span>`;
 }
 
 export function setHeaderDescriptions(key, value) {
