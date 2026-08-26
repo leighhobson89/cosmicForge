@@ -104,7 +104,7 @@ export async function destroySaveGameOnCloud() {
         const userId = getSaveName();
 
         const { data: existingRow, error: fetchError } = await supabase
-            .from('CosmicForge_saves')
+            .from('cosmicforge_saves')
             .select('*')
             .eq('pioneer_name', userId)
             .single();
@@ -117,7 +117,7 @@ export async function destroySaveGameOnCloud() {
         const backupUserId = `graveyard_${userId}`;
 
         const { data: existingGraveyardRow, error: graveyardFetchError } = await supabase
-            .from('CosmicForge_saves')
+            .from('cosmicforge_saves')
             .select('*')
             .eq('pioneer_name', backupUserId)
             .single();
@@ -128,7 +128,7 @@ export async function destroySaveGameOnCloud() {
 
         if (existingGraveyardRow) {
             const { error: graveyardUpdateError } = await supabase
-                .from('CosmicForge_saves')
+                .from('cosmicforge_saves')
                 .update({
                     data: existingRow.data,
                     created_at: currentTimestamp,
@@ -144,7 +144,7 @@ export async function destroySaveGameOnCloud() {
             }
         } else {
             const { error: insertError } = await supabase
-                .from('CosmicForge_saves')
+                .from('cosmicforge_saves')
                 .insert([{
                     pioneer_name: backupUserId,
                     data: existingRow.data,
@@ -161,7 +161,7 @@ export async function destroySaveGameOnCloud() {
         }
 
         const { error: updateError } = await supabase
-            .from('CosmicForge_saves')
+            .from('cosmicforge_saves')
             .update({ data: null })
             .eq('pioneer_name', userId);
 
@@ -201,7 +201,7 @@ export async function saveGameToCloud(gameData, type) {
         const currentTimestamp = new Date().toISOString();
 
         const { data: existingData, error: fetchError } = await supabase
-            .from('CosmicForge_saves')
+            .from('cosmicforge_saves')
             .select('*')
             .eq('pioneer_name', userId)
             .single();
@@ -212,7 +212,7 @@ export async function saveGameToCloud(gameData, type) {
 
         if (existingData) {
             const { error: updateError } = await supabase
-                .from('CosmicForge_saves')
+                .from('cosmicforge_saves')
                 .update({ 
                     data: gameData,
                     'created_at': currentTimestamp,
@@ -232,7 +232,7 @@ export async function saveGameToCloud(gameData, type) {
             }
         } else {
             const { error: insertError } = await supabase
-                .from('CosmicForge_saves')
+                .from('cosmicforge_saves')
                 .insert([{
                     pioneer_name: userId,
                     data: gameData,
@@ -436,7 +436,7 @@ export async function loadGameFromCloud() {
         const userId = localStorage.getItem('saveName') || getSaveName();
 
         const { data, error } = await supabase
-            .from('CosmicForge_saves')
+            .from('cosmicforge_saves')
             .select('data')
             .eq('pioneer_name', userId)
             .single();

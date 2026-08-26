@@ -12,7 +12,7 @@
  *     ---000test_Test1981_cosmicForge_e2e
  *
  * The name is built to be unmistakable and to sort to the very top of the
- * `CosmicForge_saves` table ahead of every real pioneer, so it is obvious at a
+ * `cosmicforge_saves` table ahead of every real pioneer, so it is obvious at a
  * glance in the dashboard that it is not a player. The row is *reused* on every
  * run rather than being uniquely named per run: a unique name would mean the
  * table grows by one row every time the suite is executed, forever. Reusing it
@@ -378,7 +378,7 @@ test.describe('Cloud save & load', () => {
     // no database credentials, and it asserts what the game actually sends, which
     // is the thing that could be wrong.
     const writes = [];
-    await game.page.route('**/rest/v1/CosmicForge_saves*', async (route) => {
+    await game.page.route('**/rest/v1/cosmicforge_saves*', async (route) => {
       const request = route.request();
       if (['POST', 'PATCH'].includes(request.method())) {
         try {
