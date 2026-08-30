@@ -53,6 +53,25 @@ async function clickById(game, id) {
   await game.page.waitForTimeout(350);
 }
 
+/**
+ * Click one of an option row's unlabelled buttons by the class that identifies it.
+ *
+ * The Sell 1 / Add rate buttons on the power plant rows carry no id, so they can
+ * only be reached through the row plus their behavioural class. Dispatching the
+ * click directly, as clickById does, for the same reason: these controls sit
+ * under other elements in the panel.
+ */
+async function clickRowButton(game, rowId, buttonClass) {
+  const fired = await game.page.evaluate(({ row, cls }) => {
+    const button = document.getElementById(row)?.querySelector(`button.${cls}`);
+    if (!button) return false;
+    button.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    return true;
+  }, { row: rowId, cls: buttonClass });
+  if (!fired) throw new Error(`No .${buttonClass} button inside #${rowId}`);
+  await game.page.waitForTimeout(350);
+}
+
 /** Reveal a plant and make it affordable, then open its pane. */
 async function openPlantPane(game, plant) {
   await game.withMods((m, key) => {
@@ -332,6 +351,24 @@ test.describe('Energy — toggling and tripping the grid', () => {
     // toggleAllPower() is the real entry point behind the Power All control. It
     // deactivates every running plant and, unless infinite power is on, drops
     // the grid with them.
+    //
+    // Re-assert the precondition rather than assume it (same discipline as the
+    // autobuyer test below): the staging above activates the plant, which opens
+    // the 5s power grace window, and on a loaded machine the deficit check that
+    // follows the grace can have auto-tripped the plant by the time we get
+    // here. toggleAllPower() would then find nothing active and take its
+    // *activation* branch — re-energising the grid — and this test would
+    // measure the wrong transition. Re-activating immediately before the toggle
+    // keeps it deterministically on the deactivation branch.
+    const staged = await game.withMods((m) => {
+      if (!m.cg.getBuildingTypeOnOff('powerPlant1')) {
+        m.game.toggleBuildingTypeOnOff('powerPlant1', true);
+        m.cg.setPowerOnOff(true);
+      }
+      return m.cg.getBuildingTypeOnOff('powerPlant1');
+    });
+    expect(staged, 'a running plant must be staged before toggling all power off').toBeTruthy();
+
     await game.withMods((m) => m.game.toggleAllPower());
     await game.page.waitForTimeout(1200);
 
@@ -424,6 +461,72 @@ test.describe('Energy — toggling and tripping the grid', () => {
     }));
 
     expect(state.quantity).toBeLessThanOrEqual(state.capacity + 1);
+  });
+
+  test('selling the last plant of a type switches that type off everywhere', async ({ game }) => {
+    // The exact player scenario: one basic plant, none of the other two, grid
+    // powered, then the one plant is sold. Everything here is driven through
+    // the real row controls — buy, activate, sell — because the defect was in
+    // the wiring between the sell handler and the power state, not in any one
+    // function.
+    //
+    // The stat-bar tooltip only carries its power lines while
+    // `basicPowerGeneration` is unlocked (ui.js statToolBarCustomizations gates
+    // it behind the tech, as the energy tab itself is gated), so stage the tech
+    // the way a real run would already have it.
+    await game.withMods((m) => m.cg.setTechUnlockedArray('basicPowerGeneration'));
+    await openPlantPane(game, 'powerPlant1');
+
+    await clickRowButton(game, 'energyPowerPlant1Row', 'building-purchase-button');
+    await game.page.waitForTimeout(600);
+
+    const bought = await game.withMods((m) => ({
+      powerPlant1: m.rdo.getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'quantity']),
+      powerPlant2: m.rdo.getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'quantity']),
+      powerPlant3: m.rdo.getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant3', 'quantity'])
+    }));
+    expect(bought.powerPlant1, 'the purchase button should have built exactly one basic plant').toBe(1);
+    expect(bought.powerPlant2 + bought.powerPlant3, 'the other two types must stay unbuilt').toBe(0);
+
+    await clickById(game, 'powerPlant1Toggle');
+    await game.page.waitForTimeout(900);
+    const running = await game.withMods((m) => ({
+      plantOn: m.cg.getBuildingTypeOnOff('powerPlant1'),
+      powerOn: m.cg.getPowerOnOff()
+    }));
+    expect(running.plantOn, 'the plant should be running before it is sold').toBe(true);
+    expect(running.powerOn, 'the grid should be up before the plant is sold').toBe(true);
+
+    // Sell the only plant the player owns.
+    await clickRowButton(game, 'energyPowerPlant1Row', 'sell-building-button');
+    await game.page.waitForTimeout(1500);
+
+    const sold = await game.withMods((m) => ({
+      quantity: m.rdo.getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'quantity']),
+      plantOn: m.cg.getBuildingTypeOnOff('powerPlant1'),
+      powerOn: m.cg.getPowerOnOff(),
+      usedForFuel: m.rdo.getResourceDataObject('resources', ['carbon', 'usedForFuelPerSec']),
+      tooltip: document.getElementById('stat3')?.dataset.tooltipContent || ''
+    }));
+
+    expect(sold.quantity, 'the sale should have removed the plant').toBe(0);
+    // The defect: a type with nothing built stayed flagged as running, so the
+    // stat-bar tooltip reported it ON forever.
+    expect(sold.plantOn, 'a plant type with none built must not be flagged as running').toBe(false);
+    expect(sold.powerOn, 'selling the last running plant should drop the grid').toBe(false);
+    expect(sold.usedForFuel, 'a sold plant must stop being charged for fuel').toBe(0);
+
+    // And the symptom the player actually sees: the tooltip line for the basic
+    // plant must read OFF, not ON. The line is `<label>: <span class=...>`, so
+    // the class on that span is what colours it ON (green) or OFF (red).
+    const basicPlantLine = sold.tooltip
+      .split('</div>')
+      .find((line) => line.includes('Basic Power Plant'));
+    expect(basicPlantLine, `the tooltip should carry a basic plant line: ${sold.tooltip}`).toBeTruthy();
+    expect(basicPlantLine, `the basic plant line should read OFF: ${basicPlantLine}`)
+      .toContain('red-disabled-text');
+    expect(basicPlantLine, `the basic plant line must not read ON: ${basicPlantLine}`)
+      .not.toContain('green-ready-text');
   });
 
   test('driving the energy panes raises no console or page errors', async ({ game }) => {

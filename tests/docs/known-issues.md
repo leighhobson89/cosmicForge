@@ -3291,3 +3291,92 @@ Verified in both directions: all three fail against the unfixed source and pass
 against the fixed source.
 
 ---
+
+## 47. Selling the last power plant of a type left that type flagged as running — ✅ FIXED
+
+**Severity was: low-medium — a permanently wrong status readout, plus a grid that
+could be left powered with no generation behind it.**
+
+### Reproduction
+
+1. Own **one** basic power plant, and none of the other two types.
+2. Activate it, so the grid is up.
+3. Sell that one plant with the row's own **Sell 1** button.
+4. Hover the stat-bar **Powered** entry.
+
+The stat-bar label correctly reads OFF — it is derived from the energy rate, and
+with no plants the rate is zero — but the tooltip underneath it still reads
+**"Basic Power Plant: ON"**, in green, with zero basic plants built. It stays
+that way indefinitely.
+
+### Cause
+
+`sellBuilding()` in `game.js` was the only plant-removal path that did not undo
+what buying a plant does.
+
+Buying is `gain()`, which adds the unit's burn rate to the fuel's
+`usedForFuelPerSec` and, while the burn is live, takes the same amount off the
+fuel's `rate`:
+
+```js
+setResourceDataObject(fuelObject.usedForFuelPerSec + powerBuildingFuelBurnRate, …, ['usedForFuelPerSec']);
+if (getActivatedFuelBurnObject(powerBuildingFuelType)) {
+    setResourceDataObject(actualRateOfPowerBuildingFuel - powerBuildingFuelBurnRate, …, ['rate']);
+}
+```
+
+The random-event removal path, `destroyPowerPlant()` in `events.js`, is the exact
+inverse of that *and* clears the on/off flag once the last one is gone:
+
+```js
+if (newQty === 0 && getBuildingTypeOnOff(powerPlantKey)) {
+    setBuildingTypeOnOff(powerPlantKey, false);
+}
+```
+
+`sellBuilding()` did neither. It decremented the quantity, rewrote the row's rate
+text and refunded the cash, and stopped there — so `buildingTypeOnOff.powerPlant1`
+stayed `true` with a quantity of `0`. The tooltip line is built straight off that
+flag (`buildPowerPlantStatusLines()` in `ui.js`), which is why it reported ON.
+
+The flag is also saved state (`gameState.buildingTypeOnOff`), so the stale value
+survived a save/load. It clears itself the next time the grid drops, because the
+frame loop's power-off branch deactivates every plant — which is why the symptom
+looks intermittent rather than permanent in a busy run.
+
+### The fix — applied
+
+`game.js`, `sellBuilding()` now mirrors `destroyPowerPlant()`:
+
+1. The sold units leave the fuel books — `usedForFuelPerSec` drops by
+   `burnRate × quantitySold`, and while the burn is live the same amount goes
+   back onto the fuel's `rate`. Without this, selling and re-buying a plant
+   double-counted its fuel charge.
+2. When the sale takes the type to zero, `setBuildingTypeOnOff(type, false)` is
+   called and the row's toggle button is put back to its **Activate** face.
+3. If that was the last *active* plant of any type, the grid is dropped with
+   `setPowerOnOff(false)` — the same thing `toggleAllPower()` does.
+
+Step 3 is not cosmetic. The grid's auto-manager in `game.js` only force-flips
+power **while some plant is flagged active**:
+
+```js
+if (anyPlantActive) {
+    const shouldForceOff = totalRate < 0 && powerOnNow && !graceActive && …;
+```
+
+so clearing the flag without dropping the grid would have replaced a wrong
+tooltip with a worse bug: `powerOnOff` frozen at `true` forever, keeping tier 2-4
+autobuyers running on a grid with no generation at all.
+
+### Regression spec
+
+`tests/e2e/energy/energy-live.spec.js` — *selling the last plant of a type
+switches that type off everywhere*. It plays the whole scenario through the real
+row controls: it buys one basic plant with the row's purchase button, activates
+it with `#powerPlant1Toggle`, sells it with the row's Sell 1 button, and then
+asserts the quantity, the on/off flag, the grid state, `usedForFuelPerSec`, and
+the colour class on the tooltip's own basic-plant line — the last one being the
+symptom the player actually sees.
+
+---

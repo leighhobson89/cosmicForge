@@ -19,6 +19,8 @@ Power plants, fuel consumption, storage, grid capacity and the consequences of a
 - [ ] Power All button correctly toggles the whole grid
 - [ ] Per-building on/off toggles are independent and persist
 - [ ] Solar output responds to star type
+- [ ] The stat-bar Powered entry is a toggle that drives the grid, and is inert with a Dyson Sphere or no plants built
+- [ ] Selling the last plant of a type switches that type off in the state, the fuel books and the stat-bar tooltip
 
 ## Status meaning
 

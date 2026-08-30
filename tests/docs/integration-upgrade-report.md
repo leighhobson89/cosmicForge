@@ -140,7 +140,7 @@ at `MINIMUM_BLACK_HOLE_CHARGE_TIME`.
 
 ---
 
-## 🟢 Energy — `energy-live.spec.js`, 10 specs, all passing
+## 🟢 Energy — `energy-live.spec.js` (11 specs) and `power-toggle.spec.js` (5 specs), all passing
 
 **What is different.** Plants are bought with the real
 `button.building-purchase-button`, panes are opened by clicking their side-menu
@@ -191,6 +191,43 @@ through by design.
   `?.` on module functions: a wrong module should throw, not no-op.
 - A power plant needs **fuel** to stay running. Staging a plant with a token
   amount of carbon reads as "the toggle does not work".
+
+### Second pass — the stat-bar Powered toggle (plan item P3)
+
+`power-toggle.spec.js` (5 specs) covers the stat-bar **Powered** entry after it
+became a real `createButton()`-built toggle. It clicks the button rather than
+calling `toggleAllPower()`, and asserts the state flips, stays flipped across
+ticks, and survives a tab switch and re-render. The two inert states — a Dyson
+Sphere supplying infinite power, and a run with no plant of any type built — are
+asserted on the *computed* `pointer-events`, because that is what the browser's
+hit-testing actually obeys, plus a dispatched click to prove the handler no-ops
+behind it. Note the ordering that makes the hover tooltip keep working:
+`setupPoweredStatToggleButton()` runs **before** `setupStatTooltips()`, so the
+tooltip listeners bind to the parent `.stat-cell` and to the replacement button,
+not to the span that was swapped out.
+
+### The defect this pass found: selling the last plant of a type
+
+`sellBuilding()` in `game.js` was the only plant-removal path that did not undo
+what buying a plant did. `gain()` adds the unit's burn rate to the fuel's
+`usedForFuelPerSec`; `destroyPowerPlant()` in `events.js` (the random-event path)
+takes it back off and clears `buildingTypeOnOff[type]` once the last one is gone.
+`sellBuilding()` did neither. Selling your only basic plant while it was running
+therefore left the type flagged as running with **zero built**, so the stat-bar
+tooltip reported "Basic Power Plant: ON" indefinitely, and the grid's
+auto-manager kept treating a plant that no longer exists as active.
+
+`sellBuilding()` now mirrors `destroyPowerPlant()`, and additionally drops the
+grid when the plant it just removed was the last active one — the same thing
+`toggleAllPower()` does. That last part is not cosmetic: the auto-manager only
+force-flips the grid *while some plant is flagged active*, so clearing the flag
+without dropping the grid would have left `powerOnOff` stuck at true forever,
+powering tier 2-4 autobuyers from a grid with no generation.
+
+`energy-live.spec.js` gained "selling the last plant of a type switches that type
+off everywhere", which plays the whole scenario through the real row controls —
+buy, activate, sell — and asserts the flag, the grid, the fuel books and the
+colour class on the tooltip's own basic-plant line.
 
 ---
 

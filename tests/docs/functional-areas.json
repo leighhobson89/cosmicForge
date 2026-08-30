@@ -353,7 +353,7 @@
         "energyMid.test.js"
       ],
       "summary": "Power plants, fuel consumption, storage, grid capacity and the consequences of a deficit.",
-      "specCount": 26,
+      "specCount": 32,
       "tests": [
         "Each power plant type generates its rated output",
         "Fuel is consumed at the documented rate and generation stops when fuel runs out",
@@ -361,7 +361,9 @@
         "Consumption exceeding generation triggers the deficit behaviour (not a silent stall)",
         "Power All button correctly toggles the whole grid",
         "Per-building on/off toggles are independent and persist",
-        "Solar output responds to star type"
+        "Solar output responds to star type",
+        "The stat-bar Powered entry is a toggle that drives the grid, and is inert with a Dyson Sphere or no plants built",
+        "Selling the last plant of a type switches that type off in the state, the fuel books and the stat-bar tooltip"
       ]
     },
     {

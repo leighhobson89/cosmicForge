@@ -9853,6 +9853,59 @@ export function sellBuilding(quantityToSell, building) {
         energyRateElement.innerHTML = `${Math.floor(totalRate)} kJ / s`;
     }
 
+    // A sold plant has to leave the fuel books and, once the last one of its
+    // type is gone, stop counting as a running plant. This is the exact inverse
+    // of the purchase path in gain() (which adds the unit's burn rate to
+    // usedForFuelPerSec and, while the burn is live, takes it back off the
+    // fuel's rate) and it mirrors destroyPowerPlant() in events.js, which
+    // already does this for the random-event path. Without it, selling the last
+    // plant of a type left buildingTypeOnOff[type] stuck at true: the stat-bar
+    // tooltip then reported that plant type as ON with zero of them built, and
+    // the grid's auto-manager kept treating a plant that no longer exists as
+    // active.
+    const quantitySold = Math.max(0, quantityBuilding - newQuantityBuilding);
+    const fuel = getResourceDataObject('buildings', ['energy', 'upgrades', building, 'fuel']);
+
+    if (quantitySold > 0 && Array.isArray(fuel) && fuel.length >= 3) {
+        const fuelType = fuel[0];
+        const fuelCategory = fuel[2];
+        const burnRateSold = (Number(fuel[1]) || 0) * quantitySold;
+
+        const usedForFuel = Number(getResourceDataObject(fuelCategory, [fuelType, 'usedForFuelPerSec'])) || 0;
+        setResourceDataObject(Math.max(0, usedForFuel - burnRateSold), fuelCategory, [fuelType, 'usedForFuelPerSec']);
+
+        if (getActivatedFuelBurnObject(fuelType)) {
+            const currentFuelRate = Number(getResourceDataObject(fuelCategory, [fuelType, 'rate'])) || 0;
+            setResourceDataObject(currentFuelRate + burnRateSold, fuelCategory, [fuelType, 'rate']);
+        }
+    }
+
+    if (newQuantityBuilding <= 0 && getBuildingTypeOnOff(building)) {
+        setBuildingTypeOnOff(building, false);
+
+        // Put the row's own toggle back to its Activate face, the way the
+        // deactivate branch of addOrRemoveUsedPerSecForFuelRate does, so the
+        // button does not keep offering to deactivate a plant that is gone.
+        const toggleButton = document.getElementById(building + 'Toggle');
+        if (toggleButton) {
+            setPowerToggleLabel(toggleButton, false);
+            toggleButton.classList.remove('green-ready-text');
+        }
+
+        // Selling the last running plant leaves the grid with nothing behind
+        // it, so drop it — the same thing toggleAllPower() does when it
+        // deactivates the last plant. It also keeps the auto-manager honest:
+        // that manager only force-flips the grid while some plant is flagged
+        // active, so a `powerOnOff` left true here would stay true forever and
+        // keep tier 2-4 autobuyers running on a grid with no generation.
+        const anyPlantStillActive = ['powerPlant1', 'powerPlant2', 'powerPlant3']
+            .some((plantKey) => getBuildingTypeOnOff(plantKey));
+
+        if (!anyPlantStillActive && !getInfinitePower()) {
+            setPowerOnOff(false);
+        }
+    }
+
     const priceKeys = [
         { key: 'price', isArray: false },
         { key: 'resource1Price', isArray: true },

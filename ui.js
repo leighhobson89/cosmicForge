@@ -1795,8 +1795,50 @@ export function fitSideMenuLabels() {
 }
 
 
+// P3 (player-feedback plan): shared state checks for the stat-bar Powered
+// toggle. They deliberately live at module top level — not inside the
+// DOMContentLoaded listener below — because they are called from two places:
+// the listener's setupPoweredStatToggleButton() and the per-frame,
+// top-level statToolBarCustomizations().
+function hasAnyPowerPlantBuilt() {
+    return ['powerPlant1', 'powerPlant2', 'powerPlant3'].some((key) =>
+        (getResourceDataObject('buildings', ['energy', 'upgrades', key, 'quantity']) ?? 0) > 0
+    );
+}
+
+function isPoweredToggleDisabled() {
+    return getInfinitePower() || !hasAnyPowerPlantBuilt();
+}
+
+// P3: while the Powered toggle is inert (Dyson Sphere active, or no power plant
+// of any type built) the button itself must not react to the pointer at all —
+// no hover highlight and no clicks. Setting pointer-events:none takes the
+// button out of the browser's hit-testing entirely, so :hover styles cannot
+// match it and clicks never land on it. The hover tooltip is unaffected: its
+// listeners are bound to the parent .stat-cell in setupStatTooltips(), which
+// keeps receiving the pointer while the button is inert.
+function applyPoweredToggleInertState(button, inert) {
+    if (inert) {
+        // Inline !important is required: `button.stat-power-toggle` carries
+        // `pointer-events: auto !important` in styles.css (it exists so the
+        // generic `.red-disabled-text { pointer-events: none }` rule cannot
+        // lock the player out of an OFF-but-built grid), and a plain inline
+        // value loses to it. A style attribute with !important outranks
+        // author-stylesheet !important in the cascade.
+        button.style.setProperty('pointer-events', 'none', 'important');
+        button.setAttribute('aria-disabled', 'true');
+    } else {
+        // Hand pointer handling back to the stylesheet: the stat-power-toggle
+        // rule re-arms `pointer-events: auto !important` so the button stays
+        // clickable in every enabled state.
+        button.style.removeProperty('pointer-events');
+        button.setAttribute('aria-disabled', 'false');
+    }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     setElements();
+    setupPoweredStatToggleButton();
     setupStatTooltips();
     setupInfoTooltips();
     attachEnergyTooltipMirrors();
@@ -2039,6 +2081,49 @@ function setupDemoTooltips() {
             hideTooltip();
         }
     });
+}
+
+
+// P3 (player-feedback plan): the stat-bar Powered entry becomes a real toggle.
+// The static #stat3 span is swapped for a createButton()-built button so it
+// matches every other button in the game, while keeping the same id and the
+// powered-check/stat-value classes so the existing per-frame label/colour
+// update (powerOnOrOffChecks) and the hover tooltip keep working unchanged.
+// Clicking drives the same toggleAllPower() path as the energy UI's Power All
+// control: ON when off/tripped, OFF when on.
+// P3: the toggle must be inert when it has nothing to act on. While a Dyson
+// Sphere supplies infinite power, or while the run has no power plant of any
+// type built, the button must not react to the pointer at all — no hover
+// highlight and no clicks. applyPoweredToggleInertState() enforces that by
+// lifting the button out of hit-testing; it is applied here at creation and
+// re-synced every frame by statToolBarCustomizations(). The hover tooltip keeps
+// working because its listeners are bound to the parent .stat-cell in
+// setupStatTooltips(), not to the button itself. (hasAnyPowerPlantBuilt /
+// isPoweredToggleDisabled live at module top level — see just above the
+// DOMContentLoaded listener — so both this setup and the per-frame
+// statToolBarCustomizations() can call them.)
+function setupPoweredStatToggleButton() {
+    const stat3Element = document.getElementById('stat3');
+    if (!stat3Element || stat3Element.tagName === 'BUTTON') {
+        return;
+    }
+
+    const poweredToggleButton = createButton({
+        text: stat3Element.textContent.trim() || 'N/A',
+        classNames: ['option-button', 'stat-power-toggle', 'stat-value', 'powered-check', 'id_stat3'],
+        onClick: () => {
+            if (isPoweredToggleDisabled()) {
+                return;
+            }
+            toggleAllPower();
+        },
+        disableKeyboardForButton: true
+    });
+
+    // A fresh run has no plants, so the button boots inert; the per-frame sync
+    // in statToolBarCustomizations() keeps the state current from then on.
+    applyPoweredToggleInertState(poweredToggleButton, isPoweredToggleDisabled());
+    stat3Element.replaceWith(poweredToggleButton);
 }
 
 
@@ -7421,6 +7506,14 @@ export function statToolBarCustomizations() {
 
 
     if (stat3Element) {
+        // P3: keep the Powered toggle's inert state in sync every frame. While
+        // inert the button is lifted out of hit-testing (pointer-events:none),
+        // so it cannot be hovered or clicked; the tooltip is unaffected either
+        // way because its hover listeners live on the parent .stat-cell
+        // (setupStatTooltips). The click guard in setupPoweredStatToggleButton
+        // additionally no-ops any synthetic click that reaches the handler.
+        applyPoweredToggleInertState(stat3Element, isPoweredToggleDisabled());
+
         if (hasBasicPowerGeneration) {
             stat3Element.dataset.tooltipDisabled = 'false';
             const stat3Text = stat3Element.textContent.trim();

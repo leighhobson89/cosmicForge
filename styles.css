@@ -2874,6 +2874,30 @@ button.red-disabled-text {
     align-items: center;
 }
 
+/* P3: the Powered stat-bar entry is a real toggle button (createButton-built).
+   It keeps the .stat-value sizing above and only tightens the button chrome so
+   the stat bar's flex layout is unchanged: no fixed width, it shrinks/grows
+   with its label (ON / OFF / TRIPPED) and never wraps or overflows the cell.
+   The status colour classes (red-disabled-text etc.) are reused for meaning,
+   but this control must stay clickable in every state — the generic
+   `button.red-disabled-text { pointer-events: none }` rule would otherwise lock
+   the player out of switching power back on. That rule has the same specificity
+   as this one, so `!important` is what settles it rather than source order:
+   without it, moving either rule in this file would silently disable the
+   toggle. ui.js turns the button inert (Dyson Sphere, or no plant built) with an
+   inline `!important` value, which is the only thing that outranks this. */
+button.stat-power-toggle {
+    font-size: 0.8rem;
+    padding: 1px 8px;
+    line-height: 1.2;
+    white-space: nowrap;
+    flex-shrink: 0;
+    min-width: 0;
+    overflow: visible;
+    text-overflow: clip;
+    pointer-events: auto !important;
+}
+
 .stats-title {
     font-weight: 700;
 }

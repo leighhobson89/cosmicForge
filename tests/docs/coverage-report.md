@@ -23,7 +23,7 @@ One line per functional area, worst first. 44 green, 0 amber, 0 red, out of 44.
 | 🟢 | [Cosmicopedia & Help](areas/cosmicopedia.md) | Presentation & Shell | Low | 6 | Done — driven through its own controls, 6 specs passing. |
 | 🟢 | [Demo Build Lockdowns](areas/demo-build.md) | Presentation & Shell | High | 19 | Done — driven through its own controls, 19 specs passing. |
 | 🟢 | [Diplomacy](areas/diplomacy.md) | Interstellar | High | 30 | Upgraded to integration: a real starship flies to a real star, the scan gate is crossed at three quarters of the journey, and every conversation is held through the pane's own buttons. The outcome coverage is written as sweeps that repeat a press until every documented outcome is reached and assert the consequences of each one along the way. The area found known-issues #38 and #39, both fixed at source: the vassalize gate compared a trait array to a trait name, and taking offence at a passive approach never actually ended the system's patience. 29 specs passing. |
-| 🟢 | [Energy & Power Grid](areas/energy.md) | Core Economy | High | 26 | Done — driven through its own controls, 26 specs passing. |
+| 🟢 | [Energy & Power Grid](areas/energy.md) | Core Economy | High | 32 | Done — driven through its own controls, 32 specs passing. |
 | 🟢 | [Fleet Hangar](areas/fleet-hangar.md) | Interstellar | High | 29 | Upgraded to integration: the hangar module is proved to be the gate on shipbuilding by finishing the other three starship modules and leaving it out, then every class is bought through its own Build button and its bill and price escalation measured to the unit. The envoy cap is asserted as the CSS gate it is rather than by clicking a disabled button. 29 specs passing. |
 | 🟢 | [Galactic Casino](areas/galactic-casino.md) | Meta Progression | Medium | 69 | Done — driven through its own controls, 69 specs passing. |
 | 🟢 | [Galactic Market](areas/galactic-market.md) | Meta Progression | Medium | 35 | Done — driven through its own controls, 35 specs passing. |
@@ -80,7 +80,7 @@ when an area is upgraded.
 | 🟢 Green — signed off | 44 | 100% |
 | **Total functional areas** | **44** | |
 
-667 individual test cases are identified across all areas. **1206 Playwright specs are implemented** across 44 areas, and all of them pass except where an area's note says otherwise — a spec that fails on a live defect is left failing on purpose, and the defect is written up in [known-issues.md](known-issues.md).
+669 individual test cases are identified across all areas. **1212 Playwright specs are implemented** across 44 areas, and all of them pass except where an area's note says otherwise — a spec that fails on a live defect is left failing on purpose, and the defect is written up in [known-issues.md](known-issues.md).
 
 Run them with `npm run test:e2e` (all areas) or `node tests/run-e2e.mjs <area>`. Each area writes its own HTML report to `test-reports/e2e/<area>/index.html`, with a summary index at `test-reports/e2e/index.html`.
 
@@ -116,7 +116,7 @@ The minute-to-minute loop: extract, craft, power, research. Where players spend 
 | 🟢 | [Resources](areas/resources.md) | High | 21 | **21** | earlyLoop.test.js |
 | 🟢 | [Compounds & Crafting](areas/compounds.md) | High | 32 | **31** | — |
 | 🟢 | [Auto Buyers](areas/autobuyers.md) | High | 18 | **19** | autobuyer.test.js |
-| 🟢 | [Energy & Power Grid](areas/energy.md) | High | 7 | **26** | energyMid.test.js |
+| 🟢 | [Energy & Power Grid](areas/energy.md) | High | 9 | **32** | energyMid.test.js |
 | 🟢 | [Research](areas/research.md) | High | 21 | **25** | researchTech.test.js |
 | 🟢 | [Tech Tree](areas/technology.md) | High | 18 | **18** | researchTech.test.js |
 
