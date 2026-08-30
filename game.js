@@ -7091,11 +7091,18 @@ function spaceTelescopeChecks(element, type) {
     const isStar = type === 'investigateStar';
     const isPillageVoid = type === 'pillageVoid';
     
-    const labelId = isAsteroid
-      ? 'scanAsteroidsDescription'
+    // Addressed through the row, not by a short id. `createOptionRow` used to
+    // derive these ids from the row's visible label - "Scan Asteroids:" became
+    // `scanAsteroidsDescription` - and the localisation work moved the derivation
+    // onto the row id, so `#scanAsteroidsDescription` and its two siblings have
+    // not existed since. That left this whole block dead: the row that is *not*
+    // running still read "Ready To Search" while the other job was in flight, and
+    // with the grid down no telescope progress bar was advanced at all.
+    const rowId = isAsteroid
+      ? 'spaceTelescopeSearchAsteroidRow'
       : isStar
-        ? 'studyStarsDescription'
-        : 'pillageTheVoidDescription';
+        ? 'spaceTelescopeInvestigateStarRow'
+        : 'spaceTelescopePhilosophyBoostResourcesAndCompoundsRow';
     
     const progressBarId = isAsteroid
       ? 'spaceTelescopeSearchAsteroidProgressBar'
@@ -7109,7 +7116,7 @@ function spaceTelescopeChecks(element, type) {
         ? 'spaceTelescopeInvestigateStarProgressBarContainer'
         : 'spaceTelescopePillageVoidProgressBarContainer';
     
-    const accompanyingLabel = document.getElementById(labelId);
+    const accompanyingLabel = getRowMainDescriptionLabel(rowId);
 
     if (accompanyingLabel) {
         if (getPowerOnOff()) {
@@ -7167,8 +7174,12 @@ function spaceTelescopeChecks(element, type) {
                 totalDuration = getCurrentPillageVoidTimerDurationTotal();
             }
         
-            const progressBarPercentage = (elapsedTime / totalDuration) * 100;
-            document.getElementById(progressBarId).style.width = `${progressBarPercentage}%`;
+            // Guarded: a row can be on the pane before its job has ever run, and
+            // a zero total would put NaN into the width.
+            const progressBar = document.getElementById(progressBarId);
+            if (progressBar && totalDuration > 0) {
+                progressBar.style.width = `${(elapsedTime / totalDuration) * 100}%`;
+            }
         } 
     }
 
@@ -15777,6 +15788,22 @@ export function rebirth() {
 
     setupNewRunStarSystem();
     setRebirthPossible(false);
+
+    // Kill the telescope's own timers before the variables are reset. The reset
+    // clears the flags - `currentlyInvestigatingStar`, the time-left values, the
+    // duration totals - but the delta timers belong to timerManagerDelta and
+    // survive it, so a job that was running when the player rebirthed keeps
+    // ticking into the new run. That orphan does real damage: the first thing
+    // `checkAndStartAutoTelescopeAction` asks is whether any telescope timer is
+    // live, so the auto-telescope silently never starts a job once the telescope
+    // is rebuilt, and when the ghost timer finally reaches zero it hands its
+    // reward to a run that never began it.
+    ['searchAsteroidTimer', 'investigateStarTimer', 'pillageVoidTimer'].forEach((timerName) => {
+        if (timerManagerDelta.hasTimer(timerName)) {
+            timerManagerDelta.removeTimer(timerName);
+        }
+    });
+
     resetAllVariablesOnRebirth();
     resetAchievementsOnRebirth();
     autoGrantAchievementsOnRebirth();

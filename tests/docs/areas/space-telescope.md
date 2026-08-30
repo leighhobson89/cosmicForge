@@ -23,6 +23,9 @@ The three telescope actions - star study, asteroid search, void pillage - the on
 - [ ] Voidborn's Void Seers adds the pillage row and takes the same lock; without the ability the row stays hidden
 - [ ] The auto-telescope perk's row repeats the selected mode with no further presses
 - [ ] With the perk already owned, building the telescope puts the auto row on the open pane without a reopen
+- [ ] After a rebirth, building the telescope redraws the pane and the saved automation starts its job as soon as the grid is up
+- [ ] A telescope job running when the player rebirths does not survive the reset, so it cannot block the next run's automation
+- [ ] While one job runs the other row says which job holds the telescope, and with the grid down both rows say they need power
 
 ## Status meaning
 

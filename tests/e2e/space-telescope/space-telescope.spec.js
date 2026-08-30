@@ -95,12 +95,20 @@ async function telescopeRows(page) {
       const row = document.getElementById(id);
       return { present: Boolean(row), visible: Boolean(row) && !row.classList.contains('invisible') };
     };
+    // `present` is deliberately "on the pane", not "somewhere in the document":
+    // `createOptionRow` builds a row whether or not the pane appends it, so a row
+    // the pane left out can still be reachable by id.
+    const onPane = (id) => {
+      const row = document.getElementById(id);
+      const pane = document.getElementById('optionContentTab6');
+      return Boolean(row) && Boolean(pane) && pane.contains(row);
+    };
     return {
       build: state('spaceBuildTelescopeRow'),
       searchAsteroid: state('spaceTelescopeSearchAsteroidRow'),
       investigateStar: state('spaceTelescopeInvestigateStarRow'),
       pillageVoid: state('spaceTelescopePhilosophyBoostResourcesAndCompoundsRow'),
-      auto: state('spaceTelescopeAutoRow')
+      auto: { ...state('spaceTelescopeAutoRow'), present: onPane('spaceTelescopeAutoRow') }
     };
   });
 }
@@ -809,6 +817,329 @@ test.describe('Space Telescope — the auto-telescope', () => {
   });
 });
 
+// ------------------------ what the pane says while one of the jobs is running
+
+/** The status line of a telescope row, as the player reads it. */
+async function rowStatusText(page, rowId) {
+  return page.evaluate((id) => document.getElementById(id)
+    ?.querySelector('.description-container .notation')?.innerText?.trim(), rowId);
+}
+
+/** Localised copy, read from the game rather than hard-coded in English. */
+async function telescopeCopy(game) {
+  return game.withMods((m) => {
+    const lang = m.cg.getLanguage();
+    return {
+      readyToSearch: m.loc.localize('textReadyToSearch', lang),
+      readyToStudy: m.loc.localize('textReadyToStudy', lang),
+      busyStudying: m.loc.localize('textCurrentlyInvestigatingStars', lang),
+      busySearching: m.loc.localize('textCurrentlySearchingAsteroids', lang),
+      requiresPower: m.loc.localize('textRequiresPower', lang)
+    };
+  });
+}
+
+/** Which control each row is currently showing: its button, or its progress bar. */
+async function rowControls(page) {
+  return page.evaluate(() => {
+    const vis = (el) => Boolean(el) && !el.classList.contains('invisible');
+    const of = (rowId, barId) => ({
+      buttonVisible: vis(document.getElementById(rowId)?.querySelector('button')),
+      progressBarVisible: vis(document.getElementById(barId))
+    });
+    return {
+      searchAsteroid: of('spaceTelescopeSearchAsteroidRow', 'spaceTelescopeSearchAsteroidProgressBarContainer'),
+      investigateStar: of('spaceTelescopeInvestigateStarRow', 'spaceTelescopeInvestigateStarProgressBarContainer')
+    };
+  });
+}
+
+test.describe('Space Telescope — the pane while a job is running', () => {
+  test('the idle row reports the telescope busy instead of ready, and the running row shows its bar', async ({ game, page }) => {
+    await game.boot();
+    await stockRunWithoutTelescope(game, page);
+    await buildTelescopeThroughDebugMenu(game, page);
+    const copy = await telescopeCopy(game);
+
+    // Both jobs are offered while the instrument is idle.
+    const idle = await rowControls(page);
+    expect(idle.searchAsteroid.buttonVisible, 'an idle telescope offers the scan').toBe(true);
+    expect(idle.investigateStar.buttonVisible, 'and the study').toBe(true);
+    expect(await rowStatusText(page, 'spaceTelescopeSearchAsteroidRow')).toBe(copy.readyToSearch);
+
+    await pressTelescopeAction(page, 'spaceTelescopeInvestigateStarRow');
+    await page.waitForTimeout(700);
+    expect((await readTelescopeState(game)).investigating, 'the study should have started').toBe(true);
+
+    // The running row hands its button over to the progress bar...
+    const running = await rowControls(page);
+    expect(running.investigateStar.progressBarVisible, 'the running job shows its progress bar').toBe(true);
+    expect(running.investigateStar.buttonVisible, 'and not its button').toBe(false);
+
+    // ...and so does the other one, because the two share one instrument. The
+    // status line is the part that has to say *why*: a row still reading "ready
+    // to search" beside a running study is telling the player something untrue.
+    expect(running.searchAsteroid.buttonVisible, 'the other job cannot be started either').toBe(false);
+    expect(running.searchAsteroid.progressBarVisible, 'and nothing of its own is running').toBe(false);
+    expect(await rowStatusText(page, 'spaceTelescopeSearchAsteroidRow'),
+      'the idle row should name the job that is holding the telescope')
+      .toBe(copy.busyStudying);
+
+    // And the gate is real, not only visual: pressing the hidden button - which
+    // is what a stale pane would leave a player able to do - starts nothing.
+    const before = await readTelescopeState(game);
+    await pressTelescopeAction(page, 'spaceTelescopeSearchAsteroidRow');
+    await page.waitForTimeout(600);
+    const after = await readTelescopeState(game);
+    expect(after.searching, 'no second job on top of the running one').toBe(false);
+    expect(after.investigating, 'and the study is still the one that was running').toBe(true);
+    expect(after.starTimeLeft).toBeLessThanOrEqual(before.starTimeLeft);
+
+    expect(game.significantErrors()).toEqual([]);
+  });
+
+  test('with the grid down the rows say so rather than offering a job that cannot run', async ({ game, page }) => {
+    await game.boot();
+    await stockRunWithoutTelescope(game, page);
+    await buildTelescopeThroughDebugMenu(game, page);
+    const copy = await telescopeCopy(game);
+
+    await game.withMods((m) => {
+      m.cg.setInfinitePower(false);
+      m.cg.setPowerOnOff(false);
+    });
+    await page.waitForTimeout(900);
+
+    expect(await rowStatusText(page, 'spaceTelescopeSearchAsteroidRow'),
+      'a telescope with no power should say so, not "ready"').toBe(copy.requiresPower);
+    expect(await rowStatusText(page, 'spaceTelescopeInvestigateStarRow')).toBe(copy.requiresPower);
+
+    expect(game.significantErrors()).toEqual([]);
+  });
+});
+
+// -------------------- the auto-telescope on a telescope rebuilt after rebirth
+
+/** Open a side-menu option by id, revealing its row first. */
+async function openOptionById(game, page, optionId, tab = null) {
+  if (tab !== null) await game.openTab(tab);
+  const found = await page.evaluate((id) => {
+    const el = document.getElementById(id);
+    if (!el) return false;
+    el.closest('.row-side-menu')?.classList.remove('invisible');
+    el.classList.remove('invisible');
+    el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    return true;
+  }, optionId);
+  if (!found) throw new Error(`No side-menu row with id ${optionId}`);
+  await page.waitForTimeout(700);
+}
+
+/** Buy one perk by pressing its own Buy button on the Ascendency Perks pane. */
+async function buyPerkThroughItsPane(game, page, key) {
+  await openOptionById(game, page, 'ascendencyOption', 7);
+  await page.waitForTimeout(500);
+  const token = key.replace(/([A-Z])/g, '-$1').toLowerCase();
+  const pressed = await page.evaluate((selector) => {
+    const button = document.querySelector(selector);
+    if (!button) return false;
+    button.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    return true;
+  }, `button.ascendency-buff-button.buff-class-${token}`);
+  if (!pressed) throw new Error(`No Buy button for the ${key} perk`);
+  await page.waitForTimeout(700);
+  await dismissAnyOpenModal(page);
+  const owned = await game.withMods((m, k) => m.rdo.getAscendencyBuffDataObject()[k].boughtYet, key);
+  expect(owned, `${key} should have been bought`).toBeGreaterThan(0);
+}
+
+/** Press Rebirth and confirm — the player's own route through the reset. */
+async function rebirthThroughTheUI(game, page) {
+  await dismissAnyOpenModal(page);
+  await openOptionById(game, page, 'rebirthOption', 7);
+  const runBefore = await game.withMods((m) => m.cg.getStatRun());
+  const confirmLabel = await game.withMods((m) =>
+    m.loc.localize('modalRebirthConfirmLabel', m.cg.getLanguage()));
+  await page.evaluate(() => document.querySelector('.rebirth-check')?.click());
+  await page.waitForFunction(
+    (label) => document.getElementById('modalConfirm')?.innerText?.trim() === label,
+    confirmLabel, { timeout: 20000 });
+  await page.evaluate(() => document.getElementById('modalConfirm').click());
+  await page.waitForFunction((before) => globalThis.__mods.cg.getStatRun() === before + 1,
+    runBefore, { timeout: 30000 });
+  await page.waitForTimeout(1500);
+  await dismissAnyOpenModal(page);
+}
+
+test.describe('Space Telescope — the auto-telescope on a telescope rebuilt after a rebirth', () => {
+  /**
+   * The whole of the reported scenario, played end to end.
+   *
+   * A rebirth keeps the perk and the settings but takes the telescope away, so
+   * the next run reaches a state no other spec covers: the automation is armed
+   * before the instrument it drives exists. The moment the player buys the
+   * telescope the frame loop starts the saved job — and everything the pane
+   * shows about that job is decided when the pane is *drawn*, which last
+   * happened while there was no telescope at all.
+   */
+  test('building it redraws the pane, and the saved automation runs as soon as the grid is up', async ({ game, page }) => {
+    await game.boot();
+    await game.prepareRunForStarshipLaunch();
+    await dismissAnyOpenModal(page);
+
+    // What `rebirth()` needs to be completable: a scanned destination and a
+    // resolved battle. `rebirthChecks()` turns those into `rebirthPossible`.
+    await game.withMods((m) => {
+      m.game.generateStarDataAndAddToDataObject({ id: 'vega' }, 12);
+      m.cg.setDestinationStar('vega');
+      m.rdo.copyStarDataToDestinationStarField('vega');
+      m.cg.setDestinationStarScanned(true);
+      m.cg.setBattleResolved(true, 'player');
+    });
+    await page.waitForTimeout(600);
+
+    // Run 1 needs a working telescope, and the telescope needs the grid. The
+    // rebirth puts `infinitePower` back to false on its own, so this does not
+    // leak into the grid-down leg of run 2 below.
+    await game.withMods((m) => {
+      m.cg.setInfinitePower(true);
+      m.cg.setPowerOnOff(true);
+    });
+
+    // Run 1: buy the perk on its own pane, then set the automation up through
+    // the telescope's own dropdown and toggle.
+    await game.openDebugMenu();
+    await game.debugClick('add100ApButton');
+    await page.waitForTimeout(300);
+    await buyPerkThroughItsPane(game, page, 'autoSpaceTelescope');
+    await openOptionById(game, page, 'spaceTelescopeOption', 6);
+    await page.evaluate(() => {
+      document.querySelector('#autoSpaceTelescopeModeDropdown .dropdown-option[data-value="studyStars"]')
+        ?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+    await page.waitForTimeout(400);
+    await page.evaluate(() => {
+      const toggle = document.querySelector('#spaceTelescopeAutoRow #autoTelescopeToggle');
+      if (toggle && !toggle.checked) toggle.click();
+    });
+    await page.waitForTimeout(400);
+    const armed = await game.withMods((m) => ({
+      on: m.rdo.getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'autoSpaceTelescopeEnabled']),
+      mode: m.rdo.getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'autoSpaceTelescopeMode'])
+    }));
+    expect(armed, 'run 1 should end with the automation armed at the stars')
+      .toMatchObject({ on: true, mode: 'studyStars' });
+
+    // The rebirth is deliberately taken with a study *in flight*, which is the
+    // ordinary case for an automated telescope and the one that breaks: the
+    // reset clears the flags but the delta timer is owned by timerManagerDelta
+    // and outlives them.
+    await page.waitForFunction(() => globalThis.__mods.cg.getCurrentlyInvestigatingStar() === true,
+      null, { timeout: 20000 });
+
+    await rebirthThroughTheUI(game, page);
+
+    // Nothing of the previous run's job may cross the rebirth. A surviving timer
+    // is not merely untidy: `checkAndStartAutoTelescopeAction` returns early
+    // while any telescope timer is live, so the automation would be dead for the
+    // whole run, and the ghost would hand its reward to a run that never began it.
+    const carriedOver = await game.withMods((m) => ({
+      star: m.timers.timerManagerDelta.hasTimer('investigateStarTimer'),
+      asteroid: m.timers.timerManagerDelta.hasTimer('searchAsteroidTimer'),
+      pillage: m.timers.timerManagerDelta.hasTimer('pillageVoidTimer'),
+      starTimeLeft: m.cg.getTimeLeftUntilStarInvestigationTimerFinishes(),
+      investigating: m.cg.getCurrentlyInvestigatingStar()
+    }));
+    expect(carriedOver, 'the rebirth should have taken the running job with it').toEqual({
+      star: false, asteroid: false, pillage: false, starTimeLeft: 0, investigating: false
+    });
+
+    // Run 2, exactly as reported: the debug grants, then straight to the pane.
+    await game.openDebugMenu();
+    await game.debugClick('give1BButton');
+    await game.debugClick('give1MAllResourcesAndCompounds');
+    await game.debugClick('grantAllTechsButton');
+    await game.debugClick('unlockAllTabsButton');
+    await page.waitForTimeout(600);
+    await dismissAnyOpenModal(page);
+    // The grid is deliberately left as the rebirth left it: down. A fresh run has
+    // generated no power, and every telescope job is gated on it.
+    await openOptionById(game, page, 'spaceTelescopeOption', 6);
+
+    const beforeBuild = await telescopeRows(page);
+    expect(beforeBuild.build.visible, 'the rebirth took the telescope away').toBe(true);
+    expect(beforeBuild.auto.present, 'and with no telescope there is no auto row yet').toBe(false);
+
+    // The build button, on the pane the player is standing on. Nothing below
+    // this line reopens the pane — that reopen is the workaround this spec
+    // exists to make unnecessary.
+    await page.evaluate(() => {
+      document.querySelector('#spaceBuildTelescopeRow button.spaceTelescope')
+        ?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+    await page.waitForTimeout(500);
+    await dismissAnyOpenModal(page);
+
+    // The perk survived the rebirth, so the row it pays for has to be on the
+    // rebuilt pane, still set as the player left it in the previous run.
+    const rows = await telescopeRows(page);
+    expect(rows.auto.present, 'the auto row belongs on the pane as soon as the telescope is built').toBe(true);
+    expect(rows.auto.visible).toBe(true);
+    expect(rows.build.visible, 'a built telescope is not for sale twice').toBe(false);
+    const toggleDrawnOn = await page.evaluate(() =>
+      document.querySelector('#spaceTelescopeAutoRow #autoTelescopeToggle')?.checked);
+    expect(toggleDrawnOn, 'the toggle the player left on is drawn on').toBe(true);
+
+    // Nothing starts yet, and this is the part that is easily read as the perk
+    // having been lost in the rebirth: the automation is armed and correct, but
+    // `startInvestigateStarTimer` returns at `getStarInvestigationTimerCanContinue()`
+    // while the grid is down. What the pane owes the player here is the reason,
+    // on both rows, rather than a pair of buttons that look ready.
+    await page.waitForTimeout(2500);
+    const darkGrid = await readTelescopeState(game);
+    expect(darkGrid.powerOn, 'the run has generated no power yet').toBe(false);
+    expect(darkGrid.investigating, 'so the automation cannot have started anything').toBe(false);
+    const copy = await telescopeCopy(game);
+    expect(await rowStatusText(page, 'spaceTelescopeInvestigateStarRow'),
+      'the study row should say why it is idle').toBe(copy.requiresPower);
+    expect(await rowStatusText(page, 'spaceTelescopeSearchAsteroidRow')).toBe(copy.requiresPower);
+    expect(await page.evaluate(() => document.getElementById('spaceTelescopeInvestigateStarRow')
+      ?.querySelector('button')?.classList.contains('red-disabled-text')),
+    'and its button should be gated by the colour class while the grid is down').toBe(true);
+
+    // Power the grid, press nothing. The automation is what starts the job.
+    await game.withMods((m) => {
+      m.cg.setInfinitePower(true);
+      m.cg.setPowerOnOff(true);
+    });
+    await page.waitForFunction(() => globalThis.__mods.cg.getCurrentlyInvestigatingStar() === true,
+      null, { timeout: 20000 });
+    await page.waitForTimeout(700);
+
+    // Both rows must now show the running job rather than an offer to start one.
+    const controls = await rowControls(page);
+    expect(controls.investigateStar.progressBarVisible, 'the running study shows its bar').toBe(true);
+    expect(controls.investigateStar.buttonVisible, 'not a button to start it again').toBe(false);
+    expect(controls.searchAsteroid.buttonVisible, 'and the shared instrument is not offered twice').toBe(false);
+
+    expect(await rowStatusText(page, 'spaceTelescopeSearchAsteroidRow'),
+      'the scan row should name the job holding the telescope').toBe(copy.busyStudying);
+
+    // The job cannot be doubled up on, even by reaching the hidden buttons.
+    const before = await readTelescopeState(game);
+    await pressTelescopeAction(page, 'spaceTelescopeSearchAsteroidRow');
+    await pressTelescopeAction(page, 'spaceTelescopeInvestigateStarRow');
+    await page.waitForTimeout(600);
+    const after = await readTelescopeState(game);
+    expect(after.searching, 'no asteroid scan on top of the automation study').toBe(false);
+    expect(after.investigating).toBe(true);
+    expect(after.starTimeLeft, 'and the running study was not restarted')
+      .toBeLessThanOrEqual(before.starTimeLeft);
+
+    expect(game.significantErrors()).toEqual([]);
+  });
+});
+
 // ------------------------------ the auto row on a telescope built while open
 
 test.describe('Space Telescope — the auto row on a freshly built telescope', () => {
@@ -816,11 +1147,9 @@ test.describe('Space Telescope — the auto row on a freshly built telescope', (
     await game.boot();
     await stockRunWithoutTelescope(game, page);
 
-    // The perk is bought first and the telescope second, which is the order a
-    // player meets after a rebirth: `resetAllForRebirth` re-applies
-    // `autoSpaceTelescopeRowEnabled` from the owned buff, and the telescope
-    // itself has to be rebuilt. No rebirth is run here because the ordering is
-    // the whole of it — the perk being owned while the telescope is not.
+    // The perk owned while the telescope is not is the state a rebirth leaves
+    // behind, and it is the whole of what this spec needs; the played rebirth
+    // that produces it is covered above.
     await game.debugClick('add100ApButton');
     await game.withMods((m) => m.game.purchaseBuff('autoSpaceTelescope'));
     await openTelescopePane(game, page);
@@ -830,8 +1159,8 @@ test.describe('Space Telescope — the auto row on a freshly built telescope', (
     expect(before.auto.present, 'and with no telescope there is nothing for the auto row to drive').toBe(false);
 
     // Built through the pane's own button, and the pane deliberately not
-    // reopened afterwards: the claim is that the click handler puts the row up,
-    // not that `drawTab6Content` would build it on the next open.
+    // reopened afterwards: the claim is that the purchase redraws the pane it
+    // was made on, not that the next open would have drawn it correctly.
     await page.evaluate(() => {
       document.querySelector('#spaceBuildTelescopeRow button.spaceTelescope')
         ?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
@@ -842,17 +1171,18 @@ test.describe('Space Telescope — the auto row on a freshly built telescope', (
     const after = await telescopeRows(page);
     expect(after.auto.present, 'the auto row should appear as soon as the telescope is built').toBe(true);
     expect(after.auto.visible).toBe(true);
+    expect(after.searchAsteroid.visible, 'the two jobs open with it').toBe(true);
+    expect(after.investigateStar.visible).toBe(true);
+    expect(after.build.visible, 'and the build row goes').toBe(false);
 
-    // And it is a working row, not an orphan: its two controls are there and the
-    // toggle still writes through to the data object.
+    // It is a working row, not an orphan: the toggle still writes through.
     await page.click('label[for="autoTelescopeToggle"]');
     await page.waitForTimeout(400);
     expect(await game.withMods((m) =>
       m.rdo.getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'autoSpaceTelescopeEnabled'])),
-    'the toggle on the inserted row should still be wired up').toBe(true);
+    'the toggle on the redrawn row should be wired up').toBe(true);
 
-    // It sits where it is drawn on a reopened pane — under the build row and
-    // above the two action rows.
+    // And it sits where the pane draws it — under the build row, above the jobs.
     const order = await page.evaluate(() => Array.from(
       document.getElementById('spaceTelescopeAutoRow')?.parentElement?.children ?? [])
       .map((el) => el.id).filter(Boolean));

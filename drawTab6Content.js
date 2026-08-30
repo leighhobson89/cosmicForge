@@ -119,29 +119,19 @@ export function drawTab6Content(heading, optionContentElement) {
 
                         sfxPlayer.playAudio('buildTelescope', false);
 
-                        document.getElementById('spaceTelescopeSearchAsteroidRow').classList.remove('invisible');
-
-                        document.getElementById('spaceTelescopeInvestigateStarRow').classList.remove('invisible');
-
-                        // The auto telescope row is only appended when the pane is drawn with the
-                        // telescope already built, so a telescope built while the pane is open has
-                        // to have it inserted here - otherwise the row stays missing until the
-                        // player reopens the pane.
-                        if (getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'autoSpaceTelescopeRowEnabled']) && !spaceTelescopeAutoRow.isConnected) {
-
-                            spaceBuildTelescopeRow.after(spaceTelescopeAutoRow);
-
-                        }
-
-                        if (getPlayerPhilosophy() === 'voidborn' && getPhilosophyAbilityActive() && getStatRun() > 1) {
-
-                            document.getElementById('spaceTelescopePhilosophyBoostResourcesAndCompoundsRow').classList.remove('invisible');
-
-                        }
-
-                        spaceBuildTelescopeRow.classList.add('invisible');
-
                         showNotification(localize('notificationSpaceTelescopeBuilt', getLanguage()), 'info', 3000, 'special');
+
+                        // Redraw the whole pane rather than un-hiding the rows by hand. Two
+                        // things about this pane are decided at draw time and cannot be
+                        // patched up from here: the auto-telescope row is only *created* when
+                        // the telescope already exists, and a job already running - the
+                        // auto-telescope starts one on the frame after the build - is drawn as
+                        // a progress bar in place of its button, with its timer re-entered
+                        // through the deferred actions at the foot of this function. This is
+                        // the same clear-and-redraw ui.js uses when it re-enters this pane.
+                        optionContentElement.innerHTML = '';
+
+                        drawTab6Content('Space Telescope', optionContentElement);
 
                     },
 
