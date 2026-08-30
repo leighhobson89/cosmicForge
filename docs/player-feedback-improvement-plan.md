@@ -24,7 +24,7 @@ The audit moved several items vs. the original review order: **P3** (power toggl
 | Exec # | ID | Item | Tier | Value | Effort |
 |--------|----|------|------|-------|--------|
 | 1 | P3 | Powered On/Off toggle — ✅ **COMPLETED** | 1 — quick win | Medium | Very low (3–5 h) |
-| 2 | P1 | Buy Max / bulk purchase | 1 — quick win | Very high | Low (8–12 h) |
+| 2 | P1 | Buy Max / bulk purchase — ✅ **COMPLETED** | 1 — quick win | Very high | Low (8–12 h) |
 | 3 | P2 | AP list sorting + alignment + maxed-state cleanup | 1 — quick win | High | Low (6–10 h) |
 | 4 | P4 | Star list: name sort + direct travel target | 1 — quick win | High | Low (6–10 h) |
 | 5 | P10 | Persistent automation across rebirths | 1 — quick win | High | Low-Med (6–10 h) |
@@ -77,7 +77,7 @@ The audit moved several items vs. the original review order: **P3** (power toggl
 
 **Change.**
 - Sort perks: not-purchased → partially purchased → fully purchased (stable secondary sort by cost).
-- Maxed perks: hide the Buy button entirely, show a single "Maxed" badge in the price slot with a *distinct* style (e.g. green/gold check, never red), and remove the duplicated status text.
+- Maxed perks: hide the Buy button entirely, show a single "Maxed" badge in the far right slot with a class of green-ready-text, and remove the duplicated text.
 
 **Effort:** ~4–8 h.
 **Risk:** Low. Pure presentation + one sort comparator.

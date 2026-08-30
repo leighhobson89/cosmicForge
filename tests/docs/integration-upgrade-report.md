@@ -2454,7 +2454,7 @@ escaped that one only because `setResourceDataObject` refuses non-finite writes.
 ## 🟢 Buy Max — `resources/bulk-purchase.spec.js`, 12 specs, all passing
 
 Plan item **P1**. A Max button now sits beside the Buy button on every repeatable
-purchase, unlocked by a one-AP `bulkPurchasing` ascendency perk.
+purchase, unlocked by a `bulkPurchasing` ascendency perk.
 
 **What is different about testing it.** The obvious way to test a bulk-buy is to
 re-derive the cost curve in the spec and assert the quantity matches. That proves

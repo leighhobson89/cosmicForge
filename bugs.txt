@@ -65,3 +65,25 @@ are flakes; 1 and 2 fail every time.
    10.4MB. Fix: compare the mean of the first half against the mean of the second,
    which keeps the "a leak adds the same amount every cycle" claim but stops a single
    sample deciding the result.
+
+--- ADDENDUM after the P1 (Buy Max) full suite: 1243 passed, 5 failed ---
+Items 1 and 2 above reproduced unchanged. Items 3 and 4 did not recur; two DIFFERENT
+flakes did, and both passed on a focused rerun straight afterwards.
+
+5. performance - "a long idle window does not grow nodes, listeners or heap".
+   Idle node growth 4604 -> 7708 against a ceiling of 1000. Note this is a
+   DIFFERENT test from item 4, and item 4 passed in this run: the performance
+   area produces a different failure each time rather than the same one, which is
+   itself the evidence that it is measuring noise rather than a leak. The test's
+   own comment concedes "the news ticker and notifications legitimately come and
+   go". Fix: the two idle/heap tests should compare distributions (means over the
+   samples) rather than single readings, the same fix as item 4, and the idle node
+   ceiling should be expressed relative to the baseline instead of as a flat 1000.
+
+6. onboarding - "the exit button ends the tutorial and leaves the game playable".
+   Timed out after 60s waiting for #pioneerCodeName, i.e. the page never finished
+   loading. Infrastructure rather than game code - the static server or the
+   machine was saturated - and it passed on the focused rerun. Worth watching
+   rather than fixing; if it recurs, the boot helper in
+   tests/e2e/_harness/game-fixture.mjs should retry the navigation once before
+   failing, since a lost first load is indistinguishable from a broken app today.

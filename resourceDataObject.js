@@ -1338,7 +1338,7 @@ export let ascendencyBuffs = {
         timesRebuyable: 1
     },
     // P1 (player-feedback plan): unlocks the Max button beside every repeatable
-    // purchase. Priced at a single AP deliberately - the player's stated goal is
+    // purchase. Priced at 3AP - the player's stated goal is
     // eliminating clicks, so the perk that does that should not compete with the
     // ones that change the numbers.
     "bulkPurchasing": {
@@ -1346,7 +1346,7 @@ export let ascendencyBuffs = {
         description: "buffBulkPurchasingRow",
         rebuyable: false,
         rebuyableIncreaseMultiple: 1,
-        baseCostAp: 1,
+        baseCostAp: 3,
         effectCategoryMagnitude: 1,
         boughtYet: 0,
         timesRebuyable: 1
