@@ -11,7 +11,7 @@ One line per functional area, worst first. 44 green, 0 amber, 0 red, out of 44.
 | 🟢 | [Achievements](areas/achievements.md) | Meta Progression | Low | 33 | Upgraded to integration and swept end to end: all seventy achievements are earned at their own condition and their reward audited against the arithmetic the data promises, the playable scenarios are played and granted by the frame loop, two rebirths audit what persists, and the pane is checked across 630 artwork files and six languages. The area found known-issues #37, now fixed at source: the pane installed a fresh tooltip element and three more document listeners on every visit. |
 | 🟢 | [Antimatter](areas/antimatter.md) | Space Operations | Medium | 26 | Done — driven through its own controls, 26 specs passing. |
 | 🟢 | [Application Boot](areas/app-boot.md) | Foundation | High | 11 | Done — driven through its own controls, 11 specs passing. |
-| 🟢 | [Ascendency Points & Perks](areas/ascendency.md) | Meta Progression | High | 20 | Done — driven through its own controls, 20 specs passing. |
+| 🟢 | [Ascendency Points & Perks](areas/ascendency.md) | Meta Progression | High | 24 | Done — driven through its own controls, 24 specs passing. |
 | 🟢 | [Audio](areas/audio.md) | Simulation & Ambience | Low | 13 | Done — driven through its own controls, 13 specs passing. |
 | 🟢 | [Auto Buyers](areas/autobuyers.md) | Core Economy | High | 19 | Done — driven through its own controls, 19 specs passing. |
 | 🟢 | [Battle & Conquest](areas/battle.md) | Interstellar | High | 18 | Done — driven through its own controls, 18 specs passing. |
@@ -80,7 +80,7 @@ when an area is upgraded.
 | 🟢 Green — signed off | 44 | 100% |
 | **Total functional areas** | **44** | |
 
-680 individual test cases are identified across all areas. **1227 Playwright specs are implemented** across 44 areas, and all of them pass except where an area's note says otherwise — a spec that fails on a live defect is left failing on purpose, and the defect is written up in [known-issues.md](known-issues.md).
+684 individual test cases are identified across all areas. **1231 Playwright specs are implemented** across 44 areas, and all of them pass except where an area's note says otherwise — a spec that fails on a live defect is left failing on purpose, and the defect is written up in [known-issues.md](known-issues.md).
 
 Run them with `npm run test:e2e` (all areas) or `node tests/run-e2e.mjs <area>`. Each area writes its own HTML report to `test-reports/e2e/<area>/index.html`, with a summary index at `test-reports/e2e/index.html`.
 
@@ -152,7 +152,7 @@ Cross-run systems. Bugs here destroy player progress permanently, which makes th
 | Status | Area | Risk | Planned | Specs | Existing coverage |
 |:--:|---|:--:|--:|--:|---|
 | 🟢 | [Galactic Market](areas/galactic-market.md) | Medium | 13 | **35** | — |
-| 🟢 | [Ascendency Points & Perks](areas/ascendency.md) | High | 11 | **20** | — |
+| 🟢 | [Ascendency Points & Perks](areas/ascendency.md) | High | 15 | **24** | — |
 | 🟢 | [Galactic Casino](areas/galactic-casino.md) | Medium | 11 | **69** | — |
 | 🟢 | [Rebirth](areas/rebirth.md) | High | 10 | **10** | — |
 | 🟢 | [Philosophies](areas/philosophies.md) | High | 13 | **42** | — |

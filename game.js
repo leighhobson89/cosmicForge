@@ -455,6 +455,8 @@ import {
     resetResourceDataObjectOnRebirthAndAddApAndPermanentBuffsBack,
     setupNewRunStarSystem,
     getAscendencyBuffDataObject,
+    getAscendencyBuffCost,
+    isAscendencyBuffMaxed,
     setAscendencyBuffDataObject,
     getBuffEfficientStorageData,
     getBuffSmartAutoBuyersData,
@@ -539,6 +541,7 @@ import {
     generateStarfield,
     createBlackHole,
     setButtonState,
+    createAscendencyMaxedSpacer,
     setElementPointerEvents,
     setElementOpacity,
     playWinCinematic,
@@ -8807,16 +8810,21 @@ function checkAscendencyButtons() {
 
         if (!buff) return;
 
-        const baseCost = buff.baseCostAp;
-        let calculatedCost = baseCost;
-
-        if (buff.rebuyable && buff.boughtYet > 0) {
-            calculatedCost *= Math.pow(buff.rebuyableIncreaseMultiple, buff.boughtYet);
+        // P2 (player-feedback plan): the perk the player just finished loses its
+        // Buy button here, rather than waiting for the next redraw of the pane.
+        // Leaving it in place wearing `red-disabled-text` is what made "finished"
+        // and "cannot afford" the same shade of red. The row keeps its width
+        // because the button is swapped for the same-sized invisible box, not
+        // deleted - see createAscendencyMaxedSpacer.
+        if (isAscendencyBuffMaxed(buff)) {
+            const slug = buffName.replace(/([A-Z])/g, '-$1').toLowerCase();
+            button.replaceWith(createAscendencyMaxedSpacer(slug));
+            return;
         }
 
-        calculatedCost = Math.round(calculatedCost);
+        const calculatedCost = Math.round(getAscendencyBuffCost(buff));
 
-        if (getAscendencyPoints() >= calculatedCost && ((buff.rebuyable && buff.timesRebuyable > buff.boughtYet) || (!buff.rebuyable && buff.boughtYet === 0))) {
+        if (getAscendencyPoints() >= calculatedCost) {
             button.classList.add('green-ready-text');
             button.classList.remove('red-disabled-text');
         } else {
@@ -8841,9 +8849,15 @@ function updateAscendencyRowTextFields() {
 
         const buff = ascendencyBuffs[buffKey];
         const rebuyable = buff.rebuyable;
+        const maxed = isAscendencyBuffMaxed(buff);
         let statusText = "";
 
-        if (buff.boughtYet === 0) {
+        // P2 (player-feedback plan): a finished perk states that once, in the
+        // far-right slot below. This slot goes blank rather than repeating it -
+        // the element stays so the row's left-hand run keeps its shape.
+        if (maxed) {
+            statusText = "";
+        } else if (buff.boughtYet === 0) {
             statusText = localize('textNotBought', getLanguage());
         } else if (!rebuyable) {
             statusText = `<span class="green-ready-text">${localize('textBought', getLanguage())}</span>`;
@@ -8857,24 +8871,23 @@ function updateAscendencyRowTextFields() {
             statusElement.innerHTML = statusText;
         }
 
-        const cost = rebuyable
-            ? buff.baseCostAp * Math.pow(buff.rebuyableIncreaseMultiple, buff.boughtYet)
-            : buff.baseCostAp;
-        const roundedCost = Math.round(cost);
+        const roundedCost = Math.round(getAscendencyBuffCost(buff));
 
         const costTextElement = document.getElementById(costTextId);
 
         if (costTextElement) {
-            if (buff.rebuyable && buff.timesRebuyable === buff.boughtYet) {
-                costTextElement.innerHTML = localize('textBoughtMax', getLanguage());
-                costTextElement.classList.add("green-ready-text");
-                costTextElement.classList.remove("red-disabled-text");
-            } else if (!buff.rebuyable && buff.boughtYet > 0) {
-                costTextElement.innerHTML = localize('textBought', getLanguage());
-                costTextElement.classList.add("green-ready-text");
+            if (maxed) {
+                // One badge, one wording, whether the perk was a single purchase
+                // or a rebuyable one bought to its cap. The old code had a
+                // separate branch and a separate phrase for each, and the
+                // non-rebuyable one said "Bought" - the very word the status
+                // slot beside it was already showing.
+                costTextElement.innerHTML = localize('textMaxed', getLanguage());
+                costTextElement.classList.add("green-ready-text", "ascendency-buff-maxed-badge");
                 costTextElement.classList.remove("red-disabled-text");
             } else {
                 costTextElement.innerHTML = `${roundedCost} AP`;
+                costTextElement.classList.remove("ascendency-buff-maxed-badge");
 
                 if (getAscendencyPoints() >= roundedCost) {
                     costTextElement.classList.add("green-ready-text");

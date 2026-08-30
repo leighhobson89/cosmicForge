@@ -2543,6 +2543,57 @@ changed, so nothing else in the app moved.
 
 ---
 
+## 🟢 Ascendency Perks, second pass — `ascendency/ascendency-ui.spec.js`, 4 specs, all passing
+
+Plan item **P2**. `ascendency-perks-live.spec.js` already proved the perks *work* —
+prices charged, AP spent, effects measured. What it did not cover was whether the
+list can be **read** once the player starts finishing perks off, which was the
+actual complaint: finished perks kept a Buy button wearing `red-disabled-text`,
+the same red the pane uses for "you cannot afford this", and they sat wherever the
+catalogue happened to declare them.
+
+**What is different about testing it.** Three of the four assertions are about
+things a field read cannot see, so all three are taken from the rendered DOM
+rather than from state:
+
+- *There is nothing left to press* is asserted as the **absence of a button** in
+  the row, not as a class on one. A spec that asserted `red-disabled-text` would
+  pass against the very behaviour being fixed.
+- *It says so once* is counted, not assumed. The spec collects every `.buff-value`
+  on the row and requires exactly one of them to match `/max|bought|purchased/i`,
+  so a future change that reinstates the second label fails even if it words it
+  differently.
+- *The row did not move* is **measured in pixels**. The Buy button carries the
+  `margin-left: auto` that pushes the price to the row's right-hand edge, so the
+  naive fix — delete the button — collapses the whole right-hand column. The spec
+  compares the maxed row's badge right edge against an unmaxed row's price right
+  edge and allows 2px. (The *left* edges legitimately differ: "Maxed" is a wider
+  word than "3 AP".)
+
+**Live against redrawn.** The two halves of the feature are proved separately,
+because they are deliberately implemented in different places. Losing the Buy
+button has to happen the instant the last purchase lands, so `checkAscendencyButtons()`
+does it in the frame loop — and that spec never redraws the pane, which is the only
+way to tell the two apart. The ordering is settled at draw time on purpose, so the
+ordering spec leaves for the Megastructures pane and comes back before asserting.
+
+**Choosing the perks.** The three the spec drives are picked for what they can
+prove: `littleBagOfHydrogen` is a one-shot, so a single press maxes it;
+`asteroidScannerBoost` has a real cap of 2, so it is the only kind that can reach
+"maxed" *after* being part-bought — which is what proves the first press does not
+take the button away; and `quantumEngines` has a cap of 10, so one press parks it
+permanently in the middle group. All three are free of side effects that open a
+modal, which would swallow the next click.
+
+**Two existing assertions were updated, not worked around.** `a one-shot perk can
+only ever be bought once` and `a rebuyable perk doubles in price each time` pinned
+the old wording (`'Bought Max'`, `'Bought'`) and the old gate — a red button the
+CSS made unclickable. Both now assert the new gate, which is strictly stronger:
+there is no button, and none is drawn back in on a redraw. `readPerkRows` in that
+file was changed to find rows by their wrapper id rather than by their Buy button,
+since a maxed row no longer has one, and `blocked` now means what the player
+experiences — there is nothing here I can press.
+
 ## The general rule this establishes
 
 Drive the game's own buttons, panes and debug menu. Reserve direct `withMods`

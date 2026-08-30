@@ -8,7 +8,7 @@
 | **Spec folder** | `tests/e2e/ascendency/` |
 | **Existing coverage** | _none_ |
 
-The AP economy and permanent perk purchases, played through the Ascendency Perks pane. Errors here permanently corrupt cross-run progress.
+The AP economy and permanent perk purchases, played through the Ascendency Perks pane, plus how the perk list reads once perks start being finished. Errors here permanently corrupt cross-run progress.
 
 ## What should be tested
 
@@ -23,6 +23,10 @@ The AP economy and permanent perk purchases, played through the Ascendency Perks
 - [ ] Every perk bought is still bought, still paid for and still applied after a rebirth taken through the real button
 - [ ] The hydrogen bag and Non Exhaustive Resources pay their starting stock into the next run
 - [ ] Every buff description resolves to real copy in every shipped language
+- [ ] P2: a perk bought to its cap loses its Buy button the moment it is finished, and a part-bought one keeps it
+- [ ] P2: a maxed perk states its completion exactly once, in the far-right slot, and its right-hand column does not shift
+- [ ] P2: redrawing the pane groups unbought, then part-bought, then finished perks, each group cheapest-first
+- [ ] P2: the AP charged for a run of purchases is exactly what the rows quoted before they were pressed
 
 ## Status meaning
 

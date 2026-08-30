@@ -3497,6 +3497,39 @@ export function getAscendencyBuffDataObject() {
     return ascendencyBuffs;
 }
 
+// P2 (player-feedback plan): "maxed" and "the price of the next one" were each
+// worked out inline in three places - the row builder in drawTab7Content.js and
+// both frame-loop passes in game.js - and the three did not agree. Notably a
+// non-rebuyable perk carries whatever `timesRebuyable` the catalogue happened to
+// give it (several say 100000), so a cap comparison is only meaningful for a
+// rebuyable one; for the rest the single purchase is the cap. They live here,
+// beside the catalogue they read, so the pane and the loop can never drift.
+
+/** The AP price of the *next* purchase of this perk. Not rounded - callers round. */
+export function getAscendencyBuffCost(buff) {
+    if (!buff || typeof buff.baseCostAp !== 'number') {
+        return 0;
+    }
+    return buff.rebuyable
+        ? buff.baseCostAp * Math.pow(buff.rebuyableIncreaseMultiple, buff.boughtYet)
+        : buff.baseCostAp;
+}
+
+/**
+ * Has this perk been bought as many times as it can be?
+ *
+ * `timesRebuyable: 100000` is the catalogue's way of writing "no cap", so a perk
+ * sitting on it is never maxed however many times it is bought.
+ */
+export function isAscendencyBuffMaxed(buff) {
+    if (!buff || typeof buff.boughtYet !== 'number') {
+        return false;
+    }
+    return buff.rebuyable
+        ? buff.boughtYet >= buff.timesRebuyable
+        : buff.boughtYet > 0;
+}
+
 export function setAscendencyBuffDataObject(value, key, subKeys = []) {
     if (!key) {
         console.warn("Main key is required.");

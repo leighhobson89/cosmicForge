@@ -119,46 +119,57 @@ function currentAp(game) {
  *
  * The DOM carries the catalogue key separately from the translated display
  * name. This is the identity `checkAscendencyButtons()` uses as well.
+ *
+ * Rows are found by their wrapper id rather than by their Buy button, because
+ * since P2 a maxed perk has no Buy button at all — it is replaced by an inert
+ * spacer that keeps the row's shape. `blocked` therefore means what the player
+ * experiences, "there is nothing here I can press", whether that is because the
+ * button is wearing `red-disabled-text` or because there is no button left.
  */
 async function readPerkRows(game) {
   return game.withMods((m) => {
     const buffs = m.rdo.getAscendencyBuffDataObject();
     const ap = m.cg.getAscendencyPoints();
 
-    return Array.from(document.querySelectorAll('button.ascendency-buff-button')).map((button) => {
-      const key = button.dataset.buffKey || '';
-
-      const buff = buffs[key] || null;
+    const keyByRowId = new Map();
+    Object.keys(buffs).forEach((key) => {
+      if (key === 'version') return;
       const capitalised = key.charAt(0).toUpperCase() + key.slice(1);
-      const costEl = document.getElementById(`${key}CostText`);
-      const statusEl = document.getElementById(`buff${capitalised}BuyStatusText`);
-
-      const maxed = buff
-        ? (buff.rebuyable ? buff.boughtYet >= buff.timesRebuyable : buff.boughtYet > 0)
-        : true;
-      const price = buff
-        ? Math.round(buff.rebuyable
-          ? buff.baseCostAp * Math.pow(buff.rebuyableIncreaseMultiple, buff.boughtYet)
-          : buff.baseCostAp)
-        : null;
-
-      return {
-        key,
-        resolved: Boolean(buff),
-        ready: button.classList.contains('green-ready-text'),
-        blocked: button.classList.contains('red-disabled-text'),
-        costText: (costEl?.textContent || '').trim(),
-        statusText: (statusEl?.textContent || '').trim(),
-        boughtYet: buff?.boughtYet ?? null,
-        rebuyable: buff?.rebuyable ?? null,
-        timesRebuyable: buff?.timesRebuyable ?? null,
-        baseCostAp: buff?.baseCostAp ?? null,
-        price,
-        maxed,
-        // What the rules say the button should be showing right now.
-        shouldBeReady: Boolean(buff) && ap >= price && !maxed
-      };
+      keyByRowId.set(`buff${capitalised}Row`, key);
     });
+
+    return Array.from(document.querySelectorAll('.option-row'))
+      .filter((row) => keyByRowId.has(row.id))
+      .map((row) => {
+        const key = keyByRowId.get(row.id);
+        const button = row.querySelector('button.ascendency-buff-button');
+
+        const buff = buffs[key] || null;
+        const capitalised = key.charAt(0).toUpperCase() + key.slice(1);
+        const costEl = document.getElementById(`${key}CostText`);
+        const statusEl = document.getElementById(`buff${capitalised}BuyStatusText`);
+
+        const maxed = buff ? m.rdo.isAscendencyBuffMaxed(buff) : true;
+        const price = buff ? Math.round(m.rdo.getAscendencyBuffCost(buff)) : null;
+
+        return {
+          key,
+          resolved: Boolean(buff),
+          hasBuyButton: Boolean(button),
+          ready: Boolean(button) && button.classList.contains('green-ready-text'),
+          blocked: !button || button.classList.contains('red-disabled-text'),
+          costText: (costEl?.textContent || '').trim(),
+          statusText: (statusEl?.textContent || '').trim(),
+          boughtYet: buff?.boughtYet ?? null,
+          rebuyable: buff?.rebuyable ?? null,
+          timesRebuyable: buff?.timesRebuyable ?? null,
+          baseCostAp: buff?.baseCostAp ?? null,
+          price,
+          maxed,
+          // What the rules say the row should be offering right now.
+          shouldBeReady: Boolean(buff) && ap >= price && !maxed
+        };
+      });
   });
 }
 
@@ -430,7 +441,11 @@ test.describe('Ascendency Perks — the pane a player opens', () => {
     expect(capped.boughtYet).toBe(3);
     expect(capped.ready, 'a maxed perk is never buyable again').toBe(false);
     expect(capped.blocked).toBe(true);
-    expect(capped.costText).toBe('Bought Max');
+    // Since P2 the gate on a finished perk is not a red button but the absence
+    // of one, and the row states it once, in the far-right slot.
+    expect(capped.hasBuyButton, 'a maxed perk offers nothing to press').toBe(false);
+    expect(capped.costText).toBe('Maxed');
+    expect(capped.statusText, 'and does not say so twice').toBe('');
 
     // And it stays capped even when the player is rich.
     await grantAp(game, 3);
@@ -451,26 +466,25 @@ test.describe('Ascendency Perks — the pane a player opens', () => {
     const bought = (await readPerkRows(game)).find((r) => r.key === 'littleBagOfHydrogen');
     expect(bought.boughtYet).toBe(1);
     expect(await currentAp(game)).toBe(before - 3);
-    expect(bought.statusText, 'the row should report the purchase').toBe('Bought');
-    expect(bought.costText).toBe('Bought');
+    expect(bought.statusText, 'the completion is stated once, on the right').toBe('');
+    expect(bought.costText).toBe('Maxed');
     expect(bought.ready, 'a non-rebuyable perk is spent').toBe(false);
     expect(bought.blocked).toBe(true);
 
-    // The refusal is the gate, and the gate is the class: `red-disabled-text`
-    // carries `pointer-events: none`, so a player cannot reach the button at all.
-    // It stays that way however much AP is thrown at it, which is the part worth
-    // proving — a dispatched click would go straight through the CSS and buy a
-    // second copy, so it would be measuring the test harness, not the game.
+    // Since P2 the refusal is not a red button the CSS makes unclickable but no
+    // button at all — a strictly harder gate, and one that cannot be mistaken
+    // for "you cannot afford this". What is worth proving is that it stays that
+    // way however much AP is thrown at it.
     await grantAp(game, 3);
     await openPerksPane(game);
 
     const stillSpent = (await readPerkRows(game)).find((r) => r.key === 'littleBagOfHydrogen');
     expect(stillSpent.ready, 'money cannot buy a second one').toBe(false);
     expect(stillSpent.blocked).toBe(true);
-    expect(await game.page.evaluate(() =>
-      getComputedStyle(document.querySelector(
-        'button.ascendency-buff-button.buff-class-little-bag-of-hydrogen')).pointerEvents),
-      'the disabled colour is what makes the button unclickable').toBe('none');
+    expect(stillSpent.hasBuyButton, 'there is no button left to press').toBe(false);
+    expect(await game.page.locator(
+      'button.ascendency-buff-button.buff-class-little-bag-of-hydrogen').count(),
+      'and none is drawn back in on a redraw either').toBe(0);
     expect(stillSpent.boughtYet, 'and the count stays at one').toBe(1);
   });
 

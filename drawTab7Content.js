@@ -1,4 +1,4 @@
-import { removeTabAttentionIfNoIndicators, createOptionRow, createButton, createDropdown, createTextElement, createTextFieldArea, createSpinningDropdown, callPopupModal, showHideModal, createMegaStructureDiagram, createMegaStructureTable, createBlackHole, setButtonState, showNotification, updateDescriptionRow, setupInfoTooltips } from './ui.js';
+import { removeTabAttentionIfNoIndicators, createAscendencyMaxedSpacer, createOptionRow, createButton, createDropdown, createTextElement, createTextFieldArea, createSpinningDropdown, callPopupModal, showHideModal, createMegaStructureDiagram, createMegaStructureTable, createBlackHole, setButtonState, showNotification, updateDescriptionRow, setupInfoTooltips } from './ui.js';
 import {
     getCasinoGame4AlwaysWin,
     getCasinoGame5VoidSeerAlwaysMatch,
@@ -54,6 +54,8 @@ import { claimCasinoSpecialPrizeByKey, spinNumericSpinner } from './casino.js';
 import { trackAnalyticsEvent } from './analytics.js';
 import {
     getAscendencyBuffDataObject,
+    getAscendencyBuffCost,
+    isAscendencyBuffMaxed,
     getResourceDataObject,
     setResourceDataObject,
     getGalacticCasinoDataObject,
@@ -1746,8 +1748,32 @@ export function drawTab7Content(heading, optionContentElement) {
         if (Object.keys(ascendencyBuffsArray).length === 0) {
             return;
         }
-    
-        Object.keys(ascendencyBuffsArray).forEach(buffKey => {
+
+        // P2 (player-feedback plan): the list used to render in catalogue
+        // insertion order, so a perk the player had already finished with sat
+        // between two they could still buy. Group by how much of it is left -
+        // untouched, part-bought, finished - and order each group by price, so
+        // the cheapest thing worth buying is always nearest the top. The sort is
+        // stable, so perks of equal price keep their catalogue order.
+        //
+        // The order is settled once, here, at draw time. Re-sorting live would
+        // slide a row out from under the pointer at the exact moment the player
+        // finishes a perk, which is the worst possible moment to move it.
+        const sortedBuffKeys = Object.keys(ascendencyBuffsArray)
+            .map((buffKey, index) => {
+                const buff = ascendencyBuffsArray[buffKey];
+                const maxed = isAscendencyBuffMaxed(buff);
+                return {
+                    buffKey,
+                    index,
+                    group: maxed ? 2 : (buff.boughtYet > 0 ? 1 : 0),
+                    cost: Math.round(getAscendencyBuffCost(buff))
+                };
+            })
+            .sort((a, b) => (a.group - b.group) || (a.cost - b.cost) || (a.index - b.index))
+            .map((entry) => entry.buffKey);
+
+        sortedBuffKeys.forEach(buffKey => {
             const buff = ascendencyBuffsArray[buffKey];
             // The buff's display name comes from the catalogue, keyed by its
             // internal key; buff.name in the data file is the English fallback.
@@ -1763,21 +1789,39 @@ export function drawTab7Content(heading, optionContentElement) {
             const buffNameSlug = buffKey.replace(/([A-Z])/g, '-$1').toLowerCase();
     
             const buffRowDescription = `buff${capitaliseString(buffKey)}Row`;
-            const cost = buff.rebuyable ? buff.baseCostAp * Math.pow(buff.rebuyableIncreaseMultiple, buff.boughtYet) : buff.baseCostAp;
-            const buyStatus = buff.boughtYet > 0
-                ? (buff.rebuyable ? localize('textBoughtTimes', getLanguage()).replace('{count}', buff.boughtYet) : localize('textPurchased', getLanguage()))
-                : localize('textNotBought', getLanguage());
+            const cost = getAscendencyBuffCost(buff);
+            const maxed = isAscendencyBuffMaxed(buff);
+            // A finished perk says so once, in the far-right slot. Leaving the
+            // status text as "Purchased" as well printed the same fact twice,
+            // and in the same green, on every row the player had completed.
+            const buyStatus = maxed
+                ? ''
+                : (buff.boughtYet > 0
+                    ? (buff.rebuyable ? localize('textBoughtTimes', getLanguage()).replace('{count}', buff.boughtYet) : localize('textPurchased', getLanguage()))
+                    : localize('textNotBought', getLanguage()));
 
-            const buyButton = createButton({
-                text: localize('buttonBuy', getLanguage()),
-                classNames: ['option-button', 'red-disabled-text', 'ascendency-buff-button', `buff-class-${buffNameSlug}`],
-                onClick: () => {
-                    purchaseBuff(buffKey, cost);
-                },
-                disableKeyboardForButton: true,
-                rowCategory: 'ascendency'
-            });
-            buyButton.dataset.buffKey = buffKey;
+            // A maxed perk gets no Buy button at all - it used to keep one wearing
+            // `red-disabled-text`, which is the same red the pane uses for "you
+            // cannot afford this", so "finished" and "broke" were indistinguishable.
+            // The button is replaced by a same-sized invisible box rather than
+            // simply dropped, because the button carries the `margin-left: auto`
+            // that pushes the cost slot to the right-hand edge; without it the
+            // badge on a maxed row would sit at a different x than the price on
+            // the row above it.
+            const buyControl = maxed
+                ? createAscendencyMaxedSpacer(buffNameSlug)
+                : createButton({
+                    text: localize('buttonBuy', getLanguage()),
+                    classNames: ['option-button', 'red-disabled-text', 'ascendency-buff-button', `buff-class-${buffNameSlug}`],
+                    onClick: () => {
+                        purchaseBuff(buffKey, cost);
+                    },
+                    disableKeyboardForButton: true,
+                    rowCategory: 'ascendency'
+                });
+            if (!maxed) {
+                buyControl.dataset.buffKey = buffKey;
+            }
     
             const buffRow = createOptionRow({
                 labelId: buffRowDescription,
@@ -1792,10 +1836,10 @@ export function drawTab7Content(heading, optionContentElement) {
                         ['buff-value']
                     ),                
                     createTextElement(buyStatus, `buff${capitaliseString(buffKey)}BuyStatusText`, ['buff-value']),
-                    buyButton,
+                    buyControl,
                     createTextElement(
-                        `<span id="${buffKey}CostText" class="green-ready-text">${Math.floor(cost)} AP</span>`,
-                        'buffCost',
+                        `<span id="${buffKey}CostText" class="green-ready-text${maxed ? ' ascendency-buff-maxed-badge' : ''}">${maxed ? localize('textMaxed', getLanguage()) : `${Math.round(cost)} AP`}</span>`,
+                        `buff${capitaliseString(buffKey)}CostContainer`,
                         ['buff-value']
                     ),
                 ],

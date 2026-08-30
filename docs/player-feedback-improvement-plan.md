@@ -25,7 +25,7 @@ The audit moved several items vs. the original review order: **P3** (power toggl
 |--------|----|------|------|-------|--------|
 | 1 | P3 | Powered On/Off toggle — ✅ **COMPLETED** | 1 — quick win | Medium | Very low (3–5 h) |
 | 2 | P1 | Buy Max / bulk purchase — ✅ **COMPLETED** | 1 — quick win | Very high | Low (8–12 h) |
-| 3 | P2 | AP list sorting + alignment + maxed-state cleanup | 1 — quick win | High | Low (6–10 h) |
+| 3 | P2 | AP list sorting + alignment + maxed-state cleanup — ✅ **COMPLETED** | 1 — quick win | High | Low (6–10 h) |
 | 4 | P4 | Star list: name sort + direct travel target | 1 — quick win | High | Low (6–10 h) |
 | 5 | P10 | Persistent automation across rebirths | 1 — quick win | High | Low-Med (6–10 h) |
 | 6 | P5 | Increase All Storage + persistent earned increases | 2 — important | Very high | Medium (10–16 h) |
@@ -71,18 +71,29 @@ The audit moved several items vs. the original review order: **P3** (power toggl
 
 ---
 
-## P2 — AP list: sorting, maxed state
+## ~~P2 — AP list: sorting, maxed state~~ ✅ DONE
 
-**Audit.** The Ascendency Perks section (`drawTab7Content.js:1737–1818`) iterates `Object.keys(ascendencyBuffsArray)` — **insertion order, no sorting** (line 1750). Every buff renders a Buy button unconditionally (lines 1771–1779) with the `red-disabled-text` class — the same red used elsewhere for "can't afford", so "maxed" and "broke" look identical. Each row shows a buy-status text (line 1794) *and* a cost text (lines 1796–1800), so a maxed non-rebuyable perk displays its completion info twice.
+~~**Audit.** The Ascendency Perks section (`drawTab7Content.js:1737–1818`) iterates `Object.keys(ascendencyBuffsArray)` — **insertion order, no sorting** (line 1750). Every buff renders a Buy button unconditionally (lines 1771–1779) with the `red-disabled-text` class — the same red used elsewhere for "can't afford", so "maxed" and "broke" look identical. Each row shows a buy-status text (line 1794) *and* a cost text (lines 1796–1800), so a maxed non-rebuyable perk displays its completion info twice.~~
 
-**Change.**
-- Sort perks: not-purchased → partially purchased → fully purchased (stable secondary sort by cost).
-- Maxed perks: hide the Buy button entirely, show a single "Maxed" badge in the far right slot with a class of green-ready-text, and remove the duplicated text.
+~~**Change.**~~
+~~- Sort perks: not-purchased → partially purchased → fully purchased (stable secondary sort by cost).~~
+~~- Maxed perks: hide the Buy button entirely, show a single "Maxed" badge in the far right slot with a class of green-ready-text, and remove the duplicated text.~~
 
-**Effort:** ~4–8 h.
-**Risk:** Low. Pure presentation + one sort comparator.
+~~**Effort:** ~4–8 h.~~
+~~**Risk:** Low. Pure presentation + one sort comparator.~~
 
-**Integration test.** `tests/e2e/ascendency/ascendency-ui.spec.js`: grant AP, buy one perk to max via `purchaseBuff` calls, reload tab 7, assert (a) DOM order groups unmaxed before maxed, (b) maxed row has no buy button, (c) maxed row contains exactly one "maxed" indicator (preferably the one on the far right and the other one replaced with blank string but not affecting layout).
+~~**Integration test.** `tests/e2e/ascendency/ascendency-ui.spec.js`: grant AP, buy one perk to max via `purchaseBuff` calls, reload tab 7, assert (a) DOM order groups unmaxed before maxed, (b) maxed row has no buy button, (c) maxed row contains exactly one "maxed" indicator (preferably the one on the far right and the other one replaced with blank string but not affecting layout).~~
+
+**As built.** Four notes on where the implementation differs from, or goes past, the sketch above:
+
+- **The button is replaced, not simply hidden.** The Buy button carries the `margin-left: auto` that pushes the price slot to the row's right-hand edge, so dropping it collapses the whole right-hand column back to the left. It is swapped for `createAscendencyMaxedSpacer()` (`ui.js`) — the same box, the same word, `visibility: hidden` — and the spec measures the badge's right edge against an unmaxed row's price to prove the column does not move.
+- **The frame loop does the swap, not just the redraw.** `checkAscendencyButtons()` removes the button the instant the last purchase lands, so the player never sees a red "finished" button waiting for a redraw. Sorting, by contrast, is deliberately settled only at draw time: re-sorting live would slide a row out from under the pointer at the moment the player finishes a perk.
+- **"Maxed" is one wording for both kinds of perk.** The old code had a separate branch and a separate phrase for a capped rebuyable ("Bought Max") and a spent one-shot ("Bought") — and the latter was the same word the status slot beside it was already showing. Both now show a single new `textMaxed` key, translated into all six shipped languages; the now-unreachable `textBoughtMax` was deleted, which `validateLocalization.cjs` confirms.
+- **Two incidental defects in the same rows were fixed.** The far-right container was created with the literal id `buffCost` on *every* perk row, so the pane emitted one duplicate DOM id per perk; it is now keyed by the perk. And the price was drawn with `Math.floor` while `purchaseBuff` charges `Math.round`, so a fractional price (any perk with a non-integer `rebuyableIncreaseMultiple`) was quoted a point below what it charged until the first frame overwrote it.
+
+`isAscendencyBuffMaxed()` and `getAscendencyBuffCost()` now live in `resourceDataObject.js` beside the catalogue, because the "maxed" and "next price" rules had been worked out inline in three places that did not agree — notably several *non*-rebuyable perks carry a `timesRebuyable` of 100000, which only means "no cap" for a rebuyable one.
+
+Two existing assertions in `ascendency-perks-live.spec.js` were updated rather than worked around: they pinned the old wording (`'Bought Max'`, `'Bought'`) and the old gate (a red button made unclickable by `pointer-events: none`). They now assert the new, strictly stronger gate — that there is no button at all — and that no button is drawn back in on a redraw.
 
 ---
 

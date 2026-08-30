@@ -817,7 +817,7 @@
       "status": "green",
       "risk": "high",
       "legacy": [],
-      "summary": "The AP economy and permanent perk purchases, played through the Ascendency Perks pane. Errors here permanently corrupt cross-run progress.",
+      "summary": "The AP economy and permanent perk purchases, played through the Ascendency Perks pane, plus how the perk list reads once perks start being finished. Errors here permanently corrupt cross-run progress.",
       "tests": [
         "Every perk in the catalogue gets a row quoting its catalogue price, and a fresh save can afford none of them",
         "The pane lights up exactly the perks the balance can pay for, at every balance the run passes through",
@@ -829,9 +829,13 @@
         "Compound Automation, Robotic Research Automation, Auto Space Telescope and Non Exhaustive Resources land their unlocks",
         "Every perk bought is still bought, still paid for and still applied after a rebirth taken through the real button",
         "The hydrogen bag and Non Exhaustive Resources pay their starting stock into the next run",
-        "Every buff description resolves to real copy in every shipped language"
+        "Every buff description resolves to real copy in every shipped language",
+        "P2: a perk bought to its cap loses its Buy button the moment it is finished, and a part-bought one keeps it",
+        "P2: a maxed perk states its completion exactly once, in the far-right slot, and its right-hand column does not shift",
+        "P2: redrawing the pane groups unbought, then part-bought, then finished perks, each group cheapest-first",
+        "P2: the AP charged for a run of purchases is exactly what the rows quoted before they were pressed"
       ],
-      "specCount": 20
+      "specCount": 24
     },
     {
       "id": "galactic-casino",

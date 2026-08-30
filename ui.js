@@ -4310,6 +4310,26 @@ export function createButton(options = {}) {
     return button;
 }
 
+/**
+ * The invisible stand-in for a maxed perk's Buy button.
+ *
+ * It carries the same box as the button it replaces - the same `option-button`
+ * padding and the `margin-left: auto` that pushes the price slot to the right -
+ * so a maxed row lines up with the rows above and below it. `visibility: hidden`
+ * rather than `display: none` is the point: the space has to stay.
+ *
+ * It is deliberately not a <button> and deliberately does not carry
+ * `.ascendency-buff-button`, so the frame loop's affordability pass never sees
+ * it and there is nothing on the row left to click.
+ */
+export function createAscendencyMaxedSpacer(buffNameSlug) {
+    const spacer = document.createElement('div');
+    spacer.classList.add('option-button', 'ascendency-buff-maxed-spacer', `buff-maxed-class-${buffNameSlug}`);
+    spacer.setAttribute('aria-hidden', 'true');
+    spacer.textContent = localize('buttonBuy', getLanguage());
+    return spacer;
+}
+
 export function createTextElement(text, id, classList, onClick) {
     const div = document.createElement('div');
 
