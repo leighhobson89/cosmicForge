@@ -596,7 +596,8 @@
         "A star study run to completion extends the vision range by one increment and puts more systems on the star map",
         "The three actions share one instrument: starting any of them shuts the gate on the other two",
         "Voidborn's Void Seers adds the pillage row and takes the same lock; without the ability the row stays hidden",
-        "The auto-telescope perk's row repeats the selected mode with no further presses"
+        "The auto-telescope perk's row repeats the selected mode with no further presses",
+        "With the perk already owned, building the telescope puts the auto row on the open pane without a reopen"
       ],
       "specCount": 10
     },

@@ -81,7 +81,7 @@ when an area is upgraded.
 | 🟢 Green — signed off | 45 | 100% |
 | **Total functional areas** | **45** | |
 
-704 individual test cases are identified across all areas. **1238 Playwright specs are implemented** across 44 areas, and all of them pass except where an area's note says otherwise — a spec that fails on a live defect is left failing on purpose, and the defect is written up in [known-issues.md](known-issues.md).
+705 individual test cases are identified across all areas. **1238 Playwright specs are implemented** across 44 areas, and all of them pass except where an area's note says otherwise — a spec that fails on a live defect is left failing on purpose, and the defect is written up in [known-issues.md](known-issues.md).
 
 Run them with `npm run test:e2e` (all areas) or `node tests/run-e2e.mjs <area>`. Each area writes its own HTML report to `test-reports/e2e/<area>/index.html`, with a summary index at `test-reports/e2e/index.html`.
 
@@ -130,7 +130,7 @@ Mid-game expansion off-planet — asteroids, rockets, antimatter and the telesco
 | 🟢 | [Space Mining & Asteroids](areas/space-mining.md) | Medium | 18 | **44** | — |
 | 🟢 | [Rockets & Launch Pad](areas/rockets.md) | Medium | 43 | **57** | — |
 | 🟢 | [Antimatter](areas/antimatter.md) | Medium | 26 | **26** | spaceAntimatter.test.js |
-| 🟢 | [Space Telescope](areas/space-telescope.md) | Medium | 10 | **10** | — |
+| 🟢 | [Space Telescope](areas/space-telescope.md) | Medium | 11 | **10** | — |
 
 ### Interstellar
 

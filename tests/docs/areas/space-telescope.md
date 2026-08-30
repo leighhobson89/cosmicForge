@@ -22,6 +22,7 @@ The three telescope actions - star study, asteroid search, void pillage - the on
 - [ ] The three actions share one instrument: starting any of them shuts the gate on the other two
 - [ ] Voidborn's Void Seers adds the pillage row and takes the same lock; without the ability the row stays hidden
 - [ ] The auto-telescope perk's row repeats the selected mode with no further presses
+- [ ] With the perk already owned, building the telescope puts the auto row on the open pane without a reopen
 
 ## Status meaning
 

@@ -123,6 +123,16 @@ export function drawTab6Content(heading, optionContentElement) {
 
                         document.getElementById('spaceTelescopeInvestigateStarRow').classList.remove('invisible');
 
+                        // The auto telescope row is only appended when the pane is drawn with the
+                        // telescope already built, so a telescope built while the pane is open has
+                        // to have it inserted here - otherwise the row stays missing until the
+                        // player reopens the pane.
+                        if (getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'autoSpaceTelescopeRowEnabled']) && !spaceTelescopeAutoRow.isConnected) {
+
+                            spaceBuildTelescopeRow.after(spaceTelescopeAutoRow);
+
+                        }
+
                         if (getPlayerPhilosophy() === 'voidborn' && getPhilosophyAbilityActive() && getStatRun() > 1) {
 
                             document.getElementById('spaceTelescopePhilosophyBoostResourcesAndCompoundsRow').classList.remove('invisible');

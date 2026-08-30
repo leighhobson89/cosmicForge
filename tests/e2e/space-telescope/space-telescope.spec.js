@@ -808,3 +808,57 @@ test.describe('Space Telescope — the auto-telescope', () => {
     expect(game.significantErrors()).toEqual([]);
   });
 });
+
+// ------------------------------ the auto row on a telescope built while open
+
+test.describe('Space Telescope — the auto row on a freshly built telescope', () => {
+  test('owning the perk puts the auto row on the pane the moment the build button is pressed', async ({ game, page }) => {
+    await game.boot();
+    await stockRunWithoutTelescope(game, page);
+
+    // The perk is bought first and the telescope second, which is the order a
+    // player meets after a rebirth: `resetAllForRebirth` re-applies
+    // `autoSpaceTelescopeRowEnabled` from the owned buff, and the telescope
+    // itself has to be rebuilt. No rebirth is run here because the ordering is
+    // the whole of it — the perk being owned while the telescope is not.
+    await game.debugClick('add100ApButton');
+    await game.withMods((m) => m.game.purchaseBuff('autoSpaceTelescope'));
+    await openTelescopePane(game, page);
+
+    const before = await telescopeRows(page);
+    expect(before.build.visible, 'the telescope is not built yet').toBe(true);
+    expect(before.auto.present, 'and with no telescope there is nothing for the auto row to drive').toBe(false);
+
+    // Built through the pane's own button, and the pane deliberately not
+    // reopened afterwards: the claim is that the click handler puts the row up,
+    // not that `drawTab6Content` would build it on the next open.
+    await page.evaluate(() => {
+      document.querySelector('#spaceBuildTelescopeRow button.spaceTelescope')
+        ?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+    await page.waitForTimeout(800);
+    await dismissAnyOpenModal(page);
+
+    const after = await telescopeRows(page);
+    expect(after.auto.present, 'the auto row should appear as soon as the telescope is built').toBe(true);
+    expect(after.auto.visible).toBe(true);
+
+    // And it is a working row, not an orphan: its two controls are there and the
+    // toggle still writes through to the data object.
+    await page.click('label[for="autoTelescopeToggle"]');
+    await page.waitForTimeout(400);
+    expect(await game.withMods((m) =>
+      m.rdo.getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'autoSpaceTelescopeEnabled'])),
+    'the toggle on the inserted row should still be wired up').toBe(true);
+
+    // It sits where it is drawn on a reopened pane — under the build row and
+    // above the two action rows.
+    const order = await page.evaluate(() => Array.from(
+      document.getElementById('spaceTelescopeAutoRow')?.parentElement?.children ?? [])
+      .map((el) => el.id).filter(Boolean));
+    expect(order.indexOf('spaceTelescopeAutoRow'))
+      .toBeLessThan(order.indexOf('spaceTelescopeSearchAsteroidRow'));
+
+    expect(game.significantErrors()).toEqual([]);
+  });
+});
