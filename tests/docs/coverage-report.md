@@ -80,7 +80,7 @@ when an area is upgraded.
 | 🟢 Green — signed off | 44 | 100% |
 | **Total functional areas** | **44** | |
 
-691 individual test cases are identified across all areas. **1238 Playwright specs are implemented** across 44 areas, and all of them pass except where an area's note says otherwise — a spec that fails on a live defect is left failing on purpose, and the defect is written up in [known-issues.md](known-issues.md).
+697 individual test cases are identified across all areas. **1238 Playwright specs are implemented** across 44 areas, and all of them pass except where an area's note says otherwise — a spec that fails on a live defect is left failing on purpose, and the defect is written up in [known-issues.md](known-issues.md).
 
 Run them with `npm run test:e2e` (all areas) or `node tests/run-e2e.mjs <area>`. Each area writes its own HTML report to `test-reports/e2e/<area>/index.html`, with a summary index at `test-reports/e2e/index.html`.
 
@@ -137,7 +137,7 @@ Travel, conquest and settlement. The most stateful and branch-heavy part of the 
 
 | Status | Area | Risk | Planned | Specs | Existing coverage |
 |:--:|---|:--:|--:|--:|---|
-| 🟢 | [Star Map & Star Data](areas/star-map.md) | Medium | 27 | **62** | — |
+| 🟢 | [Star Map & Star Data](areas/star-map.md) | Medium | 33 | **62** | — |
 | 🟢 | [Star Type Bonuses](areas/star-types.md) | Medium | 15 | **25** | — |
 | 🟢 | [Starship](areas/starship.md) | High | 10 | **8** | — |
 | 🟢 | [Fleet Hangar](areas/fleet-hangar.md) | High | 15 | **29** | — |

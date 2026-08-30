@@ -145,6 +145,201 @@ function getWeatherDisplayData(weatherTendency, weather) {
     return ['?', 0, 'red-disabled-text'];
 }
 
+/**
+ * The three ids one star can be drawn under on the map.
+ *
+ * `generateStarfield` names the element for the star itself, prefixes a settled
+ * one and prefixes one that is only scenery, so every lookup by name has to try
+ * all three before deciding the star is not on the map.
+ */
+function findDrawnStarElement(starName) {
+    const normalized = capitaliseWordsWithRomanNumerals(starName);
+    return [
+        normalized,
+        `settledStar${normalized}`,
+        `noneInterestingStar${normalized}`
+    ]
+        .map((id) => document.getElementById(id))
+        .find(Boolean) || null;
+}
+
+// The ping is appended to `document.body`, not to the starfield, because it is
+// positioned in viewport coordinates. That means nothing tears it down when the
+// map goes away, so the mark and the timer that ends it are held here and can be
+// cancelled from outside.
+let activeSelectionPing = null;
+let activeSelectionPingTimer = null;
+
+/**
+ * Take down the selection ping now.
+ *
+ * The animation repeats for four seconds to be findable, which is long enough
+ * for a player to have left the pane before it ends. A mark pointing at a star
+ * that is no longer on screen is worse than no mark, so leaving the star map, or
+ * redrawing it in a mode that may not draw that star at all, cancels it.
+ */
+export function clearStarMapSelectionPing() {
+    if (activeSelectionPingTimer !== null) {
+        window.clearTimeout(activeSelectionPingTimer);
+        activeSelectionPingTimer = null;
+    }
+
+    activeSelectionPing = null;
+
+    // Swept by class rather than by the reference alone: a ping from a previous
+    // draw whose reference was replaced would otherwise outlive everything.
+    document.querySelectorAll('.star-map-search-selection-ping').forEach((element) => element.remove());
+}
+
+/**
+ * Drop the selection ping over a star on the map.
+ *
+ * The ping is a fixed-position element placed over the star's current rectangle,
+ * so it only means anything in the two modes that draw the star where the player
+ * can see it. Any previous mark is taken down first, so repeated selections
+ * replace one another rather than piling up.
+ */
+function runSearchSelectionPing(starName) {
+    const modeLower = String(getStarMapMode?.() || '').toLowerCase();
+    if (modeLower !== 'normal' && modeLower !== 'distance') {
+        return;
+    }
+
+    const starElement = findDrawnStarElement(starName);
+
+    if (!starElement) {
+        return;
+    }
+
+    clearStarMapSelectionPing();
+
+    const rect = starElement.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+
+    const ping = document.createElement('div');
+    ping.style.left = `${x}px`;
+    ping.style.top = `${y}px`;
+    ping.className = 'star-map-search-selection-ping green-ready-text';
+
+    document.body.appendChild(ping);
+    activeSelectionPing = ping;
+
+    activeSelectionPingTimer = window.setTimeout(() => {
+        ping.remove();
+        if (activeSelectionPing === ping) {
+            activeSelectionPing = null;
+        }
+        activeSelectionPingTimer = null;
+    }, 4100);
+}
+
+/**
+ * Select a star on the map by name, exactly as clicking it would.
+ *
+ * The click handler `generateStarfield` puts on each star is the only thing that
+ * draws the connection line, builds the destination row and calls
+ * `setDestinationStar` — and it is also where the travel guard lives. Dispatching
+ * at the element rather than duplicating any of that is what keeps the search box
+ * and the Star Data table agreeing with a plain click on the map.
+ */
+function selectStarByName(starName) {
+    const starContainer = document.querySelector('#optionContentTab5');
+    if (!starContainer) {
+        return;
+    }
+
+    const normalized = capitaliseWordsWithRomanNumerals(starName);
+    const starElement = findDrawnStarElement(starName);
+
+    if (starElement) {
+        starElement.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    } else {
+        showNotification(localize('notificationStarNotFoundOnMap', getLanguage()).replace('{star}', normalized), 'warning', 2500, 'starMap');
+    }
+}
+
+/**
+ * P4: take the player to the star map and ping one star there.
+ *
+ * This is the whole of what the globe button on a Star Data row does. It is
+ * deliberately *showing*, not choosing: the destination is left exactly as the
+ * player left it, and nothing here cares whether the star ship is in flight.
+ * Picking a destination stays the map's own job, one click away once the player
+ * can see where the star is.
+ *
+ * Two details are load-bearing. The mode is set *before* the pane is drawn,
+ * because the map-mode buttons take their highlight from `getStarMapMode()` at
+ * draw time, and the ping can only be placed in a mode that draws the star
+ * somewhere visible. And the navigation goes through the side-menu row rather
+ * than calling the draw directly, so the row highlight, the remembered screen and
+ * the current option pane are all set by the listener that already owns them; the
+ * Star Map branch of `drawTab5Content` contains no `await`, so the field is on
+ * screen by the time the click returns.
+ */
+function focusStarOnStarMap(starName) {
+    if (!starName) {
+        return false;
+    }
+
+    const starMapOption = document.getElementById('starMapOption');
+    if (!starMapOption) {
+        return false;
+    }
+
+    setStarMapMode('normal');
+    starMapOption.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+    // A star the table lists but the field never drew has nothing to ping. Say so,
+    // the same way the search box does with a name it cannot place, rather than
+    // leaving the player on a map wondering which speck flashed.
+    if (!findDrawnStarElement(starName)) {
+        const normalized = capitaliseWordsWithRomanNumerals(starName);
+        showNotification(localize('notificationStarNotFoundOnMap', getLanguage()).replace('{star}', normalized), 'warning', 2500, 'starMap');
+        return true;
+    }
+
+    runSearchSelectionPing(starName);
+
+    return true;
+}
+
+/**
+ * P4: the globe button that sits at the head of a star's name in the Star Data
+ * table.
+ *
+ * It carries no gate of its own. Showing a player where a star is cannot go
+ * wrong — not while the ship is in flight, and not when the trip is unaffordable
+ * — so the button is live on every row the table still considers a place to go.
+ */
+function createStarShowOnMapButton(starName) {
+    const button = document.createElement('span');
+    button.id = `starShowOnMapButton_${starName}`;
+    button.className = 'star-target-button';
+    button.setAttribute('role', 'button');
+    button.setAttribute('tabindex', '0');
+    button.dataset.star = String(starName);
+    button.innerHTML = `
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"></circle>
+            <ellipse cx="12" cy="12" rx="4.2" ry="9"></ellipse>
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <path d="M5.2 6.6h13.6"></path>
+            <path d="M5.2 17.4h13.6"></path>
+        </svg>
+    `;
+
+    button.title = localize('tooltipShowStarOnMap', getLanguage());
+    button.setAttribute('aria-label', button.title);
+
+    button.addEventListener('click', (event) => {
+        event.stopPropagation();
+        focusStarOnStarMap(starName);
+    });
+
+    return button;
+}
+
 export async function drawTab5Content(heading, optionContentElement, starDestinationInfoRedraw, diplomacyRedraw) {
     // The row's own marker is cleared by the click that opened this pane — see
     // clearOptionRowAttentionIndicator in ui.js.
@@ -251,6 +446,10 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                     setSearchEnabledForMode(button.mode);
 
                     removeStarConnectionTooltip();
+                    // The field is about to be thrown away and redrawn, and two of the
+                    // four modes do not draw every star at all, so a mark left over
+                    // from a search or a Star Data globe would point at nothing.
+                    clearStarMapSelectionPing();
                     const destinationRow = document.getElementById('descriptionContentTab5');
                     if (destinationRow) {
                         destinationRow.innerHTML = localize('headerDescStarMap', getLanguage());
@@ -296,66 +495,11 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             }
         };
 
-        const runSearchSelectionPing = (starName) => {
-            const modeLower = String(getStarMapMode?.() || '').toLowerCase();
-            if (modeLower !== 'normal' && modeLower !== 'distance') {
-                return;
-            }
-
-            const normalized = capitaliseWordsWithRomanNumerals(starName);
-            const possibleIds = [
-                normalized,
-                `settledStar${normalized}`,
-                `noneInterestingStar${normalized}`
-            ];
-
-            const starElement = possibleIds
-                .map((id) => document.getElementById(id))
-                .find(Boolean);
-
-            if (!starElement) {
-                return;
-            }
-
-            const rect = starElement.getBoundingClientRect();
-            const x = rect.left + rect.width / 2;
-            const y = rect.top + rect.height / 2;
-
-            const ping = document.createElement('div');
-            ping.style.left = `${x}px`;
-            ping.style.top = `${y}px`;
-            ping.className = 'star-map-search-selection-ping green-ready-text';
-
-            document.body.appendChild(ping);
-
-            window.setTimeout(() => {
-                ping.remove();
-            }, 4100);
-        };
-
-        const selectStarByName = (starName) => {
-            const starContainer = document.querySelector('#optionContentTab5');
-            if (!starContainer) {
-                return;
-            }
-
-            const normalized = capitaliseWordsWithRomanNumerals(starName);
-            const possibleIds = [
-                normalized,
-                `settledStar${normalized}`,
-                `noneInterestingStar${normalized}`
-            ];
-
-            const starElement = possibleIds
-                .map((id) => document.getElementById(id))
-                .find(Boolean);
-
-            if (starElement) {
-                starElement.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-            } else {
-                showNotification(localize('notificationStarNotFoundOnMap', getLanguage()).replace('{star}', normalized), 'warning', 2500, 'starMap');
-            }
-        };
+        // P4: the ping is shared with the Star Data table's globe button, so it and
+        // the star lookup it needs live at module scope rather than in this closure.
+        // The click-through moved with it for the same reason, even though only the
+        // search box selects a star: the search chooses a destination, the globe only
+        // shows the player where one is.
 
         const renderResults = (matches) => {
             if (!resultsEl) {
@@ -649,10 +793,13 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             )
         );
 
+        // P4: the left-hand slot used to be a static "Sort By:" caption sitting over
+        // a column that is in fact the star's name. It is now the Name header, and it
+        // sorts like the six on its right.
         const starLegendRow = createOptionRow({
             labelId: `starLegendRow`,
             renderNameABs: null,
-            labelText: localize('tab6SortByRowLabel', getLanguage()),
+            labelText: localize('textStarName', getLanguage()),
             inputElements: [
                 starLegendCells,
             ],
@@ -667,8 +814,33 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             resourceString: null,
             optionalIterationParam: null,
             rowCategory: 'star',
-            noDescriptionContainer: [true, '10%', '90%']
+            noDescriptionContainer: [true, '15%', '85%']
         });
+
+        // The header is the row's own label element rather than a seventh cell in
+        // `starLegendCells`, because the name it heads is drawn in the label column
+        // too. It is given the id here because `sortStarTable` finds every header by
+        // id when it moves the `sort-by` marker onto whichever column is active.
+        //
+        // The info icon carries the whole of what this column now does — that the
+        // header sorts, and that the globe on each row shows the star on the map —
+        // because neither is discoverable from a globe glyph alone. It is wired the
+        // same way as the Weather header's icon: `setupInfoTooltips` at the end of
+        // this branch binds every `.info-emoji` to its entry in
+        // `infoTooltipDescriptions`, keyed by id.
+        const starLegendNameHeader = starLegendRow.querySelector('.label-container .label-text');
+        if (starLegendNameHeader) {
+            starLegendNameHeader.id = 'starLegendName';
+            starLegendNameHeader.classList.add('sort-by', 'label-star', 'star-legend-name');
+            starLegendNameHeader.innerHTML = `<span class="inline-icon-header">${localize('textStarName', getLanguage())} <p id="info_starLegendName" class="info-emoji">ℹ️</p></span>`;
+            starLegendNameHeader.addEventListener('click', (event) => {
+                // Reading the tip is not a request to re-sort the table under it.
+                if (event.target.closest('.info-emoji')) {
+                    return;
+                }
+                handleSortStarClick('name');
+            });
+        }
 
         optionContentElement.appendChild(starLegendRow);
 
@@ -762,8 +934,11 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                             ? 'o-star-text'
                             : 'green-ready-text';
 
+            // P4: no trailing colon. Every other row in the game reads
+            // "<thing>: <control>", but this column is now a sortable header over a
+            // list of names rather than a label introducing the cells beside it.
             const starNameLabel = [
-                `${capitaliseWordsWithRomanNumerals(nameStar)}:${megaStructureIconHtml}`,
+                `${capitaliseWordsWithRomanNumerals(nameStar)}${megaStructureIconHtml}`,
                 starNameClass
             ];
 
@@ -787,11 +962,26 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                 resourceString: null,
                 optionalIterationParam: null,
                 rowCategory: 'star',
-                noDescriptionContainer: [true, '10%', '90%']
+                noDescriptionContainer: [true, '15%', '85%']
             });
 
             if (isSettled) {
                 starDataRow.style.opacity = '0.5';
+            }
+
+            // P4: a settled star is not a place to go any more — its distance,
+            // weather, precipitation and AP cells are already blanked — so it gets no
+            // globe. Every other row does, in the name column, because the button
+            // acts on the star rather than on any one of the six figures.
+            //
+            // It goes *before* the name rather than after it. The name column is a
+            // fixed fraction of the row and a long star name overflows it, so a
+            // trailing button ends up drawn underneath the value cells, which are
+            // later siblings and therefore paint over it. At the head of the column
+            // it is always inside its own box, and a megastructure star's icon still
+            // sits where it always did, at the end of the name.
+            if (!isSettled) {
+                starDataRow.querySelector('.label-container')?.prepend(createStarShowOnMapButton(nameStar));
             }
 
             optionContentElement.appendChild(starDataRow);

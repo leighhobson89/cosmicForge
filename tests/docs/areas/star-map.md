@@ -8,7 +8,7 @@
 | **Spec folder** | `tests/e2e/star-map/` |
 | **Existing coverage** | _none_ |
 
-The seeded starfield and how each star is drawn, the four map modes, the search and its ping, the connection lines, orbits and arrows, the travel gate, and the Star Data table with its six sortable columns.
+The seeded starfield and how each star is drawn, the four map modes, the search and its ping, the connection lines, orbits and arrows, the travel gate, and the Star Data table with its sortable Name column, its six value columns and the globe that shows a star on the map.
 
 ## What should be tested
 
@@ -39,6 +39,12 @@ The seeded starfield and how each star is drawn, the four map modes, the search 
 - [ ] Weather sorts by forecast quality then likelihood, and settled stars sink to the bottom whatever the sort
 - [ ] Name colour follows a strict precedence, with affordability outranking the O-type and megastructure colours
 - [ ] A settled star is dimmed, named in the settled colour and has its planning cells blanked
+- [ ] The Name column heads the table, sorts alphabetically, and carries an info icon explaining both the sort and the globe
+- [ ] Every unsettled row carries a globe at the head of the name; a settled one does not, and a megastructure star keeps its icon after the name
+- [ ] Pressing a globe opens the star map in normal mode and pings that star, in the same place the search box would
+- [ ] The globe shows a star without choosing one: the destination is untouched, and a ship in flight is no reason to refuse
+- [ ] The globe still takes a click on a star the run cannot fuel, whose whole name column is drawn with pointer events off
+- [ ] The selection ping does not outlive the map: leaving the pane or changing mode takes it down at once, from the search and the globe alike
 
 ## Status meaning
 

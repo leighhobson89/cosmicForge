@@ -404,7 +404,7 @@ import { drawTab1Content } from './drawTab1Content.js';
 import { drawTab2Content } from './drawTab2Content.js';
 import { drawTab3Content } from './drawTab3Content.js';
 import { drawTab4Content } from './drawTab4Content.js';
-import { drawTab5Content } from './drawTab5Content.js';
+import { drawTab5Content, clearStarMapSelectionPing } from './drawTab5Content.js';
 import { drawTab6Content } from './drawTab6Content.js';
 import { drawTab7Content } from './drawTab7Content.js';
 import { drawTab8Content } from './drawTab8Content.js';
@@ -3485,6 +3485,13 @@ export function updateContent(heading, tab, type) {
     } else {
         playClickSfx();
     }
+    // P4: the star map's selection ping is a viewport-positioned mark on
+    // `document.body`, so nothing else takes it down when the map stops being the
+    // pane on screen. Every pane change comes through here, including the one
+    // `focusStarOnStarMap` makes on the way *to* the map — which is why that
+    // function pings only after this has run.
+    clearStarMapSelectionPing();
+
     const optionDescriptionElements = getElements().optionPaneDescriptions;
     let optionDescription;
 
@@ -12121,7 +12128,11 @@ export function handleSortStarClick(sortMethod) {
 
 
 export function sortStarTable(starsObject, sortMethod) {
+    // P4: `name` is the table's own left-hand column, so it is listed first. Every
+    // header is looked up by id here, which is why the Name header in
+    // drawTab5Content carries one even though it is drawn inside the row label.
     const labels = {
+        name: document.getElementById('starLegendName'),
         distance: document.getElementById('starLegendDistance'),
         type: document.getElementById('starLegendType'),
         weather: document.getElementById('starLegendWeatherProb'),
@@ -12157,6 +12168,14 @@ export function sortStarTable(starsObject, sortMethod) {
         .filter(([, star]) => star && typeof star === 'object')
         .sort(([keyA, starA], [keyB, starB]) => {
         switch (sortMethod) {
+            case "name": {
+                // The record's own `name` is the display spelling the table prints;
+                // the object key is its lowercase form. Fall back to the key so a
+                // settled star stubbed in without a `name` still sorts sensibly.
+                const nameA = String(starA?.name ?? keyA ?? '');
+                const nameB = String(starB?.name ?? keyB ?? '');
+                return nameA.localeCompare(nameB);
+            }
             case "distance":
                 return Number(starA?.distance ?? 0) - Number(starB?.distance ?? 0);
             case "type": {

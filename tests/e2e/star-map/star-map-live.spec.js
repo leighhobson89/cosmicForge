@@ -711,6 +711,32 @@ test.describe('Star Map — the search', () => {
     'the ping is temporary').toBe(0);
   });
 
+  test('the ping does not outlive the map it is drawn over', async ({ game }) => {
+    // The mark is a viewport-positioned element on `document.body`, so nothing
+    // about the map going away removes it. It repeats for four seconds, which is
+    // easily long enough to still be flashing over a pane that has no star map on
+    // it at all.
+    const target = await pickStudiedStar(game);
+    const capitalised = await displayName(game, target.name);
+
+    await search(game, capitalised.slice(0, 4));
+    await game.page.evaluate((name) => {
+      Array.from(document.querySelectorAll('.star-map-search-item'))
+        .find((el) => el.textContent.trim() === name)
+        ?.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    }, capitalised);
+    await game.page.waitForTimeout(400);
+    expect(await game.page.evaluate(() =>
+      document.querySelectorAll('.star-map-search-selection-ping').length),
+    'the ping is up').toBeGreaterThan(0);
+
+    await openOptionById(game, 'starDataOption');
+
+    expect(await game.page.evaluate(() =>
+      document.querySelectorAll('.star-map-search-selection-ping').length),
+    'and is gone the moment the player leaves the map').toBe(0);
+  });
+
   test('the results colour a studied star, an O-type and the home star differently', async ({ game }) => {
     await studyOutTo(game, 100);
     await openStarMap(game);

@@ -512,6 +512,7 @@ export function initialiseDescriptions() {
     };
 
     infoTooltipDescriptions = {
+        info_starLegendName: localize('infoTooltipStarLegendName', getLanguage()),
         info_starLegendWeather: localize('infoTooltipStarLegendWeather', getLanguage()),
         info_starMapModes: localize('infoTooltipStarMapModes', getLanguage()),
         info_starShipScanAP: localize('infoTooltipStarShipScanAP', getLanguage()),

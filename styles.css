@@ -3055,6 +3055,52 @@ button.stat-power-toggle {
     justify-content: space-between;
  }
 
+/* P4: the Star Data table's Name column. The header is drawn inside the row
+   label rather than in `.star-table-cells`, so it takes its own width instead
+   of the quarter share the six value columns split. */
+ .star-legend-name {
+    width: auto;
+    margin-right: 0;
+    text-align: left;
+    cursor: pointer;
+ }
+
+/* The globe that targets a star on the map, sitting at the head of its name. It
+   must not shrink: the name next to it is free to be long, and a half-drawn
+   globe reads as a rendering fault rather than as a button.
+
+   `pointer-events` is the load-bearing line. createOptionRow puts the star's
+   own colour class on the whole name column, and for any star the run cannot
+   fuel that class is `red-disabled-text` — which is `pointer-events: none`.
+   Without this the globe is dead on exactly the stars a player is most likely
+   to be planning towards, and dead on every star early in a run. Affordability
+   is the Travel button's business, not this button's: the globe only shows you
+   where the star is. */
+.star-target-button {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    margin-right: 6px;
+    padding: 0;
+    border: none;
+    background: none;
+    line-height: 0;
+    pointer-events: auto;
+    color: var(--ready-text);
+    transition: filter 120ms ease-in-out;
+    /* The ready colour plus its glow is how this game says "this is live, press
+       it", and the globe needs to say that against a row of plain figures — the
+       game hides the real cursor behind a custom pointer, so `cursor` cannot do
+       that job here. The glow is a `drop-shadow` rather than the `text-shadow`
+       `.green-ready-text` uses, because the mark is an SVG stroke, not text. */
+    filter: drop-shadow(0 0 3px var(--ready-text-transparent));
+}
+
+.star-target-button:hover {
+    filter: drop-shadow(0 0 6px var(--ready-text));
+}
+
+
  .sort-by {
     color: var(--ready-text);
  }
