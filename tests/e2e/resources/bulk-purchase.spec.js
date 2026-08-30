@@ -188,6 +188,14 @@ test.describe('Buy Max — what one press buys', () => {
     await game.page.waitForTimeout(500);
     const byMax = await hydrogenState(game);
 
+    // The plan asks for the click saving to be recorded in the test report, so
+    // the count the manual run needed is attached to the result rather than
+    // being visible only when the test fails.
+    test.info().annotations.push({
+      type: 'clicks saved',
+      description: `${byHand.autobuyers} autobuyers: ${clicks} clicks by hand -> 1 press of Max`
+    });
+
     expect(byMax.autobuyers, `one press should buy what ${clicks} clicks bought`).toBe(byHand.autobuyers);
     expect(byMax.hydrogen, 'and should spend exactly the same').toBeCloseTo(byHand.hydrogen, 4);
     expect(byMax.price, 'and should leave the price curve at the same point').toBe(byHand.price);

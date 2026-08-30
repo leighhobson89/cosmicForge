@@ -102,10 +102,17 @@ const IDENTICAL_TO_ENGLISH_CEILING = { es: 50, de: 66, it: 50, fr: 79 };
  * be unreachable at all. A new constructed family means teaching the checker that
  * family, not raising a number.
  */
+// These are counts of the catalogue as it stands, not ceilings: the assertion
+// exists so a resolver that silently stops matching is caught, and it can only do
+// that if the expected number is exact. Adding a member to one of these families
+// - a sixteenth ascendency perk, say - means updating the number here in the same
+// change, which is the point: the count is a deliberate record of the catalogue's
+// shape rather than something to be relaxed.
 const CONSTRUCTED_FAMILY_SIZES = {
   'starShipModule*': 5,
   'fleetShip*': 5,
-  'buffName*': 15,
+  // 16 since the P1 Bulk Purchasing perk joined the ascendency catalogue.
+  'buffName*': 16,
   'eventName*': 13
 };
 

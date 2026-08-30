@@ -2522,6 +2522,15 @@ trip per unit for twenty. `showNotification` collapses repeats and analytics
 batches, both only for the duration of the loop. *a bulk run does not bury the
 screen in one notification per unit* covers the first.
 
+### The click saving, measured
+
+The plan asked for clicks-before against clicks-after to be recorded rather than
+asserted in the abstract, so the equivalence spec attaches the count its manual
+run needed as a Playwright annotation. On the staged row it uses - a million
+hydrogen against a tier 1 autobuyer opening at 50 - the manual run takes **63
+clicks**, each of which has to wait a frame for the purchase to settle before the
+button re-classifies. One press of Max does the same thing.
+
 ### Layout
 
 The plan allowed the buttons to be made smaller if the extra control did not fit.

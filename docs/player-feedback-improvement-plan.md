@@ -55,19 +55,19 @@ The audit moved several items vs. the original review order: **P3** (power toggl
 
 ---
 
-## P1 — Bulk purchase (Buy Max) everywhere
+## ~~P1 — Bulk purchase (Buy Max) everywhere~~ ✅ DONE
 
-**Audit.** `buyMax` / "Buy Max" appears **nowhere** in the codebase. Every purchase is a single-quantity click handler (`createButton` → `onClick` in `drawTab1Content.js`, `drawTab3Content.js`, etc.). autobuyers (both resource and compound), batteries, power buildings, rocket miners, starship building modules, repeatable philosophy technologies, research buildings, and fleet hangar are all one-click-one-unit. Sell All exists (`sellAllUnlockedResources` / `sellAllUnlockedCompounds` in `game.js`, wired via the `sellAllResourcesButton` listener at `ui.js:1805–1808`) but there is no Buy Max for anything — not even autogenerators, which the player specifically flagged.
+~~**Audit.** `buyMax` / "Buy Max" appears **nowhere** in the codebase. Every purchase is a single-quantity click handler (`createButton` → `onClick` in `drawTab1Content.js`, `drawTab3Content.js`, etc.). autobuyers (both resource and compound), batteries, power buildings, rocket miners, starship building modules, repeatable philosophy technologies, research buildings, and fleet hangar are all one-click-one-unit. Sell All exists (`sellAllUnlockedResources` / `sellAllUnlockedCompounds` in `game.js`, wired via the `sellAllResourcesButton` listener at `ui.js:1805–1808`) but there is no Buy Max for anything — not even autogenerators, which the player specifically flagged.~~
 
-**Change.**
-- Add a shared `buyMax` helper in `game.js` that loops the existing single-purchase function until affordability fails (with a hard iteration cap for safety), reusing each item's existing cost-scaling function so no pricing logic is duplicated.
-- Add a "Max" button next to the button that buys each of: autobuyers (both resource and compound), batteries, power buildings, rocket miners, starship building modules, repeatable philosophy technologies, research buildings, fleet hangar (except envoy).
-- Gate behind an AP perk costing 1 AP (player's primary goal is eliminating clicks).
+~~**Change.**~~
+~~- Add a shared `buyMax` helper in `game.js` that loops the existing single-purchase function until affordability fails (with a hard iteration cap for safety), reusing each item's existing cost-scaling function so no pricing logic is duplicated.~~
+~~- Add a "Max" button next to the button that buys each of: autobuyers (both resource and compound), batteries, power buildings, rocket miners, starship building modules, repeatable philosophy technologies, research buildings, fleet hangar (except envoy).~~
+~~- Gate behind an AP perk costing 1 AP (player's primary goal is eliminating clicks).~~
 
-**Effort:** ~8–12 h (helper + wiring across ~6 drawTab files + tests).
-**Risk:** Low. Cost curves are already per-purchase; max-buy is just iteration. Watch for float drift (see P7 — do P7's affordability helper first if drift appears).
+~~**Effort:** ~8–12 h (helper + wiring across ~6 drawTab files + tests).~~
+~~**Risk:** Low. Cost curves are already per-purchase; max-buy is just iteration. Watch for float drift (see P7 — do P7's affordability helper first if drift appears).~~
 
-**Integration test.** `tests/e2e/resources/bulk-purchase.spec.js`: grant cash via debug, click Buy Max once on an autobuyer row, assert quantity jumps to the exact affordable maximum (compare against a JS-computed geometric-series expectation), assert cash remainder < cost of one more unit. Measure clicks-before vs clicks-after in the test report (e.g. "10 autobuyers: 10 clicks → 1 click").
+~~**Integration test.** `tests/e2e/resources/bulk-purchase.spec.js`: grant cash via debug, click Buy Max once on an autobuyer row, assert quantity jumps to the exact affordable maximum (compare against a JS-computed geometric-series expectation), assert cash remainder < cost of one more unit. Measure clicks-before vs clicks-after in the test report (e.g. "10 autobuyers: 10 clicks → 1 click").~~
 
 ---
 

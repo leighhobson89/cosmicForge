@@ -41,6 +41,8 @@ The eight extractable base resources plus solar, driven through the Resources ta
 - [ ] Buy Max: the extra button does not push any row out of its container
 - [ ] Buy Max: Max is greyed out exactly when Buy is, including at a completion cap
 - [ ] Buy Max: a bulk run does not raise one notification per unit bought
+- [ ] Buy Max: a compound autobuyer bulk-buys through its own cost path, including the cash-priced diesel tier 1
+- [ ] Buy Max: a part-built rocket is finished exactly, and a finished one costs nothing to press again
 
 ## Status meaning
 
