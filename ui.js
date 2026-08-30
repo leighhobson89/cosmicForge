@@ -3179,15 +3179,41 @@ function buildFuelConsumptionLines(resourceKey, category, timerRatio) {
     
     startGame();
 
-
     document.addEventListener('keydown', (event) => {
-        const ua = (typeof window !== 'undefined' && window.navigator?.userAgent) ? window.navigator.userAgent.toLowerCase() : '';
-        const isElectron = ua.includes('electron') || (typeof window !== 'undefined' && window.process?.versions?.electron);
-        if ((!isElectron && !getDemoBuild() && getVariableDebuggerAndCheats() && event.code === 'NumpadSubtract') || (getSaveName()?.includes('Test1981') && event.code === 'NumpadSubtract')) {
+        const ua = (typeof window !== 'undefined' && window.navigator?.userAgent)
+            ? window.navigator.userAgent.toLowerCase()
+            : '';
+
+        const isElectron =
+            ua.includes('electron') ||
+            (typeof window !== 'undefined' && window.process?.versions?.electron);
+
+        const isDebugShortcut =
+            event.shiftKey &&
+            event.code === 'KeyD' &&
+            (event.ctrlKey || event.metaKey);
+
+        if (
+            (
+                !isElectron &&
+                !getDemoBuild() &&
+                getVariableDebuggerAndCheats() &&
+                (
+                    event.code === 'NumpadSubtract' ||
+                    isDebugShortcut
+                )
+            ) ||
+            (
+                getSaveName()?.includes('Test1981') &&
+                (
+                    event.code === 'NumpadSubtract' ||
+                    isDebugShortcut
+                )
+            )
+        ) {
             toggleDebugWindow();
         }
     });
-
 
     document.querySelectorAll('.collapsible-header').forEach(header => {
         header.addEventListener('click', function () {
@@ -15856,15 +15882,41 @@ function toggleVariableDebuggerWindow() {
     }
 }
 
-
 document.addEventListener('keydown', (e) => {
-    const ua = (typeof window !== 'undefined' && window.navigator?.userAgent) ? window.navigator.userAgent.toLowerCase() : '';
-    const isElectron = ua.includes('electron') || (typeof window !== 'undefined' && window.process?.versions?.electron);
-    if ((!isElectron && !getDemoBuild() && getVariableDebuggerAndCheats() && e.code === 'NumpadMultiply') || (getSaveName()?.includes('Test1981') && e.code === 'NumpadMultiply')) {
+    const ua = (typeof window !== 'undefined' && window.navigator?.userAgent)
+        ? window.navigator.userAgent.toLowerCase()
+        : '';
+
+    const isElectron =
+        ua.includes('electron') ||
+        (typeof window !== 'undefined' && window.process?.versions?.electron);
+
+    const isVariableDebuggerShortcut =
+        e.shiftKey &&
+        e.code === 'KeyV' &&
+        (e.ctrlKey || e.metaKey);
+
+    if (
+        (
+            !isElectron &&
+            !getDemoBuild() &&
+            getVariableDebuggerAndCheats() &&
+            (
+                e.code === 'NumpadMultiply' ||
+                isVariableDebuggerShortcut
+            )
+        ) ||
+        (
+            getSaveName()?.includes('Test1981') &&
+            (
+                e.code === 'NumpadMultiply' ||
+                isVariableDebuggerShortcut
+            )
+        )
+    ) {
         toggleVariableDebuggerWindow();
     }
 });
-
 
 const variableDebuggerCloseButton = document.querySelector('.variable-debugger-close-btn');
 variableDebuggerCloseButton.addEventListener('click', () => {
