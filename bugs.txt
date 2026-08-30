@@ -2,3 +2,26 @@ bun run build:all will produce 4 builds a demo and a full game for linux and win
 python create_build.py cosmicForge_v1.02 will create a pushable build to my account on itch.io via butler but the manual executable build must be uploaded seperately.
 
 up to line 100 in the improvement plan
+
+--- BUGS TO FIX NEXT ROUND (found 2026-08-30 while verifying P3) ---
+
+1. Stale dataset.toggleState after the grid auto-trips.
+   setPowerOnOff(false) in constantsAndGlobalVars.js (~line 3263) rewrites the
+   plant toggle button's textContent to "Activate" directly, bypassing
+   setPowerToggleLabel() - which is the only writer of dataset.toggleState.
+   So after a trip the button reads "Activate" while its dataset still says
+   'active'. addOrRemoveUsedPerSecForFuelRate() (game.js ~12386) derives the new
+   state from that dataset, so the next click takes the DEACTIVATE branch: the
+   plant stays off, the power-OFF sound plays, and only the grid flag flips on.
+   The player has to click twice. Fix: route that relabel through
+   setPowerToggleLabel(element, false) so the dataset and the label cannot
+   disagree. Needs a regression spec in tests/e2e/energy/.
+
+2. buildingTypeOnOff is saved state and is not normalised on load.
+   It rides in gameState.buildingTypeOnOff, so a save written before the
+   sellBuilding() fix can still come back with a plant type flagged as running
+   while its quantity is 0. It self-heals the next time the grid drops (the
+   frame loop's power-off branch deactivates every plant), so it is not
+   permanent, but a load could normalise it: any type with quantity 0 must come
+   back flagged off. Fix belongs in the restore path in constantsAndGlobalVars.js
+   (~line 2073) or in patches.js.

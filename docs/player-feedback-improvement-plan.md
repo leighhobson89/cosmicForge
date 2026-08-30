@@ -43,15 +43,15 @@ The audit moved several items vs. the original review order: **P3** (power toggl
 
 # Tier 1 — High-value quick wins
 
-## P3 — Powered On/Off becomes a toggle
+## ~~P3 — Powered On/Off becomes a toggle~~ ✅ DONE
 
-**Audit.** The Powered status lives only in the stat-bar tooltip (`ui.js:7426–7430`, `tooltipPowerStatusLabel` → `stat3Text`/`stat3Class`); it is display-only. The stat bar already has click/tooltip plumbing (`setupStatTooltips` at `ui.js:2045`, `attachSharedTooltip` at `ui.js:1196`). There is **no single master-switch button**: power is *auto-managed* — `game.js:2860–2895` force-flips `setPowerOnOff(...)` whenever the energy balance or battery charge demands it, and the "Power All" handler (`game.js:13045–13087`) plus per-building toggles (`drawTab2Content.js:206–226`) drive the same setter. `powerOn`/`powerOff` SFX already exist and are played by those paths.
+~~**Audit.** The Powered status lives only in the stat-bar tooltip (`ui.js:7426–7430`, `tooltipPowerStatusLabel` → `stat3Text`/`stat3Class`); it is display-only. The stat bar already has click/tooltip plumbing (`setupStatTooltips` at `ui.js:2045`, `attachSharedTooltip` at `ui.js:1196`). There is **no single master-switch button**: power is *auto-managed* — `game.js:2860–2895` force-flips `setPowerOnOff(...)` whenever the energy balance or battery charge demands it, and the "Power All" handler (`game.js:13045–13087`) plus per-building toggles (`drawTab2Content.js:206–226`) drive the same setter. `powerOn`/`powerOff` SFX already exist and are played by those paths.~~
 
-**Change.** Make the stat-bar Powered entry a clickable toggle that drives the same `setPowerOnOff` path as buttons within the energy UI, keeping the existing tooltip on hover, and play `powerOn`/`powerOff` SFX.  The button design should utilise the same function createButton() as all other buttons in the drawTabXContent.js etc files.  The buttons label should show the status right now of the power, ie ON OFF TRIPPED.  When clicked it will behave like the Toggle All Button, always switchin ON if tripped or OFF and OFF if ON.  If DYSON sphere is present, this button is disabled (not visually disabled) and always shows the status but cannot be clicked.
+~~**Change.** Make the stat-bar Powered entry a clickable toggle that drives the same `setPowerOnOff` path as buttons within the energy UI, keeping the existing tooltip on hover, and play `powerOn`/`powerOff` SFX.  The button design should utilise the same function createButton() as all other buttons in the drawTabXContent.js etc files.  The buttons label should show the status right now of the power, ie ON OFF TRIPPED.  When clicked it will behave like the Toggle All Button, always switchin ON if tripped or OFF and OFF if ON.  If DYSON sphere is present, this button is disabled (not visually disabled) and always shows the status but cannot be clicked.~~
 
-**Effort:** ~3–5 h.
+~~**Effort:** ~3–5 h.~~
 
-**Integration test.** `tests/e2e/energy/power-toggle.spec.js` (extends the existing `energy/` suite): click the stat-bar Powered control, assert the state flips **and stays flipped across ticks**, the tooltip still renders, and the state survives a tab switch and re-render.
+~~**Integration test.** `tests/e2e/energy/power-toggle.spec.js` (extends the existing `energy/` suite): click the stat-bar Powered control, assert the state flips **and stays flipped across ticks**, the tooltip still renders, and the state survives a tab switch and re-render.~~
 
 ---
 
