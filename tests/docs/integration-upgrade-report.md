@@ -2451,6 +2451,89 @@ escaped that one only because `setResourceDataObject` refuses non-finite writes.
 
 ---
 
+## 🟢 Buy Max — `resources/bulk-purchase.spec.js`, 12 specs, all passing
+
+Plan item **P1**. A Max button now sits beside the Buy button on every repeatable
+purchase, unlocked by a one-AP `bulkPurchasing` ascendency perk.
+
+**What is different about testing it.** The obvious way to test a bulk-buy is to
+re-derive the cost curve in the spec and assert the quantity matches. That proves
+very little: the spec and the game would be agreeing on maths they both took from
+the same data file. So the headline spec is an **equivalence** instead —
+*bulk max equals clicking buy until it greys out*. It stages a row, presses the
+ordinary Buy button in a loop until the frame loop greys it out, records where
+that left the run, re-stages the identical row, presses Max once, and requires the
+two end states to be identical down to the fractional resource balance and the
+next price on the curve. If Buy Max ever over-buys, under-buys or mis-charges, the
+two runs diverge.
+
+### The trap the design had to avoid
+
+**A purchase in this game does not settle when it is made.** `gain()` queues its
+cost into `itemsToDeduct` and its price rise into `itemsToIncreasePrice`, and the
+frame loop settles both on its *next* pass. Both are keyed maps rather than
+accumulators, so calling a purchase handler twice inside one frame overwrites the
+first entry with the second: the player would receive two units, be charged once,
+and see the price rise once.
+
+The naive implementation — a `for` loop around the row's click handler — would
+therefore have handed out an entire batch at the opening price. `buyMaxForRow()`
+settles each purchase inline, in the frame loop's own order, before evaluating
+whether another is affordable. *every unit is charged at its own price* is the
+spec that pins it: it asserts the spend exceeds `units × opening price`, which is
+exactly the comparison that fails if settlement is ever collapsed again.
+
+### Affordability is the game's, not the spec's
+
+`buyMaxForRow()` re-runs the game's own per-frame condition pass over the one row
+after each purchase and stops when the Buy button carries `red-disabled-text`.
+That is deliberately the same verdict the player sees, and it means the loop
+inherits every stopping condition for free rather than reimplementing any of them:
+
+- multi-resource costs, through `setStateOfButtonsBasedOnDescriptionStateForBuildingPurchases`;
+- a rocket's or a starship module's parts cap, and a fleet ship's `maxCanBuild`,
+  through `handleSpaceUpgradeResourceType`;
+- plain affordability, through `checkIfHaveEnoughResourceForUpgradeAndSetState`.
+
+*a completed rocket offers no further purchases through Max* is the spec for the
+cap, and it asserts against the game's own gate rather than a number the spec
+carries.
+
+### Why the Max button carries no dataset of its own
+
+It would have been natural to clone the purchase button's `data-condition-check`
+attributes onto the Max button so the frame loop classified it directly. That
+breaks two things. The diesel tier 1 row stamps a `cashOverride` onto
+`button[data-auto-buyer-tier="tier1"]` *after* `createOptionRow` returns, and
+`querySelector` would have handed that fix-up to whichever button came first;
+and four call sites reach for `.input-container button` expecting to find the
+purchase button. So the Max button carries no such dataset at all, and
+`syncBulkPurchaseButtons()` mirrors the purchase button's state onto it once per
+frame instead. *Max is greyed out exactly when Buy is* is the spec for that, and
+it is a stronger guarantee than a clone would have been: Max is enabled under
+exactly the same conditions as Buy, whatever those turn out to be for a row.
+
+### Two things a bulk run must not do to the rest of the game
+
+Replaying a purchase handler replays whatever it announces. The repeatable
+philosophy technologies raise a notification and force an immediate analytics
+flush per purchase — fine for one click, a minute of toasts and a network round
+trip per unit for twenty. `showNotification` collapses repeats and analytics
+batches, both only for the duration of the loop. *a bulk run does not bury the
+screen in one notification per unit* covers the first.
+
+### Layout
+
+The plan allowed the buttons to be made smaller if the extra control did not fit.
+It turned out not to be needed: the Max button is sized to its own one-word label
+rather than taking the 120px minimum the purchase buttons carry, and *the extra
+button does not push any row out of its container* measures every affected row
+across seven panes and finds no overflow — including the power plant row, which
+now holds Sell 1, Buy, Max and Activate side by side. No shared button styling was
+changed, so nothing else in the app moved.
+
+---
+
 ## The general rule this establishes
 
 Drive the game's own buttons, panes and debug menu. Reserve direct `withMods`

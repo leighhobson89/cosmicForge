@@ -529,6 +529,58 @@ test.describe('Energy — toggling and tripping the grid', () => {
       .not.toContain('green-ready-text');
   });
 
+  test('Buy Max builds every power plant the run can afford, and the grid gets the output', async ({ game }) => {
+    // P1 (player-feedback plan). The point of the feature is fewer clicks for the
+    // same outcome, so this measures the outcome: the plant's own generation
+    // rate, which is quantity x rate, has to move by the number of plants the
+    // press actually bought.
+    await game.openDebugMenu();
+    await game.debugClick('unlockAllTabsButton');
+    await game.withMods((m) => m.rdo.setAscendencyBuffDataObject(1, 'bulkPurchasing', ['boughtYet']));
+
+    await openPlantPane(game, 'powerPlant1');
+    await game.page.waitForTimeout(600);
+
+    const before = await game.withMods((m) => ({
+      quantity: m.rdo.getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'quantity']),
+      price: m.rdo.getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'price']),
+      cash: m.rdo.getResourceDataObject('currency', ['cash']),
+      rate: m.rdo.getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'rate'])
+    }));
+
+    const pressed = await game.page.evaluate(() => {
+      const button = document.querySelector('#energyPowerPlant1Row .buy-max-button');
+      if (!button) return false;
+      button.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      return true;
+    });
+    expect(pressed, 'the power plant row should carry a Max button once the perk is owned').toBe(true);
+    await game.page.waitForTimeout(900);
+
+    const after = await game.withMods((m) => ({
+      quantity: m.rdo.getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'quantity']),
+      price: m.rdo.getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'price']),
+      cash: m.rdo.getResourceDataObject('currency', ['cash']),
+      purchasedRate: m.rdo.getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant1', 'purchasedRate'])
+    }));
+
+    const built = after.quantity - before.quantity;
+    expect(built, 'one press should build more than a single plant').toBeGreaterThan(1);
+
+    // Each plant must have been paid for at its own price. If the purchases had
+    // been collapsed into one settlement, the whole batch would have cost the
+    // opening price once and the price would have risen once.
+    expect(before.cash - after.cash,
+      `${built} plants all at the opening price of ${before.price} would cost ${built * before.price}`)
+      .toBeGreaterThan(built * before.price);
+    expect(after.price, 'the price should have climbed once per plant').toBeGreaterThan(before.price);
+
+    // And the effect the player is buying: generation, not a counter.
+    expect(after.purchasedRate,
+      `${after.quantity} plants at ${before.rate} each should generate that much`)
+      .toBeCloseTo(after.quantity * before.rate, 5);
+  });
+
   test('driving the energy panes raises no console or page errors', async ({ game }) => {
     await game.openTab(2);
     for (const plant of ['energyOption', ...PLANTS.map((p) => `${p}Option`)]) {

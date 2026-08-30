@@ -278,6 +278,19 @@ export function startNewAnalyticsSession() {
     });
 }
 
+// P1 (player-feedback plan): set for the duration of a Buy Max only.
+//
+// Some purchase handlers ask for an immediate flush - the repeatable philosophy
+// technologies do. That is right for one click, but Buy Max replays the handler
+// once per unit, which would turn a single press into one network round trip per
+// unit bought. While this is set the events are still recorded, they just batch
+// like any other event instead of forcing a flush apiece.
+let batchOnlyMode = false;
+
+export function setAnalyticsBatchOnly(value) {
+    batchOnlyMode = !!value;
+}
+
 export function trackAnalyticsEvent(eventName, payload = {}, options = {}) {
     if (!analyticsTrackingEnabled) return;
     if (!enabled) return;
@@ -290,7 +303,7 @@ export function trackAnalyticsEvent(eventName, payload = {}, options = {}) {
     const row = buildEventRow(eventName, payload, options);
     enqueueRow(row);
 
-    if (options.immediate || inMemoryQueue.length >= batchSize) {
+    if ((options.immediate && !batchOnlyMode) || inMemoryQueue.length >= batchSize) {
         flushInternal(options.flushReason ?? 'immediate');
     }
 }

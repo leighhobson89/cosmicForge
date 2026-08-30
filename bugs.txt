@@ -25,3 +25,43 @@ up to line 100 in the improvement plan
    permanent, but a load could normalise it: any type with quantity 0 must come
    back flagged off. Fix belongs in the restore path in constantsAndGlobalVars.js
    (~line 2073) or in patches.js.
+
+--- E2E SUITE FAILURES TO FIX NEXT ROUND (full suite 2026-08-30: 1228 passed, 4 failed) ---
+None of these is a live game bug, and none is in an area changed by the P3 work.
+Confirmed by a second run of just these four areas: 3 and 4 passed on the rerun and
+are flakes; 1 and 2 fail every time.
+
+1. demo-build - "the debug hotkeys are unreachable for a non-Test1981 pioneer once
+   demoBuild is true" (tests/e2e/demo-build/demo-build.spec.js:167). Fails on its
+   CONTROL step, not on the thing it is named for. The control presses the hotkey
+   with demoBuild false and asserts the debug window opens, which only holds while
+   window.__VARIABLE_DEBUGGER_AND_CHEATS__ is true. That flag now ships as false
+   (commit 6e2f47f), so the control can never pass. Fix: have the test call
+   setVariableDebuggerAndCheats(true) for the control step, leaving demoBuild as the
+   only variable. The test must not inherit whatever the shipped build flag says.
+
+2. megastructures - "studying out to five light years turns up the first manuscript"
+   (tests/e2e/megastructures/megastructures-live.spec.js:390). An inverted operator
+   in the test. getAncientManuscriptGenerationProbability() in game.js gives a 20%
+   chance per study BELOW 5 light years and 100% AT 5, so the first manuscript
+   legitimately arrives early - it turned up at 2 ly. The test asserts
+   toBeGreaterThanOrEqual(5) while its own message reads "and it arrives no later
+   than that threshold". Fix: toBeLessThanOrEqual(GUARANTEED_AT[0]), which is the
+   stricter and correct claim. It only ever passed when the 20% roll missed four
+   times running.
+
+3. news-ticker - "a forced prize can be collected off the ticker" (FLAKE, passed on
+   rerun). Forcing the prize category still picks a RANDOM prize entry, and
+   specialMessageBuilder() in ui.js returns false when that entry's store is full or
+   its resource row is hidden, which sends the ticker into retryWithRandomCategory()
+   and produces an unrelated headline. The test empties resources with Sell All but
+   the debug scenario also fills every COMPOUND to its cap. Fix: clear compounds too,
+   and retry the forced-prize cycle a few times before failing.
+
+4. performance - "heap growth decelerates across repeated tab cycles" (FLAKE, passed
+   on rerun). It compares two single readings - the midpoint and the last - so one
+   GC trough followed by one peak decides it. The failing series (10.20, 10.34,
+   10.79, 10.05, 9.97, 10.73, 10.71) shows no accrual at all; it is noise around
+   10.4MB. Fix: compare the mean of the first half against the mean of the second,
+   which keeps the "a leak adds the same amount every cycle" claim but stops a single
+   sample deciding the result.

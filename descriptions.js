@@ -1870,6 +1870,11 @@ export function initialiseDescriptions() {
             content1: localize("buffAutoSpaceTelescopeContent1", getLanguage()),
             content2: "",
             updateAt: ""
+        },
+        buffBulkPurchasingRow: {
+            content1: localize("buffBulkPurchasingContent1", getLanguage()),
+            content2: "",
+            updateAt: ""
         }
     };
 

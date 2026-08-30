@@ -33,6 +33,14 @@ The eight extractable base resources plus solar, driven through the Resources ta
 - [ ] Each tier extracts faster and costs more than the one below it
 - [ ] Every resource name resolves to real copy in all six languages
 - [ ] Driving every resource pane raises no console or page errors
+- [ ] Buy Max: rows carry no Max button until the one-AP Bulk Purchasing perk is bought
+- [ ] Buy Max: one press lands on exactly the state that clicking Buy until it greys out lands on
+- [ ] Buy Max: every unit is charged at its own price, so the batch cannot be had at the opening price
+- [ ] Buy Max: the run stops at the last affordable unit and never overdraws
+- [ ] Buy Max: a Max button appears on every purchase the plan names and on none of the one-off ones
+- [ ] Buy Max: the extra button does not push any row out of its container
+- [ ] Buy Max: Max is greyed out exactly when Buy is, including at a completion cap
+- [ ] Buy Max: a bulk run does not raise one notification per unit bought
 
 ## Status meaning
 

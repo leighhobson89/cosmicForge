@@ -270,6 +270,7 @@ import {
     getRanOutOfFuelWhenOn,
     setBuildingTypeOnOff,
     getBuildingTypeOnOff,
+    setBulkPurchaseInProgress,
     setActivatedFuelBurnObject,
     getActivatedFuelBurnObject,
     setConstituentPartsObject,
@@ -466,6 +467,7 @@ import {
     getBuffRocketFuelOptimizationData,
     getBuffEnhancedMiningData,
     getBuffQuantumEnginesData,
+    getBuffBulkPurchasingData,
     getBlackHoleResearchPrice,
     getBlackHoleResearchDone,
     getBlackHolePowerPrice,
@@ -795,7 +797,7 @@ import {
 
 import { getTimedEffectStateSnapshot, isTimedEffectActive, initialiseRandomEventTimers } from './events.js';
 
-import { trackAnalyticsEvent } from './analytics.js';
+import { trackAnalyticsEvent, setAnalyticsBatchOnly } from './analytics.js';
 
 import {
     modalCompoundMachiningTabUnlockHeader,
@@ -2301,6 +2303,7 @@ export async function gameLoop() {
 
         const elementsToCheck = getCachedElementsToCheck();
         elementsToCheck.forEach(checkStatusAndSetTextClasses);
+        syncBulkPurchaseButtons();
         
         handleAutoCreateResourceSellRows();
 
@@ -5434,6 +5437,136 @@ function checkAndDeductResources() {
     }
 
     setItemsToDeduct('clear');
+}
+
+// ============================================================================
+// P1 (player-feedback plan): Buy Max.
+// ============================================================================
+//
+// The helper below deliberately owns no pricing and no affordability logic of
+// its own. It drives the row's existing single-purchase handler and then asks
+// the game's own per-frame condition pass whether the row is still affordable,
+// which is the same thing that greys the Buy button out for the player. Every
+// cost curve, every secondary-resource cost and every completion cap is then
+// honoured for free, because those are exactly the conditions that already put
+// `red-disabled-text` on that button: handleSpaceUpgradeResourceType() adds it
+// once a rocket's parts are all built or a fleet ship hits maxCanBuild, and
+// setStateOfButtonsBasedOnDescriptionStateForBuildingPurchases() adds it when
+// any one of a building's three secondary resources is short.
+
+/** Never loop forever, whatever a future cost curve does. */
+const BULK_PURCHASE_ITERATION_CAP = 5000;
+
+/**
+ * Re-run, for one row only, the condition pass the frame loop runs over the
+ * whole screen.
+ *
+ * This is what makes the loop below safe: after each purchase the row's Buy
+ * button carries an up-to-date affordability state rather than last frame's.
+ * The order matters and is the DOM's - the buttons sit in .input-container and
+ * the price label in .description-container after them, and it is the label's
+ * pass that decides a building row's button state.
+ */
+function refreshRowPurchaseState(rowElement) {
+    rowElement
+        .querySelectorAll('.resource-cost-sell-check, .compound-cost-sell-check')
+        .forEach(checkStatusAndSetTextClasses);
+}
+
+/**
+ * Settle the purchase the handler just queued.
+ *
+ * A purchase does not pay for itself when it is made: gain() writes into
+ * itemsToDeduct and itemsToIncreasePrice, and the frame loop settles both on its
+ * next pass. Those are keyed maps rather than accumulators, so a second purchase
+ * in the same frame would overwrite the first - the player would get the second
+ * unit free and at the old price. Settling here, in the frame loop's own order,
+ * keeps every iteration of the loop equivalent to one ordinary click.
+ */
+function settleQueuedPurchase() {
+    checkAndDeductResources();
+    checkAndIncreasePrices();
+}
+
+/**
+ * Buy as many of a row's item as the player can currently afford.
+ *
+ * Returns the number bought, which is 0 when the first affordability check
+ * already says no.
+ */
+export function buyMaxForRow(rowElement, purchaseButton, purchaseOnce) {
+    if (!rowElement || !purchaseButton || typeof purchaseOnce !== 'function') {
+        return 0;
+    }
+
+    let purchased = 0;
+
+    // Replaying a purchase handler also replays whatever it announces. One
+    // notification and one immediate analytics flush per click is right; twenty
+    // of each from a single press is not, so both are collapsed for the duration
+    // of the loop and restored however it ends.
+    setBulkPurchaseInProgress(true);
+    setAnalyticsBatchOnly(true);
+
+    try {
+        while (purchased < BULK_PURCHASE_ITERATION_CAP) {
+            refreshRowPurchaseState(rowElement);
+
+            if (purchaseButton.classList.contains('red-disabled-text')) {
+                break;
+            }
+
+            purchaseOnce();
+            settleQueuedPurchase();
+            purchased++;
+        }
+    } finally {
+        setBulkPurchaseInProgress(false);
+        setAnalyticsBatchOnly(false);
+    }
+
+    if (purchased > 0) {
+        // One row-level event for the whole press, in place of the per-unit
+        // events the loop just batched.
+        trackAnalyticsEvent('bulk_purchase', {
+            row_id: rowElement.id || '',
+            units: purchased
+        });
+        refreshRowPurchaseState(rowElement);
+    }
+
+    return purchased;
+}
+
+/** Has the player bought the ascendency perk that puts Max buttons on rows? */
+export function isBulkPurchasingUnlocked() {
+    return (getBuffBulkPurchasingData()?.boughtYet ?? 0) > 0;
+}
+
+/**
+ * Keep every Max button in step with the Buy button beside it.
+ *
+ * The Max button carries no condition-check dataset of its own, on purpose:
+ * several rows are fixed up after createOptionRow returns - the diesel tier 1
+ * row stamps a cashOverride onto `button[data-auto-buyer-tier="tier1"]` - and
+ * four other call sites reach for `.input-container button` expecting to find
+ * the purchase button. A second button carrying the same dataset would either
+ * steal those or miss them. Mirroring instead means Max is enabled under exactly
+ * the same conditions as Buy, whatever those turn out to be for a given row.
+ *
+ * The pairing is positional because createOptionRow splices the Max button in
+ * directly after the purchase button, so previousElementSibling is it.
+ */
+function syncBulkPurchaseButtons() {
+    document.querySelectorAll('button.buy-max-button').forEach((maxButton) => {
+        const purchaseButton = maxButton.previousElementSibling;
+        if (!purchaseButton || purchaseButton.tagName !== 'BUTTON') {
+            return;
+        }
+
+        maxButton.classList.toggle('red-disabled-text', purchaseButton.classList.contains('red-disabled-text'));
+        maxButton.classList.toggle('invisible', purchaseButton.classList.contains('invisible'));
+    });
 }
 
 function getAllQuantities() {

@@ -114,6 +114,7 @@ import {
     getSaveData,
     getTimerRateRatio,
     getBuildingTypeOnOff,
+    getBulkPurchaseInProgress,
     getNewsTickerSetting,
     getPowerOnOff,
     getRocketsFuellerStartedArray,
@@ -354,6 +355,8 @@ import {
     startNewsTickerTimer,
     getBatteryLevel,
     toggleAllPower,
+    buyMaxForRow,
+    isBulkPurchasingUnlocked,
     boostAntimatterRate,
     discoverAsteroid,
     buildSpaceMiningBuilding,
@@ -3577,6 +3580,103 @@ export function updateContent(heading, tab, type) {
     }
 }
 
+// ============================================================================
+// P1 (player-feedback plan): which rows get a Max button, and where it goes.
+// ============================================================================
+
+/**
+ * The plan's list, spelled out as a rule per row category so it can be read back
+ * against the plan: resource and compound autobuyers, batteries and power
+ * buildings, research buildings, rocket miners, starship modules, fleet hangar
+ * ships, and the repeatable philosophy technologies.
+ *
+ * Two exclusions are deliberate. The fleet envoy is capped at one, so a Max
+ * button would be meaningless. So is each philosophy's single special ability,
+ * which is why the philosophy branch asks the data object whether the technology
+ * is repeatable rather than trusting the row's condition check alone.
+ *
+ * Everything absent from this list is absent on purpose: one-off purchases such
+ * as the Launch Pad and the Space Telescope, tech unlocks, storage upgrades, and
+ * the sell and fuse controls.
+ */
+function rowAcceptsBulkPurchase({ dataConditionCheck, objectSectionArgument1, objectSectionArgument2, rowCategory }) {
+    const upgradeTarget = String(objectSectionArgument2 || '');
+
+    if (dataConditionCheck === 'techUnlockPhilosophy') {
+        return !!getResourceDataObject(
+            'philosophyRepeatableTechs',
+            [getPlayerPhilosophy(), objectSectionArgument1, 'repeatable'],
+            true
+        );
+    }
+
+    if (dataConditionCheck !== 'upgradeCheck') {
+        return false;
+    }
+
+    switch (rowCategory) {
+        case 'resource':
+        case 'compound':
+            return objectSectionArgument1 === 'autoBuyer';
+        case 'building':
+            return objectSectionArgument1 === 'energy' && /^(battery|powerPlant)[123]$/.test(upgradeTarget);
+        case 'science':
+            return ['scienceKit', 'scienceClub', 'scienceLab'].includes(upgradeTarget);
+        case 'spaceMiningPurchase':
+            return /^rocket[1-4]$/.test(upgradeTarget);
+        case 'starShipPurchase':
+            return upgradeTarget.startsWith('ss');
+        case 'fleetPurchase':
+            return upgradeTarget.startsWith('fleet') && upgradeTarget !== 'fleetEnvoy';
+        default:
+            return false;
+    }
+}
+
+/**
+ * Return the row's input elements with a Max button spliced in after its
+ * purchase button, or unchanged when the row does not qualify.
+ *
+ * The purchase button is the row's first button that is neither a sell control
+ * nor a toggle: a power plant row leads with Sell 1, so taking the first button
+ * outright would attach Max to the wrong control.
+ */
+function withBulkPurchaseButton(elements, rowOptions) {
+    if (!isBulkPurchasingUnlocked() || !rowAcceptsBulkPurchase(rowOptions)) {
+        return elements;
+    }
+
+    const purchaseButton = elements.find((element) =>
+        element
+        && element.tagName === 'BUTTON'
+        && !element.classList.contains('sell-building-button')
+        && !element.classList.contains('toggle-timer')
+        && element.dataset?.conditionCheck !== 'toggle'
+    );
+
+    if (!purchaseButton || typeof purchaseButton.bulkPurchaseHandler !== 'function') {
+        return elements;
+    }
+
+    // No condition-check dataset and no cost-check class of its own - see
+    // syncBulkPurchaseButtons() in game.js for why the state is mirrored from
+    // the purchase button instead. It starts disabled so it cannot be clicked in
+    // the frame before the first sync runs.
+    const maxButton = createButton({
+        text: localize('buttonBuyMax', getLanguage()),
+        classNames: ['option-button', 'buy-max-button', 'red-disabled-text'],
+        onClick: () => {
+            buyMaxForRow(rowOptions.wrapper, purchaseButton, purchaseButton.bulkPurchaseHandler);
+        },
+        disableKeyboardForButton: true
+    });
+
+    const withMax = [...elements];
+    withMax.splice(withMax.indexOf(purchaseButton) + 1, 0, maxButton);
+    return withMax;
+}
+
+
 export function createOptionRow(options = {}) {
     const opts = options || {};
 
@@ -3747,7 +3847,16 @@ export function createOptionRow(options = {}) {
         inputContainer.style.width = noDescriptionContainer[2];
     }
 
-    inputElements.slice(0, 5).forEach((el) => {
+    // P1: a qualifying row gains a Max button beside its purchase button. The
+    // original five-element cap is applied first, so no row that was already at
+    // the limit loses one of its own elements to the injection.
+    withBulkPurchaseButton(inputElements.slice(0, 5), {
+        dataConditionCheck,
+        objectSectionArgument1,
+        objectSectionArgument2,
+        rowCategory,
+        wrapper
+    }).forEach((el) => {
         if (el) inputContainer.appendChild(el);
     });
 
@@ -4154,6 +4263,11 @@ export function createButton(options = {}) {
     if (getDemoBuild() && objectSectionArgument1 === 'autoBuyer' && (autoBuyerTier === 'tier3' || autoBuyerTier === 'tier4')) {
         button.classList.add('electron-purple-demo-button');
     }
+
+    // P1 (player-feedback plan): Buy Max drives a row's purchase handler directly
+    // rather than re-dispatching a click at the button, which would replay the
+    // click sound and the press animation below once per unit bought.
+    button.bulkPurchaseHandler = typeof onClick === 'function' ? onClick : null;
 
     button.addEventListener('click', function(event) {
         if (objectSectionArgument1 && objectSectionArgument1 === 'storage') {
@@ -5199,6 +5313,15 @@ export function showNotification(message, type = 'info', time = 3000, classifica
         createNotificationContainer(classification);
     }
 
+
+    // P1: while a Buy Max is running the same purchase handler fires once per
+    // unit, and each one would enqueue an identical toast - twenty purchases
+    // would hold the screen for a minute. Collapse repeats to the first. The
+    // flag is only ever set for the duration of the loop, so ordinary play is
+    // untouched.
+    if (getBulkPurchaseInProgress() && queues[classification].some((queued) => queued.message === message)) {
+        return;
+    }
 
     queues[classification].push({ message, type, time, actionLabel: null, actionCallback: null });
     setNotificationQueues(queues);

@@ -2364,6 +2364,21 @@ body {
     min-width: 120px;
 }
 
+/* P1 (player-feedback plan): the Max button sits beside a row's Buy button, in
+   an .input-container that is only half the row wide and often already holds a
+   quantity label and a toggle. It is sized to its own label rather than taking
+   the 120px minimum above, because it is a one-word control and the row has no
+   width to spare. The disabled look is the game's usual one: it takes
+   red-disabled-text from the Buy button beside it (syncBulkPurchaseButtons in
+   game.js), and that class carries pointer-events: none, which is how every
+   other purchase control in the game is gated. */
+.option-button.buy-max-button {
+    min-width: 0;
+    padding: 6px 10px;
+    margin-left: 6px;
+    flex-shrink: 0;
+}
+
 .option-button:hover {
     background-color: var(--tab-selected-bg-hover-color);
     color: var(--text-color);

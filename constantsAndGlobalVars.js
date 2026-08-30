@@ -2634,6 +2634,24 @@ export function getItemsToIncreasePrice() {
     return itemsToIncreasePrice;
 }
 
+// P1 (player-feedback plan): set for the duration of a Buy Max only.
+//
+// Buy Max drives a row's ordinary purchase handler once per unit, and some of
+// those handlers announce themselves - the repeatable philosophy technologies
+// each raise a notification. One per click is right; twenty in a row would hold
+// the screen for a minute, so showNotification() collapses repeats while this is
+// set. Nothing else reads it, and it is always cleared in a finally block, so
+// ordinary play never sees it true.
+let bulkPurchaseInProgress = false;
+
+export function getBulkPurchaseInProgress() {
+    return bulkPurchaseInProgress;
+}
+
+export function setBulkPurchaseInProgress(value) {
+    bulkPurchaseInProgress = !!value;
+}
+
 export function setSaleResourcePreview(resource, amount, fusionTo1, fusionTo2) {
     const resourceQuantity = getResourceDataObject('resources', [resource, 'quantity']);
 

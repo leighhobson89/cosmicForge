@@ -1336,6 +1336,20 @@ export let ascendencyBuffs = {
         effectCategoryMagnitude: 1,
         boughtYet: 0,
         timesRebuyable: 1
+    },
+    // P1 (player-feedback plan): unlocks the Max button beside every repeatable
+    // purchase. Priced at a single AP deliberately - the player's stated goal is
+    // eliminating clicks, so the perk that does that should not compete with the
+    // ones that change the numbers.
+    "bulkPurchasing": {
+        name: "Bulk Purchasing",
+        description: "buffBulkPurchasingRow",
+        rebuyable: false,
+        rebuyableIncreaseMultiple: 1,
+        baseCostAp: 1,
+        effectCategoryMagnitude: 1,
+        boughtYet: 0,
+        timesRebuyable: 1
     }
 };
 
@@ -3139,6 +3153,10 @@ export function getBuffEnhancedMiningData() {
 
 export function getBuffQuantumEnginesData() {
     return ascendencyBuffs["quantumEngines"];
+}
+
+export function getBuffBulkPurchasingData() {
+    return ascendencyBuffs["bulkPurchasing"];
 }
 
 export function copyStarDataToDestinationStarField(starName) {
