@@ -1,3 +1,4 @@
+import { readStoredValue, writeStoredValue } from './utilityFunctions.js';
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
 const DEFAULT_SUPABASE_URL = 'https://bliqglhwteenckkykkzy.supabase.co';
@@ -62,36 +63,38 @@ function createId() {
 }
 
 function getOrCreateId(storageKey) {
-    const existing = localStorage.getItem(storageKey);
+    const existing = readStoredValue(storageKey);
     if (existing) return existing;
 
     const id = createId();
 
-    localStorage.setItem(storageKey, id);
+    // Without storage the id is per-session rather than per-install. That is the
+    // correct degradation: the events still carry a consistent id for this run.
+    writeStoredValue(storageKey, id);
     return id;
 }
 
 function loadEnabledFromStorage(defaultEnabled) {
-    const raw = localStorage.getItem(STORAGE_KEYS.enabled);
+    const raw = readStoredValue(STORAGE_KEYS.enabled);
     if (raw === null || raw === undefined) {
-        localStorage.setItem(STORAGE_KEYS.enabled, defaultEnabled ? '1' : '0');
+        writeStoredValue(STORAGE_KEYS.enabled, defaultEnabled ? '1' : '0');
         return !!defaultEnabled;
     }
     return raw === '1';
 }
 
 function persistEnabledToStorage(value) {
-    localStorage.setItem(STORAGE_KEYS.enabled, value ? '1' : '0');
+    writeStoredValue(STORAGE_KEYS.enabled, value ? '1' : '0');
 }
 
 function loadQueueFromStorage() {
-    const parsed = safeJsonParse(localStorage.getItem(STORAGE_KEYS.queue), []);
+    const parsed = safeJsonParse(readStoredValue(STORAGE_KEYS.queue), []);
     if (!Array.isArray(parsed)) return [];
     return parsed;
 }
 
 function persistQueueToStorage(queue) {
-    localStorage.setItem(STORAGE_KEYS.queue, safeJsonStringify(queue, '[]'));
+    writeStoredValue(STORAGE_KEYS.queue, safeJsonStringify(queue, '[]'));
 }
 
 function hydrateQueue() {
@@ -105,7 +108,7 @@ function hydrateQueue() {
 
 function setSessionId(newSessionId) {
     sessionId = newSessionId;
-    localStorage.setItem(STORAGE_KEYS.sessionId, newSessionId);
+    writeStoredValue(STORAGE_KEYS.sessionId, newSessionId);
 }
 
 function buildEventRow(eventName, payload, options) {

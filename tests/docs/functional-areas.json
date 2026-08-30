@@ -64,9 +64,12 @@
         "buildFlags are honoured: demo vs full, cosmic rip on/off, debugger gated correctly",
         "gameLoop starts and continues running across at least several seconds of frames",
         "Module-level top-level await in ui.js completes before first paint",
-        "No raw localization keys visible anywhere on the first screen"
+        "No raw localization keys visible anywhere on the first screen",
+        "With localStorage disabled wholesale the game still boots to a playable state",
+        "Analytics degrades to a no-op instead of taking boot down with it",
+        "A save is still exportable from a session that cannot persist one"
       ],
-      "specCount": 11
+      "specCount": 14
     },
     {
       "id": "save-load-local",
@@ -363,7 +366,7 @@
         "energyMid.test.js"
       ],
       "summary": "Power plants, fuel consumption, storage, grid capacity and the consequences of a deficit.",
-      "specCount": 33,
+      "specCount": 37,
       "tests": [
         "Each power plant type generates its rated output",
         "Fuel is consumed at the documented rate and generation stops when fuel runs out",
@@ -374,7 +377,11 @@
         "Solar output responds to star type",
         "The stat-bar Powered entry is a toggle that drives the grid, and is inert with a Dyson Sphere or no plants built",
         "Selling the last plant of a type switches that type off in the state, the fuel books and the stat-bar tooltip",
-        "Buy Max builds every power plant the run can afford, charging each at its own price, and the generation follows"
+        "Buy Max builds every power plant the run can afford, charging each at its own price, and the generation follows",
+        "After the grid auto-trips, ONE click on the plant toggle restarts it - the label and its dataset flag can no longer disagree",
+        "The toggle flag tracks the plant it belongs to at every step of a trip-and-restart cycle",
+        "A save carrying a plant type flagged on at quantity zero is normalised to off on load",
+        "A plant type the player does own is left switched on by that normalisation"
       ]
     },
     {

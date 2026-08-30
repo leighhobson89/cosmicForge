@@ -3,6 +3,8 @@ python create_build.py cosmicForge_v1.02 will create a pushable build to my acco
 
 up to line 100 in the improvement plan
 
+--- ALL BUGS BELOW WERE FIXED ON 2026-08-30 (see the RESOLUTIONS block at the end) ---
+
 --- BUGS TO FIX NEXT ROUND (found 2026-08-30 while verifying P3) ---
 
 1. Stale dataset.toggleState after the grid auto-trips.
@@ -87,3 +89,77 @@ flakes did, and both passed on a focused rerun straight afterwards.
    rather than fixing; if it recurs, the boot helper in
    tests/e2e/_harness/game-fixture.mjs should retry the navigation once before
    failing, since a lost first load is indistinguishable from a broken app today.
+
+
+=====================================================================
+RESOLUTIONS - 2026-08-30
+=====================================================================
+
+GAME BUGS
+
+1. Stale dataset.toggleState after the grid auto-trips.  FIXED.
+   setPowerToggleLabel() in game.js is now exported and is the single writer of
+   both the label and the dataset flag. setPowerOnOff() in
+   constantsAndGlobalVars.js routes its relabel through it instead of writing
+   textContent directly, so the two can no longer disagree. The now-unreachable
+   duplicate localization key 'activateButton' was deleted ('buttonActivate'
+   carries the same text and is what setPowerToggleLabel uses);
+   validateLocalization.cjs is clean.
+   Regression spec: tests/e2e/energy/power-trip-regressions.spec.js - drives the
+   real toggle button and asserts ONE click restarts a plant after a trip, plus
+   an invariant that the flag and the plant agree at every step of a
+   trip-and-restart cycle. Verified to fail against the pre-fix source.
+
+2. buildingTypeOnOff is saved state and is not normalised on load.  FIXED.
+   normaliseBuildingTypeOnOff() in constantsAndGlobalVars.js, applied where the
+   restore path assigns the field. Any plant type with quantity 0 comes back
+   flagged off; keys absent from the save keep the module default rather than
+   being invented. Safe to read quantities at that point because
+   restoreResourceDataObject() runs at the top of the same function.
+   Regression spec: same file - one test stages the contradiction and asserts it
+   is normalised, and a complementary test asserts a plant the player DOES own
+   is left running, so the normalisation cannot quietly kill a live grid.
+
+3. known-issues.md #4 - analytics.js unguarded localStorage.  FIXED.
+   readStoredValue()/writeStoredValue() in utilityFunctions.js are now the only
+   unguarded storage touches in the shipped game. Guarding analytics alone would
+   NOT have fixed the symptom: ui.js (pioneer name, read and written),
+   constantsAndGlobalVars.js and saveLoadGame.js all touched storage unguarded
+   during boot and would have thrown next.
+   Regression spec: tests/e2e/app-boot/storage-unavailable.spec.js. All three of
+   its tests fail against the pre-fix source.
+
+E2E SUITE FAILURES
+
+1. demo-build - FIXED. The control step now calls
+   setVariableDebuggerAndCheats(true) explicitly and restores whatever value it
+   found at the end, leaving demoBuild as the only variable. buildFlags.js is set
+   by hand and is not the suite's to manage, so nothing on disk was touched.
+   19/19 passing.
+
+2. megastructures - FIXED. toBeGreaterThanOrEqual -> toBeLessThanOrEqual, which
+   is the stricter and correct claim and matches the assertion's own message.
+   51/51 passing.
+
+3. news-ticker - FIXED. The test now clears compounds as well as resources
+   (tab 2's Sell All alongside tab 1's), because the prize pool draws from
+   compounds and a full store sends specialMessageBuilder() into
+   retryWithRandomCategory(). The forced-prize cycle is also retried up to six
+   times, since forcing the category still picks a random entry within it.
+   26/26 passing.
+
+4 & 5. performance - ONE LOW-RISK ROUND ONLY, at Leigh's instruction; this area
+   was explicitly not worth more time. Both tests now compare means over several
+   samples rather than two single readings (sampleSeries() + mean() helpers), and
+   the idle node ceiling is expressed relative to the baseline rather than as a
+   flat 1000. Both target tests pass. NOTE: the area remains flaky in character -
+   the first verification run after the fix failed a THIRD test ("the frame loop
+   holds a 60Hz budget on a late-game run") which then passed on a rerun, exactly
+   the "different failure each time" pattern described above. No further work
+   done, per instruction.
+
+6. onboarding - FIXED. tests/e2e/_harness/game-fixture.mjs retries the FIRST
+   navigation once (30s, then 60s) before failing, so a dropped first load is
+   distinguishable from a broken app. The retry is confined to the pioneer
+   prompt; nothing later in boot is retried, so a real fault further in still
+   fails as it should.

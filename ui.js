@@ -384,7 +384,9 @@ import {
 import { 
     capitaliseString, 
     capitaliseWordsWithRomanNumerals,
-    toCamelCase
+    toCamelCase,
+    readStoredValue,
+    writeStoredValue
 } from './utilityFunctions.js';
 
 
@@ -1877,8 +1879,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     generateRandomPioneerName();
 
-    if (localStorage.getItem('saveName')) {
-        setSaveName(localStorage.getItem('saveName'));
+    const storedSaveName = readStoredValue('saveName');
+    if (storedSaveName) {
+        setSaveName(storedSaveName);
     }
 
     initAnalytics({
@@ -7145,7 +7148,7 @@ async function getUserSaveName() {
 
 
                 setSaveName(userName);
-                localStorage.setItem('saveName', getSaveName());
+                writeStoredValue('saveName', getSaveName());
                 setOnboardingMode(false);
                 saveNameButton.innerText = localize('buttonStartUpper', getLanguage());
                 showHideModal();

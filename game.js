@@ -7290,7 +7290,13 @@ function energyChecks(element) {
     }
 }
 
-function setPowerToggleLabel(element, active) {
+// The single writer of a power-plant toggle button's visible label AND its
+// dataset flag. Exported because setPowerOnOff() in constantsAndGlobalVars.js
+// relabels every plant when the grid trips, and when it wrote textContent
+// directly the dataset kept saying 'active' behind a button reading "Activate" —
+// addOrRemoveUsedPerSecForFuelRate() reads the dataset, so the next click took
+// the deactivate branch and the player had to click twice to restart a plant.
+export function setPowerToggleLabel(element, active) {
     if (!element) return;
     element.dataset.toggleState = active ? 'active' : 'inactive';
     element.textContent = active

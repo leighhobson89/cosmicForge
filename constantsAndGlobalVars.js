@@ -6,8 +6,8 @@ import {
 import { getRandomEventIds } from './events.js';
 import { achievementFunctionsMap } from "./achievements.js";
 import { drawNativeTechTree, selectTheme, startWeatherEffect, stopWeatherEffect, applyCustomPointerSetting, showNotification, generateStarfield } from "./ui.js";
-import { capitaliseWordsWithRomanNumerals, capitaliseString } from './utilityFunctions.js';
-import { offlineGains, startNewsTickerTimer } from './game.js';
+import { capitaliseWordsWithRomanNumerals, capitaliseString, writeStoredValue } from './utilityFunctions.js';
+import { offlineGains, startNewsTickerTimer, setPowerToggleLabel } from './game.js';
 import { rocketNames, getStarNames, getStarTypeByName } from './descriptions.js';
 import { boostSoundManager } from './audioManager.js';
 import { trackAnalyticsEvent } from './analytics.js';
@@ -1717,11 +1717,11 @@ export function captureGameStatusForSaving(type) {
         if (saveNameElement && typeof saveNameElement.value === 'string') {
             setSaveName(saveNameElement.value);
         }
-        localStorage.setItem('saveName', getSaveName());
+        writeStoredValue('saveName', getSaveName());
     }
 
     if (type === 'initialise') {
-        localStorage.setItem('saveName', getSaveName());
+        writeStoredValue('saveName', getSaveName());
     }
 
     gameState.resourceData = JSON.parse(JSON.stringify(resourceData));
@@ -1981,6 +1981,28 @@ export function captureGameStatusForSaving(type) {
     return gameState;
 }
 
+/**
+ * Any power-plant type the player owns none of comes back flagged off.
+ *
+ * Keys absent from the save keep the module default rather than being invented,
+ * and a non-object save value falls back to the defaults wholesale.
+ */
+function normaliseBuildingTypeOnOff(saved) {
+    const restored = (saved && typeof saved === 'object')
+        ? { ...buildingTypeOnOff, ...saved }
+        : { ...buildingTypeOnOff };
+
+    Object.keys(restored).forEach((building) => {
+        if (!restored[building]) return;
+        const quantity = Number(getResourceDataObject('buildings', ['energy', 'upgrades', building, 'quantity'])) || 0;
+        if (quantity <= 0) {
+            restored[building] = false;
+        }
+    });
+
+    return restored;
+}
+
 export function restoreGameStatus(gameState, type) {
     return new Promise((resolve, reject) => {
         try {
@@ -2070,7 +2092,16 @@ export function restoreGameStatus(gameState, type) {
             unlockedResourcesArray = gameState.unlockedResourcesArray;
             unlockedCompoundsArray = gameState.unlockedCompoundsArray;
             activatedFuelBurnObject = gameState.activatedFuelBurnObject;
-            buildingTypeOnOff = gameState.buildingTypeOnOff;
+            // A plant type can only be running if the player owns at least one of
+            // them. Saves written before the sellBuilding() fix can come back with
+            // a type flagged on at quantity 0, which makes the stat-bar tooltip
+            // report a plant that does not exist as ON and leaves the grid's
+            // auto-manager balancing against it. It self-heals the next time the
+            // grid drops, but a save should not have to wait for that.
+            //
+            // Safe to read quantities here: restoreResourceDataObject() runs at the
+            // top of this function, so the buildings data is already the save's own.
+            buildingTypeOnOff = normaliseBuildingTypeOnOff(gameState.buildingTypeOnOff);
             ranOutOfFuelWhenOn = gameState.ranOutOfFuelWhenOn;
             setNotationType(gameState.notationType);
             oneOffPrizesAlreadyClaimedArray = gameState.oneOffPrizesAlreadyClaimedArray;
@@ -3277,9 +3308,12 @@ export function setPowerOnOff(value) {
         Object.keys(powerBuildings).forEach(powerBuilding => {
             if (powerBuilding.startsWith('power')) {
                 const powerBuildingToggleButtonId = powerBuilding + 'Toggle';
-                if (document.getElementById(powerBuildingToggleButtonId)) {
+                const toggleButton = document.getElementById(powerBuildingToggleButtonId);
+                if (toggleButton) {
                     setBuildingTypeOnOff(powerBuilding, false);
-                    document.getElementById(powerBuildingToggleButtonId).textContent = localize('activateButton', getLanguage());
+                    // Through the shared writer, so the dataset flag the click
+                    // handler reads cannot disagree with the label the player sees.
+                    setPowerToggleLabel(toggleButton, false);
                 }
             }
         });

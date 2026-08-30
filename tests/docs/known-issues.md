@@ -247,9 +247,9 @@ marker, the rendered label) and the secondary-cost assertion in
 
 ---
 
-## 4. `analytics.js` uses localStorage unguarded, so boot dies without it
+## 4. `analytics.js` uses localStorage unguarded, so boot dies without it — ✅ FIXED
 
-**Severity: high — the game does not start in private browsing.**
+**Severity: high — the game did not start in private browsing.**
 
 ### Reproduction
 
@@ -273,8 +273,28 @@ preference. The same treatment applied to `analytics.js` fixes it.
 
 `tests/e2e/localization/language-resolution.spec.js` breaks storage for the
 `cosmicForgeLanguage` key only, so it can assert localization's own graceful
-degradation without tripping over this. Once analytics is guarded, that spec can
-disable storage wholesale.
+degradation without tripping over this. That scoping is no longer forced by this
+defect, but it is left in place: it keeps that spec about localization.
+
+### Resolution
+
+`readStoredValue()` and `writeStoredValue()` in `utilityFunctions.js` are now the
+only unguarded storage touches in the shipped game, and both swallow the
+exception — the same treatment `localization.js` had carried from the start.
+
+Guarding `analytics.js` alone would not have fixed the reported symptom. Boot
+touches storage in two more places that would have thrown next: the saved pioneer
+name read in `ui.js`, and the same name written from `ui.js` and
+`constantsAndGlobalVars.js`. `saveLoadGame.js` read it too. All of them now go
+through the pair.
+
+Covered by `tests/e2e/app-boot/storage-unavailable.spec.js`, which disables
+`Storage.prototype` wholesale through an init script — before any module
+evaluates, since the failure happened during module initialisation — and asserts
+the behaviour rather than the guard: the tab strip is built, the frame loop runs,
+tracking an event is a no-op instead of a throw, and a save is still exportable
+from a session that cannot persist one. All three of its tests fail against the
+pre-fix build.
 
 ---
 

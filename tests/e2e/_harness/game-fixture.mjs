@@ -48,9 +48,28 @@ class GameHarness {
       }, language);
     }
 
-    await page.goto('/', { waitUntil: 'domcontentloaded' });
-
-    await page.waitForSelector('#pioneerCodeName', { timeout: 60000 });
+    // The first navigation is retried once.
+    //
+    // Under parallel workers a first load is occasionally lost outright — the
+    // static server or the machine is saturated — and the failure that produces
+    // is a 60s timeout waiting for #pioneerCodeName, which is indistinguishable
+    // from the app being broken. One retry separates the two: a genuinely broken
+    // app fails the second attempt as well, while a dropped load recovers. The
+    // retry is deliberately confined to the pioneer prompt, the very first thing
+    // the page paints; nothing later in boot is retried, so a real fault further
+    // in still fails as it should.
+    let promptShownAfterNavigation = false;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      await page.goto('/', { waitUntil: 'domcontentloaded' });
+      promptShownAfterNavigation = await page
+        .waitForSelector('#pioneerCodeName', { timeout: attempt === 0 ? 30000 : 60000 })
+        .then(() => true)
+        .catch(() => false);
+      if (promptShownAfterNavigation) break;
+    }
+    if (!promptShownAfterNavigation) {
+      throw new Error('The pioneer prompt never appeared, across two navigations');
+    }
     await page.fill('#pioneerCodeName', pioneer);
     await page.click('#modalConfirm');
 

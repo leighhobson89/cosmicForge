@@ -385,9 +385,14 @@ test.describe('Megastructures — the manuscripts that point at them', () => {
     expect(found.length, 'the first manuscript is guaranteed by five light years')
       .toBeGreaterThanOrEqual(1);
 
+    // getAncientManuscriptGenerationProbability() pays 20% per study *below* five
+    // light years and 100% *at* five, so the first manuscript legitimately turns
+    // up early — it has been seen at two. "No later than the threshold" is
+    // therefore an upper bound, and asserting a lower one only ever passed when
+    // the 20% roll happened to miss four times running.
     const vision = await game.withMods((m) => m.cg.getStarVisionDistance());
     expect(vision, 'and it arrives no later than that threshold')
-      .toBeGreaterThanOrEqual(GUARANTEED_AT[0]);
+      .toBeLessThanOrEqual(GUARANTEED_AT[0]);
   });
 
   test('a manuscript records its star, the structure it points at, and that nobody has read it', async ({ game }) => {

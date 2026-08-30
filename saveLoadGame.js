@@ -1,3 +1,4 @@
+import { readStoredValue } from './utilityFunctions.js';
 import {
     setSaveName,
     getSaveName,
@@ -433,7 +434,7 @@ export function copySaveStringToClipBoard() {
 
 export async function loadGameFromCloud() {
     try {
-        const userId = localStorage.getItem('saveName') || getSaveName();
+        const userId = readStoredValue('saveName') || getSaveName();
 
         const { data, error } = await supabase
             .from('cosmicforge_saves')

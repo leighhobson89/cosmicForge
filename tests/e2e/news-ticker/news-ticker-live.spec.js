@@ -293,15 +293,33 @@ test.describe('News Ticker — what the families put on screen', () => {
     await game.boot();
     await stageVisibleResources(game);
 
-    // A prize is only offered when the resource it gifts has room for it, and
+    // A prize is only offered when the store it gifts into has room for it, and
     // the debug scenario fills every store to its cap. Selling the lot through
-    // the real Sell All button is how a player makes room — and it leaves the
-    // resource rows on screen, which the prize builder also requires.
+    // the real Sell All buttons is how a player makes room — and it leaves the
+    // rows on screen, which the prize builder also requires.
+    //
+    // Both tabs, not just resources: the prize pool draws from compounds too, so
+    // clearing only tab 1 left every compound at its cap. specialMessageBuilder()
+    // returns false for a full store, which sends the ticker into
+    // retryWithRandomCategory() and produces an unrelated headline — the flake
+    // this test used to show.
     await game.openTab(1);
     await page.evaluate(() => document.getElementById('sellAllResourcesButton')?.click());
     await page.waitForTimeout(800);
+    await game.openTab(2);
+    await page.evaluate(() => document.getElementById('sellAllCompoundsButton')?.click());
+    await page.waitForTimeout(800);
+    await game.openTab(1);
 
-    const headline = await runTickerCycle(game, { category: 'prize' });
+    // Forcing the category still picks a RANDOM entry from within it, so a single
+    // cycle can still land on an entry whose own preconditions do not hold. Retry
+    // the forced cycle a few times before calling it a failure; what is under test
+    // is that a forced prize can be collected, not that every roll offers one.
+    let headline = null;
+    for (let attempt = 0; attempt < 6; attempt++) {
+      headline = await runTickerCycle(game, { category: 'prize' });
+      if (headline.prizeType === 'giftResource' && headline.prizeItem) break;
+    }
 
     expect(headline.prizeType, `no prize offered in "${headline.text.slice(0, 120)}"`).toBe('giftResource');
     expect(headline.prizeItem).toBeTruthy();

@@ -18,6 +18,9 @@ The game reaches a playable state from a cold start, in both browser and Electro
 - [ ] gameLoop starts and continues running across at least several seconds of frames
 - [ ] Module-level top-level await in ui.js completes before first paint
 - [ ] No raw localization keys visible anywhere on the first screen
+- [ ] With localStorage disabled wholesale the game still boots to a playable state
+- [ ] Analytics degrades to a no-op instead of taking boot down with it
+- [ ] A save is still exportable from a session that cannot persist one
 
 ## Status meaning
 

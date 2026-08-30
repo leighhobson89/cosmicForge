@@ -52,6 +52,29 @@ async function metricsSampler(game) {
   return { client, sample };
 }
 
+/** Arithmetic mean of a list of numbers. */
+function mean(values) {
+  return values.reduce((sum, value) => sum + value, 0) / values.length;
+}
+
+/**
+ * Take several samples in a row, so a comparison rests on a distribution rather
+ * than on one reading.
+ *
+ * A single sample of heap or node count is a point on a sawtooth: a GC trough
+ * followed by a peak can make a flat series look like accrual, and vice versa.
+ * These specs are the only ones in the suite that measure a trend, and comparing
+ * single readings is what made them report a different "leak" on every run.
+ */
+async function sampleSeries(game, sample, { count = 3, gapMs = 400 } = {}) {
+  const readings = [];
+  for (let i = 0; i < count; i++) {
+    if (i > 0) await game.page.waitForTimeout(gapMs);
+    readings.push(await sample({ collectGarbage: true }));
+  }
+  return readings;
+}
+
 /** One full pass over every content tab. */
 async function cycleAllTabs(game, rounds = 1) {
   for (let round = 0; round < rounds; round++) {
@@ -160,8 +183,17 @@ test.describe('Performance & Frame Budget', () => {
     const baseline = readings[0];
     const peak = Math.max(...readings);
     const midpoint = Math.floor(readings.length / 2);
-    const earlyGrowth = readings[midpoint] - readings[0];
-    const lateGrowth = readings[readings.length - 1] - readings[midpoint];
+    // Halves, not endpoints. Comparing readings[midpoint] against readings[0] and
+    // readings[last] against readings[midpoint] let one GC trough and one peak
+    // decide the result: a series like 10.20, 10.34, 10.79, 10.05, 9.97, 10.73,
+    // 10.71 shows no accrual at all — it is noise around 10.4MB — yet failed,
+    // because the two chosen points happened to fall the wrong way. The means of
+    // the two halves make the same "a leak adds the same amount every cycle"
+    // claim without a single sample being able to settle it.
+    const firstHalf = readings.slice(0, midpoint + 1);
+    const secondHalf = readings.slice(midpoint);
+    const earlyGrowth = mean(firstHalf) - readings[0];
+    const lateGrowth = mean(secondHalf) - mean(firstHalf);
 
     expect(baseline).toBeGreaterThan(0);
     expect(peak, `heap across cycles: ${series} MB`).toBeLessThan(baseline * 2.5 + 10);
@@ -191,19 +223,35 @@ test.describe('Performance & Frame Budget', () => {
     // takes longer in wall-clock terms.
     await game.page.waitForTimeout(10000);
 
-    const before = await sample({ collectGarbage: true });
+    // Three samples each side rather than one, for the reason given on
+    // sampleSeries: a single before/after pair is two points on a sawtooth.
+    const beforeSeries = await sampleSeries(game, sample);
     // The frame loop rewrites descriptions, prices and rates every tick; ten
     // seconds is ~600 frames of that churn.
     await game.page.waitForTimeout(10000);
-    const after = await sample({ collectGarbage: true });
+    const afterSeries = await sampleSeries(game, sample);
+
+    const before = {
+      listeners: mean(beforeSeries.map((s) => s.listeners)),
+      nodes: mean(beforeSeries.map((s) => s.nodes)),
+      heapMb: mean(beforeSeries.map((s) => s.heapMb))
+    };
+    const after = {
+      listeners: mean(afterSeries.map((s) => s.listeners)),
+      nodes: mean(afterSeries.map((s) => s.nodes)),
+      heapMb: mean(afterSeries.map((s) => s.heapMb))
+    };
 
     expect(after.listeners - before.listeners,
       `idle listener growth ${before.listeners} -> ${after.listeners}`).toBeLessThan(50);
     // Idle means idle: once the UI is built, ten seconds of frame-loop churn
     // must not keep adding nodes. A tolerance rather than an equality, because
-    // the news ticker and notifications legitimately come and go.
+    // the news ticker and notifications legitimately come and go — and expressed
+    // relative to the baseline, because a flat 1000 means something quite
+    // different on a 2000-node tree than on a 5000-node one.
     expect(after.nodes - before.nodes,
-      `idle node growth ${before.nodes} -> ${after.nodes}`).toBeLessThan(1000);
+      `idle node growth ${before.nodes} -> ${after.nodes}`)
+      .toBeLessThan(Math.max(1000, before.nodes * 0.25));
     expect(after.heapMb,
       `idle heap growth ${before.heapMb.toFixed(1)} -> ${after.heapMb.toFixed(1)} MB`)
       .toBeLessThan(before.heapMb * 2.5 + 10);

@@ -141,10 +141,24 @@ test.describe('Demo Build Lockdowns — debugger reachability', () => {
       globalThis.__mods = { cg: await import('/constantsAndGlobalVars.js') };
     });
 
-    // Control: with demoBuild false, __VARIABLE_DEBUGGER_AND_CHEATS__ true
-    // (the default dev buildFlags.js) and no Electron detected, the hotkeys
-    // still open for a plain pioneer.
-    await page.evaluate(() => globalThis.__mods.cg.setDemoBuild(false));
+    // Control: with demoBuild false, __VARIABLE_DEBUGGER_AND_CHEATS__ true and
+    // no Electron detected, the hotkeys still open for a plain pioneer.
+    //
+    // The cheats flag is set explicitly rather than inherited from buildFlags.js.
+    // It ships as false, so a test that trusts the shipped value can never see
+    // the debug window open and fails on its own control step — which is what it
+    // did until this line was added. demoBuild has to be the only variable here,
+    // or the assertion below is not about demoBuild at all.
+    //
+    // buildFlags.js is set by hand and is not the suite's to manage, so the flag
+    // is flipped here in memory and put back at the end of the test, whatever it
+    // was on arrival.
+    const cheatsBefore = await page.evaluate(() => {
+        const was = globalThis.__mods.cg.getVariableDebuggerAndCheats();
+        globalThis.__mods.cg.setVariableDebuggerAndCheats(true);
+        globalThis.__mods.cg.setDemoBuild(false);
+        return was;
+    });
     await page.keyboard.press('NumpadSubtract');
     await page.waitForTimeout(150);
     const openedWithoutDemo = await page.evaluate(
@@ -162,7 +176,12 @@ test.describe('Demo Build Lockdowns — debugger reachability', () => {
       () => document.getElementById('debugWindow')?.style.display === 'block'
     );
 
-    await page.evaluate(() => globalThis.__mods.cg.setDemoBuild(false));
+    // Both flags back exactly as they were found, so nothing that runs after this
+    // in the same worker inherits a debug build.
+    await page.evaluate((wasEnabled) => {
+        globalThis.__mods.cg.setDemoBuild(false);
+        globalThis.__mods.cg.setVariableDebuggerAndCheats(wasEnabled);
+    }, cheatsBefore);
 
     expect(openedWithoutDemo).toBe(true);
     expect(openedWithDemo).toBe(false);
