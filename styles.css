@@ -1726,6 +1726,10 @@ button {
     --consumption-colors: #c62828, #e53935, #ef5350;
 }
 
+[data-theme="dark"] .option-row-description {
+    border-top-style: solid;
+}
+
 body {
     margin: 0;
     padding: 0;

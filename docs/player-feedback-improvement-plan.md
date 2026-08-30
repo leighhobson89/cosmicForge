@@ -17,7 +17,7 @@ Item IDs (**P1–P15**) are stable labels carried over from the original review 
 3. **Tier 3 — Other quick wins** (medium value, low effort; good fillers between waves).
 4. **Tier 4 — The rest** (large UI refactors with lower value-per-hour).
 
-The audit moved several items vs. the original review order: **P3** (power toggle) turned out *harder* than assumed (power is auto-managed, see its section), **P10** (automation persistence) turned out *more independent* than assumed and is promoted to a quick win, **P11**'s audit numbers were corrected (×0.88 per level, not −10%; an "Always Active" maxed state already exists), and **P15** (balance) belongs with the important medium-size items rather than last.
+The audit moved several items vs. the original review order: **P3** (power toggle) turned out *harder* than assumed (power is auto-managed, see its section), **P10** (automation persistence) turned out *more independent* and *smaller* than assumed — no save-format work at all — and is promoted to a quick win, **P11**'s audit numbers were corrected (×0.88 per level, not −10%; an "Always Active" maxed state already exists), and **P15** (balance) belongs with the important medium-size items rather than last.
 
 ### Execution order (priority × size)
 
@@ -26,8 +26,8 @@ The audit moved several items vs. the original review order: **P3** (power toggl
 | 1 | P3 | Powered On/Off toggle — ✅ **COMPLETED** | 1 — quick win | Medium | Very low (3–5 h) |
 | 2 | P1 | Buy Max / bulk purchase — ✅ **COMPLETED** | 1 — quick win | Very high | Low (8–12 h) |
 | 3 | P2 | AP list sorting + alignment + maxed-state cleanup — ✅ **COMPLETED** | 1 — quick win | High | Low (6–10 h) |
-| 4 | P4 | Star list: name sort + direct travel target | 1 — quick win | High | Low (6–10 h) |
-| 5 | P10 | Persistent automation across rebirths | 1 — quick win | High | Low-Med (6–10 h) |
+| 4 | P4 | Star list: name sort + direct travel target — ✅ **COMPLETED** | 1 — quick win | High | Low (6–10 h) |
+| 5 | P10 | Automation toggles survive rebirth — ✅ **COMPLETED** | 1 — quick win | High | Very low (3–5 h) |
 | 6 | P5 | Increase All Storage + persistent earned increases | 2 — important | Very high | Medium (10–16 h) |
 | 7 | P6 | Notification layout + Clear-All safety | 2 — important | High | Medium (8–12 h) |
 | 8 | P7 | Precision / rounding / affordability consistency | 2 — important | High | Medium (12–18 h) |
@@ -124,16 +124,96 @@ The audit moved several items vs. the original review order: **P3** (power toggl
 
 ---
 
-## P10 — Persistent automation across rebirths
+## ~~P10 — Automation toggles survive rebirth~~ ✅ DONE
 
-**Audit.** Rebirth resets resource data wholesale via `resetResourceDataObjectOnRebirthAndAddApAndPermanentBuffsBack()` (`game.js:15578`), which clears per-resource `autoSell` flags, autobuyer `active` flags, telescope automation (`space.upgrades.spaceTelescope.autoSpaceTelescopeRowEnabled`), research automation, etc. Some are re-granted by perks on purchase (`purchaseBuff` sets them), but per-rebirth toggles default off. Save/load already round-trips these fields, and a migration path exists (`migrateResourceData` in `patches.js`, data version `0.98` at `resourceDataObject.js:17`), so persistence plumbing is in place. **Key audit finding:** only the autosell-*allocation-settings* sub-part depends on P9 — research auto-buyer, telescope automation, and compound automation persistence are fully independent, which is why this item is a Tier-1 quick win.
+> ~~*"The automation settings should stay from one rebirth to the next, it's a bit of a bother to be~~
+> ~~slowed down by having to go and activate again the telescope automation, the research~~
+> ~~automation… It's not a lot of clicks, but it gets in the way of the acceleration of rebirths when~~
+> ~~it's clear that of course, there is basically no reason to not automate once we've reached enough~~
+> ~~of an endgame that we can actually afford to buy the automation."* — player reviewer~~
 
-**Change.** Split "owned/unlocked" (persist) from "enabled this run" (persist by default, player can disable). On rebirth, restore enabled-state for: research auto-buyer, telescope automation, autosell + its allocation settings (the P9-dependent part lands with P9), compound automation. Audit for any setting that genuinely *should* reset (e.g. ones tied to per-run resources that start locked).
+~~**Audit.** Rebirth wipes `resourceData` back to a pristine module-load snapshot —~~
+~~`resetResourceDataObjectOnRebirthAndAddApAndPermanentBuffsBack()` (`resourceDataObject.js:3700`)~~
+~~deletes every key and re-assigns `structuredClone(resourceDataRebirthCopy)`, then hand-restores a~~
+~~named list: AP, the black hole's six fields, the whole `cosmicRip` sub-object, philosophy~~
+~~repeatable prices, megastructure techs, and exactly one automation flag —~~
+~~`research.upgrades.autoBuyer.active`.~~
 
-**Effort:** ~6–10 h.
-**Risk:** Low-Medium. Save-version bump + migration (`migrateResourceData`) for the new persisted fields.
+~~Every automation control in the game is a **pair**: an *ownership* flag saying the player has the~~
+~~capability, and an *enabled* flag holding the player's own on/off choice. Rebirth restores the~~
+~~ownership half and drops the enabled half on the floor. That asymmetry is the whole bug, and it is~~
+~~exactly what the reviewer is describing.~~
 
-**Integration test.** `tests/e2e/automation/persistence.spec.js`: enable all automations, rebirth via the real rebirth flow, assert each automation is still unlocked **and enabled**, and that its settings survived. Assert a deliberately-resettable control (if any is chosen) did reset.
+~~Verified by driving the reset function directly and diffing every flag either side of it:~~
+
+| ~~Field~~ | ~~Owner-gate~~ | ~~Gate is~~ | ~~Enabled flag after rebirth~~ |
+|---|---|---|---|
+| ~~`space.upgrades.spaceTelescope.autoSpaceTelescopeEnabled`~~ | ~~`autoSpaceTelescopeRowEnabled`, set by the `autoSpaceTelescope` AP perk (40 AP)~~ | ~~**permanent** — restored by `addPermanentBuffsBackInAfterRebirth()` (`game.js:15662`)~~ | ~~**reset to `false`**~~ |
+| ~~`space.upgrades.spaceTelescope.autoSpaceTelescopeMode`~~ | ~~same perk~~ | ~~**permanent**~~ | ~~**reset to `'studyAsteroid'`** — the player's chosen mode (asteroid / star / void) is lost too~~ |
+| ~~`research.upgrades.autoBuyer.enabled`~~ | ~~`research.upgrades.autoBuyer.active`, set by the `roboticResearchAutomation` AP perk (20 AP)~~ | ~~**permanent** — hand-restored at `resourceDataObject.js:3746`~~ | ~~**reset to `false`**~~ |
+
+~~**Scope: those three fields, and nothing else.** They are the two the reviewer named, plus the~~
+~~telescope's mode dropdown, which is part of the same control — re-ticking the telescope box without~~
+~~it puts the player back on the wrong job.~~
+
+~~**Deliberately excluded.** The audit turned up two more families that reset, both left alone:~~
+
+- ~~**`compounds.<c>.autoCreate` × 6.** Its capability *is* permanent (pseudo-tech~~
+  ~~`compoundMachining`, granted only by the `compoundAutomation` AP perk), so it would qualify on the~~
+  ~~same rule — excluded by explicit decision, not by oversight. Persisting it later is a one-line~~
+  ~~addition to the list this item introduces.~~
+- ~~**`autoSell` × 14** (8 resources, 6 compounds). Gated on tech `nanoBrokers` (`game.js:15903`), a~~
+  ~~19 000-point tech — above `jumpstartResearch`'s ≤ 4200 re-grant threshold, so it is genuinely~~
+  ~~re-researched every run. A remembered toggle would sit inert until then. Reconsider only if that~~
+  ~~tech is ever made permanent.~~
+
+~~**Correctly resetting, do not touch.** These look like automation but are per-run purchases whose~~
+~~"on" state is already the default: autobuyer tier `active` flags across all resources and compounds~~
+~~(default `true`; the machines themselves reset to `quantity: 0`), the three science-building~~
+~~`active` flags (default `true`), `buildingTypeOnOff` for the three power plants (you own none at~~
+~~rebirth), and the rocket fueller arrays. `activatedFuelBurnObject` is derived state, not a choice.~~
+
+~~**The plumbing already exists.** `captureGameStatusForSaving` serialises `resourceData` wholesale~~
+~~(`constantsAndGlobalVars.js:1727`), so all three fields already round-trip through save/load and~~
+~~through the cloud save. Nothing about the save schema changes — **no data-version bump and no~~
+~~`migrateResourceData` entry is needed.** The only thing that destroys these values is the rebirth~~
+~~reset itself.~~
+
+~~**Change.** Snapshot the three values before the wipe and write them back after it, in~~
+~~`resetResourceDataObjectOnRebirthAndAddApAndPermanentBuffsBack()` — the same shape as the existing~~
+~~`researchAutoBuyerEnabled` line, which is the pattern this item generalises. Rather than three more~~
+~~hand-written locals, declare them as a list (`REBIRTH_PERSISTED_AUTOMATION`) pairing each setting~~
+~~with its owner-gate, so adding the fourth is one entry rather than a bug report.~~
+
+~~Restore each setting **only when its owner-gate survived**: a player who reaches a run without the~~
+~~perk must not inherit an enabled toggle for a capability they no longer have. The restore therefore~~
+~~has to run *after* the ownership flags are put back, which for the telescope means after~~
+~~`addPermanentBuffsBackInAfterRebirth()`.~~
+
+~~There is no need for an opt-out setting: these are ordinary toggles the player can still switch off~~
+~~at any time, and the reviewer's point is precisely that nobody switches them off once bought.~~
+
+~~**Effort:** ~3–5 h. Smaller than first estimated — one function, one declared list, no schema work.~~
+~~**Risk:** Low. No save-format change; the fields already persist. The only real trap is restoring a~~
+~~setting whose capability did not survive, which the owner-gate check above closes.~~
+
+~~**Integration test.** `tests/e2e/automation/persistence.spec.js`: buy the two AP perks, turn both~~
+~~controls on through their real UI controls, set the telescope to a non-default mode, rebirth through~~
+~~the real rebirth flow, then assert all three values survived **and** that the automation actually~~
+~~runs in the new run rather than merely reading as enabled. Assert the negatives in the same suite: a~~
+~~run that never bought the perks comes back with both unowned and disabled, an `autoSell` toggle~~
+~~still resets (deliberately out of scope), and autobuyer tier flags come back `true`.~~
+
+~~**As built.** Four notes on where the implementation differs from, or goes past, the sketch above:~~
+
+- ~~**One declared list, not three hand-written locals.** `REBIRTH_PERSISTED_AUTOMATION` (`resourceDataObject.js`, immediately above the reset it serves) pairs each setting with the `ownedBy` flag it depends on. The reset maps the list to a snapshot before the wipe and walks it again after, so adding the fourth setting is one entry. `compounds.<c>.autoCreate` is the obvious next candidate and the comment says so, since it was scoped out by decision rather than because it would not work.~~
+- ~~**Order inside the reset turned out to be load-bearing.** The restore has to be the last thing the function does, because both owner-gates are themselves put back earlier in it — the research auto-buyer's by the explicit line near the top, the telescope's by `addPermanentBuffsBackInAfterRebirth()` two-thirds of the way down. Checking either gate any earlier reads the freshly-wiped `false` and silently drops every setting, which is a failure that looks exactly like the bug being fixed.~~
+- ~~**Snapshots read with `noWarning`.** A save old enough to predate one of these fields would otherwise log a `Missing subKey` warning on every rebirth. A missing field comes back `undefined`, which the restore skips, leaving the fresh default — the same outcome, without the console noise. That matters here because the original rebirth bug report *was* a stream of `Missing subKey` warnings.~~
+- ~~**The specs prove the work, not the flag.** Two of the seven wait for the automation to actually do something in the new run with nothing clicked: the telescope starts a real star study (and it is asserted to be studying a *star*, not scanning asteroids, which is what a fix that restored the switch but not the mode would produce), and the research auto-buyer unlocks a tech on its own. Three more pin the shape of the promise — that a toggle left **off** comes back off, that the panes redraw with the restored state, and that a run without the perks inherits nothing even when the settings are forced on behind the game's back.~~
+
+~~Two findings from the audit corrected the item before any code was written. The old text said research auto-buyer persistence was missing; in fact `autoBuyer.active` was already restored and the forgotten field was `autoBuyer.enabled`, a different flag. And it called for a save-version bump with a `migrateResourceData` entry, which is not needed at all — `captureGameStatusForSaving` serialises `resourceData` wholesale, so these fields always round-tripped through save and cloud save, and only the rebirth reset destroyed them.~~
+
+~~New coverage lives in `tests/e2e/automation/persistence.spec.js` — seven specs in a new `automation` area.~~
 
 ---
 
@@ -289,7 +369,7 @@ The audit moved several items vs. the original review order: **P3** (power toggl
 
 ## P13 — Spacing / visual hierarchy (separators → grouping)
 
-**Audit.** Rows are separated by lines with uniform spacing (`styles.css` `.option-row` / `.option-row-main` / `.description-container` at 2117–2143), so a separator reads as belonging to the item below. No card/block component exists.
+**Audit.** No card/block component exists.
 
 **Change.** Adopt the **cards/blocks** option (player-preferred): wrap each option group in a bordered/padded card within the P12 grid system. Where cards are too heavy (dense lists), fall back to the improved-spacing rule: tight below the owning item, generous before the next title. Apply globally via the shared row component so it's one fix, not per-tab patches.
 
@@ -304,14 +384,15 @@ The audit moved several items vs. the original review order: **P3** (power toggl
 
 ```
 Tier 1 (quick wins, independent — any order):
-  P3 power ── P1 bulk buy ── P2 AP UI ── P4 stars ── P10 persistence*
-      (*P10's autosell-allocation-settings sub-part lands with P9; the rest is independent)
+  P3 power ── P1 bulk buy ── P2 AP UI ── P4 stars ── P10 persistence
+      (P10 is fully independent: the nine controls it covers are all gated on AP perks,
+       and autosell is out of its scope because its tech is re-earned every run)
 
 Tier 2 (important):
   P5 storage ──► P6 notifications (P6 depends on P5's state-derived eligibility)
   P7 precision ──► P8 tick (P7's helpers are prerequisites for trustworthy tick tests)
   P15 balance (independent)
-  P8 tick ──► P9 allocation ──► (P9's allocation settings feed P10's persistence hook)
+  P8 tick ──► P9 allocation
 
 Tier 3 (quick wins, slot in any time as fillers):
   P14 gain merge (standalone; Tab-1 grid migration can ride P12 later)
@@ -336,4 +417,4 @@ Tier 4 (the rest):
 - One Playwright spec file per item under `tests/e2e/<area>/`, following existing patterns (`game.debugClick`, `readState`, `page.evaluate` for internals). Reuse existing area folders (`ascendency/`, `black-hole/`, `star-map/`, `megastructures/`, `energy/`, `resources/`) where they exist; create a new folder only for genuinely new areas (`notifications/`, `precision/`, `resource-tick/`, `autosell/`, `automation/`, `ui-layout/`).
 - Each test prints a **measured gain** to the report (clicks saved, ms saved, alignment px, accounting error, balance ratio) so the post-implementation report shows quantified improvement, not just pass/fail.
 - Run the full existing suite before starting each wave to establish the baseline (`node tests/run-e2e.mjs`).
-- Save-migration items (P9, P10) additionally need a load-old-save e2e case using `tools/save-inspector/` fixtures.
+- Save-migration items (P9) additionally need a load-old-save e2e case using `tools/save-inspector/` fixtures. P10 is **not** one: `resourceData` is serialised wholesale, so the fields it persists already round-trip and the save format does not change.

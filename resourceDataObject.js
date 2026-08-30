@@ -3697,6 +3697,45 @@ export function setGalacticCasinoDataObject(value, key, subKeys = []) {
 
 export let resourceDataRebirthCopy = structuredClone(resourceData);
 
+/**
+ * P10: the automation settings a player keeps switched on for the rest of the game.
+ *
+ * Every automation control in the game is a pair — an *ownership* flag saying the
+ * player has the capability at all, and the player's own on/off (or mode) choice.
+ * Rebirth used to restore the ownership half and drop the choice, so a player who
+ * had bought the perks still had to walk round the panes re-ticking boxes before
+ * every run could get going.
+ *
+ * Each entry therefore names both halves. `ownedBy` is the flag that already
+ * survives rebirth by some other route, and the setting is only carried across
+ * when it is still true: a run that somehow no longer has the capability must not
+ * inherit an enabled toggle for it.
+ *
+ * Adding the next one is a single entry here. `compounds.<c>.autoCreate` is the
+ * obvious candidate — its capability is permanent too — and is left out only
+ * because it was scoped out, not because it would not work.
+ */
+export const REBIRTH_PERSISTED_AUTOMATION = [
+    {
+        section: 'space',
+        path: ['upgrades', 'spaceTelescope', 'autoSpaceTelescopeEnabled'],
+        ownedBy: { section: 'space', path: ['upgrades', 'spaceTelescope', 'autoSpaceTelescopeRowEnabled'] }
+    },
+    {
+        // The mode dropdown is part of the same control: restoring the toggle
+        // without it would put the player back on studyAsteroid, which is the
+        // wrong job for anyone who had chosen stars or the void.
+        section: 'space',
+        path: ['upgrades', 'spaceTelescope', 'autoSpaceTelescopeMode'],
+        ownedBy: { section: 'space', path: ['upgrades', 'spaceTelescope', 'autoSpaceTelescopeRowEnabled'] }
+    },
+    {
+        section: 'research',
+        path: ['upgrades', 'autoBuyer', 'enabled'],
+        ownedBy: { section: 'research', path: ['upgrades', 'autoBuyer', 'active'] }
+    }
+];
+
 export function resetResourceDataObjectOnRebirthAndAddApAndPermanentBuffsBack() {
     const currentAp = getResourceDataObject('ascendencyPoints', ['quantity']);
     const blackHoleResearchDone = getResourceDataObject('blackHole', ['blackHoleResearchDone']);
@@ -3713,6 +3752,12 @@ export function resetResourceDataObjectOnRebirthAndAddApAndPermanentBuffsBack() 
     const playerPhilosophy = getPlayerPhilosophy();
     const allPhilosophyTechs = getResourceDataObject('philosophyRepeatableTechs');
     const researchAutoBuyerEnabled = !!getResourceDataObject('research', ['upgrades', 'autoBuyer', 'active']);
+    // P10: read the player's automation choices out before the wipe. `noWarning`
+    // is on because a save old enough to predate a field should carry it across as
+    // undefined and be left with the fresh default, not log a missing-key warning.
+    const persistedAutomation = REBIRTH_PERSISTED_AUTOMATION.map(
+        (entry) => getResourceDataObject(entry.section, entry.path, true)
+    );
     
     const philosophyTechs = allPhilosophyTechs[playerPhilosophy];
     
@@ -3790,6 +3835,24 @@ export function resetResourceDataObjectOnRebirthAndAddApAndPermanentBuffsBack() 
         setTechUnlockedArrayDirect(merged);
     }
  
+    // P10: put the automation choices back, last, because the owner-gates they are
+    // checked against are themselves restored above — the telescope's by
+    // `addPermanentBuffsBackInAfterRebirth()`, the research auto-buyer's by the
+    // explicit line near the top. Checking either one earlier would read the
+    // freshly-wiped `false` and silently drop every setting.
+    REBIRTH_PERSISTED_AUTOMATION.forEach((entry, index) => {
+        const value = persistedAutomation[index];
+        if (value === undefined) {
+            return;
+        }
+
+        if (!getResourceDataObject(entry.ownedBy.section, entry.ownedBy.path, true)) {
+            return;
+        }
+
+        setResourceDataObject(value, entry.section, entry.path);
+    });
+
     setResourceDataObject(currentAp, 'ascendencyPoints', ['quantity']);
 }
 
