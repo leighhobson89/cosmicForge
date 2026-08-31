@@ -379,7 +379,9 @@ import {
     timeWarp,
     forceClearWeather,
     sellAllUnlockedResources,
-    sellAllUnlockedCompounds
+    sellAllUnlockedCompounds,
+    increaseAllStorage,
+    getIncreasableStorageKeys
 } from './game.js';
 import { 
     capitaliseString, 
@@ -491,6 +493,41 @@ function updateSellAllButtonStates() {
             compoundsButton.disabled = !hasAny;
         }
     }
+}
+
+
+/**
+ * P5: light the Increase All Storage buttons only while there is something to
+ * claim.
+ *
+ * The eligibility question is the sweep's own — `getIncreasableStorageKeys()` —
+ * rather than a second copy of "is this material full" written here, so the
+ * button can never offer a claim the sweep would then decline, or refuse one it
+ * would have made. It is asked every frame from `updateDynamicUiContent()`,
+ * which is what makes the button light the instant a store tops out, with no
+ * notification and no pane visit involved.
+ */
+function updateIncreaseAllStorageButtonStates() {
+    const buttons = [
+        ['increaseAllStorageResourcesButton', 'resources'],
+        ['increaseAllStorageCompoundsButton', 'compounds']
+    ];
+
+    buttons.forEach(([buttonId, category]) => {
+        const button = document.getElementById(buttonId);
+        if (!button) {
+            return;
+        }
+
+        const hasAny = (getIncreasableStorageKeys(category) || []).length > 0;
+
+        button.classList.toggle('green-ready-text', hasAny);
+        button.classList.toggle('red-disabled-text', !hasAny);
+        setElementPointerEvents(button, hasAny);
+        if ('disabled' in button) {
+            button.disabled = !hasAny;
+        }
+    });
 }
 
 
@@ -1861,6 +1898,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (sellAllCompoundsButton) {
         sellAllCompoundsButton.addEventListener('click', () => {
             sellAllUnlockedCompounds();
+        });
+    }
+
+
+    const increaseAllStorageResourcesButton = document.getElementById('increaseAllStorageResourcesButton');
+    if (increaseAllStorageResourcesButton) {
+        increaseAllStorageResourcesButton.addEventListener('click', () => {
+            increaseAllStorage('resources');
+        });
+    }
+
+
+    const increaseAllStorageCompoundsButton = document.getElementById('increaseAllStorageCompoundsButton');
+    if (increaseAllStorageCompoundsButton) {
+        increaseAllStorageCompoundsButton.addEventListener('click', () => {
+            increaseAllStorage('compounds');
         });
     }
     const ua = (typeof window !== 'undefined' && window.navigator?.userAgent) ? window.navigator.userAgent.toLowerCase() : '';
@@ -8171,6 +8224,9 @@ export function updateDynamicUiContent() {
 
 
     updateSellAllButtonStates();
+
+
+    updateIncreaseAllStorageButtonStates();
 
 
     applyGalacticMarketLockdownUi();

@@ -658,13 +658,45 @@ function handleCosmicRipTechnologyScreenButtonAndDescriptionStates(element, tele
 
 const STORAGE_FULL_NOTIFICATION_COOLDOWN_MS = 60 * 1000;
 
+/**
+ * Claim one material's earned storage increase.
+ *
+ * Every claim route in the game funnels through here — the pane's own button,
+ * the storage-full notification's action, and P5's Increase All Storage sweep —
+ * so this is where the claim is checked against the live state rather than
+ * against whatever was true when the control that offered it was drawn.
+ *
+ * That check has to be here because the notification's action button is not
+ * governed by the frame loop's `red-disabled-text` pass the way every other
+ * purchase in the game is: notifications are queued one at a time per
+ * classification, so a store that fills alongside seven others leaves seven
+ * toasts waiting their turn, and every one of them was still offering a live
+ * claim minutes after the store had been drained by an earlier claim. Taking
+ * one of those doubled the cap for nothing: `increaseResourceStorage()` queues
+ * the charge but the cap increase is a deferred job that ran regardless of
+ * whether `checkAndDeductResources()` could actually collect it.
+ *
+ * Returns whether the claim was made.
+ */
 function performIncreaseStorageForKey(category, key) {
     if (!category || !key) {
-        return;
+        return false;
     }
 
     const normalizedCategory = category === 'resources' ? 'resources' : 'compounds';
     const normalizedKey = String(key || '').toLowerCase();
+
+    if (!getIncreasableStorageKeys(normalizedCategory).includes(normalizedKey)) {
+        // Not earned any more: the store is no longer at its cap, or the
+        // reservoir's concrete has been spent since the offer was made. Take the
+        // stale offer off the screen rather than honouring it.
+        disableStorageNotificationActionIfShowing(normalizedKey);
+        const staleBucket = storageFullNotificationState[normalizedCategory];
+        if (staleBucket) {
+            staleBucket[normalizedKey] = false;
+        }
+        return false;
+    }
 
     if (normalizedCategory === 'compounds' && normalizedKey === 'water') {
         increaseResourceStorage(['waterQuantity', 'concreteQuantity'], ['water', 'concrete'], ['compounds', 'compounds']);
@@ -673,7 +705,7 @@ function performIncreaseStorageForKey(category, key) {
         if (bucket) {
             bucket[normalizedKey] = false;
         }
-        return;
+        return true;
     }
 
     increaseResourceStorage([`${normalizedKey}Quantity`], [normalizedKey], [normalizedCategory]);
@@ -682,6 +714,178 @@ function performIncreaseStorageForKey(category, key) {
     if (bucket) {
         bucket[normalizedKey] = false;
     }
+    return true;
+}
+
+// ============================================================================
+// P5 (player-feedback plan): Increase All Storage.
+// ============================================================================
+//
+// A storage increase used to be claimed one material at a time, and the claim
+// the player actually saw lived inside a notification that times out — so a
+// player who looked away lost it until the next notification fired or they
+// walked to the material's own pane. The sweep below is the state-derived
+// claim: it asks the data object which unlocked materials are standing at their
+// cap right now and claims every one of them, through the very same
+// `increaseResourceStorage` the pane button and the notification already call.
+// No pricing and no cap arithmetic lives here.
+
+/**
+ * Solar is unlocked like any other resource but is not storage-limited. It has
+ * no Increase Storage row, no `solarQuantity` element for the deferred job to
+ * clear, and it ships with `quantity === storageCapacity`, so a sweep that did
+ * not skip it would read it as permanently claimable and then throw.
+ */
+const STORAGE_INCREASE_EXCLUDED_RESOURCES = new Set(['solar']);
+
+/**
+ * Materials whose storage increase charges a *second* material as well as
+ * itself, as a share of the first one's capacity.
+ *
+ * Only the water reservoir does this today, and `increaseResourceStorage()`
+ * owns the arithmetic — the share is repeated here so the sweep can budget for
+ * the charge before it commits to it, not so it can apply it.
+ */
+const STORAGE_INCREASE_SECONDARY_COSTS = {
+    water: { key: 'concrete', shareOfCapacity: 0.3 }
+};
+
+/**
+ * The order the sweep considers materials in: anything that charges a second
+ * material first, then everything else in declaration order.
+ *
+ * This ordering is the whole answer to the water/concrete case. Water and
+ * concrete can both be full at once, and one click can only ever pay for one of
+ * them — the reservoir charges 30% of the water cap in concrete, while
+ * concrete's own increase spends all but one unit of the concrete stock, so
+ * whichever is claimed first puts the other out of reach. Claiming the
+ * reservoir first spends only that 30% and leaves the rest of the concrete
+ * standing, and concrete's own claim comes back by itself the moment its store
+ * refills to its cap. The other way round the reservoir is starved on every
+ * sweep, because concrete is drained to a single unit every time.
+ */
+function storageClaimOrder(category) {
+    const keys = Object.keys(getResourceDataObject(category) || {}).map((k) => String(k || '').toLowerCase());
+    const dependent = keys.filter((key) => STORAGE_INCREASE_SECONDARY_COSTS[key]);
+    return [...dependent, ...keys.filter((key) => !STORAGE_INCREASE_SECONDARY_COSTS[key])];
+}
+
+/**
+ * The unlocked materials in `category` whose storage can be increased right now.
+ *
+ * Eligibility is exactly the pane button's own gate — `quantity >= capacity - 1`,
+ * the game deliberately leaving one unit behind so an upgrade cannot black out
+ * the grid — plus the secondary charge above, which the pane's button does not
+ * check but the storage-full notification does.
+ *
+ * Costs are budgeted as the list is walked, so no two claims in one sweep can
+ * spend the same stock. That matters because a claim does not pay for itself
+ * when it is made: `increaseResourceStorage()` queues the charge into
+ * `itemsToDeduct`, a keyed map the frame loop settles on its next pass, so two
+ * claims charging the same material in one frame would collapse into one
+ * deduction and hand the second increase out free. Budgeting means that pair is
+ * never queued in the first place.
+ *
+ * Exported because the header button's enabled state is this same question
+ * asked every frame — see `updateIncreaseAllStorageButtonStates()` in ui.js.
+ */
+export function getIncreasableStorageKeys(category) {
+    const normalizedCategory = category === 'resources' ? 'resources' : 'compounds';
+    const unlockedArray = normalizedCategory === 'resources'
+        ? (getUnlockedResourcesArray?.() || [])
+        : (getUnlockedCompoundsArray?.() || []);
+    const unlocked = new Set(unlockedArray.map((v) => String(v || '').toLowerCase()));
+
+    const committed = Object.create(null);
+    const stockLeft = (key) => {
+        const quantity = Number(getResourceDataObject(normalizedCategory, [key, 'quantity'], true)) || 0;
+        return quantity - (committed[key] || 0);
+    };
+
+    const eligible = [];
+
+    storageClaimOrder(normalizedCategory).forEach((key) => {
+        if (!unlocked.has(key)) {
+            return;
+        }
+        if (normalizedCategory === 'resources' && STORAGE_INCREASE_EXCLUDED_RESOURCES.has(key)) {
+            return;
+        }
+
+        const capacity = Number(getResourceDataObject(normalizedCategory, [key, 'storageCapacity'], true)) || 0;
+        if (!(capacity > 0)) {
+            return;
+        }
+
+        const price = capacity - 1;
+        if (stockLeft(key) < price) {
+            return;
+        }
+
+        const secondary = STORAGE_INCREASE_SECONDARY_COSTS[key];
+        const secondaryPrice = secondary ? capacity * secondary.shareOfCapacity : 0;
+        if (secondary && stockLeft(secondary.key) < secondaryPrice) {
+            return;
+        }
+
+        committed[key] = (committed[key] || 0) + price;
+        if (secondary) {
+            committed[secondary.key] = (committed[secondary.key] || 0) + secondaryPrice;
+        }
+        eligible.push(key);
+    });
+
+    return eligible;
+}
+
+/**
+ * Claim every storage increase that is currently earned in `category`, and say
+ * which ones were claimed.
+ *
+ * Returns the keys it claimed, in the order it claimed them, so callers and
+ * specs can see the partial-eligibility decision the sweep made rather than
+ * having to re-derive it.
+ */
+export function increaseAllStorage(category) {
+    const normalizedCategory = category === 'resources' ? 'resources' : 'compounds';
+    const increased = [];
+
+    getIncreasableStorageKeys(normalizedCategory).forEach((key) => {
+        // `performIncreaseStorageForKey` re-checks the claim against live state,
+        // so what it actually did is what gets reported — the sweep never
+        // announces a claim it did not make.
+        if (!performIncreaseStorageForKey(normalizedCategory, key)) {
+            return;
+        }
+        increased.push(key);
+        // Settle the charge now rather than leaving it for the frame loop, the
+        // same reason `buyMaxForRow` does: until it settles, the stock still
+        // reads as full, so a second press landing inside the same frame would
+        // queue the identical claim again and overwrite the first in
+        // `itemsToDeduct` — one payment, two doublings. Settling makes each
+        // claim equivalent to one ordinary click of the pane's own button.
+        checkAndDeductResources();
+    });
+
+    if (increased.length === 0) {
+        return [];
+    }
+
+    const names = increased.map((key) => localizeMaterialName(key, normalizedCategory, getLanguage()));
+    // Its own classification, deliberately, not 'storage'. Notifications are
+    // queued one at a time per classification, and the stores this sweep just
+    // claimed each raised a storage-full toast of their own that is still
+    // sitting in that queue at eight seconds apiece — so a summary posted there
+    // would not appear until a minute after the press that caused it, which is
+    // indistinguishable from no summary at all.
+    showNotification(
+        localize('notificationIncreasedAllStorage', getLanguage()).replace('{materials}', names.join(', ')),
+        'info',
+        4000,
+        'storageIncreased'
+    );
+
+    return increased;
 }
 
 function optionButtonGlowChecks() {

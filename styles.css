@@ -1949,13 +1949,31 @@ body {
      margin: 0;
  }
 
+ /* P5: Sell All and Storage All share the header's right-hand slot. Both are
+    kept compact — short labels and a smaller face than an ordinary option
+    button — because the sidebar is only a fraction of the window and the header
+    still has to hold the pane title beside them. They wrap onto a second line
+    rather than overflowing if a translation runs long. */
+ .container-item-menu-header.sidebar-intro-header .sidebar-header-actions {
+     flex: 0 1 auto;
+     flex-direction: row;
+     flex-wrap: wrap;
+     justify-content: flex-end;
+     align-items: center;
+     gap: 4px;
+     margin-left: 8px;
+     min-width: 0;
+ }
+
  .container-item-menu-header.sidebar-intro-header #sellAllResourcesButton,
- .container-item-menu-header.sidebar-intro-header #sellAllCompoundsButton {
+ .container-item-menu-header.sidebar-intro-header #sellAllCompoundsButton,
+ .container-item-menu-header.sidebar-intro-header #increaseAllStorageResourcesButton,
+ .container-item-menu-header.sidebar-intro-header #increaseAllStorageCompoundsButton {
      flex: 0 0 auto;
-     max-width: 45%;
-     margin-left: 10px;
-     padding: 6px 8px;
-     font-size: 0.9rem;
+     max-width: 100%;
+     padding: 5px 7px;
+     font-size: 0.81rem;
+     line-height: 1.2;
      white-space: nowrap;
  }
 

@@ -43,6 +43,25 @@ The eight extractable base resources plus solar, driven through the Resources ta
 - [ ] Buy Max: a bulk run does not raise one notification per unit bought
 - [ ] Buy Max: a compound autobuyer bulk-buys through its own cost path, including the cash-priced diesel tier 1
 - [ ] Buy Max: a part-built rocket is finished exactly, and a finished one costs nothing to press again
+- [ ] Increase All Storage: a Storage All button sits beside Sell All in both sidebar headers
+- [ ] Increase All Storage: the button is dark on a fresh run and lights the moment a store tops out
+- [ ] Increase All Storage: the button goes dark again once every claim has been taken
+- [ ] Increase All Storage: a press with nothing earned changes nothing and says nothing
+- [ ] Increase All Storage: one press claims every full store, doubling the cap and charging the old one
+- [ ] Increase All Storage: partial stores are left alone, at their own cap and their own price
+- [ ] Increase All Storage: the notification names exactly the stores that were claimed
+- [ ] Increase All Storage: solar is never swept, having no storage to increase
+- [ ] Increase All Storage: a full store the player has not unlocked yet is not claimed
+- [ ] Increase All Storage: the resources button never touches compounds, and vice versa
+- [ ] Increase All Storage: the compounds header claims compounds
+- [ ] Increase All Storage: the water reservoir is claimed before concrete's own increase
+- [ ] Increase All Storage: concrete's own claim comes back once its store refills
+- [ ] Increase All Storage: a full reservoir with too little concrete is not claimed, and nothing is charged
+- [ ] Increase All Storage: a claim survives its storage-full notification expiring
+- [ ] Increase All Storage: the pane's own Increase Storage button still works after a sweep
+- [ ] Increase All Storage: the storage-full notification action still works after a sweep
+- [ ] Increase All Storage: a storage-full notification cannot be claimed after a sweep already claimed it
+- [ ] Increase All Storage: enlarging the reservoir is refused when the concrete cannot be paid
 
 ## Status meaning
 
