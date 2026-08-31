@@ -1726,6 +1726,50 @@ button {
     --consumption-colors: #c62828, #e53935, #ef5350;
 }
 
+/* Misty was listed in `requiredThemes` (ui.js) and offered in the theme dropdown,
+   and it ships its own megastructure art in images/megaStructure/misty/ — but it
+   had no rules here at all, so selecting it silently fell through to the :root
+   defaults. That made it the one theme whose appearance was an accident of the
+   cascade rather than a decision, and it meant any future edit to :root would
+   change Misty without anyone intending it.
+
+   These are exactly the values it was already resolving to, written down. Nothing
+   about how Misty looks today changes; it simply now says so explicitly, and has
+   somewhere to be adjusted when its palette is designed.
+   Large UI refactor, finding F8 — see docs/largeUIRefactor.md. */
+[data-theme="misty"] {
+    --battleBgImg: url('./resources/images/battleImage1_terminal.png');
+    --twinkle-scale: 1.2;
+    --disabled-text: red;
+    --ready-text: rgba(0, 255, 0, 1);
+    --ready-text-transparent: rgba(0, 255, 0, 0.3);
+    --warning-text: orange;
+    --stats-this-run-text: #87cefa;
+    --stats-all-time-text: #ff80ff;
+    --bg-color: black;
+    --text-color: rgba(255, 255, 255, 1);
+    --text-color-rgb: 255, 255, 255;
+    --text-color-hex: #00ff00;
+    --text-hover-color: #ddd;
+    --text-focus-color: #eee;
+    --tab-bg-color: #444;
+    --tab-bg-hover: #555;
+    --tab-selected-bg-color: #222;
+    --tab-border-color: #555;
+    --tab-invisible-bg-color: #333;
+    --tab-invisible-text-color: #333;
+    --container-border-color: #bbb;
+    --container-bg-color: #333;
+    --button-bg-color: #444;
+    --button-bg-active: #666;
+    --star-color-prominent: #9da340;
+    --star-color-settled: #8fc5ff;
+    --current-star-border: #ff4500;
+    --generation-colors: #4CAF50, #8BC34A, #CDDC39;
+    --consumption-colors: #F44336, #E91E63, #9C27B0;
+}
+
+
 [data-theme="dark"] .option-row-description {
     border-top-style: solid;
 }

@@ -7,6 +7,13 @@
     <title>Cosmic Forge</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <!-- Large UI refactor, Phase 1 (docs/largeUIRefactor.md). Both files are additive:
+         tokens.css only defines custom properties, components.css only defines `.ui-*`
+         classes that nothing in the game carries yet. They load after styles.css so the
+         token definitions can build on its theme variables. Retired together with the
+         legacy row system at Phase 7. -->
+    <link rel="stylesheet" href="newUI/tokens.css">
+    <link rel="stylesheet" href="newUI/components.css">
     <link rel="icon" href="./images/favicon.ico" type="image/x-icon">
 </head>
 <!--  -->

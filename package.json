@@ -35,6 +35,8 @@
       "main.js",
       "package.json",
       "styles.css",
+      "newUI/**/*",
+      "!newUI/demo.html",
       "*.png",
       "*.js",
       "images/**/*",

@@ -1,0 +1,393 @@
+/* ============================================================================
+   newUI/components.css — Phase 1 of the large UI refactor.
+   See docs/largeUIRefactor.md §3.2 and the Phase 1 section.
+
+   The section-level grid that replaces the per-row mini-table.
+
+   PURELY ADDITIVE. Every selector here is namespaced `.ui-` and none of these
+   class names exists anywhere in styles.css or in any drawTabNContent.js today
+   (verified: zero occurrences). Nothing in the shipped game carries them, so
+   loading this file cannot change the current rendering. It is exercised only by
+   newUI/demo.html until Phase 3 starts producing real rows.
+
+   THE CENTRAL IDEA
+   ----------------
+   Today each `.option-row` is its own flex context that declares its own widths
+   (20% + 50% + 35% = 105%, styles.css:2191-2210), so two rows resolve their
+   columns independently and need not line up. Here the *section* owns one grid
+   and every row places its cells into that grid's named tracks. Alignment stops
+   being something each row has to get right and becomes structural: rows cannot
+   be misaligned, because they do not have their own columns to misalign.
+
+   Rows are `display: contents` so their cells participate in the section grid
+   directly. That is what lets a row stay a real element — for ids, dataset,
+   reveal state and hover — while contributing no box of its own.
+   ========================================================================= */
+
+
+/* --- Pane: one set of tracks for every section on the screen --------------
+
+   A section on its own is already internally aligned, but two sections are two
+   independent grids, and the `action` track is `auto` — so a section whose
+   buttons are wider resolves *all* its tracks differently and its action column
+   lands somewhere else. The first build of this file had exactly that bug: two
+   sections, two left edges, 35px apart.
+
+   `.ui-pane` fixes it at the root. The pane owns the tracks; each section spans
+   all of them and re-uses them via `grid-template-columns: subgrid`. Every row
+   on the pane therefore shares one column definition no matter which section it
+   sits in, which is what makes the alignment structural rather than a
+   coincidence of similar content.
+
+   Note the deliberate constraint: a subgrid item's own horizontal padding would
+   inset its tracks and reintroduce the drift, so sections inside a pane carry no
+   horizontal padding and are visually bare. Cards are a Phase 6 concern and will
+   be drawn behind the grid rather than as padding on it.                    */
+
+.ui-pane {
+    display: grid;
+    grid-template-columns:
+        [title]  var(--ui-track-title)
+        [stat]   var(--ui-track-stat)
+        [cost]   var(--ui-track-cost)
+        [action] var(--ui-track-action);
+    column-gap: var(--ui-sp-4);
+    row-gap: var(--ui-sp-4);
+}
+
+.ui-pane > .ui-section {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+    row-gap: var(--ui-sp-2);
+    align-items: center;
+
+    /* no horizontal padding — see above */
+    padding: 0;
+    border: 0;
+    background: none;
+    box-shadow: none;
+}
+
+/* Inside a pane the row container adds nothing: its children go straight into
+   the section's subgrid. */
+.ui-pane .ui-grid {
+    display: contents;
+}
+
+.ui-pane > .ui-section > .ui-section-head {
+    grid-column: 1 / -1;
+}
+
+/* Subgrid is in every current evergreen browser and in the Electron the game
+   ships on. This fallback keeps the layout sane rather than identical if it is
+   ever absent: sections fall back to their own matching track definition, which
+   aligns wherever the action content is the same width. */
+@supports not (grid-template-columns: subgrid) {
+    .ui-pane > .ui-section {
+        grid-template-columns:
+            [title]  var(--ui-track-title)
+            [stat]   var(--ui-track-stat)
+            [cost]   var(--ui-track-cost)
+            [action] var(--ui-track-action);
+        column-gap: var(--ui-sp-4);
+    }
+}
+
+
+/* --- Section ------------------------------------------------------------- */
+
+.ui-section {
+    display: block;
+    background: var(--ui-section-bg);
+    border: 1px solid var(--ui-section-border);
+    border-radius: var(--ui-section-radius);
+    box-shadow: var(--ui-section-shadow);
+    padding: var(--ui-sp-3) var(--ui-sp-4);
+}
+
+.ui-section + .ui-section {
+    margin-top: var(--ui-sp-3);
+}
+
+/* A section with no heading and no frame — for panes that are one flat list. */
+.ui-section.ui-section-bare {
+    border: 0;
+    background: none;
+    box-shadow: none;
+    padding: 0;
+}
+
+.ui-section-head {
+    display: flex;
+    align-items: center;
+    gap: var(--ui-sp-2);
+    margin-bottom: var(--ui-sp-2);
+    font-size: var(--ui-fs-colhead);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ui-colhead-color);
+}
+
+/* The rule that trails a section heading is drawn, not typed, so it cannot
+   drift out of sync with the heading's length the way a dashed border would. */
+.ui-section-head::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--ui-section-border);
+    opacity: 0.5;
+}
+
+
+/* --- The grid ------------------------------------------------------------ */
+
+.ui-grid {
+    display: grid;
+    grid-template-columns:
+        [title]  var(--ui-track-title)
+        [stat]   var(--ui-track-stat)
+        [cost]   var(--ui-track-cost)
+        [action] var(--ui-track-action);
+    align-items: center;
+    column-gap: var(--ui-sp-4);
+    row-gap: var(--ui-sp-2);
+}
+
+/* Column headings are written ONCE per section instead of being implied by
+   every row's own label — a direct space win, and the thing that lets the stat
+   and cost columns lose their inline prefixes. */
+.ui-colhead {
+    font-size: var(--ui-fs-colhead);
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--ui-colhead-color);
+    padding-bottom: var(--ui-sp-1);
+}
+
+.ui-colhead-action {
+    text-align: right;
+}
+
+
+/* --- Rows ---------------------------------------------------------------- */
+
+/* `display: contents` dissolves the row's own box so its cells land straight in
+   the section grid. The element itself survives for id, dataset and state. */
+.ui-row {
+    display: contents;
+}
+
+/* A full-width hairline between rows. A grid item rather than a border, so it
+   spans every track including the gaps, which a per-cell border cannot. */
+.ui-row-rule {
+    grid-column: 1 / -1;
+    height: 1px;
+    background: var(--ui-row-rule);
+}
+
+.ui-row:first-of-type > .ui-row-rule {
+    display: none;
+}
+
+/* Hover has to be driven from the cells, because a `display: contents` element
+   has no box to hover. `:has()` keeps it declarative rather than needing JS. */
+.ui-row:hover > .ui-cell {
+    background: var(--ui-row-bg-hover);
+}
+
+.ui-cell {
+    min-width: 0;              /* let long localised strings wrap, not overflow */
+    background: var(--ui-row-bg);
+    padding: var(--ui-sp-2) var(--ui-sp-1);
+    transition: background 120ms ease;
+}
+
+/* Round only the outer edges of a hovered row, so the highlight reads as one
+   band across the grid rather than four separate tinted boxes. */
+.ui-cell-title  { border-radius: var(--ui-row-radius) 0 0 var(--ui-row-radius); }
+.ui-cell-action { border-radius: 0 var(--ui-row-radius) var(--ui-row-radius) 0; }
+
+
+/* --- Cells --------------------------------------------------------------- */
+
+.ui-cell-title {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.ui-cell-title .ui-title {
+    font-size: var(--ui-fs-label);
+    line-height: 1.25;
+}
+
+/* The upgrade name, which the legacy row rendered INSTEAD of the label (see
+   `renderNameABs` in createOptionRow — when it is set, `labelText` is built,
+   localised and then discarded). Here both fit, so no localised string is
+   computed for nothing. */
+.ui-cell-title .ui-subtitle {
+    font-size: var(--ui-fs-sub);
+    line-height: 1.25;
+    color: var(--ui-sub-color);
+}
+
+.ui-cell-stat {
+    font-size: var(--ui-fs-stat);
+    font-variant-numeric: tabular-nums;   /* quantities line up down the column */
+}
+
+.ui-cell-stat .ui-stat-value {
+    font-weight: 700;
+}
+
+.ui-cell-cost {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ui-sp-1);
+    font-size: var(--ui-fs-cost);
+}
+
+/* One chip per cost component. The legacy row rendered the whole cost as a
+   single string that the frame loop then re-parsed by position
+   (complexPurchaseBuildingFormatter, game.js:12683); a chip carries its own
+   value, so Phase 2 can write the number without any string surgery. */
+.ui-chip {
+    border: 1px solid var(--ui-chip-border);
+    background: var(--ui-chip-bg);
+    border-radius: 999px;
+    padding: 1px var(--ui-sp-2);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.ui-chip-currency {
+    color: var(--accent-strong);
+    border-color: currentColor;
+}
+
+.ui-cell-action {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: var(--ui-sp-2);
+}
+
+
+/* --- Affordability ------------------------------------------------------
+
+   Unchanged mechanism, deliberately. Affordability in this game is enforced by
+   the frame loop adding `red-disabled-text` (whose CSS is `pointer-events:
+   none`), and that is by design — purchase handlers carry no guard of their own.
+   The new cost cell therefore takes the very same class on the very same
+   schedule; all that changes is which element wears it. The rule below only
+   makes the chips inside follow the cell's colour.                          */
+
+.ui-cell-cost.red-disabled-text .ui-chip {
+    color: inherit;
+    border-color: currentColor;
+}
+
+
+/* --- Collapsible detail --------------------------------------------------
+
+   The single largest space reclamation. The legacy row rendered its prose
+   description as a permanent full-width band above every row
+   (`.option-row-description`, styles.css:2184). Here it is collapsed behind a
+   disclosure and spans all four tracks when opened.                        */
+
+.ui-detail {
+    grid-column: 1 / -1;
+    font-size: var(--ui-fs-detail);
+    color: var(--ui-detail-color);
+    line-height: 1.45;
+    max-width: 78ch;               /* keep prose near a readable measure */
+}
+
+.ui-disclosure {
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    color: inherit;
+    font: inherit;
+    font-size: var(--ui-fs-colhead);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.6;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ui-sp-1);
+}
+
+.ui-disclosure:hover,
+.ui-disclosure:focus-visible {
+    opacity: 1;
+}
+
+.ui-disclosure:focus-visible {
+    outline: 2px solid var(--accent-strong);
+    outline-offset: 2px;
+}
+
+.ui-disclosure .ui-caret {
+    display: inline-block;
+    transition: transform 150ms ease;
+}
+
+.ui-disclosure[aria-expanded="true"] .ui-caret {
+    transform: rotate(90deg);
+}
+
+.ui-detail-body {
+    padding-top: var(--ui-sp-1);
+    padding-bottom: var(--ui-sp-2);
+}
+
+
+/* --- Responsive ----------------------------------------------------------
+
+   Phase 6 owns responsiveness properly. What is here is only the minimum that
+   stops the new grid from being *born* fixed-width, since the whole point of
+   the exercise is to stop hard-coding widths: below 900px the stat column folds
+   away and cost moves under the title, and the section keeps working.
+
+   The game shell around it is still fixed-proportion (styles.css:1902/1923) —
+   that is F6, and it is not in this phase's scope.                         */
+
+@media (max-width: 900px) {
+    .ui-pane,
+    .ui-grid {
+        grid-template-columns: [title] 1fr [cost] auto [action] auto;
+    }
+
+    .ui-colhead-stat,
+    .ui-cell-stat {
+        display: none;
+    }
+}
+
+@media (max-width: 620px) {
+    .ui-pane,
+    .ui-grid {
+        grid-template-columns: [title] 1fr [action] auto;
+    }
+
+    .ui-colhead-cost {
+        display: none;
+    }
+
+    /* Cost drops beneath the title rather than being lost. */
+    .ui-cell-cost {
+        grid-column: 1 / -1;
+        padding-top: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ui-cell,
+    .ui-disclosure .ui-caret {
+        transition: none;
+    }
+}

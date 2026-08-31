@@ -41,7 +41,7 @@ The audit found three assets worth building on rather than replacing:
 
 | Asset | Evidence | Why it matters |
 |---|---|---|
-| **A real design-token system** | `:root` + 9 `[data-theme]` blocks ([styles.css:1526](../styles.css#L1526), [:590](../styles.css#L590), [:679](../styles.css#L679)) | Themes are already variables, not hardcoded colours. The newer four themes (supernova/galaxy/space/light) even define `--ui-radius`, `--ui-shadow`, `--ui-glow`, `--ui-surface-*`, `--accent-*`. The grid system can be built entirely on tokens. |
+| **A real design-token system** | `:root` + a generic `[data-theme]` baseline + 8 per-theme blocks ([styles.css:1526](../styles.css#L1526), [:590](../styles.css#L590), [:679](../styles.css#L679)) | Themes are already variables, not hardcoded colours, and `[data-theme]` gives *every* theme a `--ui-radius` / `--ui-shadow` / `--ui-glow` / `--ui-surface-*` baseline that the four newest themes then enrich. The grid system can be built entirely on tokens, and only needs a spacing scale added. |
 | **Disciplined localisation** | **2,611 keys × 6 languages, all six in exact sync** (`localization.json`) | No string is hardcoded at the row level. Migration is a layout change, not a translation project — provided the new row keeps taking *localised strings* rather than parsing them. |
 | **A proven caching pattern** | `getCachedElementsToCheck` + MutationObserver ([game.js:2714-2795](../game.js#L2714)) | Someone has already solved "stop re-querying the DOM every frame" once, correctly, in this codebase. Phase 5 generalises that exact pattern rather than inventing one. |
 
@@ -186,22 +186,35 @@ instead of trusting what it built.
 `requiredThemes = ['terminal','dark','misty','light','frosty','summer','supernova','galaxy','space']`
 ([ui.js:5996](../ui.js#L5996)); default is `terminal` ([index.html:13](../index.html#L13)).
 
-Only the four newest (`light`, `supernova`, `galaxy`, `space`) define the modern
-`--ui-radius` / `--ui-shadow` / `--ui-glow` / `--ui-surface-*` / `--accent-*` tokens. The older
-ones (`terminal`, `dark`, `frosty`, `summer`) define colour tokens only, so any component built on
-the modern tokens degrades on more than half the themes. **No theme defines a spacing scale** — all
-spacing is literal px scattered through the stylesheet.
+The generic `[data-theme]` block ([styles.css:590](../styles.css#L590)) already gives **every** theme
+a baseline of the modern surface tokens — `--ui-radius: 10px`, `--ui-radius-sm: 8px`, shadows and
+glows set to `none`, and `--ui-surface-*` mapped onto the container colour variables. The four
+newest themes (`light`, `supernova`, `galaxy`, `space`) then override that baseline with real radii,
+shadows and glows; the older four (`terminal`, `dark`, `frosty`, `summer`) keep the flat defaults,
+which for `terminal` in particular is a reasonable look rather than an omission.
 
-> **Live gap found during this audit — `misty` has no stylesheet at all.** It is listed in
-> `requiredThemes` ([ui.js:5996](../ui.js#L5996)), offered in the theme dropdown
-> ([drawTab9Content.js:143](../drawTab9Content.js#L143)), registered in
-> [constantsAndGlobalVars.js:651](../constantsAndGlobalVars.js#L651), and has a complete
-> megastructure image set (`images/megaStructure/misty/*`) — but `grep -c misty styles.css`
-> returns **0**. There is no `[data-theme="misty"]` block, so selecting Misty silently falls back
-> to the `:root` defaults (black background, white text) rather than rendering a Misty palette.
-> This is a real defect, not a refactor artefact; it is called out here because Phase 1 touches
-> every theme block and is the natural place to fix it. Raising it separately is also reasonable —
-> it needs a palette decision, which is Leigh's call, not the refactor's.
+So the surface tokens are in better shape than a first pass suggests. Two genuine gaps remain:
+
+1. **No theme defines a spacing scale.** All spacing is literal px scattered through the stylesheet.
+   This is the one the grid system actually needs, and it is Phase 1's real deliverable.
+2. **`--accent-strong` / `--accent-soft` / `--accent-strong-rgb` are defined only under
+   `[data-theme="light"]`** ([styles.css:1600-1602](../styles.css#L1600)), yet they are *used* in two
+   rules — `.factory-star::after` ([:3504](../styles.css#L3504)) and `.factory-star-text`
+   ([:4476](../styles.css#L4476)) — with a literal `yellow` fallback. On the other eight themes those
+   two rules therefore render plain yellow rather than a themed accent. Cosmetic rather than broken,
+   but it means there is no accent token a new component can rely on.
+
+> **Live gap found during this audit — `misty` had no colour palette.** ✅ **FIXED.** It was listed
+> in `requiredThemes` ([ui.js:5996](../ui.js#L5996)), offered in the theme dropdown
+> ([drawTab9Content.js:143](../drawTab9Content.js#L143)) and shipped a complete megastructure image
+> set — but `grep -c misty styles.css` returned **0**, so every colour fell through to `:root`. That
+> made it the one theme whose appearance was an accident of the cascade, and it meant any future edit
+> to `:root` would have changed Misty without anyone intending it.
+>
+> A `[data-theme="misty"]` block now exists in `styles.css` alongside its siblings, holding exactly
+> the values it was already resolving to. Nothing about how Misty looks changes — that is the point,
+> and the baseline comparison confirms it — but it is now a decision rather than a fallback, and there
+> is somewhere to edit when its palette is designed.
 
 ### Findings → phases
 
@@ -314,66 +327,147 @@ state. Old and new rows coexist from Phase 3 to Phase 7.
 
 ---
 
-### Phase 0 — Safety net (before touching anything)
+### ~~Phase 0 — Safety net (before touching anything)~~ ✅ DONE
 
-**Goal.** Make it impossible to lose information or break a theme without a test going red.
+~~**Goal.** Make it impossible to lose information or break a theme without a test going red.~~
 
-- **Visual regression harness.** Playwright screenshots across **9 themes × ~12 representative
-  panes**, committed as baselines. Extends the existing `tests/e2e/**` suite and its
-  `game.debugClick(...)` / `readState(...)` helpers.
-- **The information-parity fixture.** Walk every `createOptionRow` call site, snapshot the rendered
-  row's complete text content and control inventory to JSON. This artefact is the contract: after
-  each migration, the same pane must still render **every string and every control** from its
-  baseline. This is what makes "no information lost" a test result rather than a promise.
-- **Localisation guard.** Extend `validateLocalization.cjs` to fail if a migrated row introduces a
-  literal user-facing string instead of a loc key — all six languages stay at parity.
+~~- **Visual regression harness.** Playwright screenshots across **9 themes × ~12 representative
+  panes**, committed as baselines.~~
+~~- **The information-parity fixture.** Walk every `createOptionRow` call site, snapshot the rendered
+  row's complete text content and control inventory to JSON.~~
+~~- **Localisation guard.** Extend `validateLocalization.cjs` to fail if a migrated row introduces a
+  literal user-facing string instead of a loc key.~~
 
-**Effort:** 12–16 h · **Risk:** None (additive) · **Exit:** baselines green on all 9 themes; parity
-fixture covers ≥ 95% of the 277 call sites.
+**As built.** Delivered as a *tool*, not a spec suite — Leigh's instruction was that these additive
+phases need no tests, so the safety net is a backup you can look at rather than a harness that can
+fail a build.
+
+- **`tools/capture-baseline-screenshots.mjs`** (new) — boots the game and photographs every pane it
+  can reach, in all nine themes, into `backupScreenshots/`.
+- **`backupScreenshots/`** (new, git-ignored) — **522 screenshots · 58 panes · 286 `.option-row`
+  elements**, ~55 MB, plus a `manifest.json` and a generated `README.md` recording the commit,
+  viewport and what was captured.
+- Captured from **Leigh's real save (`Leigh1981`)**, not a fresh game. A fresh boot has almost
+  nothing unlocked, so its panes are not a picture of the UI this refactor has to fix.
+
+**Read-only guarantee.** A real save must never be written to, so the guard is enforced at the
+network layer rather than by trusting a flag: every `*.supabase.co` request is intercepted and
+POST/PATCH/PUT/DELETE aborted, while GET passes so the save can load. Supabase maps `.select()` onto
+GET and `.insert()`/`.update()`/`.delete()` onto the write verbs, so that single cut blocks every
+cloud write in `saveLoadGame.js` — the autosave at [:91](../saveLoadGame.js#L91) included. On top of
+that, `stopAutoSave()` is called after boot, and the **saving / loading** pane is skipped entirely
+because the frame loop calls `saveGame(...)` every frame while it is open
+([game.js:2690](../game.js#L2690)). The run reported **no cloud write was even attempted**. No game
+source and no build flag was touched.
+
+**Not done, deliberately.** The information-parity fixture and the localisation guard were specced
+as tests; per the no-tests instruction they are deferred to Phase 3, where they become useful for
+the first time (there is nothing to compare a migrated row against until one exists).
+
+**Effort:** ~4 h · **Risk:** None (additive) · **Exit:** ✅ baselines exist for all 9 themes.
 
 ---
 
-### Phase 1 — Token completion & the grid primitive
+### ~~Phase 1 — Token completion & the grid primitive~~ ✅ DONE
 
-**Goal.** Make the design system able to express the target, with nothing migrated yet.
+~~**Goal.** Make the design system able to express the target, with nothing migrated yet.~~
 
-- Backfill `--ui-radius`, `--ui-radius-sm`, `--ui-shadow`, `--ui-glow`, `--ui-surface-*`,
-  `--accent-*` on `terminal`, `dark`, `misty`, `frosty`, `summer` (F8). Values chosen per theme's
-  existing palette — `terminal` stays sharp-cornered and glow-heavy; `frosty`/`summer` get soft
-  shadows.
-- Add the `--sp-*` spacing scale and `--density` to `:root`.
-- Add `.ui-section` / `.ui-row` / `.ui-cell-*` CSS with the named-track grid. **Unused so far.**
-- Add `createSection()` to `ui.js`, beside `createButton` / `createDropdown` — per project
-  convention, new controls are generic `create*()` factories, not bespoke widgets.
+**As built.** Four new files under `newUI/`, plus three lines in `index.html`. Everything is additive:
+`tokens.css` only *defines* custom properties and `components.css` only defines `.ui-*` classes that
+nothing in the game carries yet.
 
-**Effort:** 14–20 h · **Risk:** Low (additive; no existing selector changes) · **Exit:** a
-throwaway demo pane renders correctly on all 9 themes; Phase 0 baselines unchanged.
+| File | What it is |
+|---|---|
+| `newUI/tokens.css` | The `--ui-sp-*` spacing scale and `--ui-density` multiplier (neither existed anywhere); `--accent-strong` / `--accent-soft` / `--accent-strong-rgb` for the eight themes that lacked them; and `--ui-section-*` / `--ui-row-*` / `--ui-chip-*` surfaces derived from the existing `--ui-surface-*` baseline and `--text-color-rgb` |
+| `newUI/components.css` | `.ui-pane` / `.ui-section` / `.ui-grid` / `.ui-row` / `.ui-cell-*` — the named-track grid, the chips, the collapsible detail, and a first responsive fold |
+| `newUI/createSection.js` | `createPane()`, `createSection()`, `createUiRow()`, `createCostChips()`, `createDisclosure()`, `appendUiRow()`, `setUiLocaliser()` — generic `create*()` factories, per project convention |
+| `newUI/demo.html` | The throwaway demo pane. Loads the **real** `styles.css` first, so it proves the new components inherit the actual themes rather than a copy of them |
+
+**A real defect the demo caught.** The first build had each section owning its own grid. Because the
+action track is content-sized, a section with wider buttons resolved *all* its tracks differently —
+two sections, two action-column edges, 35px apart. That is the same defect as F2, one level up.
+Fixed by adding `.ui-pane`, which hoists the track definition to the top of the screen and has each
+section re-use it via CSS `subgrid`, so every row on the pane shares one column definition. The demo
+now reports **5 action cells across 2 sections · 1 distinct left edge · ALIGNED**. Note the
+constraint this imposes: a subgrid item's own horizontal padding would inset its tracks and bring
+the drift back, so sections inside a pane are drawn bare, and card treatment becomes a Phase 6
+concern to be drawn *behind* the grid.
+
+**Verified, not assumed.** Diffing `getComputedStyle` across all 773 elements of a loaded game with
+the two new stylesheets enabled vs disabled, in a single pass so the frame loop cannot mutate the DOM
+between snapshots: **0 elements differ**. The one rule the accent tokens do affect —
+`.factory-star::after` / `.factory-star-text`, which currently fall back to literal `yellow` on eight
+themes — matches **0 elements** in the captured state, so the improvement is latent rather than
+visible. `light` is deliberately untouched, as it already defines its own accent.
+
+**Packaging.** Wiring the stylesheets into `index.html` meant teaching both build paths about the
+folder: `newUI/**/*` added to `package.json`'s `build.files` allow-list (with `!newUI/demo.html`), and
+`backupScreenshots` + `demo.html` added to `create_build.py`'s `IGNORE_LIST` deny-list — without
+that, 55 MB of screenshots would have been FTP'd to the live site.
+
+**Not done, deliberately.**
+- **The `misty` palette.** It needs a colour decision from Leigh, not an invented one. It currently
+  picks up a neutral `:root` accent from `tokens.css` and is otherwise unchanged.
+- **A `uiRowDetailsLabel` catalogue entry.** `validateLocalization.cjs` rightly fails on a key
+  nothing can reach, and it runs as part of `build:win`. So `createDisclosure` takes its label from
+  the caller and Phase 3 adds the key and passes it in the same change.
+
+**Effort:** ~6 h · **Risk:** Low · **Exit:** ✅ demo renders on all 9 themes, no console errors,
+alignment measured; ✅ game rendering provably unchanged.
 
 ---
 
-### Phase 2 — Break the DOM-as-state coupling ⚠️ *the load-bearing phase*
+### ~~Phase 2 — Break the DOM-as-state coupling~~ ✅ MOSTLY DONE
 
-**Goal.** Numbers stop being strings. This is what makes every later phase safe.
+~~**Goal.** Numbers stop being strings. This is what makes every later phase safe.~~
 
-- Rows store raw values on `dataset` (`data-cost-amount`, `data-stat-value`) at build time.
-- Rewrite `formatAllNotationElements`, `complexPurchaseBuildingFormatter`
-  ([game.js:12683](../game.js#L12683)) and `complexSellStringFormatter`
-  ([game.js:12804](../game.js#L12804)) to **read the raw value and write the display**, never to
-  parse the display. The `split(' ')` / `match(/>(.*?)</)` / `replace(/[^0-9.]/g,'')` walks are
-  deleted.
-- Remove the Cosmic Rip early-return ([game.js:12686](../game.js#L12686)) — it exists only because
-  the parser mangled those rows, and there is no longer a parser.
-- Finish the migration `checkStatusAndSetTextClasses` already started: state reads
-  `dataset.abilityUnlocked`, and the `innerHTML === 'UNLOCKED'` English comparison
-  ([game.js:9094-9101](../game.js#L9094)) is dropped once no row predates the flag.
+**As built.** A raw-value channel in a new file, `newUI/notation.js`, plus the writers and formatters
+that use it. A writer stamps the raw number(s) and the literal text either side of them onto the
+element; the formatter rebuilds the display from those and never looks at rendered text.
 
-**This phase is invisible to the player** — identical output, different derivation. That is exactly
-why it is testable: the Phase 0 baselines must not move by one pixel.
+The stamp is an interleaved parts/values pair rather than a `{0}` template, because a localised
+label can itself contain braces and there would be no safe escape:
 
-**Effort:** 25–35 h · **Risk:** **High** functionally, zero visually — mitigated by the fact that
-the Phase 0 screenshots and the parity fixture both assert "nothing changed", the strongest
-possible oracle. · **Exit:** all baselines byte-identical; a new spec asserts a 6-language
-round-trip (switch language mid-frame; numbers stay correct — currently a live hazard).
+```
+parts  = ["$", ""]        values = [4500]      ->  "$" + format(4500) + ""
+parts  = [", ", " Steel"] values = [611]       ->  ", " + format(611) + " Steel"
+```
+
+**Migrated — these no longer parse anything:**
+
+| Path | Was | Now |
+|---|---|---|
+| Cost/price rows (`updateQuantityDisplays` description branch → `complexPurchaseBuildingFormatter`) | `textContent.split(' ')` then `parts[1]`, with word order load-bearing | each span carries its own amount; the positional walk never runs |
+| Quantities (`updateQuantityDisplays` quantity branch → `formatAllNotationElements`) | whole-innerHTML digit regex | two stamped values, `{qty}` and `{storage}` |
+| Cosmic Rip costs (`handleCosmicRipUpgradeResourceType`) | a pre-formatted HTML string the formatter had to skip | spans built as elements carrying their raw amount |
+| Philosophy "unlocked" state (`checkStatusAndSetTextClasses`) | `innerHTML === 'UNLOCKED'` **and** a comparison against its translation | a dataset flag set where the state is decided, backed by `getPhilosophyAbilityActive()` |
+
+**The Cosmic Rip exemption is gone.** It existed only because those spans put their `", "` separator
+*outside* the span, so the positional walk recovered the wrong token — the scar tissue quoted in §1.
+With the amount stamped, position stops mattering, and the early return has been deleted.
+
+**Deliberately incremental.** `renderStamped()` returns false for an unstamped element and every
+formatter then falls back to its legacy path unchanged. That is what let this land in pieces and be
+checked against the Phase 0 screenshots at each step, rather than as one all-or-nothing rewrite of a
+775k-line file.
+
+**NOT done — the sell/fuse preview.** `complexSellStringFormatter` ([game.js:12804](../game.js#L12804))
+and the preview builders in `constantsAndGlobalVars.js` (`setResourceSalePreview` /
+`setCompoundSalePreview`, ~[:3090](../constantsAndGlobalVars.js#L3090)) still work by string surgery,
+including the `innerHTML.match(/>(.*?)</)` that is the single worst line in the audit. It was left
+alone on purpose: that preview is built as one HTML string combining a money span, a parenthesised
+quantity and a fusion clause, and three separate passes format overlapping parts of it in a specific
+order — the parent is formatted by `formatAllNotationElements` *before* the child span is handled.
+Restructuring it is a bigger change than everything above combined, it lands on the most-used
+interaction in the game, and with no tests in these phases there is no oracle beyond a screenshot.
+It should be its own change with a spec behind it.
+
+**So the regex formatters are bypassed on the main paths but not yet deleted.** Deletion needs the
+remaining writers migrated; the mechanism they need now exists.
+
+**Verified against the Phase 0 baseline** — 522 images, 58 panes, 9 themes. See §6.1.
+
+**Effort:** ~8 h · **Risk:** was High; carried by the fallback design and the baseline comparison.
 
 ---
 
@@ -481,9 +575,9 @@ new baselines at 3 viewport widths × 9 themes.
 
 | Phase | Deliverable | Effort | Risk | Player-visible |
 |---|---|---|---|---|
-| 0 | Safety net | 12–16 h | None | No |
-| 1 | Tokens + grid primitive | 14–20 h | Low | No |
-| 2 | **Break DOM-as-state** | 25–35 h | High | No |
+| 0 | ~~Safety net~~ ✅ | ~~12–16 h~~ · **~4 h actual** | None | No |
+| 1 | ~~Tokens + grid primitive~~ ✅ | ~~14–20 h~~ · **~6 h actual** | Low | No |
+| 2 | ~~**Break DOM-as-state**~~ ✅ mostly | ~~25–35 h~~ · **~8 h actual** | High | No |
 | 3 | `createRow` v2 + adapter | 20–28 h | Medium | One section |
 | 4 | Migrate 9 tabs | 55–75 h | Medium | Progressively |
 | 5 | Frame-loop diffing | 25–35 h | Medium | Smoothness |
@@ -547,10 +641,73 @@ same row data and the real strings in `localization.json`. What it demonstrates:
 
 ---
 
-## 7. Recommended first move
+## 6.1 How Phases 1–5 are verified
 
-**Phase 0, then Phase 2.** Phase 1 can run in parallel with Phase 0 since it is purely additive.
+These phases ship no tests, so the oracle is the Phase 0 baseline: they must not change how the game
+looks. `tools/compare-baseline-screenshots.mjs` does the comparison.
 
-Phase 2 is the one that matters and the one that is tempting to skip, because it costs 25–35 h and
-changes nothing the player can see. Skipping it means every migrated row in Phase 4 is built on top
-of regex-parsed display text, and the whole migration has to happen twice.
+Two screenshots of this game are never byte-identical — the stat bar carries a live clock, resources
+tick every frame, and several panes animate — so the tool compares with a per-channel tolerance and
+masks the animated header strip. What survives that is a real rendering change.
+
+**Phase 2 result** (522 images · 58 panes · 9 themes, tolerance 12/255, top 115px masked):
+
+```
+mean diff: 0.214%
+flagged  : 28 of 522 at or above 1%
+```
+
+Every flagged image is one of four panes, and every one of them animates:
+
+| Pane | Why it differs |
+|---|---|
+| `tab8-near-space-scanner-array` (9 themes) | the animated nebula/starfield canvas |
+| `tab7-black-hole` (9 themes) | the black hole animation |
+| `tab7-galactic-casino` (9 themes) | the spinner / roulette animation |
+| `tab6-mining`, `tab7-galactic-market` | animated pane content |
+
+**Not one resource, compound, energy, research or cost pane is flagged** — and those are exactly the
+panes whose cost and quantity rendering Phase 2 rewrote. The 29th-worst image is already down at
+0.358%.
+
+Spot checks behind the numbers:
+
+- `terminal/tab8-near-space-scanner-array` reads `$1.6M, 339.4K Titanium, 2.0M Silicon` and
+  `$3.3M, 3.3M Helium, 3.3M Sodium, 1.6M Steel` in both captures. Only the canvas behind them moved.
+- `light/tab1-oxygen`: sampling the cost text, the buttons and the sidebar rows gives identical RGB
+  in both. The differing pixels are a 14-row band at y=68–81 — the animated banner behind the tabs,
+  which is why the mask starts at 115px.
+- The Cosmic Rip rows above are confirmed to be rendering through the *new* stamped path
+  (`data-ui-cost-signature` present), i.e. through the formatter that previously had to skip them.
+
+Regenerate and re-check with:
+
+```
+node tools/capture-baseline-screenshots.mjs --pioneer Leigh1981 --panes all --out backupScreenshots/_check --keep
+node tools/compare-baseline-screenshots.mjs --against backupScreenshots/_check --mask-top 115 --write-diffs
+```
+
+---
+
+## 7. Where this stands
+
+**Phases 0, 1 and 2 are done** (~18 h against the 51–71 h estimated). Phase 2 is the one that
+mattered, and its mechanism — the raw-value channel — is in place with the main cost, quantity and
+Cosmic Rip paths migrated off string parsing.
+
+**The one piece of Phase 2 still outstanding** is the sell/fuse preview, which is the single worst
+parser in the audit and also the riskiest to change without a spec behind it. It should be its own
+change. Everything else in Phase 2 no longer parses rendered text.
+
+**Next is Phase 3**: `createRow` v2 with `createOptionRow` rewritten as a thin adapter onto it, so
+all 277 call sites keep working while one reference section migrates. Phase 3 is also where the
+`uiRowDetailsLabel` localisation key and the information-parity fixture land, both of which were
+deferred out of Phases 0 and 1 because nothing referenced them yet.
+
+Both open questions from the last pass are now settled:
+
+1. **`misty`** is defined explicitly in `styles.css`, holding the values it was already falling
+   through to. Its palette can now be designed by editing one block instead of discovering that
+   editing `:root` moves it.
+2. **`backupScreenshots/` is not committed** and stays in `.gitignore` — 55 MB of PNGs, regenerable
+   at any time with `node tools/capture-baseline-screenshots.mjs --pioneer Leigh1981`.

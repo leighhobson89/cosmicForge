@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cosmic Forge — newUI Phase 1 demo</title>
+
+<!--
+  Phase 1 verification page for the large UI refactor (docs/largeUIRefactor.md).
+
+  This is the "throwaway demo pane" named as the Phase 1 exit criterion. It is a
+  new file in newUI/ and is not referenced by index.html or by any game module,
+  so it ships nothing and can be deleted the moment Phase 4 finishes.
+
+  It loads the REAL styles.css first, on purpose. newUI/tokens.css derives every
+  surface from variables that styles.css defines (--text-color-rgb,
+  --container-border-color, --ui-surface-*), so loading it here is what actually
+  proves the new components inherit all nine themes rather than merely claiming
+  to. Switch the theme with the buttons at the top.
+
+  Serve it, don't open it from disk — ES module imports need an http origin:
+      node tests/e2e/_harness/static-server.mjs
+      http://127.0.0.1:4173/newUI/demo.html
+-->
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="components.css">
+
+<style>
+    /* Page furniture for the demo only. Nothing here is part of the refactor. */
+    body { margin: 0; padding: 0 0 60px; }
+
+    .demo-wrap { max-width: 1180px; margin: 0 auto; padding: 24px 20px; }
+
+    .demo-bar {
+        display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px;
+        padding: 12px 14px; margin-bottom: 22px;
+        border: 1px solid var(--container-border-color);
+        border-radius: var(--ui-radius, 10px);
+        background: var(--container-bg-color);
+    }
+    .demo-bar strong { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; opacity: .7; }
+    .demo-bar button {
+        font-family: var(--font-family); font-size: 12px; cursor: pointer;
+        padding: 5px 10px; border-radius: var(--ui-radius-sm, 8px);
+        background: var(--button-bg-color); color: var(--text-color);
+        border: 1px solid var(--container-border-color);
+    }
+    .demo-bar button:hover { background: var(--button-bg-active); }
+    .demo-bar button[aria-pressed="true"] {
+        background: var(--accent-soft);
+        border-color: var(--accent-strong);
+        color: var(--accent-strong);
+        font-weight: 700;
+    }
+
+    .demo-note {
+        border-left: 3px solid var(--accent-strong);
+        background: var(--accent-soft);
+        padding: 10px 14px; margin: 0 0 22px;
+        font-size: 13px; line-height: 1.5;
+        border-radius: 0 var(--ui-radius-sm, 8px) var(--ui-radius-sm, 8px) 0;
+    }
+    .demo-note code { font-size: .9em; opacity: .85; }
+
+    h1.demo-title { font-size: 20px; margin: 0 0 4px; letter-spacing: .04em; }
+    p.demo-sub { margin: 0 0 20px; opacity: .7; font-size: 13px; }
+
+    h2.demo-h2 {
+        font-size: 13px; letter-spacing: .12em; text-transform: uppercase;
+        opacity: .6; margin: 28px 0 10px;
+    }
+
+    /* Measurement readout for the alignment check. */
+    .demo-measure {
+        margin-top: 14px; padding: 10px 14px; font-size: 13px;
+        border: 1px dashed var(--container-border-color);
+        border-radius: var(--ui-radius-sm, 8px);
+    }
+    .demo-measure b { font-variant-numeric: tabular-nums; }
+    .demo-ok { color: var(--ready-text); font-weight: 700; }
+    .demo-bad { color: var(--disabled-text); font-weight: 700; }
+</style>
+</head>
+
+<body data-theme="terminal">
+<div class="demo-wrap">
+
+    <h1 class="demo-title">newUI — Phase 1 demo pane</h1>
+    <p class="demo-sub">
+        Built entirely from <code>createSection()</code> / <code>createUiRow()</code> in
+        <code>newUI/createSection.js</code>, styled by <code>newUI/tokens.css</code> +
+        <code>newUI/components.css</code>, over the real <code>styles.css</code> themes.
+    </p>
+
+    <div class="demo-bar">
+        <strong>Theme</strong>
+        <span id="themeButtons"></span>
+    </div>
+    <div class="demo-bar">
+        <strong>Density</strong>
+        <button type="button" data-density="1" aria-pressed="true">Comfortable</button>
+        <button type="button" data-density="0.62" aria-pressed="false">Compact</button>
+        <strong style="margin-left:18px">Language</strong>
+        <button type="button" data-lang="en" aria-pressed="true">English</button>
+        <button type="button" data-lang="de" aria-pressed="false">Deutsch</button>
+        <button type="button" data-lang="fr" aria-pressed="false">Français</button>
+    </div>
+
+    <div class="demo-note">
+        <strong>What to look for.</strong> Every action control sits on one shared column, because
+        the section owns the grid rather than each row declaring its own widths. Switch language to
+        German or French — the labels get materially longer and the action column does not move.
+        Switch through all nine themes — the surfaces, accents and chips follow each palette, and
+        <code>misty</code> falls back to <code>:root</code> because <code>styles.css</code> has no
+        <code>[data-theme="misty"]</code> block (finding F8; not fixed in this phase, it needs a
+        palette decision).
+    </div>
+
+    <div id="paneRoot"></div>
+
+    <div class="demo-measure" id="measure">measuring…</div>
+
+</div>
+
+<script type="module">
+import { createPane, createSection, createUiRow, setUiLocaliser } from './createSection.js';
+
+/* ---------------------------------------------------------------------------
+   A tiny stand-in catalogue using the REAL strings from localization.json, so
+   the demo exercises the localiser hook the same way Phase 3 will. The keys and
+   values below are copied verbatim from the catalogue; nothing is invented.
+   --------------------------------------------------------------------------- */
+const CATALOGUE = {
+    en: {
+        tab1HydrogenSellRowLabel: 'Sell Hydrogen:',
+        tab1IncreaseStorageRowLabel: 'Increase Storage:',
+        tab1HydrogenAutoBuyer1RowLabel: 'Hydrogen Auto Buyer Tier 1:',
+        tab1HydrogenAutoBuyer2RowLabel: 'Hydrogen Auto Buyer Tier 2:',
+        tab1HydrogenAutoBuyer3RowLabel: 'Hydrogen Auto Buyer Tier 3:',
+        buttonSell: 'Sell', buttonFuse: 'Fuse', buttonIncreaseStorage: 'Increase Storage',
+        textQuantity: 'Quantity', resourceHydrogen: 'Hydrogen',
+        dropdownOptionAllStock: 'All Stock', buttonAddPerSecond: 'Add {rate} {resource} /s',
+        colTitle: 'Upgrade', colStat: 'Owned', colCost: 'Cost', colAction: 'Action',
+        secTrade: 'Trade', secAuto: 'Automation', details: 'Details'
+    },
+    de: {
+        tab1HydrogenSellRowLabel: 'Wasserstoff verkaufen:',
+        tab1IncreaseStorageRowLabel: 'Lager Erhöhen:',
+        tab1HydrogenAutoBuyer1RowLabel: 'Wasserstoff Auto-Käufer Stufe 1:',
+        tab1HydrogenAutoBuyer2RowLabel: 'Wasserstoff Auto-Käufer Stufe 2:',
+        tab1HydrogenAutoBuyer3RowLabel: 'Wasserstoff Auto-Käufer Stufe 3:',
+        buttonSell: 'Verkaufen', buttonFuse: 'Fusionieren', buttonIncreaseStorage: 'Lager Erhöhen',
+        textQuantity: 'Menge', resourceHydrogen: 'Wasserstoff',
+        dropdownOptionAllStock: 'Gesamter Bestand', buttonAddPerSecond: 'Hinzufügen {rate} {resource} /s',
+        colTitle: 'Verbesserung', colStat: 'Besitz', colCost: 'Kosten', colAction: 'Aktion',
+        secTrade: 'Handel', secAuto: 'Automatisierung', details: 'Details'
+    },
+    fr: {
+        tab1HydrogenSellRowLabel: "Vendre de l'Hydrogène:",
+        tab1IncreaseStorageRowLabel: 'Augmenter Stockage:',
+        tab1HydrogenAutoBuyer1RowLabel: 'Acheteur Automatique Hydrogène Niveau 1:',
+        tab1HydrogenAutoBuyer2RowLabel: 'Acheteur Automatique Hydrogène Niveau 2:',
+        tab1HydrogenAutoBuyer3RowLabel: 'Acheteur Automatique Hydrogène Niveau 3:',
+        buttonSell: 'Vendre', buttonFuse: 'Fusionner', buttonIncreaseStorage: 'Augmenter Stockage',
+        textQuantity: 'Quantité', resourceHydrogen: 'Hydrogène',
+        dropdownOptionAllStock: 'Tout le Stock', buttonAddPerSecond: 'Ajouter {rate} {resource} /s',
+        colTitle: 'Amélioration', colStat: 'Possédé', colCost: 'Coût', colAction: 'Action',
+        secTrade: 'Commerce', secAuto: 'Automatisation', details: 'Détails'
+    }
+};
+
+let lang = 'en';
+const t = (key) => CATALOGUE[lang][key] ?? key;
+setUiLocaliser(t);
+
+const THEMES = ['terminal', 'dark', 'misty', 'light', 'frosty', 'summer', 'supernova', 'galaxy', 'space'];
+
+/* ------------------------------------------------------------------ controls */
+/* Plain elements carrying the game's own classes. The row factory appends
+   whatever it is given, so real createButton()/createDropdown() output drops in
+   unchanged at Phase 3 — nothing here needs the row to know about it. */
+
+function button(text) {
+    const b = document.createElement('button');
+    b.className = 'option-button';
+    b.textContent = text;
+    return b;
+}
+function dropdown(options) {
+    const s = document.createElement('select');
+    s.className = 'option-dropdown';
+    options.forEach((o) => { const op = document.createElement('option'); op.textContent = o; s.appendChild(op); });
+    return s;
+}
+let toggleSeq = 0;
+function toggle(on) {
+    // Exactly the markup createToggleSwitch() produces (ui.js:4825): a container
+    // holding a checkbox and a <label for> — the label is what styles.css draws.
+    const id = `demoToggle${++toggleSeq}`;
+    const container = document.createElement('div');
+    container.className = 'toggle-container toggle-switch-spacing';
+    const input = document.createElement('input');
+    input.type = 'checkbox';
+    input.id = id;
+    input.checked = on;
+    const label = document.createElement('label');
+    label.htmlFor = id;
+    container.append(input, label);
+    return container;
+}
+
+/* ---------------------------------------------------------------- the pane */
+
+function addPerSecond(rate) {
+    return t('buttonAddPerSecond').replace('{rate}', rate).replace('{resource}', t('resourceHydrogen'));
+}
+
+function buildPane() {
+    const root = document.getElementById('paneRoot');
+    root.innerHTML = '';
+
+    const columns = { title: t('colTitle'), stat: t('colStat'), cost: t('colCost'), action: t('colAction') };
+
+    const sections = [];
+
+    /* Trade */
+    sections.push(createSection({
+        id: 'demoTradeSection',
+        heading: t('secTrade'),
+        columns,
+        rows: [
+            createUiRow({
+                id: 'demoHydrogenSellRow',
+                title: t('tab1HydrogenSellRowLabel'),
+                cost: [{ amount: 1240, currency: true, prefix: '$' }],
+                actions: [dropdown([t('dropdownOptionAllStock'), '100000', '1000']), button(t('buttonSell')), button(t('buttonFuse'))],
+                detail: 'Sells from the store at the current galactic market price. A sale deliberately sweeps any sub-unit remainder.',
+                detailLabel: t('details')
+            }),
+            createUiRow({
+                id: 'demoHydrogenStorageRow',
+                title: t('tab1IncreaseStorageRowLabel'),
+                cost: [{ amount: 1000, label: t('resourceHydrogen'), resource: 'hydrogen' }],
+                actions: [button(t('buttonIncreaseStorage'))],
+                detail: 'Raises the hydrogen storage ceiling by one step. The cost scales with current capacity.',
+                detailLabel: t('details')
+            })
+        ]
+    }));
+
+    /* Automation — includes one deliberately unaffordable row so the gate shows */
+    sections.push(createSection({
+        id: 'demoAutoSection',
+        heading: t('secAuto'),
+        columns,
+        rows: [
+            createUiRow({
+                id: 'demoHydrogenAB1Row',
+                title: t('tab1HydrogenAutoBuyer1RowLabel'),
+                subtitle: 'Hydrogen Compressor',
+                stat: { label: t('textQuantity'), value: 3 },
+                cost: [{ amount: 250, label: t('resourceHydrogen'), resource: 'hydrogen' }],
+                actions: [button(addPerSecond(5)), toggle(true)],
+                detail: 'Tier 1 autobuyers run without power. Tiers 2 to 4 stop when the grid goes down.',
+                detailLabel: t('details')
+            }),
+            createUiRow({
+                id: 'demoHydrogenAB2Row',
+                title: t('tab1HydrogenAutoBuyer2RowLabel'),
+                subtitle: 'Hydrogen Extractor',
+                stat: { label: t('textQuantity'), value: 1 },
+                cost: [
+                    { amount: 4500, currency: true, prefix: '$' },
+                    { amount: 2500, label: t('resourceHydrogen'), resource: 'hydrogen' }
+                ],
+                actions: [button(addPerSecond(25)), toggle(true)],
+                detail: 'Requires power. Contributes nothing while the grid is down.',
+                detailLabel: t('details')
+            }),
+            createUiRow({
+                id: 'demoHydrogenAB3Row',
+                title: t('tab1HydrogenAutoBuyer3RowLabel'),
+                subtitle: 'Hydrogen Refinery',
+                stat: { label: t('textQuantity'), value: 0 },
+                cost: [
+                    { amount: 38000, currency: true, prefix: '$' },
+                    { amount: 12000, label: t('resourceHydrogen'), resource: 'hydrogen' }
+                ],
+                actions: [button(addPerSecond(120)), toggle(false)],
+                // Unaffordable: the cost cell takes `red-disabled-text`, exactly as the
+                // frame loop applies it today. The gate mechanism is unchanged.
+                affordable: false,
+                detail: 'Requires power. Benefits from the B-type star boost, which applies to resources only.',
+                detailLabel: t('details')
+            })
+        ]
+    }));
+
+    // One pane owns the tracks, so both sections share a single column
+    // definition and the action column cannot drift between them.
+    root.appendChild(createPane({ id: 'demoPane', sections }));
+
+    measure();
+}
+
+/* ------------------------------------------------------- alignment measure */
+/* The Phase 3 exit criterion, checkable by eye here: every action cell in a
+   section shares one left edge. */
+
+function measure() {
+    const cells = Array.from(document.querySelectorAll('.ui-cell-action'));
+    const lefts = cells.map((c) => Math.round(c.getBoundingClientRect().left));
+    const unique = Array.from(new Set(lefts));
+    const out = document.getElementById('measure');
+    const ok = unique.length === 1;
+    out.innerHTML =
+        `Action cells: <b>${cells.length}</b> across 2 sections · distinct left edges: <b>${unique.length}</b> ` +
+        (ok
+            ? '<span class="demo-ok">ALIGNED</span>'
+            : `<span class="demo-bad">MISALIGNED</span> (${unique.join(', ')})`) +
+        `<br>Both sections share one grid definition, so this stays 1 at any language, density or width.`;
+}
+
+/* ------------------------------------------------------------------ wiring */
+
+const themeButtons = document.getElementById('themeButtons');
+THEMES.forEach((name) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = name;
+    b.dataset.theme = name;
+    b.setAttribute('aria-pressed', String(name === 'terminal'));
+    b.addEventListener('click', () => {
+        document.body.setAttribute('data-theme', name);
+        themeButtons.querySelectorAll('button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+        measure();
+    });
+    themeButtons.appendChild(b);
+});
+
+document.querySelectorAll('[data-density]').forEach((b) => {
+    b.addEventListener('click', () => {
+        document.documentElement.style.setProperty('--ui-density', b.dataset.density);
+        document.querySelectorAll('[data-density]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+        requestAnimationFrame(measure);
+    });
+});
+
+document.querySelectorAll('[data-lang]').forEach((b) => {
+    b.addEventListener('click', () => {
+        lang = b.dataset.lang;
+        document.querySelectorAll('[data-lang]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+        buildPane();
+    });
+});
+
+window.addEventListener('resize', () => requestAnimationFrame(measure));
+
+buildPane();
+</script>
+</body>
+</html>

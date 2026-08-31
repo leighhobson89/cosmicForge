@@ -21,7 +21,11 @@ IGNORE_LIST = [
     "create_build.py", "bugs.txt", "node_modules",
     "temp_build", "html-report", "tools", "tests", 
     "test-results", "test-reports", "docs", 
-    "cosmicForgeTrailer.mp4", "playwright-report"
+    "cosmicForgeTrailer.mp4", "playwright-report",
+    # Large UI refactor: the Phase 0 visual backup is a local artefact (~55MB of
+    # PNGs, regenerable with tools/capture-baseline-screenshots.mjs) and the
+    # Phase 1 demo page is a verification harness. Neither belongs in a build.
+    "backupScreenshots", "demo.html"
 ]
 
 # InfinityFree FTP Config

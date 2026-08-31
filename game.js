@@ -438,6 +438,18 @@ import {
 
 import { localize, localizeRaw, localizeMaterialName, reverseLocalizeMaterialName } from './localization.js';
 import { onboardingChecks } from './onboarding.js';
+// Large UI refactor, Phase 2: the raw-value channel that lets the formatters
+// rebuild a number's display from the number itself instead of parsing it back
+// out of the markup they wrote last frame. See docs/largeUIRefactor.md.
+import {
+    stamp as stampNotation,
+    stampOne as stampNotationOne,
+    hasStamp as hasNotationStamp,
+    renderStamped as renderNotationStamped,
+    FORMAT_DEFAULT as NOTATION_FORMAT_DEFAULT,
+    FORMAT_CASH as NOTATION_FORMAT_CASH,
+    FORMAT_COST_VERBATIM as NOTATION_FORMAT_COST_VERBATIM
+} from './newUI/notation.js';
 
 import {
     setGalacticMarketDataObject,
@@ -8527,14 +8539,49 @@ function handleCosmicRipUpgradeResourceType(element) {
         const r2Class = canAffordR2 ? 'green-ready-text' : 'red-disabled-text';
         const r3Class = canAffordR3 ? 'green-ready-text' : 'red-disabled-text';
 
-        const parts = [`<span class="${cashClass}">${cashText}</span>`];
-        if (r1Text) parts.push(`<span class="${r1Class}">${r1Text}</span>`);
-        if (r2Text) parts.push(`<span class="${r2Class}">${r2Text}</span>`);
-        if (r3Text) parts.push(`<span class="${r3Class}">${r3Text}</span>`);
+        // Phase 2: build these spans as elements carrying their raw amount rather
+        // than as a pre-formatted HTML string. This is what lets the Cosmic Rip
+        // exemption in complexPurchaseBuildingFormatter go away: that formatter
+        // used to recover the amount from the span's text by word position, and
+        // these spans put their separator outside the span, so the positional
+        // walk mangled them and they had to be skipped entirely. With the amount
+        // stamped, position stops mattering and the row formats like any other.
+        //
+        // The ", " separators stay as text nodes *between* the spans, exactly as
+        // `parts.join(', ')` produced them, so each comma keeps the inherited
+        // colour rather than taking the affordability colour of the span beside it.
+        const entries = [{ value: currentPrice, prefix: getCurrencySymbol?.() ?? '$', suffix: '', cls: cashClass }];
+        const pushEntry = (tuple, text, cls) => {
+            if (!text) return;
+            // buildResourceText already resolved the localised name; recover it by
+            // removing the amount it rendered, so the suffix stays translated.
+            const name = localizeMaterialName(String(tuple?.[1] || ''), tuple?.[2], getLanguage());
+            entries.push({ value: Number(tuple?.[0]), prefix: '', suffix: ' ' + name, cls });
+        };
+        pushEntry(resource1Price, r1Text, r1Class);
+        pushEntry(resource2Price, r2Text, r2Class);
+        pushEntry(resource3Price, r3Text, r3Class);
 
-        const newHtml = parts.join(', ');
-        if (descLabel.innerHTML !== newHtml) {
-            descLabel.innerHTML = newHtml;
+        // Rebuild only when something actually changed. The frame loop calls this
+        // every frame, and the old `innerHTML !== newHtml` guard served the same
+        // purpose; a signature over the raw inputs does it without formatting first.
+        const signature = entries.map((e) => `${e.cls}|${e.prefix}|${e.suffix}|${e.value}`).join('~');
+        if (descLabel.dataset.uiCostSignature !== signature) {
+            descLabel.innerHTML = '';
+            entries.forEach((entry, index) => {
+                if (index > 0) descLabel.appendChild(document.createTextNode(', '));
+                const span = document.createElement('span');
+                span.className = entry.cls;
+                if (!stampNotation(span, [entry.prefix, entry.suffix], [entry.value])) {
+                    // Non-finite amount: fall back to the text this used to show.
+                    span.textContent = index === 0 ? cashText : [r1Text, r2Text, r3Text][index - 1] || '';
+                } else {
+                    renderNotationStamped(span, notationValueFormatter);
+                }
+                descLabel.appendChild(span);
+            });
+            descLabel.dataset.uiCostSignature = signature;
+            descLabel.dataset.uiHasStamps = 'true';
         }
 
         const canAffordAll = canAffordCash && canAffordR1 && canAffordR2 && canAffordR3;
@@ -9089,14 +9136,15 @@ function checkStatusAndSetTextClasses(element) {
         return;
     }
     if (element.id === 'techPhilosophySpaceStorageTankResearchRowDescription' || element.id === 'techPhilosophyFleetHologramsRowDescription' || element.id === 'techPhilosophyVoidSeersRowDescription' || element.id === 'techPhilosophyRapidExpansionRowDescription') {
-        // The marker cannot be an English text comparison: this element is
-        // rewritten every frame, so the state rides on a dataset flag and the
-        // legacy English form is still accepted for elements drawn before it.
+        // Phase 2: this used to decide the state by comparing the element's own
+        // text against "UNLOCKED" and against its translation — reading game
+        // state out of rendered, localised prose. Both comparisons are gone. The
+        // flag is now set by updateQuantityDisplays at the moment the state is
+        // decided, and `getPhilosophyAbilityActive()` is consulted directly as
+        // the authority behind it, so a row drawn before the flag existed still
+        // resolves correctly without any text matching.
         const unlockedText = localize('textUnlocked', getLanguage());
-        if (element.dataset.abilityUnlocked === 'true'
-            || element.innerHTML === 'UNLOCKED' || element.innerHTML === unlockedText
-            || element.querySelector('span')?.innerHTML === 'UNLOCKED'
-            || element.querySelector('span')?.innerHTML === unlockedText) {
+        if (element.dataset.abilityUnlocked === 'true' || getPhilosophyAbilityActive()) {
             element.dataset.abilityUnlocked = 'true';
             element.innerHTML = `<span class="green-ready-text">${unlockedText}</span>`;
             element.parentElement.parentElement.parentElement.querySelector('.special-ability').classList.remove('red-disabled-text');
@@ -10567,50 +10615,92 @@ const updateQuantityDisplays = (element, data1, data2, resourceData1, resourceDa
     if (desc) {
         if (element && data2) {
             let priceString = "";
-    
+
+            // Phase 2: alongside the string, remember the number and the literal
+            // text on either side of it, so the formatter can rebuild this later
+            // without parsing the string back apart. `priceParts` stays null for
+            // the one branch whose text carries no number at all (the unlocked
+            // philosophy label), and that span then falls back to the legacy path.
+            let priceParts = null;
+
             if (data2 === '€') {
                 priceString = data1 + data2;
+                priceParts = ['', String(data2)];
             } else if (data2 === getCurrencySymbol()) {
                 priceString = data2 + data1;
+                priceParts = [String(data2), ''];
             } else {
                 if (element.dataset.type !== 'spaceStorageTankResearch' && element.dataset.type !== 'fleetHolograms' && element.dataset.type !== 'voidSeers' && element.dataset.type !== 'rapidExpansion') {
                     priceString = data1 + ' ' + data2;
+                    priceParts = ['', ' ' + data2];
                 } else {
+                    // Phase 2: record the unlocked state as a flag at the moment
+                    // it is decided, rather than leaving checkStatusAndSetTextClasses
+                    // to infer it later by comparing this element's text against
+                    // the word "UNLOCKED" in one of six languages.
                     if (getPhilosophyAbilityActive()) {
                         priceString = localize('textUnlocked', getLanguage());
+                        element.dataset.abilityUnlocked = 'true';
                     } else {
                         priceString = data1 + ' ' + data2;
+                        priceParts = ['', ' ' + data2];
+                        delete element.dataset.abilityUnlocked;
                     }
                 }
             }
-    
+
+            // The two variants the legacy formatter special-cased are decided by
+            // the row, not the number, so they are resolved once here and carried
+            // on each stamp.
+            const costFormat = (element.dataset.conditionCheck === 'techUnlock' || element.dataset.type === 'building')
+                ? NOTATION_FORMAT_COST_VERBATIM
+                : NOTATION_FORMAT_DEFAULT;
+
+            // Each entry keeps its own number beside its rendered text, so the
+            // formatter never has to work out which token in ", 2500 Hydrogen"
+            // is the amount — the failure mode that made word order load-bearing.
             const resourceParts = [];
             if (resourcePrice1 != null && resourceName1 && resourceName1.trim() !== "") {
-                resourceParts.push(resourcePrice1 + " " + resourceName1);
+                resourceParts.push({ text: resourcePrice1 + " " + resourceName1, value: resourcePrice1, name: resourceName1 });
             }
             if (resourcePrice2 != null && resourceName2 && resourceName2.trim() !== "") {
-                resourceParts.push(resourcePrice2 + " " + resourceName2);
+                resourceParts.push({ text: resourcePrice2 + " " + resourceName2, value: resourcePrice2, name: resourceName2 });
             }
             if (resourcePrice3 != null && resourceName3 && resourceName3.trim() !== "") {
-                resourceParts.push(resourcePrice3 + " " + resourceName3);
+                resourceParts.push({ text: resourcePrice3 + " " + resourceName3, value: resourcePrice3, name: resourceName3 });
             }
 
             element.innerHTML = "";
 
+            let anyStamped = false;
+
             const priceSpan = document.createElement("span");
             priceSpan.className = 'currency-price';
             priceSpan.innerHTML = priceString;
+            if (priceParts) {
+                anyStamped = stampNotation(priceSpan, priceParts, [data1], costFormat) || anyStamped;
+            }
             element.appendChild(priceSpan);
-    
+
             if (resourceParts.length > 0) {
                 resourceParts.forEach((resource, index) => {
                     const resourceSpan = document.createElement("span");
                     resourceSpan.className = `resource-price${index + 1}`;
-                    resourceSpan.innerHTML = `, ${resource}`;
+                    resourceSpan.innerHTML = `, ${resource.text}`;
+                    anyStamped = stampNotation(resourceSpan, [', ', ' ' + resource.name], [resource.value], costFormat) || anyStamped;
                     element.appendChild(resourceSpan);
                 });
             }
-        }     
+
+            // Tells the formatter it is worth descending into this element; see
+            // renderNotationFromStamps. Cleared when nothing could be stamped, so
+            // such a row falls back to the legacy path rather than rendering blank.
+            if (anyStamped) {
+                element.dataset.uiHasStamps = 'true';
+            } else {
+                delete element.dataset.uiHasStamps;
+            }
+        }
     } else {
         if (element && data2 >= 0) {
             // P7: `displayQuantity` rather than a bare `Math.floor`. The two
@@ -10619,21 +10709,31 @@ const updateQuantityDisplays = (element, data1, data2, resourceData1, resourceDa
             // repeated float addition left an ulp under 150 read "149 / 150"
             // and never looked full, while the affordability gate - which now
             // shares this tolerance - already treated it as 150.
+            // Phase 2: stamp the same truncated values that are being written,
+            // not the untruncated inputs — the legacy formatter parsed the text
+            // *after* displayQuantity had rounded it down, so stamping the raw
+            // input would format a different number and drift by one unit.
             if (element === getElements().energyQuantity) {
                 if (getResourceDataObject('buildings', ['energy', 'batteryBoughtYet'])) {
                     element.textContent = displayQuantity(data1) + '/' + displayQuantity(data2);
+                    stampNotation(element, ['', '/', ''], [displayQuantity(data1), displayQuantity(data2)]);
                 } else {
                     element.textContent = displayQuantity(data1);
+                    stampNotationOne(element, '', displayQuantity(data1));
                 }
             } else if (element === getElements().researchQuantity) {
                 element.textContent = displayQuantity(data1);
+                stampNotationOne(element, '', displayQuantity(data1));
             } else if (element.id && element.id.includes('power')) {
                 element.textContent = displayQuantity(data1);
+                stampNotationOne(element, '', displayQuantity(data1));
             } else {
                 element.textContent = displayQuantity(data1) + '/' + displayQuantity(data2);
+                stampNotation(element, ['', '/', ''], [displayQuantity(data1), displayQuantity(data2)]);
             }
         } else if (element) {
             element.textContent = displayQuantity(data1);
+            stampNotationOne(element, '', displayQuantity(data1));
         }
 
         // Float equality against the cap, for the same reason: a store filled by
@@ -12592,7 +12692,81 @@ function startUpdateEnergyTimers(elementName, action) {
     }
 }
 
+/**
+ * Phase 2: the one place a raw number becomes display text.
+ *
+ * This reproduces exactly what the legacy regex path produced, so that a
+ * migrated element renders identically to an unmigrated one — which is what
+ * lets Phase 2 be checked against the Phase 0 screenshots. The two special
+ * cases are carried over verbatim from formatAllNotationElements rather than
+ * rationalised, because players would notice either of them changing.
+ */
+function notationValueFormatter(number, format) {
+    const notationType = getNotationType();
+
+    if (notationType === 'normal') {
+        return formatGroupedNumber(number);
+    }
+
+    if (notationType === 'normalCondensed') {
+        // The cash stat drops a trailing `.0`: `$1M` reads better than `$1.0M`.
+        if (format === NOTATION_FORMAT_CASH) {
+            return formatAbbreviatedNumber(number).replace(/\.0(?=[A-Za-z]|e\d|$)/, '');
+        }
+        // Research and building costs under 1000 stay exact — abbreviating a
+        // price makes it unreadable against the research total beside it.
+        if (format === NOTATION_FORMAT_COST_VERBATIM && number < 1e3) {
+            return String(number);
+        }
+        return formatAbbreviatedNumber(number);
+    }
+
+    return String(number);
+}
+
+/**
+ * Draw an element from stamped raw values, if it or its spans carry any.
+ *
+ * Returns true when the element was fully handled without parsing anything, and
+ * false when the caller should fall back to its legacy string-surgery path.
+ * That fallback is what makes the migration incremental: a writer that has not
+ * been migrated yet still renders exactly as it does today.
+ *
+ * A container is never stamped when it has stamped children, so checking the
+ * element itself first cannot clobber them.
+ */
+function renderNotationFromStamps(element) {
+    if (!element) return false;
+
+    if (renderNotationStamped(element, notationValueFormatter)) {
+        return true;
+    }
+
+    // Only descend when the writer said there is something to find. Without this
+    // flag every notation element would cost a querySelectorAll on every frame,
+    // which would make Phase 2 a performance regression on the very sweeps
+    // Phase 5 exists to remove.
+    if (element.dataset.uiHasStamps !== 'true') {
+        return false;
+    }
+
+    const stampedChildren = element.querySelectorAll('[data-ui-parts]');
+    if (stampedChildren.length === 0) {
+        return false;
+    }
+
+    stampedChildren.forEach((child) => renderNotationStamped(child, notationValueFormatter));
+    return true;
+}
+
 function formatAllNotationElements(element, notationType) {
+        // Phase 2: if the writer stamped the raw numbers, rebuild from those and
+        // never look at the rendered text. Everything below this line is the
+        // legacy path, kept for elements whose writers are not migrated yet.
+        if (renderNotationFromStamps(element)) {
+            return;
+        }
+
         // Text that was written by a formatter which already applied the
         // player's notation. Re-parsing it here would read the digits out of an
         // abbreviated form and abbreviate them again.
@@ -12681,11 +12855,19 @@ function formatAllNotationElements(element, notationType) {
 }
 
 function complexPurchaseBuildingFormatter(element, notationType) {
-    //cosmic rip rows write their own description in handleCosmicRipUpgradeResourceType,
-    //and their spans carry no ", " prefix, so the walk below would mangle them in either mode
-    if (element?.dataset?.type === 'cosmicRip') {
+    // Phase 2: when the writer stamped each span with its own number and the
+    // literals around it, rebuild from those. This is the path that removes the
+    // `split(' ')` / `parts[1]` positional walk below, which is what made word
+    // order load-bearing and what forced the Cosmic Rip exemption.
+    if (renderNotationFromStamps(element)) {
         return;
     }
+
+    // The Cosmic Rip exemption that used to sit here is gone. It existed because
+    // these rows' spans carry no ", " prefix, so the positional walk below
+    // recovered the wrong token and mangled them. handleCosmicRipUpgradeResourceType
+    // now stamps each span with its raw amount, so the branch above handles them
+    // like any other row and there is nothing left to skip.
 
     //a price row is not one number: it is a cash cost whose currency symbol has to stay on the
     //correct side, followed by a comma separated list of resource costs, each in its own span.

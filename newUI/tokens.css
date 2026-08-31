@@ -1,0 +1,192 @@
+/* ============================================================================
+   newUI/tokens.css — Phase 1 of the large UI refactor.
+   See docs/largeUIRefactor.md §3.4 and the Phase 1 section.
+
+   PURELY ADDITIVE. This file only *defines* custom properties; it sets no
+   property on any element and overrides no existing rule. Loading it cannot
+   change how the game currently looks. Nothing consumes these tokens yet except
+   newUI/components.css and newUI/demo.html.
+
+   It is a separate file rather than an edit to styles.css because the old row
+   system is going to be retired slowly: when it goes, this file and
+   components.css can be folded into styles.css in one move, or dropped, without
+   unpicking anything.
+
+   Three groups live here:
+     1. A spacing scale with a density multiplier — the game has no spacing scale
+        at all today, and it is what the section grid actually needs.
+     2. Accent tokens for the eight themes that lack them.
+     3. Row/section surface tokens derived from the existing --ui-surface-*
+        baseline, so flat themes stay flat and rich themes keep their depth.
+   ========================================================================= */
+
+
+/* --- 1. Spacing scale + density ------------------------------------------
+
+   `--ui-density` is a unitless multiplier the density toggle will drive in
+   Phase 6: 1 is comfortable, ~0.62 is compact. Because it multiplies at the
+   token level, every component that spaces itself with these tokens becomes
+   density-aware for free, with no per-component work.
+
+   The scale is a 4px base. Values are deliberately few — a scale nobody can
+   remember gets bypassed, which is how the current 44 ad-hoc width overrides
+   happened.                                                                */
+
+:root {
+    --ui-density: 1;
+
+    --ui-sp-1: calc(4px  * var(--ui-density));
+    --ui-sp-2: calc(8px  * var(--ui-density));
+    --ui-sp-3: calc(12px * var(--ui-density));
+    --ui-sp-4: calc(16px * var(--ui-density));
+    --ui-sp-5: calc(22px * var(--ui-density));
+    --ui-sp-6: calc(30px * var(--ui-density));
+    --ui-sp-8: calc(46px * var(--ui-density));
+
+    /* Type scale for the new row. Sized against the game's existing body text
+       rather than an absolute scale, so a future root font-size change carries. */
+    --ui-fs-label:   0.95rem;   /* row title                                  */
+    --ui-fs-sub:     0.80rem;   /* upgrade name under the title               */
+    --ui-fs-stat:    0.88rem;   /* owned / quantity                           */
+    --ui-fs-cost:    0.88rem;   /* cost chips                                 */
+    --ui-fs-detail:  0.82rem;   /* the collapsed prose row                    */
+    --ui-fs-colhead: 0.68rem;   /* the once-per-section column headings       */
+
+    /* Grid tracks. Expressed as tokens so a pane with unusually long labels can
+       widen one track for its whole section instead of every row inventing its
+       own percentage — the specific failure mode F3 records. */
+    --ui-track-title:  minmax(11ch, 1.5fr);
+    --ui-track-stat:   minmax(6ch, 0.55fr);
+    --ui-track-cost:   minmax(11ch, 1fr);
+    --ui-track-action: auto;
+}
+
+
+/* --- 2. Accent tokens ----------------------------------------------------
+
+   `--accent-strong` / `--accent-soft` are currently defined ONLY under
+   [data-theme="light"] (styles.css:1600-1602), yet they are already *used* by
+   .factory-star::after (styles.css:3504) and .factory-star-text (:4476) with a
+   literal `yellow` fallback — so on the other eight themes those two rules
+   render plain yellow.
+
+   Defining them per theme here fixes that as a side effect and, more to the
+   point, gives new components a themed accent to rely on. Every value below is
+   taken from a colour the theme already uses, so nothing new is invented:
+   no accent is a fresh hue, each is promoted from that theme's own palette.
+
+   `light` is deliberately absent — it already defines its own, and styles.css
+   loads first, so re-stating it here would only risk drift.                */
+
+:root {
+    /* Fallback for any theme with no block of its own. Neutral on purpose, so a
+       theme that is added later inherits something sane rather than nothing. */
+    --accent-strong: #cfd6dd;
+    --accent-strong-rgb: 207, 214, 221;
+    --accent-soft: rgba(207, 214, 221, 0.16);
+}
+
+[data-theme="misty"] {
+    /* Misty now has a real block in styles.css (previously it fell through to
+       :root, finding F8). Its palette is white-on-black, so the accent is the
+       neutral one — deliberately understated until the palette is designed. */
+    --accent-strong: #cfd6dd;
+    --accent-strong-rgb: 207, 214, 221;
+    --accent-soft: rgba(207, 214, 221, 0.16);
+}
+
+[data-theme="terminal"] {
+    /* The phosphor green the whole theme is built on. */
+    --accent-strong: #00ff00;
+    --accent-strong-rgb: 0, 255, 0;
+    --accent-soft: rgba(0, 255, 0, 0.16);
+}
+
+[data-theme="dark"] {
+    /* --stats-this-run-text; the one non-grey already in this palette. */
+    --accent-strong: #90caf9;
+    --accent-strong-rgb: 144, 202, 249;
+    --accent-soft: rgba(144, 202, 249, 0.16);
+}
+
+[data-theme="frosty"] {
+    /* --text-hover-color, a deeper cut of the theme's own blue. */
+    --accent-strong: #0e7aa8;
+    --accent-strong-rgb: 14, 122, 168;
+    --accent-soft: rgba(14, 122, 168, 0.16);
+}
+
+[data-theme="summer"] {
+    /* --current-star-border, the warm terracotta already in the palette. */
+    --accent-strong: #b55735;
+    --accent-strong-rgb: 181, 87, 53;
+    --accent-soft: rgba(181, 87, 53, 0.18);
+}
+
+[data-theme="supernova"] {
+    /* The leading --generation-colors stop: the theme's signature orange. */
+    --accent-strong: #ff6d00;
+    --accent-strong-rgb: 255, 109, 0;
+    --accent-soft: rgba(255, 109, 0, 0.20);
+}
+
+[data-theme="galaxy"] {
+    /* --stats-this-run-text, the blue this theme's selected tab already uses. */
+    --accent-strong: #58a6ff;
+    --accent-strong-rgb: 88, 166, 255;
+    --accent-soft: rgba(88, 166, 255, 0.18);
+}
+
+[data-theme="space"] {
+    /* --ready-text / --star-color-settled cyan. */
+    --accent-strong: #00f5ff;
+    --accent-strong-rgb: 0, 245, 255;
+    --accent-soft: rgba(0, 245, 255, 0.18);
+}
+
+
+/* --- 3. Row and section surfaces -----------------------------------------
+
+   Built on two things styles.css already guarantees for every theme:
+
+     · the generic [data-theme] block (styles.css:590) which gives all nine
+       themes --ui-radius, --ui-radius-sm, --ui-shadow, --ui-glow and
+       --ui-surface-*; and
+     · --text-color-rgb, defined in :root and in all eight theme blocks.
+
+   Using rgba(var(--text-color-rgb), a) for the tints means every surface is
+   derived from the theme's own ink, so a light theme gets a dark wash and a
+   dark theme a light one, automatically and without color-mix(). It also means
+   a theme that adds a block later inherits correct surfaces with no work.   */
+
+[data-theme] {
+    --ui-section-bg: transparent;
+    --ui-section-border: var(--ui-surface-border, var(--container-border-color));
+    --ui-section-radius: var(--ui-radius, 10px);
+    --ui-section-shadow: var(--ui-shadow, none);
+
+    /* Rows are transparent by default and lift only on hover, so a dense pane
+       does not turn into a stack of competing boxes. */
+    --ui-row-bg: transparent;
+    --ui-row-bg-hover: rgba(var(--text-color-rgb), 0.05);
+    --ui-row-rule: rgba(var(--text-color-rgb), 0.14);
+    --ui-row-radius: var(--ui-radius-sm, 8px);
+
+    --ui-chip-border: rgba(var(--text-color-rgb), 0.28);
+    --ui-chip-bg: rgba(var(--text-color-rgb), 0.04);
+
+    --ui-colhead-color: rgba(var(--text-color-rgb), 0.55);
+    --ui-sub-color: rgba(var(--text-color-rgb), 0.65);
+    --ui-detail-color: rgba(var(--text-color-rgb), 0.72);
+}
+
+/* The four themes carrying real depth get a faint section wash as well, so the
+   card reads as a surface rather than an outline. The flat themes (terminal,
+   dark, frosty, summer, and the misty fallback) deliberately keep
+   `transparent` — terminal in particular should stay a sharp CRT outline. */
+[data-theme="light"],
+[data-theme="supernova"],
+[data-theme="galaxy"],
+[data-theme="space"] {
+    --ui-section-bg: rgba(var(--text-color-rgb), 0.03);
+}
