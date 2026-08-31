@@ -25,7 +25,6 @@ const TECH_NAME_KEYS_BY_ENGLISH = {
     "Science Laboratories": "techNameScienceLaboratories",
     "HydroCarbons": "techNameHydroCarbons",
     "Nano Tube Technology": "techNameNanoTubeTechnology",
-    "Nano Brokers": "techNameNanoBrokers",
     "Stellar Cartography": "techNameStellarCartography",
     "Basic Power Generation": "techNameBasicPowerGeneration",
     "Sodium Ion Power Storage": "techNameSodiumIonPowerStorage",
@@ -83,7 +82,7 @@ const localizeTechPrereqs = (prereqs) => (prereqs || [])
 // have catalogue entries, so the label is composed rather than duplicated.
 const megaStructureRowLabel = (structureKey, stageKey) =>
     `${localize(structureKey, getLanguage())} ${localize(stageKey, getLanguage())}`;
-import { modalMegaStructureTechDysonSphere1Header, modalMegaStructureTechDysonSphere1Text, modalMegaStructureTechDysonSphere2Header, modalMegaStructureTechDysonSphere2Text, modalMegaStructureTechDysonSphere3Header, modalMegaStructureTechDysonSphere3Text, modalMegaStructureTechDysonSphere4Header, modalMegaStructureTechDysonSphere4Text, modalMegaStructureTechDysonSphere5Header, modalMegaStructureTechDysonSphere5Text, modalMegaStructureTechCelestialProcessingCore1Header, modalMegaStructureTechCelestialProcessingCore1Text, modalMegaStructureTechCelestialProcessingCore2Header, modalMegaStructureTechCelestialProcessingCore2Text, modalMegaStructureTechCelestialProcessingCore3Header, modalMegaStructureTechCelestialProcessingCore3Text, modalMegaStructureTechCelestialProcessingCore4Header, modalMegaStructureTechCelestialProcessingCore4Text, modalMegaStructureTechCelestialProcessingCore5Header, modalMegaStructureTechCelestialProcessingCore5Text, modalMegaStructureTechPlasmaForge1Header, modalMegaStructureTechPlasmaForge1Text, modalMegaStructureTechPlasmaForge2Header, modalMegaStructureTechPlasmaForge2Text, modalMegaStructureTechPlasmaForge3Header, modalMegaStructureTechPlasmaForge3Text, modalMegaStructureTechPlasmaForge4Header, modalMegaStructureTechPlasmaForge4Text, modalMegaStructureTechPlasmaForge5Header, modalMegaStructureTechPlasmaForge5Text, modalMegaStructureTechGalacticMemoryArchive1Header, modalMegaStructureTechGalacticMemoryArchive1Text, modalMegaStructureTechGalacticMemoryArchive2Header, modalMegaStructureTechGalacticMemoryArchive2Text, modalMegaStructureTechGalacticMemoryArchive3Header, modalMegaStructureTechGalacticMemoryArchive3Text, modalMegaStructureTechGalacticMemoryArchive4Header, modalMegaStructureTechGalacticMemoryArchive4Text, modalMegaStructureTechGalacticMemoryArchive5Header, modalMegaStructureTechGalacticMemoryArchive5Text, modalNanoBrokersUnlockHeader, modalNanoBrokersUnlockText, modalRocketCompositesTabUnlockHeader, modalRocketCompositesTabUnlockText, modalQuantumComputingTabUnlockHeader, modalQuantumComputingTabUnlockText, modalScienceLabsTabUnlockHeader, modalScienceLabsTabUnlockText, modalKnowledgeSharingTabUnlockHeader, modalKnowledgeSharingTabUnlockText, modalInterstellarTabUnlockHeader, modalInterstellarTabUnlockText, modalEnergyTabUnlockHeader, modalEnergyTabUnlockText, modalSpaceMiningTabUnlockText, modalSpaceMiningTabUnlockHeader, modalCompoundsTabUnlockHeader, modalCompoundsTabUnlockText, techNotificationMessages } from './descriptions.js';
+import { modalMegaStructureTechDysonSphere1Header, modalMegaStructureTechDysonSphere1Text, modalMegaStructureTechDysonSphere2Header, modalMegaStructureTechDysonSphere2Text, modalMegaStructureTechDysonSphere3Header, modalMegaStructureTechDysonSphere3Text, modalMegaStructureTechDysonSphere4Header, modalMegaStructureTechDysonSphere4Text, modalMegaStructureTechDysonSphere5Header, modalMegaStructureTechDysonSphere5Text, modalMegaStructureTechCelestialProcessingCore1Header, modalMegaStructureTechCelestialProcessingCore1Text, modalMegaStructureTechCelestialProcessingCore2Header, modalMegaStructureTechCelestialProcessingCore2Text, modalMegaStructureTechCelestialProcessingCore3Header, modalMegaStructureTechCelestialProcessingCore3Text, modalMegaStructureTechCelestialProcessingCore4Header, modalMegaStructureTechCelestialProcessingCore4Text, modalMegaStructureTechCelestialProcessingCore5Header, modalMegaStructureTechCelestialProcessingCore5Text, modalMegaStructureTechPlasmaForge1Header, modalMegaStructureTechPlasmaForge1Text, modalMegaStructureTechPlasmaForge2Header, modalMegaStructureTechPlasmaForge2Text, modalMegaStructureTechPlasmaForge3Header, modalMegaStructureTechPlasmaForge3Text, modalMegaStructureTechPlasmaForge4Header, modalMegaStructureTechPlasmaForge4Text, modalMegaStructureTechPlasmaForge5Header, modalMegaStructureTechPlasmaForge5Text, modalMegaStructureTechGalacticMemoryArchive1Header, modalMegaStructureTechGalacticMemoryArchive1Text, modalMegaStructureTechGalacticMemoryArchive2Header, modalMegaStructureTechGalacticMemoryArchive2Text, modalMegaStructureTechGalacticMemoryArchive3Header, modalMegaStructureTechGalacticMemoryArchive3Text, modalMegaStructureTechGalacticMemoryArchive4Header, modalMegaStructureTechGalacticMemoryArchive4Text, modalMegaStructureTechGalacticMemoryArchive5Header, modalMegaStructureTechGalacticMemoryArchive5Text, modalRocketCompositesTabUnlockHeader, modalRocketCompositesTabUnlockText, modalQuantumComputingTabUnlockHeader, modalQuantumComputingTabUnlockText, modalScienceLabsTabUnlockHeader, modalScienceLabsTabUnlockText, modalKnowledgeSharingTabUnlockHeader, modalKnowledgeSharingTabUnlockText, modalInterstellarTabUnlockHeader, modalInterstellarTabUnlockText, modalEnergyTabUnlockHeader, modalEnergyTabUnlockText, modalSpaceMiningTabUnlockText, modalSpaceMiningTabUnlockHeader, modalCompoundsTabUnlockHeader, modalCompoundsTabUnlockText, techNotificationMessages } from './descriptions.js';
 
 export function drawTab3Content(heading, optionContentElement) {
     // The row's own marker is cleared by the click that opened this pane — see
@@ -772,38 +771,6 @@ export function drawTab3Content(heading, optionContentElement) {
                     resourcePriceObject: '',
                     dataConditionCheck: 'techUnlock',
                     objectSectionArgument1: 'nanoTubeTechnology',
-                    objectSectionArgument2: null,
-                    quantityArgument: 'research',
-                    autoBuyerTier: null,
-                    startInvisibleValue: ['research', 'researchPoints'],
-                    resourceString: null,
-                    optionalIterationParam: null,
-                    rowCategory: 'tech'
-                })
-            },
-            {
-                techName: 'nanoBrokers',
-                row: createOptionRow({
-                    labelId: 'techNanoBrokersRow',
-                    renderNameABs: null,
-                    labelText: `${localize('techNameNanoBrokers', getLanguage())}:`,
-                    inputElements: [
-                        createButton({
-                            text: localize('buttonResearch', getLanguage()),
-                            classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'tech-unlock'],
-                            onClick: (event) => { handleTechnologyButtonClick('nanoBrokers', event); },
-                            dataConditionCheck: 'techUnlock',
-                            resourcePriceObject: '',
-                            objectSectionArgument1: 'nanoBrokers',
-                            quantityArgument: 'research',
-                            disableKeyboardForButton: true,
-                            rowCategory: 'tech'
-                        }),
-                    ],
-                    descriptionText: `${getResourceDataObject('techs', ['nanoBrokers', 'price'])} ${localize('textResearchPointsSuffix', getLanguage())}${getResourceDataObject('techs', ['nanoBrokers', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? ', ' : ''}<span id="nanoBrokersPrereq">${localizeTechPrereqs(getResourceDataObject('techs', ['nanoBrokers', 'prereqs']))}</span>`,
-                    resourcePriceObject: '',
-                    dataConditionCheck: 'techUnlock',
-                    objectSectionArgument1: 'nanoBrokers',
                     objectSectionArgument2: null,
                     quantityArgument: 'research',
                     autoBuyerTier: null,
@@ -3787,29 +3754,6 @@ export function handleTechnologyButtonClick(techName, event) {
             }
             break;
         case 'nanoTubeTechnology':
-            break;
-        case 'nanoBrokers':
-            if (getStatRun() === 1) {
-                callPopupModal({
-                    header: modalNanoBrokersUnlockHeader,
-                    content: modalNanoBrokersUnlockText,
-                    showConfirm: true,
-                    showCancel: false,
-                    showExtra1: false,
-                    showExtra2: false,
-                    onConfirm: () => {
-                        showHideModal();
-                    },
-                    onCancel: null,
-                    onExtra1: null,
-                    onExtra2: null,
-                    confirmLabel: localize('buttonConfirm', getLanguage()),
-                    cancelLabel: null,
-                    extra1Label: null,
-                    extra2Label: null,
-                    setupToolTips: false,
-                });
-            }
             break;
         case 'stellarCartography':
             if (getStatRun() === 1) {

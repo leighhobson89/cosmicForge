@@ -248,6 +248,7 @@ import {
     getCosmicRipGalacticPoints,
     getGalacticCasinoDataObject,
     setGalacticCasinoDataObject,
+    getAutoSellUnlocked,
 } from "./resourceDataObject.js";
 import {
     optionDescriptions,
@@ -368,6 +369,10 @@ import {
     setEnemyFleetPower,
     rebirth,
     settleSystemAfterBattle,
+    getAllocationBreakdown,
+    resourceIsCompoundIngredient,
+    getActiveCompoundConsumers,
+    getAutoSellIncomePerSecond,
     setAutoSellToggleState,
     setAutoCreateToggleState,
     calculateStarTravelDurationWithModifiers,
@@ -2292,25 +2297,7 @@ function setupStatTooltips() {
 
 
 function setupProductionRateTooltips() {
-    let tooltip = document.getElementById('production-rate-tooltip');
-    if (!tooltip) {
-        tooltip = document.createElement('div');
-        tooltip.id = 'production-rate-tooltip';
-        tooltip.style.position = 'absolute';
-        tooltip.style.padding = '6px 10px';
-        tooltip.style.pointerEvents = 'none';
-        tooltip.style.background = 'var(--container-bg-color)';
-        tooltip.style.color = 'var(--text-color)';
-        tooltip.style.border = '1px solid var(--border-color, #555)';
-        tooltip.style.borderRadius = 'var(--border-radius, 4px)';
-        tooltip.style.fontSize = '12px';
-        tooltip.style.zIndex = '100000';
-        tooltip.style.display = 'none';
-        tooltip.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.2)';
-        tooltip.style.maxWidth = '320px';
-        tooltip.style.wordWrap = 'break-word';
-        document.body.appendChild(tooltip);
-    }
+    const tooltip = ensureProductionRateTooltip();
 
 
     const resources = Object.keys(getResourceDataObject('resources') || {});
@@ -2550,10 +2537,10 @@ function buildProductionTooltipContent(resourceKey, category) {
     }
 
 
-    const diversionLines = buildAutoCreateDiversionLines(resourceKey, category);
-    if (diversionLines) {
+    const allocationLines = buildAllocationLines(resourceKey, category, netRateDisplay);
+    if (allocationLines) {
         lines.push('<div class="tooltip-spacer">&nbsp;</div>');
-        lines.push(diversionLines);
+        lines.push(allocationLines);
     }
 
 
@@ -2914,7 +2901,18 @@ function buildAutoBuyerGenerationLines(resourceKey, category, timerRatio) {
         
         const contribution = baseContribution + bTypeBoost;
         const className = contribution > 0 ? 'green-ready-text' : 'red-disabled-text';
-        const label = tierData.nameUpgrade || localize('tooltipTierLabel', getLanguage()).replace('{tier}', tier);
+
+        // `nameUpgrade` holds a localization *key*, not a display name - every
+        // pane that draws an autobuyer row runs it through `localize` first.
+        // Printing it raw put `autoBuyerNameDieselBackyard` in the tooltip. A
+        // key with no catalogue entry localizes to itself, so fall back to the
+        // generic tier label rather than leak the key a second way.
+        const localisedName = tierData.nameUpgrade
+            ? localize(tierData.nameUpgrade, getLanguage())
+            : '';
+        const label = (localisedName && localisedName !== tierData.nameUpgrade)
+            ? localisedName
+            : localize('tooltipTierLabel', getLanguage()).replace('{tier}', tier);
         const tierLabel = localize('tooltipTierNamedLabel', getLanguage()).replace('{label}', label).replace('{tier}', tier);
         const formattedContribution = formatProductionRateValue(contribution);
 
@@ -2943,7 +2941,18 @@ function buildAutoCreateGenerationLine(resourceKey, category, timerRatio) {
     const autoCreateRate = autoCreatePerInterval * timerRatio;
     const formatted = formatProductionRateValue(autoCreateRate);
     const className = autoCreateRate > 0 ? 'green-ready-text' : 'red-disabled-text';
-    return `<div>${localize('tooltipAutoCreationLabel', getLanguage())} <span class="${className}">${formatted} / s</span></div>`;
+    const line = `<div>${localize('tooltipAutoCreationLabel', getLanguage())} <span class="${className}">${formatted} / s</span></div>`;
+
+    // P9: a compound can make only as much as its scarcest ingredient's share
+    // allows. Saying which ingredient is the bottleneck turns "why is this so
+    // slow" into a single actionable answer - go and widen that resource's
+    // compound band, or build more of it.
+    const throttledBy = getResourceDataObject('compounds', [resourceKey, 'autoCreateThrottledBy'], true);
+    if (!throttledBy) {
+        return line;
+    }
+    const throttleName = localizeMaterialName(throttledBy, 'resources', getLanguage());
+    return line + `<div class="warning-orange-text">${localize('tooltipAllocationThrottledBy', getLanguage()).replace('{resource}', throttleName)}</div>`;
 }
 
 
@@ -2999,28 +3008,87 @@ function buildPrecipitationGenerationLine(resourceKey, category, timerRatio) {
 }
 
 
-function buildAutoCreateDiversionLines(resourceKey, category) {
-    if (category !== 'resources') {
+/**
+ * P9: where this material's production is actually going, in full.
+ *
+ * The whole point of the allocation model is that the player can see the split
+ * they chose being applied, so this accounts for every unit: fuel off the top,
+ * then cash, then each auto-creating compound by name with the amount it is
+ * really taking, then what is accumulating. The figures come from the engine's
+ * own breakdown, so the tooltip cannot drift from the arithmetic.
+ *
+ * Compounds are the end of the line: they are made to be spent, not sold on a
+ * timer, and there is no control anywhere in a compound pane that would set a
+ * cash share. So the selling half of this block is resources-only. Quoting the
+ * game-wide autosell income on a compound was the worst of it - a figure earned
+ * entirely by resources, printed under a compound's own production, reading as
+ * though the compound were contributing to it.
+ *
+ * That leaves a compound with one line worth printing - what is accumulating -
+ * and it is taken from the headline figure the player is hovering rather than
+ * from the breakdown. The breakdown's own total counts *autobuyer* output only,
+ * so a compound made by auto-creation or falling as rain had a gross of zero and
+ * reported nothing accumulating while its store visibly filled. Nothing is
+ * diverted from a compound anyway, so the whole net rate is what accumulates,
+ * and quoting the hovered figure back guarantees the two agree.
+ */
+function buildAllocationLines(resourceKey, category, netRateDisplay) {
+    const breakdown = getAllocationBreakdown(category, resourceKey);
+    const sellsForCash = category === 'resources';
+
+    // Nothing to explain on a resource with no slider to explain and nothing
+    // drawing on it either. A compound is not gated on the selling perk here:
+    // its one line says where its production is going, which is true from the
+    // first unit made.
+    if (sellsForCash && !getAutoSellUnlocked() && breakdown.perCompound.length === 0) {
         return '';
     }
 
+    const perSecond = localize('textPerSecond', getLanguage());
+    const rate = (value) => `${formatProductionRateValue(value)} ${perSecond}`;
+    const lines = [
+        `<div><strong>${localize('tooltipAllocationHeading', getLanguage())}</strong></div>`
+    ];
 
-    const compounds = getResourceDataObject('compounds') || {};
-    const diversionTargets = Object.entries(compounds)
-        .filter(([, data]) => data?.autoCreate)
-        .filter(([, data]) => compoundUsesResource(data, resourceKey));
-
-
-    if (diversionTargets.length === 0) {
-        return '';
+    // Allocatable is the pool the handles divide up. With no handles on a
+    // compound there is nothing to divide, and the line was quoting a total that
+    // did not match the one above it.
+    if (sellsForCash) {
+        lines.push(`<div>${localize('tooltipAllocationAllocatable', getLanguage())}: <span class="stats-text">${rate(breakdown.allocatable)}</span></div>`);
     }
 
+    if (sellsForCash && breakdown.toCash > 0) {
+        lines.push(`<div>${localize('tooltipAllocationToCash', getLanguage())}: <span class="stats-text">${rate(breakdown.toCash)}</span></div>`);
+    }
 
-    const lines = diversionTargets.map(([compoundKey, data]) => {
-        const name = localizeMaterialName(compoundKey, 'compounds', getLanguage());
-        return `<div class="stats-text">${localize('tooltipResourcesDivertedToCreate', getLanguage()).replace('{compound}', name)}</div>`;
+    if (category === 'resources' && breakdown.compoundCeiling > 0) {
+        lines.push(`<div>${localize('tooltipAllocationCeiling', getLanguage())}: <span class="stats-text">${rate(breakdown.compoundCeiling)}</span></div>`);
+    }
+
+    // Each consumer gets its own line with the amount it is drawing. The share
+    // it was *offered* is an equal cut of the ceiling; what it takes may be less
+    // if another of its ingredients is the bottleneck, and the difference is
+    // exactly what stays in this store.
+    breakdown.perCompound.forEach(({ compound, draw }) => {
+        const name = localizeMaterialName(compound, 'compounds', getLanguage());
+        lines.push(
+            `<div class="stats-text">${localize('tooltipResourcesDivertedToCreate', getLanguage()).replace('{compound}', name)}: ${rate(draw)}</div>`
+        );
     });
 
+    const accumulating = sellsForCash ? rate(breakdown.toStorage) : (netRateDisplay || rate(breakdown.toStorage));
+    lines.push(`<div>${localize('tooltipAllocationToStorage', getLanguage())}: <span class="green-ready-text">${accumulating}</span></div>`);
+
+    // The game-wide total, so the player can weigh one material's split against
+    // what every other material is contributing. Only ever on a resource, since
+    // only resources are sold on a slider at all.
+    const income = sellsForCash ? getAutoSellIncomePerSecond() : 0;
+    if (income > 0) {
+        lines.push(
+            `<div>${localize('tooltipAutoSellIncome', getLanguage())}: ` +
+            `<span class="stats-text">${getCurrencySymbol()}${formatProductionRateValue(income)} ${perSecond}</span></div>`
+        );
+    }
 
     return lines.join('');
 }
@@ -3045,9 +3113,14 @@ function calculateAutoCreateRatePerSecond(compoundKey, timerRatio) {
             }
 
 
+            // P9: what this compound may actually have of the ingredient - the
+            // ceiling its resource pane set, divided equally between the
+            // compounds drawing on it - not the ingredient's whole gross rate,
+            // which every consumer would otherwise claim in full.
             const sourceCategory = category || 'resources';
-            const perSecond = calculateGrossAutoBuyerGenerationPerSecond(sourceCategory, resourceName, timerRatio);
-            return Math.max(0, perSecond / ratio);
+            const ceiling = getAllocationBreakdown(sourceCategory, resourceName).compoundCeiling;
+            const consumers = Math.max(1, getActiveCompoundConsumers(resourceName).length);
+            return Math.max(0, (ceiling / consumers) / ratio);
         })
         .filter(rate => rate >= 0);
 
@@ -3058,11 +3131,6 @@ function calculateAutoCreateRatePerSecond(compoundKey, timerRatio) {
 
 
     return Math.min(...perIngredientRates);
-}
-
-
-function compoundUsesResource(compoundData, resourceKey) {
-    return getCompoundIngredientEntries(compoundData).some(({ resourceName }) => resourceName === resourceKey);
 }
 
 
@@ -4188,6 +4256,559 @@ export function createSpinningDropdown(id, items, defaultValue, classes = []) {
 
 
     return container;
+}
+
+
+/**
+ * A multi-handle slider, built the same way as `createButton`, `createDropdown`
+ * and `createToggleSwitch` so a pane assembles out of one consistent family of
+ * controls.
+ *
+ * One handle gives an ordinary slider. Several give a partition: each handle
+ * marks a boundary along the track, the segments between the boundaries are the
+ * shares, and the handles cannot cross - dragging one past its neighbour pushes
+ * the neighbour along rather than inverting the segment. P9's production
+ * allocation line is a partition of this kind; a plain volume or difficulty
+ * control would be the one-handle case.
+ *
+ * @param {string} id           element id for the container
+ * @param {object} config
+ * @param {number[]} config.values      boundary positions, ascending, 0..max
+ * @param {number} [config.min=0]       lowest value a handle may take
+ * @param {number} [config.max=100]     highest value a handle may take
+ * @param {number} [config.step=5]      snap increment, for drag and arrow keys
+ * @param {string[]} [config.segmentClasses]  one class per segment, left to right
+ * @param {string[]} [config.handleIds]       explicit ids, so callers can address a handle
+ * @param {string[]} [config.handleLabels]    accessible names for each handle
+ * @param {Function} config.onChange    called with the full boundary array on every change
+ * @param {string[]} [classes]          extra classes for the container
+ */
+export function createSlider(id, config = {}, classes = []) {
+    const min = Number.isFinite(config.min) ? config.min : 0;
+    const max = Number.isFinite(config.max) ? config.max : 100;
+    const step = Number.isFinite(config.step) && config.step > 0 ? config.step : 5;
+    const onChange = typeof config.onChange === 'function' ? config.onChange : () => {};
+    const segmentClasses = Array.isArray(config.segmentClasses) ? config.segmentClasses : [];
+    const handleIds = Array.isArray(config.handleIds) ? config.handleIds : [];
+    const handleLabels = Array.isArray(config.handleLabels) ? config.handleLabels : [];
+
+    let boundaries = normaliseBoundaries(config.values, min, max, step);
+
+    const container = document.createElement('div');
+    container.classList.add('slider-container');
+    container.id = id;
+    if (Array.isArray(classes)) {
+        classes.forEach(className => container.classList.add(className));
+    }
+
+    const track = document.createElement('div');
+    track.classList.add('slider-track');
+    track.setAttribute('role', 'group');
+    container.appendChild(track);
+
+    // One more segment than there are boundaries: the last runs from the final
+    // handle to the end of the track.
+    const segments = [];
+    for (let i = 0; i <= boundaries.length; i++) {
+        const segment = document.createElement('div');
+        segment.classList.add('slider-segment');
+        if (segmentClasses[i]) {
+            segment.classList.add(segmentClasses[i]);
+        }
+        track.appendChild(segment);
+        segments.push(segment);
+    }
+
+    const handles = boundaries.map((_, index) => {
+        const handle = document.createElement('div');
+        handle.classList.add('slider-handle');
+        if (handleIds[index]) {
+            handle.id = handleIds[index];
+        }
+        handle.dataset.handleIndex = String(index);
+        handle.setAttribute('tabindex', '0');
+        handle.setAttribute('role', 'slider');
+        handle.setAttribute('aria-valuemin', String(min));
+        handle.setAttribute('aria-valuemax', String(max));
+        if (handleLabels[index]) {
+            handle.setAttribute('aria-label', handleLabels[index]);
+        }
+        track.appendChild(handle);
+        return handle;
+    });
+
+    const render = () => {
+        let previous = min;
+        segments.forEach((segment, index) => {
+            const end = index < boundaries.length ? boundaries[index] : max;
+            const span = Math.max(0, end - previous);
+            segment.style.width = `${((span) / (max - min)) * 100}%`;
+            previous = end;
+        });
+
+        handles.forEach((handle, index) => {
+            const value = boundaries[index];
+            handle.style.left = `${((value - min) / (max - min)) * 100}%`;
+            handle.setAttribute('aria-valuenow', String(value));
+        });
+    };
+
+    /**
+     * Move one boundary, then push every neighbour it would have crossed.
+     *
+     * Pushing rather than clamping is what makes a drag feel continuous: a
+     * handle dragged hard to one end takes the others with it instead of
+     * stopping dead against them and leaving the pointer behind.
+     */
+    const setBoundary = (index, requested) => {
+        const snapped = snap(requested, min, max, step);
+        const next = boundaries.slice();
+        next[index] = snapped;
+
+        for (let i = index - 1; i >= 0; i--) {
+            next[i] = Math.min(next[i], next[i + 1]);
+        }
+        for (let i = index + 1; i < next.length; i++) {
+            next[i] = Math.max(next[i], next[i - 1]);
+        }
+
+        if (next.every((value, i) => value === boundaries[i])) {
+            return;
+        }
+
+        boundaries = next;
+        render();
+        onChange(boundaries.slice(), index);
+    };
+
+    const valueFromPointer = (clientX) => {
+        const rect = track.getBoundingClientRect();
+        if (rect.width <= 0) {
+            return null;
+        }
+        const fraction = (clientX - rect.left) / rect.width;
+        return min + (fraction * (max - min));
+    };
+
+    handles.forEach((handle, index) => {
+        // Pointer events cover mouse, pen and touch with one code path, which is
+        // the whole reason the track sets `touch-action: none`.
+        handle.addEventListener('pointerdown', (event) => {
+            event.preventDefault();
+            handle.setPointerCapture?.(event.pointerId);
+            // Flagged so a per-frame refresh elsewhere does not write the stored
+            // value back over the drag and snap the handle out from under the
+            // pointer.
+            container.dataset.dragging = 'true';
+
+            const move = (moveEvent) => {
+                const value = valueFromPointer(moveEvent.clientX);
+                if (value !== null) {
+                    setBoundary(index, value);
+                }
+            };
+            const end = (endEvent) => {
+                handle.releasePointerCapture?.(endEvent.pointerId);
+                handle.removeEventListener('pointermove', move);
+                handle.removeEventListener('pointerup', end);
+                handle.removeEventListener('pointercancel', end);
+                delete container.dataset.dragging;
+                playSwipeSfx();
+            };
+
+            handle.addEventListener('pointermove', move);
+            handle.addEventListener('pointerup', end);
+            handle.addEventListener('pointercancel', end);
+            move(event);
+        });
+
+        // The slider is how the setting is presented, never the only way to
+        // reach it: every handle is focusable and steps with the arrow keys.
+        handle.addEventListener('keydown', (event) => {
+            const direction = (event.key === 'ArrowRight' || event.key === 'ArrowUp') ? 1
+                : ((event.key === 'ArrowLeft' || event.key === 'ArrowDown') ? -1 : 0);
+            if (direction === 0) {
+                return;
+            }
+            event.preventDefault();
+            setBoundary(index, boundaries[index] + (direction * step));
+        });
+    });
+
+    render();
+
+    // Callers that persist their values elsewhere need a way to push a corrected
+    // set back in - a rebirth, a save load, or a share the engine clamped.
+    container.setSliderValues = (values) => {
+        boundaries = normaliseBoundaries(values, min, max, step);
+        render();
+    };
+    container.getSliderValues = () => boundaries.slice();
+
+    return container;
+}
+
+function snap(value, min, max, step) {
+    if (!Number.isFinite(value)) {
+        return min;
+    }
+    const stepped = Math.round(value / step) * step;
+    return Math.max(min, Math.min(max, stepped));
+}
+
+/** Boundaries must be in range, on the step, and ascending - in that order. */
+function normaliseBoundaries(values, min, max, step) {
+    const list = (Array.isArray(values) ? values : [])
+        .map(value => snap(value, min, max, step));
+    for (let i = 1; i < list.length; i++) {
+        list[i] = Math.max(list[i], list[i - 1]);
+    }
+    return list;
+}
+
+
+/**
+ * P9 - the production allocation line.
+ *
+ * A `createSlider` partition plus the readout underneath it. The slider knows
+ * about handles, snapping and pushing; everything here is what the shares
+ * *mean*: a material's allocatable production - what its autobuyers made this
+ * second, less what the power plants burned of it - divided into cash, a ceiling
+ * offered to auto-creating compounds, and a remainder that accumulates.
+ *
+ * The line has one handle or two depending on what the player can do with the
+ * material, because a control should never offer a decision that has no effect:
+ *
+ *   - **two segments, one handle** - cash against storage. Every compound pane
+ *     is permanently here, and so is any resource no recipe draws on: helium has
+ *     no consumers, so a compound band on it would be a dead control.
+ *   - **three segments, two handles** - cash, the compound ceiling, then
+ *     storage. Only for a resource some recipe names, and only once the Nano
+ *     Brokers ladder reaches its second rung.
+ *
+ * It replaces the sell dropdown and Sell button in a material's sell row once
+ * the ladder's first rung is owned, and takes the width of the pair it replaces
+ * so every row in the pane stays aligned.
+ */
+export function createAllocationLine(category, key, options = {}) {
+    const showCompoundBand = !!options.showCompoundBand;
+
+    const container = document.createElement('div');
+    container.classList.add('allocation-line-container');
+    container.id = `${key}AllocationLine`;
+    container.dataset.category = category;
+    container.dataset.materialKey = key;
+
+    const cash = clampPercent(Number(getResourceDataObject(category, [key, 'cashShare'], true)) || 0);
+    const compound = showCompoundBand
+        ? Math.max(0, Math.min(100 - cash, Number(getResourceDataObject(category, [key, 'compoundShare'], true)) || 0))
+        : 0;
+
+    // Boundaries, not widths: one handle at the end of the cash band, and where
+    // there is a compound band, a second at the end of that.
+    const boundaries = showCompoundBand ? [cash, cash + compound] : [cash];
+
+    const slider = createSlider(`${key}AllocationSlider`, {
+        values: boundaries,
+        min: 0,
+        max: 100,
+        step: 5,
+        segmentClasses: showCompoundBand
+            ? ['allocation-band-cash', 'allocation-band-compound', 'allocation-band-storage']
+            : ['allocation-band-cash', 'allocation-band-storage'],
+        handleIds: showCompoundBand
+            ? [`${key}AllocationHandleCash`, `${key}AllocationHandleCompound`]
+            : [`${key}AllocationHandleCash`],
+        handleLabels: showCompoundBand
+            ? [localize('allocationHandleCash', getLanguage()), localize('allocationHandleCompound', getLanguage())]
+            : [localize('allocationHandleCash', getLanguage())],
+        onChange: (values) => {
+            // The slider guarantees the boundaries are ascending and on the
+            // step, so the shares derived from them are always a valid
+            // partition of 100 without further checking here.
+            const nextCash = clampPercent(values[0]);
+            setResourceDataObject(nextCash, category, [key, 'cashShare']);
+            if (showCompoundBand) {
+                setResourceDataObject(clampPercent(values[1] - nextCash), category, [key, 'compoundShare']);
+            }
+            updateAllocationReadout(container, category, key, showCompoundBand);
+        }
+    }, ['allocation-slider']);
+
+    const readout = document.createElement('div');
+    readout.classList.add('allocation-readout');
+    readout.id = `${key}AllocationReadout`;
+
+    // The bar is the only place the split is set, so it is also where the
+    // explanation of the split belongs - hovering it says what the handles do
+    // and what the three figures beside them mean.
+    attachAllocationSliderTooltip(slider, category, key, showCompoundBand);
+
+    container.appendChild(slider);
+    container.appendChild(readout);
+
+    updateAllocationReadout(container, category, key, showCompoundBand);
+    return container;
+}
+
+/** Percentages are stored as whole numbers in 0..100; nothing else is valid. */
+function clampPercent(value) {
+    if (!Number.isFinite(value)) {
+        return 0;
+    }
+    return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+/**
+ * Write the live per-second figures beside the bar.
+ *
+ * All three are *destinations*, and all three move with the handles: what is
+ * accumulating, what is being sold, and what the compounds are actually taking.
+ * The allocatable total is deliberately not among them - it does not move with
+ * the slider, so printing it beside three figures that do read as a fourth band
+ * that never changes. It is quoted once, in the breakdown tooltip on the
+ * production figure in the left pane, which is where a total belongs.
+ *
+ * Every figure comes from `getAllocationBreakdown()`, which is the engine's own
+ * arithmetic - a display that recomputed the split for itself would eventually
+ * disagree with where the production actually went. That matters most for the
+ * compound figure: it is what the recipes are *drawing*, not the ceiling they
+ * were offered, so a band whose compounds are switched off or bottlenecked on
+ * another ingredient reads zero, and the difference shows up in the storage
+ * figure where the material is genuinely going.
+ */
+export function updateAllocationReadout(container, category, key, showCompoundBand) {
+    const readout = container?.querySelector('.allocation-readout');
+    if (!readout) {
+        return;
+    }
+
+    const breakdown = getAllocationBreakdown(category, key);
+    const saleValue = Number(getResourceDataObject(category, [key, 'saleValue'])) || 0;
+    const perSecond = localize('textPerSecond', getLanguage());
+
+    const parts = [
+        `<span class="allocation-figure allocation-figure-storage">${formatProductionRateValue(breakdown.toStorage)} ${perSecond}</span>`,
+        `<span class="allocation-figure allocation-figure-cash">${getCurrencySymbol()}${formatProductionRateValue(breakdown.toCash * saleValue)} ${perSecond}</span>`
+    ];
+
+    if (showCompoundBand) {
+        parts.push(`<span class="allocation-figure allocation-figure-compound">${formatProductionRateValue(breakdown.toCompounds)} ${perSecond}</span>`);
+    }
+
+    readout.innerHTML = parts.join('');
+
+    // The slider is the record of what the player set, but the engine clamps -
+    // a compound band cannot outlive the capability that created it. Push the
+    // clamped values back so the handles never show a split that is not being
+    // acted on.
+    const slider = container.querySelector('.slider-container');
+    if (slider?.setSliderValues && !slider.dataset.dragging) {
+        const cash = clampPercent(Number(getResourceDataObject(category, [key, 'cashShare'], true)) || 0);
+        const wanted = showCompoundBand
+            ? [cash, cash + Math.max(0, Math.min(100 - cash, Number(getResourceDataObject(category, [key, 'compoundShare'], true)) || 0))]
+            : [cash];
+        const current = slider.getSliderValues();
+        if (wanted.length !== current.length || wanted.some((value, i) => value !== current[i])) {
+            slider.setSliderValues(wanted);
+        }
+    }
+}
+
+
+/**
+ * The one floating panel every production tooltip borrows.
+ *
+ * Shared rather than one panel per attachment point: only one can be on screen
+ * at a time, and a second element would have to be kept in step with this one's
+ * styling for ever. Both the per-material production tooltips and the allocation
+ * slider's own how-to tooltip call this.
+ *
+ * It lives at module level deliberately. `setupProductionRateTooltips`, its
+ * first caller, is itself nested two scopes deep, and a function declared inside
+ * a block is block-scoped in a module - so a copy of this living beside that
+ * caller is invisible to everything else in the file.
+ */
+function ensureProductionRateTooltip() {
+    let tooltip = document.getElementById('production-rate-tooltip');
+    if (tooltip) {
+        return tooltip;
+    }
+
+    tooltip = document.createElement('div');
+    tooltip.id = 'production-rate-tooltip';
+    tooltip.style.position = 'absolute';
+    tooltip.style.padding = '6px 10px';
+    tooltip.style.pointerEvents = 'none';
+    tooltip.style.background = 'var(--container-bg-color)';
+    tooltip.style.color = 'var(--text-color)';
+    tooltip.style.border = '1px solid var(--border-color, #555)';
+    tooltip.style.borderRadius = 'var(--border-radius, 4px)';
+    tooltip.style.fontSize = '12px';
+    tooltip.style.zIndex = '100000';
+    tooltip.style.display = 'none';
+    tooltip.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.2)';
+    tooltip.style.maxWidth = '320px';
+    tooltip.style.wordWrap = 'break-word';
+    document.body.appendChild(tooltip);
+    return tooltip;
+}
+
+/**
+ * A compound's recipe: every ingredient it names, with the ratio it wants.
+ *
+ * Deliberately its own reader rather than a call to `getCompoundIngredientEntries`
+ * further up this file. That one is declared inside a function two scopes deep,
+ * and a function declaration inside a block is block-scoped in a module - so it
+ * is invisible from module level, however top-level it looks in the source.
+ */
+function recipeEntriesFor(compound) {
+    const compoundData = getResourceDataObject('compounds', [compound], true) || {};
+    const entries = [];
+    for (let i = 1; i <= 4; i++) {
+        const from = compoundData[`createsFrom${i}`];
+        const ratio = Number(compoundData[`createsFromRatio${i}`]) || 0;
+        if (Array.isArray(from) && from[0] && ratio > 0) {
+            entries.push({ resourceName: from[0], category: from[1] || 'resources', ratio });
+        }
+    }
+    return entries;
+}
+
+/** Every compound whose recipe names this resource, switched on or not. */
+function compoundsMadeFrom(resourceKey) {
+    const compounds = getResourceDataObject('compounds') || {};
+    return Object.keys(compounds).filter(compound =>
+        recipeEntriesFor(compound).some(part => part.resourceName === resourceKey));
+}
+
+/** Which side of the data object a recipe's ingredient lives on. */
+function ingredientCategory(compound, resourceName) {
+    const entry = recipeEntriesFor(compound).find(part => part.resourceName === resourceName);
+    return entry?.category || 'resources';
+}
+
+/**
+ * P9 - the "what is this control?" tooltip on the allocation slider itself.
+ *
+ * The readout beside the bar says where production is going; it does not say
+ * what the handles do, and a two-handle partition is not self-explanatory. This
+ * is the explanation, and it is built from the live figures rather than written
+ * as static prose: a rule stated in the abstract ("the rest is stored") is far
+ * less convincing than the same rule with the player's own numbers in it.
+ *
+ * It grows with what the player owns, so nobody is told about a control they do
+ * not have. One handle gets the cash paragraph alone; the compound paragraphs
+ * appear only alongside the second band, which is itself only ever drawn on a
+ * resource some recipe actually draws on.
+ */
+function buildAllocationSliderTooltip(category, key, showCompoundBand) {
+    const lang = getLanguage();
+    const breakdown = getAllocationBreakdown(category, key);
+    const perSecond = localize('textPerSecond', lang);
+    const rate = (value) => `${formatProductionRateValue(value)} ${perSecond}`;
+    const money = (value) => `${getCurrencySymbol()}${formatProductionRateValue(value)} ${perSecond}`;
+    const fill = (token, values) => Object.entries(values).reduce(
+        (text, [name, value]) => text.split(`{${name}}`).join(value),
+        localize(token, lang)
+    );
+
+    const cashPercent = clampPercent(Number(getResourceDataObject(category, [key, 'cashShare'], true)) || 0);
+    const compoundPercent = showCompoundBand
+        ? Math.max(0, Math.min(100 - cashPercent, Number(getResourceDataObject(category, [key, 'compoundShare'], true)) || 0))
+        : 0;
+    const storagePercent = Math.max(0, 100 - cashPercent - compoundPercent);
+    const saleValue = Number(getResourceDataObject(category, [key, 'saleValue'])) || 0;
+
+    // The legend first, because the three figures beside the bar are the thing
+    // the player is looking at when they reach for this tooltip. Each line
+    // carries the figure's own colour class, so the label and the number it
+    // explains are unmistakably the same band in every theme.
+    const lines = [
+        `<div><strong>${localize('tooltipSliderHeading', lang)}</strong></div>`,
+        `<div>${fill('tooltipSliderIntro', { allocatable: rate(breakdown.allocatable) })}</div>`,
+        `<div class="allocation-figure-storage">${fill('tooltipSliderLegendStorage', { rate: rate(breakdown.toStorage), percent: storagePercent })}</div>`,
+        `<div class="allocation-figure-cash">${fill('tooltipSliderLegendCash', { cash: money(breakdown.toCash * saleValue), percent: cashPercent })}</div>`
+    ];
+
+    if (showCompoundBand) {
+        lines.push(`<div class="allocation-figure-compound">${fill('tooltipSliderLegendCompounds', { rate: rate(breakdown.toCompounds), percent: compoundPercent })}</div>`);
+    }
+
+    lines.push('<div>&nbsp;</div>');
+    lines.push(`<div>${localize('tooltipSliderCashHandle', lang)}</div>`);
+    lines.push(`<div>${localize('tooltipSliderCashOff', lang)}</div>`);
+
+    if (showCompoundBand) {
+        lines.push('<div>&nbsp;</div>');
+        lines.push(`<div>${localize('tooltipSliderCompoundHandle', lang)}</div>`);
+
+        const consumers = getActiveCompoundConsumers(key);
+        const idle = compoundsMadeFrom(key).filter(compound => !consumers.includes(compound));
+
+        // Auto-create off is the case most likely to look like a bug: the band
+        // is set, the bar shows it, and nothing is being made. Say where the
+        // material is actually going, and name the amount.
+        if (compoundPercent > 0 && consumers.length === 0 && idle.length > 0) {
+            lines.push(`<div>${fill('tooltipSliderCompoundOff', {
+                compounds: idle.map(compound => localizeMaterialName(compound, 'compounds', lang)).join(', '),
+                rate: rate(breakdown.compoundCeiling)
+            })}</div>`);
+        }
+
+        // A recipe held back by one of its *other* ingredients takes only what
+        // that bottleneck allows of this one, and the remainder stays here. The
+        // engine already records which ingredient is responsible, so name it.
+        consumers.forEach(compound => {
+            const throttledBy = getResourceDataObject('compounds', [compound, 'autoCreateThrottledBy'], true);
+            if (!throttledBy || throttledBy === key) {
+                return;
+            }
+            lines.push(`<div>${fill('tooltipSliderCompoundThrottled', {
+                compound: localizeMaterialName(compound, 'compounds', lang),
+                resource: localizeMaterialName(throttledBy, ingredientCategory(compound, throttledBy), lang)
+            })}</div>`);
+        });
+
+        lines.push(`<div>${localize('tooltipSliderFallsBack', lang)}</div>`);
+    }
+
+    // The one case where a stopped diversion does not fall back into the store,
+    // because there is nowhere for it to fall.
+    const quantity = Number(getResourceDataObject(category, [key, 'quantity'])) || 0;
+    const capacity = Number(getResourceDataObject(category, [key, 'storageCapacity'])) || 0;
+    if (capacity > 0 && quantity >= capacity) {
+        lines.push(`<div class="red-disabled-text">${localize('tooltipSliderStorageFull', lang)}</div>`);
+    }
+
+    lines.push('<div>&nbsp;</div>');
+    lines.push(`<div>${localize('tooltipSliderBreakdownHint', lang)}</div>`);
+
+    return lines.join('');
+}
+
+/**
+ * Show that tooltip while the pointer is over the bar.
+ *
+ * Rebuilt on every move rather than on entry alone: the figures in it are live,
+ * and a player who drags a handle with the tooltip open is exactly the player
+ * who wants to watch the numbers answer.
+ */
+function attachAllocationSliderTooltip(slider, category, key, showCompoundBand) {
+    const tooltip = ensureProductionRateTooltip();
+
+    const update = (event) => {
+        tooltip.innerHTML = buildAllocationSliderTooltip(category, key, showCompoundBand);
+        tooltip.style.display = 'block';
+        tooltip.style.left = `${event.pageX + 10}px`;
+        tooltip.style.top = `${event.pageY + 26}px`;
+    };
+
+    slider.addEventListener('mouseenter', update);
+    slider.addEventListener('mousemove', update);
+    slider.addEventListener('mouseleave', () => {
+        tooltip.style.display = 'none';
+    });
 }
 
 

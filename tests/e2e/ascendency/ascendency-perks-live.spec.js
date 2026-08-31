@@ -586,13 +586,20 @@ test.describe('Ascendency Perks — the effect, measured', () => {
       .toBeCloseTo(OPTIMIZED_POWER_GRIDS_MULTIPLIER, 1);
   });
 
-  test('Compound Automation unlocks compound machining and tells the player', async ({ game }) => {
+  test('Nano Brokers level 2 unlocks compound machining and tells the player', async ({ game }) => {
     await openPerksPane(game);
 
     expect(await game.withMods((m) => m.cg.getTechUnlockedArray().includes('compoundMachining')),
       'compound machining is behind the perk').toBe(false);
 
-    await buyPerk(game, 'compoundAutomation');
+    // P9: compound automation is the ladder's second rung, so the first buys
+    // autosell and only the second reaches compound machining.
+    await buyPerk(game, 'nanoBrokers');
+    await game.page.waitForTimeout(400);
+    expect(await game.withMods((m) => m.cg.getTechUnlockedArray().includes('compoundMachining')),
+      'level 1 buys autosell only').toBe(false);
+
+    await buyPerk(game, 'nanoBrokers');
     await game.page.waitForTimeout(700);
 
     // On the first run the purchase raises a modal announcing the new tab. It is
@@ -742,7 +749,10 @@ test.describe('Ascendency Perks — carrying over a rebirth', () => {
     const basket = [
       'smartAutoBuyers',
       'optimizedPowerGrids',
-      'compoundAutomation',
+      // Twice: the first rung is autosell, and compound machining - which this
+      // spec checks for below - is the second.
+      'nanoBrokers',
+      'nanoBrokers',
       'nonExhaustiveResources',
       'jumpstartResearch',
       'efficientStorage',
@@ -831,7 +841,7 @@ test.describe('Ascendency Perks — carrying over a rebirth', () => {
       .toBeCloseTo(OPTIMIZED_POWER_GRIDS_MULTIPLIER, 6);
 
     // 3. The unlocks are handed back.
-    expect(after.hasCompoundMachining, 'Compound Automation is permanent').toBe(true);
+    expect(after.hasCompoundMachining, 'Nano Brokers level 2 is permanent').toBe(true);
     expect(after.missingCheapTechs, 'Jumpstart Research re-grants every cheap tech').toEqual([]);
     expect(after.nonExhaustive, 'Non Exhaustive Resources is permanent').toBe(true);
 

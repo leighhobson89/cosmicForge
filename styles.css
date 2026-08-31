@@ -4574,3 +4574,154 @@ body.debug-window-open {
     font-weight: bold;
     color: var(--text-focus-color);
 }
+
+
+/* -------------------------------------------------------------------------
+   The multi-handle slider (`createSlider`), and P9's allocation line built on
+   top of it.
+
+   Every colour here is a theme variable, so the control follows all five themes
+   by construction rather than by having five sets of rules kept in step. The
+   allocation bands borrow the three colours the rest of the game already uses
+   for these ideas: the all-time-stat gold for money, the this-run blue for the
+   compound draw, and the ready-green for what is accumulating.
+
+   The line takes the width of the dropdown-and-button pair it replaces in a
+   sell row, so swapping one for the other leaves every row in the pane aligned.
+   ------------------------------------------------------------------------- */
+
+.slider-container {
+    position: relative;
+    display: flex;
+    width: 100%;
+}
+
+/* A slim pill rather than a boxy bar. The radius is deliberately a flat 999px
+   instead of the theme's `--ui-radius-*`: those run from 8px to 18px, and a bar
+   this short needs a radius of exactly half its height to read as a pill in
+   every theme rather than a rectangle with rounded corners in the sharp ones. */
+.slider-track {
+    position: relative;
+    display: flex;
+    width: 100%;
+    min-height: 20px;
+    border: 2px solid var(--container-border-color);
+    border-radius: 999px;
+    background-color: var(--button-bg-color);
+    /* The handles overhang the track, so they must not be clipped. */
+    overflow: visible;
+    /* Pointer events do mouse, pen and touch in one path; the browser must not
+       steal the drag to scroll the pane. */
+    touch-action: none;
+}
+
+.slider-segment {
+    height: 100%;
+    min-height: 16px;
+    transition: width 90ms linear;
+}
+
+/* Only the outer ends are rounded - the joins between bands stay square so the
+   boundary a handle sits on is a clean line rather than a pinched waist. */
+.slider-segment:first-child {
+    border-top-left-radius: 999px;
+    border-bottom-left-radius: 999px;
+}
+
+.slider-segment:last-child {
+    border-top-right-radius: 999px;
+    border-bottom-right-radius: 999px;
+}
+
+/* A handle straddles the boundary it sets, so `left` is the boundary itself and
+   the transform centres the grip on it. */
+.slider-handle {
+    position: absolute;
+    top: -4px;
+    transform: translateX(-50%);
+    width: 11px;
+    height: calc(100% + 8px);
+    border: 2px solid var(--container-border-color);
+    border-radius: 999px;
+    background-color: var(--container-bg-color);
+    box-shadow: var(--ui-shadow);
+    cursor: ew-resize;
+    touch-action: none;
+}
+
+.slider-handle:hover {
+    border-color: var(--text-hover-color);
+}
+
+.slider-handle:focus,
+.slider-handle:focus-visible {
+    outline: none;
+    border-color: var(--text-focus-color);
+    box-shadow: var(--ui-glow-strong);
+}
+
+/* The line stands in for the dropdown-and-button pair it replaces, so it is laid
+   out as a single row of that width and height. A column here made the row taller
+   than the Fuse button beside it and pushed the rest of the row out of line. */
+.allocation-line-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    width: 380px;
+    max-width: 380px;
+    font-size: 0.9rem;
+}
+
+.allocation-line-container .slider-container {
+    flex: 1 1 auto;
+    min-width: 180px;
+}
+
+.allocation-band-cash {
+    background-color: var(--stats-all-time-text);
+    opacity: 0.75;
+}
+
+.allocation-band-compound {
+    background-color: var(--stats-this-run-text);
+    opacity: 0.75;
+}
+
+.allocation-band-storage {
+    background-color: var(--ready-text);
+    opacity: 0.5;
+}
+
+/* Sits beside the bar rather than under it, for the same reason: the row has to
+   stay one line tall. Three figures, one per destination, each in the colour of
+   the band it belongs to: what is accumulating in the theme's own text colour,
+   what is being sold in the all-time-stat colour, and what the compounds are
+   drawing in the this-run colour. The allocatable total is not here - it does
+   not move with the handles, and it is quoted in the breakdown tooltip on the
+   production figure in the left pane instead. */
+.allocation-readout {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 1px;
+    line-height: 1.15;
+    font-size: 0.7rem;
+    white-space: nowrap;
+    color: var(--text-color);
+}
+
+.allocation-figure-storage {
+    color: var(--text-color);
+}
+
+.allocation-figure-cash {
+    color: var(--stats-all-time-text);
+}
+
+.allocation-figure-compound {
+    color: var(--stats-this-run-text);
+}
+

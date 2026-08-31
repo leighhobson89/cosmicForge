@@ -463,7 +463,12 @@ import {
     getBuffSmartAutoBuyersData,
     getBuffJumpstartResearchData,
     getBuffOptimizedPowerGridsData,
-    getBuffCompoundAutomationData,
+    getBuffNanoBrokersData,
+    getNanoBrokersLevel,
+    getAutoSellUnlocked,
+    getCompoundAutoCreateUnlocked,
+    getCompoundAutoBuyersUnlocked,
+    migrateRetiredAutomationTechUnlock,
     getBuffFasterAsteroidScanData,
     getBuffDeeperStarStudyData,
     getBuffAsteroidScannerBoostData,
@@ -546,7 +551,10 @@ import {
     setElementPointerEvents,
     setElementOpacity,
     playWinCinematic,
-    playWinCinematic2
+    playWinCinematic2,
+    createAllocationLine,
+    updateAllocationReadout,
+    setupInfoTooltips
 } from "./ui.js";
 
 const storageFullNotificationState = {
@@ -2494,6 +2502,12 @@ export async function gameLoop() {
             ? 1
             : (getBlackHoleAlwaysOn() ? getBlackHolePower() : getTimeWarpMultiplier());
         timerManagerDelta.updateWithTimestamp(performance.now(), effectiveMultiplier);
+        // P9: `runProductionAllocation` is not called here. It is registered as a
+        // post-update hook on the timer manager, so it runs inside every update -
+        // including the ones that do not come from this loop - with the same
+        // delta the material timers were advanced by. Only the display refresh
+        // belongs on the frame.
+        refreshVisibleAllocationLines();
         updateAttentionIndicators();
         calculateElapsedActiveGameTime();
         refreshAchievementTooltipDescriptions();
@@ -2576,7 +2590,6 @@ export async function gameLoop() {
         elementsToCheck.forEach(checkStatusAndSetTextClasses);
         syncBulkPurchaseButtons();
         
-        handleAutoCreateResourceSellRows();
 
         starChecks();
         optionButtonGlowChecks();
@@ -2763,7 +2776,7 @@ function ensureElementsToCheckObserver() {
 function buildElementsToCheck() {
     const base = Array.from(
         document.querySelectorAll(
-            '#autoCreateToggle, #autoSellToggle, .energy-check, .fuel-check, .resource-cost-sell-check, .compound-cost-sell-check, [class*="travel-starship"], .diplomacy-button, .description-container .resource-cost-sell-check'
+            '#autoCreateToggle, .energy-check, .fuel-check, .resource-cost-sell-check, .compound-cost-sell-check, [class*="travel-starship"], .diplomacy-button, .description-container .resource-cost-sell-check'
         )
     );
 
@@ -3195,6 +3208,7 @@ function updateEnergyDelta(deltaMs) {
 }
 
 function initialiseResourceAutoBuyerDeltaTimers() {
+    ensureProductionAllocationHook();
     const resources = getResourceDataObject('resources');
     if (!resources) {
         return;
@@ -3257,6 +3271,7 @@ function updateResourceAutoBuyerDelta(resource, tier, deltaMs) {
 
         setResourceDataObject(updatedQuantity, 'resources', [resource, 'quantity']);
         addToResourceAllTimeStat(actualGain, resource);
+        recordProduction('resources', resource, productionAmount, actualGain);
         maybeNotifyStorageFull('resources', resource, currentQuantity, updatedQuantity, storageCapacity);
         currentQuantity = updatedQuantity;
 
@@ -3294,6 +3309,7 @@ function updateResourceAutoBuyerDelta(resource, tier, deltaMs) {
                         const currentQuantityDeferred = getResourceDataObject('resources', [resource, 'quantity']) || 0;
                         const newQuantity = Math.max(currentQuantityDeferred - consumptionAmount, 0);
                         setResourceDataObject(newQuantity, 'resources', [resource, 'quantity']);
+                        recordFuelBurn('resources', resource, currentQuantityDeferred - newQuantity);
                     }
                     setCanAffordDeferred(null);
                 });
@@ -3301,7 +3317,11 @@ function updateResourceAutoBuyerDelta(resource, tier, deltaMs) {
         }
 
         if (resource !== 'solar') {
-            const netRateDisplay = (allResourceRatesAddedTogether - amountToDeductForConsumption) * getTimerRateRatio();
+            // P9: net of the allocation as well as of fuel. Quoting the gross
+            // while a share is being sold and another diverted to compounds is
+            // the single most visible way the pane could lie about itself.
+            const netRateDisplay = ((allResourceRatesAddedTogether - amountToDeductForConsumption) * getTimerRateRatio())
+                - allocationDeductionPerSecond('resources', resource);
             updateProductionRateText(`${resource}Rate`, netRateDisplay);
         }
     } else if (tier === 1) {
@@ -3317,26 +3337,32 @@ function updateResourceAutoBuyerDelta(resource, tier, deltaMs) {
 
         setResourceDataObject(updatedQuantity, 'resources', [resource, 'quantity']);
         addToResourceAllTimeStat(actualGain, resource);
+        recordProduction('resources', resource, productionAmount, actualGain);
 
         const resourceTier1Rate = calculatedResourceRate;
         setResourceDataObject(resourceTier1Rate, 'resources', [resource, 'rate']);
         if (resource !== 'solar') {
-            updateProductionRateText(`${resource}Rate`, resourceTier1Rate * getTimerRateRatio());
+            updateProductionRateText(
+                `${resource}Rate`,
+                (resourceTier1Rate * getTimerRateRatio()) - allocationDeductionPerSecond('resources', resource)
+            );
         }
     }
 
-    if (getResourceDataObject('resources', [resource, 'autoSell'])) {
-        const updatedQuantity = getResourceDataObject('resources', [resource, 'quantity']) || 0;
+}
 
-        if (updatedQuantity > 100) {
-            const autoSellQuantity = updatedQuantity - 100;
-            setResourceDataObject(100, 'resources', [resource, 'quantity']);
-            processAutoSell(resource, autoSellQuantity, 'resources');
-        }
-    }
+/**
+ * Attach the allocation pass to the timer manager.
+ *
+ * Idempotent - the manager ignores a hook it already holds - so it is safe to
+ * call from every path that sets the economy timers up.
+ */
+function ensureProductionAllocationHook() {
+    timerManagerDelta.addPostUpdateHook(runProductionAllocation);
 }
 
 function initialiseCompoundAutoBuyerDeltaTimers() {
+    ensureProductionAllocationHook();
     const compounds = getResourceDataObject('compounds');
     if (!compounds) {
         return;
@@ -3387,54 +3413,12 @@ function updateCompoundAutoBuyerDelta(compound, tier, deltaMs) {
     clearStorageFullFlagIfNotFull('compounds', compound, currentQuantity, storageCapacity);
 
     if (getPowerOnOff()) {
-        if (tier === 1) {
-            const smoothingWindowMs = 1000;
-            const smoothingAlpha = Math.min(1, Math.max(0, deltaMs / smoothingWindowMs));
-            const prevSmoothedPerSecond = getResourceDataObject('compounds', [compound, 'autoCreateRatePerSecondSmoothed'], true) || 0;
-
-            let amountCreatedThisUpdate = 0;
-
-            if (getResourceDataObject('compounds', [compound, 'autoCreate'])) {
-                const resources = [1, 2, 3, 4].map(i => getResourceDataObject('compounds', [compound, `createsFrom${i}`])?.[0]);
-                resources.forEach(resourceName => {
-                    if (resourceName !== '' && resourceName !== undefined) {
-                        setResourceDataObject(false, 'resources', [resourceName, 'autoSell']);
-                    }
-                });
-
-                currentQuantity = getResourceDataObject('compounds', [compound, 'quantity']) || 0;
-                const availableStorage = Math.max(0, storageCapacity - currentQuantity);
-
-                if (availableStorage > 0) {
-                    const amountToCreateArray = calculateCreatableCompoundAmount(compound, { buffer: 0 });
-                    const maxCreatable = amountToCreateArray[0] || 0;
-                    const amountToCreateRaw = Math.min(maxCreatable, availableStorage) * supplyChainMultiplier;
-                    const amountToCreate = Math.max(0, amountToCreateRaw);
-
-                    if (amountToCreate > 0) {
-                        amountCreatedThisUpdate = amountToCreate;
-                        setResourceDataObject(currentQuantity + amountToCreate, 'compounds', [compound, 'quantity']);
-                        currentQuantity += amountToCreate;
-
-                        amountToCreateArray.slice(1).forEach(([amountPerUnit, resourceName]) => {
-                            if (resourceName && amountPerUnit > 0 && maxCreatable > 0) {
-                                const currentResourceQuantity = getResourceDataObject('resources', [resourceName, 'quantity']) || 0;
-                                const newResourceQuantity = currentResourceQuantity - ((amountToCreate / maxCreatable) * amountPerUnit);
-                                setResourceDataObject(newResourceQuantity, 'resources', [resourceName, 'quantity']);
-                            }
-                        });
-                    }
-                }
-            }
-
-            const instantPerSecond = deltaMs > 0 ? (amountCreatedThisUpdate / deltaMs) * 1000 : 0;
-            const nextSmoothedPerSecond = prevSmoothedPerSecond + ((instantPerSecond - prevSmoothedPerSecond) * smoothingAlpha);
-            setResourceDataObject(nextSmoothedPerSecond, 'compounds', [compound, 'autoCreateRatePerSecondSmoothed']);
-
-            const timerRatio = getTimerRateRatio?.() || 0;
-            const perInterval = timerRatio > 0 ? (nextSmoothedPerSecond / timerRatio) : 0;
-            setResourceDataObject(perInterval, 'compounds', [compound, 'autoCreateRate']);
-        }
+        // P9: auto-create used to run here, drawing every ingredient's *stock*
+        // down to zero each frame and force-disabling autosell on each of them.
+        // It now runs in `runProductionAllocation()`, once per frame for every
+        // compound at once, against a share of each ingredient's *production*.
+        // Doing it in one place is what stops two compounds sharing an
+        // ingredient from being decided by whichever timer fired first.
 
         const autoBuyerExtractionRate = getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', `tier${tier}`, 'rate']) || 0;
         const currentTierAutoBuyerQuantity = getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', `tier${tier}`, 'quantity']) || 0;
@@ -3447,6 +3431,7 @@ function updateCompoundAutoBuyerDelta(compound, tier, deltaMs) {
 
         setResourceDataObject(updatedQuantity, 'compounds', [compound, 'quantity']);
         addToResourceAllTimeStat(actualGain, compound);
+        recordProduction('compounds', compound, productionAmount, actualGain);
         maybeNotifyStorageFull('compounds', compound, currentQuantity, updatedQuantity, storageCapacity);
         currentQuantity = updatedQuantity;
 
@@ -3494,6 +3479,7 @@ function updateCompoundAutoBuyerDelta(compound, tier, deltaMs) {
                 const currentQuantityTier1 = getResourceDataObject('compounds', [compound, 'quantity']) || 0;
                 const adjustedQuantity = Math.max(0, Math.min(currentQuantityTier1 - consumptionAmount, storageCapacity));
                 setResourceDataObject(adjustedQuantity, 'compounds', [compound, 'quantity']);
+                recordFuelBurn('compounds', compound, Math.max(0, currentQuantityTier1 - adjustedQuantity));
                 currentQuantity = adjustedQuantity;
             }
         }
@@ -3502,11 +3488,13 @@ function updateCompoundAutoBuyerDelta(compound, tier, deltaMs) {
             setResourceDataObject(allCompoundRatesAddedTogether - amountToDeductForConsumption, 'compounds', [compound, 'rate']);
         }
 
-        const netCompoundRateDisplay = (allCompoundRatesAddedTogether - amountToDeductForConsumption) * getTimerRateRatio();
+        const netCompoundRateDisplay = ((allCompoundRatesAddedTogether - amountToDeductForConsumption) * getTimerRateRatio())
+            - allocationDeductionPerSecond('compounds', compound);
         updateProductionRateText(`${compound}Rate`, netCompoundRateDisplay);
     } else if (tier === 1) {
-        setResourceDataObject(0, 'compounds', [compound, 'autoCreateRate']);
-        setResourceDataObject(0, 'compounds', [compound, 'autoCreateRatePerSecondSmoothed']);
+        // P9: the auto-create rate is published by `runProductionAllocation()`,
+        // which zeroes it while the grid is down - doing it here as well raced
+        // the pass and made the tooltip flicker between the two figures.
         const autoBuyerExtractionRate = getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', 'tier1', 'rate']) || 0;
         const currentTierAutoBuyerQuantity = getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', 'tier1', 'quantity']) || 0;
         const activeAutoBuyer = getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', 'tier1', 'active']);
@@ -3518,6 +3506,7 @@ function updateCompoundAutoBuyerDelta(compound, tier, deltaMs) {
 
         setResourceDataObject(updatedQuantity, 'compounds', [compound, 'quantity']);
         addToResourceAllTimeStat(actualGain, compound);
+        recordProduction('compounds', compound, productionAmount, actualGain);
 
         if (
             compound === getStarSystemDataObject('stars', [getCurrentStarSystem(), 'precipitationType']) &&
@@ -3545,15 +3534,484 @@ function updateCompoundAutoBuyerDelta(compound, tier, deltaMs) {
         updateProductionRateText(`${compound}Rate`, precipitationRate * getTimerRateRatio());
     }
 
-    if (getResourceDataObject('compounds', [compound, 'autoSell'])) {
-        const updatedQuantity = getResourceDataObject('compounds', [compound, 'quantity']) || 0;
+}
 
-        if (updatedQuantity > 100) {
-            const autoSellQuantity = updatedQuantity - 100;
-            setResourceDataObject(100, 'compounds', [compound, 'quantity']);
-            processAutoSell(compound, autoSellQuantity, 'compounds');
+//---------------------------------------------------------------------------------------------------------
+// P9 - production allocation
+//
+// One pass, once per frame, after every material timer has added its production
+// and taken its fuel. It replaces two things that used to live inside those
+// timers and fought each other:
+//
+//   - autosell, which drained a store down to 100 units and held it there
+//     forever, so a material being sold could never accumulate; and
+//   - compound auto-create, which drew from ingredient *stock* with a zero
+//     buffer, emptying it every frame, and which ran inside each compound's own
+//     timer - so whichever fired first took the shared ingredient and the rest
+//     created nothing.
+//
+// Both now work off *production*, never stock. A material's gross production for
+// the tick, less what the power plants burned of it, is its `allocatable`
+// amount, and the player's sliders cut that into cash, a ceiling offered to
+// auto-creating compounds, and a remainder that accumulates.
+//
+// Running every compound's draw in one place, after every resource's budget is
+// known, is also what removes the timer-order dependence: the outcome no longer
+// depends on which compound's timer happened to fire first.
+//---------------------------------------------------------------------------------------------------------
+
+// What each material produced and burned this frame. The timers write here; the
+// pass reads it and clears it. Deliberately not in the data object - it is
+// per-frame scratch, not state worth saving or restoring.
+const productionThisTick = new Map();
+
+// This frame's autosell income, for the cash-per-second readout. Reset by the
+// pass that publishes it, not by the pass that fills it.
+let autoSellIncomeThisTick = 0;
+let autoSellIncomePerSecondSmoothed = 0;
+
+function allocationKey(category, key) {
+    return category + ':' + key;
+}
+
+/**
+ * Record what a material produced this frame, and how much of it fitted.
+ *
+ * Both numbers are needed and they are not the same once a store is full.
+ *
+ * `grossAmount` is what the autobuyers made. It is what the shares are taken
+ * from, because a full store does not stop the mine: the player is owed the cash
+ * on everything produced, and simply loses the part that had nowhere to go. That
+ * is the behaviour agreed for the cap - the bar stops moving, the money does not.
+ *
+ * `actualGain` is what the capacity clamp let into the store, and it bounds only
+ * how much this pass may take back *out* of the store. Allocating against it
+ * would silently stop paying the moment a resource filled.
+ */
+export function recordProduction(category, key, grossAmount, actualGain) {
+    const gross = grossAmount > 0 ? grossAmount : 0;
+    const landed = actualGain > 0 ? actualGain : 0;
+    if (gross <= 0 && landed <= 0) {
+        return;
+    }
+    const id = allocationKey(category, key);
+    const entry = productionThisTick.get(id);
+    if (entry) {
+        entry.produced += gross;
+        entry.landed += landed;
+    } else {
+        productionThisTick.set(id, { category, key, produced: gross, landed, burned: 0 });
+    }
+}
+
+/**
+ * Record fuel a power plant burned of this material this frame, so it can come
+ * off the top before the shares are taken. A player who sets 90% to cash must
+ * not be able to black out their own grid without understanding why.
+ */
+export function recordFuelBurn(category, key, amountBurned) {
+    if (!(amountBurned > 0)) {
+        return;
+    }
+    const id = allocationKey(category, key);
+    const entry = productionThisTick.get(id);
+    if (entry) {
+        entry.burned += amountBurned;
+    } else {
+        productionThisTick.set(id, { category, key, produced: 0, landed: 0, burned: amountBurned });
+    }
+}
+
+/**
+ * The player's allocation for a material, as fractions of allocatable production.
+ *
+ * Returns zeroes before the capability is owned, and otherwise exactly what the
+ * slider says. There is no separate on/off switch any more: buying the first
+ * rung of Nano Brokers turns the slider on for good, and a player who wants a
+ * material left alone drags the handle back to the storage end, which is the
+ * same bypass expressed on the one control that decides everything else.
+ */
+function getAllocationShares(category, key) {
+    // Compounds are never autosold. They are end-of-the-line products, and no
+    // control in a compound pane can set a share - so the stored field is
+    // ignored rather than trusted. This is a load-bearing guard, not a tidy-up:
+    // a save written while the compound panes still carried a cash slider holds
+    // a non-zero `cashShare`, is already at the current schema version, and so
+    // meets no migration rung. Honouring it would have that compound quietly
+    // selling itself for the rest of the save's life, with no slider to turn it
+    // off and nothing in the tooltip to say it was happening.
+    if (category !== 'resources') {
+        return { cash: 0, compound: 0 };
+    }
+
+    // Before the ladder's first rung is bought there is no slider and not a unit
+    // is sold, so the material behaves exactly as one with no automation at all.
+    const sellingEnabled = getAutoSellUnlocked();
+
+    const rawCash = Number(getResourceDataObject(category, [key, 'cashShare'], true)) || 0;
+    const cash = sellingEnabled ? Math.max(0, Math.min(100, rawCash)) : 0;
+
+    // The compound band exists only on a resource a recipe draws on, and only
+    // once the ladder's second rung is owned.
+    if (!getCompoundAutoCreateUnlocked()) {
+        return { cash: cash / 100, compound: 0 };
+    }
+
+    // The compound share is read straight off the slider's second band. Nothing
+    // else gates it: owning auto-create and switching it on is enough to make a
+    // compound, and a resource whose cash band is at zero still offers its
+    // compound band in full.
+    const rawCompound = Number(getResourceDataObject(category, [key, 'compoundShare'], true)) || 0;
+    // The two bands share one line, so the compound band can never claim what the
+    // cash band already took, however the stored values got there.
+    const compound = Math.max(0, Math.min(100 - cash, rawCompound));
+    return { cash: cash / 100, compound: compound / 100 };
+}
+
+/** Every ingredient a recipe names, with the ratio it wants of each. */
+function getCompoundRecipe(compound) {
+    const parts = [];
+    for (let i = 1; i <= 4; i++) {
+        const from = getResourceDataObject('compounds', [compound, 'createsFrom' + i]);
+        const ratio = Number(getResourceDataObject('compounds', [compound, 'createsFromRatio' + i])) || 0;
+        if (Array.isArray(from) && from[0] && ratio > 0) {
+            parts.push({ resourceName: from[0], category: from[1] || 'resources', ratio });
         }
     }
+    return parts;
+}
+
+/**
+ * Does any recipe in the game draw on this resource?
+ *
+ * This decides whether a resource's allocation line has a compound band at all.
+ * Helium has no consumers and so never grows a third section, however far up the
+ * ladder the player is.
+ */
+export function resourceIsCompoundIngredient(resourceKey) {
+    const compounds = getResourceDataObject('compounds') || {};
+    return Object.keys(compounds).some(compound =>
+        getCompoundRecipe(compound).some(part => part.resourceName === resourceKey)
+    );
+}
+
+/**
+ * How many auto-creating compounds are drawing on this resource right now.
+ *
+ * Exported because the tooltips quote the equal share, and a share the display
+ * computes for itself would drift from the one the engine actually hands out.
+ */
+export function getActiveCompoundConsumers(resourceKey) {
+    const compounds = getResourceDataObject('compounds') || {};
+    return Object.keys(compounds).filter(compound =>
+        getResourceDataObject('compounds', [compound, 'autoCreate']) &&
+        getCompoundRecipe(compound).some(part => part.resourceName === resourceKey)
+    );
+}
+
+/**
+ * The single per-frame allocation pass.
+ *
+ * Order matters and is the whole design:
+ *   1. fuel off the top, giving each material its allocatable production;
+ *   2. the cash share sold - out of the flow, never out of the store;
+ *   3. the compound share offered to auto-creating compounds as a ceiling,
+ *      divided equally between however many draw on that resource;
+ *   4. whatever is left, including any part of the ceiling nobody could use,
+ *      simply stays in the store.
+ *
+ * Step 4 needs no code: production has already been added to the store by the
+ * timers, so anything this pass does not remove has accumulated by definition.
+ */
+export function runProductionAllocation(deltaMs) {
+    const compoundBudgets = new Map();
+    let cashRaised = 0;
+
+    // --- 1 & 2: fuel off the top, then the cash share ------------------------
+    productionThisTick.forEach((entry) => {
+        const allocatable = Math.max(0, entry.produced - entry.burned);
+        if (allocatable <= 0) {
+            return;
+        }
+
+        const shares = getAllocationShares(entry.category, entry.key);
+
+        if (shares.cash > 0) {
+            // The player is paid on production, not on what fitted. A full store
+            // still earns; it just cannot also keep the units.
+            const soldAmount = allocatable * shares.cash;
+
+            // What comes back out of the store is only ever the part of this
+            // frame's gain that is surplus to the share the player chose to keep.
+            // At the cap nothing landed, so nothing is taken - the money is paid
+            // out of production that was never stored in the first place. With
+            // room to spare this is exactly `soldAmount`, and with partial room
+            // it is less, because the clamp had already discarded the rest.
+            const keptShare = Math.max(0, allocatable - soldAmount);
+            const currentQuantity = Number(getResourceDataObject(entry.category, [entry.key, 'quantity'])) || 0;
+            const amountToRemove = Math.min(Math.max(0, entry.landed - keptShare), currentQuantity);
+
+            if (amountToRemove > 0) {
+                setResourceDataObject(currentQuantity - amountToRemove, entry.category, [entry.key, 'quantity']);
+            }
+            if (soldAmount > 0) {
+                const price = Number(getResourceDataObject(entry.category, [entry.key, 'saleValue'])) || 0;
+                cashRaised += soldAmount * price;
+            }
+        }
+
+        if (shares.compound > 0 && entry.category === 'resources') {
+            compoundBudgets.set(entry.key, allocatable * shares.compound);
+        }
+    });
+
+    if (cashRaised > 0) {
+        setResourceDataObject(
+            (Number(getResourceDataObject('currency', ['cash'])) || 0) + cashRaised,
+            'currency',
+            ['cash']
+        );
+        autoSellIncomeThisTick += cashRaised;
+    }
+
+    // --- 3: the compound share ----------------------------------------------
+    runCompoundAutoCreation(compoundBudgets, deltaMs);
+
+    publishAutoSellIncomeRate(deltaMs);
+    productionThisTick.clear();
+}
+
+/**
+ * Spend each resource's compound budget on the compounds auto-creating from it.
+ *
+ * The budget is split **equally** between however many compounds draw on that
+ * resource, and a compound that cannot use its whole share does not pass the
+ * surplus on - it falls through to the resource's own store. That is chosen over
+ * a demand-proportional split for predictability: a compound's throughput then
+ * depends only on its own settings and the resource sliders, never on what an
+ * unrelated compound happens to be doing. Switching steel off does not silently
+ * change titanium's rate.
+ *
+ * A recipe needs several ingredients, so each compound can make only the
+ * *minimum* its shares allow across all of them, and it consumes only what that
+ * minimum actually needs - a compound bottlenecked on neon must not also swallow
+ * the iron it cannot use.
+ */
+function runCompoundAutoCreation(compoundBudgets, deltaMs) {
+    const compounds = getResourceDataObject('compounds') || {};
+    const unlocked = getCompoundAutoCreateUnlocked() && getPowerOnOff();
+
+    const active = unlocked
+        ? Object.keys(compounds).filter(compound => getResourceDataObject('compounds', [compound, 'autoCreate']))
+        : [];
+
+    // The denominator of the equal split, counted over compounds that are
+    // switched on - so turning one off widens the others' shares next frame.
+    const consumerCount = new Map();
+    const recipes = new Map();
+    active.forEach(compound => {
+        const recipe = getCompoundRecipe(compound);
+        recipes.set(compound, recipe);
+        recipe.forEach(({ resourceName }) => {
+            consumerCount.set(resourceName, (consumerCount.get(resourceName) || 0) + 1);
+        });
+    });
+
+    Object.keys(compounds).forEach(compound => {
+        if (!active.includes(compound)) {
+            // Not creating: publish a zero rate so the tooltip does not keep
+            // quoting the rate this compound had when it was last switched on.
+            publishAutoCreateRate(compound, 0, deltaMs);
+            return;
+        }
+
+        const recipe = recipes.get(compound);
+        if (!recipe || recipe.length === 0) {
+            publishAutoCreateRate(compound, 0, deltaMs);
+            return;
+        }
+
+        const storageCapacity = Number(getResourceDataObject('compounds', [compound, 'storageCapacity'])) || 0;
+        const currentQuantity = Number(getResourceDataObject('compounds', [compound, 'quantity'])) || 0;
+        const availableStorage = Math.max(0, storageCapacity - currentQuantity);
+        if (availableStorage <= 0) {
+            publishAutoCreateRate(compound, 0, deltaMs);
+            setResourceDataObject('', 'compounds', [compound, 'autoCreateThrottledBy']);
+            return;
+        }
+
+        const supplyChainMultiplier = getSupplyChainDisruptionMultiplier('compounds', compound) || 0;
+        if (supplyChainMultiplier <= 0) {
+            publishAutoCreateRate(compound, 0, deltaMs);
+            return;
+        }
+
+        // What each ingredient's share permits, bounded by what the store
+        // actually holds - the budget is a ceiling on the draw, not a promise
+        // that the material is there.
+        let creatable = availableStorage / supplyChainMultiplier;
+        let throttledBy = '';
+
+        for (const { resourceName, category, ratio } of recipe) {
+            const consumers = consumerCount.get(resourceName) || 1;
+            const share = (compoundBudgets.get(resourceName) || 0) / consumers;
+            const stock = Number(getResourceDataObject(category, [resourceName, 'quantity'])) || 0;
+            const permits = Math.min(share, stock) / ratio;
+            if (permits < creatable) {
+                creatable = permits;
+                throttledBy = resourceName;
+            }
+        }
+
+        const amountToCreate = Math.max(0, creatable) * supplyChainMultiplier;
+        setResourceDataObject(throttledBy, 'compounds', [compound, 'autoCreateThrottledBy']);
+
+        if (!(amountToCreate > 0)) {
+            publishAutoCreateRate(compound, 0, deltaMs);
+            return;
+        }
+
+        // Consume only what this amount needs of each ingredient. Anything the
+        // share allowed but the recipe could not use is never taken, so it stays
+        // in the resource's store.
+        const perUnitDraw = amountToCreate / supplyChainMultiplier;
+        recipe.forEach(({ resourceName, category, ratio }) => {
+            const stock = Number(getResourceDataObject(category, [resourceName, 'quantity'])) || 0;
+            const consumed = Math.min(stock, perUnitDraw * ratio);
+            setResourceDataObject(stock - consumed, category, [resourceName, 'quantity']);
+        });
+
+        setResourceDataObject(
+            Math.min(currentQuantity + amountToCreate, storageCapacity),
+            'compounds',
+            [compound, 'quantity']
+        );
+        addToResourceAllTimeStat(Math.min(amountToCreate, availableStorage), compound);
+        publishAutoCreateRate(compound, amountToCreate, deltaMs);
+    });
+}
+
+/**
+ * Smooth this frame's creation into a per-second figure for the displays.
+ *
+ * The raw per-frame amount is far too jittery to read, which is why the old
+ * auto-create path smoothed it the same way over the same one-second window.
+ */
+function publishAutoCreateRate(compound, amountCreated, deltaMs) {
+    const smoothingWindowMs = 1000;
+    const alpha = Math.min(1, Math.max(0, (deltaMs || 0) / smoothingWindowMs));
+    const previous = Number(getResourceDataObject('compounds', [compound, 'autoCreateRatePerSecondSmoothed'], true)) || 0;
+    const instant = deltaMs > 0 ? (amountCreated / deltaMs) * 1000 : 0;
+    const smoothed = previous + ((instant - previous) * alpha);
+
+    setResourceDataObject(smoothed, 'compounds', [compound, 'autoCreateRatePerSecondSmoothed']);
+
+    const timerRatio = getTimerRateRatio?.() || 0;
+    setResourceDataObject(timerRatio > 0 ? (smoothed / timerRatio) : 0, 'compounds', [compound, 'autoCreateRate']);
+}
+
+/** The same smoothing, for the headline "cash from autosell" readout. */
+function publishAutoSellIncomeRate(deltaMs) {
+    const smoothingWindowMs = 1000;
+    const alpha = Math.min(1, Math.max(0, (deltaMs || 0) / smoothingWindowMs));
+    const instant = deltaMs > 0 ? (autoSellIncomeThisTick / deltaMs) * 1000 : 0;
+    autoSellIncomePerSecondSmoothed += (instant - autoSellIncomePerSecondSmoothed) * alpha;
+    autoSellIncomeThisTick = 0;
+}
+
+/** Total cash per second currently being raised by autosell, across everything. */
+export function getAutoSellIncomePerSecond() {
+    return autoSellIncomePerSecondSmoothed;
+}
+
+/**
+ * What the power buildings are burning of a material, per second.
+ *
+ * Read from the buildings themselves rather than from the material's
+ * `usedForFuelPerSec` field, for two reasons. The field is misnamed - it
+ * accumulates the fuel tuple's second element, which is a per-*tick* figure, so
+ * using it as written subtracted a hundredth of the real burn and left the
+ * "allocatable" total looking like the gross. And it is only maintained on the
+ * purchase path, so a save or a staged scenario that set a plant's quantity
+ * directly had it sitting at zero while the tick burned fuel regardless.
+ *
+ * Computing it from `fuel[1] x quantity x timerRatio` is exactly what the tick
+ * does before it deducts the burn, which is the point: the figure the tooltip
+ * quotes and the figure the pane's rate is net of are then the same number.
+ */
+function fuelBurnPerSecond(category, key) {
+    const timerRatio = getTimerRateRatio?.() || 0;
+    const buildings = getResourceDataObject('buildings', ['energy', 'upgrades'], true) || {};
+
+    return Object.keys(buildings).reduce((total, buildingKey) => {
+        const fuel = buildings[buildingKey]?.fuel;
+        if (!Array.isArray(fuel) || fuel[0] !== key || (fuel[2] || 'resources') !== category) {
+            return total;
+        }
+        // A plant that is switched off burns nothing, and the tick agrees - the
+        // deduction there is gated on the same call.
+        if (!getBuildingTypeOnOff(buildingKey)) {
+            return total;
+        }
+        const perTick = (Number(fuel[1]) || 0) * (Number(buildings[buildingKey]?.quantity) || 0);
+        return total + (perTick * timerRatio);
+    }, 0);
+}
+
+/**
+ * What one material's allocation is doing right now, in units per second.
+ *
+ * The panes and tooltips all read this rather than recomputing the split, so a
+ * display can never disagree with the engine about where production is going.
+ */
+export function getAllocationBreakdown(category, key) {
+    const timerRatio = getTimerRateRatio?.() || 0;
+    const grossPerInterval = calculateGrossAutoBuyerGenerationPerInterval(category, key);
+    const gross = grossPerInterval * timerRatio;
+    const fuel = fuelBurnPerSecond(category, key);
+    const allocatable = Math.max(0, gross - fuel);
+    const shares = getAllocationShares(category, key);
+
+    const toCash = allocatable * shares.cash;
+    const ceiling = allocatable * shares.compound;
+
+    // What the compounds are actually taking, as opposed to what they were
+    // offered. The two differ whenever a recipe is bottlenecked elsewhere, and
+    // the difference is exactly what falls through to storage.
+    const consumers = category === 'resources' ? getActiveCompoundConsumers(key) : [];
+    let toCompounds = 0;
+    const perCompound = consumers.map(compound => {
+        const ratio = getCompoundRecipe(compound).find(part => part.resourceName === key)?.ratio || 0;
+        const createRate = (Number(getResourceDataObject('compounds', [compound, 'autoCreateRatePerSecondSmoothed'], true)) || 0);
+        const draw = createRate * ratio;
+        toCompounds += draw;
+        return { compound, draw, share: consumers.length > 0 ? ceiling / consumers.length : 0 };
+    });
+
+    return {
+        gross,
+        fuel,
+        allocatable,
+        toCash,
+        compoundCeiling: ceiling,
+        toCompounds: Math.min(toCompounds, ceiling),
+        perCompound,
+        toStorage: Math.max(0, allocatable - toCash - Math.min(toCompounds, ceiling))
+    };
+}
+
+/**
+ * What the allocation is taking out of a material's headline rate, per second.
+ *
+ * The panes quote a *net* accumulation rate - what the store is actually gaining
+ * - so everything the allocation diverts has to come off: the share sold for
+ * cash, and what auto-creating compounds are drawing. Reads the engine's own
+ * breakdown rather than recomputing the split, so the figure on the pane and the
+ * production it describes can never disagree.
+ */
+function allocationDeductionPerSecond(category, key) {
+    const breakdown = getAllocationBreakdown(category, key);
+    return (breakdown.toCash || 0) + (breakdown.toCompounds || 0);
 }
 
 function calculateGrossAutoBuyerGenerationPerInterval(category, resourceKey) {
@@ -4651,26 +5109,15 @@ export function setStarshipTravelTimeReductionAfterRepeatables() {
     setStarShipTravelSpeed(newSpeed);
 }
 
-function handleAutoCreateResourceSellRows() {
-    const autoCreateCompoundsActivated = Object.keys(getResourceDataObject('compounds'))
-        .filter(key => getResourceDataObject('compounds', [key, 'autoCreate']) === true);
-
-    autoCreateCompoundsActivated.forEach(autoCreateCompound => {
-        const resources = [1, 2, 3, 4]
-            .map(i => getResourceDataObject('compounds', [autoCreateCompound, `createsFrom${i}`])[0])
-            .filter(resource => resource !== '' && resource !== undefined);
-
-        const currentPane = getCurrentOptionPane();
-
-        if (resources.includes(currentPane)) {
-            const sellRowElement = document.getElementById(`${currentPane}SellRow`);
-            if (sellRowElement) {
-                setElementPointerEvents(sellRowElement, 'none');
-                setElementOpacity(sellRowElement, 0.5);
-            }
-        }
-    });
-}
+// P9: `handleAutoCreateResourceSellRows()` used to live here. It locked a
+// resource's entire sell row - `pointer-events: none`, half opacity - whenever
+// any auto-creating compound drew on that resource. That was the companion to
+// the old every-frame `autoSell = false` loop: the game was switching the
+// player's toggle off behind their back, and greying the row out hid it.
+//
+// Both are gone. Feeding compounds *and* selling for cash *and* accumulating is
+// precisely what the allocation line exists to let the player balance, so the
+// row must stay live while a compound is being created from it.
 
 function updateNativeTechCostStates() {
     if (getCurrentOptionPane() !== 'tech tree') {
@@ -5440,8 +5887,18 @@ function updateAllSalePricePreviews() {
     
         if (resource === currentScreen) {
             const dropDownElementId = resource + "SellSelectQuantity";
+            const dropDownElement = document.getElementById(dropDownElementId);
 
-            setSaleResourcePreview(currentScreen, document.getElementById(dropDownElementId).querySelector('div.dropdown').innerText, fuseTo1, fuseTo2);
+            // P9: with the allocation line in place the sell dropdown is hidden,
+            // so there is no longer an amount for the player to pick. Fuse is the
+            // only thing still reading this preview, and it fuses everything -
+            // hence "all stock", and hence the Fuse button's relabelling in
+            // `setAutoSellToggleState()`.
+            const chosenAmount = (!dropDownElement || dropDownElement.classList.contains('invisible'))
+                ? localize('dropdownOptionAllStock', getLanguage())
+                : dropDownElement.querySelector('div.dropdown').innerText;
+
+            setSaleResourcePreview(currentScreen, chosenAmount, fuseTo1, fuseTo2);
                   
             const salePreviewString = getResourceSalePreview(resource);
             let cleanedString = cleanString(salePreviewString);
@@ -5462,10 +5919,6 @@ function updateAllSalePricePreviews() {
                 salePreviewElement.innerHTML = cleanedString;
             }
 
-            const sellDescription = document.getElementById(`${resource}SellRow`);
-            if (sellDescription && getComputedStyle(sellDescription).pointerEvents === 'none') {
-                salePreviewElement.innerHTML = `<span class="red-disabled-text">${localize('textAutoCreating', getLanguage())}</span>`;
-            }
         }
     }
     
@@ -7182,19 +7635,27 @@ function resourceAndCompoundMonitorRevealRowsChecks(element) {
                 element.classList.add('invisible');
             }
         } else if (getCurrentTab()[1].includes('Compounds') && element.dataset.rowCategory === 'compound')  {
-            if (getTechUnlockedArray().includes('compoundMachining')) {
+            // P9: the compound auto-buyer tiers are the ladder's third rung, and
+            // are now separate from auto-create, which is the second. This gate
+            // used to be `compoundMachining`, which granted both at once.
+            if (getCompoundAutoBuyersUnlocked()) {
                 element.classList.remove('invisible');
                 return;
             }
 
+            // Below that rung a compound pane shows no auto-buyer at all, with
+            // one deliberate exception: diesel's tier 1, which the early game
+            // needs to fuel the first power plants long before any perk exists.
+            //
+            // The per-tier progression check that used to run here is the
+            // *resource* rule, and it does not gate this: `currentTierLevel` is
+            // saved per material and survives whatever put it there - a save
+            // made before the ladder existed, or the debug menu's grant-all.
+            // Any compound carrying a level above zero therefore had its whole
+            // auto-buyer ladder on display at Nano Brokers 0, 1 or 2. The rung
+            // is the only thing that may reveal these rows.
             if (element.id === 'dieselAutoBuyer1Row') {
                 element.classList.remove('invisible');
-            } else if (elementTier > 0 ) {
-                if (elementTier <= getAutoBuyerTierLevel(getCurrentOptionPane(), 'compounds')) {
-                    element.classList.remove('invisible');
-                } else {
-                    element.classList.add('invisible');
-                }
             } else {
                 element.classList.add('invisible');
             }
@@ -8696,10 +9157,6 @@ function checkStatusAndSetTextClasses(element) {
         resourceCostSellChecks(element);  
     }
 
-    if (element.id === 'autoSellToggle') {
-        return autoSellerChecks(element);
-    }
-
     if (element.id === 'autoCreateToggle') {
        return autoCreateChecks(element);
     }
@@ -8744,7 +9201,8 @@ function autoCreateChecks(element) {
     const toggleSwitchContainer = element.parentElement;
     const textAutoContainer = toggleSwitchContainer.parentElement.querySelector('.autoBuyer-building-quantity');
 
-    if (getTechUnlockedArray().includes('compoundMachining')) {
+    // P9: auto-create is the ladder's second rung.
+    if (getCompoundAutoCreateUnlocked()) {
         if (toggleSwitchContainer.classList.contains('invisible')) {
             toggleSwitchContainer.classList.remove('invisible');
         }
@@ -8770,27 +9228,6 @@ function autoCreateChecks(element) {
 
 }
 
-
-function autoSellerChecks(element) {
-    const toggleSwitchContainer = element.parentElement;
-    const textAutoContainer = toggleSwitchContainer.parentElement.querySelector('.autoBuyer-building-quantity');
-
-    if (getTechUnlockedArray().includes('nanoBrokers')) {
-        if (toggleSwitchContainer.classList.contains('invisible')) {
-            toggleSwitchContainer.classList.remove('invisible');
-        }
-        if (textAutoContainer && textAutoContainer.classList.contains('invisible')) {
-            textAutoContainer.classList.remove('invisible');
-        }
-    } else {
-        if (!toggleSwitchContainer.classList.contains('invisible')) {
-            toggleSwitchContainer.classList.add('invisible');
-        }
-        if (textAutoContainer && !textAutoContainer.classList.contains('invisible')) {
-            textAutoContainer.classList.add('invisible');
-        }
-    }
-}
 
 function starChecks() {
     const starData = getStarSystemDataObject('stars');
@@ -10222,25 +10659,16 @@ const updateQuantityDisplays = (element, data1, data2, resourceData1, resourceDa
         if (element && data2 && !isEffectivelyEqual(data1, data2)) {
             const baseId = element.id.replace('Quantity', '');
         
-            const resourceAutoSell = getResourceDataObject('resources', [baseId, 'autoSell'], true);
-            const compoundAutoSell = getResourceDataObject('compounds', [baseId, 'autoSell'], true);
             const compoundsAutoCreate = getResourceDataObject('compounds', [baseId, 'autoCreate'], true);
 
-            if (resourceAutoSell || compoundAutoSell) {  //if autosell is on
-                let storageCapacity = 0;
-                if (resourceAutoSell) {
-                    storageCapacity = getResourceDataObject('resources', [baseId, 'storageCapacity']);
-                } else if (compoundAutoSell) {
-                    storageCapacity = getResourceDataObject('compounds', [baseId, 'storageCapacity']);
-                }
-
-                if (storageCapacity > 100) {
-                    element.classList.add('stats-text');
-                    element.classList.remove('green-ready-text');
-                }
-            } else {
-                element.classList.remove('stats-text');
-            }
+            // P9: this used to force `stats-text` and strip `green-ready-text`
+            // whenever autosell was on, because under the old semantics - drain
+            // the store to 100 units and hold it there - a store could never
+            // legitimately fill, and the storage-increase claim was suppressed
+            // along with the colour. Allocation takes a share of *production*
+            // and never touches stock, so a store under allocation fills like
+            // any other and must be allowed to say so.
+            element.classList.remove('stats-text');
 
             if (compoundsAutoCreate !== undefined) {
                 if (compoundsAutoCreate) {
@@ -10944,30 +11372,6 @@ export function setWeatherCycleSecondsRemaining(secondsRemaining = 10) {
     }, 1000);
 }
 
-function calculateCreatableCompoundAmount(compoundToCreate, options = {}) {
-    const buffer = (typeof options?.buffer === 'number') ? options.buffer : 100;
-
-    const parts = [1, 2, 3, 4].map(i => {
-        const ratio = getResourceDataObject('compounds', [compoundToCreate, `createsFromRatio${i}`]) || 0;
-        const [part, type] = getResourceDataObject('compounds', [compoundToCreate, `createsFrom${i}`]) || [];
-        const quantity = (type && part) ? getResourceDataObject(type, [part, 'quantity']) || 0 : 0;
-        return { quantity, ratio, part };
-    });
-
-    const maxCreatableWithBuffer = Math.min(...parts.map(({ quantity, ratio }) => {
-        if (ratio > 0) {
-            const usableAmount = Math.max(0, quantity - buffer);
-            return Math.floor(usableAmount / ratio);
-        }
-        return Infinity;
-    }));
-
-    const resourcesUsed = parts.map(({ ratio, part }) =>
-        ratio > 0 ? [maxCreatableWithBuffer * ratio, part] : [0, part]
-    );
-
-    return [maxCreatableWithBuffer, ...resourcesUsed];
-}
 
 function calculateNewLiquidationPricePerApGained() {
     const basePrice = getApBaseBuyPrice();
@@ -11156,22 +11560,24 @@ function adjustMarketBiases() {
     });
 }
 
-function processAutoSell(item, quantityToSell, type) {
-    const price = getResourceDataObject(type, [item, 'saleValue']);
-    const cashToAdd = price * quantityToSell;
-    setResourceDataObject(getResourceDataObject('currency', ['cash']) + cashToAdd, 'currency', ['cash']);
-}
-
 export function purchaseBuff(buff) {
     setAchievementFlagArray('spendAP', 'add');
     const ascendencyBuffDataObject = Object.fromEntries(Object.entries(getAscendencyBuffDataObject()).filter(([key]) => key !== "version"));
     const currentAscendencyPoints = getResourceDataObject('ascendencyPoints', ['quantity']);
 
     const buffData = ascendencyBuffDataObject[buff];
-    const baseCost = buffData.rebuyable
-        ? buffData.baseCostAp * Math.pow(buffData.rebuyableIncreaseMultiple, buffData.boughtYet)
-        : buffData.baseCostAp;
-    const cost = Math.round(baseCost);
+    // P9: quote the price from the same helper the perk row quotes it from.
+    // This used to re-derive the geometric formula inline, so a perk pricing
+    // itself any other way - `nanoBrokers` writes its ladder out - would have
+    // been charged one price and shown another.
+    const cost = Math.round(getAscendencyBuffCost(buffData));
+
+    // A perk that has been bought as many times as it can be cannot be bought
+    // again. Previously no perk both was rebuyable and had a reachable cap, so
+    // nothing enforced this outside the UI, which stops rendering the button.
+    if (isAscendencyBuffMaxed(buffData)) {
+        return;
+    }
 
     if (canAfford(currentAscendencyPoints, cost)) {
         const boughtYetBefore = buffData.boughtYet;
@@ -11205,8 +11611,13 @@ export function purchaseBuff(buff) {
         buffOptimizedPowerGridsMultiplier();
     }
 
-    if (buff === 'compoundAutomation') {
-        if (getStatRun() === 1) {
+    // P9: the automation ladder. Each level takes effect the moment it is bought
+    // - the gates read `getNanoBrokersLevel()` rather than a run-start snapshot -
+    // so all that is left to do here is the one-off explanation on the level that
+    // opens the compound panes up, and the `compoundMachining` marker for the
+    // code that still reads the tech array.
+    if (buff === 'nanoBrokers' && getCompoundAutoCreateUnlocked()) {
+        if (getNanoBrokersLevel() === 2 && getStatRun() === 1) {
             callPopupModal({
                 header: modalCompoundMachiningTabUnlockHeader,
                 content: modalCompoundMachiningTabUnlockText,
@@ -16012,7 +16423,11 @@ export function addPermanentBuffsBackInAfterRebirth() {
         }
     }
 
-    if (getBuffCompoundAutomationData()['boughtYet'] > 0) {
+    // P9: `compoundMachining` is kept as a marker for anything that still reads
+    // the tech array, but it is no longer the gate - the gates read
+    // `getNanoBrokersLevel()` live, so a perk bought mid-run applies at once
+    // rather than waiting for the next rebirth to push a pseudo-tech in here.
+    if (getCompoundAutoCreateUnlocked()) {
         setTechUnlockedArray('compoundMachining');
     }
 
@@ -16271,33 +16686,133 @@ export function buffSmartAutoBuyersRateMultiplier() {
     processRates(compounds, 'compounds');
 }
 
+/**
+ * P9: set a material's sell row to whichever form the player has earned.
+ *
+ * Below the ladder's first rung the row is what it has always been - a quantity
+ * dropdown and a Sell button - and this returns without touching it, so nothing
+ * about the early game moves.
+ *
+ * At or above it, the manual pair is replaced by the allocation line, which is
+ * built to the same width so the pane stays aligned. Deliberate emptying does
+ * not go away with the button: the global Sell All control in the header is
+ * untouched and is the route for it.
+ *
+ * The name is historic. There is no autosell toggle any more - buying the first
+ * rung is the only gate, and from then on the slider is always live - so all
+ * this does is decide which form the row takes.
+ */
 export function setAutoSellToggleState(item, type) {
-    if (!getTechUnlockedArray().includes('nanoBrokers')) {
+    const sellRow = document.getElementById(`${item}SellRow`);
+    if (!sellRow) {
         return;
     }
 
-    const sellRow = document.getElementById(`${item}SellRow`);
-    const autoSellValue = getResourceDataObject(type, [item, 'autoSell']);
-    const targetElement = sellRow.querySelector(`#autoSellToggle[data-type="${type}"]`);
-
-    if (targetElement) {
-        const allWithSameId = document.querySelectorAll('#autoSellToggle');
-        allWithSameId.forEach(el => {
-            if (el !== targetElement) {
-                el.remove();
-            }
-        });
-
-        targetElement.checked = autoSellValue;
+    // Compounds sell manually, and always have. They are not ingredients for
+    // anything, so there is no compound band to offer and nothing for a cash
+    // slider to balance against - the player either sells a quantity or does
+    // not. The row keeps its dropdown and Sell button for the whole game.
+    if (type === 'compounds') {
+        return;
     }
+
+    if (!getAutoSellUnlocked()) {
+        return;
+    }
+
+    const manualDropdown = sellRow.querySelector(`#${item}SellSelectQuantity`);
+    const manualSellButton = sellRow.querySelector('button.sell');
+    if (manualDropdown) {
+        manualDropdown.classList.add('invisible');
+    }
+    if (manualSellButton) {
+        manualSellButton.classList.add('invisible');
+    }
+
+    // With the quantity dropdown gone there is no amount left to choose, and
+    // fusing reads that same preview - so fusing is now all-or-nothing and the
+    // button has to say which. Relabelling is the honest fix; leaving it reading
+    // "Fuse" would quietly mean something different from what it used to.
+    const fuseButton = sellRow.querySelector('button.fuse');
+    if (fuseButton) {
+        const fuseAllLabel = localize('buttonFuseAll', getLanguage());
+        if (fuseButton.textContent !== fuseAllLabel) {
+            fuseButton.textContent = fuseAllLabel;
+        }
+    }
+
+    // The compound band is only ever offered where it would do something: on a
+    // resource some recipe actually draws on, and only once the ladder's second
+    // rung is owned. Helium has no consumers and so stays a two-section line for
+    // the whole game.
+    const showCompoundBand = getCompoundAutoCreateUnlocked() && resourceIsCompoundIngredient(item);
+
+    const existing = sellRow.querySelector('.allocation-line-container');
+    if (existing && existing.dataset.compoundBand === String(showCompoundBand)) {
+        updateAllocationLineState(existing, type, item, showCompoundBand);
+        return;
+    }
+    if (existing) {
+        existing.remove();
+    }
+
+    const line = createAllocationLine(type, item, { showCompoundBand });
+    line.dataset.compoundBand = String(showCompoundBand);
+    // Inserted where the dropdown was, so it occupies that slot and the Fuse
+    // button, the Auto label and the toggle stay on the same line after it.
+    const inputContainer = (manualDropdown || manualSellButton)?.parentElement
+        || sellRow.querySelector('.input-container');
+    if (inputContainer) {
+        inputContainer.insertBefore(line, inputContainer.firstChild);
+    }
+    updateAllocationLineState(line, type, item, showCompoundBand);
+}
+
+/**
+ * Keep one visible allocation line's figures current.
+ *
+ * The figures move with production, so a line that only refreshed when its pane
+ * was opened would quote whatever the rates happened to be at that moment for
+ * as long as the player looked at it. There is no enabled/disabled state left to
+ * track: once the slider exists it is always live, and the storage end of the
+ * bar is how a player switches a material's allocation off.
+ */
+export function updateAllocationLineState(line, category, key, showCompoundBand) {
+    if (!line || !category || !key) {
+        return;
+    }
+    updateAllocationReadout(line, category, key, showCompoundBand);
+}
+
+/**
+ * The per-frame refresh for whichever allocation line is on screen.
+ *
+ * There is at most one - the panes render one material at a time - so this is a
+ * single query rather than a sweep over every material in the game.
+ */
+export function refreshVisibleAllocationLines() {
+    if (!getAutoSellUnlocked()) {
+        return;
+    }
+    const line = document.querySelector('.allocation-line-container');
+    if (!line) {
+        return;
+    }
+    updateAllocationLineState(
+        line,
+        line.dataset.category,
+        line.dataset.materialKey,
+        line.dataset.compoundBand === 'true'
+    );
 }
 
 export function setAutoCreateToggleState(item) {
-    if (!getTechUnlockedArray().includes('compoundMachining')) {
+    if (!getCompoundAutoCreateUnlocked()) {
         return;
     }
 
     const createRow = document.getElementById(`${item}CreateRow`);
+    addAutoCreateAllocationInfo(createRow);
     const autoCreateValue = getResourceDataObject('compounds', [item, 'autoCreate']);
     const targetElement = createRow.querySelector(`#autoCreateToggle`);
 
@@ -16311,6 +16826,36 @@ export function setAutoCreateToggleState(item) {
 
         targetElement.checked = autoCreateValue;
     }
+}
+
+/**
+ * P9: the "i" marker on a compound's Create row.
+ *
+ * Auto-creation stopped being self-contained when allocation arrived. It now
+ * draws only on the share each ingredient's *resource* pane makes available to
+ * compounds, and that share is split equally between every compound using it -
+ * so a player looking at a slow compound has to go and look somewhere else to
+ * find out why. The marker says where.
+ *
+ * Added here rather than in the six row definitions because this is where the
+ * row is already being set up per pane, and one implementation cannot drift
+ * from another.
+ */
+function addAutoCreateAllocationInfo(createRow) {
+    if (!createRow || createRow.querySelector('#info_autoCreateAllocation')) {
+        return;
+    }
+
+    const label = createRow.querySelector('.label-container') || createRow;
+    const marker = document.createElement('p');
+    marker.id = 'info_autoCreateAllocation';
+    marker.classList.add('info-emoji');
+    marker.textContent = 'ℹ️';
+    label.appendChild(marker);
+
+    // The shared binder reads the text out of `infoTooltipDescriptions` by id,
+    // so the string is localised on the same path as every other info marker.
+    setupInfoTooltips();
 }
 
 export const addStorageCapacityAndCompoundsToAllResources = (addValue) => {

@@ -15,8 +15,10 @@
  *    with the grid down a tier 1 autobuyer keeps producing from its own rate and
  *    quantity while every higher tier yields exactly zero. This holds for every
  *    resource.
- * 2. **Compound autobuyers are gated behind the `compoundAutomation` ascendency
- *    perk**, which unlocks the `compoundMachining` tech.
+ * 2. **Compound autobuyers are gated behind the third rung of the `nanoBrokers`
+ *    ascendency perk** (P9). The one perk is bought up to three times: level 1
+ *    grants autosell, level 2 compound auto-create, level 3 the compound
+ *    autobuyer tiers. Level 2 also sets the `compoundMachining` marker.
  * 3. **Diesel tier 1 is the deliberate exception**: it ships available from the
  *    start, is purchasable without the perk, and carries `energyUse: 0` so it
  *    runs unpowered like any other tier 1.
@@ -182,32 +184,46 @@ test.describe('Autobuyers — compounds are gated behind the ascendency perk', (
     await game.boot();
   });
 
-  test('the compoundAutomation perk is not owned on a fresh run', async ({ game }) => {
+  test('the Nano Brokers ladder is untouched on a fresh run', async ({ game }) => {
     const state = await game.withMods((m) => ({
-      bought: m.rdo.getBuffCompoundAutomationData()?.boughtYet,
-      cost: m.rdo.getBuffCompoundAutomationData()?.baseCostAp,
-      rebuyable: m.rdo.getBuffCompoundAutomationData()?.rebuyable,
+      bought: m.rdo.getBuffNanoBrokersData()?.boughtYet,
+      ladder: m.rdo.getBuffNanoBrokersData()?.costLadderAp,
+      rebuyable: m.rdo.getBuffNanoBrokersData()?.rebuyable,
+      timesRebuyable: m.rdo.getBuffNanoBrokersData()?.timesRebuyable,
+      autoBuyersUnlocked: m.rdo.getCompoundAutoBuyersUnlocked(),
       techs: [...(m.cg.getTechUnlockedArray?.() ?? [])]
     }));
 
     expect(state.bought).toBe(0);
-    expect(state.cost).toBeGreaterThan(0);
-    // A one-off unlock, not a rebuyable multiplier.
-    expect(state.rebuyable).toBe(false);
+    // P9: one perk, three rungs - autosell, auto-create, then the auto-buyers.
+    expect(state.rebuyable).toBe(true);
+    expect(state.timesRebuyable).toBe(3);
+    expect(state.ladder).toEqual([15, 30, 50]);
+    expect(state.autoBuyersUnlocked, 'the third rung is not owned yet').toBe(false);
     expect(state.techs, 'compoundMachining should not be unlocked yet').not.toContain('compoundMachining');
   });
 
-  test('buying the perk unlocks compoundMachining, which is what gates compound automation', async ({ game }) => {
-    const after = await game.withMods((m) => {
-      // Grant the perk the way the run-restore path does, then apply its effect.
-      m.rdo.getBuffCompoundAutomationData().boughtYet = 1;
-      if (m.rdo.getBuffCompoundAutomationData().boughtYet > 0) {
-        m.cg.setTechUnlockedArray('compoundMachining');
-      }
-      return [...(m.cg.getTechUnlockedArray?.() ?? [])];
+  test('the compound autobuyer tiers need the third rung of the ladder, not the second', async ({ game }) => {
+    // P9 split what used to be one `compoundMachining` gate in two: level 2 buys
+    // auto-create, level 3 buys the autobuyer tiers. Level 2 alone must not open
+    // the tiers, or the third rung would be sold for nothing.
+    const atLevelTwo = await game.withMods((m) => {
+      m.rdo.getBuffNanoBrokersData().boughtYet = 2;
+      return {
+        autoCreate: m.rdo.getCompoundAutoCreateUnlocked(),
+        autoBuyers: m.rdo.getCompoundAutoBuyersUnlocked()
+      };
     });
 
-    expect(after, 'the perk should unlock compoundMachining').toContain('compoundMachining');
+    expect(atLevelTwo.autoCreate, 'level 2 buys auto-create').toBe(true);
+    expect(atLevelTwo.autoBuyers, 'level 2 must NOT buy the autobuyer tiers').toBe(false);
+
+    const atLevelThree = await game.withMods((m) => {
+      m.rdo.getBuffNanoBrokersData().boughtYet = 3;
+      return m.rdo.getCompoundAutoBuyersUnlocked();
+    });
+
+    expect(atLevelThree, 'level 3 buys the autobuyer tiers').toBe(true);
   });
 
   test('every compound has four autobuyer tiers behind that gate', async ({ game }) => {
@@ -233,7 +249,7 @@ test.describe('Autobuyers — compounds are gated behind the ascendency perk', (
     // without power — it is the player's route into compounds before any
     // ascendency progress exists.
     const shipped = await game.withMods((m) => ({
-      perkOwned: m.rdo.getBuffCompoundAutomationData()?.boughtYet,
+      perkOwned: m.rdo.getBuffNanoBrokersData()?.boughtYet,
       tier1: m.rdo.getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier1']),
       tier2: m.rdo.getResourceDataObject('compounds', ['diesel', 'upgrades', 'autoBuyer', 'tier2'])
     }));

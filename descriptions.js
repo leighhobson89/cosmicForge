@@ -78,8 +78,6 @@ export let modalQuantumComputingTabUnlockHeader;
 export let modalQuantumComputingTabUnlockText;
 export let modalRocketCompositesTabUnlockHeader;
 export let modalRocketCompositesTabUnlockText;
-export let modalNanoBrokersUnlockHeader;
-export let modalNanoBrokersUnlockText;
 export let modalCompoundMachiningTabUnlockHeader;
 export let modalCompoundMachiningTabUnlockText;
 export let modalMegaStructureTechDysonSphere1Header;
@@ -279,8 +277,6 @@ export function initialiseDescriptions() {
     modalQuantumComputingTabUnlockText = localize('modalQuantumComputingTabUnlockText', getLanguage());
     modalRocketCompositesTabUnlockHeader = localize('modalRocketCompositesTabUnlockHeader', getLanguage());
     modalRocketCompositesTabUnlockText = localize('modalRocketCompositesTabUnlockText', getLanguage());
-    modalNanoBrokersUnlockHeader = localize('modalNanoBrokersUnlockHeader', getLanguage());
-    modalNanoBrokersUnlockText = localize('modalNanoBrokersUnlockText', getLanguage());
     modalCompoundMachiningTabUnlockHeader = localize('modalCompoundMachiningTabUnlockHeader', getLanguage());
     modalCompoundMachiningTabUnlockText = localize('modalCompoundMachiningTabUnlockText', getLanguage());
     modalMegaStructureTechDysonSphere1Header = localize('modalMegaStructureTechDysonSphere1Header', getLanguage());
@@ -512,6 +508,7 @@ export function initialiseDescriptions() {
     };
 
     infoTooltipDescriptions = {
+        info_autoCreateAllocation: localize('infoTooltipAutoCreateAllocation', getLanguage()),
         info_starLegendName: localize('infoTooltipStarLegendName', getLanguage()),
         info_starLegendWeather: localize('infoTooltipStarLegendWeather', getLanguage()),
         info_starMapModes: localize('infoTooltipStarMapModes', getLanguage()),
@@ -559,7 +556,6 @@ export function initialiseDescriptions() {
         scienceLaboratories: localize('techNotifyScienceLaboratories', getLanguage()),
         hydroCarbons: localize('techNotifyHydroCarbons', getLanguage()),
         nanoTubeTechnology: localize('techNotifyNanoTubeTechnology', getLanguage()),
-        nanoBrokers: localize('techNotifyNanoBrokers', getLanguage()),
         stellarCartography: localize('techNotifyStellarCartography', getLanguage()),
         fusionEfficiencyI: localize('techNotifyFusionEfficiencyI', getLanguage()),
         fusionEfficiencyII: localize('techNotifyFusionEfficiencyII', getLanguage()),
@@ -1183,11 +1179,6 @@ export function initialiseDescriptions() {
         techStellarCartographyRow: {
             content1: localize('optionDescTechStellarCartographyContent1', getLanguage()),
             content2: localize('optionDescTechStellarCartographyContent2', getLanguage()),
-            updateAt: ""
-        },
-        techNanoBrokersRow: {
-            content1: localize('optionDescTechNanoBrokersContent1', getLanguage()),
-            content2: localize('optionDescTechNanoBrokersContent2', getLanguage()),
             updateAt: ""
         },
         techQuantumComputingRow: {
@@ -1827,8 +1818,8 @@ export function initialiseDescriptions() {
             content2: "",
             updateAt: ""
         },
-        buffCompoundAutomationRow: {
-            content1: localize("buffCompoundAutomationContent1", getLanguage()),
+        buffNanoBrokersRow: {
+            content1: localize("buffNanoBrokersContent1", getLanguage()),
             content2: "",
             updateAt: ""
         },

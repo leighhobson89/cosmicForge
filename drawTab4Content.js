@@ -115,10 +115,6 @@ export function drawTab4Content(heading, optionContentElement) {
                         disableKeyboardForButton: true,
                         rowCategory: 'compound'
                     }),
-                    createTextElement(localize('textAuto', getLanguage()), '', ['autoBuyer-building-quantity']),
-                    createToggleSwitch('autoSellToggle', false, (isEnabled) => {
-                        setResourceDataObject(isEnabled, 'compounds', ['diesel', 'autoSell']);
-                    }, ['toggle-switch-spacing']),
                 ],
                 descriptionText: `${getCompoundSalePreview('diesel')}`,
                 resourcePriceObject: null,
@@ -133,11 +129,6 @@ export function drawTab4Content(heading, optionContentElement) {
                 rowCategory: 'compound'
             });
             optionContentElement.appendChild(dieselSellRow);
-            const toggleSwitch = dieselSellRow.querySelector('#autoSellToggle');
-            if (toggleSwitch) {
-                toggleSwitch.setAttribute('data-type', 'compounds');
-            }
-    
             const dieselIncreaseStorageRow = createOptionRow({
                 labelId: 'dieselIncreaseStorageRow',
                 renderNameABs: null,
@@ -424,10 +415,6 @@ export function drawTab4Content(heading, optionContentElement) {
                         disableKeyboardForButton: true,
                         rowCategory: 'compound'
                     }),
-                    createTextElement(localize('textAuto', getLanguage()), '', ['autoBuyer-building-quantity']),
-                    createToggleSwitch('autoSellToggle', false, (isEnabled) => {
-                        setResourceDataObject(isEnabled, 'compounds', ['glass', 'autoSell']);
-                    }, ['toggle-switch-spacing']),
                 ],
                 descriptionText: `${getCompoundSalePreview('glass')}`,
                 resourcePriceObject: null,
@@ -442,11 +429,6 @@ export function drawTab4Content(heading, optionContentElement) {
                 rowCategory: 'compound'
             });
             optionContentElement.appendChild(glassSellRow);
-            const toggleSwitch = glassSellRow.querySelector('#autoSellToggle');
-            if (toggleSwitch) {
-                toggleSwitch.setAttribute('data-type', 'compounds');
-            }
-    
             const glassIncreaseStorageRow = createOptionRow({
                 labelId: 'glassIncreaseStorageRow',
                 renderNameABs: null,
@@ -725,10 +707,6 @@ export function drawTab4Content(heading, optionContentElement) {
                         disableKeyboardForButton: true,
                         rowCategory: 'compound'
                     }),
-                    createTextElement(localize('textAuto', getLanguage()), '', ['autoBuyer-building-quantity']),
-                    createToggleSwitch('autoSellToggle', false, (isEnabled) => {
-                        setResourceDataObject(isEnabled, 'compounds', ['steel', 'autoSell']);
-                    }, ['toggle-switch-spacing']),
                 ],
                 descriptionText: `${getCompoundSalePreview('steel')}`,
                 resourcePriceObject: null,
@@ -743,11 +721,6 @@ export function drawTab4Content(heading, optionContentElement) {
                 rowCategory: 'compound'
             });
             optionContentElement.appendChild(steelSellRow);
-            const toggleSwitch = steelSellRow.querySelector('#autoSellToggle');
-            if (toggleSwitch) {
-                toggleSwitch.setAttribute('data-type', 'compounds');
-            }
-        
             const steelIncreaseStorageRow = createOptionRow({
                 labelId: 'steelIncreaseStorageRow',
                 renderNameABs: null,
@@ -1025,10 +998,6 @@ export function drawTab4Content(heading, optionContentElement) {
                         disableKeyboardForButton: true,
                         rowCategory: 'compound'
                     }),
-                    createTextElement(localize('textAuto', getLanguage()), '', ['autoBuyer-building-quantity']),
-                    createToggleSwitch('autoSellToggle', false, (isEnabled) => {
-                        setResourceDataObject(isEnabled, 'compounds', ['concrete', 'autoSell']);
-                    }, ['toggle-switch-spacing']),
                 ],
                 descriptionText: `${getCompoundSalePreview('concrete')}`,
                 resourcePriceObject: null,
@@ -1043,11 +1012,6 @@ export function drawTab4Content(heading, optionContentElement) {
                 rowCategory: 'compound'
             });
             optionContentElement.appendChild(concreteSellRow);
-            const toggleSwitch = concreteSellRow.querySelector('#autoSellToggle');
-            if (toggleSwitch) {
-                toggleSwitch.setAttribute('data-type', 'compounds');
-            }
-
             const concreteIncreaseStorageRow = createOptionRow({
                 labelId: 'concreteIncreaseStorageRow',
                 renderNameABs: null,
@@ -1327,10 +1291,6 @@ export function drawTab4Content(heading, optionContentElement) {
                         disableKeyboardForButton: true,
                         rowCategory: 'compound'
                     }),
-                    createTextElement(localize('textAuto', getLanguage()), '', ['autoBuyer-building-quantity']),
-                    createToggleSwitch('autoSellToggle', false, (isEnabled) => {
-                        setResourceDataObject(isEnabled, 'compounds', ['water', 'autoSell']);
-                    }, ['toggle-switch-spacing']),
                 ],
                 descriptionText: `${getCompoundSalePreview('water')}`,
                 resourcePriceObject: null,
@@ -1345,11 +1305,6 @@ export function drawTab4Content(heading, optionContentElement) {
                 rowCategory: 'compound'
             });
             optionContentElement.appendChild(waterSellRow);
-            const toggleSwitch = waterSellRow.querySelector('#autoSellToggle');
-            if (toggleSwitch) {
-                toggleSwitch.setAttribute('data-type', 'compounds');
-            }
-
             const waterIncreaseStorageRow = createOptionRow({
                 labelId: 'waterIncreaseStorageRow',
                 renderNameABs: null,
@@ -1628,10 +1583,6 @@ export function drawTab4Content(heading, optionContentElement) {
                         disableKeyboardForButton: true,
                         rowCategory: 'compound'
                     }),
-                    createTextElement(localize('textAuto', getLanguage()), '', ['autoBuyer-building-quantity']),
-                    createToggleSwitch('autoSellToggle', false, (isEnabled) => {
-                        setResourceDataObject(isEnabled, 'compounds', ['titanium', 'autoSell']);
-                    }, ['toggle-switch-spacing']),
                 ],
                 descriptionText: `${getCompoundSalePreview('titanium')}`,
                 resourcePriceObject: null,
@@ -1646,11 +1597,6 @@ export function drawTab4Content(heading, optionContentElement) {
                 rowCategory: 'compound'
             });
             optionContentElement.appendChild(titaniumSellRow);
-            const toggleSwitch = titaniumSellRow.querySelector('#autoSellToggle');
-            if (toggleSwitch) {
-                toggleSwitch.setAttribute('data-type', 'compounds');
-            }
-        
             const titaniumIncreaseStorageRow = createOptionRow({
                 labelId: 'titaniumIncreaseStorageRow',
                 renderNameABs: null,

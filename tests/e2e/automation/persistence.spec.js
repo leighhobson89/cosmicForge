@@ -42,10 +42,14 @@
  *    fix, so the telescope case is checked by letting the frame loop start a real
  *    scan in the new run with nothing touched by hand.
  *
- * The negative half matters as much as the positive: `autoSell` and `autoCreate`
- * were both looked at and left out of scope, so a spec here pins that they still
- * reset — otherwise a later "while I'm in here" change would widen the behaviour
- * silently.
+ * The negative half matters as much as the positive, and the shape of it changed
+ * with P9: `autoSell` and `autoCreate` were originally out of scope, and P9
+ * brought both in — autosell as the `cashShare` / `compoundShare` pair that
+ * replaced it, and auto-create as the candidate this file's original note
+ * nominated. The final spec here now pins that they *do* survive, and — just as
+ * importantly — that the exact shares the player chose come back, including a
+ * material deliberately left at nothing-sold, rather than everything being
+ * forced to some default because the perk is owned.
  */
 import { test, expect } from '../_harness/game-fixture.mjs';
 
@@ -477,15 +481,25 @@ test.describe('Automation — what must not be inherited', () => {
     expect(after.researchEnabled, 'nor the research one').toBe(false);
   });
 
-  test('the automation left out of scope still resets', async ({ game, page }) => {
-    // autoSell and autoCreate were both examined and deliberately excluded — the
-    // first because its tech is re-researched every run, the second by decision.
-    // Pinning them here means widening the behaviour has to be a choice.
+  test('the P9 allocation settings and auto-create now survive too', async ({ game, page }) => {
+    // P10 left `autoSell` and `autoCreate` out of scope; P9 brought both in, on
+    // the grounds the original note gave for the candidates it did carry - the
+    // capability behind them is permanent, so making the player re-tune fourteen
+    // splits every run is the same friction P10 set out to remove.
+    //
+    // Distinctive values, not just "on": the lazy implementation - force
+    // everything true when the perk is owned - passes any test that only checks
+    // the on case, exactly as the telescope specs above are careful about.
     await playRunToRebirthReady(game, page);
 
     await game.withMods((m) => {
-      m.rdo.setResourceDataObject(true, 'resources', ['hydrogen', 'autoSell']);
-      m.rdo.setResourceDataObject(true, 'compounds', ['diesel', 'autoSell']);
+      m.rdo.setResourceDataObject(35, 'resources', ['hydrogen', 'cashShare']);
+      m.rdo.setResourceDataObject(25, 'resources', ['hydrogen', 'compoundShare']);
+      // One deliberately left selling nothing. With the autosell toggle gone
+      // that is what "off" means, so it has to come back as chosen rather than
+      // being reset to some default because the perk is owned.
+      m.rdo.setResourceDataObject(0, 'resources', ['iron', 'cashShare']);
+      m.rdo.setResourceDataObject(80, 'resources', ['iron', 'compoundShare']);
       m.rdo.setResourceDataObject(true, 'compounds', ['diesel', 'autoCreate']);
       // A machine switched off by hand, to prove the tier flags are not swept up.
       m.rdo.setResourceDataObject(false, 'resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier2', 'active']);
@@ -494,15 +508,19 @@ test.describe('Automation — what must not be inherited', () => {
     await rebirthThroughTheUI(game, page);
 
     const after = await game.withMods((m) => ({
-      resourceAutoSell: m.rdo.getResourceDataObject('resources', ['hydrogen', 'autoSell'], true),
-      compoundAutoSell: m.rdo.getResourceDataObject('compounds', ['diesel', 'autoSell'], true),
+      hydrogenCash: m.rdo.getResourceDataObject('resources', ['hydrogen', 'cashShare'], true),
+      hydrogenCompound: m.rdo.getResourceDataObject('resources', ['hydrogen', 'compoundShare'], true),
+      ironCash: m.rdo.getResourceDataObject('resources', ['iron', 'cashShare'], true),
+      ironCompound: m.rdo.getResourceDataObject('resources', ['iron', 'compoundShare'], true),
       compoundAutoCreate: m.rdo.getResourceDataObject('compounds', ['diesel', 'autoCreate'], true),
       tier2Active: m.rdo.getResourceDataObject('resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier2', 'active'], true)
     }));
 
-    expect(after.resourceAutoSell, 'autoSell is out of scope and still resets').toBe(false);
-    expect(after.compoundAutoSell, 'for compounds too').toBe(false);
-    expect(after.compoundAutoCreate, 'autoCreate was scoped out by decision').toBe(false);
+    expect(after.hydrogenCash, 'the exact cash share the player set comes back').toBe(35);
+    expect(after.hydrogenCompound, 'and the exact compound share').toBe(25);
+    expect(after.ironCash, 'a material set to sell nothing comes back selling nothing').toBe(0);
+    expect(after.ironCompound, 'with the compound band it was left at').toBe(80);
+    expect(after.compoundAutoCreate, 'auto-create is carried now, as P10 anticipated it would be').toBe(true);
     expect(after.tier2Active, 'and an autobuyer tier comes back on, its own default').toBe(true);
   });
 });

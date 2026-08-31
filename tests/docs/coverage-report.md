@@ -4,7 +4,7 @@ _Generated from `functional-areas.json`. Re-run `node tests/docs/generate-report
 
 ## Coverage at a glance
 
-One line per functional area, worst first. 47 green, 0 amber, 0 red, out of 47.
+One line per functional area, worst first. 48 green, 0 amber, 0 red, out of 48.
 
 | | Area | Group | Risk | Specs | Where it stands |
 |:--:|---|---|:--:|--:|---|
@@ -15,6 +15,7 @@ One line per functional area, worst first. 47 green, 0 amber, 0 red, out of 47.
 | 🟢 | [Audio](areas/audio.md) | Simulation & Ambience | Low | 13 | Done — driven through its own controls, 13 specs passing. |
 | 🟢 | [Auto Buyers](areas/autobuyers.md) | Core Economy | High | 19 | Done — driven through its own controls, 19 specs passing. |
 | 🟢 | [Automation Persistence](areas/automation.md) | Meta Progression | Medium | — | Done — driven through its own controls, undefined specs passing. |
+| 🟢 | [Autosell & Production Allocation](areas/autosell.md) | Core Economy | High | 51 | Done — driven through its own controls, 51 specs passing. |
 | 🟢 | [Battle & Conquest](areas/battle.md) | Interstellar | High | 18 | Done — driven through its own controls, 18 specs passing. |
 | 🟢 | [Black Hole Time Warp](areas/black-hole.md) | Endgame | High | 19 | Done — driven through its own controls, 19 specs passing. |
 | 🟢 | [Cloud Save & Load](areas/save-load-cloud.md) | Foundation | High | 8 | Done — driven through its own controls, 8 specs passing. |
@@ -80,10 +81,10 @@ when an area is upgraded.
 |---|---:|---:|
 | 🔴 Red — no spec file | 0 | 0% |
 | 🟠 Amber — spec written, not yet upgraded | 0 | 0% |
-| 🟢 Green — signed off | 47 | 100% |
-| **Total functional areas** | **47** | |
+| 🟢 Green — signed off | 48 | 100% |
+| **Total functional areas** | **48** | |
 
-762 individual test cases are identified across all areas. **1318 Playwright specs are implemented** across 46 areas, and all of them pass except where an area's note says otherwise — a spec that fails on a live defect is left failing on purpose, and the defect is written up in [known-issues.md](known-issues.md).
+813 individual test cases are identified across all areas. **1369 Playwright specs are implemented** across 47 areas, and all of them pass except where an area's note says otherwise — a spec that fails on a live defect is left failing on purpose, and the defect is written up in [known-issues.md](known-issues.md).
 
 Run them with `npm run test:e2e` (all areas) or `node tests/run-e2e.mjs <area>`. Each area writes its own HTML report to `test-reports/e2e/<area>/index.html`, with a summary index at `test-reports/e2e/index.html`.
 
@@ -119,6 +120,7 @@ The minute-to-minute loop: extract, craft, power, research. Where players spend 
 | 🟢 | [Resources](areas/resources.md) | High | 50 | **55** | earlyLoop.test.js |
 | 🟢 | [Compounds & Crafting](areas/compounds.md) | High | 32 | **31** | — |
 | 🟢 | [Auto Buyers](areas/autobuyers.md) | High | 18 | **19** | autobuyer.test.js |
+| 🟢 | [Autosell & Production Allocation](areas/autosell.md) | High | 51 | **51** | — |
 | 🟢 | [Energy & Power Grid](areas/energy.md) | High | 14 | **37** | energyMid.test.js |
 | 🟢 | [Research](areas/research.md) | High | 21 | **25** | researchTech.test.js |
 | 🟢 | [Tech Tree](areas/technology.md) | High | 18 | **18** | researchTech.test.js |

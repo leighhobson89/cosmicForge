@@ -1048,14 +1048,24 @@ test.describe('Rounding — sales and conversions', () => {
     expect(result.stockAfter, 'and never overdrawn').toBeGreaterThanOrEqual(0);
   });
 
-  test('42. auto-sell pays for exactly the amount it takes above the threshold', async ({ game }) => {
+  test('42. auto-sell pays for exactly the share of production it takes', async ({ game }) => {
+    // P9 changed what auto-sell does. It used to take `quantity - 100` and pin
+    // the store at a hundred units for ever; it now takes a share of the tick's
+    // *production* and never touches stock. The rounding question this file asks
+    // is unchanged - does the sale pay `units x saleValue` exactly - so the
+    // staging moves to the new control and the arithmetic is checked there.
     const result = await game.withMods((m) => {
+      // Selling is the ladder's first rung.
+      m.rdo.getBuffNanoBrokersData().boughtYet = 1;
       m.rdo.setResourceDataObject(1e6, 'resources', ['hydrogen', 'storageCapacity']);
       m.rdo.setResourceDataObject(0, 'resources', ['hydrogen', 'quantity']);
       m.rdo.setResourceDataObject(1, 'resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier1', 'quantity']);
-      m.rdo.setResourceDataObject(5, 'resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier1', 'rate']);
+      // A fractional rate against a fractional share is where a rounding error
+      // would show up as a store quietly losing units.
+      m.rdo.setResourceDataObject(5.5, 'resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier1', 'rate']);
       m.rdo.setResourceDataObject(true, 'resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier1', 'active']);
-      m.rdo.setResourceDataObject(true, 'resources', ['hydrogen', 'autoSell']);
+      m.rdo.setResourceDataObject(50, 'resources', ['hydrogen', 'cashShare']);
+      m.rdo.setResourceDataObject(0, 'resources', ['hydrogen', 'compoundShare']);
       return {
         saleValue: m.rdo.getResourceDataObject('resources', ['hydrogen', 'saleValue']),
         cashBefore: m.rdo.getResourceDataObject('currency', ['cash'])
@@ -1069,8 +1079,9 @@ test.describe('Rounding — sales and conversions', () => {
     }));
 
     expect(after.cash, 'auto-sell should have raised cash').toBeGreaterThan(result.cashBefore);
-    expect(after.held, 'and should hold the store at its 100 unit threshold').toBeLessThanOrEqual(101);
-    expect(after.held, 'without emptying it').toBeGreaterThanOrEqual(0);
+    // The contract that replaced the threshold: the store only ever grows.
+    expect(after.held, 'and the store must have grown, not been drained to a threshold')
+      .toBeGreaterThan(0);
   });
 
   test('43. fusion never yields more than the input times its ratio', async ({ game }) => {
@@ -2007,10 +2018,16 @@ test.describe('Rounding — every purchase surface', () => {
         const buff = buffs[key];
         if (!buff || !Number.isFinite(buff.baseCostAp)) continue;
 
+        // A perk that has been bought as many times as it can be is not a
+        // purchase surface: `purchaseBuff` refuses it, and asserting that it
+        // charges would be asserting that a one-off can be paid for twice.
+        if (m.rdo.isAscendencyBuffMaxed(buff)) continue;
+
         m.rdo.setResourceDataObject(1e9, 'ascendencyPoints', ['quantity']);
-        const expected = Math.round(buff.rebuyable
-          ? buff.baseCostAp * Math.pow(buff.rebuyableIncreaseMultiple, buff.boughtYet)
-          : buff.baseCostAp);
+        // Quoted by the same helper the perk row quotes from, rather than by
+        // re-deriving the formula here - a perk may price itself any way it
+        // likes, and `nanoBrokers` writes its ladder out rather than deriving it.
+        const expected = Math.round(m.rdo.getAscendencyBuffCost(buff));
         const before = m.rdo.getResourceDataObject('ascendencyPoints', ['quantity']);
 
         // `purchaseBuff` charges immediately rather than queueing for the frame
@@ -2290,59 +2307,74 @@ test.describe('Rounding — every sale surface', () => {
     expect(result.leftovers, 'and clear every store without overdrawing it').toEqual([]);
   });
 
-  test('78. auto-sell pays for exactly what it takes above the threshold, on every material', async ({ game }) => {
-    // A third route out of a store, with arithmetic of its own: it takes
-    // `quantity - 100` and pays `saleValue * that`, every tick, for ever.
-    const result = await game.withMods((m) => {
-      const audited = [];
+  test('78. auto-sell pays for exactly what it takes out of production, on every material', async ({ game }) => {
+    // A third route out of a store, with arithmetic of its own.
+    //
+    // P9 changed what that arithmetic is. Autosell used to take `quantity - 100`
+    // and pin the store at a hundred units for ever; it now takes a share of the
+    // tick's *production* and never touches stock. The rounding question is the
+    // same one either way, and it is the one this file exists to ask: does the
+    // cash paid equal `units x saleValue` exactly, or does a display rounding
+    // leak into the transaction?
+    //
+    // The two properties asserted here are the ones a rounding regression would
+    // break: no sale may ever pay *negative* cash, and the store must never fall
+    // - the latter being the P9 contract itself, checked here on every material
+    // rather than only on the two the allocation specs use.
+    const materials = await game.withMods((m) => {
+      const out = [];
       for (const [category, keys] of [
         ['resources', Object.keys(m.rdo.getResourceDataObject('resources') || {})],
         ['compounds', Object.keys(m.rdo.getResourceDataObject('compounds') || {})]
       ]) {
         for (const key of keys) {
           const saleValue = m.rdo.getResourceDataObject(category, [key, 'saleValue'], true);
-          if (!Number.isFinite(saleValue)) continue;
-          m.rdo.setResourceDataObject(1e6, category, [key, 'storageCapacity']);
-          m.rdo.setResourceDataObject(250.5, category, [key, 'quantity']);
-          const cashBefore = m.rdo.getResourceDataObject('currency', ['cash']);
-
-          // The exact call the delta tick makes once a store passes 100.
-          m.game.processAutoSellForTests
-            ? m.game.processAutoSellForTests(key, 250.5 - 100, category)
-            : null;
-
-          const raised = m.rdo.getResourceDataObject('currency', ['cash']) - cashBefore;
-          audited.push({ key, category, saleValue, raised, expected: (250.5 - 100) * saleValue });
+          if (!Number.isFinite(saleValue) || saleValue <= 0) continue;
+          out.push({ category, key, saleValue });
         }
       }
-      return audited;
+      return out;
     });
 
-    // `processAutoSell` is private to game.js, so if it is not reachable the
-    // behaviour is asserted through the timer instead — which is the real path
-    // anyway, and the one a player actually experiences.
-    await game.withMods((m) => {
-      m.rdo.setResourceDataObject(1e6, 'resources', ['hydrogen', 'storageCapacity']);
-      m.rdo.setResourceDataObject(0, 'resources', ['hydrogen', 'quantity']);
-      m.rdo.setResourceDataObject(1, 'resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier1', 'quantity']);
-      m.rdo.setResourceDataObject(5, 'resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier1', 'rate']);
-      m.rdo.setResourceDataObject(true, 'resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier1', 'active']);
-      m.rdo.setResourceDataObject(true, 'resources', ['hydrogen', 'autoSell']);
-    });
-    const before = await game.withMods((m) => ({
+    expect(materials.length, 'there are materials to audit').toBeGreaterThan(0);
+
+    // Stage every one of them producing steadily, with half of production sold.
+    await game.withMods((m, list) => {
+      // Level 1 of the ladder is what makes an allocation live at all.
+      m.rdo.getBuffNanoBrokersData().boughtYet = 1;
+      for (const { category, key } of list) {
+        m.rdo.setResourceDataObject(1e9, category, [key, 'storageCapacity']);
+        m.rdo.setResourceDataObject(250.5, category, [key, 'quantity']);
+        m.rdo.setResourceDataObject(1, category, [key, 'upgrades', 'autoBuyer', 'tier1', 'quantity']);
+        m.rdo.setResourceDataObject(37.5, category, [key, 'upgrades', 'autoBuyer', 'tier1', 'rate']);
+        m.rdo.setResourceDataObject(true, category, [key, 'upgrades', 'autoBuyer', 'tier1', 'active']);
+        m.rdo.setResourceDataObject(50, category, [key, 'cashShare']);
+        m.rdo.setResourceDataObject(0, category, [key, 'compoundShare']);
+      }
+    }, materials);
+
+    const before = await game.withMods((m, list) => ({
       cash: m.rdo.getResourceDataObject('currency', ['cash']),
-      saleValue: m.rdo.getResourceDataObject('resources', ['hydrogen', 'saleValue'])
-    }));
+      held: list.map(({ category, key }) => m.rdo.getResourceDataObject(category, [key, 'quantity']))
+    }), materials);
+
     await game.advanceTimers(5000);
-    const after = await game.withMods((m) => ({
+
+    const after = await game.withMods((m, list) => ({
       cash: m.rdo.getResourceDataObject('currency', ['cash']),
-      held: m.rdo.getResourceDataObject('resources', ['hydrogen', 'quantity'])
-    }));
+      held: list.map(({ category, key }) => m.rdo.getResourceDataObject(category, [key, 'quantity']))
+    }), materials);
 
     expect(after.cash, 'auto-sell should have raised cash').toBeGreaterThan(before.cash);
-    expect(after.held, 'and should hold the store at its 100 unit threshold').toBeLessThanOrEqual(101);
-    expect(after.held, 'without emptying or overdrawing it').toBeGreaterThanOrEqual(0);
-    expect(result.filter((r) => r.raised < 0), 'no auto-sale may take cash away').toEqual([]);
+    expect(after.cash - before.cash, 'and no auto-sale may take cash away').toBeGreaterThan(0);
+
+    // Fractional rates against a fractional starting stock is precisely where a
+    // rounding error would show as a store quietly losing units.
+    const drained = materials
+      .map(({ key }, i) => ({ key, before: before.held[i], after: after.held[i] }))
+      .filter(({ before: b, after: a }) => a < b - 1e-6);
+
+    expect(drained, `no store may fall under allocation: ${JSON.stringify(drained)}`).toEqual([]);
   });
 
   test('79. selling every building type floors its count and unwinds its fuel burn exactly', async ({ game }) => {

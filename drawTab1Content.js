@@ -78,10 +78,6 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: null,
                     rowCategory: 'resource'
                 }),
-                createTextElement(localize('textAuto', getLanguage()), '', ['autoBuyer-building-quantity']),
-                createToggleSwitch('autoSellToggle', false, (isEnabled) => {
-                    setResourceDataObject(isEnabled, 'resources', ['hydrogen', 'autoSell']);
-                }, ['toggle-switch-spacing']),
             ],
             descriptionText: `${getResourceSalePreview('hydrogen')}`,
             resourcePriceObject: null,
@@ -96,11 +92,6 @@ export function drawTab1Content(heading, optionContentElement) {
             rowCategory: 'resource'
         });
         optionContentElement.appendChild(hydrogenSellRow);
-        const toggleSwitch = hydrogenSellRow.querySelector('#autoSellToggle');
-        if (toggleSwitch) {
-            toggleSwitch.setAttribute('data-type', 'resources');
-        }
-
         const hydrogenGainRow = createOptionRow({
             labelId: 'hydrogenGainRow',
             renderNameABs: null,
@@ -396,10 +387,6 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: null,
                     rowCategory: 'resource'
                 }),
-                createTextElement(localize('textAuto', getLanguage()), '', ['autoBuyer-building-quantity']),
-                createToggleSwitch('autoSellToggle', false, (isEnabled) => {
-                    setResourceDataObject(isEnabled, 'resources', ['helium', 'autoSell']);
-                }, ['toggle-switch-spacing']),
             ],
             descriptionText: `${getResourceSalePreview('helium')}`,
             resourcePriceObject: null,
@@ -414,11 +401,6 @@ export function drawTab1Content(heading, optionContentElement) {
             rowCategory: 'resource'
         });
         optionContentElement.appendChild(heliumSellRow);
-        const toggleSwitch = heliumSellRow.querySelector('#autoSellToggle');
-        if (toggleSwitch) {
-            toggleSwitch.setAttribute('data-type', 'resources');
-        }
-
         const heliumGainRow = createOptionRow({
             labelId: 'heliumGainRow',
             renderNameABs: null,
@@ -722,10 +704,6 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: null,
                     rowCategory: 'resource'
                 }),
-                createTextElement(localize('textAuto', getLanguage()), '', ['autoBuyer-building-quantity']),
-                createToggleSwitch('autoSellToggle', false, (isEnabled) => {
-                    setResourceDataObject(isEnabled, 'resources', ['carbon', 'autoSell']);
-                }, ['toggle-switch-spacing']),
             ],
             descriptionText: `${getResourceSalePreview('neon')}`,
             resourcePriceObject: null,
@@ -740,11 +718,6 @@ export function drawTab1Content(heading, optionContentElement) {
             rowCategory: 'resource'
         });
         optionContentElement.appendChild(carbonSellRow);
-        const toggleSwitch = carbonSellRow.querySelector('#autoSellToggle');
-        if (toggleSwitch) {
-            toggleSwitch.setAttribute('data-type', 'resources');
-        }
-
         const carbonGainRow = createOptionRow({
             labelId: 'carbonGainRow',
             renderNameABs: null,
@@ -1041,10 +1014,6 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: null,
                     rowCategory: 'resource'
                 }),
-                createTextElement(localize('textAuto', getLanguage()), '', ['autoBuyer-building-quantity']),
-                createToggleSwitch('autoSellToggle', false, (isEnabled) => {
-                    setResourceDataObject(isEnabled, 'resources', ['neon', 'autoSell']);
-                }, ['toggle-switch-spacing']),
             ],
             descriptionText: `${getResourceSalePreview('neon')}`,
             resourcePriceObject: null,
@@ -1059,11 +1028,6 @@ export function drawTab1Content(heading, optionContentElement) {
             rowCategory: 'resource'
         });
         optionContentElement.appendChild(neonSellRow);
-        const toggleSwitch = neonSellRow.querySelector('#autoSellToggle');
-        if (toggleSwitch) {
-            toggleSwitch.setAttribute('data-type', 'resources');
-        }
-
         const neonGainRow = createOptionRow({
             labelId: 'neonGainRow',
             renderNameABs: null,
@@ -1360,10 +1324,6 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: null,
                     rowCategory: 'resource'
                 }),
-                createTextElement(localize('textAuto', getLanguage()), '', ['autoBuyer-building-quantity']),
-                createToggleSwitch('autoSellToggle', false, (isEnabled) => {
-                    setResourceDataObject(isEnabled, 'resources', ['oxygen', 'autoSell']);
-                }, ['toggle-switch-spacing']),
             ],
             descriptionText: `${getResourceSalePreview('oxygen')}`,
             resourcePriceObject: null,
@@ -1378,11 +1338,6 @@ export function drawTab1Content(heading, optionContentElement) {
             rowCategory: 'resource'
         });
         optionContentElement.appendChild(oxygenSellRow);
-        const toggleSwitch = oxygenSellRow.querySelector('#autoSellToggle');
-        if (toggleSwitch) {
-            toggleSwitch.setAttribute('data-type', 'resources');
-        }
-
         const oxygenGainRow = createOptionRow({
             labelId: 'oxygenGainRow',
             renderNameABs: null,
@@ -1654,10 +1609,6 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: null,
                     rowCategory: 'resource'
                 }),
-                createTextElement(localize('textAuto', getLanguage()), '', ['autoBuyer-building-quantity']),
-                createToggleSwitch('autoSellToggle', false, (isEnabled) => {
-                    setResourceDataObject(isEnabled, 'resources', ['sodium', 'autoSell']);
-                }, ['toggle-switch-spacing']),
             ],
             descriptionText: `${getResourceSalePreview('sodium')}`,
             resourcePriceObject: null,
@@ -1672,11 +1623,6 @@ export function drawTab1Content(heading, optionContentElement) {
             rowCategory: 'resource'
         });
         optionContentElement.appendChild(sodiumSellRow);
-        const toggleSwitch = sodiumSellRow.querySelector('#autoSellToggle');
-        if (toggleSwitch) {
-            toggleSwitch.setAttribute('data-type', 'resources');
-        }
-
         const sodiumGainRow = createOptionRow({
             labelId: 'sodiumGainRow',
             renderNameABs: null,
@@ -1973,10 +1919,6 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: null,
                     rowCategory: 'resource'
                 }),
-                createTextElement(localize('textAuto', getLanguage()), '', ['autoBuyer-building-quantity']),
-                createToggleSwitch('autoSellToggle', false, (isEnabled) => {
-                    setResourceDataObject(isEnabled, 'resources', ['silicon', 'autoSell']);
-                }, ['toggle-switch-spacing']),
             ],
             descriptionText: `${getResourceSalePreview('silicon')}`,
             resourcePriceObject: null,
@@ -1991,11 +1933,6 @@ export function drawTab1Content(heading, optionContentElement) {
             rowCategory: 'resource'
         });
         optionContentElement.appendChild(siliconSellRow);
-        const toggleSwitch = siliconSellRow.querySelector('#autoSellToggle');
-        if (toggleSwitch) {
-            toggleSwitch.setAttribute('data-type', 'resources');
-        }
-
         const siliconGainRow = createOptionRow({
             labelId: 'siliconGainRow',
             renderNameABs: null,
@@ -2267,10 +2204,6 @@ export function drawTab1Content(heading, optionContentElement) {
                     autoBuyerTier: null,
                     rowCategory: 'resource'
                 }),
-                createTextElement(localize('textAuto', getLanguage()), '', ['autoBuyer-building-quantity']),
-                createToggleSwitch('autoSellToggle', false, (isEnabled) => {
-                    setResourceDataObject(isEnabled, 'resources', ['iron', 'autoSell']);
-                }, ['toggle-switch-spacing']),
             ],
             descriptionText: `${getResourceSalePreview('iron')}`,
             resourcePriceObject: null,
@@ -2285,11 +2218,6 @@ export function drawTab1Content(heading, optionContentElement) {
             rowCategory: 'resource'
         });
         optionContentElement.appendChild(ironSellRow);
-        const toggleSwitch = ironSellRow.querySelector('#autoSellToggle');
-        if (toggleSwitch) {
-            toggleSwitch.setAttribute('data-type', 'resources');
-        }
-
         const ironGainRow = createOptionRow({
             labelId: 'ironGainRow',
             renderNameABs: null,

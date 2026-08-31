@@ -173,17 +173,23 @@ async function forceRain(game, { attempts = 60 } = {}) {
 }
 
 /**
- * Buy the ascendency perk that unlocks compound automation.
+ * Buy the ascendency perk levels that unlock compound automation.
  *
- * `compoundMachining` is **not** one of the researchable techs, so Grant All
- * Techs does not provide it — it comes only from the `compoundAutomation`
- * ascendency perk. `purchaseBuff` is the function the ascendency pane's own
- * buttons call, so this is the real purchase rather than a flag being set.
+ * P9 folded the old `compoundAutomation` perk and the old `nanoBrokers` tech
+ * into one three-rung `nanoBrokers` perk: level 1 is autosell, level 2 is
+ * compound auto-create, level 3 is the compound autobuyer tiers. Compound
+ * automation therefore costs two purchases, and neither is researchable - Grant
+ * All Techs does not provide it. `purchaseBuff` is the function the ascendency
+ * pane's own buttons call, so this is the real purchase rather than a flag being
+ * set.
  */
 async function buyCompoundAutomation(game) {
   await game.debugClick('add100ApButton');
   await game.page.waitForTimeout(300);
-  await game.withMods((m) => m.game.purchaseBuff('compoundAutomation'));
+  // Level 1 (autosell) has to be bought before level 2 (auto-create) exists.
+  await game.withMods((m) => m.game.purchaseBuff('nanoBrokers'));
+  await game.page.waitForTimeout(200);
+  await game.withMods((m) => m.game.purchaseBuff('nanoBrokers'));
   await game.page.waitForTimeout(400);
 
   // Run 1 celebrates the unlock with a modal, which would sit over the pane.
@@ -820,27 +826,51 @@ test.describe('Compounds — automatic creation behind the perk', () => {
     expect(full.quantity).toBe(500);
   });
 
-  test('auto-create switches off auto-sell on the resources it eats', async ({ game }) => {
+  test('auto-create no longer switches off selling on the resources it eats', async ({ game }) => {
+    // This asserted the opposite until P9. Auto-create used to run
+    //
+    //     resources.forEach(r => setResourceDataObject(false, 'resources', [r, 'autoSell']))
+    //
+    // every frame, on the reasoning that selling an ingredient out from under an
+    // auto-crafter would deadlock the pipeline. It could not deadlock anything by
+    // then, because the old autosell drained the store to 100 units and held it
+    // there, so the two were simply incompatible.
+    //
+    // Under the allocation model they are not: selling takes a share of
+    // production, feeding compounds takes another share, and the player sets the
+    // balance between them on the resource's own line. Reverting the player's
+    // choice within a frame - silently, with no explanation - is exactly the
+    // behaviour the rework removed.
     await prepareCraftingRun(game);
     await buyCompoundAutomation(game);
     await openCompound(game, 'diesel');
     await stageIngredients(game, 'diesel', { each: 1000000, capacity: 1e6 });
 
-    // Selling the ingredients out from under an auto-crafter would deadlock the
-    // pipeline, so enabling one has to switch the other off.
     await game.withMods((m) => {
-      m.rdo.setResourceDataObject(true, 'resources', ['hydrogen', 'autoSell']);
-      m.rdo.setResourceDataObject(true, 'resources', ['carbon', 'autoSell']);
+      for (const resource of ['hydrogen', 'carbon']) {
+        m.rdo.setResourceDataObject(20, 'resources', [resource, 'cashShare']);
+        m.rdo.setResourceDataObject(50, 'resources', [resource, 'compoundShare']);
+      }
       m.rdo.setResourceDataObject(true, 'compounds', ['diesel', 'autoCreate']);
     });
 
     await game.page.waitForTimeout(1500);
 
-    const autoSell = await game.withMods((m) => ({
-      hydrogen: m.rdo.getResourceDataObject('resources', ['hydrogen', 'autoSell']),
-      carbon: m.rdo.getResourceDataObject('resources', ['carbon', 'autoSell'])
+    const settings = await game.withMods((m) => ({
+      hydrogen: {
+        cash: m.rdo.getResourceDataObject('resources', ['hydrogen', 'cashShare'], true),
+        compound: m.rdo.getResourceDataObject('resources', ['hydrogen', 'compoundShare'], true)
+      },
+      carbon: {
+        cash: m.rdo.getResourceDataObject('resources', ['carbon', 'cashShare'], true),
+        compound: m.rdo.getResourceDataObject('resources', ['carbon', 'compoundShare'], true)
+      }
     }));
-    expect(autoSell).toEqual({ hydrogen: false, carbon: false });
+
+    expect(settings).toEqual({
+      hydrogen: { cash: 20, compound: 50 },
+      carbon: { cash: 20, compound: 50 }
+    });
   });
 });
 

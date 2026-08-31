@@ -29,7 +29,7 @@ Crafting driven through the Compounds tab: the create dropdown and what it actua
 - [ ] The auto-create toggle is hidden until the compoundAutomation perk is bought
 - [ ] Switching auto-create on crafts continuously and consumes the ingredients
 - [ ] Auto-create needs the grid, and stops at the storage cap
-- [ ] Auto-create switches off auto-sell on the resources it eats
+- [ ] P9 removed the force-disable: auto-create leaves an ingredient's allocation alone
 - [ ] Increase Storage doubles the cap and charges the old cap for every simple compound
 - [ ] The water reservoir charges water and concrete together
 - [ ] A second reservoir costs the new, larger amounts of both materials

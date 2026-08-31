@@ -1,4 +1,5 @@
 import {
+  migrateRetiredAutomationTechUnlock,
   restoreAchievementsDataObject, restoreAscendencyBuffsDataObject, restoreGalacticMarketDataObject, restoreGalacticCasinoDataObject, restoreRocketNamesObject, restoreResourceDataObject, restoreStarSystemsDataObject, resourceData, starSystems, getResourceDataObject, setResourceDataObject, galacticMarket, galacticCasino, ascendencyBuffs, achievementsData, getStarSystemDataObject, getBlackHoleResearchDone, getBlackHolePower, getBlackHoleDuration, getBlackHoleRechargeMultiplier, getBlackHoleResearchPrice, getBlackHolePowerPrice, getBlackHoleDurationPrice, getBlackHoleRechargePrice, setBlackHoleResearchDone, setBlackHolePower, setBlackHoleDuration, setBlackHoleRechargeMultiplier, setBlackHoleResearchPrice, setBlackHolePowerPrice, setBlackHoleDurationPrice, setBlackHoleRechargePrice, oTypePowerPlantBuffs, restoreOTypePowerPlantBuffsObject, getAchievementDataObject,
   getGalacticCasinoDataObject,
   setGalacticCasinoDataObject,
@@ -34,7 +35,7 @@ let saveData = null;
 //CONSTANTS
 export const HOMESTAR = 'miaplacidus';
 export const MINIMUM_GAME_VERSION_FOR_SAVES = 0.93;
-export const GAME_VERSION_FOR_SAVES = 0.98;
+export const GAME_VERSION_FOR_SAVES = 0.99;
 export const deferredActions = [];
 
 //NOTIFICATIONS
@@ -2090,7 +2091,20 @@ export function restoreGameStatus(gameState, type) {
             blackHoleDiscovered = gameState.blackHoleDiscovered ?? false;
             blackHoleDiscoveryProbability = gameState.blackHoleDiscoveryProbability ?? 0;
             techUnlockedArray = gameState.techUnlockedArray;
+            // P9: `nanoBrokers` used to be a tech that granted autosell. It is now
+            // the first rung of an ascendency ladder, so a save that researched it
+            // is granted the equivalent level for free and the stale tech entry is
+            // stripped - leaving it in place would have it render as an unknown row
+            // in the tree and keep answering `includes('nanoBrokers')` for any gate
+            // that had not yet been moved across.
+            if (Array.isArray(techUnlockedArray) && techUnlockedArray.includes('nanoBrokers')) {
+                migrateRetiredAutomationTechUnlock(true);
+                techUnlockedArray = techUnlockedArray.filter((techKey) => techKey !== 'nanoBrokers');
+            }
             revealedTechArray = gameState.revealedTechArray;
+            if (Array.isArray(revealedTechArray)) {
+                revealedTechArray = revealedTechArray.filter((techKey) => techKey !== 'nanoBrokers');
+            }
             cosmicRipTechUnlockedArray = gameState.cosmicRipTechUnlockedArray ?? [];
             revealedCosmicRipTechArray = gameState.revealedCosmicRipTechArray ?? [];
             upcomingTechArray = gameState.upcomingTechArray;

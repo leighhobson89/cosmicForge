@@ -157,7 +157,11 @@ class GameHarness {
         saveLoad: await import('/saveLoadGame.js'),
         casino: await import('/casino.js'),
         onboarding: await import('/onboarding.js'),
-        events: await import('/events.js')
+        events: await import('/events.js'),
+        // The save-version migration chain. Exposed for the specs that have
+        // to prove an old save is carried forward correctly, which cannot be
+        // asserted from the loaded game state alone.
+        patches: await import('/patches.js')
       };
     });
   }

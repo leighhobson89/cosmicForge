@@ -33,7 +33,7 @@ The audit moved several items vs. the original review order: **P3** (power toggl
 | 8 | P7 | Precision / rounding / affordability consistency — ✅ **COMPLETED** | 2 — important | High | Medium (12–18 h) |
 | 9 | P15 | Megastructure balance pass | 2 — important | High | Medium (12–20 h) |
 | 10 | P8 | Resource tick unification (foundational refactor) | 2 — important, large | Very high | High (30–50 h) |
-| 11 | P9 | Autosell → production allocation redesign | 2 — important, large | Very high | High (25–40 h) |
+| 11 | P9 | Autosell → production allocation redesign — ✅ **COMPLETED** | 2 — important, large | Very high | High (25–40 h) |
 | 12 | P14 | Gain button merge | 3 — quick win | Medium | Low (4–8 h) |
 | 13 | P11 | Progression clarity (black hole & upgrade displays) | 3 — quick win | Medium | Low-Med (8–12 h) |
 | 14 | P12 | UI row/layout refactor (`createOptionRow` mini-tables) | 4 — the rest | Medium | High (30–40 h) |
@@ -325,7 +325,7 @@ The audit moved several items vs. the original review order: **P3** (power toggl
 
 **Audit.** There is **no single resource tick**. Each resource × tier has its own delta timer (compound auto-buyers: `${compound}AB${tier}` timers registered in `initialiseCompoundAutoBuyerDeltaTimers`, `game.js:3065–3088`), each independently doing read → add production → write with its own clamp (`game.js:3040–3044`), then separately applying fuel consumption, autosell (hardcoded "drain everything above 100", inline at `game.js:3054–3062`), compound draws, etc. Consequences confirmed in code:
 - Order-dependence: whichever timer fires first wins; a resource gaining 1B/s and spending 100/s may never register as cap-reached because each writer clamps independently.
-- The diesel micromanagement (pause consumption → hit cap → resume) is a direct symptom.
+- The diesel micromanagement (pause consumption → hit cap → resume) is a direct symptom (although currently worked around by the rounding refactor not properly solved probably needs investigation).
 - `rate` is written per-timer (`game.js:3048`), so the displayed net rate is computed per-subsystem, not per-resource.
 
 **Change.**
@@ -340,19 +340,583 @@ The audit moved several items vs. the original review order: **P3** (power toggl
 
 ---
 
-## P9 — Autosell & compound automation → production allocation
+## ~~P9 — Production allocation (autosell, compound automation and storage on one line)~~ ✅ DONE
 
-**Audit.** Current autosell (`game.js:3054–3062` resources, `3274–3281` compounds): if `autoSell` is on and quantity > **100** (hardcoded), set quantity to 100 and sell the rest. So autosell *permanently caps the resource at 100* — it can never accumulate. `processAutoSell` (`game.js:10641`) is just `cash += price * qty`. Compound auto-create similarly draws ingredients with no allocation awareness (one compound can starve another; `calculateAutoCreateRatePerSecond` in `ui.js:2881` shows the draw model). This confirms the player's core complaint precisely.
+~~**The player's ask, in his own words.** *"I want autosell to never prevent me from increasing my~~
+~~resources, with rare exceptions. The need, I feel, is to choose the ratio of resource spending, so~~
+~~basically I want 90% of future gains to go make $, and 10% increasing resources so that I don't have~~
+~~anything to do until it reaches max. I just choose how to prioritise, not lose one to get the other."*~~
+~~And on compounds: *"in practice what I want is 'spend at most x% of my resource production for that'.~~
+~~Maybe, to not rethink and re-engineer too much, the Resource tab could have two spending settings:~~
+~~I set 10% conversion to $, I set a max of 50% conversion for automated compound use, it displays as~~
+~~a result that at least 40% stays in resource accumulation. Then on the compound side, it would use~~
+~~for automation only the portion of production that is made available on the resource side, not the~~
+~~rest — avoids cross-tabs settings management."*~~
 
-**Change (design decision required — two options, both preserve the QoL goal):**
-- **Option A (recommended, builds on P8):** Resource-tab allocation model. Per resource: `% of production → cash`, `max % of production → compound automation`, remainder accumulates. The tick (P8) already computes `producedThisTick`; allocation splits it. Stored stock is never drained by autosell. Compound automation consumes only its allocation, distributed across compounds (proportional with per-compound cap as the default).
-- **Option B (smaller):** Keep autosell but change semantics to "sell X% of *new production* only" (using `producedThisTick`), never touching stored quantity. Doesn't solve compound competition but removes the drain problem.
-- Either way: make the percentage direction unambiguous in the UI ("X% to $"), keep Sell All for deliberate emptying, and evaluate the "Nano Brokers on rebirth" ascendency perk if manual selling is retired from the main interface.
+~~That is the whole feature in two sentences. **Every allocation decision for a resource is made on~~
+~~that resource's own pane, as percentages of its production. The compound pane only decides whether a~~
+~~compound is being made at all.**~~
 
-**Effort:** Option B ~10–15 h; Option A ~25–40 h (incl. Resource-tab UI, compound distribution algorithm, rebirth persistence hooks).
-**Risk:** High for A (gameplay balance + save migration for new settings), Medium for B.
+---
 
-**Integration test.** `tests/e2e/autosell/allocation.spec.js`: configure 10% to $, 50% max to compounds on iron at 1000/s; run 10 s of ticks; assert iron accumulated ≈ 40% of production (within tolerance), cash grew ≈ 10% of production value, compound consumption never exceeded 50%, and **stored iron was never drained** (monotonic increase). Competing-compounds test: two compounds demanding more than the allocation — assert proportional sharing, neither starved to zero by the other.
+~~### Audit — what the code does today~~
+
+~~**1. Autosell does not sell production. It permanently caps the stock at 100.**~~
+~~`game.js:3328-3336` (resources) and `game.js:3548-3556` (compounds) are the entire autosell~~
+~~implementation:~~
+
+```js
+if (getResourceDataObject('resources', [resource, 'autoSell'])) {
+    const updatedQuantity = getResourceDataObject('resources', [resource, 'quantity']) || 0;
+    if (updatedQuantity > 100) {
+        const autoSellQuantity = updatedQuantity - 100;
+        setResourceDataObject(100, 'resources', [resource, 'quantity']);
+        processAutoSell(resource, autoSellQuantity, 'resources');
+    }
+}
+```
+
+~~The literal `100` is hardcoded in four places (two categories, each with a read and a write). This~~
+~~runs inside the *tier-1 auto-buyer delta timer*, i.e. every frame, after production has been added.~~
+~~So switching autosell on does not divert a share of income — it liquidates the entire store down to~~
+~~a hundred units and then holds it there forever. This is precisely the complaint: autosell and~~
+~~accumulation are mutually exclusive, and there is no dial between them. `processAutoSell`~~
+~~(`game.js:11159`) is three lines — `cash += saleValue * quantityToSell` — with no notification, no~~
+~~market bias and no statistic.~~
+
+~~**2. Turning auto-create on force-disables autosell on every ingredient, silently.**~~
+~~`game.js:3400-3404`, inside the compound tier-1 timer, runs *every frame while auto-create is on*:~~
+
+```js
+const resources = [1,2,3,4].map(i => getResourceDataObject('compounds', [compound, `createsFrom${i}`])?.[0]);
+resources.forEach(resourceName => {
+    if (resourceName !== '' && resourceName !== undefined) {
+        setResourceDataObject(false, 'resources', [resourceName, 'autoSell']);
+    }
+});
+```
+
+~~Auto-creating diesel therefore pins hydrogen's and carbon's autosell toggles off permanently, and a~~
+~~player's click on those toggles is reverted within a frame with no explanation. This is a hard mutual~~
+~~exclusion between the two automations, and it disappears entirely under the new model — the whole~~
+~~point of the allocation line is that a resource can feed cash *and* compounds *and* storage at once.~~
+
+~~**3. Auto-create draws from *stock*, not from production, and takes all of it.**~~
+~~`game.js:3409` calls `calculateCreatableCompoundAmount(compound, { buffer: 0 })`~~
+~~(`game.js:10947`), which computes `Math.floor((quantity - buffer) / ratio)` against the **current~~
+~~stored quantity** of each ingredient and converts that much, bounded only by the compound's own~~
+~~storage headroom. With `buffer: 0` the auto path empties the ingredient stores to the last unit,~~
+~~every frame. (The manual Create path uses the default `buffer: 100`; the auto path deliberately~~
+~~passes `0`.) Consequences, all read out of the code rather than inferred:~~
+
+- ~~**Compounds starve each other, and the winner is decided by timer order.** Six recipes draw on~~
+  ~~eight resources, and six of those resources feed more than one compound:~~
+
+  ~~| Resource | Feeds | Ratios |~~
+  ~~|---|---|---|~~
+  ~~| hydrogen | diesel, concrete, water | 26 / 3 / 20 |~~
+  ~~| sodium | glass, concrete, titanium | 1 / 2 / 18 |~~
+  ~~| carbon | diesel, steel | 12 / 1 |~~
+  ~~| silicon | glass, concrete | 4 / 5 |~~
+  ~~| oxygen | glass, water | 2 / 10 |~~
+  ~~| iron | steel, titanium | 4 / 22 |~~
+  ~~| neon | titanium | 40 |~~
+  ~~| helium | *(nothing)* | — |~~
+
+  ~~Whichever compound's `${compound}AB1` timer fires first that frame consumes the shared ingredient~~
+  ~~down to zero; the ones after it create nothing. There is no arbitration anywhere in the code.~~
+- ~~**A resource with any auto-creating consumer can never accumulate** — the same defect as autosell,~~
+  ~~wearing a different hat, and the reason automation currently feels like "I stop growing".~~
+- ~~**Storage-increase claims become unreachable** for any ingredient, for exactly the reason diesel's~~
+  ~~were before P7: the store is emptied the frame after it fills.~~
+
+~~**4. The displays are all downstream of these two behaviours, and all need reworking.**~~
+- ~~`game.js:10225-10241` — when autosell is on and capacity > 100, the quantity readout is forced to~~
+  ~~`stats-text` and stripped of `green-ready-text`. The game *deliberately suppresses* the storage-full~~
+  ~~colour, because under today's semantics the store can never legitimately fill. Under the new model~~
+  ~~it can, so the suppression must go or the storage-increase claim stays invisible.~~
+- ~~`ui.js:3002` `buildAutoCreateDiversionLines` — the resource tooltip says only *"diverted to create~~
+  ~~{compound}"*, with no quantity, because today the honest answer is "all of it".~~
+- ~~`ui.js:3029` `calculateAutoCreateRatePerSecond` and `ui.js:2930` `buildAutoCreateGenerationLine` —~~
+  ~~the compound tooltip estimates its creation rate as `min(ingredient gross rate / ratio)` across~~
+  ~~ingredients, i.e. it assumes the compound has the *entire* gross production of every ingredient to~~
+  ~~itself. Already wrong for any shared ingredient, and wrong by construction under allocation.~~
+- ~~`game.js:3448-3479` — a compound's `rate` adds `autoCreateRate` to its auto-buyer tiers, while a~~
+  ~~resource's `rate` (`game.js:3293`, `3321`) subtracts only *fuel*, never the compound draw. So the~~
+  ~~headline "/s" on a resource pane is a lie the moment auto-create is on. This is the single most~~
+  ~~visible display fix in the item.~~
+- ~~`constantsAndGlobalVars.js:3127` `getResourceSalePreview` feeds the sell row's description — the~~
+  ~~row the allocation line replaces.~~
+
+~~**5. The two capability gates as they stand, and what they cost to move.**~~
+
+~~*Autosell* is gated on the **`nanoBrokers` tech** — `resourceDataObject.js:851`, price 19000 research~~
+~~points, prereqs Nano Tube Technology / Steel Foundries / Compounds, `idForRenderPosition: 498`,~~
+~~`path: 4`. It is checked in `autoSellerChecks` (`game.js:8778`) and `setAutoSellToggleState`~~
+~~(`game.js:16275`). **It is a leaf: no other tech names it as a prereq**, so it can be removed from the~~
+~~tree without disturbing anything downstream. Its other references are the tech row in~~
+~~`drawTab3Content.js` (lines 28, 785, 794, 797, 803, 806, 3791), the unlock notification in~~
+~~`descriptions.js:562`, and four localisation keys (`techNotifyNanoBrokers`,~~
+~~`optionDescTechNanoBrokersContent1`, `optionDescTechNanoBrokersContent2`, `techNameNanoBrokers`).~~
+
+~~*Compound automation* is gated on the **`compoundAutomation` ascendency perk**~~
+~~(`resourceDataObject.js:1250`, 15 AP, non-rebuyable). At run start,~~
+~~`if (getBuffCompoundAutomationData()['boughtYet'] > 0) setTechUnlockedArray('compoundMachining')`~~
+~~(`game.js:16015`) pushes a pseudo-tech into `techUnlockedArray`. **`compoundMachining` gates more than~~
+~~auto-create**: it makes the compound *auto-buyer tier rows* visible (`game.js:7185`) as well as the~~
+~~auto-create toggle (`game.js:8747`) and `setAutoCreateToggleState` (`game.js:16296`). Anything~~
+~~inheriting this gate inherits the whole compound-automation unlock, not just auto-create.~~
+
+~~**6. What already exists and should be reused.**~~
+- ~~`REBIRTH_PERSISTED_AUTOMATION` (`resourceDataObject.js:3718`) is the P10 mechanism for carrying an~~
+  ~~automation setting through a rebirth, with an `ownedBy` capability flag. The new percentages hook~~
+  ~~straight into it; its own comment already nominates `compounds.<c>.autoCreate` as the next~~
+  ~~candidate.~~
+- ~~New per-resource fields inherit their defaults on old saves through the template-merge in the~~
+  ~~`restoreResourceDataObject` family, so no bespoke migration is needed for *fields* — but the data~~
+  ~~object `version` (`resourceDataObject.js:17`, currently `0.98`) must still be bumped, and the perk~~
+  ~~change below *does* need real migration code.~~
+- ~~`sellAllUnlockedResources` / `sellAllUnlockedCompounds` (`game.js:5188`, `5340`) are wired to the~~
+  ~~**global** `sellAllResourcesButton` / `sellAllCompoundsButton` (`ui.js:1893`), not to the~~
+  ~~per-resource rows. So *"if you just want to sell all you still have that option"* is already true~~
+  ~~and survives this change untouched.~~
+
+---
+
+~~### Unlock rework — Nano Brokers becomes one ascendency perk, bought twice~~
+
+~~The `nanoBrokers` **tech is removed from the tree entirely**, and the `compoundAutomation` **perk is~~
+~~removed**. In their place, a single rebuyable ascendency perk named **Nano Brokers**, buyable twice:~~
+
+| | ~~Grants~~ | ~~Cost~~ |
+|---|---|---|
+| ~~**Level 1** (`boughtYet >= 1`)~~ | ~~Autosell — i.e. the allocation line, in its one-handle form, on every resource and compound pane~~ | ~~**15 AP**~~ |
+| ~~**Level 2** (`boughtYet >= 2`)~~ | ~~Compound auto-create, and with it the compound band on the allocation line of every resource a recipe draws on~~ | ~~**30 AP**~~ |
+| ~~**Level 3** (`boughtYet >= 3`)~~ | ~~The compound auto-buyer tier rows — split out of the old `compoundMachining` gate, which granted them together with auto-create~~ | ~~**50 AP**~~ |
+
+```js
+"nanoBrokers": {
+    name: "Nano Brokers",
+    description: "buffNanoBrokersRow",
+    rebuyable: true,
+    rebuyableIncreaseMultiple: 2,
+    // Not geometric - 15/30/60 would price the third rung out of reach of the
+    // run that needs it - so the ladder is written out in full.
+    costLadderAp: [15, 30, 50],
+    baseCostAp: 15,
+    effectCategoryMagnitude: 1,
+    boughtYet: 0,
+    timesRebuyable: 3
+}
+```
+
+~~**Why this is simpler than what it replaces.** There is now exactly one capability axis with three~~
+~~values (`boughtYet` 0, 1, 2), and it is permanent across rebirths by the nature of ascendency perks.~~
+~~The previous plan needed an in-run tech gate layered on top of a permanent perk gate, plus copy~~
+~~explaining to the player why a perk they owned was temporarily inert. All of that disappears: level 2~~
+~~cannot be reached without level 1, so "compound automation implies autosell is available" is~~
+~~structurally true rather than something to enforce and explain.~~
+
+~~**Capability must be read live, not snapshotted at run start.** Today `compoundMachining` is pushed~~
+~~into `techUnlockedArray` once, at run start (`game.js:16015`), so a perk bought at any other moment~~
+~~would not take effect until the next run. The new gates read `boughtYet` directly wherever the~~
+~~capability is checked. Keep the run-start `setTechUnlockedArray('compoundMachining')` — now driven by~~
+~~`boughtYet >= 2` — so the existing `compoundMachining` consumers at `game.js:7185`, `8747` and `16296`~~
+~~keep working unchanged, but *also* re-run that grant on purchase so level 2 applies immediately.~~
+
+~~**Removals, in full:**~~
+- ~~`resourceDataObject.js:851` — the `nanoBrokers` tech entry.~~
+- ~~`resourceDataObject.js:1250` — the `compoundAutomation` perk entry, and~~
+  ~~`getBuffCompoundAutomationData` (`resourceDataObject.js:3126`).~~
+- ~~`drawTab3Content.js` lines 28, 785-806 and case `'nanoBrokers'` at 3791 — the tech row and its~~
+  ~~handler.~~
+- ~~`descriptions.js:562` — the research notification.~~
+- ~~`game.js:11208-11231` — the `compoundAutomation` branch of `purchaseBuff`, re-homed onto the new~~
+  ~~perk's level 2 (the first-run explanatory modal is worth keeping, fired on level 2).~~
+- ~~Localisation: retire `techNotifyNanoBrokers`, `optionDescTechNanoBrokersContent1/2` and~~
+  ~~`techNameNanoBrokers`; add `buffNanoBrokersRow` and its level-specific copy.~~
+
+~~**Migration is required and must be written explicitly** — this is the one part of P9 that cannot ride~~
+~~on the template merge:~~
+- ~~A save with `'nanoBrokers'` in `techUnlockedArray` → grant `boughtYet = 1` at no AP cost. The player~~
+  ~~paid 19000 research points for it; they must not lose the capability or be charged again.~~
+- ~~A save with `compoundAutomation.boughtYet > 0` → grant `boughtYet = 3` at no AP cost. **Level 3,~~
+  ~~not level 2**: the old perk granted `compoundMachining`, and that pseudo-tech gated the compound~~
+  ~~*auto-buyer tier rows* as well as auto-create. Mapping such a player to level 2 would take the~~
+  ~~tiers away from them and put a 50 AP bill on getting back what they had already paid for. A save~~
+  ~~with both retired unlocks still gets 3, not 4 — the levels are a ladder, not a tally.~~
+- ~~Strip `'nanoBrokers'` from `techUnlockedArray` on load so no stale entry lingers, and drop the~~
+  ~~`compoundAutomation` key from the buffs object.~~
+- ~~**No AP is refunded and none is charged.** Capability is preserved; the ledger is not rewritten.~~
+
+---
+
+~~### The model~~
+
+~~**One resource's gross production per tick is divided in this order.**~~
+
+1. ~~**Fuel comes off the top.** Whatever the power plants burn of this resource is taken before any~~
+   ~~percentage applies. A player who sets 90% to cash must not be able to black out their own grid~~
+   ~~without understanding why. The split therefore operates on **allocatable production** =~~
+   ~~`gross production − fuel burn`, and the pane says so in as many words.~~
+2. ~~**`cashShare` %** of allocatable production is sold. Never stock — only the flow. Cash accrues at~~
+   ~~this rate *whether or not the store is full*: at the cap the bar stops moving but the money keeps~~
+   ~~coming, which is the behaviour agreed explicitly in the Discord exchange.~~
+3. ~~**`compoundShare` %** of allocatable production is offered to auto-creating compounds as a~~
+   ~~**ceiling, not a reservation**. If the compounds drawing on this resource want less than their~~
+   ~~share, or are switched off, or are at their own storage cap, the unused remainder **falls through~~
+   ~~to storage**. It never becomes cash. This is the "at most x%" the player asked for.~~
+4. ~~**The remainder accumulates**, exactly as production does with no automation at all, clamped at~~
+   ~~`storageCapacity`.~~
+
+~~**Splitting the compound share — an equal split, `n` ways.** A resource's compound allocation is~~
+~~divided **equally between however many auto-creating compounds draw on it**, regardless of recipe~~
+~~size. Iron with steel and titanium both auto-creating gives each exactly half of iron's compound~~
+~~allocation. A compound that cannot use its full share **does not pass the surplus on** — the unused~~
+~~part falls through to the resource's own storage, exactly like an unused ceiling.~~
+
+~~This is deliberately chosen over a demand-proportional split for predictability: **a compound's~~
+~~throughput depends only on its own settings and the resource sliders, never on what an unrelated~~
+~~compound is doing.** Toggling steel off does not silently change titanium's rate; it just returns~~
+~~steel's half to iron storage. Proportional sharing and player-set priority ordering are both~~
+~~explicitly out of scope.~~
+
+~~Because a recipe needs *several* resources, the per-resource shares are reconciled into one creatable~~
+~~amount per compound: **a compound creates `min` over its ingredients of~~
+~~`grantedShare(c, r) / ratio(c, r)`**, and then *returns* the ingredient amounts it did not need rather~~
+~~than consuming its full grant — so a compound bottlenecked on neon does not also swallow the iron it~~
+~~cannot use. One reconciliation pass per tick, ordered resource-shares → per-compound minimum → actual~~
+~~consumption, removes the timer-order dependence of audit point 3 as a side effect.~~
+
+~~**Compound panes get a one-handle line, and auto-create stays a plain on/off toggle.** Compounds are~~
+~~not ingredients for anything, so a compound's line is `cashShare % → $` with the remainder to storage~~
+~~— the same widget helium gets. Diesel's power-plant-3 burn is handled exactly as a resource's fuel~~
+~~burn is: off the top, before the split. Auto-create is unchanged as a control: on or off, nothing~~
+~~else, because by the time the game reaches the compound pane the resource panes have already decided~~
+~~how much material it may have. That is exactly the *"avoids cross-tabs settings management"* property~~
+~~the player was after.~~
+
+~~**Manual sell retires on a pane the moment Nano Brokers level 1 is owned.** Before the perk, the row~~
+~~is what it is today (quantity dropdown + Sell button) and nothing about the early game moves. After~~
+~~it, the row *becomes* the allocation line plus its on/off toggle. Deliberate emptying is the global~~
+~~Sell All button, which already exists and is untouched.~~
+
+~~**The off state must be a true bypass.** With the toggle off, the resource behaves exactly as a~~
+~~resource with no automation at all: no cash, no compound ceiling, everything accumulates. That is the~~
+~~player's *"if you want to grow your storage you toggle it off, and turn it back on when you want funds~~
+~~again"*, and it is also the safety net for the whole feature — one click returns any resource to~~
+~~known-good behaviour.~~
+
+---
+
+~~### The control — three states, and which pane is in which~~
+
+~~One horizontal bar representing 100% of allocatable production, cut into labelled sections by~~
+~~draggable handles. Which state a pane is in is a pure function of `nanoBrokers.boughtYet` and whether~~
+~~any compound recipe names that resource — no run state, no tech array, no timing.~~
+
+~~**State A — `boughtYet === 0`: no line.** Today's manual sell row, unchanged, on every resource and~~
+~~compound pane.~~
+
+```
+Iron   Sell [All Stock v] [Sell]
+```
+
+~~**State B — `boughtYet >= 1`: two sections, one handle.** Cash versus storage. This is the terminal~~
+~~state for **helium** (no compound draws on it) and for **every compound pane**.~~
+
+```
+Helium  [========== 30% $ ==========|==================== 70% storage ====================]  Auto [x]
+                        handle A ---^
+         allocatable: 800 /s   ($240 /s  ·  560 /s stored)
+```
+
+~~**State C — `boughtYet === 2` and at least one compound recipe names this resource: three sections,~~
+~~two handles.** The seven ingredient resources — hydrogen, carbon, silicon, oxygen, sodium, iron, neon.~~
+
+```
+Iron    [==== 10% $ ====|============ 40% compounds ============|======== 50% storage ========]  Auto [x]
+         handle A ------^                       handle B -------^
+         allocatable: 800 /s   ($80 /s  ·  320 /s to compounds  ·  400 /s stored)
+```
+
+- ~~**Handle A** sets `cashShare`. **Handle B** sets the far edge of the compound band, so~~
+  ~~`compoundShare = B − A` and storage is `100 − B`. Handles cannot cross; dragging A past B pushes B~~
+  ~~ahead of it.~~
+- ~~The middle band's appearance is one-way in practice — perks are never lost — but `compoundShare` is~~
+  ~~stored per resource from the start and simply becomes visible at level 2, so nothing is reset or~~
+  ~~re-derived at the transition.~~
+- ~~Sections are colour-coded using classes already in the stylesheet, and each carries its **live~~
+  ~~per-second figure**, so intent and effect read in one glance.~~
+- ~~**Keyboard and coarse input:** each handle is a real focusable control stepping in **5%** increments~~
+  ~~with arrow keys, and clicking a section's percentage label opens numeric entry. The slider is the~~
+  ~~presentation, not the only way in — this matters for the localisation suite and for touch devices.~~
+- ~~**Fallback, if the drag interaction proves unworkable inside `createOptionRow`:** dropdowns —~~
+  ~~`% to $`, then (in state C) `max % to compounds` populated with only the values still available~~
+  ~~after the first, with the remainder stated as text. That is the player's own first suggestion and is~~
+  ~~functionally identical. Decide after the widget spike, which is task 1 below, not before.~~
+- ~~The line lives inside `createOptionRow`, so it inherits the P12 grid work when that lands rather~~
+  ~~than needing to be redone.~~
+
+---
+
+~~### Displays that must change (this is the bulk of the work)~~
+
+| ~~Where~~ | ~~Today~~ | ~~Must become~~ |
+|---|---|---|
+| ~~Resource pane rate (`game.js:3293`, `3321`)~~ | ~~gross − fuel~~ | ~~gross − fuel − cash share − actual compound draw: the **net accumulation rate**, matching what the bar is doing~~ |
+| ~~Resource tooltip generation block (`ui.js:2535`)~~ | ~~auto-buyer tiers only~~ | ~~tiers, then an allocation breakdown — allocatable, to $, to each compound by name, to storage~~ |
+| ~~`buildAutoCreateDiversionLines` (`ui.js:3002`)~~ | ~~"diverted to create {compound}"~~ | ~~"{n} /s to {compound}" per consumer, plus the ceiling, the equal share each consumer receives, and how much of it is actually taken~~ |
+| ~~`calculateAutoCreateRatePerSecond` (`ui.js:3029`)~~ | ~~`min(gross / ratio)` — assumes sole ownership~~ | ~~`min(grantedShare / ratio)` — the real equal-split allocation~~ |
+| ~~Compound tooltip auto-create line (`ui.js:2930`)~~ | ~~smoothed observed rate~~ | ~~keep the smoothed rate, and add *why* it is what it is when the compound is throttled by an ingredient's share, **naming the ingredient**~~ |
+| ~~Quantity colour (`game.js:10225-10241`)~~ | ~~autosell suppresses the storage-full green~~ | ~~remove the suppression: a store under allocation **can** legitimately fill, and its storage-increase claim must be offered when it does~~ |
+| ~~Sell row description (`getResourceSalePreview`, `constantsAndGlobalVars.js:3127`)~~ | ~~"sell N for $X"~~ | ~~replaced by the allocation line's own live figures once level 1 is owned~~ |
+| ~~Ascendency perk row~~ | ~~two perks, one of them a tech's silent partner~~ | ~~one **Nano Brokers** row stating both levels and what each grants, with the next level's cost and effect visible before purchase~~ |
+| ~~Technology tree~~ | ~~a Nano Brokers tech row at 19000 RP~~ | ~~removed; check the `path: 4` column still reads sensibly with the leaf gone~~ |
+| ~~Per-compound "i" tooltip~~ | ~~*(does not exist)*~~ | ~~localised note that automated creation draws from the compound share set on each ingredient's resource pane, and that the share is split equally between the compounds using it~~ |
+| ~~Cash-per-second readout~~ | ~~*(does not exist)*~~ | ~~total autosell income across all resources and compounds, so the player can see what the setting is buying them~~ |
+| ~~Localisation~~ | ~~—~~ | ~~every new label, section name, perk string and tooltip added to `localization.json` for all supported languages, with `validateLocalization.cjs` kept clean, and the four retired `nanoBrokers` tech keys removed~~ |
+
+---
+
+~~### Change — implementation sequence~~
+
+1. ~~**Widget spike (do first).** Build the allocation line as a standalone control inside~~
+   ~~`createOptionRow` on one resource, in both its two-section and three-section forms, and confirm it~~
+   ~~works in all five themes and at the narrowest supported width. This decides slider-vs-dropdown for~~
+   ~~the rest of the item.~~
+2. ~~**Unlock rework.** Add the `nanoBrokers` perk; remove the `nanoBrokers` tech and the~~
+   ~~`compoundAutomation` perk with all references listed above; point the `compoundMachining` grant at~~
+   ~~`boughtYet >= 2` and make it apply on purchase as well as at run start; write the save migration~~
+   ~~and its tests. **Do this before the engine** — every later gate reads `boughtYet`.~~
+3. ~~**Data model.** Add `cashShare`, `compoundShare` and `allocationEnabled` per resource, and~~
+   ~~`cashShare` / `allocationEnabled` per compound, to `resourceDataObject.js`; bump `version` from~~
+   ~~`0.98`. Defaults `cashShare: 0`, `compoundShare: 100`, `allocationEnabled: false` — a save loading~~
+   ~~into the new build behaves exactly as it did, with automation off.~~
+4. ~~**Allocation engine.** A single per-tick reconciliation pass: fuel off the top, then shares, then~~
+   ~~the equal `n`-way split, then the per-compound `min` and the return of unused grants. Replace the~~
+   ~~`> 100` autosell blocks at `game.js:3328` and `game.js:3548` with it, and delete the force-disable~~
+   ~~at `game.js:3400-3404`.~~
+5. ~~**Rewire auto-create** to consume its granted share instead of calling~~
+   ~~`calculateCreatableCompoundAmount(..., { buffer: 0 })` against raw stock. Leave the manual Create~~
+   ~~path (`buffer: 100`) alone.~~
+6. ~~**UI.** The allocation line on all eight resource panes and six compound panes; the row swap at~~
+   ~~level 1; the state B / state C rule; the perk row copy; the per-compound "i" tooltip; all~~
+   ~~localisation strings.~~
+7. ~~**Displays.** Everything in the table above.~~
+8. ~~**Rebirth persistence.** Add the new fields to `REBIRTH_PERSISTED_AUTOMATION` with `ownedBy` the~~
+   ~~`nanoBrokers` perk level, so a returning player's tuned splits survive — and take~~
+   ~~`compounds.<c>.autoCreate` along with them, since that entry's own comment says it was left out~~
+   ~~only for scope.~~
+
+~~**Relationship to P8.** P8's unified `resourceTick` publishes `producedThisTick` / `consumedThisTick`,~~
+~~which is exactly the input this engine wants, and its single clamped write is what makes "the store~~
+~~legitimately fills under allocation" true rather than approximately true. **P9 does not require P8 and~~
+~~is being built first.** The allocation pass computes gross production itself by summing the tier~~
+~~contributions (the same sum `calculateGrossAutoBuyerGenerationPerInterval`, `game.js:3557`, already~~
+~~produces) and becomes one of the subsystems P8 later absorbs.~~
+
+~~**Explicitly out of scope.** Market bias and commission on autosold goods (autosell keeps paying flat~~
+~~`saleValue`, as today); demand-proportional or priority-ordered compound sharing; redistributing a~~
+~~compound's unused share to other compounds; refunding the research points or AP spent on the retired~~
+~~unlocks; and any change to the Sell All buttons or to pre-perk behaviour.~~
+
+~~**Effort:** ~35-50 h. Unlock rework and migration ~6 h; engine ~10 h; the fourteen panes' UI ~10 h;~~
+~~the display table ~10-15 h; localisation ~3 h; tests ~8 h. The displays, not the arithmetic, are the~~
+~~bulk — as the table shows.~~
+~~**Risk:** High. It changes the economy's core loop, it touches every resource and compound pane, it~~
+~~adds saved settings, and it migrates two unlocks. Mitigations: the toggle-off bypass is a true no-op~~
+~~path; defaults keep every existing save behaving as before; the engine is one function with a pure,~~
+~~directly testable core; and the migration is covered by its own spec against a real pre-P9 save.~~
+
+---
+
+~~### Integration tests~~
+
+~~All specs play the game through its own controls and debug tooling, staging state directly only to~~
+~~set preconditions and to read state back for assertions.~~
+
+~~**`tests/e2e/autosell/allocation.spec.js`** — the core model, on iron.~~
+
+1. ~~*The split holds.* Stage iron production, buy Nano Brokers to level 2, set the line to 10% $ / 0%~~
+   ~~compounds by dragging the handles, run 10 s of frames. Assert stored iron grew by ≈90% of~~
+   ~~production and cash by ≈10% × `saleValue`, both within tolerance for frame jitter.~~
+2. ~~*Stock is never drained.* Same run, sampling iron every 500 ms: **monotonic non-decreasing**. This~~
+   ~~is the regression test for the whole complaint, and it fails hard against today's build.~~
+3. ~~*Cash keeps flowing at the cap.* Fill iron to `storageCapacity`, then run 10 s. Assert quantity~~
+   ~~stays pinned at the cap and cash still rises at the 10% rate.~~
+4. ~~*Fuel comes off the top.* With power plant 1 burning hydrogen, set hydrogen to 90% $ and run.~~
+   ~~Assert the grid stays up, hydrogen's burn is unaffected, and the pane's stated allocatable figure~~
+   ~~equals gross − burn.~~
+5. ~~*Off is a true bypass.* Toggle the line off mid-run. Assert cash stops accruing from iron, the~~
+   ~~compound ceiling stops applying, and the accumulation rate returns to the no-automation rate.~~
+6. ~~*Settings survive a rebirth.* Set a distinctive split, rebirth, assert the handles come back where~~
+   ~~they were **and that the behaviour matches** — a reward is verified by its effect, not its flag.~~
+
+~~**`tests/e2e/autosell/nano-brokers-perk.spec.js`** — the unlock rework.~~
+
+7. ~~*The tech is gone.* Assert no Nano Brokers row exists anywhere in the technology tree, that no tech~~
+   ~~is left with a dangling prereq, and that the `path: 4` column renders without a gap.~~
+8. ~~*State A.* With `boughtYet === 0`, assert every resource and compound pane shows the manual sell~~
+   ~~row and no allocation line — this is today's early game, unchanged.~~
+9. ~~*Level 1 buys autosell and nothing else.* Buy once. Assert every pane gains the one-handle line and~~
+   ~~loses its manual sell controls, **and** that the auto-create toggle and the compound auto-buyer tier~~
+   ~~rows are still unavailable.~~
+10. ~~*Level 2 buys compound automation.* Buy again. Assert the compound auto-buyer rows and the~~
+    ~~auto-create toggle become available, and that iron's line gains its third section and second~~
+    ~~handle.~~
+11. ~~*Level 2 applies immediately, without a reload or a rebirth.* The direct regression test for the~~
+    ~~run-start-only grant at `game.js:16015`.~~
+12. ~~*Terminal states.* Assert helium's line stays two-section at level 2, and that no compound pane~~
+    ~~ever renders a third band.~~
+13. ~~*Cost ladder.* Assert level 1 costs 15 AP, level 2 costs 30 AP, that a player with insufficient AP~~
+    ~~cannot buy, and that the perk cannot be bought a third time.~~
+14. ~~*Perk copy.* Assert the row states what each level grants and what the next level costs, in a~~
+    ~~non-English language as well as English, so the strings are proven localised.~~
+
+~~**`tests/e2e/autosell/unlock-migration.spec.js`** — the save migration.~~
+
+15. ~~*A save that researched the old tech* loads with `boughtYet >= 1`, gets the one-handle line, spends~~
+    ~~no AP, and has `'nanoBrokers'` stripped from `techUnlockedArray`.~~
+16. ~~*A save that owned Compound Automation* loads with `boughtYet === 2` — never 3 — keeps its~~
+    ~~compound auto-buyer rows and auto-create, and spends no AP.~~
+17. ~~*A save with neither* loads at `boughtYet === 0` in state A, behaving exactly as before.~~
+18. ~~*A save with a stale `autoSell: true`* does not reproduce the old drain-to-100 behaviour; the~~
+    ~~resource accumulates.~~
+
+~~**`tests/e2e/autosell/compound-allocation.spec.js`** — sharing.~~
+
+19. ~~*Equal split.* Auto-create steel and titanium, both drawing iron, both demanding more than iron's~~
+    ~~compound share. Assert each receives exactly half of the allocation, sampled per tick. **Today one~~
+    ~~of the two creates nothing** — that is the baseline this test records.~~
+20. ~~*A third consumer re-divides.* Switch on a third compound drawing the same resource and assert the~~
+    ~~shares become thirds, immediately and without a reload.~~
+21. ~~*An unused share falls to storage, not to another compound.* Give steel far more than it needs.~~
+    ~~Assert titanium's rate is **unchanged** by steel's surplus and that the surplus lands in iron~~
+    ~~storage — the defining property of the equal-split choice.~~
+22. ~~*The ceiling is a ceiling.* Set iron's compound share to 30% against demand far above it. Assert~~
+    ~~the total compound draw never exceeds 30% of allocatable, sampled per tick.~~
+23. ~~*Nothing to spend it on.* Set 50% to compounds with every consumer switched off. Assert storage~~
+    ~~receives the full 50% and cash receives nothing beyond `cashShare`.~~
+24. ~~*Multi-ingredient reconciliation.* Starve titanium's neon while leaving iron and sodium generous.~~
+    ~~Assert titanium throttles to the neon bound and that the iron and sodium it could not use are~~
+    ~~**returned** — visible as those two stores continuing to grow.~~
+25. ~~*No timer-order dependence.* Run the same shared-ingredient scenario across repeated loads and~~
+    ~~assert the outcome is stable, not decided by which compound's timer fired first.~~
+26. ~~*Auto-create no longer force-disables anything.* Switch on diesel auto-create, then set hydrogen's~~
+    ~~cash share. Assert it is still set several seconds later — the direct regression test for~~
+    ~~`game.js:3400-3404`.~~
+
+~~**`tests/e2e/autosell/allocation-displays.spec.js`** — the displays, which are most of the item.~~
+
+27. ~~*The rate readout tells the truth.* With 10% $ / 40% compounds live, assert the pane's `/s` figure~~
+    ~~equals the measured accumulation rate, not the gross.~~
+28. ~~*The tooltip accounts for 100%.* Assert the breakdown's four figures (fuel, $, compounds, storage)~~
+    ~~sum to gross within tolerance, and that each named compound consumer appears with its own figure~~
+    ~~and its equal share.~~
+29. ~~*Storage-full colour is restored.* Fill an allocated resource with `storageCapacity > 100` and~~
+    ~~assert `green-ready-text` appears and the storage-increase claim is offered — the direct~~
+    ~~regression test for the suppression at `game.js:10225-10241`.~~
+30. ~~*Throttle attribution.* With titanium throttled on neon, assert the compound tooltip names neon.~~
+31. ~~*The per-compound "i" tooltip* explains the equal split and points at the ingredient panes, in~~
+    ~~every supported language.~~
+32. ~~*Localisation.* Every new string resolves in each supported language, no raw keys render, and the~~
+    ~~four retired `nanoBrokers` tech keys are gone from `localization.json` with~~
+    ~~`validateLocalization.cjs` clean.~~
+
+~~**As built — the follow-up pass.** Four changes came out of playing the finished feature, all of~~
+~~them narrowing it rather than adding to it:~~
+
+- ~~**The autosell toggle is gone.** It was a second control that could contradict the bar: a slider~~
+  ~~set to 40% cash while the switch beside it said "off" is two answers to one question. Buying Nano~~
+  ~~Brokers once is now the only gate, the slider is always live after that, and dragging the cash~~
+  ~~handle back to the storage end is how a material is left alone. `getAllocationShares()` no longer~~
+  ~~reads `allocationEnabled`, `setAutoSellToggleState()` no longer renders or reads a switch, the~~
+  ~~toggle is removed from all fourteen sell-row templates, and the dead `autoSellerChecks()` frame~~
+  ~~path went with it. The `allocationEnabled` field stays in `resourceData` so old saves round-trip,~~
+  ~~but nothing reads it any more.~~
+- ~~**The readout is three destinations, and all three move.** It used to lead with the *allocatable*~~
+  ~~total, which does not change when a handle does — a fixed number sitting beside a slider the~~
+  ~~player was dragging, which read as a band that never moved. The first figure is now **storage**~~
+  ~~(`toStorage`), and the compound figure is what the recipes are actually **drawing**~~
+  ~~(`toCompounds`) rather than the ceiling they were offered. The total is quoted once, in the~~
+  ~~breakdown tooltip on the production figure in the left pane. This also fixes the honesty problem~~
+  ~~the ceiling created: a 40% band with auto-create off now reads zero in magenta and shows up in~~
+  ~~green, which is genuinely where the material is going.~~
+- ~~**The bar explains itself.** A two-handle partition is not self-evident, so hovering the slider~~
+  ~~now brings up a tooltip that names the three figures in their own colours, says what each handle~~
+  ~~does, and states the fall-back rules — a share set but not used goes to storage; a recipe held~~
+  ~~back by another ingredient takes only what it can use; a full store loses what it cannot hold. It~~
+  ~~is built from the live breakdown, so the player's own percentages and rates are written into the~~
+  ~~sentences, and it grows with the ladder: at level 1 it says nothing about compounds.~~
+- ~~**The fuel deduction was a hundredth of the real burn.** `usedForFuelPerSec` is misnamed: it~~
+  ~~accumulates a power building's `fuel` tuple, whose second element is a per-*tick* figure~~
+  ~~(`['carbon', 0.03, 'resources']` is 3 carbon a second at a hundred ticks to the second).~~
+  ~~`getAllocationBreakdown` subtracted it straight from a per-second gross, so "allocatable" was the~~
+  ~~gross in all but name — the tooltip said "after anything burned as fuel" and quoted a figure that~~
+  ~~was not. It was also only maintained on the *purchase* path, so a save or a staged scenario that~~
+  ~~set a plant's quantity directly had it at zero while the tick burned fuel regardless. The~~
+  ~~breakdown now computes the burn the way the tick does — `fuel[1] x quantity x timerRatio`, gated~~
+  ~~on the same `getBuildingTypeOnOff` — so the figure the tooltip quotes and the figure the left~~
+  ~~pane's rate is net of are the same number. Carbon with a basic power plant is the case that shows~~
+  ~~it, and is what the two new specs use.~~
+- ~~**The per-second suffix in this feature is localised.** The readout, the slider tooltip and the~~
+  ~~allocation lines in the production tooltip take it from `textPerSecond` rather than a hardcoded~~
+  ~~`/ s`. The tooltip's opening sentence also lost its own "each second", which said the same thing~~
+  ~~twice next to a figure that already carries the unit.~~
+- ~~**The engine already did what the tooltip claims**, which was checked rather than assumed:~~
+  ~~`runCompoundAutoCreation` consumes only `perUnitDraw × ratio` of each ingredient, so a compound~~
+  ~~bottlenecked elsewhere leaves the rest in the store, and with auto-create off the budget is never~~
+  ~~spent at all. The only thing that was wrong was the display, and that is what changed.~~
+
+~~Thirteen new localisation keys (`tooltipSlider*`), in all six languages. New specs:~~
+~~`allocation-row.spec.js` 11–15 (no toggle survives anywhere; the storage figure tracks the cash~~
+~~handle and agrees with the engine; the tooltip explains itself with live values; it stays quiet~~
+~~about compounds at level 1; and it quotes the fuel-net total on carbon with a basic power plant),~~
+~~plus `allocation-displays.spec.js` 4c on the per-second fuel arithmetic. Existing specs that pinned~~
+~~the old shapes were updated rather than worked around — the "switching the line off is a true~~
+~~bypass" spec now drives the handle to zero, and the persistence spec pins the shares rather than the~~
+~~retired flag. One existing spec was found to be testing nothing: "fuel comes off the top" staged~~
+~~**hydrogen**, which no power building burns, so it passed without ever exercising the path it names.~~
+~~It now stages carbon and asserts the burn is non-zero before drawing any conclusion from it.~~
+
+~~**As built — the second follow-up pass.** Five more changes from playing the finished feature. Like~~
+~~the pass above, every one of them narrows the feature rather than adding to it:~~
+
+- ~~**Compounds are never autosold, and the guard is in the engine rather than the data.** The sketch~~
+  ~~put every compound pane permanently in state B — a one-handle cash-versus-storage line. That was~~
+  ~~dropped: a compound is an end-of-the-line product, made to be spent, and the pane keeps its~~
+  ~~quantity dropdown and **Sell** button for the whole game. `getAllocationShares()` now returns~~
+  ~~zeroes for any compound outright instead of reading its stored `cashShare`, and that is~~
+  ~~load-bearing rather than tidy: a save written while the compound panes still carried a slider~~
+  ~~holds a non-zero share, is *already* at schema 0.99, and so meets no migration rung. Trusting the~~
+  ~~field would have left that compound quietly selling itself for the life of the save, with no~~
+  ~~slider to turn it off and nothing on screen to say it was happening.~~
+- ~~**The compound production tooltip lost the whole selling half.** No "Sold for cash", and no~~
+  ~~game-wide **Autosell income** — that total is earned entirely by the resource sliders, and~~
+  ~~printing it under a compound's own production read as though the compound were contributing to~~
+  ~~it. **Allocatable** went too: it is the pool the handles divide, and a compound has no handles.~~
+- ~~**A compound's Accumulating figure was always zero, and is now the headline figure itself.** The~~
+  ~~breakdown's gross counts *auto-buyer* output only, so a compound made by auto-creation or falling~~
+  ~~as rain had a gross of nothing and reported nothing accumulating while its store visibly filled.~~
+  ~~Nothing is diverted from a compound, so its whole net rate is what accumulates; quoting the~~
+  ~~hovered figure back makes the two agree by construction rather than by coincidence.~~
+- ~~**The generation lines were printing localisation keys.** `nameUpgrade` holds a *key*, and every~~
+  ~~pane that draws an auto-buyer row runs it through `localize` first — the tooltip did not, so it~~
+  ~~read `autoBuyerNameDieselBackyard`. This was never compounds-only: the same builder feeds the~~
+  ~~resource tooltips, which were leaking their keys the same way. A key with no catalogue entry now~~
+  ~~falls back to the generic tier label rather than leaking by a second route.~~
+- ~~**The compound auto-buyer rows are gated on rung 3 alone.** The visibility sweep checked the rung~~
+  ~~first but then *fell through* to the per-tier progression rule, which is the resource rule:~~
+  ~~`currentTierLevel` is saved per material and survives whatever put it there — a save predating~~
+  ~~the ladder, or the debug menu's grant-all — so any compound carrying a level above zero had its~~
+  ~~whole auto-buyer ladder on display at Nano Brokers 0, 1 or 2. Diesel's tier 1 remains the one~~
+  ~~deliberate exception, because the early game needs it to fuel the first power plants long before~~
+  ~~any perk exists.~~
+- ~~**The bar itself is slimmer.** 30px to 20px, with the segments and handles rounded to a pill~~
+  ~~rather than to the theme's corner radius — a bar this short needs a radius of exactly half its~~
+  ~~height to read as a pill in every theme instead of a rectangle in the sharp ones. The slider's~~
+  ~~hover tooltip also sits 8px lower, clear of the pointer.~~
 
 ---
 

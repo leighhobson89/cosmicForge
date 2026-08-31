@@ -110,7 +110,12 @@ This section documents the structure and central role of `resourceDataObject.js`
 **Structure of `resourceData`:**
 - The `resourceData` object has a `version` property for migration/versioning.
 - The `resources` property is an object keyed by resource name (e.g., `hydrogen`, `helium`, `carbon`, etc.). Each resource defines:
-  - `autoSell`: Whether the resource is set to auto-sell.
+  - `cashShare`, `compoundShare`: The P9 production allocation, as whole
+    percentages of *allocatable* production (gross less fuel burn). `cashShare` is
+    sold each second; `compoundShare` is the ceiling offered to auto-creating
+    compounds. Whatever is left accumulates. There is no separate on/off flag:
+    a `cashShare` of 0 is how a material is left alone. (`autoSell` and
+    `allocationEnabled` are retired fields kept only so old saves round-trip.)
   - `nameResource`, `screenName`: Display and reference names.
   - `saleValue`, `salePreviewElement`: Economy and UI integration.
   - `quantity`, `rate`, `usedForFuelPerSec`, `storageCapacity`, `currentSecondaryIncreasePrice`, etc.: State and progression variables.

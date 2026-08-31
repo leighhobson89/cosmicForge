@@ -14,10 +14,17 @@ import { capitaliseString } from "./utilityFunctions.js";
 
 export let achievementImageUrls;
 export let resourceData = {
-    version: 0.98, //update this whenever changes are made to the structure
+    version: 0.99, //update this whenever changes are made to the structure
     resources: {
         solar: {
             autoSell: false,
+            // P9 production allocation. Percentages of *allocatable*
+            // production (gross minus fuel burn), never of stored stock.
+            // `compoundShare` is the ceiling offered to auto-creating
+            // compounds and is inert on a material no recipe draws on.
+            allocationEnabled: false,
+            cashShare: 0,
+            compoundShare: 100,
             nameResource: 'Solar',
             screenName: 'solar',
             saleValue: 0,
@@ -46,6 +53,13 @@ export let resourceData = {
         },
         hydrogen: {
             autoSell: false,
+            // P9 production allocation. Percentages of *allocatable*
+            // production (gross minus fuel burn), never of stored stock.
+            // `compoundShare` is the ceiling offered to auto-creating
+            // compounds and is inert on a material no recipe draws on.
+            allocationEnabled: false,
+            cashShare: 0,
+            compoundShare: 100,
             nameResource: 'Hydrogen',
             screenName: 'hydrogen',
             saleValue: 0.02,
@@ -74,6 +88,13 @@ export let resourceData = {
         },
         helium: {
             autoSell: false,
+            // P9 production allocation. Percentages of *allocatable*
+            // production (gross minus fuel burn), never of stored stock.
+            // `compoundShare` is the ceiling offered to auto-creating
+            // compounds and is inert on a material no recipe draws on.
+            allocationEnabled: false,
+            cashShare: 0,
+            compoundShare: 100,
             nameResource: 'Helium',
             screenName: 'helium',
             saleValue: 0.03,
@@ -102,6 +123,13 @@ export let resourceData = {
         },
         carbon: {
             autoSell: false,
+            // P9 production allocation. Percentages of *allocatable*
+            // production (gross minus fuel burn), never of stored stock.
+            // `compoundShare` is the ceiling offered to auto-creating
+            // compounds and is inert on a material no recipe draws on.
+            allocationEnabled: false,
+            cashShare: 0,
+            compoundShare: 100,
             nameResource: 'Carbon',
             screenName: 'carbon',
             saleValue: 0.1,
@@ -130,6 +158,13 @@ export let resourceData = {
         },    
         neon: {
             autoSell: false,
+            // P9 production allocation. Percentages of *allocatable*
+            // production (gross minus fuel burn), never of stored stock.
+            // `compoundShare` is the ceiling offered to auto-creating
+            // compounds and is inert on a material no recipe draws on.
+            allocationEnabled: false,
+            cashShare: 0,
+            compoundShare: 100,
             nameResource: 'Neon',
             screenName: 'neon',
             saleValue: 0.40,
@@ -158,6 +193,13 @@ export let resourceData = {
         },
         oxygen: {
             autoSell: false,
+            // P9 production allocation. Percentages of *allocatable*
+            // production (gross minus fuel burn), never of stored stock.
+            // `compoundShare` is the ceiling offered to auto-creating
+            // compounds and is inert on a material no recipe draws on.
+            allocationEnabled: false,
+            cashShare: 0,
+            compoundShare: 100,
             nameResource: 'Oxygen',
             screenName: 'oxygen',
             saleValue: 0.05,
@@ -186,6 +228,13 @@ export let resourceData = {
         },
         silicon: {
             autoSell: false,
+            // P9 production allocation. Percentages of *allocatable*
+            // production (gross minus fuel burn), never of stored stock.
+            // `compoundShare` is the ceiling offered to auto-creating
+            // compounds and is inert on a material no recipe draws on.
+            allocationEnabled: false,
+            cashShare: 0,
+            compoundShare: 100,
             nameResource: 'Silicon',
             screenName: 'silicon',
             saleValue: 0.08,
@@ -214,6 +263,13 @@ export let resourceData = {
         },
         iron: {
             autoSell: false,
+            // P9 production allocation. Percentages of *allocatable*
+            // production (gross minus fuel burn), never of stored stock.
+            // `compoundShare` is the ceiling offered to auto-creating
+            // compounds and is inert on a material no recipe draws on.
+            allocationEnabled: false,
+            cashShare: 0,
+            compoundShare: 100,
             nameResource: 'Iron',
             screenName: 'iron',
             saleValue: 0.17,
@@ -242,6 +298,13 @@ export let resourceData = {
         },
         sodium: {
             autoSell: false,
+            // P9 production allocation. Percentages of *allocatable*
+            // production (gross minus fuel burn), never of stored stock.
+            // `compoundShare` is the ceiling offered to auto-creating
+            // compounds and is inert on a material no recipe draws on.
+            allocationEnabled: false,
+            cashShare: 0,
+            compoundShare: 100,
             nameResource: 'Sodium',
             screenName: 'sodium',
             saleValue: 0.1,
@@ -272,7 +335,18 @@ export let resourceData = {
     compounds: {
         diesel: {
             autoSell: false,
+            // P9 production allocation. Percentages of *allocatable*
+            // production (gross minus fuel burn), never of stored stock.
+            // `compoundShare` is the ceiling offered to auto-creating
+            // compounds and is inert on a material no recipe draws on.
+            allocationEnabled: false,
+            cashShare: 0,
+            compoundShare: 100,
             autoCreate: false,
+            // P9: which ingredient is currently limiting auto-creation,
+            // so the tooltip can name it rather than leaving the player
+            // to work out why the rate is lower than they expected.
+            autoCreateThrottledBy: '',
             nameResource: 'Diesel',
             screenName: 'diesel',
             saleValue: 0.3,
@@ -306,7 +380,18 @@ export let resourceData = {
         },        
         glass: {
             autoSell: false,
+            // P9 production allocation. Percentages of *allocatable*
+            // production (gross minus fuel burn), never of stored stock.
+            // `compoundShare` is the ceiling offered to auto-creating
+            // compounds and is inert on a material no recipe draws on.
+            allocationEnabled: false,
+            cashShare: 0,
+            compoundShare: 100,
             autoCreate: false,
+            // P9: which ingredient is currently limiting auto-creation,
+            // so the tooltip can name it rather than leaving the player
+            // to work out why the rate is lower than they expected.
+            autoCreateThrottledBy: '',
             nameResource: 'Glass',
             screenName: 'glass',
             saleValue: 0.8,
@@ -340,7 +425,18 @@ export let resourceData = {
         },
         steel: {
             autoSell: false,
+            // P9 production allocation. Percentages of *allocatable*
+            // production (gross minus fuel burn), never of stored stock.
+            // `compoundShare` is the ceiling offered to auto-creating
+            // compounds and is inert on a material no recipe draws on.
+            allocationEnabled: false,
+            cashShare: 0,
+            compoundShare: 100,
             autoCreate: false,
+            // P9: which ingredient is currently limiting auto-creation,
+            // so the tooltip can name it rather than leaving the player
+            // to work out why the rate is lower than they expected.
+            autoCreateThrottledBy: '',
             nameResource: 'Steel',
             screenName: 'steel',
             saleValue: 1.8,
@@ -374,7 +470,18 @@ export let resourceData = {
         },
         concrete: {
             autoSell: false,
+            // P9 production allocation. Percentages of *allocatable*
+            // production (gross minus fuel burn), never of stored stock.
+            // `compoundShare` is the ceiling offered to auto-creating
+            // compounds and is inert on a material no recipe draws on.
+            allocationEnabled: false,
+            cashShare: 0,
+            compoundShare: 100,
             autoCreate: false,
+            // P9: which ingredient is currently limiting auto-creation,
+            // so the tooltip can name it rather than leaving the player
+            // to work out why the rate is lower than they expected.
+            autoCreateThrottledBy: '',
             nameResource: 'Concrete',
             screenName: 'concrete',
             saleValue: 0.8,
@@ -408,7 +515,18 @@ export let resourceData = {
         },
         water: {
             autoSell: false,
+            // P9 production allocation. Percentages of *allocatable*
+            // production (gross minus fuel burn), never of stored stock.
+            // `compoundShare` is the ceiling offered to auto-creating
+            // compounds and is inert on a material no recipe draws on.
+            allocationEnabled: false,
+            cashShare: 0,
+            compoundShare: 100,
             autoCreate: false,
+            // P9: which ingredient is currently limiting auto-creation,
+            // so the tooltip can name it rather than leaving the player
+            // to work out why the rate is lower than they expected.
+            autoCreateThrottledBy: '',
             nameResource: 'Water',
             screenName: 'water',
             saleValue: 1.6,
@@ -442,7 +560,18 @@ export let resourceData = {
         },
         titanium: {
             autoSell: false,
+            // P9 production allocation. Percentages of *allocatable*
+            // production (gross minus fuel burn), never of stored stock.
+            // `compoundShare` is the ceiling offered to auto-creating
+            // compounds and is inert on a material no recipe draws on.
+            allocationEnabled: false,
+            cashShare: 0,
+            compoundShare: 100,
             autoCreate: false,
+            // P9: which ingredient is currently limiting auto-creation,
+            // so the tooltip can name it rather than leaving the player
+            // to work out why the rate is lower than they expected.
+            autoCreateThrottledBy: '',
             nameResource: 'Titanium',
             screenName: 'titanium',
             saleValue: 6,
@@ -848,7 +977,6 @@ export let resourceData = {
         steelFoundries: { appearsAt: [11500, "siliconFusion", ""], prereqs: ['Silicon Fusion'], price: 13000, idForRenderPosition: 82, path: 1 },
 
         nanoTubeTechnology: { appearsAt: [3500, "heliumFusion", ""], prereqs: ['Helium Fusion'], price: 4000, idForRenderPosition: 499, path: 4 },
-        nanoBrokers: { appearsAt: [18000, "nanoTubeTechnology", "steelFoundries", "compounds"], prereqs: ['Nano Tube Technology', 'Steel Foundries', 'Compounds'], price: 19000, idForRenderPosition: 498, path: 4 },
         hydroCarbons: { appearsAt: [3200, "basicPowerGeneration", ""], prereqs: ['Basic Power Generation'], price: 3800, idForRenderPosition: 500, path: 2 },
         stellarCartography: { appearsAt: [700, null], prereqs: [null], price: 800, idForRenderPosition: 510, path: 4 },
         quantumComputing: { appearsAt: [3500, "nanoTubeTechnology", ""], prereqs: ['Nano Tube Technology'], price: 5750, idForRenderPosition: 520, path: 4 },
@@ -1022,7 +1150,7 @@ export const miaplacidus = {
 
 
 export let starSystems = {
-    version: 0.98,
+    version: 0.99,
     stars: {
         spica: {
             mapSize: 5.504440179536064, //might need to add this to star object when added dynamically for after rebirth
@@ -1041,14 +1169,14 @@ export let starSystems = {
 };
 
 export let oTypePowerPlantBuffs = {
-    version: 0.98,
+    version: 0.99,
     basicPowerPlantStar: { starName: null, settled: false },
     solarPowerPlantStar: { starName: null, settled: false },
     advancedPowerPlantStar: { starName: null, settled: false }
 };
 
 export let galacticCasino = {
-    version: 0.98,
+    version: 0.99,
     settings: {
         baseProbabilityCasino: 0.4,
     },
@@ -1080,7 +1208,7 @@ export let galacticCasino = {
 };
 
 export let galacticMarket = {
-    version: 0.98,
+    version: 0.99,
     resources: {
         hydrogen: { 
             name: "Hydrogen", 
@@ -1186,7 +1314,7 @@ export let galacticMarket = {
 };
 
 export let ascendencyBuffs = {
-    version: 0.98,
+    version: 0.99,
     "littleBagOfHydrogen": {
         name: "Little Bag Of Hydrogen",
         description: "buffLittleBagOfHydrogenRow",
@@ -1247,15 +1375,36 @@ export let ascendencyBuffs = {
         boughtYet: 0,
         timesRebuyable: 100000
     },
-    "compoundAutomation": {  //done
-        name: "Compound Automation",
-        description: "buffCompoundAutomationRow",
-        rebuyable: false,
-        rebuyableIncreaseMultiple: 1,
+    /**
+     * P9: the one automation ladder. Each level unlocks the next rung of the
+     * production-allocation feature, and because the levels are bought in order,
+     * "compound automation implies autosell exists" is structurally true rather
+     * than something the gates have to check for and explain.
+     *
+     *   1 - autosell: the allocation line, in its one-handle form, on every
+     *       resource and compound pane.
+     *   2 - compound auto-create, and with it the compound band and second
+     *       handle on the allocation line of every resource a recipe draws on.
+     *   3 - the compound auto-buyer tier rows.
+     *
+     * This replaces the `nanoBrokers` *tech* (which gated autosell) and the
+     * `compoundAutomation` *perk* (which gated everything compound). Both are
+     * gone; `migrateRetiredAutomationUnlocks()` grants the equivalent level to a
+     * save that owned either.
+     */
+    "nanoBrokers": {
+        name: "Nano Brokers",
+        description: "buffNanoBrokersRow",
+        rebuyable: true,
+        rebuyableIncreaseMultiple: 2,
+        // The ladder is not geometric - 15/30/60 would price the third rung out
+        // of reach of the run that needs it - so it is written out. `costLadderAp`
+        // takes precedence over the multiplier wherever a cost is quoted.
+        costLadderAp: [15, 30, 50],
         baseCostAp: 15,
         effectCategoryMagnitude: 1,
         boughtYet: 0,
-        timesRebuyable: 100000
+        timesRebuyable: 3
     },
     "roboticResearchAutomation": {
         name: "Robotic Research Automation",
@@ -3123,8 +3272,39 @@ export function getBuffOptimizedPowerGridsData() {
     return ascendencyBuffs["optimizedPowerGrids"];
 }
 
-export function getBuffCompoundAutomationData() {
-    return ascendencyBuffs["compoundAutomation"];
+export function getBuffNanoBrokersData() {
+    return ascendencyBuffs["nanoBrokers"];
+}
+
+/**
+ * P9: the single source of truth for what the player may automate.
+ *
+ * Every gate in the game reads this rather than a snapshot taken at run start,
+ * which is what the retired `compoundMachining` pseudo-tech was - it was pushed
+ * into `techUnlockedArray` once, on rebirth, so a perk bought at any other
+ * moment did nothing until the next run.
+ *
+ *   0 - nothing; manual sell rows, as the game has always opened.
+ *   1 - autosell / the allocation line.
+ *   2 - and compound auto-create.
+ *   3 - and the compound auto-buyer tiers.
+ */
+export function getNanoBrokersLevel() {
+    const buff = ascendencyBuffs["nanoBrokers"];
+    const level = buff && typeof buff.boughtYet === 'number' ? buff.boughtYet : 0;
+    return Math.max(0, Math.min(3, level));
+}
+
+export function getAutoSellUnlocked() {
+    return getNanoBrokersLevel() >= 1;
+}
+
+export function getCompoundAutoCreateUnlocked() {
+    return getNanoBrokersLevel() >= 2;
+}
+
+export function getCompoundAutoBuyersUnlocked() {
+    return getNanoBrokersLevel() >= 3;
 }
 
 export function getBuffRoboticResearchAutomationData() {
@@ -3402,6 +3582,84 @@ export function restoreAscendencyBuffsDataObject(value) {
 
     merged.version = template.version;
     ascendencyBuffs = merged;
+
+    // P9: a save written before the automation ladder existed carries its
+    // capability in the two retired unlocks instead. Convert here, while the
+    // saved object is still in hand.
+    migrateRetiredAutomationUnlocks(value);
+}
+
+/**
+ * P9: carry a pre-ladder save's automation capability onto `nanoBrokers`.
+ *
+ * Two unlocks were retired. The `nanoBrokers` *tech* cost 19000 research points
+ * and granted autosell; the `compoundAutomation` *perk* cost 15 AP and granted
+ * everything compound. A player who paid for either must not lose what they
+ * bought, and must not be charged again - so the equivalent level is granted
+ * outright and no AP moves in either direction.
+ *
+ * The old perk maps to level **3**, not level 2, and this matters. It granted
+ * `compoundMachining`, and that pseudo-tech gated the compound auto-buyer tier
+ * rows (`game.js`, the compound branch of the row visibility check) as well as
+ * the auto-create toggle. P9 split those two apart into rungs 2 and 3, but a
+ * player who bought the old perk already had both - mapping them to level 2
+ * would take the auto-buyer tiers away from them and charge 50 AP to get back
+ * something they had already paid for.
+ *
+ * The levels are a ladder and not a tally, so a save holding both retired
+ * unlocks still maps to 3 rather than 4: the tech's capability is rung 1, which
+ * the perk's mapping already includes.
+ *
+ * The tech half of this cannot be done here, because `techUnlockedArray` lives
+ * in `constantsAndGlobalVars.js` and is restored on its own path; `game.js`
+ * calls `migrateRetiredAutomationTechUnlock()` for that once both are loaded.
+ * This function is therefore safe to run before or after the tech array exists.
+ */
+export function migrateRetiredAutomationUnlocks(savedBuffs) {
+    if (!savedBuffs || typeof savedBuffs !== 'object') {
+        return;
+    }
+
+    // Already on the ladder: a save written by this build or later. Nothing to do,
+    // and in particular do not let a retired key re-grant a level the player has
+    // since spent AP to reach.
+    const savedLadder = savedBuffs.nanoBrokers;
+    if (savedLadder && typeof savedLadder === 'object' && typeof savedLadder.boughtYet === 'number' && savedLadder.boughtYet > 0) {
+        return;
+    }
+
+    const ownedCompoundAutomation = !!(
+        savedBuffs.compoundAutomation &&
+        typeof savedBuffs.compoundAutomation === 'object' &&
+        (savedBuffs.compoundAutomation.boughtYet || 0) > 0
+    );
+
+    if (ownedCompoundAutomation) {
+        setAscendencyBuffDataObject(3, 'nanoBrokers', ['boughtYet']);
+    }
+
+    // The retired perk's own key is dropped so it can never be rendered as a row,
+    // sorted into the perk list, or read as capability again.
+    if (ascendencyBuffs && typeof ascendencyBuffs === 'object') {
+        delete ascendencyBuffs.compoundAutomation;
+    }
+}
+
+/**
+ * P9: the tech half of the migration above - see its comment for the reasoning.
+ *
+ * Granting level 1 for the retired `nanoBrokers` tech must not overwrite a level
+ * 2 already granted for the retired perk, so it only ever raises the level.
+ * Returns true when the stale tech entry was found, so the caller can strip it.
+ */
+export function migrateRetiredAutomationTechUnlock(hadNanoBrokersTech) {
+    if (!hadNanoBrokersTech) {
+        return false;
+    }
+    if (getNanoBrokersLevel() < 1) {
+        setAscendencyBuffDataObject(1, 'nanoBrokers', ['boughtYet']);
+    }
+    return true;
 }
 
 export function restoreAchievementsDataObject(value) {
@@ -3509,6 +3767,20 @@ export function getAscendencyBuffDataObject() {
 export function getAscendencyBuffCost(buff) {
     if (!buff || typeof buff.baseCostAp !== 'number') {
         return 0;
+    }
+    // P9: a perk may write its price ladder out in full rather than deriving it
+    // from a multiplier, for a short ladder whose steps are chosen rather than
+    // computed. Past the end of the ladder the multiplier takes over again, so a
+    // perk that is also uncapped still has a defined price - though in practice
+    // a perk with a ladder is capped at the ladder's length.
+    if (Array.isArray(buff.costLadderAp) && buff.costLadderAp.length > 0) {
+        const step = buff.costLadderAp[buff.boughtYet];
+        if (typeof step === 'number' && Number.isFinite(step)) {
+            return step;
+        }
+        const last = buff.costLadderAp[buff.costLadderAp.length - 1];
+        const overshoot = buff.boughtYet - (buff.costLadderAp.length - 1);
+        return last * Math.pow(buff.rebuyableIncreaseMultiple || 1, Math.max(0, overshoot));
     }
     return buff.rebuyable
         ? buff.baseCostAp * Math.pow(buff.rebuyableIncreaseMultiple, buff.boughtYet)
@@ -3733,8 +4005,48 @@ export const REBIRTH_PERSISTED_AUTOMATION = [
         section: 'research',
         path: ['upgrades', 'autoBuyer', 'enabled'],
         ownedBy: { section: 'research', path: ['upgrades', 'autoBuyer', 'active'] }
-    }
+    },
+    // P9: the production allocation settings. A player who has tuned fourteen
+    // splits should not have to tune them again every run - the perk that lets
+    // them set the splits at all is permanent, so the splits are too.
+    //
+    // `ownedBy` is deliberately absent on these. The capability lives on the
+    // `nanoBrokers` ascendency perk rather than anywhere in `resourceData`, and
+    // it is permanent by construction: an ascendency perk cannot be lost, so
+    // there is no run that could inherit a setting for a capability it no longer
+    // has. `carryPersistedAutomationThroughRebirth` treats a missing `ownedBy`
+    // as "always owned" for exactly this case.
+    ...buildAllocationRebirthEntries(),
+    // The compound auto-create toggles, which the note above nominated as the
+    // obvious next candidate. They are carried for the same reason and on the
+    // same terms - their capability is the ladder's second rung, and permanent.
+    ...buildAutoCreateRebirthEntries()
 ];
+
+/**
+ * One rebirth-persistence entry per material per allocation field.
+ *
+ * Written out from the templates rather than listed by hand so that a material
+ * added later cannot quietly lose its settings by being forgotten here.
+ */
+function buildAllocationRebirthEntries() {
+    const entries = [];
+    for (const [section, template] of [['resources', resourceData.resources], ['compounds', resourceData.compounds]]) {
+        for (const key of Object.keys(template || {})) {
+            for (const field of ['allocationEnabled', 'cashShare', 'compoundShare']) {
+                entries.push({ section, path: [key, field] });
+            }
+        }
+    }
+    return entries;
+}
+
+function buildAutoCreateRebirthEntries() {
+    return Object.keys(resourceData.compounds || {}).map(key => ({
+        section: 'compounds',
+        path: [key, 'autoCreate']
+    }));
+}
 
 export function resetResourceDataObjectOnRebirthAndAddApAndPermanentBuffsBack() {
     const currentAp = getResourceDataObject('ascendencyPoints', ['quantity']);
@@ -3846,7 +4158,12 @@ export function resetResourceDataObjectOnRebirthAndAddApAndPermanentBuffsBack() 
             return;
         }
 
-        if (!getResourceDataObject(entry.ownedBy.section, entry.ownedBy.path, true)) {
+        // P9: an entry without an `ownedBy` is one whose capability cannot be
+        // lost - the `nanoBrokers` ascendency perk, which no rebirth takes away
+        // and which does not live in `resourceData` to be checked against. There
+        // is no run that could inherit such a setting without the capability, so
+        // there is nothing to gate on.
+        if (entry.ownedBy && !getResourceDataObject(entry.ownedBy.section, entry.ownedBy.path, true)) {
             return;
         }
 
