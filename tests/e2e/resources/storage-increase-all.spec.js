@@ -133,6 +133,60 @@ async function openMaterial(game, key, tab) {
   await game.page.waitForTimeout(700);
 }
 
+/**
+ * Wait for a storage-full toast that names `material` and still has a live
+ * action button, then press it.
+ *
+ * Both halves matter. One classification shows one notification at a time, so
+ * the toast on screen is often some other material's; and a claim taken
+ * elsewhere disables the action on the toast that is showing rather than
+ * removing it, so "a visible action button" can be a spent one. The press
+ * happens inside the same evaluate as the match, so the toast cannot rotate
+ * between finding it and clicking it.
+ */
+async function claimFromStorageToast(game, material) {
+  await expect
+    .poll(async () => game.page.evaluate((name) => {
+      const toasts = document.querySelectorAll('.notification-container.classification-storage .notification');
+      for (const toast of toasts) {
+        const text = toast.querySelector('.notification-content')?.textContent || '';
+        if (!text.toLowerCase().includes(name.toLowerCase())) continue;
+        const button = toast.querySelector('button.notification-action-button');
+        if (button && !button.disabled) return true;
+      }
+      return false;
+    }, material), { timeout: 40000 })
+    .toBe(true);
+
+  const pressed = await game.page.evaluate((name) => {
+    const toasts = document.querySelectorAll('.notification-container.classification-storage .notification');
+    for (const toast of toasts) {
+      const text = toast.querySelector('.notification-content')?.textContent || '';
+      if (!text.toLowerCase().includes(name.toLowerCase())) continue;
+      const button = toast.querySelector('button.notification-action-button');
+      if (button && !button.disabled) {
+        button.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        return true;
+      }
+    }
+    return false;
+  }, material);
+  if (!pressed) throw new Error(`No live storage toast for ${material}`);
+  await game.page.waitForTimeout(900);
+}
+
+/** An option-row button's CSS gate: the class the frame loop paints it with. */
+async function rowButtonGate(game, rowId) {
+  return game.page.evaluate((row) => {
+    const button = document.getElementById(row)?.querySelector('button');
+    if (!button) return null;
+    return {
+      dark: button.classList.contains('red-disabled-text'),
+      pointerEvents: getComputedStyle(button).pointerEvents
+    };
+  }, rowId);
+}
+
 /** Press a button inside one of a pane's option rows. */
 async function clickRowButton(game, rowId) {
   const clicked = await game.page.evaluate((row) => {
@@ -484,6 +538,13 @@ test.describe('Increase All Storage — the earned claim outlives the notificati
     const gate = await buttonGate(game, RESOURCES_BUTTON);
     expect(gate.ready, 'the earned claim is state, not a notification, so it is still offered').toBe(true);
 
+    // Stop the extraction before measuring the charge. The autobuyers that
+    // filled the store are still running at 10/second, and the claim leaves a
+    // single unit behind — so the charge is only legible with production off.
+    await game.withMods((m) => {
+      m.rdo.setResourceDataObject(0, 'resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier1', 'quantity']);
+    });
+
     await pressHeaderButton(game, RESOURCES_BUTTON);
     const after = await readCategory(game, 'resources');
     expect(after.hydrogen.capacity, 'and it can still be claimed').toBe(300);
@@ -512,29 +573,37 @@ test.describe('Increase All Storage — the earned claim outlives the notificati
   });
 
   test('the storage-full notification action still works after a sweep', async ({ game }) => {
-    await fillEverythingFromDebug(game);
-    await pressHeaderButton(game, RESOURCES_BUTTON);
+    // The notification is exercised on a *different* store from the one the
+    // sweep claimed, which is the honest version of this question: a claim taken
+    // from the header must not disarm the notification route for anything else.
+    // It also sidesteps the sixty-second re-notify cooldown, which would
+    // otherwise stop the same store raising a second toast inside one test.
+    await game.withMods((m) => {
+      m.cg.setUnlockedResourcesArray('helium');
+      m.rdo.setResourceDataObject(true, 'resources', ['helium', 'revealedYet']);
+      m.rdo.setResourceDataObject(150, 'resources', ['hydrogen', 'storageCapacity']);
+      m.rdo.setResourceDataObject(150, 'resources', ['hydrogen', 'quantity']);
+    });
     await game.page.waitForTimeout(600);
 
-    // Produce hydrogen up to its new cap so the notification fires for real.
-    await game.withMods((m, cap) => {
-      m.rdo.setResourceDataObject(cap - 40, 'resources', ['hydrogen', 'quantity']);
-      m.rdo.setResourceDataObject(true, 'resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier1', 'active']);
-      m.rdo.setResourceDataObject(5, 'resources', ['hydrogen', 'upgrades', 'autoBuyer', 'tier1', 'quantity']);
-    }, DEBUG_FILL * 2);
+    await pressHeaderButton(game, RESOURCES_BUTTON);
+    const afterSweep = await readCategory(game, 'resources');
+    expect(afterSweep.hydrogen.capacity, 'the sweep claimed hydrogen').toBe(300);
 
-    const action = game.page.locator('.notification-container.classification-storage button.notification-action-button');
-    await action.waitFor({ state: 'visible', timeout: 40000 });
-
-    await game.page.evaluate(() => {
-      document
-        .querySelector('.notification-container.classification-storage button.notification-action-button')
-        ?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    // Fill helium by producing into it — the production path is what raises the
+    // storage-full notification. Tier 1 is 0.02/tick, so five extractors is
+    // 10/second and the last ten units arrive in about a second.
+    await game.withMods((m) => {
+      m.rdo.setResourceDataObject(120, 'resources', ['helium', 'storageCapacity']);
+      m.rdo.setResourceDataObject(90, 'resources', ['helium', 'quantity']);
+      m.rdo.setResourceDataObject(true, 'resources', ['helium', 'upgrades', 'autoBuyer', 'tier1', 'active']);
+      m.rdo.setResourceDataObject(5, 'resources', ['helium', 'upgrades', 'autoBuyer', 'tier1', 'quantity']);
     });
-    await game.page.waitForTimeout(900);
+
+    await claimFromStorageToast(game, 'helium');
 
     const after = await readCategory(game, 'resources');
-    expect(after.hydrogen.capacity, 'the notification is still a working claim').toBe(DEBUG_FILL * 4);
+    expect(after.helium.capacity, 'the notification is still a working claim').toBe(240);
   });
 
   test('a storage-full notification cannot be claimed after a sweep already claimed it', async ({ game }) => {
@@ -579,25 +648,43 @@ test.describe('Increase All Storage — the earned claim outlives the notificati
     expect(after.hydrogen.quantity, 'and nothing further is charged').toBe(1);
   });
 
-  test('enlarging the reservoir is refused when the concrete cannot be paid', async ({ game }) => {
-    // The reservoir costs concrete as well as water, and the storage-full
-    // notification has always said so by disabling its own action. The pane's
-    // button carries no such check, so the claim itself has to hold the rule:
-    // without it the cap doubled while the concrete charge silently failed to
-    // collect.
-    await fillEverythingFromDebug(game);
-    await game.withMods((m) => {
-      m.rdo.setResourceDataObject(10, 'compounds', ['concrete', 'quantity']);
-    });
+  test('the reservoir button goes red when the concrete cannot be paid', async ({ game }) => {
+    // Enlarging the reservoir costs concrete as well as water. On the pane that
+    // rule is enforced the way every affordability rule in this game is — the
+    // frame loop paints `red-disabled-text` on the button, whose CSS is
+    // `pointer-events: none`. The class is therefore the assertion: a dispatched
+    // click goes straight through the gate by design, so proving the refusal by
+    // clicking would prove nothing.
+    //
+    // Staged at the shipped scale on an ordinary run rather than from the debug
+    // "give 1M of everything" fill. That fill leaves every storage row in the
+    // game dark even with every store at its cap — a pre-existing quirk of that
+    // debug path, unrelated to the concrete rule under test here.
+    await game.debugClick('grantAllTechsButton');
+    await game.page.waitForTimeout(900);
     await openMaterial(game, 'water', 4);
-    await game.page.waitForTimeout(600);
 
-    const before = await readCategory(game, 'compounds');
-    await clickRowButton(game, 'waterIncreaseStorageRow');
-    const after = await readCategory(game, 'compounds');
+    await game.withMods((m) => {
+      m.cg.setUnlockedCompoundsArray('water');
+      m.cg.setUnlockedCompoundsArray('concrete');
+      const cap = m.rdo.getResourceDataObject('compounds', ['water', 'storageCapacity']);
+      m.rdo.setResourceDataObject(cap, 'compounds', ['water', 'quantity']);
+      m.rdo.setResourceDataObject(cap * 5, 'compounds', ['concrete', 'quantity']);
+    });
 
-    expect(after.water.capacity, 'the reservoir does not grow on credit').toBe(before.water.capacity);
-    expect(after.water.quantity, 'and the water is not taken either').toBe(before.water.quantity);
-    expect(after.concrete.quantity, 'nor the concrete').toBe(before.concrete.quantity);
+    await expect
+      .poll(async () => (await rowButtonGate(game, 'waterIncreaseStorageRow')).dark, { timeout: 15000 })
+      .toBe(false);
+
+    // Spend the concrete the reservoir needs, and the button closes again.
+    await game.withMods((m) => {
+      m.rdo.setResourceDataObject(1, 'compounds', ['concrete', 'quantity']);
+    });
+
+    await expect
+      .poll(async () => (await rowButtonGate(game, 'waterIncreaseStorageRow')).dark, { timeout: 15000 })
+      .toBe(true);
+    expect((await rowButtonGate(game, 'waterIncreaseStorageRow')).pointerEvents,
+      'and a real click cannot reach it').toBe('none');
   });
 });

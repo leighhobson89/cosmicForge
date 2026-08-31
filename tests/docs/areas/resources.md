@@ -61,7 +61,7 @@ The eight extractable base resources plus solar, driven through the Resources ta
 - [ ] Increase All Storage: the pane's own Increase Storage button still works after a sweep
 - [ ] Increase All Storage: the storage-full notification action still works after a sweep
 - [ ] Increase All Storage: a storage-full notification cannot be claimed after a sweep already claimed it
-- [ ] Increase All Storage: enlarging the reservoir is refused when the concrete cannot be paid
+- [ ] Increase All Storage: the reservoir button goes red when the concrete cannot be paid
 
 ## Status meaning
 

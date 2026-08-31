@@ -1949,15 +1949,16 @@ body {
      margin: 0;
  }
 
- /* P5: Sell All and Storage All share the header's right-hand slot. Both are
-    kept compact — short labels and a smaller face than an ordinary option
-    button — because the sidebar is only a fraction of the window and the header
-    still has to hold the pane title beside them. They wrap onto a second line
-    rather than overflowing if a translation runs long. */
+ /* P5: Sell All and Storage All share the header's right-hand slot, side by
+    side on one line. Both are kept compact — short labels and a smaller face
+    than an ordinary option button — because the sidebar is only a fraction of
+    the window and the header still has to hold the pane title beside them.
+    The title (flex: 1 1 auto, min-width: 0 above) shrinks first if space is
+    tight, so the two buttons stay together rather than wrapping. */
  .container-item-menu-header.sidebar-intro-header .sidebar-header-actions {
-     flex: 0 1 auto;
+     flex: 0 0 auto;
      flex-direction: row;
-     flex-wrap: wrap;
+     flex-wrap: nowrap;
      justify-content: flex-end;
      align-items: center;
      gap: 4px;
