@@ -394,6 +394,10 @@ let sortStarMethod = 'distance';
 let saleResourcePreviews = {};
 let saleCompoundPreviews = {};
 let createCompoundPreviews = {};
+//P7: the numbers behind the sentence in createCompoundPreviews. The preview is a
+//rendered string and the notation ladder truncates it, so it can never be the
+//authority for what a craft actually makes - see setCompoundCreatePreview.
+let createCompoundExactAmounts = {};
 let constituentPartsObject = {};
 let itemsToDeduct = {};
 let itemsToIncreasePrice = {};
@@ -1423,6 +1427,7 @@ export function resetAllVariablesOnRebirth() {
     saleResourcePreviews = {};
     saleCompoundPreviews = {};
     createCompoundPreviews = {};
+    createCompoundExactAmounts = {};
     constituentPartsObject = {};
     itemsToDeduct = {};
     itemsToIncreasePrice = {};
@@ -2958,6 +2963,28 @@ export function setCompoundCreatePreview(compoundToCreate, createAmount, amountC
 
     createCompoundPreviews[compoundToCreate] =
         `${createAmount} ${compoundToCreateCapitalised} (${partsString}${suffix})`;
+
+    //P7: the same figures, unrendered. The line above is what the player reads,
+    //and the frame loop used to read it back as the authority for the craft -
+    //but a preview element carries the `notation` class, so in condensed mode
+    //the ladder had already truncated it to one decimal per magnitude. A fill of
+    //132,432 rendered "132.4K" and was parsed back as 132,400, so "Fill To
+    //Capacity" stopped 32 units short of the cap and the storage increase the
+    //player was filling for stayed locked. The amounts are kept here in full,
+    //with the ingredients under their *internal* names, so the craft never has
+    //to read its own display back.
+    const exactParts = [amountConstituentPart1, amountConstituentPart2, amountConstituentPart3, amountConstituentPart4]
+        .map((amount, index) => {
+            const source = getResourceDataObject('compounds', [compoundToCreate, `createsFrom${index + 1}`]);
+            if (!Array.isArray(source) || !source[0] || !(amount > 0)) return null;
+            return { name: source[0], category: source[1] || 'resources', quantity: amount };
+        })
+        .filter(Boolean);
+
+    createCompoundExactAmounts[compoundToCreate] = {
+        compoundToCreateQuantity: createAmount,
+        parts: exactParts
+    };
 }
 
 export function setResourceSalePreview(resource, value, fuseToResource1, fuseToResource2) {
@@ -3091,6 +3118,10 @@ export function getOfflineGainsRate() {
 
 export function getCompoundCreatePreview(key) {
     return createCompoundPreviews[key];
+}
+
+export function getCompoundCreateExactAmounts(key) {
+    return createCompoundExactAmounts[key];
 }
 
 export function getResourceSalePreview(key) {

@@ -117,6 +117,22 @@ async function stopPrecipitation(game) {
 async function freezeEconomy(game) {
   await stopPrecipitation(game);
   await game.withMods((m) => {
+    // Research is an income stream too, and the same trap as precipitation: the
+    // scenarios that audit a research price read the charge as
+    // `research before - research after`, which is only exact while nothing else
+    // is paying in. Science buildings accrue every frame through
+    // `calculateResearchRatePerTick`, so a run that happens to have them running
+    // reports an undercharge and one that does not passes - scenario 70 failed
+    // exactly once that way. Only `active` is cleared, not the counts, because
+    // scenario 65 buys science buildings and reads those counts back; nothing in
+    // the frame loop recomputes the flag, so it stays cleared.
+    const researchUpgrades = m.rdo.getResourceDataObject('research', ['upgrades']) || {};
+    for (const key of Object.keys(researchUpgrades)) {
+      if (m.rdo.getResourceDataObject('research', ['upgrades', key, 'active'], true) === undefined) continue;
+      m.rdo.setResourceDataObject(false, 'research', ['upgrades', key, 'active']);
+    }
+  });
+  await game.withMods((m) => {
     const present = (category, path) =>
       m.rdo.getResourceDataObject(category, path, true) !== undefined;
 
@@ -1409,6 +1425,13 @@ async function makeEverythingAffordable(game) {
 async function refillPurse(game) {
   await stopPrecipitation(game);
   await game.withMods((m) => {
+    const researchUpgrades = m.rdo.getResourceDataObject('research', ['upgrades']) || {};
+    for (const key of Object.keys(researchUpgrades)) {
+      if (m.rdo.getResourceDataObject('research', ['upgrades', key, 'active'], true) === undefined) continue;
+      m.rdo.setResourceDataObject(false, 'research', ['upgrades', key, 'active']);
+    }
+  });
+  await game.withMods((m) => {
     m.rdo.setResourceDataObject(1e15, 'currency', ['cash']);
     m.rdo.setResourceDataObject(1e12, 'research', ['quantity']);
     for (const category of ['resources', 'compounds']) {
@@ -2532,6 +2555,172 @@ test.describe('Rounding — every conversion and trade', () => {
     const held = await game.withMods((m) => m.rdo.getResourceDataObject('compounds', ['diesel', 'quantity']));
     expect(held, `a craft into a store 0.5 short of its ${cap} cap must not overfill it`).toBeLessThanOrEqual(cap);
     expect(held, 'and must not lose what was already there').toBeGreaterThanOrEqual(cap - 0.5);
+  });
+
+  test('90. Fill To Capacity fills every compound to its cap in one click, in both notation modes', async ({ game }) => {
+    // The seam: "Fill To Capacity" computes an exact amount, renders it into the
+    // preview sentence, and the frame loop then reads that *rendered* sentence
+    // back as the authoritative amount for the craft. In condensed notation the
+    // ladder truncates to one decimal at each magnitude, so a fill of 132,432
+    // renders "132.4K" and is parsed back as 132,400 - the store lands 32 short
+    // of its cap and the storage increase it was being filled for is still not
+    // claimable. A second click then closes the gap, which is what makes it look
+    // like a display lag rather than a lost quantity.
+    //
+    // The capacities below are deliberately chosen so the exact fill carries
+    // digits below the ladder's precision; a round number would round-trip
+    // cleanly through the string and prove nothing.
+    const COMPOUNDS = ['diesel', 'glass', 'steel', 'concrete', 'water', 'titanium'];
+
+    const offenders = [];
+    let compoundsDriven = 0;
+
+    for (const notation of ['normalCondensed', 'normal']) {
+      await game.withMods((m, mode) => m.cg.setNotationType(mode), notation);
+
+      for (const compound of COMPOUNDS) {
+        await stopPrecipitation(game);
+        const staged = await game.withMods((m, key) => {
+          for (const category of ['resources', 'compounds']) {
+            for (const name of Object.keys(m.rdo.getResourceDataObject(category) || {})) {
+              if (category === 'compounds' && name === key) continue;
+              m.rdo.setResourceDataObject(1e12, category, [name, 'storageCapacity']);
+              m.rdo.setResourceDataObject(1e10, category, [name, 'quantity']);
+            }
+          }
+          m.rdo.setResourceDataObject(250000, 'compounds', [key, 'storageCapacity']);
+          m.rdo.setResourceDataObject(117568, 'compounds', [key, 'quantity']);
+          return {
+            cap: m.rdo.getResourceDataObject('compounds', [key, 'storageCapacity']),
+            held: m.rdo.getResourceDataObject('compounds', [key, 'quantity'])
+          };
+        }, compound);
+
+        try {
+          await openOptionById(game, `${compound}Option`, 4);
+          await chooseDropdown(game, `${compound}CreateSelectQuantity`, 'fillToCapacity');
+        } catch {
+          continue;
+        }
+        compoundsDriven++;
+
+        await clickSelector(game, `#${compound}CreateRow button.create`);
+        await game.page.waitForTimeout(FRAME_SETTLE_MS);
+
+        const after = await game.withMods((m, key) => ({
+          held: m.rdo.getResourceDataObject('compounds', [key, 'quantity']),
+          cap: m.rdo.getResourceDataObject('compounds', [key, 'storageCapacity'])
+        }), compound);
+
+        const label = `${compound} (${notation})`;
+        if (after.held > after.cap + 1e-6) {
+          offenders.push(`${label}: overfilled to ${after.held} against a ${after.cap} cap`);
+        } else if (after.held < after.cap - 1e-6) {
+          offenders.push(`${label}: one Fill To Capacity left ${after.held} of ${after.cap}, ${after.cap - after.held} short (staged ${staged.held})`);
+        }
+      }
+    }
+
+    test.info().annotations.push({
+      type: 'coverage', description: `${compoundsDriven} compound fills driven across both notation modes`
+    });
+    expect(compoundsDriven, 'the sweep should have driven a real fill for most compounds').toBeGreaterThan(6);
+    expect(offenders, 'one Fill To Capacity click must actually fill the store to its cap').toEqual([]);
+  });
+
+  test('91. a single Fill To Capacity on water makes its storage increase claimable', async ({ game }) => {
+    // The consequence the player actually reported, pinned end to end and on
+    // water specifically: filling a compound is how you unlock its storage
+    // increase, so a fill that lands short does not merely read wrong, it
+    // withholds the thing the fill was for. Water is worth its own scenario
+    // because it is the store the reservoir's 30% concrete share is measured
+    // against, and because it is the compound the weather pays into - so the
+    // precipitation has to be stopped or it closes the gap on its own and hides
+    // the defect.
+    await stopPrecipitation(game);
+    const staged = await game.withMods((m) => {
+      for (const category of ['resources', 'compounds']) {
+        for (const name of Object.keys(m.rdo.getResourceDataObject(category) || {})) {
+          if (category === 'compounds' && name === 'water') continue;
+          m.rdo.setResourceDataObject(1e12, category, [name, 'storageCapacity']);
+          m.rdo.setResourceDataObject(1e10, category, [name, 'quantity']);
+        }
+      }
+      m.rdo.setResourceDataObject(250000, 'compounds', ['water', 'storageCapacity']);
+      m.rdo.setResourceDataObject(117568, 'compounds', ['water', 'quantity']);
+      return { cap: m.rdo.getResourceDataObject('compounds', ['water', 'storageCapacity']) };
+    });
+
+    await openOptionById(game, 'waterOption', 4);
+    await chooseDropdown(game, 'waterCreateSelectQuantity', 'fillToCapacity');
+    await clickSelector(game, '#waterCreateRow button.create');
+    await game.page.waitForTimeout(FRAME_SETTLE_MS);
+
+    const held = await game.withMods((m) => m.rdo.getResourceDataObject('compounds', ['water', 'quantity']));
+    expect(held, `one fill must reach the ${staged.cap} cap, not stop short of it`).toBeCloseTo(staged.cap, 6);
+
+    // The store reading full is what offers the increase - the same
+    // `green-ready-text` scenario 29 asserts for a resource an ulp under its cap.
+    const readout = await game.page.evaluate(() => {
+      const el = document.getElementById('waterQuantity');
+      return { text: el?.textContent?.trim() ?? '', ready: !!el?.classList.contains('green-ready-text') };
+    });
+    expect(readout.ready, `the water readout "${readout.text}" must mark the store full after one fill`).toBe(true);
+  });
+
+  test('92. a compound being burned for fuel can still have its storage increased', async ({ game }) => {
+    // The claim asks for cap-1, so on an instantaneous reading a material with a
+    // fuel burn against it can never qualify: the frame it touches its cap, the
+    // burn has already taken it back under. The player was left with no move but
+    // to shut the power plants down, fill, claim, and turn them back on - which
+    // is not a choice the game should be asking anyone to make. Diesel is the
+    // case that bites, because it is the fuel the early power plants run on.
+    const BURN_PER_SEC = 250;
+
+    await stopPrecipitation(game);
+    const staged = await game.withMods((m, burn) => {
+      for (const category of ['resources', 'compounds']) {
+        for (const name of Object.keys(m.rdo.getResourceDataObject(category) || {})) {
+          if (category === 'compounds' && name === 'diesel') continue;
+          m.rdo.setResourceDataObject(1e12, category, [name, 'storageCapacity']);
+          m.rdo.setResourceDataObject(1e10, category, [name, 'quantity']);
+        }
+      }
+      m.rdo.setResourceDataObject(250000, 'compounds', ['diesel', 'storageCapacity']);
+      // Standing at the cap, with the plants burning it down every second - the
+      // exact state a player reaches the instant a fill completes.
+      m.rdo.setResourceDataObject(250000, 'compounds', ['diesel', 'quantity']);
+      m.rdo.setResourceDataObject(burn, 'compounds', ['diesel', 'usedForFuelPerSec']);
+      m.cg.setPowerOnOff(true);
+      return { cap: m.rdo.getResourceDataObject('compounds', ['diesel', 'storageCapacity']) };
+    }, BURN_PER_SEC);
+
+    // A store one full second of burn below its cap is the worst case the
+    // allowance is meant to cover, and the one an instantaneous test refuses.
+    await game.withMods((m, burn) => {
+      const cap = m.rdo.getResourceDataObject('compounds', ['diesel', 'storageCapacity']);
+      m.rdo.setResourceDataObject(cap - burn, 'compounds', ['diesel', 'quantity']);
+    }, BURN_PER_SEC);
+
+    const offered = await game.withMods((m) =>
+      (m.game.getIncreasableStorageKeys('compounds') || []).includes('diesel'));
+    expect(offered, 'a store that reached its cap must stay claimable while the plants burn it down').toBe(true);
+
+    await game.withMods((m) => m.game.increaseAllStorage('compounds'));
+    await game.page.waitForTimeout(FRAME_SETTLE_MS);
+
+    const after = await game.withMods((m) => ({
+      cap: m.rdo.getResourceDataObject('compounds', ['diesel', 'storageCapacity']),
+      held: m.rdo.getResourceDataObject('compounds', ['diesel', 'quantity'])
+    }));
+
+    expect(after.cap, 'the claim must actually enlarge the store').toBeGreaterThan(staged.cap);
+    // And it must be paid for. A claim that enlarges the cap without collecting
+    // is the failure mode the allowance could have introduced, because the cap
+    // increase is a deferred job that runs whether or not the charge settled.
+    expect(after.held, 'and must charge the store rather than doubling the cap for free')
+      .toBeLessThan(staged.cap * 0.5);
+    expect(after.held, 'without ever driving the store negative').toBeGreaterThanOrEqual(0);
   });
 
   test('83. every fusable resource yields no more than its input times its ratio', async ({ game }) => {

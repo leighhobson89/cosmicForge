@@ -327,6 +327,7 @@ import {
     getResourceSalePreview,
     getCompoundSalePreview,
     getCompoundCreatePreview,
+    getCompoundCreateExactAmounts,
     getNotationType,
     getTechTreeDataAndDraw,
     getSaveName,
@@ -793,6 +794,18 @@ function storageClaimOrder(category) {
  * Exported because the header button's enabled state is this same question
  * asked every frame — see `updateIncreaseAllStorageButtonStates()` in ui.js.
  */
+/**
+ * One second of a material's fuel burn, as an allowance on the storage claim.
+ *
+ * `usedForFuelPerSec` is the drain the power plants apply every second and the
+ * player cannot pause it without shutting the grid down. It is the whole reason
+ * the claim needs an allowance at all: production stops at the cap but the burn
+ * does not, so a full store is already draining by the next frame.
+ */
+function burnAllowanceFor(category, key) {
+    return Number(getResourceDataObject(category, [key, 'usedForFuelPerSec'], true)) || 0;
+}
+
 export function getIncreasableStorageKeys(category) {
     const normalizedCategory = category === 'resources' ? 'resources' : 'compounds';
     const unlockedArray = normalizedCategory === 'resources'
@@ -822,13 +835,22 @@ export function getIncreasableStorageKeys(category) {
         }
 
         const price = capacity - 1;
-        if (!canAfford(stockLeft(key), price)) {
+        // A material that is being burned for fuel can never win this test on an
+        // instantaneous reading. The claim asks for cap-1, so the moment a store
+        // touches its cap the burn takes it back under again - and the player is
+        // told to fill a store that the power plants empty faster than the click
+        // can land. Short of switching the plants off there is no way through,
+        // which is not a choice the game should be asking for. One second of the
+        // material's own burn is therefore forgiven here: enough that a store
+        // that genuinely reached its cap stays claimable while it drains, and far
+        // too little to offer the claim to a store that never filled.
+        if (!canAfford(stockLeft(key) + burnAllowanceFor(normalizedCategory, key), price)) {
             return;
         }
 
         const secondary = STORAGE_INCREASE_SECONDARY_COSTS[key];
         const secondaryPrice = secondary ? capacity * secondary.shareOfCapacity : 0;
-        if (secondary && !canAfford(stockLeft(secondary.key), secondaryPrice)) {
+        if (secondary && !canAfford(stockLeft(secondary.key) + burnAllowanceFor(normalizedCategory, secondary.key), secondaryPrice)) {
             return;
         }
 
@@ -7716,8 +7738,14 @@ function compoundCostSellCreateChecks(element) {
             accompanyingLabel.classList.remove('red-disabled-text'); 
         }
         
-        let constituentComponents = getConstituentComponents(createCompoundDescriptionString);      
-        constituentComponents = unpackConstituentPartsObject(constituentComponents);
+        //P7: prefer the figures setCompoundCreatePreview computed over the ones
+        //written into the sentence on screen. Parsing the rendered description
+        //means reading back a number the notation ladder has already truncated -
+        //"132.4K" for a 132,432 fill - so "Fill To Capacity" crafted 132,400 and
+        //left the store 32 short of the cap, taking the storage increase it was
+        //being filled for with it. The parse survives as a fallback for the frame
+        //or two after a pane is drawn, before the preview has been computed once.
+        let constituentComponents = buildConstituentComponentsFor(checkQuantityString, createCompoundDescriptionString);
         setConstituentPartsObject(constituentComponents);
 
         let isDisabled = false;
@@ -10577,20 +10605,32 @@ export function increaseResourceStorage(elementIds, resource, itemTypeArray) {
     let resourceToDeductNamesArray;
     const increaseFactor = getIncreaseStorageFactor() * (getBuffEfficientStorageData()['boughtYet'] + 1);
 
+    //Quoted against the stock as well as the cap. The claim asks for cap-1, but a
+    //material being burned for fuel is under its cap again by the time the charge
+    //settles a frame later - and a charge checkAndDeductResources() refuses is
+    //worse than a slightly smaller one, because the cap increase below is a
+    //deferred job that runs either way, handing out a doubled cap for nothing.
+    //Quoting what the store holds keeps the claim collectable while the plants
+    //keep burning; the shortfall is at most the second of burn the offer forgave.
+    const chargeable = (category, key, wanted) => {
+        const held = Number(getResourceDataObject(category, [key, 'quantity'])) || 0;
+        return Math.max(0, Math.min(wanted, held));
+    };
+
     if (resource[0] === 'water') {
         resourceToDeductNamesArray = resource;
         const firstResourceStorage = getResourceDataObject(itemTypeArray[0], [resource[0], 'storageCapacity']);
 
         for (let index = 0; index < resourceToDeductNamesArray.length; index++) {
             if (index > 0) {
-                amountToDeductArray.push(firstResourceStorage * 0.3);
+                amountToDeductArray.push(chargeable(itemTypeArray[index], resource[index], firstResourceStorage * 0.3));
             } else {
-                amountToDeductArray.push(firstResourceStorage - 1); //to leave power on if increasing storage
+                amountToDeductArray.push(chargeable(itemTypeArray[index], resource[index], firstResourceStorage - 1)); //to leave power on if increasing storage
             }
         }
     } else {
         resourceToDeductNamesArray = [resource[0]];
-        amountToDeductArray[0] = getResourceDataObject(itemTypeArray[0], [resourceToDeductNamesArray, 'storageCapacity']) - 1; //to leave power on if increasing storage
+        amountToDeductArray[0] = chargeable(itemTypeArray[0], resource[0], getResourceDataObject(itemTypeArray[0], [resourceToDeductNamesArray, 'storageCapacity']) - 1); //to leave power on if increasing storage
     }
 
     setItemsToDeduct(resourceToDeductNamesArray, amountToDeductArray, itemTypeArray, [[0,''],[0,''],[0,'']]);
@@ -12693,6 +12733,39 @@ function getConstituentComponents(createCompoundDescriptionString) {
         constituentPartQuantity4,
         constituentPartName4
     };
+}
+
+/**
+ * The ingredients and output for a craft, taken from the exact figures where they
+ * exist and from the rendered sentence only when they do not.
+ *
+ * Both routes return the same shape - `compoundToCreateQuantity` plus four
+ * name/quantity slots packed in the order the sentence lists them - because
+ * createCompound() and the affordability pass around it both read that shape.
+ * The exact route needs no reverse-localization: it already holds internal
+ * names, which is the lookup createCompound wants.
+ */
+function buildConstituentComponentsFor(compound, createCompoundDescriptionString) {
+    const exact = compound ? getCompoundCreateExactAmounts(compound) : null;
+
+    if (exact && Array.isArray(exact.parts)) {
+        const components = {
+            compoundToCreateQuantity: exact.compoundToCreateQuantity || 0,
+            constituentPartQuantity1: 0, constituentPartName1: '',
+            constituentPartQuantity2: 0, constituentPartName2: '',
+            constituentPartQuantity3: 0, constituentPartName3: '',
+            constituentPartQuantity4: 0, constituentPartName4: ''
+        };
+
+        exact.parts.slice(0, 4).forEach((part, index) => {
+            components[`constituentPartName${index + 1}`] = String(part.name).toLowerCase();
+            components[`constituentPartQuantity${index + 1}`] = part.quantity;
+        });
+
+        return components;
+    }
+
+    return unpackConstituentPartsObject(getConstituentComponents(createCompoundDescriptionString));
 }
 
 function unpackConstituentPartsObject(constituentComponents) {
