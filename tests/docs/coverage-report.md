@@ -4,7 +4,7 @@ _Generated from `functional-areas.json`. Re-run `node tests/docs/generate-report
 
 ## Coverage at a glance
 
-One line per functional area, worst first. 48 green, 0 amber, 0 red, out of 48.
+One line per functional area, worst first. 49 green, 0 amber, 0 red, out of 49.
 
 | | Area | Group | Risk | Specs | Where it stands |
 |:--:|---|---|:--:|--:|---|
@@ -33,6 +33,7 @@ One line per functional area, worst first. 48 green, 0 amber, 0 red, out of 48.
 | 🟢 | [Localization](areas/localization.md) | Foundation | High | 114 | Done — driven through its own controls, 114 specs passing. |
 | 🟢 | [Megastructures](areas/megastructures.md) | Endgame | Medium | 51 | Done — the manuscripts are rolled by studying stars through the game's own tooling, the stages are bought through the real Technology rows, and every bonus is measured off the store, the grid or the rock rather than read back off a multiplier. The battle at a factory star is not re-fought here; that belongs to the Battle area, and this file drives the conquest handler every access point funnels into. |
 | 🟢 | [News Ticker](areas/news-ticker.md) | Simulation & Ambience | Low | 26 | Done — driven through its own controls, 26 specs passing. |
+| 🟢 | [Notifications](areas/notifications.md) | Presentation & Shell | Medium | 18 | Done — added by P6 of the player-feedback plan when the notification stack was turned from a horizontal spread into one bottom-right column. The geometry is measured off real bounding boxes rather than read back off inline styles, storage cards are produced by running real tier 1 autobuyers into a real cap, and the cheat and achievement rows come from real debug-menu presses. Two live defects fell out of writing it: Clear All emptied a classification's queue instead of deleting it, which silently muted that classification for the rest of the run, and the routine that spends a storage claim only ever looked at the first card in the row. |
 | 🟢 | [Number Notation](areas/notation.md) | Presentation & Shell | Medium | 22 | Upgraded to integration — the setting is driven through its own dropdown and every screen is swept in both modes. The 3 specs that were failing found known-issues #26 and #27, both now fixed at source. |
 | 🟢 | [Offline Gains](areas/offline-gains.md) | Foundation | High | 18 | Done — driven through its own controls, 18 specs passing. |
 | 🟢 | [Onboarding & Tutorial](areas/onboarding.md) | Presentation & Shell | High | 13 | Done — driven through its own controls, 13 specs passing. |
@@ -81,10 +82,10 @@ when an area is upgraded.
 |---|---:|---:|
 | 🔴 Red — no spec file | 0 | 0% |
 | 🟠 Amber — spec written, not yet upgraded | 0 | 0% |
-| 🟢 Green — signed off | 48 | 100% |
-| **Total functional areas** | **48** | |
+| 🟢 Green — signed off | 49 | 100% |
+| **Total functional areas** | **49** | |
 
-819 individual test cases are identified across all areas. **1374 Playwright specs are implemented** across 47 areas, and all of them pass except where an area's note says otherwise — a spec that fails on a live defect is left failing on purpose, and the defect is written up in [known-issues.md](known-issues.md).
+836 individual test cases are identified across all areas. **1392 Playwright specs are implemented** across 48 areas, and all of them pass except where an area's note says otherwise — a spec that fails on a live defect is left failing on purpose, and the defect is written up in [known-issues.md](known-issues.md).
 
 Run them with `npm run test:e2e` (all areas) or `node tests/run-e2e.mjs <area>`. Each area writes its own HTML report to `test-reports/e2e/<area>/index.html`, with a summary index at `test-reports/e2e/index.html`.
 
@@ -196,6 +197,7 @@ Navigation, tutorial, formatting and build variants. Highly visible, cheap to te
 | 🟢 | [Precision & Rounding](areas/precision.md) | High | 10 | **8** | — |
 | 🟢 | [Rounding](areas/rounding.md) | High | 25 | **52** | — |
 | 🟢 | [UI Navigation](areas/ui-navigation.md) | Medium | 18 | **24** | launch-app.test.js |
+| 🟢 | [Notifications](areas/notifications.md) | Medium | 17 | **18** | — |
 | 🟢 | [Onboarding & Tutorial](areas/onboarding.md) | High | 7 | **13** | launchAndOnboard.test.js |
 | 🟢 | [Cosmicopedia & Help](areas/cosmicopedia.md) | Low | 5 | **6** | — |
 | 🟢 | [Demo Build Lockdowns](areas/demo-build.md) | High | 9 | **19** | — |

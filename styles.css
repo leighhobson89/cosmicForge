@@ -2306,40 +2306,113 @@ body {
     opacity: 1 !important;
 }
 
-.notification-container {
+/*
+ * P6 - notification stack.
+ *
+ * One fixed, bottom-right anchored column owns every notification. Classification
+ * containers are its children and stack *upward* (column-reverse puts the first
+ * child in the corner), which is what replaced the old horizontal spread across
+ * the bottom of the screen. A container that goes away lets the ones above it
+ * fall back towards the corner with no arithmetic involved.
+ *
+ * Nothing in the stack takes pointer events except the notification card itself
+ * - the root and the containers are `pointer-events: none`, so the empty space
+ * beside and above a card is not an invisible strip swallowing clicks meant for
+ * the game underneath.
+ */
+#notificationStackRoot {
     position: fixed;
+    right: 10px;
     bottom: 1%;
-    width: 200px;
-    max-width: 90vw;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
     z-index: 100000;
-    transition: right 0.3s ease;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: flex-end;
+    gap: 10px;
+    max-width: 96vw;
+    max-height: 92vh;
+    pointer-events: none;
+}
+
+.notification-container {
+    position: relative;
+    /* Deliberately uncapped. A multi-card row is right-anchored, so if the
+       window is too narrow to hold a full row the *oldest* cards run off to the
+       left and the newest stays where the player is looking. Capping the row
+       and wrapping it would push the newest card up and away instead. */
+    max-width: none;
+    /* Row, right-aligned: a multi-card classification appends its newest card
+       last, so the newest sits on the right and older ones slide left. A
+       single-card classification only ever holds one child, so the direction
+       makes no difference to it. */
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: flex-end;
+    gap: 10px;
+    pointer-events: none;
+}
+
+/* An empty container still holds its queue but must not reserve a gap in the
+   column, and a container past MAX_STACKS has no row to occupy at all. */
+.notification-container:empty,
+.notification-container-deferred {
+    display: none;
 }
 
 .notification {
     position: relative;
     overflow: hidden;
-    width: 100%;
+    width: 200px;
+    max-width: 90vw;
+    flex: 0 0 auto;
     padding: 15px;
-    background-color: var(--tab-bg-color);
+    /* Opaque by construction. The old surface was --tab-bg-color, which is
+       rgba(...,0.04) in several themes, so the game showed straight through the
+       notification and the text was unreadable over a busy pane. */
+    background-color: var(--container-bg-color);
     color: var(--text-color);
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--container-border-color, rgba(0, 0, 0, 0.25));
+    border-left: 4px solid var(--notification-accent, var(--text-color));
+    border-radius: var(--ui-radius, 10px);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.38), 0 1px 0 rgba(255, 255, 255, 0.06) inset;
     opacity: 0;
-    transform: translateY(20px);
-    transition: transform 0.5s ease, opacity 0.5s ease;
+    transform: translateY(20px) scale(0.98);
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s ease;
     min-height: 100px;
     text-align: center;
     font-weight: bold;
+    pointer-events: auto;
 }
 
 .notification.show {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
 }
 
+/* A card on its way out stops taking clicks immediately, so a claim cannot be
+   pressed after its timer has already handed the row on. */
+.notification-dismissing {
+    pointer-events: none;
+}
+
+/* The top sheen. Purely decorative, and behind the content. */
+.notification::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 38%;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0));
+    pointer-events: none;
+    /* Behind the message, not over it. The card always carries a transform, so
+       it owns a stacking context and a negative index cannot escape the card. */
+    z-index: -1;
+}
+
+/* The hover dim that makes the Clear All button readable: it deliberately sits
+   *over* the message (z-index 1) while the button sits over that (z-index 3). */
 .notification::before {
     content: '';
     position: absolute;
@@ -2359,30 +2432,38 @@ body {
 }
 
 .notification-achievement {
-    background-color: var(--tab-bg-color);
-    color: var(--stats-all-time-text);
+    --notification-accent: #ffcc00;
+    background-color: var(--container-bg-color);
     color: #ffcc00;
-    border: 6px solid #ffcc00;
+    border: 3px solid #ffcc00;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.38), 0 0 14px rgba(255, 204, 0, 0.35);
 }
 
 .notification-info {
-    background-color: var(--tab-bg-color);
+    --notification-accent: var(--text-color);
+    background-color: var(--container-bg-color);
     color: var(--text-color);
 }
 
 .notification-success {
+    --notification-accent: #6cf09a;
     background-color: #28a745;
     color: #ffffff;
+    border-color: #1c7a33;
 }
 
 .notification-warning {
+    --notification-accent: #ffe08a;
     background-color: #ffc107;
     color: #212529;
+    border-color: #b98900;
 }
 
 .notification-error {
+    --notification-accent: #ff9aa4;
     background-color: #dc3545;
     color: #ffffff;
+    border-color: #9c2029;
 }
 
 .option-button {

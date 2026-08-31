@@ -39,9 +39,22 @@ export const GAME_VERSION_FOR_SAVES = 0.99;
 export const deferredActions = [];
 
 //NOTIFICATIONS
+//P6: the stack is vertical. MAX_STACKS is how many *classifications* may hold a
+//row in the bottom-right column at once; anything past that keeps its queue and
+//slides in as a row frees up. MAX_NOTIFICATION_COLUMNS is the second axis, and
+//only the classifications in MULTI_NOTIFICATION_CLASSIFICATIONS use it: those
+//show several cards side by side in one row, newest on the right, instead of one
+//at a time on a timer.
+//
+//The three that qualify all fire in bursts where every message is worth reading
+//on its own: 'storage' because each toast carries its own storage claim, so
+//queueing eight of them at eight seconds apiece is exactly what made the claim
+//feel lost; 'debug' because a cheat press often triggers several at once and a
+//developer wants to see all of them; and 'achievement' because unlocking three
+//in the same frame should show three cards, not hide two behind a timer.
 export const MAX_STACKS = 4;
-export const STACK_WIDTH = 220;
-export const BASE_RIGHT = 0;        
+export const MAX_NOTIFICATION_COLUMNS = 6;
+export const MULTI_NOTIFICATION_CLASSIFICATIONS = ['storage', 'debug', 'achievement'];
 
 export const MINIMUM_BLACK_HOLE_CHARGE_TIME = 30000;
 export const INFINITE_POWER_RATE = 5000000000000000;

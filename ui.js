@@ -144,8 +144,8 @@ import {
     setNeedNewBattleCanvas,
     getSettledStars,
     MAX_STACKS,
-    STACK_WIDTH,
-    BASE_RIGHT,
+    MAX_NOTIFICATION_COLUMNS,
+    MULTI_NOTIFICATION_CLASSIFICATIONS,
     setAchievementFlagArray,
     getThemesTriedArray,
     setThemesTriedArray,
@@ -6071,7 +6071,7 @@ export function showNotification(message, type = 'info', time = 3000, classifica
     setNotificationQueues(queues);
 
 
-    if (!status[classification]) {
+    if (notificationRowAvailable(classification) && (isMultiCardClassification(classification) || !status[classification])) {
         processNotificationQueue(classification);
     }
 }
@@ -6111,18 +6111,57 @@ export function showNotificationWithAction(message, type = 'info', time = 3000, 
     setNotificationQueues(queues);
 
 
-    if (!status[classification]) {
+    if (notificationRowAvailable(classification) && (isMultiCardClassification(classification) || !status[classification])) {
         processNotificationQueue(classification);
     }
 }
 
 
+// P6: a classification whose cards sit side by side in one row rather than one
+// at a time on a queue timer. See MULTI_NOTIFICATION_CLASSIFICATIONS.
+function isMultiCardClassification(classification) {
+    return MULTI_NOTIFICATION_CLASSIFICATIONS.includes(String(classification));
+}
+
+
+// Cards that are already fading out still exist in the DOM for the half second
+// `hideNotification` gives the transition, so they must not count against the
+// column cap - otherwise the row refuses to refill for that half second and the
+// queue stutters.
+function countLiveNotifications(container) {
+    if (!container) {
+        return 0;
+    }
+    return container.querySelectorAll('.notification:not(.notification-dismissing)').length;
+}
+
+
+// The stack is one fixed, bottom-right anchored flex column, and every
+// classification container is a child of it. Positioning each container by hand
+// is what produced the horizontal spread P6 removes: with the column doing the
+// layout, a container that goes away lets the ones above it fall towards the
+// corner on their own, which is the "always try to move to the bottom right"
+// behaviour, and no arithmetic has to know how tall a notification is.
+function getNotificationStackRoot() {
+    let root = document.getElementById('notificationStackRoot');
+    if (!root) {
+        root = document.createElement('div');
+        root.id = 'notificationStackRoot';
+        document.body.appendChild(root);
+    }
+    return root;
+}
+
+
 function createNotificationContainer(classification) {
     const container = document.createElement('div');
+    // No separate class for a multi-card row: every container is already a
+    // right-aligned flex row, so a classification that appends several cards
+    // lays them out newest-on-the-right without any extra styling.
     container.className = `notification-container classification-${classification}`;
 
 
-    document.body.appendChild(container);
+    getNotificationStackRoot().appendChild(container);
 
 
     const containers = getNotificationContainers();
@@ -6135,19 +6174,61 @@ function createNotificationContainer(classification) {
     setClassificationOrder(order);
 
 
-    updateContainerPositions();
+    updateNotificationStackLayout();
 }
 
 
-function updateContainerPositions() {
+// DOM order inside the root *is* the stack order, because the root is a
+// `column-reverse` flex: the first child sits in the corner and each later one
+// stacks above it. Re-appending in `classificationOrder` therefore both orders
+// the stack and moves any container that has drifted, and `appendChild` moves an
+// existing node rather than duplicating it.
+function updateNotificationStackLayout() {
     const containers = getNotificationContainers();
     const order = getClassificationOrder();
+    const root = getNotificationStackRoot();
 
 
-    order.slice(0, MAX_STACKS).forEach((className, index) => {
+    order.forEach((className, index) => {
         const container = containers[className];
-        if (container) {
-            container.style.right = `${BASE_RIGHT + index * STACK_WIDTH}px`;
+        if (!container) {
+            return;
+        }
+        root.appendChild(container);
+        // Past MAX_STACKS there is no row to occupy. The container stays in the
+        // document holding its queue, but shows nothing, so the notifications it
+        // owns are genuinely queued rather than drawn off the bottom of the
+        // screen or piled on top of a neighbour.
+        container.classList.toggle('notification-container-deferred', index >= MAX_STACKS);
+    });
+
+
+    promoteQueuedClassifications();
+}
+
+
+// A classification only holds a row while it is inside the cap.
+function notificationRowAvailable(classification) {
+    const index = getClassificationOrder().indexOf(classification);
+    return index >= 0 && index < MAX_STACKS;
+}
+
+
+// When a row frees up - a queue emptied, or a Clear All took a whole
+// classification away - whatever was waiting behind the cap gets to start.
+// Terminates because a classification is only processed here when it has
+// something queued, and processing either shows it or removes it from the order.
+function promoteQueuedClassifications() {
+    const queues = getNotificationQueues();
+    const status = getNotificationStatus();
+
+
+    getClassificationOrder().slice(0, MAX_STACKS).forEach((className) => {
+        if (!queues[className]?.length) {
+            return;
+        }
+        if (isMultiCardClassification(className) || !status[className]) {
+            processNotificationQueue(className);
         }
     });
 }
@@ -6162,6 +6243,41 @@ function processNotificationQueue(classification) {
 
 
     const queue = queues[classification];
+
+
+    // The multi-card row is the storage exception: fill it up to its column cap
+    // and let each card time out on its own, newest on the right, rather than
+    // holding the rest behind a single timer. Anything past the cap stays queued
+    // and slides in as a card leaves.
+    if (isMultiCardClassification(classification)) {
+        const container = getNotificationContainers()[classification];
+
+
+        while (container && queue?.length > 0 && countLiveNotifications(container) < MAX_NOTIFICATION_COLUMNS) {
+            const item = queue.shift();
+            setNotificationQueues(queues);
+            sendNotification(
+                item.message,
+                item.type,
+                classification,
+                item.time,
+                item.actionLabel,
+                item.actionCallback,
+                item.actionDisabled,
+                item.actionDisabledTooltip
+            );
+        }
+
+
+        if (countLiveNotifications(container) > 0 || queue?.length > 0) {
+            status[classification] = countLiveNotifications(container) > 0;
+            setNotificationStatus(status);
+            return;
+        }
+        // Nothing showing and nothing left: fall through to the shared teardown.
+    }
+
+
     if (queue?.length > 0) {
         status[classification] = true;
         setNotificationStatus(status);
@@ -6194,7 +6310,7 @@ function processNotificationQueue(classification) {
         setClassificationOrder(order);
         delete status[classification];
         setNotificationStatus(status);
-        updateContainerPositions();
+        updateNotificationStackLayout();
     }
 }
 
@@ -6219,9 +6335,16 @@ function sendNotification(message, type, classification, duration, actionLabel, 
     notification.innerHTML = `<div class="notification-content">${message}</div>`;
 
 
-    const existing = container.querySelector('.notification');
-    if (existing) {
-        existing.remove();
+    // A single-card row only ever shows the head of its queue, so anything the
+    // previous timer left mid-fade is cleared out. A multi-card row is the
+    // opposite: its cards coexist, newest appended last, which the row's
+    // right-aligned flex direction puts on the right with the older ones sliding
+    // left - so nothing is removed here.
+    if (!isMultiCardClassification(classification)) {
+        const existing = container.querySelector('.notification');
+        if (existing) {
+            existing.remove();
+        }
     }
 
 
@@ -6330,7 +6453,11 @@ function sendNotification(message, type, classification, duration, actionLabel, 
         const order = getClassificationOrder();
 
     
-        queues[classification] = [];
+        // Deleted, not emptied. An empty-but-present key still satisfies the
+        // `if (!queues[classification])` guard in showNotification, so the next
+        // notification of this type would be pushed onto a queue whose container
+        // and stack row had both been torn down - and never seen again.
+        delete queues[classification];
         setNotificationQueues(queues);
 
     
@@ -6350,7 +6477,9 @@ function sendNotification(message, type, classification, duration, actionLabel, 
         setClassificationOrder(newOrder);
 
     
-        updateContainerPositions();
+        // Clearing a whole classification frees its row, so the stack closes up
+        // and anything held behind the cap gets its turn.
+        updateNotificationStackLayout();
     };
 
 
@@ -6373,6 +6502,10 @@ function sendNotification(message, type, classification, duration, actionLabel, 
 
 function hideNotification(notification) {
     notification.classList.remove('show');
+    // The element lives on for the length of the fade. Marking it as leaving is
+    // what lets a multi-card row refill immediately instead of waiting out the
+    // transition of the card that just went.
+    notification.classList.add('notification-dismissing');
     setTimeout(() => {
         notification.remove();
     }, 500);
@@ -6394,16 +6527,16 @@ export function disableStorageNotificationActionIfShowing(key, tooltipText = loc
     }
 
 
-    const notification = container.querySelector('.notification');
-    if (!notification) {
-        return;
-    }
-
-
-    const contentEl = notification.querySelector('.notification-content');
-    const messageText = String(contentEl?.textContent || '');
+    // P6: the storage row shows several cards at once, so the one that offers
+    // this key's claim has to be picked out rather than assumed to be the only
+    // one there. Before the multi-card row this read the single visible card,
+    // which silently did nothing as soon as a second store filled.
     const keyLower = normalizedKey.toLowerCase();
-    if (!messageText.toLowerCase().includes(`${keyLower} storage is full`)) {
+    const notification = Array.from(container.querySelectorAll('.notification')).find((card) => {
+        const text = String(card.querySelector('.notification-content')?.textContent || '');
+        return text.toLowerCase().includes(`${keyLower} storage is full`);
+    });
+    if (!notification) {
         return;
     }
 

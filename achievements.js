@@ -164,7 +164,12 @@ export function grantAchievement(achievement) {
     }
 
     setAchievementDataObject(true, achievement.id, ['active']);
-    showNotification(getAchievementNotification(achievement.notification), 'achievement', 4000, 'default');
+    // Its own classification rather than the 'default' catch-all: 'achievement'
+    // is a multi-card row (see MULTI_NOTIFICATION_CLASSIFICATIONS), so unlocking
+    // three at once shows three cards side by side instead of holding two of
+    // them behind a four-second timer. Sharing 'default' would have dragged
+    // every unclassified notification in the game into that row with them.
+    showNotification(getAchievementNotification(achievement.notification), 'achievement', 4000, 'achievement');
 
     trackAnalyticsEvent('achievement_granted', {
         achievement_id: achievement.id,

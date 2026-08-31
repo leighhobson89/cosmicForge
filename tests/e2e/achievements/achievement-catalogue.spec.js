@@ -369,7 +369,9 @@ const measureGrant = (m, payload) => {
 
   const after = snapshot();
   const activeAfter = activeSet();
-  const queuedMessages = (m.cg.getNotificationQueues()?.default ?? []).map((n) => String(n.message));
+  // P6 gave achievements their own classification so several can share a row;
+  // before that they were posted to the 'default' catch-all queue.
+  const queuedMessages = (m.cg.getNotificationQueues()?.achievement ?? []).map((n) => String(n.message));
   const onScreen = Array.from(document.querySelectorAll('.notification-container'))
     .map((el) => (el.textContent || '').trim());
 

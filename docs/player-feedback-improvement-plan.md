@@ -29,15 +29,15 @@ The audit moved several items vs. the original review order: **P3** (power toggl
 | 4 | P4 | Star list: name sort + direct travel target — ✅ **COMPLETED** | 1 — quick win | High | Low (6–10 h) |
 | 5 | P10 | Automation toggles survive rebirth — ✅ **COMPLETED** | 1 — quick win | High | Very low (3–5 h) |
 | 6 | P5 | Increase All Storage + persistent earned increases — ✅ **COMPLETED** | 2 — important | Very high | Medium (10–16 h) |
-| 7 | P6 | Notification layout + Clear-All safety | 2 — important | High | Medium (8–12 h) |
+| 7 | P6 | Notification layout + Clear-All safety — ✅ **COMPLETED** | 2 — important | High | Medium (8–12 h) |
 | 8 | P7 | Precision / rounding / affordability consistency — ✅ **COMPLETED** | 2 — important | High | Medium (12–18 h) |
 | 9 | P15 | Megastructure balance pass | 2 — important | High | Medium (12–20 h) |
 | 10 | P8 | Resource tick unification (foundational refactor) | 2 — important, large | Very high | High (30–50 h) |
 | 11 | P9 | Autosell → production allocation redesign — ✅ **COMPLETED** | 2 — important, large | Very high | High (25–40 h) |
 | 12 | P14 | Gain button merge — ✅ **COMPLETED** | 3 — quick win | Medium | Low (4–8 h) |
 | 13 | P11 | Progression clarity (black hole & upgrade displays) | 3 — quick win | Medium | Low-Med (8–12 h) |
-| 14 | P12 | UI row/layout refactor (`createOptionRow` mini-tables) | 4 — the rest | Medium | High (30–40 h) |
-| 15 | P13 | Spacing / visual hierarchy | 4 — the rest | Medium | Medium (10–16 h) |
+| 14 | P12 | UI row/layout refactor (`createOptionRow` mini-tables) — ➡️ **superseded by [largeUIRefactor.md](largeUIRefactor.md)** | 4 — the rest | Medium | High (re-scoped) |
+| 15 | P13 | Spacing / visual hierarchy — ➡️ **superseded by [largeUIRefactor.md](largeUIRefactor.md)** | 4 — the rest | Medium | Medium (re-scoped) |
 
 ---
 
@@ -249,19 +249,40 @@ The audit moved several items vs. the original review order: **P3** (power toggl
 
 ---
 
-## P6 — Notification layout & Clear-All safety
+## ~~P6 — Notification layout & Clear-All safety~~ ✅ DONE
 
-**Audit.** `ui.js:5100–5470`: one container per classification, positioned **horizontally** — `MAX_STACKS`/`STACK_WIDTH`/`BASE_RIGHT` constants (`ui.js:145–147`) feed `updateContainerPositions()` (`ui.js:5190`), which sets `container.style.right = BASE_RIGHT + index * STACK_WIDTH` (line 5198) — confirming the multi-column overlap/misclick complaint. Queues are per-classification (`getNotificationQueues`), one visible notification per column at a time; `hideNotification` (`ui.js:5422`) destroys action bindings with the DOM element. Clear-All (settings) clears queues wholesale — combined with P5's finding, clearing can orphan earned actions. The container CSS is at `styles.css:2255`.
+~~**Audit.** `ui.js:5100–5470`: one container per classification, positioned **horizontally** — `MAX_STACKS`/`STACK_WIDTH`/`BASE_RIGHT` constants (`ui.js:145–147`) feed `updateContainerPositions()` (`ui.js:5190`), which sets `container.style.right = BASE_RIGHT + index * STACK_WIDTH` (line 5198) — confirming the multi-column overlap/misclick complaint. Queues are per-classification (`getNotificationQueues`), one visible notification per column at a time; `hideNotification` (`ui.js:5422`) destroys action bindings with the DOM element. Clear-All (settings) clears queues wholesale — combined with P5's finding, clearing can orphan earned actions. The container CSS is at `styles.css:2255`.~~
 
-**Change.**
-- Restyle containers to a **single vertical stack** (top-right, below the stat bar), preserving per-classification queueing/colours. This is a CSS + `updateContainerPositions()` change; the queue architecture stays.
-- Cap visible notifications (e.g. 4) with the rest queued; ensure containers have `pointer-events` only on the notification card itself, never a full-width invisible strip (verify at `styles.css:2255`).
-- After P5, Clear-All is safe by construction (eligibility is state-derived). Add a regression test regardless.
+~~**Change.**~~
+- ~~Restyle containers to a **single vertical stack** (bottom-right corner), preserving per-classification queueing/colours. This is a CSS + `updateContainerPositions()` change; the queue architecture stays.~~
+- ~~Cap visible notifications (e.g. 4) with the rest queued; ensure containers have `pointer-events` only on the notification card itself, never a full-width invisible strip (verify at `styles.css:2255`).~~
+- ~~After P5, Clear-All is safe by construction (eligibility is state-derived). Add a regression test regardless.~~
+- ~~it will still seperate notifications into the different queues by type and notifications of the same type will only show one at once in their respective queue.  the exception to this is the increase storage one which will show as many as wants to appear stacked in order moving left with the newest on the right side - vertically we are moving through the queue types, horizontally we show multiple of the same type if increase storage type or just one on a queue timer if other types - also make the notifications nicer, using the same colors but snazzier and also no transparent backgrounds like now in some themes- notifications will now have their differnt types going up instead of across.  all notifications always try to move to the bottom right if a timer removes older ones of differnt types impeding them (as now)~~
 
-**Effort:** ~8–12 h.
-**Risk:** Medium. Visual change touches every notification type; needs a visual pass across themes.
+~~**Effort:** ~8–12 h.~~
+~~**Risk:** Medium. Visual change touches every notification type; needs a visual pass across themes.~~
 
-**Integration test.** `tests/e2e/notifications/notification-layout.spec.js`: fire 6 notifications of mixed classifications, assert all containers share the same `right` offset and differ only in `top` (vertical stack), and assert none of their bounding boxes intersect the Sell All / tab buttons (measured "misclick surface" gain in the report). Clear-All test: queue an actionable storage notification, Clear All, then assert Increase All Storage still claims the increase.
+~~**Integration test.** `tests/e2e/notifications/notification-layout.spec.js`: fire 10 notifications of mixed classifications, more than one of the increase storage type - assert all containers share the same `right` offset (except in the case of increase storage) and differ only in `bottom` (vertical stack). Clear-All test, increase storage notification test.~~
+
+**As built.** Seven notes on where the implementation differs from, or goes past, the sketch above:
+
+- **The column does the layout; nothing measures a notification any more.** The sketch called for a rewritten `updateContainerPositions()`. What replaced it is a single fixed element, `#notificationStackRoot`, laid out `flex-direction: column-reverse` and anchored to the bottom-right corner, with every classification container as a child of it. `updateNotificationStackLayout()` now only re-appends the containers in `classificationOrder` and marks the ones over the cap; the browser decides where each row sits. That matters because a notification's height is not knowable in advance — it depends on the message, the language and whether it carries an action button — so any arithmetic version of a vertical stack would have had to measure the DOM and re-measure it on every language change. It also gives "all notifications try to move to the bottom right" for free: a row that goes away simply stops taking space and the ones above it fall towards the corner.
+
+- **The cap genuinely queues rather than hiding.** `MAX_STACKS` used to be the number of containers that got a position, so a fifth classification was drawn wherever `right: auto` put it. Now a classification past `MAX_STACKS` keeps its container and its queue but is never processed at all, and `promoteQueuedClassifications()` starts it the moment a row frees up. Nothing is dropped, and nothing runs a timer the player cannot see.
+
+- **Three classifications share their row, not one.** The sketch named only the storage toasts. `debug` and `achievement` were added on the same reasoning during implementation, at Leigh's request: all three fire in bursts where every message is worth reading, and holding two behind an eight- or four-second timer is exactly the complaint. `MULTI_NOTIFICATION_CLASSIFICATIONS` in `constantsAndGlobalVars.js` is the whole list, and `MAX_NOTIFICATION_COLUMNS` caps such a row so it cannot run off the side of the screen; the rest of that classification's queue slides in from the right as cards expire. Both caps are tuning knobs — `MAX_STACKS` for the column, `MAX_NOTIFICATION_COLUMNS` for the row — and the specs read them off the game rather than mirroring their values, so turning one up does not fail a test whose subject is the rule.
+
+- **Achievements needed a classification of their own to get one.** They were posted to `'default'`, the catch-all every unclassified notification in the game falls into, so making them share a row would have dragged everything else in with them. `achievements.js` now posts under `'achievement'`. The only consequence elsewhere is one line in `tests/e2e/achievements/achievement-catalogue.spec.js`, which read the `default` queue to see what an unlock announced.
+
+- **A live defect in Clear All was found and fixed rather than worked around.** The handler set `queues[classification] = []` while removing the container, the stack row and the status entry. But `showNotification` decides whether a classification is new by asking `if (!queues[classification])`, and an empty array is not falsy — so after a Clear All, the *next* notification of that type was pushed onto a queue whose container had been destroyed and was never seen again. The classification was effectively muted for the rest of the run. It is now deleted rather than emptied. This predates P6 (the old code lost the notification a different way, inside `sendNotification`'s missing-container guard), but the vertical stack made it reproducible in seconds, and a spec pins it.
+
+- **`disableStorageNotificationActionIfShowing` had to learn to look at more than one card.** It took the storage container's single `.notification` and matched the message text against the key. With several storage cards on screen that silently did nothing whenever the card it happened to find was some other material's — leaving a live button on a claim the header sweep had already spent. It now scans every card in the row for the one that names the key.
+
+- **Only the card takes pointer events.** The root and the classification containers are `pointer-events: none` and the `.notification` itself is `pointer-events: auto`, so the empty space beside and above a notification belongs to the game. A card on its way out drops to `none` as well, so a claim cannot be pressed after its timer has already handed the row on. The spec probes this with `elementFromPoint` rather than trusting the CSS.
+
+**On the visual pass.** The card surface was `--tab-bg-color`, which is `rgba(255, 255, 255, 0.04)` in the galaxy, space and supernova themes — the game showed straight through the notification and the message was unreadable over a busy pane. It is now `--container-bg-color`, which is opaque in all nine themes, and a spec walks every theme asserting an alpha of exactly 1. The palette is unchanged: success, warning and error keep their colours, and what is new is a type-coloured left accent, a real border, a layered shadow, the shared corner radius and a top sheen behind the message. The hover dim that makes the Clear All button readable is preserved deliberately — it sits over the message at `z-index: 1` with the button above it at 3.
+
+New coverage lives in `tests/e2e/notifications/notification-layout.spec.js` — eighteen specs in a new `notifications` area, across the column's geometry, the cap, the three multi-card rows, Clear All, and the opaque surface in every theme.
 
 ---
 
@@ -984,6 +1005,11 @@ Iron    [==== 10% $ ====|============ 40% compounds ============|======== 50% st
 
 ## P12 — UI row/layout refactor (the `createOptionRow` mini-table problem)
 
+> **Superseded by [largeUIRefactor.md](largeUIRefactor.md).** A deeper audit found the layout is the
+> symptom, not the cause: rows have no model beneath them, so numbers are stored as display text and
+> re-parsed by regex every frame. P12 and P13 are folded into that document's eight-phase plan, and the
+> combined estimate rises from ~40–56 h to ~191–264 h (or ~110–140 h for the reduced two-tab scope).
+
 **Audit.** The legacy row builder is `createOptionRow` (`ui.js:3495`, exported; used by every drawTab file — e.g. `drawTab7Content.js` `megastructureTableRow` at 1844, the Ascendency Perks rows at 1782, `drawTab9Content.js` statistics rows). Each row lays out its own label/description/controls with its own width logic (ad-hoc `noDescriptionContainer: [true, '30%', '70%']`-style percentages throughout), so rows behave as independent mini-tables — the root cause of the AP misalignment (P2) and inconsistent spacing (P13).
 
 **Change.**
@@ -998,6 +1024,9 @@ Iron    [==== 10% $ ====|============ 40% compounds ============|======== 50% st
 ---
 
 ## P13 — Spacing / visual hierarchy (separators → grouping)
+
+> **Superseded by [largeUIRefactor.md](largeUIRefactor.md)** — delivered as Phase 6 there, which is
+> cheap only once the section grid from Phase 3 exists.
 
 **Audit.** No card/block component exists.
 
