@@ -93,6 +93,28 @@ async function chooseDropdown(game, dropdownId, value) {
   await game.page.waitForTimeout(600);
 }
 
+/**
+ * Run `body` with the debug tooling forced off, then put the flag back.
+ *
+ * `buildFlags.js` ships with `__VARIABLE_DEBUGGER_AND_CHEATS__` false, but it is
+ * Leigh's own control surface and a working copy set up for testing has it on.
+ * So a spec about what an ordinary *player* sees has to state the flag rather
+ * than inherit whatever the file happens to say, and restore whatever it found —
+ * the same rule the demo-build specs follow for `demoBuild`.
+ *
+ * Only the Visual pane reads the flag at draw time, so callers open the pane
+ * inside `body` rather than before it.
+ */
+async function withDebugToolingOff(game, body) {
+  const was = await game.withMods((m) => m.cg.getVariableDebuggerAndCheats() === true);
+  await game.withMods((m) => m.cg.setVariableDebuggerAndCheats(false));
+  try {
+    return await body();
+  } finally {
+    await game.withMods((m, value) => m.cg.setVariableDebuggerAndCheats(value), was);
+  }
+}
+
 test.describe('Settings — every control is on its pane', () => {
   test.setTimeout(180000);
 
@@ -100,30 +122,54 @@ test.describe('Settings — every control is on its pane', () => {
     await game.boot();
   });
 
-  test('the Visual pane renders all seven of its rows, each with its own input', async ({ game }) => {
-    await openSettingsPane(game, 'visual');
-
+  test('the Visual pane renders all six of its rows, each with its own input, Theme first', async ({ game }) => {
+    // Order matters: Theme leads the pane. Notation is deliberately absent — plain
+    // notation is no longer offered to players, so the row only exists behind the
+    // debug flag (covered by its own spec below). That makes the flag the thing
+    // this test is holding still: it is forced off for the duration so the pane is
+    // the one a player actually gets, whatever buildFlags.js is currently set to.
     const expected = [
+      ['settingsThemeRow', 'themeSelect'],
       ['settingsCurrencySymbolRow', 'currencySelect'],
-      ['settingsNotationRow', 'notationSelect'],
       ['settingsToggleNotificationsRow', 'notificationsToggle'],
       ['customPointerToggleRow', 'customPointerToggle'],
       ['mouseTrailToggleRow', 'mouseTrailToggle'],
-      ['settingsThemeRow', 'themeSelect'],
       ['weatherEffectSettingsRow', 'weatherEffectSettingToggle']
     ];
 
-    const problems = [];
-    for (const [row, input] of expected) {
-      const shape = await rowShape(game, row, input);
-      if (!shape.rowPresent) problems.push(`${row}: missing`);
-      else if (!shape.rowVisible) problems.push(`${row}: hidden`);
-      else if (!shape.inputPresent) problems.push(`${row}: #${input} missing`);
-      else if (!shape.inputInsideRow) problems.push(`${row}: #${input} is not inside the row`);
-      else if (!shape.labelled) problems.push(`${row}: no label text`);
-    }
+    const { problems, renderedOrder, notationRowPresent } = await withDebugToolingOff(game, async () => {
+      await openSettingsPane(game, 'visual');
+
+      const found = [];
+      for (const [row, input] of expected) {
+        const shape = await rowShape(game, row, input);
+        if (!shape.rowPresent) found.push(`${row}: missing`);
+        else if (!shape.rowVisible) found.push(`${row}: hidden`);
+        else if (!shape.inputPresent) found.push(`${row}: #${input} missing`);
+        else if (!shape.inputInsideRow) found.push(`${row}: #${input} is not inside the row`);
+        else if (!shape.labelled) found.push(`${row}: no label text`);
+      }
+
+      // The rows are read back off the pane in document order, so this pins the
+      // arrangement rather than only the membership.
+      const order = await game.page.evaluate((ids) => {
+        const pane = document.getElementById('optionContentTab9');
+        if (!pane) return [];
+        return Array.from(pane.querySelectorAll('.option-row'))
+          .map((row) => row.id)
+          .filter((id) => ids.includes(id));
+      }, expected.map(([row]) => row));
+
+      const notation = await game.page.evaluate(() =>
+        !!document.getElementById('settingsNotationRow') || !!document.getElementById('notationSelect'));
+
+      return { problems: found, renderedOrder: order, notationRowPresent: notation };
+    });
 
     expect(problems).toEqual([]);
+    expect(renderedOrder).toEqual(expected.map(([row]) => row));
+    // Nothing offers plain notation to an ordinary pioneer.
+    expect(notationRowPresent, 'the notation row must not be on the Visual pane').toBe(false);
   });
 
   test('the Game Options pane renders all five of its rows', async ({ game }) => {
@@ -352,23 +398,60 @@ test.describe('Settings — theme, notation and currency', () => {
     expect(failures).toEqual([]);
   });
 
-  test('switching notation changes how figures are rendered on screen', async ({ game }) => {
-    // Large stock, so the two notations are visibly different.
+  test('plain notation is only reachable behind the debug flag, and still renders when it is', async ({ game }) => {
+    // Plain notation was retired from the Visual pane: condensed is the only
+    // notation a player is offered, and the formatter keeps understanding 'normal'
+    // purely so a debug session can look at the un-abbreviated figure. This spec
+    // pins both halves — the ordinary pioneer has no way in, and the debug route
+    // still produces a genuinely different render.
+    //
+    // The cheats flag is buildFlags.js's, not the suite's: both legs set it
+    // explicitly and it is put back exactly as it was found, whatever that was.
+    // Neither leg may inherit it — the shipped file has it false but a working
+    // copy set up for testing has it on, so an inherited flag decides which half
+    // of this test is really running.
+    //
+    // The debug menu still opens with the flag off, because the harness boots a
+    // `Test1981` pioneer and that backdoor is checked independently of the flag.
     await game.debugClick('give100AllResourcesAndCompounds');
     await game.page.waitForTimeout(700);
-    await openSettingsPane(game, 'visual');
 
-    await chooseDropdown(game, 'notationSelect', 'normalCondensed');
-    await game.page.waitForTimeout(700);
-    const condensed = await game.page.evaluate(() =>
-      document.getElementById('hydrogenQuantity')?.textContent?.trim());
+    const cheatsBefore = await game.withMods((m) => m.cg.getVariableDebuggerAndCheats() === true);
 
-    await chooseDropdown(game, 'notationSelect', 'normal');
-    await game.page.waitForTimeout(700);
-    const normal = await game.page.evaluate(() =>
-      document.getElementById('hydrogenQuantity')?.textContent?.trim());
+    const condensed = await withDebugToolingOff(game, async () => {
+      await openSettingsPane(game, 'visual');
 
-    expect(await game.withMods((m) => m.cg.getNotationType())).toBe('normal');
+      expect(await game.withMods((m) => m.cg.getNotationType()),
+        'a player is left on condensed').toBe('normalCondensed');
+      expect(await game.page.evaluate(() => !!document.getElementById('notationSelect')),
+        'the notation dropdown must not be on the pane').toBe(false);
+
+      return game.page.evaluate(() =>
+        document.getElementById('hydrogenQuantity')?.textContent?.trim());
+    });
+
+    await game.withMods((m) => m.cg.setVariableDebuggerAndCheats(true));
+
+    let normal;
+    try {
+      // Redraw the pane with the flag on — the row is built at draw time.
+      await openSettingsPane(game, 'gameOptions');
+      await openSettingsPane(game, 'visual');
+      expect(await game.page.evaluate(() => !!document.getElementById('notationSelect')),
+        'the debug build must still expose the notation dropdown').toBe(true);
+
+      await chooseDropdown(game, 'notationSelect', 'normal');
+      await game.page.waitForTimeout(700);
+      normal = await game.page.evaluate(() =>
+        document.getElementById('hydrogenQuantity')?.textContent?.trim());
+      expect(await game.withMods((m) => m.cg.getNotationType())).toBe('normal');
+    } finally {
+      await game.withMods((m, was) => {
+        m.cg.setNotationType('normalCondensed');
+        m.cg.setVariableDebuggerAndCheats(was);
+      }, cheatsBefore);
+    }
+
     // Condensed abbreviates a million to "1.0M"; normal spells the digits out in
     // full, comma-grouped — "1,000,000/1,000,000".
     expect(condensed).toMatch(/[KMB]|e\d/);

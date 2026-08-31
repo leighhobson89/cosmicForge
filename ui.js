@@ -3646,6 +3646,16 @@ export function updateContent(heading, tab, type) {
 
     optionContentElement.innerHTML = '';
 
+    // P14 (player-feedback plan): a pane header can carry its own controls — tab 1
+    // puts the resource's "Gain 1" button there. Whatever the previous pane left
+    // behind is cleared here, before the intro branch returns, so the intro page
+    // never shows the last resource's button. The pane's own draw function refills
+    // it.
+    const headerActionsElement = document.getElementById(`headerActionsTab${tabNumber}`);
+    if (headerActionsElement) {
+        headerActionsElement.innerHTML = '';
+    }
+
        
     if (type === 'intro') {
         // Both lookups are keyed by the canonical English tab name, which is why

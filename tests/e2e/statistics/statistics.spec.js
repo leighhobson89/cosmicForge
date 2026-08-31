@@ -63,6 +63,23 @@ async function clickRowButton(game, rowId, selector = 'button') {
   await game.page.waitForTimeout(250);
 }
 
+/**
+ * Dispatch a click at a resource pane's "Gain 1" button. P14 of the
+ * player-feedback plan moved it out of an option row of its own and onto the
+ * pane header line, beside the resource name, so it is addressed by its own id
+ * rather than through a row.
+ */
+async function clickGainButton(game, resource) {
+  const fired = await game.page.evaluate((id) => {
+    const button = document.getElementById(id);
+    if (!button) return false;
+    button.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    return true;
+  }, `${resource}GainButton`);
+  if (!fired) throw new Error(`No Gain button in the ${resource} pane header`);
+  await game.page.waitForTimeout(250);
+}
+
 /** Dismiss the run-1 popup several techs raise, which would swallow later clicks. */
 async function dismissPopup(game) {
   await game.page.evaluate(() => {
@@ -253,7 +270,7 @@ test.describe('Statistics — resources', () => {
     const quantityBefore = await game.withMods((m) =>
       m.rdo.getResourceDataObject('resources', ['hydrogen', 'quantity']));
 
-    for (let i = 0; i < 5; i++) await clickRowButton(game, 'hydrogenGainRow');
+    for (let i = 0; i < 5; i++) await clickGainButton(game, 'hydrogen');
     await game.page.waitForTimeout(400);
 
     const after = await readStats(game, keys);
@@ -278,7 +295,7 @@ test.describe('Statistics — resources', () => {
     const keys = ['stat_hydrogen', 'stat_hydrogenThisRun'];
     const before = await readStats(game, keys);
 
-    for (let i = 0; i < 5; i++) await clickRowButton(game, 'hydrogenGainRow');
+    for (let i = 0; i < 5; i++) await clickGainButton(game, 'hydrogen');
     await game.page.waitForTimeout(400);
 
     const after = await readStats(game, keys);
@@ -498,7 +515,7 @@ test.describe('Statistics — this run versus all time', () => {
     // Earn something in each of the families the page tracks.
     await game.openTab(1);
     await openPaneById(game, 'hydrogenOption');
-    for (let i = 0; i < 5; i++) await clickRowButton(game, 'hydrogenGainRow');
+    for (let i = 0; i < 5; i++) await clickGainButton(game, 'hydrogen');
     await game.openTab(3);
     await openPaneById(game, 'researchOption');
     for (let i = 0; i < 5; i++) await clickRowButton(game, 'researchScienceKitRow');

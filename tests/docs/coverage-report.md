@@ -42,7 +42,7 @@ One line per functional area, worst first. 48 green, 0 amber, 0 red, out of 48.
 | 🟢 | [Random Events](areas/random-events.md) | Simulation & Ambience | Medium | 52 | Done — driven through its own controls, 52 specs passing. |
 | 🟢 | [Rebirth](areas/rebirth.md) | Meta Progression | High | 10 | Done — driven through its own controls, 10 specs passing. |
 | 🟢 | [Research](areas/research.md) | Core Economy | High | 25 | Done — driven through its own controls, 25 specs passing. |
-| 🟢 | [Resources](areas/resources.md) | Core Economy | High | 55 | Done — driven through its own controls, 55 specs passing. |
+| 🟢 | [Resources](areas/resources.md) | Core Economy | High | 60 | Done — driven through its own controls, 60 specs passing. |
 | 🟢 | [Rockets & Launch Pad](areas/rockets.md) | Space Operations | Medium | 57 | Done — the launch pad and all four rockets are bought part by part through their own buttons, renamed in the header field, fuelled by pressing Fuel and flown twice over, so the reset is proved by the second journey rather than by reading state back. The area found known-issues #36, now fixed at source: the notation formatter was rewriting the digits inside an asteroid's name. |
 | 🟢 | [Rounding](areas/rounding.md) | Presentation & Shell | High | 52 | Added by P7 of the player-feedback plan as a dedicated regression net for the seams between subsystems that round differently. It found three live defects: the abbreviation ladder overstating a value scaled down by a billion, the sale preview quoting a fractional quantity that the sell path then re-parsed as a whole number, and both sell paths reading their payment back out of a two-decimal rendered label instead of computing it. One behaviour it pins is deliberate rather than a defect: a single sale sweeps up whatever sub-unit remainder is left, so a 12.7 stock that sells 12 ends empty and the 0.7 is not paid for. Sell All differs - it sells the whole float and pays for all of it - and the two routes are meant to differ, so nothing should try to reconcile them. |
 | 🟢 | [Save Migration](areas/save-migration.md) | Foundation | High | 11 | Done — driven through its own controls, 11 specs passing. |
@@ -84,7 +84,7 @@ when an area is upgraded.
 | 🟢 Green — signed off | 48 | 100% |
 | **Total functional areas** | **48** | |
 
-813 individual test cases are identified across all areas. **1369 Playwright specs are implemented** across 47 areas, and all of them pass except where an area's note says otherwise — a spec that fails on a live defect is left failing on purpose, and the defect is written up in [known-issues.md](known-issues.md).
+819 individual test cases are identified across all areas. **1374 Playwright specs are implemented** across 47 areas, and all of them pass except where an area's note says otherwise — a spec that fails on a live defect is left failing on purpose, and the defect is written up in [known-issues.md](known-issues.md).
 
 Run them with `npm run test:e2e` (all areas) or `node tests/run-e2e.mjs <area>`. Each area writes its own HTML report to `test-reports/e2e/<area>/index.html`, with a summary index at `test-reports/e2e/index.html`.
 
@@ -117,7 +117,7 @@ The minute-to-minute loop: extract, craft, power, research. Where players spend 
 
 | Status | Area | Risk | Planned | Specs | Existing coverage |
 |:--:|---|:--:|--:|--:|---|
-| 🟢 | [Resources](areas/resources.md) | High | 50 | **55** | earlyLoop.test.js |
+| 🟢 | [Resources](areas/resources.md) | High | 55 | **60** | earlyLoop.test.js |
 | 🟢 | [Compounds & Crafting](areas/compounds.md) | High | 32 | **31** | — |
 | 🟢 | [Auto Buyers](areas/autobuyers.md) | High | 18 | **19** | autobuyer.test.js |
 | 🟢 | [Autosell & Production Allocation](areas/autosell.md) | High | 51 | **51** | — |
@@ -192,7 +192,7 @@ Navigation, tutorial, formatting and build variants. Highly visible, cheap to te
 
 | Status | Area | Risk | Planned | Specs | Existing coverage |
 |:--:|---|:--:|--:|--:|---|
-| 🟢 | [Number Notation](areas/notation.md) | Medium | 16 | **22** | — |
+| 🟢 | [Number Notation](areas/notation.md) | Medium | 17 | **22** | — |
 | 🟢 | [Precision & Rounding](areas/precision.md) | High | 10 | **8** | — |
 | 🟢 | [Rounding](areas/rounding.md) | High | 25 | **52** | — |
 | 🟢 | [UI Navigation](areas/ui-navigation.md) | Medium | 18 | **24** | launch-app.test.js |

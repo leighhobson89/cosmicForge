@@ -330,8 +330,12 @@ test.describe('Buy Max — where the button appears', () => {
     // The exclusions are as deliberate as the inclusions: selling, manual
     // gathering, storage upgrades, compound creation, and the fleet envoy, which
     // is capped at one.
+    //
+    // Manual gathering no longer has a row of its own — P14 moved the resource's
+    // "Gain 1" button into the pane header — so it is checked where it now lives,
+    // below.
     const excluded = [
-      { tab: 1, option: 'hydrogenOption', rows: ['hydrogenSellRow', 'hydrogenGainRow', 'hydrogenIncreaseStorageRow'] },
+      { tab: 1, option: 'hydrogenOption', rows: ['hydrogenSellRow', 'hydrogenIncreaseStorageRow'] },
       { tab: 4, option: 'dieselOption', rows: ['dieselCreateRow', 'dieselSellRow', 'dieselIncreaseStorageRow'] },
       { tab: 5, option: 'fleetHangarOption', rows: ['spaceFleetEnvoyBuildRow'] }
     ];
@@ -345,6 +349,17 @@ test.describe('Buy Max — where the button appears', () => {
     }
 
     expect(unexpected, 'these rows must not offer a Max button').toEqual([]);
+
+    await openOptionById(game, 'hydrogenOption', 1);
+    const header = await game.page.evaluate(() => {
+      const actions = document.getElementById('headerActionsTab1');
+      return {
+        gainButton: !!document.getElementById('hydrogenGainButton'),
+        maxButtons: actions ? actions.querySelectorAll('.buy-max-button').length : -1
+      };
+    });
+    expect(header, 'the header Gain button must be there, and must not offer Max')
+      .toEqual({ gainButton: true, maxButtons: 0 });
   });
 
   test('Max is a narrow button to the right of an unchanged Buy button', async ({ game }) => {

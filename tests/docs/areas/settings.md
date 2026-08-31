@@ -8,11 +8,11 @@
 | **Spec folder** | `tests/e2e/settings/` |
 | **Existing coverage** | _none_ |
 
-Every control on the three Options panes — currency, notation, notifications, custom pointer, mouse trail, theme, weather effects, full screen, language, news ticker, background audio, SFX and autosave — driven through the real toggles and dropdowns.
+Every control on the three Options panes — theme, currency, notifications, custom pointer, mouse trail, weather effects, full screen, language, news ticker, background audio, SFX and autosave — driven through the real toggles and dropdowns. Theme leads the Visual pane; notation was retired from it and now exists only behind the debug flag.
 
 ## What should be tested
 
-- [ ] The Visual pane renders all seven of its rows, each with its own input
+- [ ] The Visual pane renders all six of its rows, each with its own input, Theme first
 - [ ] The Game Options pane renders all five of its rows
 - [ ] The Saving / Loading pane renders its autosave, export and import rows
 - [ ] Every control opens showing the value the game currently holds
@@ -20,7 +20,7 @@ Every control on the three Options panes — currency, notation, notifications, 
 - [ ] The mouse trail toggle stops and starts particles actually spawning
 - [ ] Choosing a theme repaints the document and records it as tried
 - [ ] Every theme in the dropdown is selectable and paints the body
-- [ ] Switching notation changes how figures are rendered on screen
+- [ ] Plain notation is only reachable behind the debug flag, and still renders when it is
 - [ ] The currency symbol carries through to what a sale is quoted in
 - [ ] Switching notifications off actually stops them appearing
 - [ ] The news ticker toggle adds and removes the real ticker timer

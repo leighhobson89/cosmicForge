@@ -1,4 +1,4 @@
-import { getCurrentOptionPane, getCurrentTheme, setAutoSaveToggle, getAutoSaveToggle, getAutoSaveFrequency, setAutoSaveFrequency, getSaveData, setSaveData, getCurrencySymbol, setCurrencySymbol, getNotationType, setNotationType, setNotificationsToggle, getNotificationsToggle, getSaveName, getWeatherEffectSetting, setWeatherEffectSetting, setNewsTickerSetting, getNewsTickerSetting, setSaveExportCloudFlag, getBackgroundAudio, setBackgroundAudio, getSfx, setSfx, setWasAutoSaveToggled, setMouseParticleTrailEnabled, getMouseParticleTrailEnabled, setCustomPointerEnabled, getCustomPointerEnabled, getOnboardingMode, getDemoBuild, getLanguage } from './constantsAndGlobalVars.js';
+import { getCurrentOptionPane, getCurrentTheme, setAutoSaveToggle, getAutoSaveToggle, getAutoSaveFrequency, setAutoSaveFrequency, getSaveData, setSaveData, getCurrencySymbol, setCurrencySymbol, getNotationType, setNotationType, setNotificationsToggle, getNotificationsToggle, getSaveName, getWeatherEffectSetting, setWeatherEffectSetting, setNewsTickerSetting, getNewsTickerSetting, setSaveExportCloudFlag, getBackgroundAudio, setBackgroundAudio, getSfx, setSfx, setWasAutoSaveToggled, setMouseParticleTrailEnabled, getMouseParticleTrailEnabled, setCustomPointerEnabled, getCustomPointerEnabled, getOnboardingMode, getDemoBuild, getLanguage, getVariableDebuggerAndCheats } from './constantsAndGlobalVars.js';
 import { createButton, createTextFieldArea, createOptionRow, createDropdown, createToggleSwitch, createHtmlTableAchievementsGrid, createHtmlTableStatistics, createHtmlTextAreaProse, toggleGameFullScreen, selectTheme, callPopupModal, showHideModal, showNotification, applyCustomPointerSetting, setElementPointerEvents, fadeInStartupOverlay, setupAchievementTooltip, relocalizeAll } from './ui.js';
 import { localize } from './localization.js';
 import { importSaveStringFileFromComputer, downloadSaveStringToComputer, initializeAutoSave, saveGame, saveGameToCloud, loadGameFromCloud, copySaveStringToClipBoard, loadGame, destroySaveGameOnCloud } from './saveLoadGame.js';
@@ -126,6 +126,46 @@ export function drawTab9Content(heading, optionContentElement) {
     }
 
     if (heading === 'Visual') {
+        // P14 (player-feedback plan): Theme leads the Visual pane. It is the setting
+        // players reach for most and the only one whose effect is immediately visible
+        // across the whole window, so it no longer sits below four toggles.
+        const settingsThemeRow = createOptionRow({
+            labelId: 'settingsThemeRow',
+            renderNameABs: null,
+            labelText: localize('tab9ThemeRowLabel', getLanguage()),
+            inputElements: [
+                createDropdown('themeSelect', [
+                    { value: 'terminal', text: localize('dropdownThemeTerminal', getLanguage()) },
+                    { value: 'dark', text: localize('dropdownThemeDark', getLanguage()) },
+                    { value: 'supernova', text: localize('dropdownThemeSupernova', getLanguage()) },
+                    { value: 'galaxy', text: localize('dropdownThemeGalaxy', getLanguage()) },
+                    { value: 'space', text: localize('dropdownThemeSpace', getLanguage()) },
+                    { value: 'misty', text: localize('dropdownThemeMisty', getLanguage()) },
+                    { value: 'light', text: localize('dropdownThemeLight', getLanguage()) },
+                    { value: 'frosty', text: localize('dropdownThemeFrosty', getLanguage()) },
+                    { value: 'summer', text: localize('dropdownThemeSummer', getLanguage()) },
+                ], document.body.getAttribute('data-theme'), (value) => {
+                    selectTheme(value);
+                    setAchievementIconImageUrls();
+                }),
+            ],
+            descriptionText: localize('tab9ThemeRowDescription', getLanguage()),
+            resourcePriceObject: null,
+            dataConditionCheck: null,
+            objectSectionArgument1: null,
+            objectSectionArgument2: null,
+            quantityArgument: null,
+            autoBuyerTier: null,
+            startInvisibleValue: false,
+            resourceString: null,
+            optionalIterationParam: null,
+            rowCategory: null,
+            noDescriptionContainer: false,
+            specialInputContainerClasses: null,
+            hideMainDescriptionRow: false
+        });
+        optionContentElement.appendChild(settingsThemeRow);
+
         const settingsCurrencySymbolRow = createOptionRow({
             labelId: 'settingsCurrencySymbolRow',
             renderNameABs: null,
@@ -161,34 +201,41 @@ export function drawTab9Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(settingsCurrencySymbolRow);
 
-        const settingsNotationRow = createOptionRow({
-            labelId: 'settingsNotationRow',
-            renderNameABs: null,
-            labelText: localize('tab9NotationRowLabel', getLanguage()),
-            inputElements: [
-                createDropdown('notationSelect', [
-                    { value: 'normalCondensed', text: localize('dropdownNotationNormalCondensed', getLanguage()) },
-                    { value: 'normal', text: localize('dropdownNotationNormal', getLanguage()) },
-                ], getNotationType(), (value) => {
-                    setNotationType(value);
-                }),
-            ],
-            descriptionText: localize('tab9NotationRowDescription', getLanguage()),
-            resourcePriceObject: null,
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: null,
-            noDescriptionContainer: false,
-            specialInputContainerClasses: null,
-            hideMainDescriptionRow: false
-        });
-        optionContentElement.appendChild(settingsNotationRow);
+        // P14 (player-feedback plan): plain notation is no longer offered to players —
+        // condensed is the only notation the game presents, and setNotationType()
+        // forces a save that predates that back onto it. The formatter still
+        // understands 'normal', so the row survives behind the debug flag for
+        // checking how a figure renders without the abbreviation ladder.
+        if (getVariableDebuggerAndCheats()) {
+            const settingsNotationRow = createOptionRow({
+                labelId: 'settingsNotationRow',
+                renderNameABs: null,
+                labelText: localize('tab9NotationRowLabel', getLanguage()),
+                inputElements: [
+                    createDropdown('notationSelect', [
+                        { value: 'normalCondensed', text: localize('dropdownNotationNormalCondensed', getLanguage()) },
+                        { value: 'normal', text: localize('dropdownNotationNormal', getLanguage()) },
+                    ], getNotationType(), (value) => {
+                        setNotationType(value);
+                    }),
+                ],
+                descriptionText: localize('tab9NotationRowDescription', getLanguage()),
+                resourcePriceObject: null,
+                dataConditionCheck: null,
+                objectSectionArgument1: null,
+                objectSectionArgument2: null,
+                quantityArgument: null,
+                autoBuyerTier: null,
+                startInvisibleValue: false,
+                resourceString: null,
+                optionalIterationParam: null,
+                rowCategory: null,
+                noDescriptionContainer: false,
+                specialInputContainerClasses: null,
+                hideMainDescriptionRow: false
+            });
+            optionContentElement.appendChild(settingsNotationRow);
+        }
 
         const settingsToggleNotificationsRow = createOptionRow({
             labelId: 'settingsToggleNotificationsRow',
@@ -291,42 +338,6 @@ export function drawTab9Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(mouseTrailToggleRow);
 
-        const settingsThemeRow = createOptionRow({
-            labelId: 'settingsThemeRow',
-            renderNameABs: null,
-            labelText: localize('tab9ThemeRowLabel', getLanguage()),
-            inputElements: [
-                createDropdown('themeSelect', [
-                    { value: 'terminal', text: localize('dropdownThemeTerminal', getLanguage()) },
-                    { value: 'dark', text: localize('dropdownThemeDark', getLanguage()) },
-                    { value: 'supernova', text: localize('dropdownThemeSupernova', getLanguage()) },
-                    { value: 'galaxy', text: localize('dropdownThemeGalaxy', getLanguage()) },
-                    { value: 'space', text: localize('dropdownThemeSpace', getLanguage()) },
-                    { value: 'misty', text: localize('dropdownThemeMisty', getLanguage()) },
-                    { value: 'light', text: localize('dropdownThemeLight', getLanguage()) },
-                    { value: 'frosty', text: localize('dropdownThemeFrosty', getLanguage()) },
-                    { value: 'summer', text: localize('dropdownThemeSummer', getLanguage()) },
-                ], document.body.getAttribute('data-theme'), (value) => {
-                    selectTheme(value);
-                    setAchievementIconImageUrls();
-                }),
-            ],
-            descriptionText: localize('tab9ThemeRowDescription', getLanguage()),
-            resourcePriceObject: null,
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: null,
-            noDescriptionContainer: false,
-            specialInputContainerClasses: null,
-            hideMainDescriptionRow: false
-        });
-        optionContentElement.appendChild(settingsThemeRow);
 
         const weatherEffectSettingsRow = createOptionRow({
             labelId: 'weatherEffectSettingsRow',

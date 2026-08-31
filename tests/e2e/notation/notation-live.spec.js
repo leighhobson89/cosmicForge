@@ -16,10 +16,13 @@
  *
  * ## The two modes, and which one matters
  *
- * The dropdown offers exactly two: **Normal Condensed** (the default, and the
- * one players actually use) and **Normal**. Every assertion here runs in both,
- * and the condensed sweep is the deeper of the two because it is the mode the
- * game ships in.
+ * The formatter knows exactly two: **Normal Condensed** (the default, and now the
+ * only one a player is offered) and **Normal**. Plain notation was retired from
+ * the Visual pane — the row is only built when the debug tooling is on — but the
+ * formatter still has to produce it correctly, so this file turns the debug flag
+ * on for the duration and drives the real dropdown. Every assertion here runs in
+ * both modes, and the condensed sweep is the deeper of the two because it is the
+ * mode every player is actually in.
  *
  * ## The grammar, and why it is stated as a rule rather than a value list
  *
@@ -129,8 +132,41 @@ async function visibleNotationElements(page) {
       .filter((entry) => /\d/.test(entry.text)));
 }
 
+/**
+ * The notation dropdown only exists behind the debug flag now, so a test in this
+ * file has to *state* the flag before it looks at the Visual pane — turning it on
+ * to drive the setting, or off to check what a player is actually offered.
+ *
+ * Inheriting the flag is the trap. `buildFlags.js` ships with it false, but it is
+ * Leigh's own control surface and a working copy set up for testing has it on, so
+ * a spec that trusts the file is testing the build configuration rather than the
+ * behaviour it is named for. It is set here in memory and put back to whatever it
+ * was on arrival by the afterEach below.
+ */
+let cheatsFlagBeforeTest = null;
+
+async function setDebugTooling(game, enabled) {
+  if (cheatsFlagBeforeTest === null) {
+    cheatsFlagBeforeTest = await game.withMods((m) => m.cg.getVariableDebuggerAndCheats() === true);
+  }
+  await game.withMods((m, value) => m.cg.setVariableDebuggerAndCheats(value), enabled);
+}
+
+const enableNotationDropdown = (game) => setDebugTooling(game, true);
+
+test.afterEach(async ({ game }) => {
+  if (cheatsFlagBeforeTest === null) return;
+  const was = cheatsFlagBeforeTest;
+  cheatsFlagBeforeTest = null;
+  await game.withMods((m, value) => {
+    m.cg.setNotationType('normalCondensed');
+    m.cg.setVariableDebuggerAndCheats(value);
+  }, was);
+});
+
 /** Choose a notation mode through the dropdown on the Visual pane. */
 async function chooseNotation(game, value) {
+  await enableNotationDropdown(game);
   await game.openTab(9);
   await openOptionRow(game, 9, 'tab9.option1');
 
@@ -170,8 +206,35 @@ async function openStatisticsScreen(game) {
 // ------------------------------------------------- the setting, driven for real
 
 test.describe('Number Notation — the setting on the Visual pane', () => {
-  test('a new run starts condensed, and the dropdown shows that as the chosen option', async ({ game, page }) => {
+  test('the game loads in condensed, and the Visual pane offers a player no way to leave it', async ({ game, page }) => {
     await game.boot();
+
+    // Read the mode before anything touches the flag: this is the state the game
+    // came up in, straight off a load, which is the claim being made.
+    expect(await game.withMods((m) => m.cg.getNotationType()),
+      'the game loads in condensed').toBe('normalCondensed');
+
+    // The pane is built from the flag at draw time, so it is forced off here and
+    // the pane opened afterwards — otherwise this asserts whatever buildFlags.js
+    // currently says rather than what a player is offered.
+    await setDebugTooling(game, false);
+    await game.openTab(9);
+    await openOptionRow(game, 9, 'tab9.option1');
+
+    const forPlayer = await page.evaluate(() => ({
+      row: !!document.getElementById('settingsNotationRow'),
+      dropdown: !!document.getElementById('notationSelect')
+    }));
+
+    expect(forPlayer, 'the notation row is retired from the player-facing Visual pane')
+      .toEqual({ row: false, dropdown: false });
+    expect(await game.withMods((m) => m.cg.getNotationType()),
+      'and nothing on the pane moved it off condensed').toBe('normalCondensed');
+  });
+
+  test('the debug build still exposes the dropdown, opened on the mode the game is in', async ({ game, page }) => {
+    await game.boot();
+    await enableNotationDropdown(game);
     await game.openTab(9);
     await openOptionRow(game, 9, 'tab9.option1');
 
@@ -186,7 +249,7 @@ test.describe('Number Notation — the setting on the Visual pane', () => {
       };
     });
 
-    expect(shown.present, 'the notation row belongs on the Visual pane').toBe(true);
+    expect(shown.present, 'the debug build keeps the notation row on the Visual pane').toBe(true);
     // Two modes ship. A third appearing here means a mode nothing in this file
     // has a grammar for, which is worth failing over.
     expect(shown.options).toEqual(['normalCondensed', 'normal']);

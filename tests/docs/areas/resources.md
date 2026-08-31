@@ -62,6 +62,11 @@ The eight extractable base resources plus solar, driven through the Resources ta
 - [ ] Increase All Storage: the storage-full notification action still works after a sweep
 - [ ] Increase All Storage: a storage-full notification cannot be claimed after a sweep already claimed it
 - [ ] Increase All Storage: the reservoir button goes red when the concrete cannot be paid
+- [ ] Gain 1: every resource pane carries its own Gain button in the header, and no Gain row in the body
+- [ ] Gain 1: the button sits on the title line rather than above or below it
+- [ ] Gain 1: one press gains exactly one unit, and a full store refuses the press
+- [ ] Gain 1: switching panes swaps the button, so a press can never gain the previous resource
+- [ ] Gain 1: the tab intro page has no Gain button, and leaving the tab and returning restores exactly one
 
 ## Status meaning
 

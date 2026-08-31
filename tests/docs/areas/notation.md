@@ -8,7 +8,7 @@
 | **Spec folder** | `tests/e2e/notation/` |
 | **Existing coverage** | _none_ |
 
-Formatting of every displayed number across notation modes — touches every screen in the game.
+Formatting of every displayed number across notation modes — touches every screen in the game. Condensed is the only mode a player is offered; plain notation survives in the formatter and behind the debug flag, and both are swept here.
 
 ## What should be tested
 
@@ -17,7 +17,8 @@ Formatting of every displayed number across notation modes — touches every scr
 - [ ] Negative, zero and unparseable values format sanely
 - [ ] Notation preference persists across save/load
 - [ ] Formatting is idempotent, so the per-frame reformat cannot compound its own output
-- [ ] The Visual pane offers exactly the two shipped modes, and opens on the one the game is in
+- [ ] The game loads in condensed, and the Visual pane offers a player no way to leave it
+- [ ] The debug build still exposes the dropdown, opened on the mode the game is in
 - [ ] Choosing a mode from the real dropdown reformats what is already on screen, both ways
 - [ ] The chosen mode survives leaving the settings pane and coming back
 - [ ] Condensed: no screen in the game renders an un-abbreviated number

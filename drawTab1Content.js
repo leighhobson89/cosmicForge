@@ -4,12 +4,54 @@ import { getResourceDataObject, setResourceDataObject } from './resourceDataObje
 import { removeTabAttentionIfNoIndicators, createTextElement, createToggleSwitch, createOptionRow, createDropdown, createButton, disableStorageNotificationActionIfShowing } from './ui.js';
 import { localize } from './localization.js';
 
+// P14 (player-feedback plan): the per-resource "Gain 1" option row is gone. The
+// button it held now sits in the pane header, on the same line as the resource
+// name, so every resource pane is one row shorter and the manual gain is still a
+// single click away. The heading arrives here as the canonical English resource
+// name, which is also the key the resource data object is stored under.
+const TAB1_HEADING_RESOURCES = ['hydrogen', 'helium', 'carbon', 'neon', 'oxygen', 'sodium', 'silicon', 'iron'];
+
+function drawResourceGainHeaderButton(heading) {
+    const headerActionsElement = document.getElementById('headerActionsTab1');
+    if (!headerActionsElement) {
+        return;
+    }
+
+    // Cleared unconditionally: switching from one resource pane to another has to
+    // drop the previous resource's button, and the intro pane has to end up with
+    // no button at all.
+    headerActionsElement.innerHTML = '';
+
+    const resource = String(heading).toLowerCase();
+    if (!TAB1_HEADING_RESOURCES.includes(resource)) {
+        return;
+    }
+
+    headerActionsElement.appendChild(createButton({
+        text: localize('buttonGainOne', getLanguage()),
+        classNames: [`id_${resource}GainButton`, 'option-button', 'pane-header-button'],
+        onClick: () => {
+            gain(1, `${resource}Quantity`, null, false, null, resource, 'resources');
+        },
+        dataConditionCheck: null,
+        resourcePriceObject: null,
+        objectSectionArgument1: null,
+        objectSectionArgument2: null,
+        quantityArgument: null,
+        disableKeyboardForButton: true,
+        autoBuyerTier: null,
+        rowCategory: 'resource'
+    }));
+}
+
 export function drawTab1Content(heading, optionContentElement) {
     // The row's own marker is cleared by the click that opened this pane — see
     // clearOptionRowAttentionIndicator in ui.js. Only the tab badge is recomputed
     // here, because a redraw can also follow a language change or a state change
     // rather than a click.
     removeTabAttentionIfNoIndicators('tab1');
+
+    drawResourceGainHeaderButton(heading);
 
     if (heading === 'Hydrogen') {
         let storagePrice = getResourceDataObject('resources', ['hydrogen', 'storageCapacity']);
@@ -92,40 +134,6 @@ export function drawTab1Content(heading, optionContentElement) {
             rowCategory: 'resource'
         });
         optionContentElement.appendChild(hydrogenSellRow);
-        const hydrogenGainRow = createOptionRow({
-            labelId: 'hydrogenGainRow',
-            renderNameABs: null,
-            labelText: localize('tab1HydrogenGainRowLabel', getLanguage()),
-            inputElements: [
-                createButton({
-                    text: localize('buttonGain', getLanguage()),
-                    classNames: ['option-button'],
-                    onClick: () => {
-                        gain(1, 'hydrogenQuantity', null, false, null, 'hydrogen', 'resources');
-                    },
-                    dataConditionCheck: null,
-                    resourcePriceObject: null,
-                    objectSectionArgument1: null,
-                    objectSectionArgument2: null,
-                    quantityArgument: null,
-                    disableKeyboardForButton: true,
-                    autoBuyerTier: null,
-                    rowCategory: 'resource'
-                }),
-            ],
-            descriptionText: null,
-            resourcePriceObject: null,
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: 'resource'
-        });
-        optionContentElement.appendChild(hydrogenGainRow);
 
         const hydrogenIncreaseStorageRow = createOptionRow({
             labelId: 'hydrogenIncreaseStorageRow',
@@ -401,40 +409,6 @@ export function drawTab1Content(heading, optionContentElement) {
             rowCategory: 'resource'
         });
         optionContentElement.appendChild(heliumSellRow);
-        const heliumGainRow = createOptionRow({
-            labelId: 'heliumGainRow',
-            renderNameABs: null,
-            labelText: localize('tab1HeliumGainRowLabel', getLanguage()),
-            inputElements: [
-                createButton({
-                    text: localize('buttonGain', getLanguage()),
-                    classNames: ['option-button'],
-                    onClick: () => {
-                        gain(1, 'heliumQuantity', null, false, null, 'helium', 'resources');
-                    },
-                    dataConditionCheck: null,
-                    resourcePriceObject: null,
-                    objectSectionArgument1: null,
-                    objectSectionArgument2: null,
-                    quantityArgument: null,
-                    disableKeyboardForButton: true,
-                    autoBuyerTier: null,
-                    rowCategory: 'resource'
-                }),
-            ],
-            descriptionText: null,
-            resourcePriceObject: null,
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: 'resource'
-        });
-        optionContentElement.appendChild(heliumGainRow);
 
         const heliumIncreaseStorageRow = createOptionRow({
             labelId: 'heliumIncreaseStorageRow',
@@ -718,40 +692,6 @@ export function drawTab1Content(heading, optionContentElement) {
             rowCategory: 'resource'
         });
         optionContentElement.appendChild(carbonSellRow);
-        const carbonGainRow = createOptionRow({
-            labelId: 'carbonGainRow',
-            renderNameABs: null,
-            labelText: localize('tab1CarbonGainRowLabel', getLanguage()),
-            inputElements: [
-                createButton({
-                    text: localize('buttonGain', getLanguage()),
-                    classNames: ['option-button'],
-                    onClick: () => {
-                        gain(1, 'carbonQuantity', null, false, null, 'carbon', 'resources');
-                    },
-                    dataConditionCheck: null,
-                    resourcePriceObject: null,
-                    objectSectionArgument1: null,
-                    objectSectionArgument2: null,
-                    quantityArgument: null,
-                    disableKeyboardForButton: true,
-                    autoBuyerTier: null,
-                    rowCategory: 'resource'
-                }),
-            ],
-            descriptionText: null,
-            resourcePriceObject: null,
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: 'resource'
-        });
-        optionContentElement.appendChild(carbonGainRow);
 
         const carbonIncreaseStorageRow = createOptionRow({
             labelId: 'carbonIncreaseStorageRow',
@@ -1028,40 +968,6 @@ export function drawTab1Content(heading, optionContentElement) {
             rowCategory: 'resource'
         });
         optionContentElement.appendChild(neonSellRow);
-        const neonGainRow = createOptionRow({
-            labelId: 'neonGainRow',
-            renderNameABs: null,
-            labelText: localize('tab1NeonGainRowLabel', getLanguage()),
-            inputElements: [
-                createButton({
-                    text: localize('buttonGain', getLanguage()),
-                    classNames: ['option-button'],
-                    onClick: () => {
-                        gain(1, 'neonQuantity', null, false, null, 'neon', 'resources');
-                    },
-                    dataConditionCheck: null,
-                    resourcePriceObject: null,
-                    objectSectionArgument1: null,
-                    objectSectionArgument2: null,
-                    quantityArgument: null,
-                    disableKeyboardForButton: true,
-                    autoBuyerTier: null,
-                    rowCategory: 'resource'
-                }),
-            ],
-            descriptionText: null,
-            resourcePriceObject: null,
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: 'resource'
-        });
-        optionContentElement.appendChild(neonGainRow);
 
         const neonIncreaseStorageRow = createOptionRow({
             labelId: 'neonIncreaseStorageRow',
@@ -1338,40 +1244,6 @@ export function drawTab1Content(heading, optionContentElement) {
             rowCategory: 'resource'
         });
         optionContentElement.appendChild(oxygenSellRow);
-        const oxygenGainRow = createOptionRow({
-            labelId: 'oxygenGainRow',
-            renderNameABs: null,
-            labelText: localize('tab1OxygenGainRowLabel', getLanguage()),
-            inputElements: [
-                createButton({
-                    text: localize('buttonGain', getLanguage()),
-                    classNames: ['option-button'],
-                    onClick: () => {
-                        gain(1, 'oxygenQuantity', null, false, null, 'oxygen', 'resources');
-                    },
-                    dataConditionCheck: null,
-                    resourcePriceObject: null,
-                    objectSectionArgument1: null,
-                    objectSectionArgument2: null,
-                    quantityArgument: null,
-                    disableKeyboardForButton: true,
-                    autoBuyerTier: null,
-                    rowCategory: 'resource'
-                }),
-            ],
-            descriptionText: null,
-            resourcePriceObject: null,
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: 'resource'
-        });
-        optionContentElement.appendChild(oxygenGainRow);
 
         const oxygenIncreaseStorageRow = createOptionRow({
             labelId: 'oxygenIncreaseStorageRow',
@@ -1623,40 +1495,6 @@ export function drawTab1Content(heading, optionContentElement) {
             rowCategory: 'resource'
         });
         optionContentElement.appendChild(sodiumSellRow);
-        const sodiumGainRow = createOptionRow({
-            labelId: 'sodiumGainRow',
-            renderNameABs: null,
-            labelText: localize('tab1SodiumGainRowLabel', getLanguage()),
-            inputElements: [
-                createButton({
-                    text: localize('buttonGain', getLanguage()),
-                    classNames: ['option-button'],
-                    onClick: () => {
-                        gain(1, 'sodiumQuantity', null, false, null, 'sodium', 'resources');
-                    },
-                    dataConditionCheck: null,
-                    resourcePriceObject: null,
-                    objectSectionArgument1: null,
-                    objectSectionArgument2: null,
-                    quantityArgument: null,
-                    disableKeyboardForButton: true,
-                    autoBuyerTier: null,
-                    rowCategory: 'resource'
-                }),
-            ],
-            descriptionText: null,
-            resourcePriceObject: null,
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: 'resource'
-        });
-        optionContentElement.appendChild(sodiumGainRow);
 
         const sodiumIncreaseStorageRow = createOptionRow({
             labelId: 'sodiumIncreaseStorageRow',
@@ -1933,40 +1771,6 @@ export function drawTab1Content(heading, optionContentElement) {
             rowCategory: 'resource'
         });
         optionContentElement.appendChild(siliconSellRow);
-        const siliconGainRow = createOptionRow({
-            labelId: 'siliconGainRow',
-            renderNameABs: null,
-            labelText: localize('tab1SiliconGainRowLabel', getLanguage()),
-            inputElements: [
-                createButton({
-                    text: localize('buttonGain', getLanguage()),
-                    classNames: ['option-button'],
-                    onClick: () => {
-                        gain(1, 'siliconQuantity', null, false, null, 'silicon', 'resources');
-                    },
-                    dataConditionCheck: null,
-                    resourcePriceObject: null,
-                    objectSectionArgument1: null,
-                    objectSectionArgument2: null,
-                    quantityArgument: null,
-                    disableKeyboardForButton: true,
-                    autoBuyerTier: null,
-                    rowCategory: 'resource'
-                }),
-            ],
-            descriptionText: null,
-            resourcePriceObject: null,
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: 'resource'
-        });
-        optionContentElement.appendChild(siliconGainRow);
 
         const siliconIncreaseStorageRow = createOptionRow({
             labelId: 'siliconIncreaseStorageRow',
@@ -2218,40 +2022,6 @@ export function drawTab1Content(heading, optionContentElement) {
             rowCategory: 'resource'
         });
         optionContentElement.appendChild(ironSellRow);
-        const ironGainRow = createOptionRow({
-            labelId: 'ironGainRow',
-            renderNameABs: null,
-            labelText: localize('tab1IronGainRowLabel', getLanguage()),
-            inputElements: [
-                createButton({
-                    text: localize('buttonGain', getLanguage()),
-                    classNames: ['option-button'],
-                    onClick: () => {
-                        gain(1, 'ironQuantity', null, false, null, 'iron', 'resources');
-                    },
-                    dataConditionCheck: null,
-                    resourcePriceObject: null,
-                    objectSectionArgument1: null,
-                    objectSectionArgument2: null,
-                    quantityArgument: null,
-                    disableKeyboardForButton: true,
-                    autoBuyerTier: null,
-                    rowCategory: 'resource'
-                }),
-            ],
-            descriptionText: null,
-            resourcePriceObject: null,
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: 'resource'
-        });
-        optionContentElement.appendChild(ironGainRow);
 
         const ironIncreaseStorageRow = createOptionRow({
             labelId: 'ironIncreaseStorageRow',

@@ -15,6 +15,7 @@
  *   quantity         #<resource>SellSelectQuantity        (feeds BOTH of the above)
  *   Increase Storage #<resource>IncreaseStorageRow button
  *   Autobuyers       #<resource>AutoBuyer<N>Row button    (rows gated by tech)
+ *   Gain 1           #<resource>GainButton                (in the pane header, P14)
  *   Sell All         #sellAllResourcesButton
  *
  * Two pieces of wiring make the pane worth testing through the DOM at all, and

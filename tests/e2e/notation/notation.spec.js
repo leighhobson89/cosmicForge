@@ -2,10 +2,17 @@
  * Area: Number Notation
  * Plan: tests/docs/areas/notation.md
  *
- * Two shipped modes, chosen from Settings → Notation:
+ * Two modes the formatter supports:
  *
  *   normalCondensed  (default) — 1.2K / 3.4M / 5.6B / 7.8e12 / 9.0e42
  *   normal                     — 1,234 with thousands separators
+ *
+ * P14 of the player-feedback plan retired plain notation from the Visual pane:
+ * condensed is the only mode a player is offered, the row is built only when the
+ * debug tooling is on, and a save carrying 'normal' is migrated back onto
+ * condensed as it loads. The formatter keeps both modes, which is why this file
+ * still exercises both — it tests `formatNumber()`, not the settings pane. What
+ * is reachable from the pane is `notation-live.spec.js`'s business.
  *
  * `formatNumber()` is the condensed formatter every display path funnels
  * through, and the frame loop applies `formatAllNotationElements` to every

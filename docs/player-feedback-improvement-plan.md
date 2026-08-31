@@ -34,7 +34,7 @@ The audit moved several items vs. the original review order: **P3** (power toggl
 | 9 | P15 | Megastructure balance pass | 2 — important | High | Medium (12–20 h) |
 | 10 | P8 | Resource tick unification (foundational refactor) | 2 — important, large | Very high | High (30–50 h) |
 | 11 | P9 | Autosell → production allocation redesign — ✅ **COMPLETED** | 2 — important, large | Very high | High (25–40 h) |
-| 12 | P14 | Gain button merge | 3 — quick win | Medium | Low (4–8 h) |
+| 12 | P14 | Gain button merge — ✅ **COMPLETED** | 3 — quick win | Medium | Low (4–8 h) |
 | 13 | P11 | Progression clarity (black hole & upgrade displays) | 3 — quick win | Medium | Low-Med (8–12 h) |
 | 14 | P12 | UI row/layout refactor (`createOptionRow` mini-tables) | 4 — the rest | Medium | High (30–40 h) |
 | 15 | P13 | Spacing / visual hierarchy | 4 — the rest | Medium | Medium (10–16 h) |
@@ -922,16 +922,44 @@ Iron    [==== 10% $ ====|============ 40% compounds ============|======== 50% st
 
 # Tier 3 — Other quick wins
 
-## P14 — Gain button merge / space reclaim
+## ~~P14 — Gain button merge / space reclaim~~ ✅ DONE
 
-**Audit.** Every resource pane renders a dedicated Gain row (`hydrogenGainRow`, `drawTab1Content.js:104–137`, repeated per resource) calling `gain(1, ...)`. There is already a hold-Enter rapid-click system (`startHoldEnterRapidClick`, `ui.js:1037`) indicating manual gain matters mainly early-game. This item is fully standalone — it can ship any time; if the Tab-1 grid migration (P12) happens later, the merged row simply rides along.
+~~**Audit.** Every resource pane renders a dedicated Gain row (`hydrogenGainRow`, `drawTab1Content.js:104–137`, repeated per resource) calling `gain(1, ...)`. There is already a hold-Enter rapid-click system (`startHoldEnterRapidClick`, `ui.js:1037`) indicating manual gain matters mainly early-game. This item is fully standalone — it can ship any time; if the Tab-1 grid migration (P12) happens later, the merged row simply rides along.~~
 
-**Change.** Merge Gain into the Sell row as a single compact control group (e.g. one row: `[Gain ×1] [Sell dropdown] [Sell]`), or collapse Gain behind an early-game-only visibility rule (hide once auto-buyer tier 1 exists — the point where manual gain stops mattering). Keep the tooltip explaining the rare late-game uses.
+~~**Change.** Merge Gain into the Sell row as a single compact control group (e.g. one row: `[Gain ×1] [Sell dropdown] [Sell]`), or collapse Gain behind an early-game-only visibility rule (hide once auto-buyer tier 1 exists — the point where manual gain stops mattering). Keep the tooltip explaining the rare late-game uses.~~
 
-**Effort:** ~4–8 h.
-**Risk:** Low. Pure UI; `gain()` logic untouched.
+~~**Effort:** ~4–8 h.~~
+~~**Risk:** Low. Pure UI; `gain()` logic untouched.~~
 
-**Integration test.** `tests/e2e/resources/gain-row.spec.js`: fresh run — Gain visible and functional (+1 per click, capped at storage); after unlocking auto-buyer tier 1 — Gain row hidden/merged, vertical height of the resource pane measured before/after in the report (the "scroll reduction" gain).
+~~**Integration test.** `tests/e2e/resources/gain-row.spec.js`: fresh run — Gain visible and functional (+1 per click, capped at storage); after unlocking auto-buyer tier 1 — Gain row hidden/merged, vertical height of the resource pane measured before/after in the report (the "scroll reduction" gain).~~
+
+~~**As built.** Neither of the two options above was taken. The Gain row is **deleted outright** and its~~
+~~button moved into the **pane header**, on the same line as the resource name and to its right, reading~~
+~~**"Gain 1"** (`buttonGainOne`, translated into all six languages). There is no label beside it — the~~
+~~label is inside the button — and the click does exactly what the row's button did,~~
+~~`gain(1, '<resource>Quantity', null, false, null, '<resource>', 'resources')`. Every resource pane is~~
+~~therefore one option row shorter at every point in the run, rather than only after tier 1 is bought,~~
+~~and there is no early/late visibility rule to reason about.~~
+
+~~The header gained a generic slot to hang this on: `#headerContentTab1` now sits inside a~~
+~~`.pane-header-title-row` beside `#headerActionsTab1`, mirroring the sidebar's existing~~
+~~`sidebar-intro-header` / `sidebar-header-actions` pattern (P5's Sell All and Storage All). The button~~
+~~is built by `drawResourceGainHeaderButton()` in `drawTab1Content.js` through the shared~~
+~~`createButton()` factory, with the id `#<resource>GainButton`. Because the button lives *outside*~~
+~~`#optionContentTab1`, `updateContent()` clears `#headerActionsTab<n>` on every pane draw — before the~~
+~~intro branch returns — so a pane change can never leave the previous resource's button behind.~~
+
+~~The row's tooltip was dropped rather than kept: `optionDesc<Resource>GainContent1` read "Manually~~
+~~gain one unit of Hydrogen", which a button labelled "Gain 1" on the Hydrogen pane already says. The~~
+~~eight `tab1<Resource>GainRowLabel` keys and eight `optionDesc<Resource>GainContent1` keys were~~
+~~removed from all six languages (96 entries), and `validateLocalization.cjs` passes clean.~~
+
+~~**Test.** `tests/e2e/resources/gain-header-button.spec.js` (not `gain-row.spec.js` — there is no row):~~
+~~all eight panes carry exactly one header button with the catalogue's label and no Gain row in the~~
+~~body; the button's rect overlaps the title's vertically and sits to its right (the reclaimed-height~~
+~~claim, asserted as geometry); five presses gain exactly five and a full store refuses the press; and~~
+~~switching Hydrogen → Helium swaps the button so a press can never gain the previous resource.~~
+~~`statistics.spec.js` and `bulk-purchase.spec.js` were repointed at the new button.~~
 
 ---
 

@@ -210,9 +210,9 @@
       "status": "green",
       "risk": "medium",
       "legacy": [],
-      "summary": "Every control on the three Options panes — currency, notation, notifications, custom pointer, mouse trail, theme, weather effects, full screen, language, news ticker, background audio, SFX and autosave — driven through the real toggles and dropdowns.",
+      "summary": "Every control on the three Options panes — theme, currency, notifications, custom pointer, mouse trail, weather effects, full screen, language, news ticker, background audio, SFX and autosave — driven through the real toggles and dropdowns. Theme leads the Visual pane; notation was retired from it and now exists only behind the debug flag.",
       "tests": [
-        "The Visual pane renders all seven of its rows, each with its own input",
+        "The Visual pane renders all six of its rows, each with its own input, Theme first",
         "The Game Options pane renders all five of its rows",
         "The Saving / Loading pane renders its autosave, export and import rows",
         "Every control opens showing the value the game currently holds",
@@ -220,7 +220,7 @@
         "The mouse trail toggle stops and starts particles actually spawning",
         "Choosing a theme repaints the document and records it as tried",
         "Every theme in the dropdown is selectable and paints the body",
-        "Switching notation changes how figures are rendered on screen",
+        "Plain notation is only reachable behind the debug flag, and still renders when it is",
         "The currency symbol carries through to what a sale is quoted in",
         "Switching notifications off actually stops them appearing",
         "The news ticker toggle adds and removes the real ticker timer",
@@ -295,9 +295,14 @@
         "Increase All Storage: the pane's own Increase Storage button still works after a sweep",
         "Increase All Storage: the storage-full notification action still works after a sweep",
         "Increase All Storage: a storage-full notification cannot be claimed after a sweep already claimed it",
-        "Increase All Storage: the reservoir button goes red when the concrete cannot be paid"
+        "Increase All Storage: the reservoir button goes red when the concrete cannot be paid",
+        "Gain 1: every resource pane carries its own Gain button in the header, and no Gain row in the body",
+        "Gain 1: the button sits on the title line rather than above or below it",
+        "Gain 1: one press gains exactly one unit, and a full store refuses the press",
+        "Gain 1: switching panes swaps the button, so a press can never gain the previous resource",
+        "Gain 1: the tab intro page has no Gain button, and leaving the tab and returning restores exactly one"
       ],
-      "specCount": 55
+      "specCount": 60
     },
     {
       "id": "compounds",
@@ -1282,14 +1287,15 @@
       "status": "green",
       "risk": "medium",
       "legacy": [],
-      "summary": "Formatting of every displayed number across notation modes — touches every screen in the game.",
+      "summary": "Formatting of every displayed number across notation modes — touches every screen in the game. Condensed is the only mode a player is offered; plain notation survives in the formatter and behind the debug flag, and both are swept here.",
       "tests": [
         "The condensed formatter picks the right suffix at every magnitude from 1 to 1e300, and truncates rather than rounds",
         "The production-rate formatter keeps the sign and scales its precision",
         "Negative, zero and unparseable values format sanely",
         "Notation preference persists across save/load",
         "Formatting is idempotent, so the per-frame reformat cannot compound its own output",
-        "The Visual pane offers exactly the two shipped modes, and opens on the one the game is in",
+        "The game loads in condensed, and the Visual pane offers a player no way to leave it",
+        "The debug build still exposes the dropdown, opened on the mode the game is in",
         "Choosing a mode from the real dropdown reformats what is already on screen, both ways",
         "The chosen mode survives leaving the settings pane and coming back",
         "Condensed: no screen in the game renders an un-abbreviated number",

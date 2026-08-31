@@ -2122,7 +2122,14 @@ export function restoreGameStatus(gameState, type) {
             // top of this function, so the buildings data is already the save's own.
             buildingTypeOnOff = normaliseBuildingTypeOnOff(gameState.buildingTypeOnOff);
             ranOutOfFuelWhenOn = gameState.ranOutOfFuelWhenOn;
-            setNotationType(gameState.notationType);
+            // P14 (player-feedback plan): plain notation is no longer offered in the
+            // Visual settings pane, so a save written while it still was gets migrated
+            // onto condensed here rather than loading into a mode the player has no
+            // way to leave. The debug build keeps the dropdown, so a debug session is
+            // left with whatever it chose.
+            setNotationType(
+                (gameState.notationType === 'normal' && getVariableDebuggerAndCheats()) ? 'normal' : 'normalCondensed'
+            );
             oneOffPrizesAlreadyClaimedArray = gameState.oneOffPrizesAlreadyClaimedArray;
             rocketsBuilt = gameState.rocketsBuilt;
             starShipModulesBuilt = gameState.starShipModulesBuilt ?? [''];

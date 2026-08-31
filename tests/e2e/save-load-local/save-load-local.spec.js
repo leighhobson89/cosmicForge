@@ -192,10 +192,15 @@ async function chooseDropdown(game, dropdownId, value) {
 
 /**
  * Play a run worth saving: the game's own scenario chain for the bulk of it, plus
- * two settings changed through their real dropdowns so the save carries something
+ * the currency changed through its real dropdown so the save carries something
  * the player chose by hand rather than only what the debug menu granted.
+ *
+ * Notation used to be the second hand-chosen setting here. It no longer can be:
+ * plain notation was retired from the Visual pane, and a save that carries it is
+ * migrated back onto condensed on load — so notationType still round-trips (it is
+ * in `structural()` below), it just no longer varies.
  */
-async function playARun(game, { currency = '€', notation = 'normal' } = {}) {
+async function playARun(game, { currency = '€' } = {}) {
   await game.openDebugMenu();
   await game.debugClick('give1BButton');
   await game.debugClick('grantAllTechsButton');
@@ -206,7 +211,6 @@ async function playARun(game, { currency = '€', notation = 'normal' } = {}) {
 
   await openPaneByToken(game, VISUAL_PANE_TOKEN);
   await chooseDropdown(game, 'currencySelect', currency);
-  await chooseDropdown(game, 'notationSelect', notation);
 }
 
 test.describe('Local save & load — the code', () => {
@@ -440,7 +444,7 @@ test.describe('Local save & load — the file', () => {
     await game.boot();
     const originalPioneer = game.pioneer;
 
-    await playARun(game, { currency: '£', notation: 'normal' });
+    await playARun(game, { currency: '£' });
     await openSavingPane(game);
 
     const [download] = await Promise.all([

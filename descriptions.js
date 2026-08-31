@@ -616,11 +616,6 @@ export function initialiseDescriptions() {
             content2: localize('optionDescHydrogenSellContent2', getLanguage()),
             updateAt: "hydrogenFusion"
         },
-        hydrogenGainRow: {
-            content1: localize('optionDescHydrogenGainContent1', getLanguage()),
-            content2: "",
-            updateAt: ""
-        },
         hydrogenIncreaseStorageRow: {
             content1: localize('optionDescHydrogenStorageContent1', getLanguage()),
             content2: "",
@@ -630,11 +625,6 @@ export function initialiseDescriptions() {
             content1: localize('optionDescHeliumSellContent1', getLanguage()),
             content2: localize('optionDescHeliumSellContent2', getLanguage()),
             updateAt: "heliumFusion"
-        },
-        heliumGainRow: {
-            content1: localize('optionDescHeliumGainContent1', getLanguage()),
-            content2: "",
-            updateAt: ""
         },
         heliumIncreaseStorageRow: {
             content1: localize('optionDescHeliumStorageContent1', getLanguage()),
@@ -646,11 +636,6 @@ export function initialiseDescriptions() {
             content2: localize('optionDescCarbonSellContent2', getLanguage()),
             updateAt: "carbonFusion"
         },
-        carbonGainRow: {
-            content1: localize('optionDescCarbonGainContent1', getLanguage()),
-            content2: "",
-            updateAt: ""
-        },
         carbonIncreaseStorageRow: {
             content1: localize('optionDescCarbonStorageContent1', getLanguage()),
             content2: "",
@@ -660,11 +645,6 @@ export function initialiseDescriptions() {
             content1: localize('optionDescNeonSellContent1', getLanguage()),
             content2: localize('optionDescNeonSellContent2', getLanguage()),
             updateAt: "neonFusion"
-        },
-        neonGainRow: {
-            content1: localize('optionDescNeonGainContent1', getLanguage()),
-            content2: "",
-            updateAt: ""
         },
         neonIncreaseStorageRow: {
             content1: localize('optionDescNeonStorageContent1', getLanguage()),
@@ -676,11 +656,6 @@ export function initialiseDescriptions() {
             content2: localize('optionDescOxygenSellContent2', getLanguage()),
             updateAt: "oxygenFusion"
         },
-        oxygenGainRow: {
-            content1: localize('optionDescOxygenGainContent1', getLanguage()),
-            content2: "",
-            updateAt: ""
-        },
         oxygenIncreaseStorageRow: {
             content1: localize('optionDescOxygenStorageContent1', getLanguage()),
             content2: "",
@@ -688,11 +663,6 @@ export function initialiseDescriptions() {
         },
         sodiumSellRow: {
             content1: localize('optionDescSodiumSellContent1', getLanguage()),
-            content2: "",
-            updateAt: ""
-        },
-        sodiumGainRow: {
-            content1: localize('optionDescSodiumGainContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
@@ -706,11 +676,6 @@ export function initialiseDescriptions() {
             content2: localize('optionDescSiliconSellContent2', getLanguage()),
             updateAt: "siliconFusion"
         },
-        siliconGainRow: {
-            content1: localize('optionDescSiliconGainContent1', getLanguage()),
-            content2: "",
-            updateAt: ""
-        },
         siliconIncreaseStorageRow: {
             content1: localize('optionDescSiliconStorageContent1', getLanguage()),
             content2: "",
@@ -718,11 +683,6 @@ export function initialiseDescriptions() {
         },
         ironSellRow: {
             content1: localize('optionDescIronSellContent1', getLanguage()),
-            content2: "",
-            updateAt: ""
-        },
-        ironGainRow: {
-            content1: localize('optionDescIronGainContent1', getLanguage()),
             content2: "",
             updateAt: ""
         },
