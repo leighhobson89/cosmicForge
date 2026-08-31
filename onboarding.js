@@ -9,6 +9,9 @@ import {
 
 import { localize } from './localization.js';
 
+// P7 (player-feedback plan): the game's one precision policy. See precision.js.
+import { toleranceFor, isAtLeast, isEffectivelyEqual } from './precision.js';
+
 import { setAchievementFlagArray } from './constantsAndGlobalVars.js';
 
 import { getResourceDataObject } from './resourceDataObject.js';
@@ -933,7 +936,9 @@ function checkOnboardingCondition(conditionStep, calculateResearchRatePerTick) {
         return false;
     }
 
-    const epsilon = 1e-9;
+    // P7: one tolerance for the whole game, rather than a local 1e-9 that stops
+    // being a tolerance at all once values reach the scale a late run works at.
+    const epsilon = toleranceFor(target);
 
     switch (comparator) {
         case 'gt':
@@ -947,14 +952,14 @@ function checkOnboardingCondition(conditionStep, calculateResearchRatePerTick) {
             return current <= target + epsilon;
         case 'eq':
         case '==':
-            return Math.abs(current - target) <= epsilon;
+            return isEffectivelyEqual(current, target);
         case 'ne':
         case '!=':
-            return Math.abs(current - target) > epsilon;
+            return !isEffectivelyEqual(current, target);
         case 'gte':
         case '>=':
         default:
-            return current >= target - epsilon;
+            return isAtLeast(current, target);
     }
 }
 

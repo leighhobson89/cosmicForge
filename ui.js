@@ -391,6 +391,10 @@ import {
     writeStoredValue
 } from './utilityFunctions.js';
 
+// P7 (player-feedback plan): the game's one precision policy, so a figure ui.js
+// renders and a gate game.js applies to it cannot disagree. See precision.js.
+import { canAfford, displayQuantity } from './precision.js';
+
 
 import { enableGlobalClickTracking, initAnalytics, trackAnalyticsEvent } from './analytics.js';
 
@@ -607,7 +611,7 @@ function formatCountdownMs(ms) {
 }
 
 
-function formatDurationMs(ms) {
+export function formatDurationMs(ms) {
     const totalSeconds = Math.max(0, Math.round((Number(ms) || 0) / 1000));
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -7717,7 +7721,7 @@ export function statToolBarCustomizations() {
 
 
     if (cashStatElement) {
-        const cashAmount = Math.floor(getResourceDataObject('currency', ['cash']) ?? 0);
+        const cashAmount = displayQuantity(getResourceDataObject('currency', ['cash']) ?? 0);
         const currencySymbol = getCurrencySymbol();
         const cashDisplay = currencySymbol === '€'
             ? `${cashAmount.toLocaleString()}${currencySymbol}`
@@ -9626,7 +9630,7 @@ export function drawNativeTechTree(techData, containerSelector) {
         const price = typeof priceRaw === 'number' ? priceRaw : Number(priceRaw) || 0;
         const currentResearchRaw = getResourceDataObject('research', ['quantity']);
         const currentResearch = typeof currentResearchRaw === 'number' ? currentResearchRaw : Number(currentResearchRaw) || 0;
-        const meetsCostRequirement = currentResearch >= price || unlockedTechs.includes(techKey);
+        const meetsCostRequirement = canAfford(currentResearch, price) || unlockedTechs.includes(techKey);
         const costElement = document.createElement('div');
         costElement.classList.add('native-tech-cost', meetsCostRequirement ? 'ready-text' : 'red-disabled-text');
         costElement.dataset.techKey = techKey;

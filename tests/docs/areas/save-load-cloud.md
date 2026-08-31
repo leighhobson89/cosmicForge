@@ -20,6 +20,7 @@ Supabase-backed saves keyed on pioneer name, exercised as a feature: uploaded th
 - [ ] A blank pioneer name is refused before any write is attempted
 - [ ] Autosave reaches the cloud on its configured interval with no player action
 - [ ] Region, hostSource and feedback columns are populated correctly on the outgoing write
+- [ ] `time_playing_this_save` carries the pioneer's active play time, formatted as the game formats a duration ("14m 34s", "44h 12m 11s"), on both the insert and the overwrite
 
 ## Status meaning
 

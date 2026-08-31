@@ -10,9 +10,18 @@
  * `formatNumber()` is the condensed formatter every display path funnels
  * through, and the frame loop applies `formatAllNotationElements` to every
  * element carrying the `notation` class. The condensed form deliberately
- * *truncates* rather than rounds — `Math.floor(n / divisor * 10) / 10` — so
- * 1999 reads 1.9K, not 2.0K. That is the single most load-bearing detail here:
- * a switch to rounding would silently overstate every number in the game.
+ * *truncates* rather than rounds, so 1999 reads 1.9K, not 2.0K. That is the
+ * single most load-bearing detail here: a switch to rounding would silently
+ * overstate every number in the game.
+ *
+ * P7 of the player-feedback plan closed the one gap in that rule. Truncation
+ * held at every magnitude above 1000 and then stopped: the sub-1000 branch ended
+ * in `toFixed(0)`, so a store holding 999.9 rendered "1000" — one unit more than
+ * the player had, beside a 1000 price the game then refused. The three copies of
+ * the ladder are now one (`formatAbbreviatedNumber`) and truncate throughout.
+ * Rates are the deliberate exception and still round below 1000, because a rate
+ * is never compared against a price and truncating a live 0.005 / s trickle to
+ * "0.00 / s" would read as stopped.
  */
 import { test, expect } from '../_harness/game-fixture.mjs';
 
@@ -48,12 +57,19 @@ test.describe('Number Notation', () => {
     expect(results).toEqual(['1.9K', '1.0K', '1.9M', '9.9B']);
   });
 
-  test('sub-thousand values render as whole numbers with no suffix', async ({ game }) => {
+  test('sub-thousand values render as whole numbers with no suffix, and still truncate', async ({ game }) => {
     const results = await game.withMods((m, values) =>
       values.map((value) => m.game.formatNumber(value)), [0, 0.4, 0.6, 12.7, 999.9]);
 
-    // Everything below 1000 goes through toFixed(0), so fractions disappear.
-    expect(results).toEqual(['0', '0', '1', '13', '1000']);
+    // P7 changed these expectations, and the change is the point rather than a
+    // side effect. This branch was the one place the condensed formatter rounded
+    // instead of truncating - it ended in `toFixed(0)` - so 999.9 rendered as
+    // "1000", overstating a holding by a whole unit beside a 1000 price the
+    // affordability gate then refused. That is the "looks affordable but the
+    // button is red" report. Below 1000 now truncates like every other magnitude
+    // does, so 0.6 reads 0 and 12.7 reads 12: a holding is never displayed as
+    // more than the player has. See tests/e2e/precision/precision.spec.js.
+    expect(results).toEqual(['0', '0', '0', '12', '999']);
   });
 
   test('negative and zero values format sanely, and unparseable input passes through untouched', async ({ game }) => {

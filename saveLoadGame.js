@@ -19,12 +19,13 @@ import {
     setOnboardingMode,
     getDemoBuild,
     getLanguage,
+    getGameActiveCountTime,
 } from './constantsAndGlobalVars.js';
 
 import { setAchievementIconImageUrls } from './resourceDataObject.js';
 
 import { localize } from './localization.js';
-import { showNotification } from './ui.js';
+import { formatDurationMs, showNotification } from './ui.js';
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 import { getNavigatorLanguage } from './game.js';
 
@@ -136,7 +137,8 @@ export async function destroySaveGameOnCloud() {
                     region: existingRow.region,
                     hostSource: existingRow.hostSource,
                     feedback: existingRow.feedback,
-                    feedback_content: existingRow.feedback_content
+                    feedback_content: existingRow.feedback_content,
+                    time_playing_this_save: existingRow.time_playing_this_save ?? null
                 })
                 .eq('pioneer_name', backupUserId);
 
@@ -153,7 +155,8 @@ export async function destroySaveGameOnCloud() {
                     region: existingRow.region,
                     hostSource: existingRow.hostSource,
                     feedback: existingRow.feedback,
-                    feedback_content: existingRow.feedback_content
+                    feedback_content: existingRow.feedback_content,
+                    time_playing_this_save: existingRow.time_playing_this_save ?? null
                 }]);
 
             if (insertError) {
@@ -191,6 +194,14 @@ function createCircularReplacer() {
     };
 }
 
+//getGameActiveCountTime() returns [activeMs, offlineMs] and only the first is
+//"playing" - the same element achievementHave50HoursWithOnePioneer() measures -
+//formatted through the UI's own duration formatter so the column reads the way
+//the game reads: "14m 34s", "44h 12m 11s".
+function getActivePlayTimeForColumn() {
+    const active = getGameActiveCountTime();
+    return formatDurationMs(Array.isArray(active) ? active[0] : 0);
+}
 
 export async function saveGameToCloud(gameData, type) {
     try {
@@ -220,7 +231,8 @@ export async function saveGameToCloud(gameData, type) {
                     'region': getUserPlatform(),
                     'hostSource': getHostSource(),
                     'feedback': getFeedbackGiven(),
-                    'feedback_content': getFeedbackContent()
+                    'feedback_content': getFeedbackContent(),
+                    'time_playing_this_save': getActivePlayTimeForColumn()
                 })
                 .eq('pioneer_name', userId);
 
@@ -241,7 +253,8 @@ export async function saveGameToCloud(gameData, type) {
                     region: getUserPlatform(),
                     hostSource: getHostSource(),
                     feedback: getFeedbackGiven(),
-                    feedback_content: getFeedbackContent()
+                    feedback_content: getFeedbackContent(),
+                    time_playing_this_save: getActivePlayTimeForColumn()
                 }]);
 
             if (insertError) {

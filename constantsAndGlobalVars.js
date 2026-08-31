@@ -2686,6 +2686,14 @@ export function setBulkPurchaseInProgress(value) {
 export function setSaleResourcePreview(resource, amount, fusionTo1, fusionTo2) {
     const resourceQuantity = getResourceDataObject('resources', [resource, 'quantity']);
 
+    // P7: every branch below floors, including the fixed amounts, which used to
+    // clamp with `Math.min(n, resourceQuantity)` against the raw float. A player
+    // holding 12.7 who chose "100" was quoted "(12.7 Hydrogen)" - and
+    // `sellResource()` re-reads that rendered string to run the transaction,
+    // parsing the quantity with `\((\d+)`, which stops at the decimal point. So
+    // the sale deducted 12 and paid for 12.7. Quoting whole units makes the
+    // string round-trip exactly.
+
     let calculatedAmount;
 
     switch (amount) {
@@ -2705,22 +2713,22 @@ export function setSaleResourcePreview(resource, amount, fusionTo1, fusionTo2) {
             calculatedAmount = Math.floor(resourceQuantity / 3);
             break;
         case '100000':
-            calculatedAmount = Math.min(100000, resourceQuantity);
+            calculatedAmount = Math.min(100000, Math.floor(resourceQuantity));
             break;
         case '10000':
-            calculatedAmount = Math.min(10000, resourceQuantity);
+            calculatedAmount = Math.min(10000, Math.floor(resourceQuantity));
             break;
         case '1000':
-            calculatedAmount = Math.min(1000, resourceQuantity);
+            calculatedAmount = Math.min(1000, Math.floor(resourceQuantity));
             break;
         case '100':
-            calculatedAmount = Math.min(100, resourceQuantity);
+            calculatedAmount = Math.min(100, Math.floor(resourceQuantity));
             break;
         case '10':
-            calculatedAmount = Math.min(10, resourceQuantity);
+            calculatedAmount = Math.min(10, Math.floor(resourceQuantity));
             break;
         case '1':
-            calculatedAmount = Math.min(1, resourceQuantity);
+            calculatedAmount = Math.min(1, Math.floor(resourceQuantity));
             break;
         default:
             calculatedAmount = 0;
@@ -2751,22 +2759,22 @@ export function setSaleCompoundPreview(compound, amount) {
             calculatedAmount = Math.floor(compoundQuantity / 3);
             break;
         case '100000':
-            calculatedAmount = Math.min(100000, compoundQuantity);
+            calculatedAmount = Math.min(100000, Math.floor(compoundQuantity));
             break;
         case '10000':
-            calculatedAmount = Math.min(10000, compoundQuantity);
+            calculatedAmount = Math.min(10000, Math.floor(compoundQuantity));
             break;
         case '1000':
-            calculatedAmount = Math.min(1000, compoundQuantity);
+            calculatedAmount = Math.min(1000, Math.floor(compoundQuantity));
             break;
         case '100':
-            calculatedAmount = Math.min(100, compoundQuantity);
+            calculatedAmount = Math.min(100, Math.floor(compoundQuantity));
             break;
         case '10':
-            calculatedAmount = Math.min(10, compoundQuantity);
+            calculatedAmount = Math.min(10, Math.floor(compoundQuantity));
             break;
         case '1':
-            calculatedAmount = Math.min(1, compoundQuantity);
+            calculatedAmount = Math.min(1, Math.floor(compoundQuantity));
             break;
         default:
             calculatedAmount = 0;

@@ -563,9 +563,13 @@ function handleCosmicRipTechnologyScreenButtonAndDescriptionStates(element, tele
         .slice(1)
         .filter(prereq => prereq !== null && prereq !== '');
     const currentGP = Number(getCosmicRipGalacticPoints?.()) || 0;
-    const hasEnoughGP = currentGP >= 1;
-    const hasEnoughTelemetry = telemetryQty >= price;
-    const canAfford = hasEnoughTelemetry && hasEnoughGP;
+    const hasEnoughGP = canAfford(currentGP, 1);
+    const hasEnoughTelemetry = canAfford(telemetryQty, price);
+    // Named `affordable`, not `canAfford`: a local by that name would shadow the
+    // imported helper for the whole function body, putting the two calls above
+    // it in its temporal dead zone and throwing on every frame this screen is
+    // evaluated.
+    const affordable = hasEnoughTelemetry && hasEnoughGP;
 
     if (getCosmicRipTechUnlockedArray().includes(techName)) {
         if (element.tagName.toLowerCase() === 'button') {
@@ -578,7 +582,7 @@ function handleCosmicRipTechnologyScreenButtonAndDescriptionStates(element, tele
     }
 
     if (element.tagName.toLowerCase() === 'button') {
-        if (canAfford) {
+        if (affordable) {
             const allPrerequisitesUnlocked = prerequisiteArray.every(prerequisite => getCosmicRipTechUnlockedArray().includes(prerequisite));
             if (allPrerequisitesUnlocked) {
                 element.classList.remove('red-disabled-text');
@@ -818,13 +822,13 @@ export function getIncreasableStorageKeys(category) {
         }
 
         const price = capacity - 1;
-        if (stockLeft(key) < price) {
+        if (!canAfford(stockLeft(key), price)) {
             return;
         }
 
         const secondary = STORAGE_INCREASE_SECONDARY_COSTS[key];
         const secondaryPrice = secondary ? capacity * secondary.shareOfCapacity : 0;
-        if (secondary && stockLeft(secondary.key) < secondaryPrice) {
+        if (secondary && !canAfford(stockLeft(secondary.key), secondaryPrice)) {
             return;
         }
 
@@ -1001,6 +1005,20 @@ import {
     capitaliseString,
     capitaliseWordsWithRomanNumerals
  } from './utilityFunctions.js';
+
+// P7 (player-feedback plan): the game's one precision policy. Every affordability
+// gate, every charge that settles one, and every quantity or cost the player
+// reads goes through these, so that what is displayed and what is charged can
+// never disagree. See precision.js for why the rounding runs in the directions
+// it does.
+import {
+    canAfford,
+    isEffectivelyEqual,
+    settleSpend,
+    displayQuantity,
+    displayCurrency,
+    truncateToDecimals
+ } from './precision.js';
 
 import { getTimedEffectStateSnapshot, isTimedEffectActive, initialiseRandomEventTimers } from './events.js';
 
@@ -1307,7 +1325,7 @@ function galacticCasinoChecks() {
             options.forEach((opt) => {
                 const value = String(opt.getAttribute('data-value') || '').toLowerCase();
                 const cost = catalog?.[value]?.costCp ?? null;
-                let enabled = value === 'select' || (cost !== null && cpQuantity >= cost);
+                let enabled = value === 'select' || (cost !== null && canAfford(cpQuantity, cost));
 
                 if (enabled) {
                     if (value === 'prize1') {
@@ -1335,7 +1353,7 @@ function galacticCasinoChecks() {
         }
 
         const cost = catalog?.[selection]?.costCp ?? null;
-        const canSpin = !spinning && selection !== 'select' && cost !== null && cpQuantity >= cost;
+        const canSpin = !spinning && selection !== 'select' && cost !== null && canAfford(cpQuantity, cost);
 
         setButtonState(voidSeerSpinButton, {
             enabled: canSpin,
@@ -1524,6 +1542,11 @@ function updateProductionRateText(elementId, rateValue) {
 
     const formattedValue = formatProductionRateValue(displayRateValue);
 
+    // `formatProductionRateValue` has already applied the player's notation, so
+    // the frame's `.notation` sweep must not have a second go: it re-parses the
+    // rendered text as a bare number, which turned "1.2K / s" into "1K / s" and
+    // "0.42 / s" into "0 / s" - a live production line reading as stopped.
+    rateElement.dataset.notationPreformatted = 'true';
     rateElement.textContent = `${formattedValue} / s`;
 
     rateElement.classList.remove('green-ready-text', 'red-disabled-text', 'warning-orange-text');
@@ -1711,7 +1734,7 @@ function cosmicRipChecks() {
             const closeCosmicRipCostEl = document.getElementById('closeCosmicRipCostGP');
             const closeCosmicRipBtn = closeCosmicRipRow.querySelector?.('.cosmic-rip-close-rip-button');
             const currentGP = Math.max(0, (((getSettledStars?.() || []).length) - 1) - (Number(getGalacticPointsSpent?.()) || 0));
-            const hasEnoughGP = currentGP >= 1;
+            const hasEnoughGP = canAfford(currentGP, 1);
 
             if (closeCosmicRipCostEl) {
                 if (hasEnoughGP) {
@@ -2239,12 +2262,31 @@ export function timeWarp(lengthOfTimeInMs, multiplyRateBy) {
     setTimeWarpTimeoutId(timeoutId);
 }
 
+/**
+ * Format a per-second production rate for display.
+ *
+ * Unlike a holding, a rate is never compared against a price, so this rounds
+ * rather than truncates below 1000: truncating would show a live 0.005 / s
+ * trickle as "0.00 / s", which reads as stopped. The affordability invariant
+ * that governs quantities does not apply here, and pretending it does would
+ * make the display less honest rather than more.
+ *
+ * Above 1000 it hands off to whichever notation the player has chosen. It used
+ * to always hand off to the condensed ladder and then leave the result to be
+ * re-formatted by the frame's `.notation` sweep — which re-parsed "1.2K" as the
+ * number 1.2 and rounded it to "1K". Rate elements are now marked
+ * `data-notation-preformatted` by `updateProductionRateText()` so that sweep
+ * leaves them alone, which is why the notation choice has to be honoured here.
+ */
 export function formatProductionRateValue(rateValue) {
     const sign = rateValue < 0 ? '-' : '';
     const absValue = Math.abs(rateValue);
 
     if (absValue >= 1000) {
-        return `${sign}${formatNumber(absValue)}`;
+        const abbreviated = getNotationType() === 'normal'
+            ? formatGroupedNumber(displayQuantity(absValue))
+            : formatAbbreviatedNumber(absValue);
+        return `${sign}${abbreviated}`;
     }
 
     if (absValue >= 1) {
@@ -3904,7 +3946,7 @@ function blackHoleUIChecks() {
             researchButton.textContent = localizeRaw('buttonResearchBlackHoleWithPrice', getLanguage()).replace('{price}', formatNumber(price));
             setButtonState(researchButton, { enabled: false, ready: false });
 
-            if (currentResearch >= price) {
+            if (canAfford(currentResearch, price)) {
                 setButtonState(researchButton, { enabled: true, ready: true });
             }
         }
@@ -4137,8 +4179,8 @@ function blackHoleUIChecks() {
         const increment = Number(currentPower) >= 50 ? 0.5 : baseIncrement;
         const nextPower = Number(currentPower) + Number(increment);
         secondaryButton2.textContent = localizeRaw('buttonBlackHolePowerUpgrade', getLanguage()).replace('{current}', currentPower).replace('{next}', nextPower).replace('{price}', formatNumber(price));
-        const canAfford = currentResearch >= price;
-        setButtonState(secondaryButton2, { enabled: canAfford, ready: canAfford });
+        const affordable = canAfford(currentResearch, price);
+        setButtonState(secondaryButton2, { enabled: affordable, ready: affordable });
     }
 
     if (secondaryButton3) {
@@ -4162,8 +4204,8 @@ function blackHoleUIChecks() {
             const currentDurationSeconds = Math.round(currentDurationMs / 1000);
             const nextDurationSeconds = Math.round(nextDurationMs / 1000);
             secondaryButton3.textContent = localizeRaw('buttonBlackHoleDurationUpgrade', getLanguage()).replace('{current}', currentDurationSeconds).replace('{next}', nextDurationSeconds).replace('{price}', formatNumber(price));
-            const canAfford = currentResearch >= price;
-            setButtonState(secondaryButton3, { enabled: canAfford, ready: canAfford });
+            const affordable = canAfford(currentResearch, price);
+            setButtonState(secondaryButton3, { enabled: affordable, ready: affordable });
         }
     }
 
@@ -4192,8 +4234,8 @@ function blackHoleUIChecks() {
             const nextChargeSeconds = (Math.max(minChargeMs, nextChargeMs) / 1000).toFixed(1);
             secondaryButton4.textContent = localizeRaw('buttonBlackHoleRechargeUpgrade', getLanguage()).replace('{current}', currentChargeSeconds).replace('{next}', nextChargeSeconds).replace('{price}', formatNumber(price));
 
-            const canAfford = currentResearch >= price;
-            setButtonState(secondaryButton4, { enabled: canAfford, ready: canAfford });
+            const affordable = canAfford(currentResearch, price);
+            setButtonState(secondaryButton4, { enabled: affordable, ready: affordable });
         }
     }
 
@@ -4629,7 +4671,7 @@ function updateNativeTechCostStates() {
             return;
         }
 
-        const meetsCostRequirement = unlockedTechs.includes(techKey) || currentResearch >= price;
+        const meetsCostRequirement = unlockedTechs.includes(techKey) || canAfford(currentResearch, price);
         costElement.classList.toggle('ready-text', meetsCostRequirement);
         costElement.classList.toggle('red-disabled-text', !meetsCostRequirement);
     });
@@ -4867,10 +4909,16 @@ function updateStats() {
     //top bar
     //stat1
     const cash = getResourceDataObject('currency', ['cash']);
+    // P7: never `toFixed(2)`. Cash is the only figure in the game shown to a
+    // precision fine enough for the player to compare against a price by eye,
+    // and toFixed rounds up - a balance of 999.996 read $1000.00 beside a 1000
+    // price the game then refused. `displayCurrency` truncates instead, so the
+    // stat bar never claims more money than the purchase gate will find.
+    const cashText = displayCurrency(cash);
     if (getCurrencySymbol() !== "€") {
-        getElements().cashStat.textContent = `${getCurrencySymbol()}${cash.toFixed(2)}`;
+        getElements().cashStat.textContent = `${getCurrencySymbol()}${cashText}`;
     } else {
-        getElements().cashStat.textContent = `${cash.toFixed(2) + getCurrencySymbol()}`;
+        getElements().cashStat.textContent = `${cashText + getCurrencySymbol()}`;
     }
 
     //stat2
@@ -5078,15 +5126,19 @@ export function sellResource(resource) {
     const saleData = getResourceSalePreview(resource);
 
     const currentCash = getResourceDataObject('currency', ['cash']);
-    const extractedValue = saleData.split('>')[1].split('<')[0].trim();
-    let cashRaised;
-
-    if (getCurrencySymbol() === "€") {
-        cashRaised = parseFloat(extractedValue.replace('€', '').replace(',', ''));
-    } else {
-        cashRaised = parseFloat(extractedValue.slice(1).replace(',', ''));
-    }
     const quantityToDeduct = parseInt(saleData.match(/\((\d+)/)[1], 10);
+
+    // P7: the payment is computed, not read back off the label.
+    //
+    // This used to parse the cash out of the rendered preview, which is written
+    // by `setResourceSalePreview()` through `toFixed(2)` - so the sale paid
+    // whatever two decimal places happened to round to rather than what the
+    // goods were worth. Selling 12.7 units at 0.04752 quoted "$0.60" and paid
+    // 0.60 against a true value of 0.6035. Rounding belongs at the display; the
+    // transaction takes the same `quantity x saleValue` that
+    // `sellAllUnlockedResources()` has always used, so the two routes to a sale
+    // can no longer disagree about what a stock is worth.
+    const cashRaised = quantityToDeduct * (Number(getResourceDataObject('resources', [resource, 'saleValue'])) || 0);
 
     if (getCurrencySymbol() === "€") {
         showNotification(
@@ -5234,17 +5286,11 @@ export function sellCompound(compound) {
     const saleData = getCompoundSalePreview(compound);
 
     const currentCash = getResourceDataObject('currency', ['cash']);
-    let extractedValue = saleData.split('>')[1].split('<')[0].trim();
-
-    let cashRaised;
-
-    if (getCurrencySymbol() === "€") {
-        cashRaised = parseFloat(extractedValue.replace('€', '').replace(',', ''));
-    } else {
-        cashRaised = parseFloat(extractedValue.slice(1).replace(',', ''));
-    }
-
     const quantityToDeduct = parseInt(saleData.match(/\((\d+)/)[1], 10);
+
+    // P7: computed rather than parsed back out of the rendered label, for the
+    // same reason as `sellResource()` above - see the note there.
+    const cashRaised = quantityToDeduct * (Number(getResourceDataObject('compounds', [compound, 'saleValue'])) || 0);
 
     setResourceDataObject(resourceQuantity - quantityToDeduct, 'compounds', [compound, 'quantity']);
 
@@ -5612,33 +5658,41 @@ function checkAndDeductResources() {
             deductAmount = deductObject[itemToDeductType].deductQuantity;
             const typeOfResourceCompound = deductObject[itemToDeductType].typeOfResourceCompound;
 
+            // P7: the charge and the gate that offered it share one tolerance.
+            // They have to. `gain()` grants the item before this runs, and a
+            // failed settle here also suppresses the matching price rise in
+            // checkAndIncreasePrices() - so a gate looser than this test hands
+            // out a free unit at the old price, and a gate tighter than it
+            // refuses purchases the game would have honoured. `settleSpend`
+            // then snaps the residue to zero rather than leaving the balance a
+            // few ulps overdrawn on the purchases the tolerance is what allowed.
             if (itemToDeductType === 'cash') {
                 mainKey = 'currency';
                 currentQuantity = getResourceDataObject(mainKey, [itemToDeductType]);
-                if (deductAmount >  currentQuantity) {
+                if (!canAfford(currentQuantity, deductAmount)) {
                     setCanAffordDeferred(false);
                 } else {
-                    setResourceDataObject(currentQuantity - deductAmount, mainKey, [itemToDeductType]);
+                    setResourceDataObject(settleSpend(currentQuantity, deductAmount), mainKey, [itemToDeductType]);
                     setCanAffordDeferred(true);
                 }
             } else if (itemToDeductType === 'research') {
                 mainKey = 'research';
                 currentQuantity = getResourceDataObject(mainKey, ['quantity']);
-                if (deductAmount >  currentQuantity) {
+                if (!canAfford(currentQuantity, deductAmount)) {
                     setCanAffordDeferred(false);
                 } else {
-                    setResourceDataObject(currentQuantity - deductAmount, mainKey, ['quantity']);
+                    setResourceDataObject(settleSpend(currentQuantity, deductAmount), mainKey, ['quantity']);
                     setCanAffordDeferred(true);
                 }
             } else {
                 mainKey = typeOfResourceCompound;
                 currentQuantity = getResourceDataObject(mainKey, [itemToDeductType, 'quantity']);
-                if (deductAmount >  currentQuantity) {
+                if (!canAfford(currentQuantity, deductAmount)) {
                     setCanAffordDeferred(false);
                 } else {
-                    setResourceDataObject(currentQuantity - deductAmount, mainKey, [itemToDeductType, 'quantity']);
+                    setResourceDataObject(settleSpend(currentQuantity, deductAmount), mainKey, [itemToDeductType, 'quantity']);
                     setCanAffordDeferred(true);
-                } 
+                }
             }
         }
     }
@@ -7755,7 +7809,7 @@ function compoundCostSellCreateChecks(element) {
         }
     }
 
-    if (element.dataset.conditionCheck === 'upgradeCheck' && quantity >= price && quantity2 >= price2) { //reason for quantity2 being -1 higher up
+    if (element.dataset.conditionCheck === 'upgradeCheck' && canAfford(quantity, price) && canAfford(quantity2, price2)) { //reason for quantity2 being -1 higher up
         if (element.tagName.toLowerCase() !== 'button' && price2 > 0) {
             document.getElementById('mainCompoundPriceText').classList.add('green-ready-text');
             document.getElementById('secondaryCompoundPriceText').classList.add('green-ready-text');
@@ -7765,25 +7819,25 @@ function compoundCostSellCreateChecks(element) {
         element.classList.remove('red-disabled-text');
     } else {
         if (element.tagName.toLowerCase() !== 'button' && price2 > 0) {
-            if (quantity < price) {
+            if (!canAfford(quantity, price)) {
                 document.getElementById('mainCompoundPriceText').classList.add('red-disabled-text');
                 document.getElementById('mainCompoundPriceText').classList.remove('green-ready-text');
                 element.classList.add('red-disabled-text');
             } else {
                 document.getElementById('mainCompoundPriceText').classList.add('green-ready-text');
             }
-            if (quantity2 < price2) {
+            if (!canAfford(quantity2, price2)) {
                 document.getElementById('secondaryCompoundPriceText').classList.add('red-disabled-text');
                 document.getElementById('secondaryCompoundPriceText').classList.remove('green-ready-text'); 
                 element.classList.add('red-disabled-text');
             } else {
                 document.getElementById('secondaryCompoundPriceText').classList.add('green-ready-text');
             }
-            if (quantity >= price && quantity2 >= price2) {
+            if (canAfford(quantity, price) && canAfford(quantity2, price2)) {
                 element.classList.remove('red-disabled-text');
             }
         } else if (element.tagName.toLowerCase() !== 'button') {
-            if (quantity < price) {
+            if (!canAfford(quantity, price)) {
                 element.classList.add('red-disabled-text');
             } else {
                 element.classList.remove('red-disabled-text');
@@ -7885,7 +7939,7 @@ function resourceCostSellChecks(element) {
 
     checkIfHaveEnoughResourceForUpgradeAndSetState(element, quantity, price);
     
-    if (element.dataset.conditionCheck === 'upgradeCheck' && quantity >= price) {
+    if (element.dataset.conditionCheck === 'upgradeCheck' && canAfford(quantity, price)) {
         setStateOfDescriptionLabelsForAutoBuyers(element, price, quantity, resourceCategories, resourceNames, resourcePrices);
     } else {
         setStateOfDescriptionLabelsForBuildingAndOneOffSpacePurchases(element, price, quantity, resourceCategories, resourceNames, resourcePrices);
@@ -7974,10 +8028,10 @@ function handleCosmicRipUpgradeResourceType(element) {
         const r2Text = buildResourceText(resource2Price);
         const r3Text = buildResourceText(resource3Price);
 
-        const canAffordCash = cashQuantity >= currentPrice;
-        const canAffordR1 = resource1Quantity >= (resource1Price?.[0] || 0);
-        const canAffordR2 = resource2Quantity >= (resource2Price?.[0] || 0);
-        const canAffordR3 = resource3Quantity >= (resource3Price?.[0] || 0);
+        const canAffordCash = canAfford(cashQuantity, currentPrice);
+        const canAffordR1 = canAfford(resource1Quantity, resource1Price?.[0] || 0);
+        const canAffordR2 = canAfford(resource2Quantity, resource2Price?.[0] || 0);
+        const canAffordR3 = canAfford(resource3Quantity, resource3Price?.[0] || 0);
 
         const cashClass = canAffordCash ? 'green-ready-text' : 'red-disabled-text';
         const r1Class = canAffordR1 ? 'green-ready-text' : 'red-disabled-text';
@@ -8060,7 +8114,7 @@ function handleTechnologyScreenButtonAndDescriptionStates(element, quantity, tec
     const prerequisiteArray = getResourceDataObject('techs', [techName, 'appearsAt']).slice(1).filter(prereq => prereq !== null && prereq !== '');
     const shouldApplyDemoLock = getDemoBuild() && techName === 'orbitalConstruction';
     
-    if (element && quantity >= getResourceDataObject('techs', [techName, 'price'])) {
+    if (element && canAfford(quantity, getResourceDataObject('techs', [techName, 'price']))) {
         element.classList.remove('red-disabled-text');
         if (shouldApplyDemoLock) {
             element.classList.remove('green-ready-text');
@@ -8077,7 +8131,7 @@ function handleTechnologyScreenButtonAndDescriptionStates(element, quantity, tec
     }
 
     if (element.tagName.toLowerCase() === 'button') {
-        if (quantity >= getResourceDataObject('techs', [techName, 'price'])) {
+        if (canAfford(quantity, getResourceDataObject('techs', [techName, 'price']))) {
             const allPrerequisitesUnlocked = prerequisiteArray.every(prerequisite => getTechUnlockedArray().includes(prerequisite));
 
             if (allPrerequisitesUnlocked) {
@@ -8142,7 +8196,7 @@ function handlePhilosophyTechnologyScreenButtonAndDescriptionStates(element, qua
         return;
     }
 
-    if (element && quantity >= getResourceDataObject('philosophyRepeatableTechs', [getPlayerPhilosophy(), techName, 'price'])) {
+    if (element && canAfford(quantity, getResourceDataObject('philosophyRepeatableTechs', [getPlayerPhilosophy(), techName, 'price']))) {
         element.classList.remove('red-disabled-text');
         element.parentElement.parentElement?.querySelector('.description-container label span')?.classList.remove('red-disabled-text');
     
@@ -8158,7 +8212,7 @@ function handlePhilosophyTechnologyScreenButtonAndDescriptionStates(element, qua
     
 
     if (element.tagName.toLowerCase() === 'button') {
-        if (quantity >= getResourceDataObject('philosophyRepeatableTechs', [getPlayerPhilosophy(), techName, 'price'])) {
+        if (canAfford(quantity, getResourceDataObject('philosophyRepeatableTechs', [getPlayerPhilosophy(), techName, 'price']))) {
             element.classList.remove('red-disabled-text');
             element.parentElement.parentElement?.querySelector('.description-container label span')?.classList.remove('red-disabled-text');
             element.classList.add('green-ready-text');
@@ -8267,7 +8321,7 @@ function setUpResourcePricesNamesCategories(resource, type, spaceUpgradeType, bu
 }
 
 function checkIfHaveEnoughResourceForUpgradeAndSetState(element, quantity, price) {
-    if (element.dataset.conditionCheck === 'upgradeCheck' && quantity >= price && element.dataset.argumentCheckQuantity !== 'time') {
+    if (element.dataset.conditionCheck === 'upgradeCheck' && canAfford(quantity, price) && element.dataset.argumentCheckQuantity !== 'time') {
         element.classList.remove('red-disabled-text');
     } else {
         element.classList.add('red-disabled-text');
@@ -8282,31 +8336,47 @@ function handleResourceRateStates(resource) {
     }
 }
 
+/**
+ * Colour one price row's spans by whether each cost in it can be paid.
+ *
+ * The first span is the cash (or research) cost, the rest are the building's
+ * secondary resource costs, one span each. This is more than cosmetic:
+ * `setStateOfButtonsBasedOnDescriptionStateForBuildingPurchases()` reads these
+ * very classes back off the spans to decide whether the row's Buy button is
+ * enabled, so the colour of a span *is* the affordability gate for the purchase.
+ *
+ * That is why P7 pulled it out of the two callers that each carried a copy. The
+ * copies compared the secondary costs with a strict `>` while the charge settles
+ * on `>=` in `checkAndDeductResources()`, so a player holding exactly the quoted
+ * price of one of a building's resources saw that resource in red and the button
+ * dead, on a purchase the game would have honoured had the click reached it.
+ * Every comparison now goes through `canAfford`, the same one the charge uses.
+ */
+function setPriceSpanAffordabilityClasses(element, price, quantity, resourceCategories, resourceNames, resourcePrices) {
+    element.querySelectorAll('span').forEach((span, index) => {
+        let affordable;
+
+        if (index !== 0) {
+            const category = resourceCategories[index - 1];
+            const name = resourceNames[index - 1];
+            const secondaryPrice = resourcePrices[index - 1];
+
+            if (!category) {
+                return;
+            }
+            affordable = canAfford(getResourceDataObject(category, [name, 'quantity']), secondaryPrice);
+        } else {
+            affordable = element.dataset.conditionCheck === 'upgradeCheck' && canAfford(quantity, price);
+        }
+
+        span.classList.toggle('green-ready-text', affordable);
+        span.classList.toggle('red-disabled-text', !affordable);
+    });
+}
+
 function setStateOfDescriptionLabelsForAutoBuyers(element, price, quantity, resourceCategories, resourceNames, resourcePrices) {
     if (element.classList.contains('building-purchase')) {
-        element.querySelectorAll('span').forEach((span, index) => {
-            if (index !== 0) {
-                const category = resourceCategories[index-1];
-                const name = resourceNames[index-1];
-                const price = resourcePrices[index-1];
-
-                if (category && getResourceDataObject(category, [name, 'quantity']) > price) {
-                    span.classList.remove('red-disabled-text');
-                    span.classList.add('green-ready-text');
-                } else if (category) {
-                    span.classList.add('red-disabled-text');
-                    span.classList.remove('green-ready-text');
-                }
-            } else {
-                if (element.dataset.conditionCheck === 'upgradeCheck' && quantity >= price) {
-                    span.classList.remove('red-disabled-text');
-                    span.classList.add('green-ready-text');  
-                } else {
-                    span.classList.add('red-disabled-text');
-                    span.classList.remove('green-ready-text');
-                }
-            }
-        });
+        setPriceSpanAffordabilityClasses(element, price, quantity, resourceCategories, resourceNames, resourcePrices);
     } else if (element.dataset.argumentCheckQuantity !== 'time') {
         element.classList.remove('red-disabled-text');
     } else if (element.dataset.argumentCheckQuantity === 'time') {
@@ -8320,29 +8390,7 @@ function setStateOfDescriptionLabelsForAutoBuyers(element, price, quantity, reso
 
 function setStateOfDescriptionLabelsForBuildingAndOneOffSpacePurchases(element, price, quantity, resourceCategories, resourceNames, resourcePrices) {
     if (element.classList.contains('building-purchase') && !element.classList.contains('building-purchase-button')) {
-        element.querySelectorAll('span').forEach((span, index) => {
-            if (index !== 0) {
-                const category = resourceCategories[index-1];
-                const name = resourceNames[index-1];
-                const price = resourcePrices[index-1];
-    
-                if (category && getResourceDataObject(category, [name, 'quantity']) > price) {
-                    span.classList.remove('red-disabled-text');
-                    span.classList.add('green-ready-text');
-                } else if (category) {
-                    span.classList.add('red-disabled-text');
-                    span.classList.remove('green-ready-text');
-                }
-            } else {
-                if (element.dataset.conditionCheck === 'upgradeCheck' && quantity >= price) {
-                    span.classList.remove('red-disabled-text');
-                    span.classList.add('green-ready-text');  
-                } else {
-                    span.classList.add('red-disabled-text');
-                    span.classList.remove('green-ready-text');
-                }
-            }
-        });
+        setPriceSpanAffordabilityClasses(element, price, quantity, resourceCategories, resourceNames, resourcePrices);
     } else {
         element.classList.add('red-disabled-text');
     }
@@ -8422,7 +8470,7 @@ function handleRocketFuellingChecksAndOneOffPurchases(element, price) {
     const filteredRockets = rocketsFuellerStartedArray.filter(item => !item.includes('FuelledUp'));
     const launchButton = document.querySelector(`.${rocket}-launch-button`);
 
-    if (!filteredRockets.includes(rocket) && currentCash >= price) { //purchase launchPad, spaceTelescope etc
+    if (!filteredRockets.includes(rocket) && canAfford(currentCash, price)) { //purchase launchPad, spaceTelescope etc
         if (element.dataset?.rowCategory !== 'rocketFuel') {
             element.classList.remove('red-disabled-text');
         } else {
@@ -10100,24 +10148,34 @@ const updateQuantityDisplays = (element, data1, data2, resourceData1, resourceDa
         }     
     } else {
         if (element && data2 >= 0) {
+            // P7: `displayQuantity` rather than a bare `Math.floor`. The two
+            // agree everywhere except within a tolerance of a whole number,
+            // which is exactly where a plain floor misreports: a store that
+            // repeated float addition left an ulp under 150 read "149 / 150"
+            // and never looked full, while the affordability gate - which now
+            // shares this tolerance - already treated it as 150.
             if (element === getElements().energyQuantity) {
                 if (getResourceDataObject('buildings', ['energy', 'batteryBoughtYet'])) {
-                    element.textContent = Math.floor(data1) + '/' + Math.floor(data2);
+                    element.textContent = displayQuantity(data1) + '/' + displayQuantity(data2);
                 } else {
-                    element.textContent = Math.floor(data1);
+                    element.textContent = displayQuantity(data1);
                 }
             } else if (element === getElements().researchQuantity) {
-                element.textContent = Math.floor(data1);
+                element.textContent = displayQuantity(data1);
             } else if (element.id && element.id.includes('power')) {
-                element.textContent = Math.floor(data1);
+                element.textContent = displayQuantity(data1);
             } else {
-                element.textContent = Math.floor(data1) + '/' + Math.floor(data2);
+                element.textContent = displayQuantity(data1) + '/' + displayQuantity(data2);
             }
         } else if (element) {
-            element.textContent = Math.floor(data1);
+            element.textContent = displayQuantity(data1);
         }
 
-        if (element && data2 && data1 === data2) {
+        // Float equality against the cap, for the same reason: a store filled by
+        // any route other than the clamping production tick - an offline gain, a
+        // rebirth grant - can land an ulp short and then never read as full, so
+        // its storage increase is never offered.
+        if (element && data2 && isEffectivelyEqual(data1, data2)) {
             element.classList.add('green-ready-text');
 
             if (element.id && element.id.endsWith('Quantity')) {
@@ -10133,7 +10191,7 @@ const updateQuantityDisplays = (element, data1, data2, resourceData1, resourceDa
             }
         }
 
-        if (element && data2 && data1 !== data2) {
+        if (element && data2 && !isEffectivelyEqual(data1, data2)) {
             const baseId = element.id.replace('Quantity', '');
         
             const resourceAutoSell = getResourceDataObject('resources', [baseId, 'autoSell'], true);
@@ -10172,7 +10230,7 @@ const updateQuantityDisplays = (element, data1, data2, resourceData1, resourceDa
             }
         }        
 
-        if (element && element.classList.contains('green-ready-text') && data1 !== data2) {
+        if (element && element.classList.contains('green-ready-text') && !isEffectivelyEqual(data1, data2)) {
             element.classList.remove('green-ready-text');
 
             if (element.id && element.id.endsWith('Quantity')) {
@@ -10326,7 +10384,7 @@ export function gain(incrementAmount, elementId, item, ABOrTechPurchase, tierAB,
         const price = getResourceDataObject('cosmicRip', ['techs', item, 'price']);
         const currentTelemetry = getResourceDataObject('cosmicRip', ['ripTelemetryData']);
         const currentGP = Number(getCosmicRipGalacticPoints?.()) || 0;
-        if (currentTelemetry >= price && currentGP >= 1) {
+        if (canAfford(currentTelemetry, price) && canAfford(currentGP, 1)) {
             setResourceDataObject(currentTelemetry - price, 'cosmicRip', ['ripTelemetryData']);
             setCosmicRipGalacticPoints(Math.max(0, currentGP - 1));
             const spent = Number(getGalacticPointsSpent?.()) || 0;
@@ -11075,7 +11133,7 @@ export function purchaseBuff(buff) {
         : buffData.baseCostAp;
     const cost = Math.round(baseCost);
 
-    if (currentAscendencyPoints >= cost) {
+    if (canAfford(currentAscendencyPoints, cost)) {
         const boughtYetBefore = buffData.boughtYet;
         const updatedAp = Math.max(0, Math.round(currentAscendencyPoints - cost));
         setResourceDataObject(updatedAp, 'ascendencyPoints', ['quantity']);
@@ -12084,6 +12142,13 @@ function startUpdateEnergyTimers(elementName, action) {
 }
 
 function formatAllNotationElements(element, notationType) {
+        // Text that was written by a formatter which already applied the
+        // player's notation. Re-parsing it here would read the digits out of an
+        // abbreviated form and abbreviate them again.
+        if (element.dataset?.notationPreformatted === 'true') {
+            return;
+        }
+
         const originalContent = element.innerHTML;
         const parseDisplayNumber = (raw) => {
             if (typeof raw !== 'string') {
@@ -12138,53 +12203,26 @@ function formatAllNotationElements(element, notationType) {
             if (notationType === 'normal') {
                 return formatNormalNumber(number);
             } else if (notationType === 'normalCondensed') {
+                // The cash stat is the one place the abbreviation is allowed to
+                // drop its decimal, because `$1.0M` reads worse than `$1M`. It
+                // is otherwise the same truncating ladder as everything else:
+                // it used to end in `Math.round(number).toFixed(0)`, which took
+                // the already-truncated `$999.99` written by updateStats() and
+                // rounded it back up to `$1000`, undoing the fix at the far end
+                // of the same frame.
                 if (element.id === 'cashStat') {
-                    const formatNumber = (num, divisor) => {
-                        const result = num / divisor;
-                        const fraction = result % 1;
-                        return (fraction === 0 || fraction === 0.1 || fraction === 0.9) 
-                            ? result.toFixed(0) 
-                            : result.toFixed(1);
-                    };
-                
-                    if (number >= 1e13) {
-                        let exponent = Math.floor(Math.log10(number));
-                        const scaledNumber = number / Math.pow(10, exponent);
-                        const fraction = scaledNumber % 1;
-                        return `${(fraction === 0 || fraction === 0.1 || fraction === 0.9 
-                            ? scaledNumber.toFixed(0) 
-                            : scaledNumber.toFixed(1))}e${exponent}`;
-                    } else if (number >= 1e12) {
-                        return `${formatNumber(number, 1e12)}e12`;
-                    } else if (number >= 1e9) {
-                        return `${formatNumber(number, 1e9)}B`;
-                    } else if (number >= 1e6) {
-                        return `${formatNumber(number, 1e6)}M`;
-                    } else if (number >= 1e3) {
-                        return `${formatNumber(number, 1e3)}K`;
-                    } else {
-                        return Math.round(number).toFixed(0);
-                    }
-                }                
-            
-                if (number >= 1e13) {
-                    let exponent = Math.floor(Math.log10(number));
-                    return `${Math.floor(number / Math.pow(10, exponent) * 10) / 10}e${exponent}`;
-                } else if (number >= 1e12) {
-                    return `${(Math.floor(number / 1e12 * 10) / 10).toFixed(1)}e12`;
-                } else if (number >= 1e9) {
-                    return `${(Math.floor(number / 1e9 * 10) / 10).toFixed(1)}B`;
-                } else if (number >= 1e6) {
-                    return `${(Math.floor(number / 1e6 * 10) / 10).toFixed(1)}M`;
-                } else if (number >= 1e3) {
-                    return `${(Math.floor(number / 1e3 * 10) / 10).toFixed(1)}K`;
-                } else {
-                    if (element.dataset.conditionCheck === 'techUnlock' || element.dataset.type === 'building') {
-                        return number;
-                    } else {
-                        return number.toFixed(0);
-                    }
-                }                               
+                    return formatAbbreviatedNumber(number).replace(/\.0(?=[A-Za-z]|e\d|$)/, '');
+                }
+
+                // Rows that quote a research or building cost verbatim keep the
+                // raw number; abbreviating a price would make it unreadable
+                // against the research total beside it.
+                if (number < 1e3
+                    && (element.dataset.conditionCheck === 'techUnlock' || element.dataset.type === 'building')) {
+                    return number;
+                }
+
+                return formatAbbreviatedNumber(number);
             }                       
         });
 
@@ -12248,36 +12286,68 @@ export function formatGroupedNumber(value) {
     const number = typeof value === 'number' ? value : parseFloat(String(value ?? '').replace(/,/g, ''));
     if (!Number.isFinite(number)) return value;
 
-    const roundedInt = Math.round(number);
-    if (Math.abs(number - roundedInt) < 1e-6) {
-        return roundedInt.toLocaleString('en-US');
+    // P7: truncate, never round. `Math.round` here displayed 999.6 as "1,000"
+    // beside a 1,000 price the affordability gate refused - the plain-notation
+    // half of the same defect the condensed ladder had.
+    const asWholeUnits = displayQuantity(number);
+    if (Math.abs(number - asWholeUnits) < 1e-6) {
+        return asWholeUnits.toLocaleString('en-US');
     }
 
-    const rounded = Math.round(number * 1e6) / 1e6;
-    return rounded.toLocaleString('en-US', {
+    const truncated = truncateToDecimals(number, 6);
+    return truncated.toLocaleString('en-US', {
         minimumFractionDigits: 0,
         maximumFractionDigits: 6,
     });
+}
+
+/**
+ * The condensed notation's abbreviation ladder, in one place.
+ *
+ * Three copies of this ladder used to exist - `formatNumber`, the condensed
+ * branch of `formatAllNotationElements`, and `formatSellStringCondensed` - and
+ * they disagreed at the bottom of the range. All three truncated correctly above
+ * 1000 ("1.29K" reads 1.2K, never 1.3K) and then rounded *up* below it with
+ * `toFixed(0)`, so a store holding 999.6 read "1000" beside a 1000 price the
+ * game refused. P7 makes truncation the rule at every magnitude.
+ *
+ * `decimals` is how many places the abbreviated form keeps; one, everywhere
+ * except the sub-1000 range, which is whole units.
+ */
+function formatAbbreviatedNumber(number) {
+    const abbreviate = (divisor, suffix) =>
+        `${truncateToDecimals(number / divisor, 1).toFixed(1)}${suffix}`;
+
+    // Negatives keep the path they always had. Every magnitude branch tests
+    // `>=`, so a negative was never given a suffix and fell through to
+    // `toFixed(0)`; truncating them instead would turn "-0" into "-1", and a
+    // negative here is a net production rate rather than a holding, so the
+    // rounding direction that protects the affordability invariant does not
+    // apply to it.
+    if (!(number >= 0)) {
+        return number.toFixed(0);
+    }
+
+    if (number >= 1e13) {
+        const exponent = Math.floor(Math.log10(number));
+        return abbreviate(Math.pow(10, exponent), `e${exponent}`);
+    } else if (number >= 1e12) {
+        return abbreviate(1e12, 'e12');
+    } else if (number >= 1e9) {
+        return abbreviate(1e9, 'B');
+    } else if (number >= 1e6) {
+        return abbreviate(1e6, 'M');
+    } else if (number >= 1e3) {
+        return abbreviate(1e3, 'K');
+    }
+    return String(displayQuantity(number));
 }
 
 export function formatNumber(value) {
     const number = parseFloat(value);
     if (isNaN(number)) return value;
 
-    if (number >= 1e13) {
-        let exponent = Math.floor(Math.log10(number));
-        return `${(Math.floor(number / Math.pow(10, exponent) * 10) / 10).toFixed(1)}e${exponent}`;
-    } else if (number >= 1e12) {
-        return `${(Math.floor(number / 1e12 * 10) / 10).toFixed(1)}e12`;
-    } else if (number >= 1e9) {
-        return `${(Math.floor(number / 1e9 * 10) / 10).toFixed(1)}B`;
-    } else if (number >= 1e6) {
-        return `${(Math.floor(number / 1e6 * 10) / 10).toFixed(1)}M`;
-    } else if (number >= 1e3) {
-        return `${(Math.floor(number / 1e3 * 10) / 10).toFixed(1)}K`;
-    } else {
-        return number.toFixed(0);
-    }
+    return formatAbbreviatedNumber(number);
 }
 
 function complexSellStringFormatter(element, notationType) {
@@ -12310,22 +12380,10 @@ function formatSellStringCondensed(element, regex, sliceOffsetBefore, sliceOffse
         let formatted;
         if (capturedNumber < 0) {
             formatted = 0;
-        }else {
-            if (capturedNumber >= 1e13) {
-                let exponent = Math.floor(Math.log10(capturedNumber));
-                formatted = `${(Math.floor(capturedNumber / Math.pow(10, exponent) * 10) / 10).toFixed(1)}e${exponent}`;
-            } else if (capturedNumber >= 1e12) {
-                formatted = `${(Math.floor(capturedNumber / 1e12 * 10) / 10).toFixed(1)}e12`;
-            } else if (capturedNumber >= 1e9) {
-                formatted = `${(Math.floor(capturedNumber / 1e9 * 10) / 10).toFixed(1)}B`;
-            } else if (capturedNumber >= 1e6) {
-                formatted = `${(Math.floor(capturedNumber / 1e6 * 10) / 10).toFixed(1)}M`;
-            } else if (capturedNumber >= 1e3) {
-                formatted = `${(Math.floor(capturedNumber / 1e3 * 10) / 10).toFixed(1)}K`;
-            } else {
-                formatted = capturedNumber.toFixed(0);
-            }
-        }        
+        } else {
+            formatted = formatAbbreviatedNumber(capturedNumber);
+        }
+
         const beforeMatch = element.innerHTML.slice(0, match.index + sliceOffsetBefore);
         const afterMatch = element.innerHTML.slice(match.index + match[0].length - sliceOffsetAfter);
         element.innerHTML = beforeMatch + formatted + afterMatch;
@@ -13234,18 +13292,28 @@ export function buildSpaceMiningBuilding(spaceMiningBuilding, debug) {
         currentResource3Quantity = getResourceDataObject(spaceMiningBuildingResource3PriceCategory, [spaceMiningBuildingResource3PriceResource, 'quantity']);
     }
 
-    setResourceDataObject(Math.floor(currentCash - spaceMiningBuildingCashPrice), 'currency', ['cash']);
+    //P7: the launch pad and the space telescope are the only purchases in the
+    //game that settle here and now instead of queueing into itemsToDeduct, so
+    //they never reach checkAndDeductResources() and were the last two charges
+    //outside the shared precision policy. They used to write
+    //Math.floor(balance - price), which does not charge the price - it charges
+    //the price plus whatever fraction the balance was carrying, so a $40,000
+    //launch pad took $40,000.75 from a purse holding cents, and a quarter of a
+    //unit extra from each of the three material stores as well. settleSpend()
+    //deducts exactly the quoted amount and snaps a tolerance-sized residue to
+    //zero, which is what every other purchase in the game does.
+    setResourceDataObject(settleSpend(currentCash, spaceMiningBuildingCashPrice), 'currency', ['cash']);
 
     if (spaceMiningBuildingResource1PriceCategory) {
-        setResourceDataObject(Math.floor(currentResource1Quantity - spaceMiningBuildingResource1PriceQuantity), spaceMiningBuildingResource1PriceCategory, [spaceMiningBuildingResource1PriceResource, 'quantity']);
+        setResourceDataObject(settleSpend(currentResource1Quantity, spaceMiningBuildingResource1PriceQuantity), spaceMiningBuildingResource1PriceCategory, [spaceMiningBuildingResource1PriceResource, 'quantity']);
     }
 
     if (spaceMiningBuildingResource2PriceCategory) {
-        setResourceDataObject(Math.floor(currentResource2Quantity - spaceMiningBuildingResource2PriceQuantity), spaceMiningBuildingResource2PriceCategory, [spaceMiningBuildingResource2PriceResource, 'quantity']);
+        setResourceDataObject(settleSpend(currentResource2Quantity, spaceMiningBuildingResource2PriceQuantity), spaceMiningBuildingResource2PriceCategory, [spaceMiningBuildingResource2PriceResource, 'quantity']);
     }
 
     if (spaceMiningBuildingResource3PriceCategory) {
-        setResourceDataObject(Math.floor(currentResource3Quantity - spaceMiningBuildingResource3PriceQuantity), spaceMiningBuildingResource3PriceCategory, [spaceMiningBuildingResource3PriceResource, 'quantity']);
+        setResourceDataObject(settleSpend(currentResource3Quantity, spaceMiningBuildingResource3PriceQuantity), spaceMiningBuildingResource3PriceCategory, [spaceMiningBuildingResource3PriceResource, 'quantity']);
     }
 
     setResourceDataObject(true, 'space', ['upgrades', spaceMiningBuilding, `${spaceMiningBuilding}BoughtYet`]);
