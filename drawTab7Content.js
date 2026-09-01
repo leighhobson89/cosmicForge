@@ -88,9 +88,6 @@ import { timerManagerDelta } from './timerManagerDelta.js';
 import { localize, localizeMaterialName } from './localization.js';
 import { getLanguage } from './constantsAndGlobalVars.js';
 
-// The market and casino dropdowns offer the same 14 tradeable materials. Their
-// display names come from the catalogue, so the list is built from the internal
-// keys rather than repeating the English names three times.
 const TRADEABLE_MATERIALS = [
     { value: 'hydrogen', type: 'resources' },
     { value: 'helium', type: 'resources' },
@@ -108,8 +105,6 @@ const TRADEABLE_MATERIALS = [
     { value: 'titanium', type: 'compounds' }
 ];
 
-// Void Seer prizes carry a catalogue key plus the cost and reel size the label
-// quotes, so the rendered label is composed here rather than stored in English.
 const voidSeerPrizeLabel = (prize, fallbackKey) => {
     if (!prize?.labelKey) return localize(fallbackKey, getLanguage());
     return localize(prize.labelKey, getLanguage())
@@ -126,8 +121,6 @@ const tradeableMaterialOptions = () => TRADEABLE_MATERIALS.map(({ value, type })
 const materialDisplayName = (key, type) => localizeMaterialName(key, type, getLanguage());
 
 export function drawTab7Content(heading, optionContentElement) {
-    // The row's own marker is cleared by the click that opened this pane — see
-    // clearOptionRowAttentionIndicator in ui.js.
     removeTabAttentionIfNoIndicators('tab7');
 
     if (heading === 'Rebirth') {
@@ -1249,11 +1242,6 @@ export function drawTab7Content(heading, optionContentElement) {
                 && awarded.key
                 && Number.isFinite(Number(awarded.oldQuantity))
                 && Number.isFinite(Number(awarded.newQuantity))) {
-                // A finite old/new quantity pair is the doubling award, and the
-                // prize label for it already names the material, so the detail
-                // line would just repeat it. This used to be decided by matching
-                // the English words "double" and the material name inside the
-                // rendered label, which was false in every other language.
                 return false;
             }
 
@@ -1749,16 +1737,6 @@ export function drawTab7Content(heading, optionContentElement) {
             return;
         }
 
-        // P2 (player-feedback plan): the list used to render in catalogue
-        // insertion order, so a perk the player had already finished with sat
-        // between two they could still buy. Group by how much of it is left -
-        // untouched, part-bought, finished - and order each group by price, so
-        // the cheapest thing worth buying is always nearest the top. The sort is
-        // stable, so perks of equal price keep their catalogue order.
-        //
-        // The order is settled once, here, at draw time. Re-sorting live would
-        // slide a row out from under the pointer at the exact moment the player
-        // finishes a perk, which is the worst possible moment to move it.
         const sortedBuffKeys = Object.keys(ascendencyBuffsArray)
             .map((buffKey, index) => {
                 const buff = ascendencyBuffsArray[buffKey];
@@ -1775,39 +1753,23 @@ export function drawTab7Content(heading, optionContentElement) {
 
         sortedBuffKeys.forEach(buffKey => {
             const buff = ascendencyBuffsArray[buffKey];
-            // The buff's display name comes from the catalogue, keyed by its
-            // internal key; buff.name in the data file is the English fallback.
             const buffNameKey = 'buffName' + capitaliseString(buffKey);
             const buffNameLocalized = localize(buffNameKey, getLanguage());
             const buffNameRaw = buffNameLocalized !== buffNameKey
                 ? buffNameLocalized
                 : (typeof buff?.name === 'string' ? buff.name : capitaliseString(buffKey));
             const buffName = typeof buffNameRaw === 'string' ? buffNameRaw : capitaliseString(buffKey);
-            // UI text is translated, but the perk catalogue is not. Keep DOM
-            // identifiers tied to the catalogue key so a translated name can
-            // never become part of the game logic.
             const buffNameSlug = buffKey.replace(/([A-Z])/g, '-$1').toLowerCase();
     
             const buffRowDescription = `buff${capitaliseString(buffKey)}Row`;
             const cost = getAscendencyBuffCost(buff);
             const maxed = isAscendencyBuffMaxed(buff);
-            // A finished perk says so once, in the far-right slot. Leaving the
-            // status text as "Purchased" as well printed the same fact twice,
-            // and in the same green, on every row the player had completed.
             const buyStatus = maxed
                 ? ''
                 : (buff.boughtYet > 0
                     ? (buff.rebuyable ? localize('textBoughtTimes', getLanguage()).replace('{count}', buff.boughtYet) : localize('textPurchased', getLanguage()))
                     : localize('textNotBought', getLanguage()));
 
-            // A maxed perk gets no Buy button at all - it used to keep one wearing
-            // `red-disabled-text`, which is the same red the pane uses for "you
-            // cannot afford this", so "finished" and "broke" were indistinguishable.
-            // The button is replaced by a same-sized invisible box rather than
-            // simply dropped, because the button carries the `margin-left: auto`
-            // that pushes the cost slot to the right-hand edge; without it the
-            // badge on a maxed row would sit at a different x than the price on
-            // the row above it.
             const buyControl = maxed
                 ? createAscendencyMaxedSpacer(buffNameSlug)
                 : createButton({
@@ -1989,6 +1951,8 @@ export function drawTab7Content(heading, optionContentElement) {
         blackHoleResearchGateContainer.style.height = '100%';
         blackHoleResearchGateContainer.style.minHeight = '220px';
         blackHoleResearchGateContainer.style.flex = '1 0 auto';
+        blackHoleResearchGateContainer.style.flexDirection = 'column';
+        blackHoleResearchGateContainer.style.gap = '16px';
 
         const blackHoleUnlockedContainer = document.createElement('div');
         blackHoleUnlockedContainer.id = 'blackHoleUnlockedContainer';
@@ -2027,8 +1991,6 @@ export function drawTab7Content(heading, optionContentElement) {
 
         const blackHoleButton1 = createButton({
             text: localize('buttonResearchBlackHole', getLanguage()),
-            // --wrap because the frame loop swaps this label for the two-line
-            // `buttonResearchBlackHoleWithPrice`, and `.option-button` is nowrap.
             classNames: ['id_blackHoleResearchButton', 'option-button', 'red-disabled-text', 'wide-option-button', 'option-button--wrap'],
             onClick: () => {
                 if (getBlackHoleResearchDone()) {
@@ -2252,6 +2214,12 @@ export function drawTab7Content(heading, optionContentElement) {
         blackHoleActivateChargeButton.style.width = '120px';
 
         blackHoleResearchGateContainer.appendChild(blackHoleButton1);
+
+        const blackHoleValueHintElement = document.createElement('div');
+        blackHoleValueHintElement.id = 'blackHoleValueHint';
+        blackHoleValueHintElement.classList.add('black-hole-value-hint');
+        blackHoleValueHintElement.textContent = localize('blackHoleValueHint', getLanguage());
+        blackHoleResearchGateContainer.appendChild(blackHoleValueHintElement);
         blackHoleRow2LeftButtons.appendChild(blackHoleButton3);
         blackHoleRow2LeftButtons.appendChild(blackHoleButton2);
         blackHoleRow2LeftButtons.appendChild(blackHoleButton4);

@@ -504,18 +504,6 @@ function updateSellAllButtonStates() {
     }
 }
 
-
-/**
- * P5: light the Increase All Storage buttons only while there is something to
- * claim.
- *
- * The eligibility question is the sweep's own — `getIncreasableStorageKeys()` —
- * rather than a second copy of "is this material full" written here, so the
- * button can never offer a claim the sweep would then decline, or refuse one it
- * would have made. It is asked every frame from `updateDynamicUiContent()`,
- * which is what makes the button light the instant a store tops out, with no
- * notification and no pane visit involved.
- */
 function updateIncreaseAllStorageButtonStates() {
     const buttons = [
         ['increaseAllStorageResourcesButton', 'resources'],
@@ -773,10 +761,6 @@ function formatHistoryAmount(value) {
     return formatNumber?.(num) ?? String(num);
 }
 
-
-// History rows carry the event name that was current when they were recorded.
-// The id is canonical, so resolve the display name from that instead and the
-// tables follow a runtime language change.
 function localizedEventName(entry) {
     const id = String(entry?.id ?? '').trim();
     if (id) {
@@ -1794,23 +1778,6 @@ export function applyCustomPointerSetting() {
 
 
 export function initialiseStaticButtonLabels() {
-    // Every statically-authored label in index.html carries a `data-loc`
-    // attribute naming the catalogue key it renders from, so relocalizing the
-    // static shell is one pass over those elements.
-    //
-    // This replaced ~200 lines of hand-written id-to-key blocks. Two classes of
-    // bug went with them:
-    //
-    //  - Around twenty ids in those blocks did not match index.html at all
-    //    (`energyStorageOption` vs `energyOption`, `contactOption` vs
-    //    `tab9ContactDevOption`, and every other tab-9 entry), so those labels
-    //    were never translated in any language.
-    //  - The Gases / Liquids / Solids headers were relocalized by matching their
-    //    *current text* against a hardcoded list of previously-seen
-    //    translations. Any form missing from that list stranded the header
-    //    permanently: once German had been visited, "Flüssigkeiten" never
-    //    changed again. Keying off the element rather than its text removes the
-    //    whole class of problem.
     document.querySelectorAll('[data-loc]').forEach(element => {
         const key = element.dataset.loc;
         if (key) {
@@ -1826,7 +1793,6 @@ export function fitLabelToWidth(element, { minFontPx = 11 } = {}) {
 
     element.style.fontSize = '';
 
-    // A hidden element measures 0 wide and would shrink to the floor for nothing.
     if (element.clientWidth <= 0) return;
     if (element.scrollWidth <= element.clientWidth + 1) return;
 
@@ -1845,12 +1811,6 @@ export function fitSideMenuLabels() {
         .forEach((label) => fitLabelToWidth(label));
 }
 
-
-// P3 (player-feedback plan): shared state checks for the stat-bar Powered
-// toggle. They deliberately live at module top level — not inside the
-// DOMContentLoaded listener below — because they are called from two places:
-// the listener's setupPoweredStatToggleButton() and the per-frame,
-// top-level statToolBarCustomizations().
 function hasAnyPowerPlantBuilt() {
     return ['powerPlant1', 'powerPlant2', 'powerPlant3'].some((key) =>
         (getResourceDataObject('buildings', ['energy', 'upgrades', key, 'quantity']) ?? 0) > 0
@@ -1861,27 +1821,11 @@ function isPoweredToggleDisabled() {
     return getInfinitePower() || !hasAnyPowerPlantBuilt();
 }
 
-// P3: while the Powered toggle is inert (Dyson Sphere active, or no power plant
-// of any type built) the button itself must not react to the pointer at all —
-// no hover highlight and no clicks. Setting pointer-events:none takes the
-// button out of the browser's hit-testing entirely, so :hover styles cannot
-// match it and clicks never land on it. The hover tooltip is unaffected: its
-// listeners are bound to the parent .stat-cell in setupStatTooltips(), which
-// keeps receiving the pointer while the button is inert.
 function applyPoweredToggleInertState(button, inert) {
     if (inert) {
-        // Inline !important is required: `button.stat-power-toggle` carries
-        // `pointer-events: auto !important` in styles.css (it exists so the
-        // generic `.red-disabled-text { pointer-events: none }` rule cannot
-        // lock the player out of an OFF-but-built grid), and a plain inline
-        // value loses to it. A style attribute with !important outranks
-        // author-stylesheet !important in the cascade.
         button.style.setProperty('pointer-events', 'none', 'important');
         button.setAttribute('aria-disabled', 'true');
     } else {
-        // Hand pointer handling back to the stylesheet: the stat-power-toggle
-        // rule re-arms `pointer-events: auto !important` so the button stays
-        // clickable in every enabled state.
         button.style.removeProperty('pointer-events');
         button.setAttribute('aria-disabled', 'false');
     }
@@ -2151,25 +2095,6 @@ function setupDemoTooltips() {
     });
 }
 
-
-// P3 (player-feedback plan): the stat-bar Powered entry becomes a real toggle.
-// The static #stat3 span is swapped for a createButton()-built button so it
-// matches every other button in the game, while keeping the same id and the
-// powered-check/stat-value classes so the existing per-frame label/colour
-// update (powerOnOrOffChecks) and the hover tooltip keep working unchanged.
-// Clicking drives the same toggleAllPower() path as the energy UI's Power All
-// control: ON when off/tripped, OFF when on.
-// P3: the toggle must be inert when it has nothing to act on. While a Dyson
-// Sphere supplies infinite power, or while the run has no power plant of any
-// type built, the button must not react to the pointer at all — no hover
-// highlight and no clicks. applyPoweredToggleInertState() enforces that by
-// lifting the button out of hit-testing; it is applied here at creation and
-// re-synced every frame by statToolBarCustomizations(). The hover tooltip keeps
-// working because its listeners are bound to the parent .stat-cell in
-// setupStatTooltips(), not to the button itself. (hasAnyPowerPlantBuilt /
-// isPoweredToggleDisabled live at module top level — see just above the
-// DOMContentLoaded listener — so both this setup and the per-frame
-// statToolBarCustomizations() can call them.)
 function setupPoweredStatToggleButton() {
     const stat3Element = document.getElementById('stat3');
     if (!stat3Element || stat3Element.tagName === 'BUTTON') {
@@ -2188,8 +2113,6 @@ function setupPoweredStatToggleButton() {
         disableKeyboardForButton: true
     });
 
-    // A fresh run has no plants, so the button boots inert; the per-frame sync
-    // in statToolBarCustomizations() keeps the state current from then on.
     applyPoweredToggleInertState(poweredToggleButton, isPoweredToggleDisabled());
     stat3Element.replaceWith(poweredToggleButton);
 }
@@ -2901,12 +2824,6 @@ function buildAutoBuyerGenerationLines(resourceKey, category, timerRatio) {
         
         const contribution = baseContribution + bTypeBoost;
         const className = contribution > 0 ? 'green-ready-text' : 'red-disabled-text';
-
-        // `nameUpgrade` holds a localization *key*, not a display name - every
-        // pane that draws an autobuyer row runs it through `localize` first.
-        // Printing it raw put `autoBuyerNameDieselBackyard` in the tooltip. A
-        // key with no catalogue entry localizes to itself, so fall back to the
-        // generic tier label rather than leak the key a second way.
         const localisedName = tierData.nameUpgrade
             ? localize(tierData.nameUpgrade, getLanguage())
             : '';
@@ -2942,11 +2859,6 @@ function buildAutoCreateGenerationLine(resourceKey, category, timerRatio) {
     const formatted = formatProductionRateValue(autoCreateRate);
     const className = autoCreateRate > 0 ? 'green-ready-text' : 'red-disabled-text';
     const line = `<div>${localize('tooltipAutoCreationLabel', getLanguage())} <span class="${className}">${formatted} / s</span></div>`;
-
-    // P9: a compound can make only as much as its scarcest ingredient's share
-    // allows. Saying which ingredient is the bottleneck turns "why is this so
-    // slow" into a single actionable answer - go and widen that resource's
-    // compound band, or build more of it.
     const throttledBy = getResourceDataObject('compounds', [resourceKey, 'autoCreateThrottledBy'], true);
     if (!throttledBy) {
         return line;
@@ -3007,39 +2919,10 @@ function buildPrecipitationGenerationLine(resourceKey, category, timerRatio) {
     return `<div>${localize('tooltipPrecipitationLabel', getLanguage())} <span class="${className}">${formatted} / s</span></div>`;
 }
 
-
-/**
- * P9: where this material's production is actually going, in full.
- *
- * The whole point of the allocation model is that the player can see the split
- * they chose being applied, so this accounts for every unit: fuel off the top,
- * then cash, then each auto-creating compound by name with the amount it is
- * really taking, then what is accumulating. The figures come from the engine's
- * own breakdown, so the tooltip cannot drift from the arithmetic.
- *
- * Compounds are the end of the line: they are made to be spent, not sold on a
- * timer, and there is no control anywhere in a compound pane that would set a
- * cash share. So the selling half of this block is resources-only. Quoting the
- * game-wide autosell income on a compound was the worst of it - a figure earned
- * entirely by resources, printed under a compound's own production, reading as
- * though the compound were contributing to it.
- *
- * That leaves a compound with one line worth printing - what is accumulating -
- * and it is taken from the headline figure the player is hovering rather than
- * from the breakdown. The breakdown's own total counts *autobuyer* output only,
- * so a compound made by auto-creation or falling as rain had a gross of zero and
- * reported nothing accumulating while its store visibly filled. Nothing is
- * diverted from a compound anyway, so the whole net rate is what accumulates,
- * and quoting the hovered figure back guarantees the two agree.
- */
 function buildAllocationLines(resourceKey, category, netRateDisplay) {
     const breakdown = getAllocationBreakdown(category, resourceKey);
     const sellsForCash = category === 'resources';
 
-    // Nothing to explain on a resource with no slider to explain and nothing
-    // drawing on it either. A compound is not gated on the selling perk here:
-    // its one line says where its production is going, which is true from the
-    // first unit made.
     if (sellsForCash && !getAutoSellUnlocked() && breakdown.perCompound.length === 0) {
         return '';
     }
@@ -3050,9 +2933,6 @@ function buildAllocationLines(resourceKey, category, netRateDisplay) {
         `<div><strong>${localize('tooltipAllocationHeading', getLanguage())}</strong></div>`
     ];
 
-    // Allocatable is the pool the handles divide up. With no handles on a
-    // compound there is nothing to divide, and the line was quoting a total that
-    // did not match the one above it.
     if (sellsForCash) {
         lines.push(`<div>${localize('tooltipAllocationAllocatable', getLanguage())}: <span class="stats-text">${rate(breakdown.allocatable)}</span></div>`);
     }
@@ -3065,10 +2945,6 @@ function buildAllocationLines(resourceKey, category, netRateDisplay) {
         lines.push(`<div>${localize('tooltipAllocationCeiling', getLanguage())}: <span class="stats-text">${rate(breakdown.compoundCeiling)}</span></div>`);
     }
 
-    // Each consumer gets its own line with the amount it is drawing. The share
-    // it was *offered* is an equal cut of the ceiling; what it takes may be less
-    // if another of its ingredients is the bottleneck, and the difference is
-    // exactly what stays in this store.
     breakdown.perCompound.forEach(({ compound, draw }) => {
         const name = localizeMaterialName(compound, 'compounds', getLanguage());
         lines.push(
@@ -3079,9 +2955,6 @@ function buildAllocationLines(resourceKey, category, netRateDisplay) {
     const accumulating = sellsForCash ? rate(breakdown.toStorage) : (netRateDisplay || rate(breakdown.toStorage));
     lines.push(`<div>${localize('tooltipAllocationToStorage', getLanguage())}: <span class="green-ready-text">${accumulating}</span></div>`);
 
-    // The game-wide total, so the player can weigh one material's split against
-    // what every other material is contributing. Only ever on a resource, since
-    // only resources are sold on a slider at all.
     const income = sellsForCash ? getAutoSellIncomePerSecond() : 0;
     if (income > 0) {
         lines.push(
@@ -3112,11 +2985,6 @@ function calculateAutoCreateRatePerSecond(compoundKey, timerRatio) {
                 return 0;
             }
 
-
-            // P9: what this compound may actually have of the ingredient - the
-            // ceiling its resource pane set, divided equally between the
-            // compounds drawing on it - not the ingredient's whole gross rate,
-            // which every consumer would otherwise claim in full.
             const sourceCategory = category || 'resources';
             const ceiling = getAllocationBreakdown(sourceCategory, resourceName).compoundCeiling;
             const consumers = Math.max(1, getActiveCompoundConsumers(resourceName).length);
@@ -3514,15 +3382,7 @@ function buildPowerPlantStatusLines() {
     }).join('');
 }
 
-
-
-
-// Mapping from English headings to localization keys
 const headingToLocalizationKey = {
-    // Tab bar. These are the canonical `data-name` values, used as the heading
-    // when a tab's intro page is shown. 'Research' and 'Cosmic Rip' are both a
-    // tab name and a pane name; their headerMain* entries below carry the same
-    // text, so they are not duplicated here.
     'Resources': 'tabHeaderResources',
     'Energy': 'tabHeaderEnergy',
     'Compounds': 'tabHeaderCompounds',
@@ -3610,11 +3470,6 @@ export function updateContent(heading, tab, type) {
     } else {
         playClickSfx();
     }
-    // P4: the star map's selection ping is a viewport-positioned mark on
-    // `document.body`, so nothing else takes it down when the map stops being the
-    // pane on screen. Every pane change comes through here, including the one
-    // `focusStarOnStarMap` makes on the way *to* the map — which is why that
-    // function pings only after this has run.
     clearStarMapSelectionPing();
 
     const optionDescriptionElements = getElements().optionPaneDescriptions;
@@ -3646,11 +3501,6 @@ export function updateContent(heading, tab, type) {
 
     optionContentElement.innerHTML = '';
 
-    // P14 (player-feedback plan): a pane header can carry its own controls — tab 1
-    // puts the resource's "Gain 1" button there. Whatever the previous pane left
-    // behind is cleared here, before the intro branch returns, so the intro page
-    // never shows the last resource's button. The pane's own draw function refills
-    // it.
     const headerActionsElement = document.getElementById(`headerActionsTab${tabNumber}`);
     if (headerActionsElement) {
         headerActionsElement.innerHTML = '';
@@ -3658,10 +3508,6 @@ export function updateContent(heading, tab, type) {
 
        
     if (type === 'intro') {
-        // Both lookups are keyed by the canonical English tab name, which is why
-        // the caller passes `data-name` rather than the rendered label. The `?? ''`
-        // guards are belt-and-braces: assigning an undefined lookup to innerHTML
-        // renders the literal string "undefined" on the intro page.
         optionDescription = getHeaderDescriptions(heading);
         optionDescriptionElement = optionDescriptionElements[tabNumber - 1];
         optionDescriptionElement.innerHTML = optionDescription ?? '';
@@ -3751,25 +3597,6 @@ export function updateContent(heading, tab, type) {
     }
 }
 
-// ============================================================================
-// P1 (player-feedback plan): which rows get a Max button, and where it goes.
-// ============================================================================
-
-/**
- * The plan's list, spelled out as a rule per row category so it can be read back
- * against the plan: resource and compound autobuyers, batteries and power
- * buildings, research buildings, rocket miners, starship modules, fleet hangar
- * ships, and the repeatable philosophy technologies.
- *
- * Two exclusions are deliberate. The fleet envoy is capped at one, so a Max
- * button would be meaningless. So is each philosophy's single special ability,
- * which is why the philosophy branch asks the data object whether the technology
- * is repeatable rather than trusting the row's condition check alone.
- *
- * Everything absent from this list is absent on purpose: one-off purchases such
- * as the Launch Pad and the Space Telescope, tech unlocks, storage upgrades, and
- * the sell and fuse controls.
- */
 function rowAcceptsBulkPurchase({ dataConditionCheck, objectSectionArgument1, objectSectionArgument2, rowCategory }) {
     const upgradeTarget = String(objectSectionArgument2 || '');
 
@@ -3804,14 +3631,6 @@ function rowAcceptsBulkPurchase({ dataConditionCheck, objectSectionArgument1, ob
     }
 }
 
-/**
- * Return the row's input elements with a Max button spliced in after its
- * purchase button, or unchanged when the row does not qualify.
- *
- * The purchase button is the row's first button that is neither a sell control
- * nor a toggle: a power plant row leads with Sell 1, so taking the first button
- * outright would attach Max to the wrong control.
- */
 function withBulkPurchaseButton(elements, rowOptions) {
     if (!isBulkPurchasingUnlocked() || !rowAcceptsBulkPurchase(rowOptions)) {
         return elements;
@@ -3829,10 +3648,6 @@ function withBulkPurchaseButton(elements, rowOptions) {
         return elements;
     }
 
-    // No condition-check dataset and no cost-check class of its own - see
-    // syncBulkPurchaseButtons() in game.js for why the state is mirrored from
-    // the purchase button instead. It starts disabled so it cannot be clicked in
-    // the frame before the first sync runs.
     const maxButton = createButton({
         text: localize('buttonBuyMax', getLanguage()),
         classNames: ['option-button', 'buy-max-button', 'red-disabled-text'],
@@ -4018,9 +3833,6 @@ export function createOptionRow(options = {}) {
         inputContainer.style.width = noDescriptionContainer[2];
     }
 
-    // P1: a qualifying row gains a Max button beside its purchase button. The
-    // original five-element cap is applied first, so no row that was already at
-    // the limit loses one of its own elements to the injection.
     withBulkPurchaseButton(inputElements.slice(0, 5), {
         dataConditionCheck,
         objectSectionArgument1,
@@ -4061,13 +3873,6 @@ export function createOptionRow(options = {}) {
                 description.dataset.argumentCheckQuantity = quantityArgument;
                 description.dataset.type = objectSectionArgument1;
             } else {
-                // The secondary cost is parsed out of already-translated
-                // description text, so what comes back is a display name.
-                // Resolve it to its internal compound key here, once per row
-                // build, instead of reverse-mapping it inside
-                // compoundCostSellCreateChecks on every frame. The stored key is
-                // language-independent, so the row also stays correct if it
-                // outlives a language change.
                 const parsedSecondCompound = descriptionText && descriptionText.includes(',') && objectSectionArgument1 && objectSectionArgument1.includes('storage')
                     ? descriptionText.split(',').pop().trim().split(' ').pop().toLowerCase()
                     : '';
@@ -4268,31 +4073,6 @@ export function createSpinningDropdown(id, items, defaultValue, classes = []) {
     return container;
 }
 
-
-/**
- * A multi-handle slider, built the same way as `createButton`, `createDropdown`
- * and `createToggleSwitch` so a pane assembles out of one consistent family of
- * controls.
- *
- * One handle gives an ordinary slider. Several give a partition: each handle
- * marks a boundary along the track, the segments between the boundaries are the
- * shares, and the handles cannot cross - dragging one past its neighbour pushes
- * the neighbour along rather than inverting the segment. P9's production
- * allocation line is a partition of this kind; a plain volume or difficulty
- * control would be the one-handle case.
- *
- * @param {string} id           element id for the container
- * @param {object} config
- * @param {number[]} config.values      boundary positions, ascending, 0..max
- * @param {number} [config.min=0]       lowest value a handle may take
- * @param {number} [config.max=100]     highest value a handle may take
- * @param {number} [config.step=5]      snap increment, for drag and arrow keys
- * @param {string[]} [config.segmentClasses]  one class per segment, left to right
- * @param {string[]} [config.handleIds]       explicit ids, so callers can address a handle
- * @param {string[]} [config.handleLabels]    accessible names for each handle
- * @param {Function} config.onChange    called with the full boundary array on every change
- * @param {string[]} [classes]          extra classes for the container
- */
 export function createSlider(id, config = {}, classes = []) {
     const min = Number.isFinite(config.min) ? config.min : 0;
     const max = Number.isFinite(config.max) ? config.max : 100;
@@ -4316,8 +4096,6 @@ export function createSlider(id, config = {}, classes = []) {
     track.setAttribute('role', 'group');
     container.appendChild(track);
 
-    // One more segment than there are boundaries: the last runs from the final
-    // handle to the end of the track.
     const segments = [];
     for (let i = 0; i <= boundaries.length; i++) {
         const segment = document.createElement('div');
@@ -4363,13 +4141,6 @@ export function createSlider(id, config = {}, classes = []) {
         });
     };
 
-    /**
-     * Move one boundary, then push every neighbour it would have crossed.
-     *
-     * Pushing rather than clamping is what makes a drag feel continuous: a
-     * handle dragged hard to one end takes the others with it instead of
-     * stopping dead against them and leaving the pointer behind.
-     */
     const setBoundary = (index, requested) => {
         const snapped = snap(requested, min, max, step);
         const next = boundaries.slice();
@@ -4401,14 +4172,9 @@ export function createSlider(id, config = {}, classes = []) {
     };
 
     handles.forEach((handle, index) => {
-        // Pointer events cover mouse, pen and touch with one code path, which is
-        // the whole reason the track sets `touch-action: none`.
         handle.addEventListener('pointerdown', (event) => {
             event.preventDefault();
             handle.setPointerCapture?.(event.pointerId);
-            // Flagged so a per-frame refresh elsewhere does not write the stored
-            // value back over the drag and snap the handle out from under the
-            // pointer.
             container.dataset.dragging = 'true';
 
             const move = (moveEvent) => {
@@ -4432,8 +4198,6 @@ export function createSlider(id, config = {}, classes = []) {
             move(event);
         });
 
-        // The slider is how the setting is presented, never the only way to
-        // reach it: every handle is focusable and steps with the arrow keys.
         handle.addEventListener('keydown', (event) => {
             const direction = (event.key === 'ArrowRight' || event.key === 'ArrowUp') ? 1
                 : ((event.key === 'ArrowLeft' || event.key === 'ArrowDown') ? -1 : 0);
@@ -4447,8 +4211,6 @@ export function createSlider(id, config = {}, classes = []) {
 
     render();
 
-    // Callers that persist their values elsewhere need a way to push a corrected
-    // set back in - a rebirth, a save load, or a share the engine clamped.
     container.setSliderValues = (values) => {
         boundaries = normaliseBoundaries(values, min, max, step);
         render();
@@ -4466,7 +4228,6 @@ function snap(value, min, max, step) {
     return Math.max(min, Math.min(max, stepped));
 }
 
-/** Boundaries must be in range, on the step, and ascending - in that order. */
 function normaliseBoundaries(values, min, max, step) {
     const list = (Array.isArray(values) ? values : [])
         .map(value => snap(value, min, max, step));
@@ -4476,30 +4237,6 @@ function normaliseBoundaries(values, min, max, step) {
     return list;
 }
 
-
-/**
- * P9 - the production allocation line.
- *
- * A `createSlider` partition plus the readout underneath it. The slider knows
- * about handles, snapping and pushing; everything here is what the shares
- * *mean*: a material's allocatable production - what its autobuyers made this
- * second, less what the power plants burned of it - divided into cash, a ceiling
- * offered to auto-creating compounds, and a remainder that accumulates.
- *
- * The line has one handle or two depending on what the player can do with the
- * material, because a control should never offer a decision that has no effect:
- *
- *   - **two segments, one handle** - cash against storage. Every compound pane
- *     is permanently here, and so is any resource no recipe draws on: helium has
- *     no consumers, so a compound band on it would be a dead control.
- *   - **three segments, two handles** - cash, the compound ceiling, then
- *     storage. Only for a resource some recipe names, and only once the Nano
- *     Brokers ladder reaches its second rung.
- *
- * It replaces the sell dropdown and Sell button in a material's sell row once
- * the ladder's first rung is owned, and takes the width of the pair it replaces
- * so every row in the pane stays aligned.
- */
 export function createAllocationLine(category, key, options = {}) {
     const showCompoundBand = !!options.showCompoundBand;
 
@@ -4514,8 +4251,6 @@ export function createAllocationLine(category, key, options = {}) {
         ? Math.max(0, Math.min(100 - cash, Number(getResourceDataObject(category, [key, 'compoundShare'], true)) || 0))
         : 0;
 
-    // Boundaries, not widths: one handle at the end of the cash band, and where
-    // there is a compound band, a second at the end of that.
     const boundaries = showCompoundBand ? [cash, cash + compound] : [cash];
 
     const slider = createSlider(`${key}AllocationSlider`, {
@@ -4533,9 +4268,6 @@ export function createAllocationLine(category, key, options = {}) {
             ? [localize('allocationHandleCash', getLanguage()), localize('allocationHandleCompound', getLanguage())]
             : [localize('allocationHandleCash', getLanguage())],
         onChange: (values) => {
-            // The slider guarantees the boundaries are ascending and on the
-            // step, so the shares derived from them are always a valid
-            // partition of 100 without further checking here.
             const nextCash = clampPercent(values[0]);
             setResourceDataObject(nextCash, category, [key, 'cashShare']);
             if (showCompoundBand) {
@@ -4549,9 +4281,6 @@ export function createAllocationLine(category, key, options = {}) {
     readout.classList.add('allocation-readout');
     readout.id = `${key}AllocationReadout`;
 
-    // The bar is the only place the split is set, so it is also where the
-    // explanation of the split belongs - hovering it says what the handles do
-    // and what the three figures beside them mean.
     attachAllocationSliderTooltip(slider, category, key, showCompoundBand);
 
     container.appendChild(slider);
@@ -4561,7 +4290,6 @@ export function createAllocationLine(category, key, options = {}) {
     return container;
 }
 
-/** Percentages are stored as whole numbers in 0..100; nothing else is valid. */
 function clampPercent(value) {
     if (!Number.isFinite(value)) {
         return 0;
@@ -4569,24 +4297,6 @@ function clampPercent(value) {
     return Math.max(0, Math.min(100, Math.round(value)));
 }
 
-/**
- * Write the live per-second figures beside the bar.
- *
- * All three are *destinations*, and all three move with the handles: what is
- * accumulating, what is being sold, and what the compounds are actually taking.
- * The allocatable total is deliberately not among them - it does not move with
- * the slider, so printing it beside three figures that do read as a fourth band
- * that never changes. It is quoted once, in the breakdown tooltip on the
- * production figure in the left pane, which is where a total belongs.
- *
- * Every figure comes from `getAllocationBreakdown()`, which is the engine's own
- * arithmetic - a display that recomputed the split for itself would eventually
- * disagree with where the production actually went. That matters most for the
- * compound figure: it is what the recipes are *drawing*, not the ceiling they
- * were offered, so a band whose compounds are switched off or bottlenecked on
- * another ingredient reads zero, and the difference shows up in the storage
- * figure where the material is genuinely going.
- */
 export function updateAllocationReadout(container, category, key, showCompoundBand) {
     const readout = container?.querySelector('.allocation-readout');
     if (!readout) {
@@ -4608,10 +4318,6 @@ export function updateAllocationReadout(container, category, key, showCompoundBa
 
     readout.innerHTML = parts.join('');
 
-    // The slider is the record of what the player set, but the engine clamps -
-    // a compound band cannot outlive the capability that created it. Push the
-    // clamped values back so the handles never show a split that is not being
-    // acted on.
     const slider = container.querySelector('.slider-container');
     if (slider?.setSliderValues && !slider.dataset.dragging) {
         const cash = clampPercent(Number(getResourceDataObject(category, [key, 'cashShare'], true)) || 0);
@@ -4625,20 +4331,6 @@ export function updateAllocationReadout(container, category, key, showCompoundBa
     }
 }
 
-
-/**
- * The one floating panel every production tooltip borrows.
- *
- * Shared rather than one panel per attachment point: only one can be on screen
- * at a time, and a second element would have to be kept in step with this one's
- * styling for ever. Both the per-material production tooltips and the allocation
- * slider's own how-to tooltip call this.
- *
- * It lives at module level deliberately. `setupProductionRateTooltips`, its
- * first caller, is itself nested two scopes deep, and a function declared inside
- * a block is block-scoped in a module - so a copy of this living beside that
- * caller is invisible to everything else in the file.
- */
 function ensureProductionRateTooltip() {
     let tooltip = document.getElementById('production-rate-tooltip');
     if (tooltip) {
@@ -4664,14 +4356,6 @@ function ensureProductionRateTooltip() {
     return tooltip;
 }
 
-/**
- * A compound's recipe: every ingredient it names, with the ratio it wants.
- *
- * Deliberately its own reader rather than a call to `getCompoundIngredientEntries`
- * further up this file. That one is declared inside a function two scopes deep,
- * and a function declaration inside a block is block-scoped in a module - so it
- * is invisible from module level, however top-level it looks in the source.
- */
 function recipeEntriesFor(compound) {
     const compoundData = getResourceDataObject('compounds', [compound], true) || {};
     const entries = [];
@@ -4685,33 +4369,17 @@ function recipeEntriesFor(compound) {
     return entries;
 }
 
-/** Every compound whose recipe names this resource, switched on or not. */
 function compoundsMadeFrom(resourceKey) {
     const compounds = getResourceDataObject('compounds') || {};
     return Object.keys(compounds).filter(compound =>
         recipeEntriesFor(compound).some(part => part.resourceName === resourceKey));
 }
 
-/** Which side of the data object a recipe's ingredient lives on. */
 function ingredientCategory(compound, resourceName) {
     const entry = recipeEntriesFor(compound).find(part => part.resourceName === resourceName);
     return entry?.category || 'resources';
 }
 
-/**
- * P9 - the "what is this control?" tooltip on the allocation slider itself.
- *
- * The readout beside the bar says where production is going; it does not say
- * what the handles do, and a two-handle partition is not self-explanatory. This
- * is the explanation, and it is built from the live figures rather than written
- * as static prose: a rule stated in the abstract ("the rest is stored") is far
- * less convincing than the same rule with the player's own numbers in it.
- *
- * It grows with what the player owns, so nobody is told about a control they do
- * not have. One handle gets the cash paragraph alone; the compound paragraphs
- * appear only alongside the second band, which is itself only ever drawn on a
- * resource some recipe actually draws on.
- */
 function buildAllocationSliderTooltip(category, key, showCompoundBand) {
     const lang = getLanguage();
     const breakdown = getAllocationBreakdown(category, key);
@@ -4729,11 +4397,6 @@ function buildAllocationSliderTooltip(category, key, showCompoundBand) {
         : 0;
     const storagePercent = Math.max(0, 100 - cashPercent - compoundPercent);
     const saleValue = Number(getResourceDataObject(category, [key, 'saleValue'])) || 0;
-
-    // The legend first, because the three figures beside the bar are the thing
-    // the player is looking at when they reach for this tooltip. Each line
-    // carries the figure's own colour class, so the label and the number it
-    // explains are unmistakably the same band in every theme.
     const lines = [
         `<div><strong>${localize('tooltipSliderHeading', lang)}</strong></div>`,
         `<div>${fill('tooltipSliderIntro', { allocatable: rate(breakdown.allocatable) })}</div>`,
@@ -4756,9 +4419,6 @@ function buildAllocationSliderTooltip(category, key, showCompoundBand) {
         const consumers = getActiveCompoundConsumers(key);
         const idle = compoundsMadeFrom(key).filter(compound => !consumers.includes(compound));
 
-        // Auto-create off is the case most likely to look like a bug: the band
-        // is set, the bar shows it, and nothing is being made. Say where the
-        // material is actually going, and name the amount.
         if (compoundPercent > 0 && consumers.length === 0 && idle.length > 0) {
             lines.push(`<div>${fill('tooltipSliderCompoundOff', {
                 compounds: idle.map(compound => localizeMaterialName(compound, 'compounds', lang)).join(', '),
@@ -4766,9 +4426,6 @@ function buildAllocationSliderTooltip(category, key, showCompoundBand) {
             })}</div>`);
         }
 
-        // A recipe held back by one of its *other* ingredients takes only what
-        // that bottleneck allows of this one, and the remainder stays here. The
-        // engine already records which ingredient is responsible, so name it.
         consumers.forEach(compound => {
             const throttledBy = getResourceDataObject('compounds', [compound, 'autoCreateThrottledBy'], true);
             if (!throttledBy || throttledBy === key) {
@@ -4783,8 +4440,6 @@ function buildAllocationSliderTooltip(category, key, showCompoundBand) {
         lines.push(`<div>${localize('tooltipSliderFallsBack', lang)}</div>`);
     }
 
-    // The one case where a stopped diversion does not fall back into the store,
-    // because there is nowhere for it to fall.
     const quantity = Number(getResourceDataObject(category, [key, 'quantity'])) || 0;
     const capacity = Number(getResourceDataObject(category, [key, 'storageCapacity'])) || 0;
     if (capacity > 0 && quantity >= capacity) {
@@ -4797,13 +4452,6 @@ function buildAllocationSliderTooltip(category, key, showCompoundBand) {
     return lines.join('');
 }
 
-/**
- * Show that tooltip while the pointer is over the bar.
- *
- * Rebuilt on every move rather than on entry alone: the figures in it are live,
- * and a player who drags a handle with the tooltip open is exactly the player
- * who wants to watch the numbers answer.
- */
 function attachAllocationSliderTooltip(slider, category, key, showCompoundBand) {
     const tooltip = ensureProductionRateTooltip();
 
@@ -4988,9 +4636,6 @@ export function createButton(options = {}) {
         button.classList.add('electron-purple-demo-button');
     }
 
-    // P1 (player-feedback plan): Buy Max drives a row's purchase handler directly
-    // rather than re-dispatching a click at the button, which would replay the
-    // click sound and the press animation below once per unit bought.
     button.bulkPurchaseHandler = typeof onClick === 'function' ? onClick : null;
 
     button.addEventListener('click', function(event) {
@@ -5034,18 +4679,6 @@ export function createButton(options = {}) {
     return button;
 }
 
-/**
- * The invisible stand-in for a maxed perk's Buy button.
- *
- * It carries the same box as the button it replaces - the same `option-button`
- * padding and the `margin-left: auto` that pushes the price slot to the right -
- * so a maxed row lines up with the rows above and below it. `visibility: hidden`
- * rather than `display: none` is the point: the space has to stay.
- *
- * It is deliberately not a <button> and deliberately does not carry
- * `.ascendency-buff-button`, so the frame loop's affordability pass never sees
- * it and there is nothing on the row left to click.
- */
 export function createAscendencyMaxedSpacer(buffNameSlug) {
     const spacer = document.createElement('div');
     spacer.classList.add('option-button', 'ascendency-buff-maxed-spacer', `buff-maxed-class-${buffNameSlug}`);
@@ -5122,12 +4755,6 @@ export function createHtmlTextAreaProse(id, classList = [], headerText = '', bod
 
 
 export function setupAchievementTooltip() {
-    //the achievements pane is rebuilt from scratch on every visit, and this installs
-    //an element on document.body plus three listeners on document - none of which the
-    //rebuild removes. without this guard every visit left another tooltip sharing the
-    //same id, and another three handlers running on every mouse move.
-    //the early return is safe because the handlers already bound close over the
-    //element that is still in the document, so the existing tooltip keeps working.
     if (document.getElementById('achievement-tooltip')) {
         return;
     }
@@ -5382,11 +5009,6 @@ export function updateAttentionIndicators() {
     });
 }
 
-
-// The indicator is positioned absolutely (see .attention-indicator in
-// styles.css) so it never counts towards the width of the label it marks. That
-// needs a positioned host, which `has-attention-indicator` supplies — added and
-// removed alongside the icon so no element is left positioned without one.
 export function appendAttentionIndicator(element, iconText = '⚠️') {
     if (!element || !(element instanceof HTMLElement)) return;
     element.classList.add('has-attention-indicator');
@@ -5498,13 +5120,6 @@ export function createHtmlTableStatistics(id, classList = [], mainHeadings, subH
             <tbody>
         `;
 
-
-        //the stats whose value is a bare unit-free figure, and so is worth putting through the
-        //notation setting. matched on the resolved english key, never on the displayed heading -
-        //the heading is capitalised and localized, so comparing it against these keys never matches.
-        //deliberately left out: anything carrying a unit ('12 ly', '450 kJ / s'), anything that is
-        //a yes/no or a name, and totalEnergy, which reads the stat bar's already formatted text and
-        //would therefore be condensed a second time
         const notationHeaders = [
             'cash', 'antimatter', 'antimatterMined',
             'hydrogen', 'helium', 'carbon', 'neon', 'oxygen', 'sodium', 'silicon', 'iron',
@@ -6057,12 +5672,6 @@ export function showNotification(message, type = 'info', time = 3000, classifica
         createNotificationContainer(classification);
     }
 
-
-    // P1: while a Buy Max is running the same purchase handler fires once per
-    // unit, and each one would enqueue an identical toast - twenty purchases
-    // would hold the screen for a minute. Collapse repeats to the first. The
-    // flag is only ever set for the duration of the loop, so ordinary play is
-    // untouched.
     if (getBulkPurchaseInProgress() && queues[classification].some((queued) => queued.message === message)) {
         return;
     }
@@ -6117,17 +5726,10 @@ export function showNotificationWithAction(message, type = 'info', time = 3000, 
 }
 
 
-// P6: a classification whose cards sit side by side in one row rather than one
-// at a time on a queue timer. See MULTI_NOTIFICATION_CLASSIFICATIONS.
 function isMultiCardClassification(classification) {
     return MULTI_NOTIFICATION_CLASSIFICATIONS.includes(String(classification));
 }
 
-
-// Cards that are already fading out still exist in the DOM for the half second
-// `hideNotification` gives the transition, so they must not count against the
-// column cap - otherwise the row refuses to refill for that half second and the
-// queue stutters.
 function countLiveNotifications(container) {
     if (!container) {
         return 0;
@@ -6135,13 +5737,6 @@ function countLiveNotifications(container) {
     return container.querySelectorAll('.notification:not(.notification-dismissing)').length;
 }
 
-
-// The stack is one fixed, bottom-right anchored flex column, and every
-// classification container is a child of it. Positioning each container by hand
-// is what produced the horizontal spread P6 removes: with the column doing the
-// layout, a container that goes away lets the ones above it fall towards the
-// corner on their own, which is the "always try to move to the bottom right"
-// behaviour, and no arithmetic has to know how tall a notification is.
 function getNotificationStackRoot() {
     let root = document.getElementById('notificationStackRoot');
     if (!root) {
@@ -6155,9 +5750,6 @@ function getNotificationStackRoot() {
 
 function createNotificationContainer(classification) {
     const container = document.createElement('div');
-    // No separate class for a multi-card row: every container is already a
-    // right-aligned flex row, so a classification that appends several cards
-    // lays them out newest-on-the-right without any extra styling.
     container.className = `notification-container classification-${classification}`;
 
 
@@ -6177,12 +5769,6 @@ function createNotificationContainer(classification) {
     updateNotificationStackLayout();
 }
 
-
-// DOM order inside the root *is* the stack order, because the root is a
-// `column-reverse` flex: the first child sits in the corner and each later one
-// stacks above it. Re-appending in `classificationOrder` therefore both orders
-// the stack and moves any container that has drifted, and `appendChild` moves an
-// existing node rather than duplicating it.
 function updateNotificationStackLayout() {
     const containers = getNotificationContainers();
     const order = getClassificationOrder();
@@ -6195,10 +5781,6 @@ function updateNotificationStackLayout() {
             return;
         }
         root.appendChild(container);
-        // Past MAX_STACKS there is no row to occupy. The container stays in the
-        // document holding its queue, but shows nothing, so the notifications it
-        // owns are genuinely queued rather than drawn off the bottom of the
-        // screen or piled on top of a neighbour.
         container.classList.toggle('notification-container-deferred', index >= MAX_STACKS);
     });
 
@@ -6206,18 +5788,11 @@ function updateNotificationStackLayout() {
     promoteQueuedClassifications();
 }
 
-
-// A classification only holds a row while it is inside the cap.
 function notificationRowAvailable(classification) {
     const index = getClassificationOrder().indexOf(classification);
     return index >= 0 && index < MAX_STACKS;
 }
 
-
-// When a row frees up - a queue emptied, or a Clear All took a whole
-// classification away - whatever was waiting behind the cap gets to start.
-// Terminates because a classification is only processed here when it has
-// something queued, and processing either shows it or removes it from the order.
 function promoteQueuedClassifications() {
     const queues = getNotificationQueues();
     const status = getNotificationStatus();
@@ -6244,11 +5819,6 @@ function processNotificationQueue(classification) {
 
     const queue = queues[classification];
 
-
-    // The multi-card row is the storage exception: fill it up to its column cap
-    // and let each card time out on its own, newest on the right, rather than
-    // holding the rest behind a single timer. Anything past the cap stays queued
-    // and slides in as a card leaves.
     if (isMultiCardClassification(classification)) {
         const container = getNotificationContainers()[classification];
 
@@ -6274,7 +5844,6 @@ function processNotificationQueue(classification) {
             setNotificationStatus(status);
             return;
         }
-        // Nothing showing and nothing left: fall through to the shared teardown.
     }
 
 
@@ -6334,12 +5903,6 @@ function sendNotification(message, type, classification, duration, actionLabel, 
     notification.style.paddingBottom = '40px';
     notification.innerHTML = `<div class="notification-content">${message}</div>`;
 
-
-    // A single-card row only ever shows the head of its queue, so anything the
-    // previous timer left mid-fade is cleared out. A multi-card row is the
-    // opposite: its cards coexist, newest appended last, which the row's
-    // right-aligned flex direction puts on the right with the older ones sliding
-    // left - so nothing is removed here.
     if (!isMultiCardClassification(classification)) {
         const existing = container.querySelector('.notification');
         if (existing) {
@@ -6452,11 +6015,6 @@ function sendNotification(message, type, classification, duration, actionLabel, 
         const status = getNotificationStatus();
         const order = getClassificationOrder();
 
-    
-        // Deleted, not emptied. An empty-but-present key still satisfies the
-        // `if (!queues[classification])` guard in showNotification, so the next
-        // notification of this type would be pushed onto a queue whose container
-        // and stack row had both been torn down - and never seen again.
         delete queues[classification];
         setNotificationQueues(queues);
 
@@ -6476,9 +6034,6 @@ function sendNotification(message, type, classification, duration, actionLabel, 
         const newOrder = order.filter(c => c !== classification);
         setClassificationOrder(newOrder);
 
-    
-        // Clearing a whole classification frees its row, so the stack closes up
-        // and anything held behind the cap gets its turn.
         updateNotificationStackLayout();
     };
 
@@ -6502,18 +6057,12 @@ function sendNotification(message, type, classification, duration, actionLabel, 
 
 function hideNotification(notification) {
     notification.classList.remove('show');
-    // The element lives on for the length of the fade. Marking it as leaving is
-    // what lets a multi-card row refill immediately instead of waiting out the
-    // transition of the card that just went.
     notification.classList.add('notification-dismissing');
     setTimeout(() => {
         notification.remove();
     }, 500);
 }
 
-
-// The tooltip default is resolved per call rather than baked in, so it follows a
-// runtime language change instead of freezing on whatever was active at import.
 export function disableStorageNotificationActionIfShowing(key, tooltipText = localize('tooltipStorageAlreadyIncreased', getLanguage())) {
     const normalizedKey = String(key || '').trim();
     if (!normalizedKey) {
@@ -6526,11 +6075,6 @@ export function disableStorageNotificationActionIfShowing(key, tooltipText = loc
         return;
     }
 
-
-    // P6: the storage row shows several cards at once, so the one that offers
-    // this key's claim has to be picked out rather than assumed to be the only
-    // one there. Before the multi-card row this read the single visible card,
-    // which silently did nothing as soon as a second store filled.
     const keyLower = normalizedKey.toLowerCase();
     const notification = Array.from(container.querySelectorAll('.notification')).find((card) => {
         const text = String(card.querySelector('.notification-content')?.textContent || '');
@@ -6685,19 +6229,8 @@ export function generateStarfield(starfieldContainer, numberOfStars = 70, seed =
     const containerRect = starfieldContainer.getBoundingClientRect();
     const containerLeft = containerRect.left;
     const containerTop = containerRect.top;
-    // Star coordinates are simulation data, not layout. They are generated over a
-    // fixed nominal field so that a star is the same distance away no matter who
-    // asks: the drawn map passes a real panel, everything in calculation mode
-    // passes a detached div whose width and height are zero. Deriving x and y from
-    // the measured container made those two disagree — the planar term collapsed
-    // for the detached one — so a star could be studied for the map and unstudied
-    // for the search, the manuscript roll and the O-type achievement gate. It also
-    // made a star's distance depend on the size of the browser window.
     const fieldWidth = STAR_FIELD_NOMINAL_WIDTH;
     const fieldHeight = STAR_FIELD_NOMINAL_HEIGHT;
-    // The map still fills whatever box it is drawn into: the nominal field is
-    // scaled onto the real container for placement only. A zero-sized container
-    // (calculation mode) never draws, so its scale is irrelevant.
     const drawScaleX = containerRect.width > 30 ? (containerRect.width - 30) / (fieldWidth - 30) : 1;
     const drawScaleY = containerRect.height > 0 ? containerRect.height / fieldHeight : 1;
     const starNames = getStarNames();
@@ -6712,8 +6245,6 @@ export function generateStarfield(starfieldContainer, numberOfStars = 70, seed =
         const x = getSeededRandomInRange(seed + i + numberOfStars, 0, fieldWidth - 30);
         const y = getSeededRandomInRange(seed + i + numberOfStars * 2, 0, fieldHeight);
         const z = getSeededRandomInRange(seed + i + numberOfStars * 3, 10, 100000);
-        // x/y/z are the star's place in the field and feed distance; left/top are
-        // where that place lands on screen and feed nothing but CSS.
         stars.push({
             name,
             x,
@@ -6897,14 +6428,6 @@ export function generateStarfield(starfieldContainer, numberOfStars = 70, seed =
             starElement.style.height = `${star.height * 2}px`;
             starElement.classList.add('star');
 
-            // Guarded exactly as the interesting-star branch below is.
-            // `generateStarDataAndAddToDataObject` builds a whole new record —
-            // four fresh weather probabilities, a fresh tendency and a fresh
-            // precipitation roll — and `setStarSystemDataObject` replaces the
-            // entry rather than merging into it. Unguarded, every redraw of the
-            // map re-rolled a revealed megastructure star's forecast and the
-            // compound its system precipitates, both of which the player has
-            // already planned around by the time they can see it.
             if (!checkIfInterestingStarIsInStarDataAlready(starElement.id.toLowerCase())) {
                 generateStarDataAndAddToDataObject(starElement, distance);
             }
@@ -8506,12 +8029,6 @@ export function statToolBarCustomizations() {
 
 
     if (stat3Element) {
-        // P3: keep the Powered toggle's inert state in sync every frame. While
-        // inert the button is lifted out of hit-testing (pointer-events:none),
-        // so it cannot be hovered or clicked; the tooltip is unaffected either
-        // way because its hover listeners live on the parent .stat-cell
-        // (setupStatTooltips). The click guard in setupPoweredStatToggleButton
-        // additionally no-ops any synthetic click that reaches the handler.
         applyPoweredToggleInertState(stat3Element, isPoweredToggleDisabled());
 
         if (hasBasicPowerGeneration) {
@@ -9327,9 +8844,6 @@ const starShipStatusClassMap = {
     'Colonised Destination': 'green-ready-text'
 };
 
-
-// Market items are internal keys naming either a resource or a compound, so the
-// display name is resolved from the key and the section it lives in.
 function localizeTradeItemDisplayName(item) {
     if (!item || item === 'select') return '';
     const section = galacticMarketCompoundKeys.includes(item) ? 'compounds' : 'resources';
@@ -9651,9 +9165,6 @@ function buildMegastructuresSidebarStatus() {
         return { text: '', className: '' };
     }
 
-
-    // `name` is matched against the stored possession array, so it stays
-    // canonical English; `nameKey` and `techKeys` drive what is displayed.
     const megastructures = [
         {
             id: 1,
@@ -10701,8 +10212,6 @@ export function updateWrappedTabStyles() {
             return;
         }
 
-        // Re-measure only when the input that can affect wrapping changes. This
-        // keeps the per-frame call read-only during normal gameplay.
         const measurementKey = [
             label,
             Math.round(tab.getBoundingClientRect().width * 100),
@@ -10799,7 +10308,6 @@ export function showTabsUponUnlock() {
             tab.textContent = '???';
             removeAttentionIndicator(tab);
         } else {
-            // Always-visible tabs (empty data-tab) - localize them too
             const localizationKey = tabNameToLocalizationKey[tabName];
             if (localizationKey) {
                 tab.textContent = localize(localizationKey, getLanguage());
@@ -10828,9 +10336,6 @@ function optionPaneKeyFromOptionElement(optionEl) {
         return declared;
     }
 
-
-    // Some sidebar option ids are legacy shorthand and don't match the option pane key.
-    // Map them explicitly so attention indicators don't break under localization.
     const legacyIdToOptionPaneKey = {
         energyOption: 'energy storage',
         ascendencyOption: 'ascendency perks',
@@ -11710,9 +11215,6 @@ function initializeTabEventListeners() {
         const [tabClass, optionClass] = tabClassName.split('.');
         if (!tabClass || !optionClass) return;
 
-        // Opening a pane is what makes it no longer new, so the marker is cleared
-        // here, from the row that was actually clicked, and the tab's own badge is
-        // recomputed from what is left.
         clearOptionRowAttentionIndicator(clickedItem);
         removeTabAttentionIfNoIndicators(tabClass);
 
@@ -11735,15 +11237,6 @@ function initializeTabEventListeners() {
 
                 const dynamicIndex = parseInt(tab.id.replace('tab', ''), 10);
 
-                // Identify the tab by its canonical English `data-name`, not by its
-                // rendered label. The label is translated and carries attention
-                // indicators, while everything downstream keys off the English name:
-                // ~19 frame-loop gates (`getCurrentTab()[1].includes('Compounds')`),
-                // the headerDescriptions table, and the intro ASCII art lookup. Using
-                // the label meant all of those silently missed outside English.
-                //
-                // `???` is preserved as-is: it is a locked-tab state marker rather
-                // than a name, and `manageTabSpecificUi` tests for it.
                 const renderedLabel = document.getElementById('tab' + dynamicIndex).textContent;
                 const tabName = renderedLabel.trim() === '???'
                     ? renderedLabel.trim()
@@ -11753,9 +11246,6 @@ function initializeTabEventListeners() {
                 highlightActiveTab(tab.textContent);
                 setGameState(getGameVisibleActive());
 
-                // A side-menu label can only be measured once its row is on
-                // screen, and rows unhide as the run unlocks them, so the fit is
-                // re-run whenever a tab is brought forward.
                 fitSideMenuLabels();
 
 
@@ -11841,13 +11331,6 @@ export function spaceTravelButtonHideAndShowDescription() {
     }
 }
 
-
-// A forced category can have nothing eligible to say — "Always Manuscript Clue"
-// with no manuscript outstanding, or "Always Feedback" when feedback is not
-// currently being requested. Every one of the retries below used to re-enter
-// this function, which re-read the same debug override, re-selected the same
-// impossible category and recursed until the stack overflowed. Retries now drop
-// the override and re-roll a real category, and are bounded as a backstop.
 const NEWS_TICKER_MAX_RETRIES = 10;
 
 export async function showNewsTickerMessage(newsTickerContainer, options = {}) {
@@ -12952,9 +12435,6 @@ export function handleSortStarClick(sortMethod) {
 
 
 export function sortStarTable(starsObject, sortMethod) {
-    // P4: `name` is the table's own left-hand column, so it is listed first. Every
-    // header is looked up by id here, which is why the Name header in
-    // drawTab5Content carries one even though it is drawn inside the row label.
     const labels = {
         name: document.getElementById('starLegendName'),
         distance: document.getElementById('starLegendDistance'),
@@ -12993,9 +12473,6 @@ export function sortStarTable(starsObject, sortMethod) {
         .sort(([keyA, starA], [keyB, starB]) => {
         switch (sortMethod) {
             case "name": {
-                // The record's own `name` is the display spelling the table prints;
-                // the object key is its lowercase form. Fall back to the key so a
-                // settled star stubbed in without a `name` still sorts sensibly.
                 const nameA = String(starA?.name ?? keyA ?? '');
                 const nameB = String(starB?.name ?? keyB ?? '');
                 return nameA.localeCompare(nameB);
@@ -13174,14 +12651,6 @@ function determineStatClassColor(value) {
     const rawString = isString ? value.trim() : '';
     const normalized = isString ? rawString.replace(/^•/, '').trim().toUpperCase() : value;
 
-
-    // The values arriving here are already localized — the stat accessors in
-    // constantsAndGlobalVars.js return `localize('textNo')`,
-    // `localize('textNotApplicable')` and so on, and the power indicator returns
-    // `localize('textOff')` — so the words being matched have to be looked up in
-    // the player's language too. Matching a fixed English list left every one of
-    // these stats reading green outside English. The English forms are kept
-    // alongside because a few values still arrive as bare literals.
     const negative = localizedForms('textNo', 'textOff', 'textNotApplicable');
     ['FALSE', 'NO', 'OFF', 'N/A', '0'].forEach((form) => negative.add(form));
 
@@ -13336,7 +12805,6 @@ function ensureBattleBackdropStar(canvas, starData) {
 
 
     if (forcedBottomRight) {
-        // Always glow in from off-screen bottom-right.
         x = w + radius * 0.04;
         y = h + radius * 0.04;
     } else {
@@ -14485,7 +13953,6 @@ function renderBattleExplosions(ctx, now) {
         unit.rotation = desiredAngle;
         return unit;
     }
-
 
     export function resetTabsOnRebirth() {
         const cosmicRipEnabled = typeof window !== 'undefined' && window.__COSMIC_RIP_ENABLED__ === true;
@@ -16047,18 +15514,9 @@ if (debugLanguageSelect) {
     debugLanguageSelect.value = getLanguage?.() ?? 'en';
 }
 
-
-// Single entry point for changing language at runtime. Both the Settings
-// dropdown and the debug panel route through here so the redraw sequence is
-// defined in exactly one place.
 export async function relocalizeAll(language) {
-    // initLocalization owns setting and persisting the language: an explicit
-    // selection takes priority over the stored/browser fallbacks inside it.
     const resolved = await initLocalization(language);
 
-    // The compound create dropdown is built from a table that caches its
-    // localized strings for the lifetime of the run, so it has to be dropped
-    // here or that one control stays in the old language. See known-issues #20.
     invalidateCompoundCreateDropdownRecipeText();
 
     initialiseDescriptions();
@@ -16152,9 +15610,6 @@ if (debugRandomEventSelect) {
         const opt = document.createElement('option');
         opt.value = id;
         opt.textContent = title;
-        // This list is built before the catalogue is fetched, so the label is
-        // annotated and picked up by the same `data-loc` sweep as the static
-        // shell — which also makes it follow a runtime language change.
         if (titleKey) opt.dataset.loc = titleKey;
         debugRandomEventSelect.appendChild(opt);
     });
@@ -16638,7 +16093,6 @@ unlockAllTabsButton.addEventListener('click', () => {
         }
     });
 
-    // data-name is the canonical English name; put the translated label back.
     localizeTabLabels();
 
 

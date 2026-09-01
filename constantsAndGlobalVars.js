@@ -37,23 +37,8 @@ export const HOMESTAR = 'miaplacidus';
 export const MINIMUM_GAME_VERSION_FOR_SAVES = 0.93;
 export const GAME_VERSION_FOR_SAVES = 0.99;
 export const deferredActions = [];
-
-//NOTIFICATIONS
-//P6: the stack is vertical. MAX_STACKS is how many *classifications* may hold a
-//row in the bottom-right column at once; anything past that keeps its queue and
-//slides in as a row frees up. MAX_NOTIFICATION_COLUMNS is the second axis, and
-//only the classifications in MULTI_NOTIFICATION_CLASSIFICATIONS use it: those
-//show several cards side by side in one row, newest on the right, instead of one
-//at a time on a timer.
-//
-//The three that qualify all fire in bursts where every message is worth reading
-//on its own: 'storage' because each toast carries its own storage claim, so
-//queueing eight of them at eight seconds apiece is exactly what made the claim
-//feel lost; 'debug' because a cheat press often triggers several at once and a
-//developer wants to see all of them; and 'achievement' because unlocking three
-//in the same frame should show three cards, not hide two behind a timer.
 export const MAX_STACKS = 4;
-export const MAX_NOTIFICATION_COLUMNS = 6;
+export const MAX_NOTIFICATION_COLUMNS = 4;
 export const MULTI_NOTIFICATION_CLASSIFICATIONS = ['storage', 'debug', 'achievement'];
 
 export const MINIMUM_BLACK_HOLE_CHARGE_TIME = 30000;
@@ -71,23 +56,12 @@ export const GAME_COST_MULTIPLIER = 1.13;
 export const ASTEROID_COST_MULTIPLIER = 1.07;
 export const NORMAL_MAX_ANTIMATTER_RATE = 0.004;
 export const BOOST_ANTIMATTER_RATE_MULTIPLIER = 2;
-// A run of severe weather (rain or volcano) is capped: once this many severe
-// windows have run back to back, the next severe draw is turned into a cloudy
-// window of SEVERE_WEATHER_RELIEF_WINDOW_MINUTES so a fuelled rocket always gets
-// a reliable chance to launch. The streak is counted per star system and is
-// carried through focus changes and saved games.
 export const SEVERE_WEATHER_STREAK_BEFORE_RELIEF = 3;
 export const SEVERE_WEATHER_RELIEF_WINDOW_MINUTES = 1;
 export const STARTING_STAR_SYSTEM = 'spica';
 export const STAR_SEED = 53;
 export const STAR_FIELD_SEED = 80;
 export const NUMBER_OF_STARS = 100;
-// The star field is a simulation, not a picture of a panel. Star coordinates are
-// generated over this fixed nominal field and the drawn map scales it onto
-// whatever container it is given, so a star's distance is one number regardless
-// of window size, tab state, or whether the caller passed a real panel or the
-// detached div used in calculation mode. These figures are the shipped star-map
-// panel at a 1280x720 desktop viewport, so distances keep the balance they had.
 export const STAR_FIELD_NOMINAL_WIDTH = 1200;
 export const STAR_FIELD_NOMINAL_HEIGHT = 450;
 export const STELLAR_SCANNER_RANGE = 0.75;
@@ -97,9 +71,7 @@ export const ENEMY_FLEET_SPEED_LAND = 2;
 export const ENEMY_FLEET_SPEED_SEA = 1;
 export const PRICE_CASINO_GAME_2 = 1;
 export const PRICE_CASINO_GAME_3 = 5;
-// The label is a catalogue key rather than a rendered string: the cost and the
-// odds it quotes are the two numbers beside it, so the display form is composed
-// at draw time and follows a language change.
+
 export const VOID_SEER_PRIZE_CATALOG = {
     prize1: { costCp: 7, maxReel: 6, labelKey: 'casinoVoidSeerPrizeLabel1' },
     prize2: { costCp: 10, maxReel: 8, labelKey: 'casinoVoidSeerPrizeLabel2' },
@@ -256,10 +228,6 @@ export let repeatableTechMultipliers = {
     4: 1
 };
 
-// Built on demand rather than at module evaluation: `localize` needs the
-// catalogue, which is fetched after this module is imported. Everything that
-// reads the table goes through `ensureCompoundCreateDropdownRecipeText()`, so
-// the first read after boot produces the table in the player's language.
 const buildCompoundCreateDropdownRecipeText = () => {
     return {
         diesel: {
@@ -408,9 +376,6 @@ let sortStarMethod = 'distance';
 let saleResourcePreviews = {};
 let saleCompoundPreviews = {};
 let createCompoundPreviews = {};
-//P7: the numbers behind the sentence in createCompoundPreviews. The preview is a
-//rendered string and the notation ladder truncates it, so it can never be the
-//authority for what a craft actually makes - see setCompoundCreatePreview.
 let createCompoundExactAmounts = {};
 let constituentPartsObject = {};
 let itemsToDeduct = {};
@@ -1569,8 +1534,6 @@ export function resetAllVariablesOnRebirth() {
         powerPlant3: false,
     }
 
-    // Cleared rather than rebuilt: a reset can run before the catalogue has
-    // been fetched, and the lazy accessor rebuilds it on the first read.
     compoundCreateDropdownRecipeText = null;
     
     battleResolved = [false, null];
@@ -1628,27 +1591,9 @@ export function resetAllVariablesOnRebirth() {
     currentRunTimer = 0;
     apAnticipatedThisRun = 0;
     asteroidsMinedThisRun = 0;
-
-    //starStudyRange and starShipTravelDistance are reset here on purpose: despite the
-    //names, both are the CURRENT RUN figure on the statistics page - their all time
-    //column renders "N/A" - so a rebirth is exactly when they should go back to zero.
-    //allTimeStarShipsBuilt is likewise left alone; no statistic getter reads it.
     starStudyRange = 0;
     starShipTravelDistance = 0;
     allTimeStarShipsBuilt = 0;
-
-    //Everything below used to be zeroed here too, which wiped fourteen lifetime totals
-    //the statistics page renders under an "All Time" heading - alongside the resource,
-    //compound and research totals, which correctly survive. Each of these has either a
-    //separate ...ThisRun counter reset above or in the block further up, or no run
-    //column at all, and none of them is read by gameplay, so they now persist across a
-    //rebirth as their names and their column promise:
-    //  allTimeTotalRocketsLaunched, allTimeTotalStarShipsLaunched,
-    //  allTimeTotalAsteroidsDiscovered, allTimeTotalLegendaryAsteroidsDiscovered,
-    //  allTimeTotalAntimatterMined, allTimeTotalApGain, totalNewsTickerPrizesCollected,
-    //  allTimesTripped, allTimeBasicPowerPlantsBuilt, allTimeAdvancedPowerPlantsBuilt,
-    //  allTimeSolarPowerPlantsBuilt, allTimeSodiumIonBatteriesBuilt,
-    //  allTimeBattery2Built, allTimeBattery3Built
     formationGoal = null;
     liquidationValue = 0;
 
@@ -2000,12 +1945,6 @@ export function captureGameStatusForSaving(type) {
     return gameState;
 }
 
-/**
- * Any power-plant type the player owns none of comes back flagged off.
- *
- * Keys absent from the save keep the module default rather than being invented,
- * and a non-object save value falls back to the defaults wholesale.
- */
 function normaliseBuildingTypeOnOff(saved) {
     const restored = (saved && typeof saved === 'object')
         ? { ...buildingTypeOnOff, ...saved }
@@ -2104,12 +2043,7 @@ export function restoreGameStatus(gameState, type) {
             blackHoleDiscovered = gameState.blackHoleDiscovered ?? false;
             blackHoleDiscoveryProbability = gameState.blackHoleDiscoveryProbability ?? 0;
             techUnlockedArray = gameState.techUnlockedArray;
-            // P9: `nanoBrokers` used to be a tech that granted autosell. It is now
-            // the first rung of an ascendency ladder, so a save that researched it
-            // is granted the equivalent level for free and the stale tech entry is
-            // stripped - leaving it in place would have it render as an unknown row
-            // in the tree and keep answering `includes('nanoBrokers')` for any gate
-            // that had not yet been moved across.
+
             if (Array.isArray(techUnlockedArray) && techUnlockedArray.includes('nanoBrokers')) {
                 migrateRetiredAutomationTechUnlock(true);
                 techUnlockedArray = techUnlockedArray.filter((techKey) => techKey !== 'nanoBrokers');
@@ -2124,22 +2058,9 @@ export function restoreGameStatus(gameState, type) {
             unlockedResourcesArray = gameState.unlockedResourcesArray;
             unlockedCompoundsArray = gameState.unlockedCompoundsArray;
             activatedFuelBurnObject = gameState.activatedFuelBurnObject;
-            // A plant type can only be running if the player owns at least one of
-            // them. Saves written before the sellBuilding() fix can come back with
-            // a type flagged on at quantity 0, which makes the stat-bar tooltip
-            // report a plant that does not exist as ON and leaves the grid's
-            // auto-manager balancing against it. It self-heals the next time the
-            // grid drops, but a save should not have to wait for that.
-            //
-            // Safe to read quantities here: restoreResourceDataObject() runs at the
-            // top of this function, so the buildings data is already the save's own.
             buildingTypeOnOff = normaliseBuildingTypeOnOff(gameState.buildingTypeOnOff);
             ranOutOfFuelWhenOn = gameState.ranOutOfFuelWhenOn;
-            // P14 (player-feedback plan): plain notation is no longer offered in the
-            // Visual settings pane, so a save written while it still was gets migrated
-            // onto condensed here rather than loading into a mode the player has no
-            // way to leave. The debug build keeps the dropdown, so a debug session is
-            // left with whatever it chose.
+
             setNotationType(
                 (gameState.notationType === 'normal' && getVariableDebuggerAndCheats()) ? 'normal' : 'normalCondensed'
             );
@@ -2277,10 +2198,6 @@ export function restoreGameStatus(gameState, type) {
             gameStartTimeStamp = gameState.gameStartTimeStamp ?? null;
             battleUnits = gameState.battleUnits ?? { player: [], enemy: [] };
             battleResolved = gameState.battleResolved ?? [false, null];
-            // Restored through the same normalisation the setter applies: a save
-            // written before `setSettledStars` validated its input can carry
-            // duplicates, and those would keep awarding galactic points on every
-            // load. Falls back to the starting system if nothing survives.
             settledStars = normaliseSettledStarsList(gameState.settledStars);
             currentGalacticMarketCommission = gameState.currentGalacticMarketCommission ?? 10;
             activatedWackyNewsEffectsArray = gameState.activatedWackyNewsEffectsArray ?? [];
@@ -2704,14 +2621,6 @@ export function getItemsToIncreasePrice() {
     return itemsToIncreasePrice;
 }
 
-// P1 (player-feedback plan): set for the duration of a Buy Max only.
-//
-// Buy Max drives a row's ordinary purchase handler once per unit, and some of
-// those handlers announce themselves - the repeatable philosophy technologies
-// each raise a notification. One per click is right; twenty in a row would hold
-// the screen for a minute, so showNotification() collapses repeats while this is
-// set. Nothing else reads it, and it is always cleared in a finally block, so
-// ordinary play never sees it true.
 let bulkPurchaseInProgress = false;
 
 export function getBulkPurchaseInProgress() {
@@ -2724,14 +2633,6 @@ export function setBulkPurchaseInProgress(value) {
 
 export function setSaleResourcePreview(resource, amount, fusionTo1, fusionTo2) {
     const resourceQuantity = getResourceDataObject('resources', [resource, 'quantity']);
-
-    // P7: every branch below floors, including the fixed amounts, which used to
-    // clamp with `Math.min(n, resourceQuantity)` against the raw float. A player
-    // holding 12.7 who chose "100" was quoted "(12.7 Hydrogen)" - and
-    // `sellResource()` re-reads that rendered string to run the transaction,
-    // parsing the quantity with `\((\d+)`, which stops at the decimal point. So
-    // the sale deducted 12 and paid for 12.7. Quoting whole units makes the
-    // string round-trip exactly.
 
     let calculatedAmount;
 
@@ -2964,8 +2865,6 @@ export function setCompoundCreatePreview(compoundToCreate, createAmount, amountC
     const compoundToCreateQuantity = getResourceDataObject('compounds', [compoundToCreate, 'quantity']);
     const compoundToCreateStorage = getResourceDataObject('compounds', [compoundToCreate, 'storageCapacity']);
     
-    // Each createsFrom entry is [internalKey, section], which is exactly what
-    // localizeMaterialName needs to resolve a display name from the catalogue.
     const constituentPartName = (index) => {
         const source = getResourceDataObject('compounds', [compoundToCreate, `createsFrom${index}`]);
         if (!Array.isArray(source) || !source[0]) return '';
@@ -2998,15 +2897,6 @@ export function setCompoundCreatePreview(compoundToCreate, createAmount, amountC
     createCompoundPreviews[compoundToCreate] =
         `${createAmount} ${compoundToCreateCapitalised} (${partsString}${suffix})`;
 
-    //P7: the same figures, unrendered. The line above is what the player reads,
-    //and the frame loop used to read it back as the authority for the craft -
-    //but a preview element carries the `notation` class, so in condensed mode
-    //the ladder had already truncated it to one decimal per magnitude. A fill of
-    //132,432 rendered "132.4K" and was parsed back as 132,400, so "Fill To
-    //Capacity" stopped 32 units short of the cap and the storage increase the
-    //player was filling for stayed locked. The amounts are kept here in full,
-    //with the ingredients under their *internal* names, so the craft never has
-    //to read its own display back.
     const exactParts = [amountConstituentPart1, amountConstituentPart2, amountConstituentPart3, amountConstituentPart4]
         .map((amount, index) => {
             const source = getResourceDataObject('compounds', [compoundToCreate, `createsFrom${index + 1}`]);
@@ -3374,7 +3264,7 @@ export function setPowerOnOff(value) {
         powerOnOff = true;
     }
 
-    if (!value) { //if power cuts off set all buttons to Activate mode ie deactivated.
+    if (!value) {
         setPowerGracePeriodEnd(0);
         const powerBuildings = getResourceDataObject('buildings', ['energy', 'upgrades']);
 
@@ -3384,8 +3274,6 @@ export function setPowerOnOff(value) {
                 const toggleButton = document.getElementById(powerBuildingToggleButtonId);
                 if (toggleButton) {
                     setBuildingTypeOnOff(powerBuilding, false);
-                    // Through the shared writer, so the dataset flag the click
-                    // handler reads cannot disagree with the label the player sees.
                     setPowerToggleLabel(toggleButton, false);
                 }
             }
@@ -3562,9 +3450,7 @@ export function getConsecutiveSevereWeatherPeriods() {
 
 export function setConsecutiveSevereWeatherPeriods(value) {
     const periods = Math.floor(Number(value));
-    // The streak has to be able to reach SEVERE_WEATHER_STREAK_BEFORE_RELIEF,
-    // because that is the value changeWeather() tests before it grants the
-    // cloudy launch window. Clamping any lower silently disables the guard.
+
     consecutiveSevereWeatherPeriods = Number.isFinite(periods)
         ? Math.max(0, Math.min(SEVERE_WEATHER_STREAK_BEFORE_RELIEF, periods))
         : 0;
@@ -4203,12 +4089,6 @@ export function getIsAntimatterBoostActive() {
 }
 
 export function setIsAntimatterBoostActive(value) {
-    // The flag has to be written before the loop is started. `startBoostLoop`
-    // plays its first sound synchronously, and that first play checks
-    // `getIsAntimatterBoostActive()` to decide whether the boost is still on —
-    // so starting the loop first meant it read the *old* value, concluded the
-    // boost had ended, and stopped itself again immediately. The boost sound
-    // never played at all.
     isAntimatterBoostActive = value;
 
     if (getSfx() && value) {
@@ -4264,11 +4144,6 @@ export function getCurrentDestinationDropdownText() {
     return currentDestinationDropdownText ?? localize('dropdownSelectAnOption', getLanguage());
 }
 
-// A rocket the player has never renamed carries no stored name, so the default
-// is resolved from the catalogue on every read and follows a language change.
-// Saves written before this change stored the English default verbatim; that
-// exact shape is treated as "not renamed" so those rockets translate too. A
-// player who deliberately types "Rocket 2" simply gets the translated form.
 const LEGACY_DEFAULT_ROCKET_NAME = /^Rocket [1-4]$/;
 
 export function getRocketUserName(key) {
@@ -6821,9 +6696,6 @@ export function populateVariableDebugger() {
         { label: "cosmicRipFoundSectorIndexForZoom", value: getCosmicRipFoundSectorIndexForZoom() ?? null },
     ];    
 
-    // If the inline editor is open, preserve the DOM node and (if focused) its selection.
-    // This window is refreshed every tick, and clearing/rebuilding the container would otherwise
-    // continuously steal focus from the textarea, making it impossible to type.
     const existingEditorRow = globalThis.__variableDebuggerEditorRow;
     const existingEditorTextarea = existingEditorRow?.querySelector?.('textarea') ?? null;
     const editorHadFocus = !!(existingEditorTextarea && document.activeElement === existingEditorTextarea);
@@ -6849,8 +6721,6 @@ export function populateVariableDebugger() {
             blankLineDiv.style.height = "10px";
             debugTextAreaContainer.appendChild(blankLineDiv);
         } else if (variable.value === "" && (variable.labelKey || variable.label.endsWith(':'))) {
-            // Section headings carry a catalogue key; identifying them by a
-            // trailing colon in the rendered text would not survive translation.
             label.innerHTML = variable.labelKey
                 ? localize(variable.labelKey, getLanguage())
                 : `${variable.label}`;
@@ -6951,8 +6821,6 @@ export function populateVariableDebugger() {
             debugTextAreaContainer.appendChild(div);
 
             if (editTargetLabel && String(variable.label) === editTargetLabel) {
-                // Always insert the editor row directly after the target variable row.
-                // If it already exists, we re-append the same DOM node to preserve event handlers.
                 let editorRow = globalThis.__variableDebuggerEditorRow;
                 if (!editorRow || editorRow.dataset.editLabel !== editTargetLabel) {
                     editorRow = createVariableDebuggerInlineEditorRow(editTargetLabel);
@@ -6960,7 +6828,6 @@ export function populateVariableDebugger() {
                     globalThis.__variableDebuggerEditorRow = editorRow;
                 }
 
-                // If the textarea isn't focused, keep it in sync with state on repaint.
                 const textarea = editorRow.querySelector?.('textarea') ?? null;
                 if (textarea && document.activeElement !== textarea) {
                     textarea.value = String(globalThis.__variableDebuggerEditState?.value ?? '');
@@ -7077,12 +6944,9 @@ function createVariableDebuggerInlineEditorRow(label) {
     input.style.resize = 'vertical';
     input.style.whiteSpace = 'pre-wrap';
     input.style.overflowWrap = 'anywhere';
-    // Ensure normal mouse interactions (click-to-place caret, drag-to-select) aren't blocked
-    // by pointer handlers on parent containers during tick rerenders.
     input.style.pointerEvents = 'auto';
     input.style.touchAction = 'auto';
     input.addEventListener('pointerdown', (e) => {
-        // Do NOT preventDefault here (that would stop selection/caret placement).
         e.stopPropagation();
     });
     input.addEventListener('pointermove', (e) => {
@@ -7210,42 +7074,33 @@ function parseVariableDebuggerInput(raw) {
         return '';
     }
 
-    // Try to parse as JSON first (for arrays and objects)
     if ((str.startsWith('[') && str.endsWith(']')) || (str.startsWith('{') && str.endsWith('}'))) {
         try {
             const parsed = JSON.parse(str);
-            // Validate that arrays contain only the expected types
             if (Array.isArray(parsed)) {
                 return parsed;
             }
-            // Return objects as-is
             if (typeof parsed === 'object' && parsed !== null) {
                 return parsed;
             }
         } catch (err) {
-            // JSON parse failed, throw a descriptive error
             throw new Error(localize('debuggerErrorInvalidJson', getLanguage()).replace('{message}', err.message));
         }
     }
 
-    // Try to parse as number
     if (!isNaN(str) && !isNaN(parseFloat(str))) {
         const num = parseFloat(str);
-        // Check if it should be an integer
         if (Number.isInteger(num)) {
             return parseInt(str, 10);
         }
         return num;
     }
 
-    // Try to parse as boolean
     if (str === 'true') return true;
     if (str === 'false') return false;
 
-    // Try to parse as null
     if (str === 'null') return null;
 
-    // Return as string
     return str;
 }
 
@@ -7346,11 +7201,6 @@ function getVariableDebuggerSetterForLabel(label) {
         // Weather
         weatherEffectOn: (v) => { weatherEffectOn = v === 'true' || v === true; },
         weatherEfficiencyApplied: (v) => { weatherEfficiencyApplied = v === 'true' || v === true; },
-        // `[system, efficiency, type]`, not a number. The reader below renders it
-        // as "spica,0.4,rain", so coercing what comes back with Number() turned
-        // the live weather into NaN — and the energy tick reads index 1 of it on
-        // every frame. A value that does not parse is rejected rather than
-        // written, for the same reason.
         currentStarSystemWeatherEfficiency: (v) => {
             if (Array.isArray(v) && v.length === 3) {
                 currentStarSystemWeatherEfficiency = [String(v[0]), Number(v[1]), String(v[2])];

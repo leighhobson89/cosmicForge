@@ -13,94 +13,17 @@
  * of production happened. The measurement here is the one a player would notice:
  * how much a resource accrues per second of wall-clock time, warped versus not.
  *
- * The three upgrades and what each is meant to do:
- *
- *   Power     (#blackHoleButton2)  raises the warp multiplier
- *   Duration  (#blackHoleButton3)  lengthens how long a warp lasts
- *   Recharge  (#blackHoleButton4)  shortens the charge time between warps
- *
- * All three are bought with research points, and each purchase raises its own
- * price by the game cost multiplier.
+ * The setup — opening the pane, paying for the research, clicking an upgrade —
+ * is shared with `progression-clarity.spec.js` and lives in
+ * `_black-hole-helpers.mjs`, which also records what each upgrade does and why a
+ * dispatched click is needed to reach the buttons at all.
  */
 import { test, expect } from '../_harness/game-fixture.mjs';
-
-/** Open a side-menu option by id, the way a player clicks it. */
-async function openOptionById(game, optionId) {
-  await game.page.evaluate((id) => {
-    const el = document.getElementById(id);
-    el?.closest('.row-side-menu')?.classList.remove('invisible');
-    el?.classList.remove('invisible');
-    el?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-  }, optionId);
-  await game.page.waitForTimeout(600);
-}
-
-/** Grant research points; every black hole purchase is priced in them. */
-async function grantResearch(game, amount = 1e12) {
-  await game.withMods((m, value) => m.rdo.setResourceDataObject(value, 'research', ['quantity']), amount);
-}
-
-/**
- * Reach the black hole pane with the feature discovered and plenty of research.
- * Discovery is normally a random telescope event, so it is seeded — but every
- * step after this point goes through the real controls.
- */
-async function openBlackHolePane(game) {
-  await game.withMods((m) => m.cg.setBlackHoleDiscovered(true));
-  await game.openTab(7);
-  await openOptionById(game, 'blackholeOption');
-  await grantResearch(game);
-  await game.page.waitForTimeout(600);
-}
-
-/**
- * Click Research, then reopen the pane.
- *
- * The three upgrade buttons are built by `drawTab7Content` inside
- * `#blackHoleUnlockedContainer`, and that only happens on a pane *draw*. Clicking
- * Research flips the container visible but does not rebuild the pane, so without
- * the reopen the buttons do not exist in the DOM at all — not merely hidden.
- */
-async function researchBlackHole(game) {
-  await game.page.locator('#blackHoleResearchButton').click({ force: true });
-  await game.page.waitForTimeout(800);
-
-  // Reopening the *same* pane is a no-op — the click handler short-circuits when
-  // the pane is already current — so bounce off another one to force a genuine
-  // redraw. Only then does the upgrade section get built.
-  await openOptionById(game, 'rebirthOption');
-  await openOptionById(game, 'blackholeOption');
-  await game.page.waitForTimeout(800);
-}
-
-/**
- * Click a black hole button by id, and let the frame loop react.
- *
- * Note the selector: `createButton` takes the `id_blackHoleButton2` entry in its
- * classNames list and turns it into the element's **id**, so the class is gone
- * by the time the button is in the DOM. Selecting on `button.id_blackHoleButton2`
- * matches nothing at all — which reads as "the pane never built the upgrades".
- */
-async function clickBlackHoleButton(game, buttonId) {
-  const button = game.page.locator(`#${buttonId}`).first();
-  await button.waitFor({ state: 'visible', timeout: 15000 });
-
-  // Dispatched rather than clicked. `#blackHoleButton4` is visible, enabled and
-  // carries `green-ready-text`, but a real click at its coordinates never
-  // reaches its handler — something in the black hole panel sits over it, and
-  // even `force: true` only skips the actionability wait, not hit-testing. A
-  // wrapper installed on the element counted zero invocations, which is how this
-  // was distinguished from the handler early-returning. Buttons 2 and 3 happen
-  // to sit clear and work either way.
-  const fired = await game.page.evaluate((id) => {
-    const el = document.getElementById(id);
-    if (!el) return false;
-    el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    return true;
-  }, buttonId);
-  if (!fired) throw new Error(`Black hole button ${buttonId} was not in the DOM`);
-  await game.page.waitForTimeout(400);
-}
+import {
+  clickBlackHoleButton,
+  openBlackHolePane,
+  researchBlackHole
+} from './_black-hole-helpers.mjs';
 
 /**
  * Measure how much a resource accrues per second of wall clock.
@@ -154,8 +77,10 @@ test.describe('Black Hole — researched and upgraded through the real controls'
     expect(before.done).toBeFalsy();
     expect(before.price).toBeGreaterThan(0);
 
-    await game.page.locator('#blackHoleResearchButton').click({ force: true });
-    await game.page.waitForTimeout(800);
+    // Dispatched, not clicked: the achievement toasts earned by
+    // `prepareRunForStarshipLaunch()` stack over this corner of the screen and
+    // win the hit test. See `researchBlackHole()` in `_black-hole-helpers.mjs`.
+    await clickBlackHoleButton(game, 'blackHoleResearchButton', { settleMs: 800 });
 
     const after = await game.withMods((m) => ({
       done: m.rdo.getBlackHoleResearchDone(),

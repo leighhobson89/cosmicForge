@@ -1772,7 +1772,6 @@ body {
     transform: translateY(4px);
 }
 
-/* Applied by updateWrappedTabStyles only when a multi-word tab label wraps. */
 .tab.tab-wrapped {
     padding: 1px 10px;
     line-height: 1.1;
@@ -1949,12 +1948,6 @@ body {
      margin: 0;
  }
 
- /* P5: Sell All and Storage All share the header's right-hand slot, side by
-    side on one line. Both are kept compact — short labels and a smaller face
-    than an ordinary option button — because the sidebar is only a fraction of
-    the window and the header still has to hold the pane title beside them.
-    The title (flex: 1 1 auto, min-width: 0 above) shrinks first if space is
-    tight, so the two buttons stay together rather than wrapping. */
  .container-item-menu-header.sidebar-intro-header .sidebar-header-actions {
      flex: 0 0 auto;
      flex-direction: row;
@@ -1978,10 +1971,6 @@ body {
      white-space: nowrap;
  }
 
-/* P14 (player-feedback plan): the pane title and the pane's own action buttons
-   share one line, so the per-resource "Gain 1" button no longer costs an option
-   row of vertical space. The title takes the slack (flex: 1 1 auto, min-width: 0)
-   so a long resource name shrinks before the button is pushed off the line. */
 .pane-header-title-row {
     width: 100%;
     gap: 8px;
@@ -2306,20 +2295,6 @@ body {
     opacity: 1 !important;
 }
 
-/*
- * P6 - notification stack.
- *
- * One fixed, bottom-right anchored column owns every notification. Classification
- * containers are its children and stack *upward* (column-reverse puts the first
- * child in the corner), which is what replaced the old horizontal spread across
- * the bottom of the screen. A container that goes away lets the ones above it
- * fall back towards the corner with no arithmetic involved.
- *
- * Nothing in the stack takes pointer events except the notification card itself
- * - the root and the containers are `pointer-events: none`, so the empty space
- * beside and above a card is not an invisible strip swallowing clicks meant for
- * the game underneath.
- */
 #notificationStackRoot {
     position: fixed;
     right: 10px;
@@ -2336,15 +2311,7 @@ body {
 
 .notification-container {
     position: relative;
-    /* Deliberately uncapped. A multi-card row is right-anchored, so if the
-       window is too narrow to hold a full row the *oldest* cards run off to the
-       left and the newest stays where the player is looking. Capping the row
-       and wrapping it would push the newest card up and away instead. */
     max-width: none;
-    /* Row, right-aligned: a multi-card classification appends its newest card
-       last, so the newest sits on the right and older ones slide left. A
-       single-card classification only ever holds one child, so the direction
-       makes no difference to it. */
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
@@ -2353,8 +2320,6 @@ body {
     pointer-events: none;
 }
 
-/* An empty container still holds its queue but must not reserve a gap in the
-   column, and a container past MAX_STACKS has no row to occupy at all. */
 .notification-container:empty,
 .notification-container-deferred {
     display: none;
@@ -2367,9 +2332,6 @@ body {
     max-width: 90vw;
     flex: 0 0 auto;
     padding: 15px;
-    /* Opaque by construction. The old surface was --tab-bg-color, which is
-       rgba(...,0.04) in several themes, so the game showed straight through the
-       notification and the text was unreadable over a busy pane. */
     background-color: var(--container-bg-color);
     color: var(--text-color);
     border: 1px solid var(--container-border-color, rgba(0, 0, 0, 0.25));
@@ -2390,13 +2352,10 @@ body {
     transform: translateY(0) scale(1);
 }
 
-/* A card on its way out stops taking clicks immediately, so a claim cannot be
-   pressed after its timer has already handed the row on. */
 .notification-dismissing {
     pointer-events: none;
 }
 
-/* The top sheen. Purely decorative, and behind the content. */
 .notification::after {
     content: '';
     position: absolute;
@@ -2406,13 +2365,9 @@ body {
     height: 38%;
     background: linear-gradient(to bottom, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0));
     pointer-events: none;
-    /* Behind the message, not over it. The card always carries a transform, so
-       it owns a stacking context and a negative index cannot escape the card. */
     z-index: -1;
 }
 
-/* The hover dim that makes the Clear All button readable: it deliberately sits
-   *over* the message (z-index 1) while the button sits over that (z-index 3). */
 .notification::before {
     content: '';
     position: absolute;
@@ -2499,14 +2454,6 @@ body {
     min-width: 120px;
 }
 
-/* P1 (player-feedback plan): the Max button sits beside a row's Buy button, in
-   an .input-container that is only half the row wide and often already holds a
-   quantity label and a toggle. It is sized to its own label rather than taking
-   the 120px minimum above, because it is a one-word control and the row has no
-   width to spare. The disabled look is the game's usual one: it takes
-   red-disabled-text from the Buy button beside it (syncBulkPurchaseButtons in
-   game.js), and that class carries pointer-events: none, which is how every
-   other purchase control in the game is gated. */
 .option-button.buy-max-button {
     min-width: 0;
     padding: 6px 10px;
@@ -2934,11 +2881,6 @@ cursor: pointer;
 
 }
 
-/* P2 (player-feedback plan): a maxed perk has no Buy button, but the button is
-   what carries the `margin-left: auto` that pushes the price slot to the row's
-   right-hand edge. This is the same box, holding the same word, made invisible -
-   so the "Maxed" badge lands at exactly the x the price above it does. It is
-   inert: no pointer events, no glow, out of the tab order. */
 .ascendency-buff-maxed-spacer {
     margin-left: auto;
     margin-right: 100px;
@@ -3038,18 +2980,6 @@ button.red-disabled-text {
     align-items: center;
 }
 
-/* P3: the Powered stat-bar entry is a real toggle button (createButton-built).
-   It keeps the .stat-value sizing above and only tightens the button chrome so
-   the stat bar's flex layout is unchanged: no fixed width, it shrinks/grows
-   with its label (ON / OFF / TRIPPED) and never wraps or overflows the cell.
-   The status colour classes (red-disabled-text etc.) are reused for meaning,
-   but this control must stay clickable in every state — the generic
-   `button.red-disabled-text { pointer-events: none }` rule would otherwise lock
-   the player out of switching power back on. That rule has the same specificity
-   as this one, so `!important` is what settles it rather than source order:
-   without it, moving either rule in this file would silently disable the
-   toggle. ui.js turns the button inert (Dyson Sphere, or no plant built) with an
-   inline `!important` value, which is the only thing that outranks this. */
 button.stat-power-toggle {
     font-size: 0.8rem;
     padding: 1px 8px;
@@ -3190,9 +3120,6 @@ button.stat-power-toggle {
     justify-content: space-between;
  }
 
-/* P4: the Star Data table's Name column. The header is drawn inside the row
-   label rather than in `.star-table-cells`, so it takes its own width instead
-   of the quarter share the six value columns split. */
  .star-legend-name {
     width: auto;
     margin-right: 0;
@@ -3200,17 +3127,6 @@ button.stat-power-toggle {
     cursor: pointer;
  }
 
-/* The globe that targets a star on the map, sitting at the head of its name. It
-   must not shrink: the name next to it is free to be long, and a half-drawn
-   globe reads as a rendering fault rather than as a button.
-
-   `pointer-events` is the load-bearing line. createOptionRow puts the star's
-   own colour class on the whole name column, and for any star the run cannot
-   fuel that class is `red-disabled-text` — which is `pointer-events: none`.
-   Without this the globe is dead on exactly the stars a player is most likely
-   to be planning towards, and dead on every star early in a run. Affordability
-   is the Travel button's business, not this button's: the globe only shows you
-   where the star is. */
 .star-target-button {
     flex: 0 0 auto;
     display: inline-flex;
@@ -3223,11 +3139,6 @@ button.stat-power-toggle {
     pointer-events: auto;
     color: var(--ready-text);
     transition: filter 120ms ease-in-out;
-    /* The ready colour plus its glow is how this game says "this is live, press
-       it", and the globe needs to say that against a row of plain figures — the
-       game hides the real cursor behind a custom pointer, so `cursor` cannot do
-       that job here. The glow is a `drop-shadow` rather than the `text-shadow`
-       `.green-ready-text` uses, because the mark is an SVG stroke, not text. */
     filter: drop-shadow(0 0 3px var(--ready-text-transparent));
 }
 
@@ -4667,15 +4578,6 @@ body.debug-window-open {
     border-color: var(--text-hover-color);
 }
 
-/* The chosen flag announces itself with a glow, the same treatment a button
-   carrying `green-ready-text` gets, rather than by recolouring - a flag's own
-   colours are the point of it and cannot be tinted without ruining it.
-
-   The glow is authored white rather than taken from `--ui-glow`, because that
-   token is themed and the welcome modal is the one screen a player sees before
-   picking a theme; white is also the only colour that lifts every flag equally.
-   Unselected flags are left exactly as they are, so the row still reads as one
-   choice among several. */
 .language-flag-cell.language-flag-selected {
     border-color: var(--text-focus-color);
     box-shadow: 0 0 12px rgba(255, 255, 255, 0.85), 0 0 24px rgba(255, 255, 255, 0.45);
@@ -4687,31 +4589,12 @@ body.debug-window-open {
     color: var(--text-focus-color);
 }
 
-
-/* -------------------------------------------------------------------------
-   The multi-handle slider (`createSlider`), and P9's allocation line built on
-   top of it.
-
-   Every colour here is a theme variable, so the control follows all five themes
-   by construction rather than by having five sets of rules kept in step. The
-   allocation bands borrow the three colours the rest of the game already uses
-   for these ideas: the all-time-stat gold for money, the this-run blue for the
-   compound draw, and the ready-green for what is accumulating.
-
-   The line takes the width of the dropdown-and-button pair it replaces in a
-   sell row, so swapping one for the other leaves every row in the pane aligned.
-   ------------------------------------------------------------------------- */
-
 .slider-container {
     position: relative;
     display: flex;
     width: 100%;
 }
 
-/* A slim pill rather than a boxy bar. The radius is deliberately a flat 999px
-   instead of the theme's `--ui-radius-*`: those run from 8px to 18px, and a bar
-   this short needs a radius of exactly half its height to read as a pill in
-   every theme rather than a rectangle with rounded corners in the sharp ones. */
 .slider-track {
     position: relative;
     display: flex;
@@ -4720,10 +4603,7 @@ body.debug-window-open {
     border: 2px solid var(--container-border-color);
     border-radius: 999px;
     background-color: var(--button-bg-color);
-    /* The handles overhang the track, so they must not be clipped. */
     overflow: visible;
-    /* Pointer events do mouse, pen and touch in one path; the browser must not
-       steal the drag to scroll the pane. */
     touch-action: none;
 }
 
@@ -4733,8 +4613,6 @@ body.debug-window-open {
     transition: width 90ms linear;
 }
 
-/* Only the outer ends are rounded - the joins between bands stay square so the
-   boundary a handle sits on is a clean line rather than a pinched waist. */
 .slider-segment:first-child {
     border-top-left-radius: 999px;
     border-bottom-left-radius: 999px;
@@ -4745,8 +4623,6 @@ body.debug-window-open {
     border-bottom-right-radius: 999px;
 }
 
-/* A handle straddles the boundary it sets, so `left` is the boundary itself and
-   the transform centres the grip on it. */
 .slider-handle {
     position: absolute;
     top: -4px;
@@ -4772,9 +4648,6 @@ body.debug-window-open {
     box-shadow: var(--ui-glow-strong);
 }
 
-/* The line stands in for the dropdown-and-button pair it replaces, so it is laid
-   out as a single row of that width and height. A column here made the row taller
-   than the Fuse button beside it and pushed the rest of the row out of line. */
 .allocation-line-container {
     display: flex;
     flex-direction: row;
@@ -4805,13 +4678,6 @@ body.debug-window-open {
     opacity: 0.5;
 }
 
-/* Sits beside the bar rather than under it, for the same reason: the row has to
-   stay one line tall. Three figures, one per destination, each in the colour of
-   the band it belongs to: what is accumulating in the theme's own text colour,
-   what is being sold in the all-time-stat colour, and what the compounds are
-   drawing in the this-run colour. The allocatable total is not here - it does
-   not move with the handles, and it is quoted in the breakdown tooltip on the
-   production figure in the left pane instead. */
 .allocation-readout {
     display: flex;
     flex: 0 0 auto;
@@ -4837,3 +4703,11 @@ body.debug-window-open {
     color: var(--stats-this-run-text);
 }
 
+
+.black-hole-value-hint {
+    max-width: 620px;
+    text-align: center;
+    line-height: 1.4;
+    opacity: 0.85;
+    padding: 0 12px;
+}

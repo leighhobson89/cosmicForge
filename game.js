@@ -671,26 +671,6 @@ function handleCosmicRipTechnologyScreenButtonAndDescriptionStates(element, tele
 
 const STORAGE_FULL_NOTIFICATION_COOLDOWN_MS = 60 * 1000;
 
-/**
- * Claim one material's earned storage increase.
- *
- * Every claim route in the game funnels through here — the pane's own button,
- * the storage-full notification's action, and P5's Increase All Storage sweep —
- * so this is where the claim is checked against the live state rather than
- * against whatever was true when the control that offered it was drawn.
- *
- * That check has to be here because the notification's action button is not
- * governed by the frame loop's `red-disabled-text` pass the way every other
- * purchase in the game is: notifications are queued one at a time per
- * classification, so a store that fills alongside seven others leaves seven
- * toasts waiting their turn, and every one of them was still offering a live
- * claim minutes after the store had been drained by an earlier claim. Taking
- * one of those doubled the cap for nothing: `increaseResourceStorage()` queues
- * the charge but the cap increase is a deferred job that ran regardless of
- * whether `checkAndDeductResources()` could actually collect it.
- *
- * Returns whether the claim was made.
- */
 function performIncreaseStorageForKey(category, key) {
     if (!category || !key) {
         return false;
@@ -700,9 +680,6 @@ function performIncreaseStorageForKey(category, key) {
     const normalizedKey = String(key || '').toLowerCase();
 
     if (!getIncreasableStorageKeys(normalizedCategory).includes(normalizedKey)) {
-        // Not earned any more: the store is no longer at its cap, or the
-        // reservoir's concrete has been spent since the offer was made. Take the
-        // stale offer off the screen rather than honouring it.
         disableStorageNotificationActionIfShowing(normalizedKey);
         const staleBucket = storageFullNotificationState[normalizedCategory];
         if (staleBucket) {
@@ -730,86 +707,18 @@ function performIncreaseStorageForKey(category, key) {
     return true;
 }
 
-// ============================================================================
-// P5 (player-feedback plan): Increase All Storage.
-// ============================================================================
-//
-// A storage increase used to be claimed one material at a time, and the claim
-// the player actually saw lived inside a notification that times out — so a
-// player who looked away lost it until the next notification fired or they
-// walked to the material's own pane. The sweep below is the state-derived
-// claim: it asks the data object which unlocked materials are standing at their
-// cap right now and claims every one of them, through the very same
-// `increaseResourceStorage` the pane button and the notification already call.
-// No pricing and no cap arithmetic lives here.
-
-/**
- * Solar is unlocked like any other resource but is not storage-limited. It has
- * no Increase Storage row, no `solarQuantity` element for the deferred job to
- * clear, and it ships with `quantity === storageCapacity`, so a sweep that did
- * not skip it would read it as permanently claimable and then throw.
- */
 const STORAGE_INCREASE_EXCLUDED_RESOURCES = new Set(['solar']);
 
-/**
- * Materials whose storage increase charges a *second* material as well as
- * itself, as a share of the first one's capacity.
- *
- * Only the water reservoir does this today, and `increaseResourceStorage()`
- * owns the arithmetic — the share is repeated here so the sweep can budget for
- * the charge before it commits to it, not so it can apply it.
- */
 const STORAGE_INCREASE_SECONDARY_COSTS = {
     water: { key: 'concrete', shareOfCapacity: 0.3 }
 };
 
-/**
- * The order the sweep considers materials in: anything that charges a second
- * material first, then everything else in declaration order.
- *
- * This ordering is the whole answer to the water/concrete case. Water and
- * concrete can both be full at once, and one click can only ever pay for one of
- * them — the reservoir charges 30% of the water cap in concrete, while
- * concrete's own increase spends all but one unit of the concrete stock, so
- * whichever is claimed first puts the other out of reach. Claiming the
- * reservoir first spends only that 30% and leaves the rest of the concrete
- * standing, and concrete's own claim comes back by itself the moment its store
- * refills to its cap. The other way round the reservoir is starved on every
- * sweep, because concrete is drained to a single unit every time.
- */
 function storageClaimOrder(category) {
     const keys = Object.keys(getResourceDataObject(category) || {}).map((k) => String(k || '').toLowerCase());
     const dependent = keys.filter((key) => STORAGE_INCREASE_SECONDARY_COSTS[key]);
     return [...dependent, ...keys.filter((key) => !STORAGE_INCREASE_SECONDARY_COSTS[key])];
 }
 
-/**
- * The unlocked materials in `category` whose storage can be increased right now.
- *
- * Eligibility is exactly the pane button's own gate — `quantity >= capacity - 1`,
- * the game deliberately leaving one unit behind so an upgrade cannot black out
- * the grid — plus the secondary charge above, which the pane's button does not
- * check but the storage-full notification does.
- *
- * Costs are budgeted as the list is walked, so no two claims in one sweep can
- * spend the same stock. That matters because a claim does not pay for itself
- * when it is made: `increaseResourceStorage()` queues the charge into
- * `itemsToDeduct`, a keyed map the frame loop settles on its next pass, so two
- * claims charging the same material in one frame would collapse into one
- * deduction and hand the second increase out free. Budgeting means that pair is
- * never queued in the first place.
- *
- * Exported because the header button's enabled state is this same question
- * asked every frame — see `updateIncreaseAllStorageButtonStates()` in ui.js.
- */
-/**
- * One second of a material's fuel burn, as an allowance on the storage claim.
- *
- * `usedForFuelPerSec` is the drain the power plants apply every second and the
- * player cannot pause it without shutting the grid down. It is the whole reason
- * the claim needs an allowance at all: production stops at the cap but the burn
- * does not, so a full store is already draining by the next frame.
- */
 function burnAllowanceFor(category, key) {
     return Number(getResourceDataObject(category, [key, 'usedForFuelPerSec'], true)) || 0;
 }
@@ -843,15 +752,6 @@ export function getIncreasableStorageKeys(category) {
         }
 
         const price = capacity - 1;
-        // A material that is being burned for fuel can never win this test on an
-        // instantaneous reading. The claim asks for cap-1, so the moment a store
-        // touches its cap the burn takes it back under again - and the player is
-        // told to fill a store that the power plants empty faster than the click
-        // can land. Short of switching the plants off there is no way through,
-        // which is not a choice the game should be asking for. One second of the
-        // material's own burn is therefore forgiven here: enough that a store
-        // that genuinely reached its cap stays claimable while it drains, and far
-        // too little to offer the claim to a store that never filled.
         if (!canAfford(stockLeft(key) + burnAllowanceFor(normalizedCategory, key), price)) {
             return;
         }
@@ -872,32 +772,15 @@ export function getIncreasableStorageKeys(category) {
     return eligible;
 }
 
-/**
- * Claim every storage increase that is currently earned in `category`, and say
- * which ones were claimed.
- *
- * Returns the keys it claimed, in the order it claimed them, so callers and
- * specs can see the partial-eligibility decision the sweep made rather than
- * having to re-derive it.
- */
 export function increaseAllStorage(category) {
     const normalizedCategory = category === 'resources' ? 'resources' : 'compounds';
     const increased = [];
 
     getIncreasableStorageKeys(normalizedCategory).forEach((key) => {
-        // `performIncreaseStorageForKey` re-checks the claim against live state,
-        // so what it actually did is what gets reported — the sweep never
-        // announces a claim it did not make.
         if (!performIncreaseStorageForKey(normalizedCategory, key)) {
             return;
         }
         increased.push(key);
-        // Settle the charge now rather than leaving it for the frame loop, the
-        // same reason `buyMaxForRow` does: until it settles, the stock still
-        // reads as full, so a second press landing inside the same frame would
-        // queue the identical claim again and overwrite the first in
-        // `itemsToDeduct` — one payment, two doublings. Settling makes each
-        // claim equivalent to one ordinary click of the pane's own button.
         checkAndDeductResources();
     });
 
@@ -906,12 +789,6 @@ export function increaseAllStorage(category) {
     }
 
     const names = increased.map((key) => localizeMaterialName(key, normalizedCategory, getLanguage()));
-    // Its own classification, deliberately, not 'storage'. Notifications are
-    // queued one at a time per classification, and the stores this sweep just
-    // claimed each raised a storage-full toast of their own that is still
-    // sitting in that queue at eight seconds apiece — so a summary posted there
-    // would not appear until a minute after the press that caused it, which is
-    // indistinguishable from no summary at all.
     showNotification(
         localize('notificationIncreasedAllStorage', getLanguage()).replace('{materials}', names.join(', ')),
         'info',
@@ -1036,18 +913,14 @@ import {
     capitaliseWordsWithRomanNumerals
  } from './utilityFunctions.js';
 
-// P7 (player-feedback plan): the game's one precision policy. Every affordability
-// gate, every charge that settles one, and every quantity or cost the player
-// reads goes through these, so that what is displayed and what is charged can
-// never disagree. See precision.js for why the rounding runs in the directions
-// it does.
 import {
     canAfford,
     isEffectivelyEqual,
     settleSpend,
     displayQuantity,
     displayCurrency,
-    truncateToDecimals
+    truncateToDecimals,
+    formatUpgradeStep
  } from './precision.js';
 
 import { getTimedEffectStateSnapshot, isTimedEffectActive, initialiseRandomEventTimers } from './events.js';
@@ -1099,13 +972,8 @@ import { drawTab6Content } from './drawTab6Content.js';
 
 let weatherCountDownToChangeInterval = null;
 
-// How long the window the weather system is currently running was armed for.
-// The countdown itself is a closure over a local `timeLeft`, so without this the
-// only way to tell a one-to-three-minute draw apart from the fixed one-minute
-// relief window granted after a severe streak is to sit and watch the clock.
 let currentWeatherWindowSeconds = 0;
 
-/** Seconds the current weather window was armed for. */
 export function getCurrentWeatherWindowSeconds() {
     return currentWeatherWindowSeconds;
 }
@@ -2211,14 +2079,8 @@ function getSupplyChainDisruptionMultiplier(category, key) {
         return 1;
     }
 
-    // The event rolls its own severity (60-80%) and stores it on the effect, and
-    // both the modal and the Events screen quote that roll to the player — so the
-    // production cut has to come from the same number rather than from a
-    // constant, or the figure shown is not the figure applied.
     const percentDown = Number(state.percentDown);
     if (!Number.isFinite(percentDown)) {
-        // Effects restored from a save written before the roll was stored keep
-        // the original flat 75% cut.
         return 0.25;
     }
 
@@ -2292,22 +2154,6 @@ export function timeWarp(lengthOfTimeInMs, multiplyRateBy) {
     setTimeWarpTimeoutId(timeoutId);
 }
 
-/**
- * Format a per-second production rate for display.
- *
- * Unlike a holding, a rate is never compared against a price, so this rounds
- * rather than truncates below 1000: truncating would show a live 0.005 / s
- * trickle as "0.00 / s", which reads as stopped. The affordability invariant
- * that governs quantities does not apply here, and pretending it does would
- * make the display less honest rather than more.
- *
- * Above 1000 it hands off to whichever notation the player has chosen. It used
- * to always hand off to the condensed ladder and then leave the result to be
- * re-formatted by the frame's `.notation` sweep — which re-parsed "1.2K" as the
- * number 1.2 and rounded it to "1K". Rate elements are now marked
- * `data-notation-preformatted` by `updateProductionRateText()` so that sweep
- * leaves them alone, which is why the notation choice has to be honoured here.
- */
 export function formatProductionRateValue(rateValue) {
     const sign = rateValue < 0 ? '-' : '';
     const absValue = Math.abs(rateValue);
@@ -2335,12 +2181,6 @@ export function startGame() {
     if (!getRunStartTime()) {
         setRunStartTime();
     }
-    // `getGameStartTime()` hands back a `Date.now()` number, which has no
-    // `toISOString` of its own. Seeding the stamp with the bare property left it
-    // `undefined` until the first blur or load wrote a real one, and any focus
-    // before that made `offlineGains()` compute a NaN elapsed time and put NaN
-    // into the play-time clock. Reachable by opening the game in a background
-    // tab and clicking into it, where `focus` fires with no `blur` before it.
     setLastSavedTimeStamp(new Date(getGameStartTime()).toISOString());
     setGameState(getGameVisibleActive());
     updateContent('Resources', `tab1`, 'intro');
@@ -3351,12 +3191,6 @@ function updateResourceAutoBuyerDelta(resource, tier, deltaMs) {
 
 }
 
-/**
- * Attach the allocation pass to the timer manager.
- *
- * Idempotent - the manager ignores a hook it already holds - so it is safe to
- * call from every path that sets the economy timers up.
- */
 function ensureProductionAllocationHook() {
     timerManagerDelta.addPostUpdateHook(runProductionAllocation);
 }
@@ -3413,12 +3247,6 @@ function updateCompoundAutoBuyerDelta(compound, tier, deltaMs) {
     clearStorageFullFlagIfNotFull('compounds', compound, currentQuantity, storageCapacity);
 
     if (getPowerOnOff()) {
-        // P9: auto-create used to run here, drawing every ingredient's *stock*
-        // down to zero each frame and force-disabling autosell on each of them.
-        // It now runs in `runProductionAllocation()`, once per frame for every
-        // compound at once, against a share of each ingredient's *production*.
-        // Doing it in one place is what stops two compounds sharing an
-        // ingredient from being decided by whichever timer fired first.
 
         const autoBuyerExtractionRate = getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', `tier${tier}`, 'rate']) || 0;
         const currentTierAutoBuyerQuantity = getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', `tier${tier}`, 'quantity']) || 0;
@@ -3435,14 +3263,6 @@ function updateCompoundAutoBuyerDelta(compound, tier, deltaMs) {
         maybeNotifyStorageFull('compounds', compound, currentQuantity, updatedQuantity, storageCapacity);
         currentQuantity = updatedQuantity;
 
-        if (
-            getCurrentStarSystemWeatherEfficiency()[2] === 'rain' &&
-            compound === getStarSystemDataObject('stars', [getCurrentStarSystem(), 'precipitationType']) &&
-            getUnlockedCompoundsArray().includes(getStarSystemDataObject('stars', [getCurrentStarSystem(), 'precipitationType']))
-        ) {
-            const precipitationGain = currentQuantity >= storageCapacity ? 0 : (autoBuyerExtractionRate * tickMultiplier * supplyChainMultiplier);
-            setCollectedPrecipitationQuantityThisRun(getCollectedPrecipitationQuantityThisRun() + precipitationGain);
-        }
 
         const getCompoundTierContribution = tierIndex => {
             const isActive = getResourceDataObject('compounds', [compound, 'upgrades', 'autoBuyer', `tier${tierIndex}`, 'active']);
@@ -3508,13 +3328,6 @@ function updateCompoundAutoBuyerDelta(compound, tier, deltaMs) {
         addToResourceAllTimeStat(actualGain, compound);
         recordProduction('compounds', compound, productionAmount, actualGain);
 
-        if (
-            compound === getStarSystemDataObject('stars', [getCurrentStarSystem(), 'precipitationType']) &&
-            getUnlockedCompoundsArray().includes(getStarSystemDataObject('stars', [getCurrentStarSystem(), 'precipitationType']))
-        ) {
-            const precipitationGain = activeAutoBuyer ? (autoBuyerExtractionRate * tickMultiplier * supplyChainMultiplier) : 0;
-            setCollectedPrecipitationQuantityThisRun(getCollectedPrecipitationQuantityThisRun() + precipitationGain);
-        }
 
         let compoundTier1Rate = calculatedCompoundRate;
 
@@ -3536,37 +3349,8 @@ function updateCompoundAutoBuyerDelta(compound, tier, deltaMs) {
 
 }
 
-//---------------------------------------------------------------------------------------------------------
-// P9 - production allocation
-//
-// One pass, once per frame, after every material timer has added its production
-// and taken its fuel. It replaces two things that used to live inside those
-// timers and fought each other:
-//
-//   - autosell, which drained a store down to 100 units and held it there
-//     forever, so a material being sold could never accumulate; and
-//   - compound auto-create, which drew from ingredient *stock* with a zero
-//     buffer, emptying it every frame, and which ran inside each compound's own
-//     timer - so whichever fired first took the shared ingredient and the rest
-//     created nothing.
-//
-// Both now work off *production*, never stock. A material's gross production for
-// the tick, less what the power plants burned of it, is its `allocatable`
-// amount, and the player's sliders cut that into cash, a ceiling offered to
-// auto-creating compounds, and a remainder that accumulates.
-//
-// Running every compound's draw in one place, after every resource's budget is
-// known, is also what removes the timer-order dependence: the outcome no longer
-// depends on which compound's timer happened to fire first.
-//---------------------------------------------------------------------------------------------------------
-
-// What each material produced and burned this frame. The timers write here; the
-// pass reads it and clears it. Deliberately not in the data object - it is
-// per-frame scratch, not state worth saving or restoring.
 const productionThisTick = new Map();
 
-// This frame's autosell income, for the cash-per-second readout. Reset by the
-// pass that publishes it, not by the pass that fills it.
 let autoSellIncomeThisTick = 0;
 let autoSellIncomePerSecondSmoothed = 0;
 
@@ -3574,20 +3358,6 @@ function allocationKey(category, key) {
     return category + ':' + key;
 }
 
-/**
- * Record what a material produced this frame, and how much of it fitted.
- *
- * Both numbers are needed and they are not the same once a store is full.
- *
- * `grossAmount` is what the autobuyers made. It is what the shares are taken
- * from, because a full store does not stop the mine: the player is owed the cash
- * on everything produced, and simply loses the part that had nowhere to go. That
- * is the behaviour agreed for the cap - the bar stops moving, the money does not.
- *
- * `actualGain` is what the capacity clamp let into the store, and it bounds only
- * how much this pass may take back *out* of the store. Allocating against it
- * would silently stop paying the moment a resource filled.
- */
 export function recordProduction(category, key, grossAmount, actualGain) {
     const gross = grossAmount > 0 ? grossAmount : 0;
     const landed = actualGain > 0 ? actualGain : 0;
@@ -3604,11 +3374,6 @@ export function recordProduction(category, key, grossAmount, actualGain) {
     }
 }
 
-/**
- * Record fuel a power plant burned of this material this frame, so it can come
- * off the top before the shares are taken. A player who sets 90% to cash must
- * not be able to black out their own grid without understanding why.
- */
 export function recordFuelBurn(category, key, amountBurned) {
     if (!(amountBurned > 0)) {
         return;
@@ -3622,53 +3387,25 @@ export function recordFuelBurn(category, key, amountBurned) {
     }
 }
 
-/**
- * The player's allocation for a material, as fractions of allocatable production.
- *
- * Returns zeroes before the capability is owned, and otherwise exactly what the
- * slider says. There is no separate on/off switch any more: buying the first
- * rung of Nano Brokers turns the slider on for good, and a player who wants a
- * material left alone drags the handle back to the storage end, which is the
- * same bypass expressed on the one control that decides everything else.
- */
 function getAllocationShares(category, key) {
-    // Compounds are never autosold. They are end-of-the-line products, and no
-    // control in a compound pane can set a share - so the stored field is
-    // ignored rather than trusted. This is a load-bearing guard, not a tidy-up:
-    // a save written while the compound panes still carried a cash slider holds
-    // a non-zero `cashShare`, is already at the current schema version, and so
-    // meets no migration rung. Honouring it would have that compound quietly
-    // selling itself for the rest of the save's life, with no slider to turn it
-    // off and nothing in the tooltip to say it was happening.
     if (category !== 'resources') {
         return { cash: 0, compound: 0 };
     }
 
-    // Before the ladder's first rung is bought there is no slider and not a unit
-    // is sold, so the material behaves exactly as one with no automation at all.
     const sellingEnabled = getAutoSellUnlocked();
 
     const rawCash = Number(getResourceDataObject(category, [key, 'cashShare'], true)) || 0;
     const cash = sellingEnabled ? Math.max(0, Math.min(100, rawCash)) : 0;
 
-    // The compound band exists only on a resource a recipe draws on, and only
-    // once the ladder's second rung is owned.
     if (!getCompoundAutoCreateUnlocked()) {
         return { cash: cash / 100, compound: 0 };
     }
 
-    // The compound share is read straight off the slider's second band. Nothing
-    // else gates it: owning auto-create and switching it on is enough to make a
-    // compound, and a resource whose cash band is at zero still offers its
-    // compound band in full.
     const rawCompound = Number(getResourceDataObject(category, [key, 'compoundShare'], true)) || 0;
-    // The two bands share one line, so the compound band can never claim what the
-    // cash band already took, however the stored values got there.
     const compound = Math.max(0, Math.min(100 - cash, rawCompound));
     return { cash: cash / 100, compound: compound / 100 };
 }
 
-/** Every ingredient a recipe names, with the ratio it wants of each. */
 function getCompoundRecipe(compound) {
     const parts = [];
     for (let i = 1; i <= 4; i++) {
@@ -3681,13 +3418,6 @@ function getCompoundRecipe(compound) {
     return parts;
 }
 
-/**
- * Does any recipe in the game draw on this resource?
- *
- * This decides whether a resource's allocation line has a compound band at all.
- * Helium has no consumers and so never grows a third section, however far up the
- * ladder the player is.
- */
 export function resourceIsCompoundIngredient(resourceKey) {
     const compounds = getResourceDataObject('compounds') || {};
     return Object.keys(compounds).some(compound =>
@@ -3695,12 +3425,6 @@ export function resourceIsCompoundIngredient(resourceKey) {
     );
 }
 
-/**
- * How many auto-creating compounds are drawing on this resource right now.
- *
- * Exported because the tooltips quote the equal share, and a share the display
- * computes for itself would drift from the one the engine actually hands out.
- */
 export function getActiveCompoundConsumers(resourceKey) {
     const compounds = getResourceDataObject('compounds') || {};
     return Object.keys(compounds).filter(compound =>
@@ -3709,25 +3433,10 @@ export function getActiveCompoundConsumers(resourceKey) {
     );
 }
 
-/**
- * The single per-frame allocation pass.
- *
- * Order matters and is the whole design:
- *   1. fuel off the top, giving each material its allocatable production;
- *   2. the cash share sold - out of the flow, never out of the store;
- *   3. the compound share offered to auto-creating compounds as a ceiling,
- *      divided equally between however many draw on that resource;
- *   4. whatever is left, including any part of the ceiling nobody could use,
- *      simply stays in the store.
- *
- * Step 4 needs no code: production has already been added to the store by the
- * timers, so anything this pass does not remove has accumulated by definition.
- */
 export function runProductionAllocation(deltaMs) {
     const compoundBudgets = new Map();
     let cashRaised = 0;
 
-    // --- 1 & 2: fuel off the top, then the cash share ------------------------
     productionThisTick.forEach((entry) => {
         const allocatable = Math.max(0, entry.produced - entry.burned);
         if (allocatable <= 0) {
@@ -3737,16 +3446,8 @@ export function runProductionAllocation(deltaMs) {
         const shares = getAllocationShares(entry.category, entry.key);
 
         if (shares.cash > 0) {
-            // The player is paid on production, not on what fitted. A full store
-            // still earns; it just cannot also keep the units.
             const soldAmount = allocatable * shares.cash;
 
-            // What comes back out of the store is only ever the part of this
-            // frame's gain that is surplus to the share the player chose to keep.
-            // At the cap nothing landed, so nothing is taken - the money is paid
-            // out of production that was never stored in the first place. With
-            // room to spare this is exactly `soldAmount`, and with partial room
-            // it is less, because the clamp had already discarded the rest.
             const keptShare = Math.max(0, allocatable - soldAmount);
             const currentQuantity = Number(getResourceDataObject(entry.category, [entry.key, 'quantity'])) || 0;
             const amountToRemove = Math.min(Math.max(0, entry.landed - keptShare), currentQuantity);
@@ -3774,29 +3475,12 @@ export function runProductionAllocation(deltaMs) {
         autoSellIncomeThisTick += cashRaised;
     }
 
-    // --- 3: the compound share ----------------------------------------------
     runCompoundAutoCreation(compoundBudgets, deltaMs);
 
     publishAutoSellIncomeRate(deltaMs);
     productionThisTick.clear();
 }
 
-/**
- * Spend each resource's compound budget on the compounds auto-creating from it.
- *
- * The budget is split **equally** between however many compounds draw on that
- * resource, and a compound that cannot use its whole share does not pass the
- * surplus on - it falls through to the resource's own store. That is chosen over
- * a demand-proportional split for predictability: a compound's throughput then
- * depends only on its own settings and the resource sliders, never on what an
- * unrelated compound happens to be doing. Switching steel off does not silently
- * change titanium's rate.
- *
- * A recipe needs several ingredients, so each compound can make only the
- * *minimum* its shares allow across all of them, and it consumes only what that
- * minimum actually needs - a compound bottlenecked on neon must not also swallow
- * the iron it cannot use.
- */
 function runCompoundAutoCreation(compoundBudgets, deltaMs) {
     const compounds = getResourceDataObject('compounds') || {};
     const unlocked = getCompoundAutoCreateUnlocked() && getPowerOnOff();
@@ -3805,8 +3489,6 @@ function runCompoundAutoCreation(compoundBudgets, deltaMs) {
         ? Object.keys(compounds).filter(compound => getResourceDataObject('compounds', [compound, 'autoCreate']))
         : [];
 
-    // The denominator of the equal split, counted over compounds that are
-    // switched on - so turning one off widens the others' shares next frame.
     const consumerCount = new Map();
     const recipes = new Map();
     active.forEach(compound => {
@@ -3819,8 +3501,6 @@ function runCompoundAutoCreation(compoundBudgets, deltaMs) {
 
     Object.keys(compounds).forEach(compound => {
         if (!active.includes(compound)) {
-            // Not creating: publish a zero rate so the tooltip does not keep
-            // quoting the rate this compound had when it was last switched on.
             publishAutoCreateRate(compound, 0, deltaMs);
             return;
         }
@@ -3846,9 +3526,6 @@ function runCompoundAutoCreation(compoundBudgets, deltaMs) {
             return;
         }
 
-        // What each ingredient's share permits, bounded by what the store
-        // actually holds - the budget is a ceiling on the draw, not a promise
-        // that the material is there.
         let creatable = availableStorage / supplyChainMultiplier;
         let throttledBy = '';
 
@@ -3871,9 +3548,6 @@ function runCompoundAutoCreation(compoundBudgets, deltaMs) {
             return;
         }
 
-        // Consume only what this amount needs of each ingredient. Anything the
-        // share allowed but the recipe could not use is never taken, so it stays
-        // in the resource's store.
         const perUnitDraw = amountToCreate / supplyChainMultiplier;
         recipe.forEach(({ resourceName, category, ratio }) => {
             const stock = Number(getResourceDataObject(category, [resourceName, 'quantity'])) || 0;
@@ -3891,12 +3565,6 @@ function runCompoundAutoCreation(compoundBudgets, deltaMs) {
     });
 }
 
-/**
- * Smooth this frame's creation into a per-second figure for the displays.
- *
- * The raw per-frame amount is far too jittery to read, which is why the old
- * auto-create path smoothed it the same way over the same one-second window.
- */
 function publishAutoCreateRate(compound, amountCreated, deltaMs) {
     const smoothingWindowMs = 1000;
     const alpha = Math.min(1, Math.max(0, (deltaMs || 0) / smoothingWindowMs));
@@ -3910,7 +3578,6 @@ function publishAutoCreateRate(compound, amountCreated, deltaMs) {
     setResourceDataObject(timerRatio > 0 ? (smoothed / timerRatio) : 0, 'compounds', [compound, 'autoCreateRate']);
 }
 
-/** The same smoothing, for the headline "cash from autosell" readout. */
 function publishAutoSellIncomeRate(deltaMs) {
     const smoothingWindowMs = 1000;
     const alpha = Math.min(1, Math.max(0, (deltaMs || 0) / smoothingWindowMs));
@@ -3919,26 +3586,10 @@ function publishAutoSellIncomeRate(deltaMs) {
     autoSellIncomeThisTick = 0;
 }
 
-/** Total cash per second currently being raised by autosell, across everything. */
 export function getAutoSellIncomePerSecond() {
     return autoSellIncomePerSecondSmoothed;
 }
 
-/**
- * What the power buildings are burning of a material, per second.
- *
- * Read from the buildings themselves rather than from the material's
- * `usedForFuelPerSec` field, for two reasons. The field is misnamed - it
- * accumulates the fuel tuple's second element, which is a per-*tick* figure, so
- * using it as written subtracted a hundredth of the real burn and left the
- * "allocatable" total looking like the gross. And it is only maintained on the
- * purchase path, so a save or a staged scenario that set a plant's quantity
- * directly had it sitting at zero while the tick burned fuel regardless.
- *
- * Computing it from `fuel[1] x quantity x timerRatio` is exactly what the tick
- * does before it deducts the burn, which is the point: the figure the tooltip
- * quotes and the figure the pane's rate is net of are then the same number.
- */
 function fuelBurnPerSecond(category, key) {
     const timerRatio = getTimerRateRatio?.() || 0;
     const buildings = getResourceDataObject('buildings', ['energy', 'upgrades'], true) || {};
@@ -3948,8 +3599,7 @@ function fuelBurnPerSecond(category, key) {
         if (!Array.isArray(fuel) || fuel[0] !== key || (fuel[2] || 'resources') !== category) {
             return total;
         }
-        // A plant that is switched off burns nothing, and the tick agrees - the
-        // deduction there is gated on the same call.
+
         if (!getBuildingTypeOnOff(buildingKey)) {
             return total;
         }
@@ -3958,12 +3608,6 @@ function fuelBurnPerSecond(category, key) {
     }, 0);
 }
 
-/**
- * What one material's allocation is doing right now, in units per second.
- *
- * The panes and tooltips all read this rather than recomputing the split, so a
- * display can never disagree with the engine about where production is going.
- */
 export function getAllocationBreakdown(category, key) {
     const timerRatio = getTimerRateRatio?.() || 0;
     const grossPerInterval = calculateGrossAutoBuyerGenerationPerInterval(category, key);
@@ -3975,9 +3619,6 @@ export function getAllocationBreakdown(category, key) {
     const toCash = allocatable * shares.cash;
     const ceiling = allocatable * shares.compound;
 
-    // What the compounds are actually taking, as opposed to what they were
-    // offered. The two differ whenever a recipe is bottlenecked elsewhere, and
-    // the difference is exactly what falls through to storage.
     const consumers = category === 'resources' ? getActiveCompoundConsumers(key) : [];
     let toCompounds = 0;
     const perCompound = consumers.map(compound => {
@@ -4000,15 +3641,6 @@ export function getAllocationBreakdown(category, key) {
     };
 }
 
-/**
- * What the allocation is taking out of a material's headline rate, per second.
- *
- * The panes quote a *net* accumulation rate - what the store is actually gaining
- * - so everything the allocation diverts has to come off: the share sold for
- * cash, and what auto-creating compounds are drawing. Reads the engine's own
- * breakdown rather than recomputing the split, so the figure on the pane and the
- * production it describes can never disagree.
- */
 function allocationDeductionPerSecond(category, key) {
     const breakdown = getAllocationBreakdown(category, key);
     return (breakdown.toCash || 0) + (breakdown.toCompounds || 0);
@@ -4384,18 +4016,6 @@ function blackHoleUIChecks() {
         const researchPoints = getResourceDataObject('research', ['quantity']);
         const baseText = localize('blackHoleInteractionResearchPointsLabel', getLanguage());
         const formattedResearch = `<span class="green-ready-text">${formatNumber(researchPoints)}</span>`;
-        // Two things about this line:
-        //
-        // Only the gap before the number is non-breaking. Replacing every space
-        // with `&nbsp;` made the whole sentence one unbreakable token, which
-        // overflowed the panel in every language and worst of all in German.
-        //
-        // The wrapping span is load-bearing: this element carries
-        // `option-row-description d-flex`, so a bare text node and the value span
-        // become two *flex items*. Once the sentence was long enough to wrap —
-        // which German is — the value was laid out beside the wrapped text rather
-        // than after it, reading "…und verbessern 1.0B — Forschungspunkte:".
-        // One flex item restores normal inline flow.
         interactionDescriptionElement.innerHTML = `<span>${baseText}&nbsp;${formattedResearch}</span>`;
     }
 
@@ -4532,12 +4152,6 @@ function blackHoleUIChecks() {
     const charging = getCurrentlyChargingBlackHole();
     const chargeReady = getBlackHoleChargeReady();
 
-    // 🌀 is the black hole's charge-ready marker, and only that. The row's
-    // removal used to drop *any* indicator on the row while charging or warping,
-    // while the tab's removal below is correctly limited to 🌀 — so an ordinary
-    // ⚠️ "not visited yet" marker was stripped from the row and left on the tab,
-    // giving the Galactic tab a badge with no option under it carrying one.
-    // Both sides now remove only what this function put there.
     if (researchDone && chargeReady && !timeWarping) {
         appendAttentionIndicator(rowElement, '🌀');
     } else if (charging || timeWarping) {
@@ -4658,7 +4272,14 @@ function blackHoleUIChecks() {
         const baseIncrement = getBlackHolePowerUpgradeIncrement();
         const increment = Number(currentPower) >= 50 ? 0.5 : baseIncrement;
         const nextPower = Number(currentPower) + Number(increment);
-        secondaryButton2.textContent = localizeRaw('buttonBlackHolePowerUpgrade', getLanguage()).replace('{current}', currentPower).replace('{next}', nextPower).replace('{price}', formatNumber(price));
+
+        const wholeSteps = Number.isInteger(Number(currentPower)) && Number.isInteger(nextPower);
+        const powerStep = formatUpgradeStep(currentPower, nextPower, {
+            decimals: wholeSteps ? 0 : 1,
+            maxDecimals: 3
+        });
+
+        secondaryButton2.textContent = localizeRaw('buttonBlackHolePowerUpgrade', getLanguage()).replace('{current}', powerStep.current).replace('{next}', powerStep.next).replace('{price}', formatNumber(price));
         const affordable = canAfford(currentResearch, price);
         setButtonState(secondaryButton2, { enabled: affordable, ready: affordable });
     }
@@ -4681,9 +4302,13 @@ function blackHoleUIChecks() {
             const price = getBlackHoleDurationPrice();
             const currentDurationMs = getBlackHoleDuration();
             const nextDurationMs = currentDurationMs + getBlackHoleDurationUpgradeIncrementMs();
-            const currentDurationSeconds = Math.round(currentDurationMs / 1000);
-            const nextDurationSeconds = Math.round(nextDurationMs / 1000);
-            secondaryButton3.textContent = localizeRaw('buttonBlackHoleDurationUpgrade', getLanguage()).replace('{current}', currentDurationSeconds).replace('{next}', nextDurationSeconds).replace('{price}', formatNumber(price));
+
+            const durationStep = formatUpgradeStep(currentDurationMs / 1000, nextDurationMs / 1000, {
+                decimals: 0,
+                maxDecimals: 2
+            });
+
+            secondaryButton3.textContent = localizeRaw('buttonBlackHoleDurationUpgrade', getLanguage()).replace('{current}', durationStep.current).replace('{next}', durationStep.next).replace('{price}', formatNumber(price));
             const affordable = canAfford(currentResearch, price);
             setButtonState(secondaryButton3, { enabled: affordable, ready: affordable });
         }
@@ -4710,9 +4335,19 @@ function blackHoleUIChecks() {
             secondaryButton4.textContent = localizeRaw('buttonBlackHoleRechargeMaxed', getLanguage()).replace('{seconds}', (minChargeMs / 1000).toFixed(0));
             setButtonState(secondaryButton4, { enabled: false, ready: false });
         } else {
-            const currentChargeSeconds = (currentChargeMs / 1000).toFixed(1);
-            const nextChargeSeconds = (Math.max(minChargeMs, nextChargeMs) / 1000).toFixed(1);
-            secondaryButton4.textContent = localizeRaw('buttonBlackHoleRechargeUpgrade', getLanguage()).replace('{current}', currentChargeSeconds).replace('{next}', nextChargeSeconds).replace('{price}', formatNumber(price));
+            const clampedNextChargeMs = Math.max(minChargeMs, nextChargeMs);
+            const nextReachesAlwaysActive = clampedNextChargeMs <= minChargeMs;
+
+            if (nextReachesAlwaysActive) {
+                const currentChargeSeconds = (currentChargeMs / 1000).toFixed(1);
+                secondaryButton4.textContent = localizeRaw('buttonBlackHoleRechargeFinalUpgrade', getLanguage()).replace('{current}', currentChargeSeconds).replace('{price}', formatNumber(price));
+            } else {
+                const rechargeStep = formatUpgradeStep(currentChargeMs / 1000, clampedNextChargeMs / 1000, {
+                    decimals: 1,
+                    maxDecimals: 3
+                });
+                secondaryButton4.textContent = localizeRaw('buttonBlackHoleRechargeUpgrade', getLanguage()).replace('{current}', rechargeStep.current).replace('{next}', rechargeStep.next).replace('{price}', formatNumber(price));
+            }
 
             const affordable = canAfford(currentResearch, price);
             setButtonState(secondaryButton4, { enabled: affordable, ready: affordable });
@@ -5109,16 +4744,6 @@ export function setStarshipTravelTimeReductionAfterRepeatables() {
     setStarShipTravelSpeed(newSpeed);
 }
 
-// P9: `handleAutoCreateResourceSellRows()` used to live here. It locked a
-// resource's entire sell row - `pointer-events: none`, half opacity - whenever
-// any auto-creating compound drew on that resource. That was the companion to
-// the old every-frame `autoSell = false` loop: the game was switching the
-// player's toggle off behind their back, and greying the row out hid it.
-//
-// Both are gone. Feeding compounds *and* selling for cash *and* accumulating is
-// precisely what the allocation line exists to let the player balance, so the
-// row must stay live while a compound is being created from it.
-
 function updateNativeTechCostStates() {
     if (getCurrentOptionPane() !== 'tech tree') {
         return;
@@ -5260,6 +4885,11 @@ function addPrecipitationResource() {
         const precipitationGain = getCurrentPrecipitationRate() * supplyChainMultiplier;
         setResourceDataObject(currentStarSystemPrecipitationTypeQuantity + precipitationGain, currentStarSystemPrecipitationCategory, [currentStarSystemPrecipitationType, 'quantity']);
         addToResourceAllTimeStat(precipitationGain, currentStarSystemPrecipitationType);
+
+        // Counted here because here is the only place precipitation is actually
+        // collected - already gated on rain, on the material being revealed and
+        // on there being room to store it. See known-issues #48.
+        setCollectedPrecipitationQuantityThisRun(getCollectedPrecipitationQuantityThisRun() + precipitationGain);
         const precipitationId = currentStarSystemPrecipitationType + 'Quantity';
 
         if (document.getElementById(precipitationId)) {
@@ -5378,11 +5008,6 @@ function updateStats() {
     //top bar
     //stat1
     const cash = getResourceDataObject('currency', ['cash']);
-    // P7: never `toFixed(2)`. Cash is the only figure in the game shown to a
-    // precision fine enough for the player to compare against a price by eye,
-    // and toFixed rounds up - a balance of 999.996 read $1000.00 beside a 1000
-    // price the game then refused. `displayCurrency` truncates instead, so the
-    // stat bar never claims more money than the purchase gate will find.
     const cashText = displayCurrency(cash);
     if (getCurrencySymbol() !== "€") {
         getElements().cashStat.textContent = `${getCurrencySymbol()}${cashText}`;
@@ -5597,16 +5222,6 @@ export function sellResource(resource) {
     const currentCash = getResourceDataObject('currency', ['cash']);
     const quantityToDeduct = parseInt(saleData.match(/\((\d+)/)[1], 10);
 
-    // P7: the payment is computed, not read back off the label.
-    //
-    // This used to parse the cash out of the rendered preview, which is written
-    // by `setResourceSalePreview()` through `toFixed(2)` - so the sale paid
-    // whatever two decimal places happened to round to rather than what the
-    // goods were worth. Selling 12.7 units at 0.04752 quoted "$0.60" and paid
-    // 0.60 against a true value of 0.6035. Rounding belongs at the display; the
-    // transaction takes the same `quantity x saleValue` that
-    // `sellAllUnlockedResources()` has always used, so the two routes to a sale
-    // can no longer disagree about what a stock is worth.
     const cashRaised = quantityToDeduct * (Number(getResourceDataObject('resources', [resource, 'saleValue'])) || 0);
 
     if (getCurrencySymbol() === "€") {
@@ -5685,10 +5300,6 @@ export function createCompound(compound) {
     const existingCompoundQuantity = getResourceDataObject('compounds', [compound, 'quantity']);
     const compoundMaxStorage = getResourceDataObject('compounds', [compound, 'storageCapacity']);
 
-    // Resolve every ingredient before anything is credited. A name that does not
-    // map to a real material used to leave `type === 'error'`, so the deduction
-    // wrote nowhere while the compound had already been added — free goods. Fail
-    // the whole craft instead, loudly. See known-issues #19.
     const resolvedParts = [];
     for (let i = 1; i <= 4; i++) {
         const partName = constituentPartsObject[`constituentPartName${i}`];
@@ -5889,11 +5500,6 @@ function updateAllSalePricePreviews() {
             const dropDownElementId = resource + "SellSelectQuantity";
             const dropDownElement = document.getElementById(dropDownElementId);
 
-            // P9: with the allocation line in place the sell dropdown is hidden,
-            // so there is no longer an amount for the player to pick. Fuse is the
-            // only thing still reading this preview, and it fuses everything -
-            // hence "all stock", and hence the Fuse button's relabelling in
-            // `setAutoSellToggleState()`.
             const chosenAmount = (!dropDownElement || dropDownElement.classList.contains('invisible'))
                 ? localize('dropdownOptionAllStock', getLanguage())
                 : dropDownElement.querySelector('div.dropdown').innerText;
@@ -6133,14 +5739,6 @@ function checkAndDeductResources() {
             deductAmount = deductObject[itemToDeductType].deductQuantity;
             const typeOfResourceCompound = deductObject[itemToDeductType].typeOfResourceCompound;
 
-            // P7: the charge and the gate that offered it share one tolerance.
-            // They have to. `gain()` grants the item before this runs, and a
-            // failed settle here also suppresses the matching price rise in
-            // checkAndIncreasePrices() - so a gate looser than this test hands
-            // out a free unit at the old price, and a gate tighter than it
-            // refuses purchases the game would have honoured. `settleSpend`
-            // then snaps the residue to zero rather than leaving the balance a
-            // few ulps overdrawn on the purchases the tolerance is what allowed.
             if (itemToDeductType === 'cash') {
                 mainKey = 'currency';
                 currentQuantity = getResourceDataObject(mainKey, [itemToDeductType]);
@@ -6175,61 +5773,19 @@ function checkAndDeductResources() {
     setItemsToDeduct('clear');
 }
 
-// ============================================================================
-// P1 (player-feedback plan): Buy Max.
-// ============================================================================
-//
-// The helper below deliberately owns no pricing and no affordability logic of
-// its own. It drives the row's existing single-purchase handler and then asks
-// the game's own per-frame condition pass whether the row is still affordable,
-// which is the same thing that greys the Buy button out for the player. Every
-// cost curve, every secondary-resource cost and every completion cap is then
-// honoured for free, because those are exactly the conditions that already put
-// `red-disabled-text` on that button: handleSpaceUpgradeResourceType() adds it
-// once a rocket's parts are all built or a fleet ship hits maxCanBuild, and
-// setStateOfButtonsBasedOnDescriptionStateForBuildingPurchases() adds it when
-// any one of a building's three secondary resources is short.
-
-/** Never loop forever, whatever a future cost curve does. */
 const BULK_PURCHASE_ITERATION_CAP = 5000;
 
-/**
- * Re-run, for one row only, the condition pass the frame loop runs over the
- * whole screen.
- *
- * This is what makes the loop below safe: after each purchase the row's Buy
- * button carries an up-to-date affordability state rather than last frame's.
- * The order matters and is the DOM's - the buttons sit in .input-container and
- * the price label in .description-container after them, and it is the label's
- * pass that decides a building row's button state.
- */
 function refreshRowPurchaseState(rowElement) {
     rowElement
         .querySelectorAll('.resource-cost-sell-check, .compound-cost-sell-check')
         .forEach(checkStatusAndSetTextClasses);
 }
 
-/**
- * Settle the purchase the handler just queued.
- *
- * A purchase does not pay for itself when it is made: gain() writes into
- * itemsToDeduct and itemsToIncreasePrice, and the frame loop settles both on its
- * next pass. Those are keyed maps rather than accumulators, so a second purchase
- * in the same frame would overwrite the first - the player would get the second
- * unit free and at the old price. Settling here, in the frame loop's own order,
- * keeps every iteration of the loop equivalent to one ordinary click.
- */
 function settleQueuedPurchase() {
     checkAndDeductResources();
     checkAndIncreasePrices();
 }
 
-/**
- * Buy as many of a row's item as the player can currently afford.
- *
- * Returns the number bought, which is 0 when the first affordability check
- * already says no.
- */
 export function buyMaxForRow(rowElement, purchaseButton, purchaseOnce) {
     if (!rowElement || !purchaseButton || typeof purchaseOnce !== 'function') {
         return 0;
@@ -6237,10 +5793,6 @@ export function buyMaxForRow(rowElement, purchaseButton, purchaseOnce) {
 
     let purchased = 0;
 
-    // Replaying a purchase handler also replays whatever it announces. One
-    // notification and one immediate analytics flush per click is right; twenty
-    // of each from a single press is not, so both are collapsed for the duration
-    // of the loop and restored however it ends.
     setBulkPurchaseInProgress(true);
     setAnalyticsBatchOnly(true);
 
@@ -6262,8 +5814,6 @@ export function buyMaxForRow(rowElement, purchaseButton, purchaseOnce) {
     }
 
     if (purchased > 0) {
-        // One row-level event for the whole press, in place of the per-unit
-        // events the loop just batched.
         trackAnalyticsEvent('bulk_purchase', {
             row_id: rowElement.id || '',
             units: purchased
@@ -6274,25 +5824,10 @@ export function buyMaxForRow(rowElement, purchaseButton, purchaseOnce) {
     return purchased;
 }
 
-/** Has the player bought the ascendency perk that puts Max buttons on rows? */
 export function isBulkPurchasingUnlocked() {
     return (getBuffBulkPurchasingData()?.boughtYet ?? 0) > 0;
 }
 
-/**
- * Keep every Max button in step with the Buy button beside it.
- *
- * The Max button carries no condition-check dataset of its own, on purpose:
- * several rows are fixed up after createOptionRow returns - the diesel tier 1
- * row stamps a cashOverride onto `button[data-auto-buyer-tier="tier1"]` - and
- * four other call sites reach for `.input-container button` expecting to find
- * the purchase button. A second button carrying the same dataset would either
- * steal those or miss them. Mirroring instead means Max is enabled under exactly
- * the same conditions as Buy, whatever those turn out to be for a given row.
- *
- * The pairing is positional because createOptionRow splices the Max button in
- * directly after the purchase button, so previousElementSibling is it.
- */
 function syncBulkPurchaseButtons() {
     document.querySelectorAll('button.buy-max-button').forEach((maxButton) => {
         const purchaseButton = maxButton.previousElementSibling;
@@ -6530,24 +6065,12 @@ function getAllElements(resourcesArray, compoundsArray) {
     return allElements;
 }
 
-// A row's cost label cannot be reached by its own id: `createOptionRow` gives the
-// row's flavour-text container the same `<labelId>Description` id that
-// `generateElementId` gives the cost label, and the flavour container comes first
-// in document order, so `getElementById` always returns the wrong one. Every cost
-// label is therefore addressed through its row, which is uniquely `labelId`.
 export const getRowMainDescriptionLabel = (rowId) => {
     const rowEl = document.getElementById(rowId);
     if (!rowEl) return null;
     return rowEl.querySelector('.description-container .notation');
 };
 
-// The cost labels below used to be reachable by a short id — `#fuelDescription`,
-// `#travelToDescription` and so on — because `createOptionRow` derived the id from
-// the row's *visible label*: "Fuel:" became `fuelDescription`. The localisation
-// work changed that derivation to use the row's id instead, which was necessary
-// (a translated label cannot be a DOM id) but left every consumer asking for a
-// name nothing carries any more. These resolve the same labels through their rows,
-// which is the one identifier that is stable across languages.
 export const getRocketFuelDescriptionLabel = (rocket) =>
     getRowMainDescriptionLabel(`space${capitaliseString(rocket)}AutoBuyerRow`);
 
@@ -6877,17 +6400,11 @@ function getScienceResourceDescriptionElements() {
     };
 }
 
-// The frame loop rewrites these cost lines every tick, so the material names in
-// them have to be localized here too — otherwise the translated names written by
-// drawTab2Content are overwritten with English a frame later.
 function energyUpgradePriceName(upgrade, slot) {
     const price = getResourceDataObject('buildings', ['energy', 'upgrades', upgrade, `resource${slot}Price`]);
     return localizeMaterialName(price[1], price[2], getLanguage());
 }
 
-// The same applies to every other cost line the frame loop rewrites: the space
-// upgrades (star ship modules, fleet ships, the telescope, the launch pad and
-// the four rocket miners) and the three science buildings.
 function spaceUpgradePriceName(upgrade, slot) {
     const price = getResourceDataObject('space', ['upgrades', upgrade, `resource${slot}Price`]);
     return localizeMaterialName(price[1], price[2], getLanguage());
@@ -7635,25 +7152,11 @@ function resourceAndCompoundMonitorRevealRowsChecks(element) {
                 element.classList.add('invisible');
             }
         } else if (getCurrentTab()[1].includes('Compounds') && element.dataset.rowCategory === 'compound')  {
-            // P9: the compound auto-buyer tiers are the ladder's third rung, and
-            // are now separate from auto-create, which is the second. This gate
-            // used to be `compoundMachining`, which granted both at once.
             if (getCompoundAutoBuyersUnlocked()) {
                 element.classList.remove('invisible');
                 return;
             }
 
-            // Below that rung a compound pane shows no auto-buyer at all, with
-            // one deliberate exception: diesel's tier 1, which the early game
-            // needs to fuel the first power plants long before any perk exists.
-            //
-            // The per-tier progression check that used to run here is the
-            // *resource* rule, and it does not gate this: `currentTierLevel` is
-            // saved per material and survives whatever put it there - a save
-            // made before the ladder existed, or the debug menu's grant-all.
-            // Any compound carrying a level above zero therefore had its whole
-            // auto-buyer ladder on display at Nano Brokers 0, 1 or 2. The rung
-            // is the only thing that may reveal these rows.
             if (element.id === 'dieselAutoBuyer1Row') {
                 element.classList.remove('invisible');
             } else {
@@ -7734,11 +7237,6 @@ function travelToAsteroidChecks(element) {
         const rocketClass = [...element.classList].find(cls => cls.startsWith('rocket') && cls.match(/^rocket\d+/));
         if (rocketClass) {
             const rocketName = rocketClass.match(/^rocket\d+/)[0];
-            // Per rocket, and addressed through its row: the old shared
-            // `#travelToDescription` id no longer exists on any element. The
-            // block is broken out of rather than returned from, because the
-            // Travel button's own colour gate lives below it and does not
-            // depend on this label.
             const accompanyingLabel = getRocketTravelDescriptionLabel(rocketName);
             if (!accompanyingLabel) break travelRowDescription;
             const travelToProgressBarElement = document.getElementById(`spaceTravelToAsteroidProgressBar${capitaliseString(rocketName)}Container`);
@@ -7832,13 +7330,6 @@ function spaceTelescopeChecks(element, type) {
     const isStar = type === 'investigateStar';
     const isPillageVoid = type === 'pillageVoid';
     
-    // Addressed through the row, not by a short id. `createOptionRow` used to
-    // derive these ids from the row's visible label - "Scan Asteroids:" became
-    // `scanAsteroidsDescription` - and the localisation work moved the derivation
-    // onto the row id, so `#scanAsteroidsDescription` and its two siblings have
-    // not existed since. That left this whole block dead: the row that is *not*
-    // running still read "Ready To Search" while the other job was in flight, and
-    // with the grid down no telescope progress bar was advanced at all.
     const rowId = isAsteroid
       ? 'spaceTelescopeSearchAsteroidRow'
       : isStar
@@ -8042,12 +7533,6 @@ function energyChecks(element) {
     }
 }
 
-// The single writer of a power-plant toggle button's visible label AND its
-// dataset flag. Exported because setPowerOnOff() in constantsAndGlobalVars.js
-// relabels every plant when the grid trips, and when it wrote textContent
-// directly the dataset kept saying 'active' behind a button reading "Activate" —
-// addOrRemoveUsedPerSecForFuelRate() reads the dataset, so the next click took
-// the deactivate branch and the player had to click twice to restart a plant.
 export function setPowerToggleLabel(element, active) {
     if (!element) return;
     element.dataset.toggleState = active ? 'active' : 'inactive';
@@ -8095,11 +7580,6 @@ function powerOnOrOffChecks(element) {
     }
 }
 
-// argumentCheckQuantity2 holds an internal compound key whenever the parsed
-// description word matched one, and the raw parsed word when it did not. Only
-// the former can be localized; the latter is shown as-is, which is what the
-// previous localize(capitaliseString(...)) call effectively did for a value that
-// was not a key.
 function displayNameForCompoundKey(compoundKey) {
     if (!compoundKey) return '';
     return getResourceDataObject('compounds', [compoundKey])
@@ -8107,17 +7587,12 @@ function displayNameForCompoundKey(compoundKey) {
         : capitaliseString(compoundKey);
 }
 
-// Galactic market items are internal keys naming either a resource or a
-// compound; the display name is resolved from the key and whichever section it
-// actually lives in.
 function localizeTradeItemName(itemKey) {
     if (!itemKey) return '';
     const section = getResourceDataObject('compounds', [itemKey]) ? 'compounds' : 'resources';
     return localizeMaterialName(itemKey, section, getLanguage());
 }
 
-// Cosmic Rip tech ids map to their own display-name key family, the same one
-// drawTab8Content uses for the prerequisite lists.
 const COSMIC_RIP_TECH_NAME_KEYS_BY_ID = {
     stabilizerArray: 'cosmicRipTechNameStabilizerArray',
     quantumContainmentField: 'cosmicRipTechNameQuantumContainmentField',
@@ -8126,9 +7601,6 @@ const COSMIC_RIP_TECH_NAME_KEYS_BY_ID = {
     realityWeaveRegulator: 'cosmicRipTechNameRealityWeaveRegulator'
 };
 
-// `factoryStar` holds the canonical megastructure name, which is also matched
-// against elsewhere, so the display form is looked up from a map rather than
-// being stored translated.
 const FACTORY_STAR_NAME_KEYS = {
     'Dyson Sphere': 'megaStructureTTNameDysonSphere',
     'Celestial Processing Core': 'megaStructureTTNameCelestialProcessingCore',
@@ -8173,9 +7645,6 @@ function compoundCostSellCreateChecks(element) {
         quantity = 0;
     }
     let quantity2;
-    // argumentCheckQuantity2 already holds the internal compound key — ui.js
-    // resolves it once when the row is built. Reverse-mapping it here scanned
-    // the whole language table on every frame.
     compound2 ? quantity2 = getResourceDataObject('compounds', [checkQuantityString2, 'quantity']) : -1;
 
     if (element.classList.contains('sell') || element.dataset.conditionCheck === 'sellCompound') { //sell
@@ -8199,13 +7668,6 @@ function compoundCostSellCreateChecks(element) {
             accompanyingLabel.classList.remove('red-disabled-text'); 
         }
         
-        //P7: prefer the figures setCompoundCreatePreview computed over the ones
-        //written into the sentence on screen. Parsing the rendered description
-        //means reading back a number the notation ladder has already truncated -
-        //"132.4K" for a 132,432 fill - so "Fill To Capacity" crafted 132,400 and
-        //left the store 32 short of the cap, taking the storage increase it was
-        //being filled for with it. The parse survives as a fallback for the frame
-        //or two after a pane is drawn, before the preview has been computed once.
         let constituentComponents = buildConstituentComponentsFor(checkQuantityString, createCompoundDescriptionString);
         setConstituentPartsObject(constituentComponents);
 
@@ -8470,8 +7932,6 @@ function handleCosmicRipUpgradeResourceType(element) {
             return String(value ?? '');
         }
         if (getNotationType?.() === 'normal') {
-            //grouped, like every other price row - these labels are built here rather than by
-            //complexPurchaseBuildingFormatter, so they have to apply the plain grammar themselves
             return formatGroupedNumber(Math.floor(num));
         }
         return formatNumber?.(num) ?? String(Math.floor(num));
@@ -8482,8 +7942,6 @@ function handleCosmicRipUpgradeResourceType(element) {
             return null;
         }
         const amount = formatCostValue(priceTuple[0]);
-        // Price tuples are [quantity, key, section]; the display name is looked
-        // up from the key rather than derived from it.
         const name = localizeMaterialName(String(priceTuple[1] || ''), priceTuple[2], getLanguage());
         return `${amount} ${name}`;
     };
@@ -8726,12 +8184,6 @@ function setStateOfSellResourceButton(element, quantity) {
 }
 
 function setStateOfFuseResourceButton(element, quantity, resource, resourceToFuseTo) {
-    // The tech alone decides whether the button is on screen. It used to also
-    // require the fusion product to be a known resource, but the only thing that
-    // ever discovers a product is fusing to it, so that could never be true
-    // before the player's first fusion — leaving the button permanently hidden
-    // for anyone who researched the tech with this pane already open. Whether the
-    // player can afford to press it is the next condition's job.
     if (getTechUnlockedArray().includes(resource + 'Fusion')) {
         element.classList.remove('invisible');
     }
@@ -8825,22 +8277,6 @@ function handleResourceRateStates(resource) {
     }
 }
 
-/**
- * Colour one price row's spans by whether each cost in it can be paid.
- *
- * The first span is the cash (or research) cost, the rest are the building's
- * secondary resource costs, one span each. This is more than cosmetic:
- * `setStateOfButtonsBasedOnDescriptionStateForBuildingPurchases()` reads these
- * very classes back off the spans to decide whether the row's Buy button is
- * enabled, so the colour of a span *is* the affordability gate for the purchase.
- *
- * That is why P7 pulled it out of the two callers that each carried a copy. The
- * copies compared the secondary costs with a strict `>` while the charge settles
- * on `>=` in `checkAndDeductResources()`, so a player holding exactly the quoted
- * price of one of a building's resources saw that resource in red and the button
- * dead, on a purchase the game would have honoured had the click reached it.
- * Every comparison now goes through `canAfford`, the same one the charge uses.
- */
 function setPriceSpanAffordabilityClasses(element, price, quantity, resourceCategories, resourceNames, resourcePrices) {
     element.querySelectorAll('span').forEach((span, index) => {
         let affordable;
@@ -8978,10 +8414,6 @@ function handleRocketFuellingChecksAndOneOffPurchases(element, price) {
         element.classList.add('red-disabled-text');
     }
 
-    // The Fuel row's own label, addressed through its row rather than by the
-    // pre-localisation `#fuelDescription` id, which nothing carries any more. It
-    // is read once and null-guarded: this runs from the frame loop's cost-check
-    // sweep, so a missing element here would take the whole loop down with it.
     const fuelDescriptionElement = getRocketFuelDescriptionLabel(rocket);
 
     if (rocketsFuellerStartedArray.includes(`${rocket}FuelledUp`) && getCurrentStarSystemWeatherEfficiency()[2] !== 'rain' && getCurrentStarSystemWeatherEfficiency()[2] !== 'volcano' && getCurrentOptionPane() === rocket) {
@@ -9089,9 +8521,6 @@ function checkStatusAndSetTextClasses(element) {
         return;
     }
     if (element.id === 'techPhilosophySpaceStorageTankResearchRowDescription' || element.id === 'techPhilosophyFleetHologramsRowDescription' || element.id === 'techPhilosophyVoidSeersRowDescription' || element.id === 'techPhilosophyRapidExpansionRowDescription') {
-        // The marker cannot be an English text comparison: this element is
-        // rewritten every frame, so the state rides on a dataset flag and the
-        // legacy English form is still accepted for elements drawn before it.
         const unlockedText = localize('textUnlocked', getLanguage());
         if (element.dataset.abilityUnlocked === 'true'
             || element.innerHTML === 'UNLOCKED' || element.innerHTML === unlockedText
@@ -9115,7 +8544,7 @@ function checkStatusAndSetTextClasses(element) {
     }
 
     if ([...element.classList].some(clas => clas.includes('travel-to-asteroid-button'))) {
-        checkTravelToDescriptions(element); //not return as this does not affect element and so still need to check element
+        checkTravelToDescriptions(element);
     }
     
     if ((element.dataset.resourceToFuseTo === 'travelToAsteroid') && getCurrentOptionPane().startsWith('rocket')) {
@@ -9348,15 +8777,6 @@ export function getNavigatorLanguage() {
 
 
 function disableTabsLinksAndAutoSaveDuringBattle(battleStart) {
-    // Every tab, not a hardcoded 1..8. Settings (tab 9) used to be left live,
-    // and it was the one way out of a battle in progress: clicking it changes
-    // the option pane, `coloniseChecks()` only fights while the pane is
-    // 'colonise', so the engagement never resolves and the call that re-enables
-    // everything — `disableTabsLinksAndAutoSaveDuringBattle(false)` — is never
-    // reached. The run is then left with every other tab permanently disabled.
-    //
-    // Iterating the tab elements rather than counting also means a tab added
-    // later is covered without anyone remembering to raise the bound.
     document.querySelectorAll('.tab').forEach(tab => {
         tab.classList.toggle("tab-not-yet", battleStart);
     });
@@ -9544,12 +8964,6 @@ function checkAscendencyButtons() {
 
         if (!buff) return;
 
-        // P2 (player-feedback plan): the perk the player just finished loses its
-        // Buy button here, rather than waiting for the next redraw of the pane.
-        // Leaving it in place wearing `red-disabled-text` is what made "finished"
-        // and "cannot afford" the same shade of red. The row keeps its width
-        // because the button is swapped for the same-sized invisible box, not
-        // deleted - see createAscendencyMaxedSpacer.
         if (isAscendencyBuffMaxed(buff)) {
             const slug = buffName.replace(/([A-Z])/g, '-$1').toLowerCase();
             button.replaceWith(createAscendencyMaxedSpacer(slug));
@@ -9586,9 +9000,6 @@ function updateAscendencyRowTextFields() {
         const maxed = isAscendencyBuffMaxed(buff);
         let statusText = "";
 
-        // P2 (player-feedback plan): a finished perk states that once, in the
-        // far-right slot below. This slot goes blank rather than repeating it -
-        // the element stays so the row's left-hand run keeps its shape.
         if (maxed) {
             statusText = "";
         } else if (buff.boughtYet === 0) {
@@ -9611,11 +9022,6 @@ function updateAscendencyRowTextFields() {
 
         if (costTextElement) {
             if (maxed) {
-                // One badge, one wording, whether the perk was a single purchase
-                // or a rebuyable one bought to its cap. The old code had a
-                // separate branch and a separate phrase for each, and the
-                // non-rebuyable one said "Bought" - the very word the status
-                // slot beside it was already showing.
                 costTextElement.innerHTML = localize('textMaxed', getLanguage());
                 costTextElement.classList.add("green-ready-text", "ascendency-buff-maxed-badge");
                 costTextElement.classList.remove("red-disabled-text");
@@ -10147,10 +9553,6 @@ function rebirthChecks() {
     if (getCurrentOptionPane() === 'rebirth') {
         const rebirthButton = document.querySelector('.rebirth-check');
         if (rebirthButton) {
-            // setButtonState rather than the two classes alone: `red-disabled-text`
-            // only removes pointer events, so the button stayed programmatically
-            // clickable and rebirth() could still be entered from a state it
-            // cannot complete. This sets `disabled` as well.
             const ready = rebirthPreconditionsMet();
             setButtonState(rebirthButton, { enabled: ready, ready });
         }
@@ -10383,12 +9785,6 @@ function checkDiplomacyButtons(element) {
 
     const civilizationLevel = starData.civilizationLevel;
 
-    // `lifeformTraits[0]` is the `[name, cssClass, locKey]` triple, not the name.
-    // Comparing the array to 'Aggressive' was never true, so the vassalize gate
-    // below silently dropped its "not an aggressive race" condition and offered
-    // vassalage to the one kind of neighbour that is supposed to refuse it.
-    // Every other reader of this field — bullyEnemy, chatAndExchangePleasantries
-    // — takes `[0][0]`.
     const enemyTraitMain = starData.lifeformTraits[0][0];
     const playerAttackPower = getResourceDataObject('fleets', ['attackPower']);
     const enemyPower = Math.floor(starData.enemyFleets.air + starData.enemyFleets.land + starData.enemyFleets.sea);
@@ -10410,9 +9806,6 @@ function checkDiplomacyButtons(element) {
 
     if (element.classList.contains('conquest')) {
         const enemyFleetSum = Math.floor(starData.enemyFleets.air + starData.enemyFleets.land + starData.enemyFleets.sea);
-        // `dataset.conquestMode`, not the label: the button reads "Settle" only
-        // while the system is undefended, and comparing its rendered text would
-        // stop being true the moment that label is translated.
         if (playerAttackPower > 0 || element.dataset.conquestMode === 'settle' || enemyFleetSum === 0) {
             active = true;
         }
@@ -10613,12 +10006,6 @@ const updateQuantityDisplays = (element, data1, data2, resourceData1, resourceDa
         }     
     } else {
         if (element && data2 >= 0) {
-            // P7: `displayQuantity` rather than a bare `Math.floor`. The two
-            // agree everywhere except within a tolerance of a whole number,
-            // which is exactly where a plain floor misreports: a store that
-            // repeated float addition left an ulp under 150 read "149 / 150"
-            // and never looked full, while the affordability gate - which now
-            // shares this tolerance - already treated it as 150.
             if (element === getElements().energyQuantity) {
                 if (getResourceDataObject('buildings', ['energy', 'batteryBoughtYet'])) {
                     element.textContent = displayQuantity(data1) + '/' + displayQuantity(data2);
@@ -10636,10 +10023,6 @@ const updateQuantityDisplays = (element, data1, data2, resourceData1, resourceDa
             element.textContent = displayQuantity(data1);
         }
 
-        // Float equality against the cap, for the same reason: a store filled by
-        // any route other than the clamping production tick - an offline gain, a
-        // rebirth grant - can land an ulp short and then never read as full, so
-        // its storage increase is never offered.
         if (element && data2 && isEffectivelyEqual(data1, data2)) {
             element.classList.add('green-ready-text');
 
@@ -10661,13 +10044,6 @@ const updateQuantityDisplays = (element, data1, data2, resourceData1, resourceDa
         
             const compoundsAutoCreate = getResourceDataObject('compounds', [baseId, 'autoCreate'], true);
 
-            // P9: this used to force `stats-text` and strip `green-ready-text`
-            // whenever autosell was on, because under the old semantics - drain
-            // the store to 100 units and hold it there - a store could never
-            // legitimately fill, and the storage-increase claim was suppressed
-            // along with the colour. Allocation takes a share of *production*
-            // and never touches stock, so a store under allocation fills like
-            // any other and must be allowed to say so.
             element.classList.remove('stats-text');
 
             if (compoundsAutoCreate !== undefined) {
@@ -10734,16 +10110,6 @@ export function sellBuilding(quantityToSell, building) {
         energyRateElement.innerHTML = `${Math.floor(totalRate)} kJ / s`;
     }
 
-    // A sold plant has to leave the fuel books and, once the last one of its
-    // type is gone, stop counting as a running plant. This is the exact inverse
-    // of the purchase path in gain() (which adds the unit's burn rate to
-    // usedForFuelPerSec and, while the burn is live, takes it back off the
-    // fuel's rate) and it mirrors destroyPowerPlant() in events.js, which
-    // already does this for the random-event path. Without it, selling the last
-    // plant of a type left buildingTypeOnOff[type] stuck at true: the stat-bar
-    // tooltip then reported that plant type as ON with zero of them built, and
-    // the grid's auto-manager kept treating a plant that no longer exists as
-    // active.
     const quantitySold = Math.max(0, quantityBuilding - newQuantityBuilding);
     const fuel = getResourceDataObject('buildings', ['energy', 'upgrades', building, 'fuel']);
 
@@ -10764,21 +10130,12 @@ export function sellBuilding(quantityToSell, building) {
     if (newQuantityBuilding <= 0 && getBuildingTypeOnOff(building)) {
         setBuildingTypeOnOff(building, false);
 
-        // Put the row's own toggle back to its Activate face, the way the
-        // deactivate branch of addOrRemoveUsedPerSecForFuelRate does, so the
-        // button does not keep offering to deactivate a plant that is gone.
         const toggleButton = document.getElementById(building + 'Toggle');
         if (toggleButton) {
             setPowerToggleLabel(toggleButton, false);
             toggleButton.classList.remove('green-ready-text');
         }
 
-        // Selling the last running plant leaves the grid with nothing behind
-        // it, so drop it — the same thing toggleAllPower() does when it
-        // deactivates the last plant. It also keeps the auto-manager honest:
-        // that manager only force-flips the grid while some plant is flagged
-        // active, so a `powerOnOff` left true here would stay true forever and
-        // keep tier 2-4 autobuyers running on a grid with no generation.
         const anyPlantStillActive = ['powerPlant1', 'powerPlant2', 'powerPlant3']
             .some((plantKey) => getBuildingTypeOnOff(plantKey));
 
@@ -11033,13 +10390,6 @@ export function increaseResourceStorage(elementIds, resource, itemTypeArray) {
     let resourceToDeductNamesArray;
     const increaseFactor = getIncreaseStorageFactor() * (getBuffEfficientStorageData()['boughtYet'] + 1);
 
-    //Quoted against the stock as well as the cap. The claim asks for cap-1, but a
-    //material being burned for fuel is under its cap again by the time the charge
-    //settles a frame later - and a charge checkAndDeductResources() refuses is
-    //worse than a slightly smaller one, because the cap increase below is a
-    //deferred job that runs either way, handing out a doubled cap for nothing.
-    //Quoting what the store holds keeps the claim collectable while the plants
-    //keep burning; the shortfall is at most the second of burn the offer forgave.
     const chargeable = (category, key, wanted) => {
         const held = Number(getResourceDataObject(category, [key, 'quantity'])) || 0;
         return Math.max(0, Math.min(wanted, held));
@@ -11208,18 +10558,6 @@ function changeWeather(forcedWeatherType = null) {
             selectedWeatherType = 'sunny';
         }
 
-        // SEVERE_WEATHER_STREAK_BEFORE_RELIEF severe windows may run back to
-        // back, but the draw straight after them is never severe again: it is
-        // turned into a cloudy window so a player with a fuelled rocket always
-        // gets a short, reliable launch window, without taking hostile climates
-        // out of the weather tables.
-        //
-        // The streak counts the windows that actually ran, however they were
-        // chosen: a fair window breaks it whether it was drawn or forced by the
-        // debug menu's Sunny button or by Endless Summer, because from the
-        // player's side the sky did clear. What is reserved for drawn weather is
-        // the *diversion* — a state the game was explicitly told to use is left
-        // alone, so the debug menu stays authoritative.
         const selectedWeatherIsSevere = selectedWeatherType === 'rain' || selectedWeatherType === 'volcano';
         const forceShortCloudyWindow = !forcedWeatherType
             && selectedWeatherIsSevere
@@ -11566,15 +10904,8 @@ export function purchaseBuff(buff) {
     const currentAscendencyPoints = getResourceDataObject('ascendencyPoints', ['quantity']);
 
     const buffData = ascendencyBuffDataObject[buff];
-    // P9: quote the price from the same helper the perk row quotes it from.
-    // This used to re-derive the geometric formula inline, so a perk pricing
-    // itself any other way - `nanoBrokers` writes its ladder out - would have
-    // been charged one price and shown another.
     const cost = Math.round(getAscendencyBuffCost(buffData));
 
-    // A perk that has been bought as many times as it can be cannot be bought
-    // again. Previously no perk both was rebuyable and had a reachable cap, so
-    // nothing enforced this outside the UI, which stops rendering the button.
     if (isAscendencyBuffMaxed(buffData)) {
         return;
     }
@@ -11611,11 +10942,6 @@ export function purchaseBuff(buff) {
         buffOptimizedPowerGridsMultiplier();
     }
 
-    // P9: the automation ladder. Each level takes effect the moment it is bought
-    // - the gates read `getNanoBrokersLevel()` rather than a run-start snapshot -
-    // so all that is left to do here is the one-off explanation on the level that
-    // opens the compound panes up, and the `compoundMachining` marker for the
-    // code that still reads the tech array.
     if (buff === 'nanoBrokers' && getCompoundAutoCreateUnlocked()) {
         if (getNanoBrokersLevel() === 2 && getStatRun() === 1) {
             callPopupModal({
@@ -12593,9 +11919,6 @@ function startUpdateEnergyTimers(elementName, action) {
 }
 
 function formatAllNotationElements(element, notationType) {
-        // Text that was written by a formatter which already applied the
-        // player's notation. Re-parsing it here would read the digits out of an
-        // abbreviated form and abbreviate them again.
         if (element.dataset?.notationPreformatted === 'true') {
             return;
         }
@@ -12654,20 +11977,10 @@ function formatAllNotationElements(element, notationType) {
             if (notationType === 'normal') {
                 return formatNormalNumber(number);
             } else if (notationType === 'normalCondensed') {
-                // The cash stat is the one place the abbreviation is allowed to
-                // drop its decimal, because `$1.0M` reads worse than `$1M`. It
-                // is otherwise the same truncating ladder as everything else:
-                // it used to end in `Math.round(number).toFixed(0)`, which took
-                // the already-truncated `$999.99` written by updateStats() and
-                // rounded it back up to `$1000`, undoing the fix at the far end
-                // of the same frame.
                 if (element.id === 'cashStat') {
                     return formatAbbreviatedNumber(number).replace(/\.0(?=[A-Za-z]|e\d|$)/, '');
                 }
 
-                // Rows that quote a research or building cost verbatim keep the
-                // raw number; abbreviating a price would make it unreadable
-                // against the research total beside it.
                 if (number < 1e3
                     && (element.dataset.conditionCheck === 'techUnlock' || element.dataset.type === 'building')) {
                     return number;
@@ -12681,15 +11994,10 @@ function formatAllNotationElements(element, notationType) {
 }
 
 function complexPurchaseBuildingFormatter(element, notationType) {
-    //cosmic rip rows write their own description in handleCosmicRipUpgradeResourceType,
-    //and their spans carry no ", " prefix, so the walk below would mangle them in either mode
     if (element?.dataset?.type === 'cosmicRip') {
         return;
     }
 
-    //a price row is not one number: it is a cash cost whose currency symbol has to stay on the
-    //correct side, followed by a comma separated list of resource costs, each in its own span.
-    //both modes walk the same spans - only the number formatter differs
     let formatValue;
     if (notationType === 'normalCondensed') {
         formatValue = formatNumber;
@@ -12737,9 +12045,6 @@ export function formatGroupedNumber(value) {
     const number = typeof value === 'number' ? value : parseFloat(String(value ?? '').replace(/,/g, ''));
     if (!Number.isFinite(number)) return value;
 
-    // P7: truncate, never round. `Math.round` here displayed 999.6 as "1,000"
-    // beside a 1,000 price the affordability gate refused - the plain-notation
-    // half of the same defect the condensed ladder had.
     const asWholeUnits = displayQuantity(number);
     if (Math.abs(number - asWholeUnits) < 1e-6) {
         return asWholeUnits.toLocaleString('en-US');
@@ -12752,29 +12057,10 @@ export function formatGroupedNumber(value) {
     });
 }
 
-/**
- * The condensed notation's abbreviation ladder, in one place.
- *
- * Three copies of this ladder used to exist - `formatNumber`, the condensed
- * branch of `formatAllNotationElements`, and `formatSellStringCondensed` - and
- * they disagreed at the bottom of the range. All three truncated correctly above
- * 1000 ("1.29K" reads 1.2K, never 1.3K) and then rounded *up* below it with
- * `toFixed(0)`, so a store holding 999.6 read "1000" beside a 1000 price the
- * game refused. P7 makes truncation the rule at every magnitude.
- *
- * `decimals` is how many places the abbreviated form keeps; one, everywhere
- * except the sub-1000 range, which is whole units.
- */
 function formatAbbreviatedNumber(number) {
     const abbreviate = (divisor, suffix) =>
         `${truncateToDecimals(number / divisor, 1).toFixed(1)}${suffix}`;
 
-    // Negatives keep the path they always had. Every magnitude branch tests
-    // `>=`, so a negative was never given a suffix and fell through to
-    // `toFixed(0)`; truncating them instead would turn "-0" into "-1", and a
-    // negative here is a net production rate rather than a holding, so the
-    // rounding direction that protects the affordability invariant does not
-    // apply to it.
     if (!(number >= 0)) {
         return number.toFixed(0);
     }
@@ -13072,21 +12358,6 @@ function updateEnergyStat(element) {
     }
 }
 
-/**
- * The create preview is a *localized* sentence — "5 Diesel (130 Hidrogeno, 60 Carbono)"
- * — and these patterns read the ingredient names back out of it so the craft can
- * be charged. The name class must therefore be every letter a translator can
- * write, not just the ASCII ones: `[a-zA-Z]+` stopped dead at the first accented
- * character, so "Hidrogeno" parsed as "Hidr" and "Hydrogene" as "Hydrog". Those
- * fragments resolve to no material, so the craft was abandoned and the Create
- * button did nothing at all in Spanish, Portuguese and French while working
- * normally in English, German and Italian, whose ingredient names happen to be
- * pure ASCII. See tests/docs/known-issues.md #45.
- *
- * `\p{L}` with the `u` flag is the Unicode-aware equivalent; it also covers any
- * future language whose material names carry diacritics. Built once at module
- * scope, because `getConstituentComponents` is called from the frame loop.
- */
 const REGEX_COMPOUND_TO_CREATE = /(\d[\d,]*(?:\.\d+)?(?:[KMBGTPE]?)?)\s*/u;
 const REGEX_CONSTITUENT_PART_1 = /\((\d[\d,]*(?:\.\d+)?(?:[KMBGTPE]?)?)\s*(\p{L}+)/u;
 const REGEX_CONSTITUENT_PART_2 = /, (\d[\d,]*(?:\.\d+)?(?:[KMBGTPE]?)?)\s*(\p{L}+)/u;
@@ -13146,16 +12417,6 @@ function getConstituentComponents(createCompoundDescriptionString) {
     };
 }
 
-/**
- * The ingredients and output for a craft, taken from the exact figures where they
- * exist and from the rendered sentence only when they do not.
- *
- * Both routes return the same shape - `compoundToCreateQuantity` plus four
- * name/quantity slots packed in the order the sentence lists them - because
- * createCompound() and the affordability pass around it both read that shape.
- * The exact route needs no reverse-localization: it already holds internal
- * names, which is the lookup createCompound wants.
- */
 function buildConstituentComponentsFor(compound, createCompoundDescriptionString) {
     const exact = compound ? getCompoundCreateExactAmounts(compound) : null;
 
@@ -13194,11 +12455,6 @@ function unpackConstituentPartsObject(constituentComponents) {
 
         let nameKey = `constituentPartName${i}`;
         if (constituentComponents[nameKey]) {
-            // The names arrive from the rendered preview sentence, so they are
-            // *display* names. The data object is keyed by internal names, and
-            // outside English the two differ ("Wasserstoff" vs "hydrogen") — so
-            // without this the ingredient lookup in createCompound misses and the
-            // player is charged nothing. See known-issues #19.
             constituentComponents[nameKey] =
                 String(reverseLocalizeMaterialName(constituentComponents[nameKey], getLanguage())).toLowerCase();
         }
@@ -13285,13 +12541,6 @@ export function addOrRemoveUsedPerSecForFuelRate(fuelType, activateButtonElement
     const currentFuelRate = getResourceDataObject(fuelCategory, [fuelType, 'rate']);
 
     if (activateButtonElement) { //if clicked
-        // Read the state off the element rather than off its label. A row drawn
-        // in any language but English carries a translated label, and the switch
-        // this replaced matched neither case — so the click fell through with
-        // `newState` undefined, the plant stayed off, and the power-off sound
-        // played. A button that has never been through setPowerToggleLabel has
-        // no flag; the row is drawn showing Deactivate only when the plant is
-        // already on, so that is what an unflagged button means.
         const wasActive = activateButtonElement.dataset.toggleState
             ? activateButtonElement.dataset.toggleState === 'active'
             : getBuildingTypeOnOff(buildingToCheck);
@@ -13464,10 +12713,6 @@ export function offlineGains(switchedFocus) {
             rocket4: 0,
         };
 
-        // Rocket fuel is accumulated here, before the nerf, so it is discounted
-        // and floored like every other offline gain. It used to be added after
-        // nerfOfflineGains() had already walked the zeroed rocket1..4 fields,
-        // which paid fuel at the full online rate.
         const currentFuelQuantityRockets = getRocketsFuellerStartedArray().filter(rocket => !rocket.includes('FuelledUp'));
         currentFuelQuantityRockets.forEach(rocket => {
             const rocketDetails = getResourceDataObject('space', ['upgrades', rocket]);
@@ -13776,16 +13021,6 @@ export function buildSpaceMiningBuilding(spaceMiningBuilding, debug) {
         currentResource3Quantity = getResourceDataObject(spaceMiningBuildingResource3PriceCategory, [spaceMiningBuildingResource3PriceResource, 'quantity']);
     }
 
-    //P7: the launch pad and the space telescope are the only purchases in the
-    //game that settle here and now instead of queueing into itemsToDeduct, so
-    //they never reach checkAndDeductResources() and were the last two charges
-    //outside the shared precision policy. They used to write
-    //Math.floor(balance - price), which does not charge the price - it charges
-    //the price plus whatever fraction the balance was carrying, so a $40,000
-    //launch pad took $40,000.75 from a purse holding cents, and a quarter of a
-    //unit extra from each of the three material stores as well. settleSpend()
-    //deducts exactly the quoted amount and snaps a tolerance-sized residue to
-    //zero, which is what every other purchase in the game does.
     setResourceDataObject(settleSpend(currentCash, spaceMiningBuildingCashPrice), 'currency', ['cash']);
 
     if (spaceMiningBuildingResource1PriceCategory) {
@@ -13803,10 +13038,6 @@ export function buildSpaceMiningBuilding(spaceMiningBuilding, debug) {
     setResourceDataObject(true, 'space', ['upgrades', spaceMiningBuilding, `${spaceMiningBuilding}BoughtYet`]);
 
     if (!debug) {
-        //none of these three is essential to the purchase, and the frame loop's
-        //handleVisibilityOfOneOffPurchaseButtonsAndDescriptions does the same tidy-up
-        //a moment later - so a missing one must not abort the rest of the caller's
-        //onClick, which is what reveals the newly bought building's action rows
         buySpaceMiningBuildingButtonElement?.classList.add('invisible');
         spaceMiningBuildingDescriptionElement?.classList.add('invisible');
         spaceMiningBuildingAlreadyBoughtTextElement?.classList.remove('invisible');
@@ -13985,10 +13216,6 @@ export function launchRocket(rocket) {
     setLaunchedRockets(rocket, 'add');
     showNotification(localize('notificationRocketLaunched', getLanguage()).replace('{rocketName}', getRocketUserName(rocket)), 'info', 3000, 'rocket');
 
-    // The fuel autobuyer row only exists while this rocket's option pane is the
-    // one on screen, because drawTab6Content builds it per pane. Hiding it is
-    // presentation, so it comes last and is guarded: the launch itself and the
-    // player's confirmation of it must not depend on which pane is open.
     const autoBuyerRow = document.getElementById(`space${capitaliseString(rocket)}AutoBuyerRow`);
     autoBuyerRow?.classList.add('invisible');
 }
@@ -14726,15 +13953,10 @@ export function generateStarDataAndAddToDataObject(starElement, distance) {
 
     const totalProbability = Object.values(weatherProbabilities).reduce((acc, val) => acc + val, 0);
     if (totalProbability === 0) {
-        // A one-in-390,625 all-zero roll used to divide by zero and save NaN
-        // probabilities. Give that otherwise valid star a neutral climate.
         Object.keys(weatherProbabilities).forEach(type => {
             weatherProbabilities[type] = 25;
         });
     } else {
-        // Allocate the rounded percentages by largest remainder. Unlike adding
-        // all rounding drift to sunny, this always produces non-negative whole
-        // numbers that total exactly 100.
         const scaledProbabilities = Object.entries(weatherProbabilities).map(([type, weight], index) => {
             const exactProbability = (weight / totalProbability) * 100;
             const probability = Math.floor(exactProbability);
@@ -15234,10 +14456,6 @@ function generateEnemyFleets(threatLevel, population, lifeformTraits) {
     return { ...fleetDistribution, fleetPower };
 }
 
-// The catalogue is exported so the display side can rebuild a name-to-key and an
-// effect-to-key map from it. Anomalies rolled before the key slots existed are
-// stored in the save with only their English `name` and `effect`, and those are
-// the only handle a legacy save leaves behind.
 export const GENERATED_ANOMALY_CATALOGUE = [
     { name: "Electromagnetic Surge", nameKey: "anomalyNameElectromagneticSurge", effect: "Enemy defense -20%", effectKey: "anomalyEffectEnemyDefenseDown", value: -20, type: "enemy-defense-debuff", counter: "enemy-defense-buff", target: "enemy", class: "green-ready-text" },
     { name: "Fortified Magnetic Field", nameKey: "anomalyNameFortifiedMagneticField", effect: "Enemy defense +20%", effectKey: "anomalyEffectEnemyDefenseUp", value: 20, type: "enemy-defense-buff", counter: "enemy-defense-debuff", target: "enemy", class: "red-disabled-text" },
@@ -15649,11 +14867,6 @@ async function chatAndExchangePleasantries(starData) {
     setStarSystemDataObject(outcome, 'stars', ['destinationStar', 'attitude']);
 
     const patienceModifier = -1;
-    // Decided here and written once, at the end. The Belligerent branch used to
-    // write patience 0 itself and then have the unconditional tail below
-    // overwrite it with `patience - 1`, so taking offence never actually ended
-    // their patience — unlike the identical intent in bullyEnemy's "attack"
-    // branch and tryToImproveImpression's, both of which stick.
     let newPatience = Math.floor(patience + patienceModifier);
 
     if (outcome === "Receptive") {
@@ -16423,10 +15636,6 @@ export function addPermanentBuffsBackInAfterRebirth() {
         }
     }
 
-    // P9: `compoundMachining` is kept as a marker for anything that still reads
-    // the tech array, but it is no longer the gate - the gates read
-    // `getNanoBrokersLevel()` live, so a perk bought mid-run applies at once
-    // rather than waiting for the next rebirth to push a pseudo-tech in here.
     if (getCompoundAutoCreateUnlocked()) {
         setTechUnlockedArray('compoundMachining');
     }
@@ -16436,11 +15645,6 @@ export function addPermanentBuffsBackInAfterRebirth() {
     }
 }
 
-// The new run is rebuilt around the scanned destination system, so the
-// `stars.destinationStar` record is a hard precondition for rebirth. It is
-// written by the system scan on tab 5 and deleted by every rebirth, so any state
-// that reaches `rebirth()` without one — a rebirth attempted twice, or a run
-// where the destination was never scanned — cannot complete it.
 export function rebirthDestinationSystem() {
     const destination = getStarSystemDataObject('stars', ['destinationStar'], true);
     return destination?.starCode ? destination : null;
@@ -16451,10 +15655,6 @@ export function rebirthPreconditionsMet() {
 }
 
 export function rebirth() {
-    // Bail before anything is reset. Without this the run tears down as far as
-    // setupNewRunStarSystem(), which throws on the missing record and leaves the
-    // save half-wiped: resources cleared, run counter not incremented, and
-    // rebirthPossible still true so the next click repeats the damage.
     if (!rebirthDestinationSystem()) {
         showNotification(localize('notificationRebirthNoDestination', getLanguage()), 'error', 6000, 'special2');
         return false;
@@ -16549,15 +15749,6 @@ export function rebirth() {
     setupNewRunStarSystem();
     setRebirthPossible(false);
 
-    // Kill the telescope's own timers before the variables are reset. The reset
-    // clears the flags - `currentlyInvestigatingStar`, the time-left values, the
-    // duration totals - but the delta timers belong to timerManagerDelta and
-    // survive it, so a job that was running when the player rebirthed keeps
-    // ticking into the new run. That orphan does real damage: the first thing
-    // `checkAndStartAutoTelescopeAction` asks is whether any telescope timer is
-    // live, so the auto-telescope silently never starts a job once the telescope
-    // is rebuilt, and when the ghost timer finally reaches zero it hands its
-    // reward to a run that never began it.
     ['searchAsteroidTimer', 'investigateStarTimer', 'pillageVoidTimer'].forEach((timerName) => {
         if (timerManagerDelta.hasTimer(timerName)) {
             timerManagerDelta.removeTimer(timerName);
@@ -16598,10 +15789,6 @@ export function rebirth() {
     resetUIElementsOnRebirth();
     setCurrentRunIsMegaStructureRun(getFactoryStarsArray().includes(getCurrentStarSystem()));
     initialiseDescriptions();
-    // `changeWeather` takes a weather type, not a duration. The stray 1000 was
-    // never a state in any table so it always fell through to the fair draw, but
-    // it also reads as "the game was told to use this state", which would hold
-    // the rebirth draw back from the severe-weather relief window.
     changeWeather();
     setRunStartTime();
 
@@ -16686,32 +15873,12 @@ export function buffSmartAutoBuyersRateMultiplier() {
     processRates(compounds, 'compounds');
 }
 
-/**
- * P9: set a material's sell row to whichever form the player has earned.
- *
- * Below the ladder's first rung the row is what it has always been - a quantity
- * dropdown and a Sell button - and this returns without touching it, so nothing
- * about the early game moves.
- *
- * At or above it, the manual pair is replaced by the allocation line, which is
- * built to the same width so the pane stays aligned. Deliberate emptying does
- * not go away with the button: the global Sell All control in the header is
- * untouched and is the route for it.
- *
- * The name is historic. There is no autosell toggle any more - buying the first
- * rung is the only gate, and from then on the slider is always live - so all
- * this does is decide which form the row takes.
- */
 export function setAutoSellToggleState(item, type) {
     const sellRow = document.getElementById(`${item}SellRow`);
     if (!sellRow) {
         return;
     }
 
-    // Compounds sell manually, and always have. They are not ingredients for
-    // anything, so there is no compound band to offer and nothing for a cash
-    // slider to balance against - the player either sells a quantity or does
-    // not. The row keeps its dropdown and Sell button for the whole game.
     if (type === 'compounds') {
         return;
     }
@@ -16729,10 +15896,6 @@ export function setAutoSellToggleState(item, type) {
         manualSellButton.classList.add('invisible');
     }
 
-    // With the quantity dropdown gone there is no amount left to choose, and
-    // fusing reads that same preview - so fusing is now all-or-nothing and the
-    // button has to say which. Relabelling is the honest fix; leaving it reading
-    // "Fuse" would quietly mean something different from what it used to.
     const fuseButton = sellRow.querySelector('button.fuse');
     if (fuseButton) {
         const fuseAllLabel = localize('buttonFuseAll', getLanguage());
@@ -16741,10 +15904,6 @@ export function setAutoSellToggleState(item, type) {
         }
     }
 
-    // The compound band is only ever offered where it would do something: on a
-    // resource some recipe actually draws on, and only once the ladder's second
-    // rung is owned. Helium has no consumers and so stays a two-section line for
-    // the whole game.
     const showCompoundBand = getCompoundAutoCreateUnlocked() && resourceIsCompoundIngredient(item);
 
     const existing = sellRow.querySelector('.allocation-line-container');
@@ -16758,8 +15917,6 @@ export function setAutoSellToggleState(item, type) {
 
     const line = createAllocationLine(type, item, { showCompoundBand });
     line.dataset.compoundBand = String(showCompoundBand);
-    // Inserted where the dropdown was, so it occupies that slot and the Fuse
-    // button, the Auto label and the toggle stay on the same line after it.
     const inputContainer = (manualDropdown || manualSellButton)?.parentElement
         || sellRow.querySelector('.input-container');
     if (inputContainer) {
@@ -16768,15 +15925,6 @@ export function setAutoSellToggleState(item, type) {
     updateAllocationLineState(line, type, item, showCompoundBand);
 }
 
-/**
- * Keep one visible allocation line's figures current.
- *
- * The figures move with production, so a line that only refreshed when its pane
- * was opened would quote whatever the rates happened to be at that moment for
- * as long as the player looked at it. There is no enabled/disabled state left to
- * track: once the slider exists it is always live, and the storage end of the
- * bar is how a player switches a material's allocation off.
- */
 export function updateAllocationLineState(line, category, key, showCompoundBand) {
     if (!line || !category || !key) {
         return;
@@ -16784,12 +15932,6 @@ export function updateAllocationLineState(line, category, key, showCompoundBand)
     updateAllocationReadout(line, category, key, showCompoundBand);
 }
 
-/**
- * The per-frame refresh for whichever allocation line is on screen.
- *
- * There is at most one - the panes render one material at a time - so this is a
- * single query rather than a sweep over every material in the game.
- */
 export function refreshVisibleAllocationLines() {
     if (!getAutoSellUnlocked()) {
         return;
@@ -16828,19 +15970,6 @@ export function setAutoCreateToggleState(item) {
     }
 }
 
-/**
- * P9: the "i" marker on a compound's Create row.
- *
- * Auto-creation stopped being self-contained when allocation arrived. It now
- * draws only on the share each ingredient's *resource* pane makes available to
- * compounds, and that share is split equally between every compound using it -
- * so a player looking at a slow compound has to go and look somewhere else to
- * find out why. The marker says where.
- *
- * Added here rather than in the six row definitions because this is where the
- * row is already being set up per pane, and one implementation cannot drift
- * from another.
- */
 function addAutoCreateAllocationInfo(createRow) {
     if (!createRow || createRow.querySelector('#info_autoCreateAllocation')) {
         return;
@@ -16853,8 +15982,6 @@ function addAutoCreateAllocationInfo(createRow) {
     marker.textContent = 'ℹ️';
     label.appendChild(marker);
 
-    // The shared binder reads the text out of `infoTooltipDescriptions` by id,
-    // so the string is localised on the same path as every other info marker.
     setupInfoTooltips();
 }
 

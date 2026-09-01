@@ -29,20 +29,6 @@ export function toCamelCase(str) {
         .replace(/[^a-zA-Z0-9]+(.)/g, (match, char) => char.toUpperCase());
 }
 
-/**
- * Read one key from localStorage, or null if storage is unavailable.
- *
- * `localStorage` does not merely return nothing when the browser has it turned
- * off — reading or writing it *throws*. Private browsing, a locked-down Electron
- * partition and a Chromium profile with site data blocked all do this. Because
- * the boot path touches storage (analytics initialises inside ui.js, and the
- * save name is read while the UI is built), an unguarded throw killed the page
- * before the pioneer prompt was ever drawn: the game did not start at all.
- *
- * Losing persistence is a degraded experience; losing boot is not shippable.
- * Every storage touch in the shipped game goes through this pair, except
- * localization.js, which has carried its own equivalent guard from the start.
- */
 export function readStoredValue(key) {
     try {
         return localStorage.getItem(key);
@@ -51,7 +37,6 @@ export function readStoredValue(key) {
     }
 }
 
-/** Write one key to localStorage. Returns whether it actually persisted. */
 export function writeStoredValue(key, value) {
     try {
         localStorage.setItem(key, value);

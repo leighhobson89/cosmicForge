@@ -19,6 +19,8 @@ Time multiplication affecting every rate in the game — the widest blast radius
 - [ ] Autosave is deferred during warp unless always-on
 - [ ] Black hole power purchases scale correctly post-nerf-migration
 - [ ] No accumulator drift or double-counting across a long warp
+- [ ] No upgrade row ever renders an unchanged before/after pair — the rung that reaches the always-active floor names its outcome instead of quoting the same number twice
+- [ ] The unresearched pane states what the time warp is worth, in all six languages, and drops the pitch once the feature is owned
 
 ## Status meaning
 

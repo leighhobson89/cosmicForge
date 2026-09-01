@@ -538,22 +538,10 @@ export function migrateResourceData(saveData, objectType, options = {}) {
             saveData.version = 0.979;
         }
         if (saveData.version < 0.98) {
-            // Release 0.98 does not change any saved structure. Keep this rung
-            // nevertheless: a save made by 0.979 must be explicitly carried to
-            // the new schema version, just like every later structural release.
+
             saveData.version = 0.98;
         }
         if (saveData.version < 0.99) {
-            // P9 production allocation. Every material gains `allocationEnabled`,
-            // `cashShare` and `compoundShare`; the template merge supplies the
-            // defaults, so all this rung has to do is retire the behaviour those
-            // fields replace.
-            //
-            // `autoSell` used to mean "drain this store to 100 units, forever".
-            // A save carrying it switched on must not have that happen once more
-            // under the new engine - and must not silently acquire an allocation
-            // the player never chose either - so it is cleared. The player opts
-            // in again on the new control, which does something quite different.
             if (objectType === 'resourceData') {
                 for (const category of ['resources', 'compounds']) {
                     const section = saveData?.[category];

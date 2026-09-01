@@ -17,10 +17,9 @@ Planning, reporting and how-to for the Cosmic Forge E2E test suite.
 
 ## Current state
 
-**42 of 43 functional areas are green, across 80 spec files and 1,177 specs.**
-The one exception is `ascendency`, which is amber: its 12 specs are written and
-passing but are still function-level rather than driven through the perk screen.
-No area is red.
+**All 49 functional areas are green, across 102 spec files and 1,399 specs.**
+No area is red or amber — `ascendency`, the last amber, is now driven through the
+perk screen rather than through its functions.
 
 The suite is maintained area by area, and every green area has been through the
 *integration upgrade* — the rule that a spec should play the game rather than
@@ -38,10 +37,18 @@ reward.
 **A live bug is expected to make the suite fail.** Specs are written against the
 behaviour the game should have, not the behaviour it currently has, and defects
 found this way are fixed in the source rather than absorbed by the test. Of the
-42 entries in [known-issues.md](known-issues.md), **39 are fixed** and each names
-the regression spec that now guards it, **2 record behaviour that turned out to
-be by design** (CSS-only affordability gating, and the terminal end-credits
-overlay), and **1 remains open** — `analytics.js` reading localStorage unguarded.
+48 entries in [known-issues.md](known-issues.md), **46 are fixed** and each names
+the regression spec that now guards it, and **2 record behaviour that turned out
+to be by design** (CSS-only affordability gating, and the terminal end-credits
+overlay). Nothing is open.
+
+The newest is #48, which came from play rather than from the suite: the
+collect-100-precipitation achievements were being awarded on runs it had never
+rained on. The run's precipitation total was accrued by the compound autobuyer
+tick from a figure that was not the precipitation rate, four times a tick with
+the grid up and with no weather check at all with it down. It is now counted at
+the one place precipitation is actually collected, and two specs in `weather`
+pin it there.
 
 The most severe of the recent finds is #40: a power plant could not be switched
 on in any language but English, because the toggle's state rode on its own label
@@ -61,15 +68,15 @@ the current ratchet values live in
 
 | Group | Areas | Green | Specs |
 |---|--:|--:|--:|
-| Foundation | 6 | 6 | 174 |
-| Core Economy | 6 | 6 | 140 |
+| Foundation | 7 | 7 | 195 |
+| Core Economy | 7 | 7 | 241 |
 | Space Operations | 4 | 4 | 137 |
 | Interstellar | 7 | 7 | 195 |
-| Meta Progression | 6 | 5 | 201 |
-| Endgame | 3 | 3 | 98 |
-| Simulation & Ambience | 5 | 5 | 138 |
-| Presentation & Shell | 6 | 6 | 94 |
-| **Total** | **43** | **42** | **1,177** |
+| Meta Progression | 7 | 7 | 213 |
+| Endgame | 3 | 3 | 103 |
+| Simulation & Ambience | 5 | 5 | 143 |
+| Presentation & Shell | 9 | 9 | 172 |
+| **Total** | **49** | **49** | **1,399** |
 
 [coverage-report.md](coverage-report.md) carries the per-area breakdown: status,
 risk, spec count, and a one-line note on what each area's specs actually do. It

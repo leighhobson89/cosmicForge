@@ -68,8 +68,6 @@ function getOrCreateId(storageKey) {
 
     const id = createId();
 
-    // Without storage the id is per-session rather than per-install. That is the
-    // correct degradation: the events still carry a consistent id for this run.
     writeStoredValue(storageKey, id);
     return id;
 }
@@ -281,13 +279,6 @@ export function startNewAnalyticsSession() {
     });
 }
 
-// P1 (player-feedback plan): set for the duration of a Buy Max only.
-//
-// Some purchase handlers ask for an immediate flush - the repeatable philosophy
-// technologies do. That is right for one click, but Buy Max replays the handler
-// once per unit, which would turn a single press into one network round trip per
-// unit bought. While this is set the events are still recorded, they just batch
-// like any other event instead of forcing a flush apiece.
 let batchOnlyMode = false;
 
 export function setAnalyticsBatchOnly(value) {

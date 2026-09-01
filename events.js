@@ -91,10 +91,6 @@ const GLOBAL_EVENT_TIMER_ID = 'randomEventGlobalTimer';
 
 const TIMED_EFFECTS_TIMER_ID = 'randomEventTimedEffectsTimer';
 
-// Every player-facing string in this file resolves through the catalogue at the
-// moment it is built, so a runtime language change is picked up by anything
-// rebuilt afterwards. `{placeholder}` tokens follow the same convention the draw
-// functions use.
 function t(key, replacements = null) {
     let text = localize(key, getLanguage());
     if (replacements) {
@@ -105,8 +101,6 @@ function t(key, replacements = null) {
     return text;
 }
 
-// Event ids are canonical and stored; the display name is looked up from the id
-// rather than carried beside it, so the events tables follow a language change.
 function eventDisplayName(eventId) {
     const key = `eventName${String(eventId).charAt(0).toUpperCase()}${String(eventId).slice(1)}`;
     const localized = localize(key, getLanguage());
@@ -746,9 +740,6 @@ function getItemDisplayName(category, key) {
         return t('textUnknown');
     }
 
-    // The stored `nameResource` / `nameCompound` fields are English fallbacks;
-    // the display name is looked up from the internal key and its section.
-    // `localize` echoes the key back on a miss, so compare against that.
     const catalogueKey = (category === 'compounds' ? 'compound' : 'resource')
         + String(key).charAt(0).toUpperCase() + String(key).slice(1);
     const localized = localizeMaterialName(String(key), category, getLanguage());
@@ -1520,8 +1511,6 @@ function resetRocketToUnbuilt(rocket) {
 
     removeRocketBuilt(rocket);
 
-    // Clearing the name rather than writing an English default lets
-    // `getRocketUserName` resolve the localized default at read time.
     setRocketUserName(rocket, null);
 
     setRocketsFuellerStartedArray(rocket, 'remove', 'reset');
@@ -1540,9 +1529,6 @@ function formatEventName(eventId) {
     return eventId.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase());
 }
 
-// Built at module-evaluation time by the debug panel, before the catalogue has
-// been fetched, so this returns the English name plus the key to render it from
-// rather than calling localize() here.
 export function getRandomEventDebugOptions() {
     return Object.keys(randomEventDefinitions).map((id) => ({
         id,

@@ -103,29 +103,10 @@ export function isAtLeast(value, threshold) {
     return v >= t - toleranceFor(t);
 }
 
-/**
- * Can a holding of `quantity` pay a cost of `cost`?
- *
- * This must be the *only* question asked anywhere a purchase is gated or
- * settled. The gate that greys a button out and the deduction that collects the
- * charge have to agree exactly: a gate looser than the deduction hands out free
- * units (the item is granted by `gain()` before the charge settles, and a failed
- * settle also suppresses the price rise), while a gate tighter than the
- * deduction refuses purchases the game would have honoured.
- */
 export function canAfford(quantity, cost) {
     return isAtLeast(quantity, cost);
 }
 
-/**
- * Are two quantities the same, allowing for float drift?
- *
- * Used for "this store is at its cap" rather than for money. Production clamps
- * with `Math.min(current + amount, capacity)` so a full store usually lands on
- * the cap exactly, but a store filled by any other route — an offline gain, a
- * rebirth grant, a sale that was reversed — can sit an ulp under it and then
- * never reads as full.
- */
 export function isEffectivelyEqual(a, b) {
     const x = Number(a);
     const y = Number(b);
@@ -135,14 +116,6 @@ export function isEffectivelyEqual(a, b) {
     return Math.abs(x - y) <= Math.max(toleranceFor(x), toleranceFor(y));
 }
 
-/**
- * Pay `cost` out of `quantity`.
- *
- * Subtraction alone is not enough. When the tolerance is what made the purchase
- * affordable, the plain difference is a small negative number, and a negative
- * balance is both displayable and spendable-from. Snapping that residue to zero
- * keeps the loosened gate from being a way to go overdrawn.
- */
 export function settleSpend(quantity, cost) {
     const q = Number(quantity) || 0;
     const c = Number(cost) || 0;
@@ -153,13 +126,6 @@ export function settleSpend(quantity, cost) {
     return remainder;
 }
 
-/**
- * The integer to show for a holding: always at or below the true value.
- *
- * The tolerance is added before flooring, so a balance sitting an ulp under a
- * round number reads as that round number rather than one short — which is the
- * same forgiveness `canAfford` applies, and the reason the two agree.
- */
 export function displayQuantity(value) {
     const v = Number(value);
     if (!Number.isFinite(v)) {
@@ -168,14 +134,6 @@ export function displayQuantity(value) {
     return Math.floor(v + toleranceFor(v));
 }
 
-/**
- * The integer to show for a cost: always at or above what will be charged.
- *
- * Prices are already integral, so in practice this is the identity — it exists
- * to state the direction, and to stay correct for the few costs derived as a
- * share of something else (the water reservoir charges 30% of the water cap in
- * concrete).
- */
 export function displayCost(value) {
     const v = Number(value);
     if (!Number.isFinite(v)) {
@@ -184,14 +142,6 @@ export function displayCost(value) {
     return Math.ceil(v - toleranceFor(v));
 }
 
-/**
- * Cash, to two decimal places, never rounded up.
- *
- * `toFixed(2)` was the single most misleading call in the game: cash is the only
- * display that carries decimals, so it is the only one where the player can read
- * a value precise enough to compare against a price by eye — and it rounded the
- * wrong way.
- */
 export function displayCurrency(value) {
     const v = Number(value);
     if (!Number.isFinite(v)) {
@@ -199,43 +149,11 @@ export function displayCurrency(value) {
     }
     const sign = v < 0 ? '-' : '';
     const magnitude = Math.abs(v);
-    // A display's tolerance must never exceed half its own quantum, or the slack
-    // that is meant to absorb invisible drift starts moving the last digit the
-    // player can see. This is the only two-decimal display in the game, so it is
-    // the only one where the shared tolerance is coarser than what it renders:
-    // past a balance of about 5e10 the relative term grows beyond half a cent.
     const slack = Math.min(toleranceFor(magnitude), 0.005);
     const truncated = Math.floor((magnitude + slack) * 100) / 100;
     return `${sign}${truncated.toFixed(2)}`;
 }
 
-/**
- * Round a value to `decimals` places without ever rounding up.
- *
- * The shared primitive behind the abbreviated notations, which quote a value to
- * one decimal place ("1.2K"). Truncating rather than rounding is what stops 1250
- * becoming "1.3K" and reading as more than the player has.
- *
- * The slack here is **a few ulps**, and deliberately not `toleranceFor` — which
- * this function is otherwise the twin of.
- *
- * `toleranceFor` answers "is this balance close enough to that price to count",
- * and its floor of 1e-9 is calibrated for a raw balance. This function is asked
- * something quite different, and it is asked it *after a division*: the
- * abbreviation ladder divides by up to 1e12 before it truncates, and a tolerance
- * meaningful at the original magnitude is enormous at the scaled one. At 1e-9 it
- * rendered 9,999,999,999 as "10.0B"; at a relative 1e-13 it still rendered
- * 9,999,999,999,999 as "10.0e12" — both a whole tenth of a suffix more than the
- * player had, in the one function whose entire purpose is to never overstate.
- *
- * The only error this actually has to absorb is binary representation: a divide
- * and a multiply each cost at most an ulp, so two ulps covers the arithmetic
- * and four leaves double the margin. That is around 9e-16 of the value — a thousand times
- * smaller than the smallest difference the one-decimal display can show, so it
- * can never move a rendered digit, while still fixing the case it exists for:
- * binary cannot hold 2.9, so `2.9 * 10` is 28.999999999999996 and a bare floor
- * would render it "2.8".
- */
 export function truncateToDecimals(value, decimals) {
     const v = Number(value);
     if (!Number.isFinite(v)) {
@@ -246,4 +164,39 @@ export function truncateToDecimals(value, decimals) {
     const magnitude = Math.abs(v);
     const slack = magnitude * 4 * Number.EPSILON;
     return sign * (Math.floor((magnitude + slack) * factor) / factor);
+}
+
+export function formatUpgradeStep(currentValue, nextValue, options = {}) {
+    const preferred = Number.isFinite(Number(options.decimals)) ? Math.floor(Number(options.decimals)) : 0;
+    const ceiling = Number.isFinite(Number(options.maxDecimals)) ? Math.floor(Number(options.maxDecimals)) : 3;
+
+    const low = Math.max(0, Math.min(20, preferred));
+    const high = Math.max(low, Math.min(20, ceiling));
+
+    const current = Number(currentValue);
+    const next = Number(nextValue);
+
+    if (!Number.isFinite(current) || !Number.isFinite(next)) {
+        return {
+            current: String(currentValue),
+            next: String(nextValue),
+            decimals: low,
+            distinct: false
+        };
+    }
+
+    for (let decimals = low; decimals <= high; decimals++) {
+        const currentText = current.toFixed(decimals);
+        const nextText = next.toFixed(decimals);
+        if (currentText !== nextText) {
+            return { current: currentText, next: nextText, decimals, distinct: true };
+        }
+    }
+
+    return {
+        current: current.toFixed(high),
+        next: next.toFixed(high),
+        decimals: high,
+        distinct: false
+    };
 }

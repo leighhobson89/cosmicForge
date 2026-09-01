@@ -94,26 +94,6 @@ class TimerManagerDelta {
         this.postUpdateHooks = [];
     }
 
-    /**
-     * Register work that must run immediately after every timer has been
-     * advanced, in the same time step and with the same delta.
-     *
-     * P9's production allocation needs this. It reads what the material timers
-     * produced this step and divides it, so it has to run after all of them and
-     * before anything else observes the result. Two other placements were tried
-     * and are wrong:
-     *
-     *   - as a timer of its own, relying on `Map` insertion order. Material
-     *     timers are registered lazily as materials unlock, so a timer added
-     *     later would run *after* the pass that is supposed to consume it.
-     *   - in the animation-frame loop, after `updateWithTimestamp`. That works
-     *     in the browser but silently decouples the two: anything that advances
-     *     the timers directly - offline catch-up, and every e2e spec, which
-     *     drives `update()` rather than the frame loop - then injects production
-     *     that no allocation pass ever sees in the same step.
-     *
-     * A hook here is the only placement that holds for all three callers.
-     */
     addPostUpdateHook(hook) {
         if (typeof hook === 'function' && !this.postUpdateHooks.includes(hook)) {
             this.postUpdateHooks.push(hook);
@@ -166,9 +146,6 @@ class TimerManagerDelta {
             : 1;
         const effectiveDeltaMs = deltaMs * effectiveMultiplier;
 
-        // No time passed, or nothing to advance: the post-update hooks are
-        // skipped too, deliberately. A pass over zero production would only
-        // decay the smoothed rates against a delta that never happened.
         if (effectiveDeltaMs <= 0 || this.timers.size === 0) {
             return;
         }
@@ -186,16 +163,6 @@ class TimerManagerDelta {
         this.postUpdateHooks.forEach(hook => hook(effectiveDeltaMs));
     }
 
-    /**
-     * Advance every timer, and return the *effective* delta the timers were
-     * advanced by - real elapsed time multiplied by any time warp in force.
-     *
-     * P9's allocation pass runs immediately after this call and has to agree
-     * with the timers about how much time passed, or the per-second figures it
-     * publishes would be wrong by the warp multiplier every time a black hole
-     * was running. Returns 0 on the first call, when there is no previous
-     * timestamp to measure from and no timer has been advanced.
-     */
     updateWithTimestamp(currentTime, multiplier = 1) {
         if (this.lastUpdateTime === null) {
             this.lastUpdateTime = currentTime;

@@ -19,8 +19,6 @@ export function drawTab4Content(heading, optionContentElement) {
         }
     };
 
-    // The row's own marker is cleared by the click that opened this pane — see
-    // clearOptionRowAttentionIndicator in ui.js.
         removeTabAttentionIfNoIndicators('tab4');
 
         if (heading === 'Diesel') {

@@ -17,7 +17,7 @@ One line per functional area, worst first. 49 green, 0 amber, 0 red, out of 49.
 | 🟢 | [Automation Persistence](areas/automation.md) | Meta Progression | Medium | — | Done — driven through its own controls, undefined specs passing. |
 | 🟢 | [Autosell & Production Allocation](areas/autosell.md) | Core Economy | High | 51 | Done — driven through its own controls, 51 specs passing. |
 | 🟢 | [Battle & Conquest](areas/battle.md) | Interstellar | High | 18 | Done — driven through its own controls, 18 specs passing. |
-| 🟢 | [Black Hole Time Warp](areas/black-hole.md) | Endgame | High | 19 | Done — driven through its own controls, 19 specs passing. |
+| 🟢 | [Black Hole Time Warp](areas/black-hole.md) | Endgame | High | 24 | Done — driven through its own controls, 24 specs passing. |
 | 🟢 | [Cloud Save & Load](areas/save-load-cloud.md) | Foundation | High | 8 | Done — driven through its own controls, 8 specs passing. |
 | 🟢 | [Colonisation](areas/colonise.md) | Interstellar | High | 23 | Upgraded to integration: a real battle is won on the canvas and followed all the way through a rebirth — the achievements granted, the ascendency points paid (twice the star's, plus what the achievements it unlocked pay), the settled list growing at rebirth rather than at victory, the galactic point earned, and the system left behind drawn on the star map as settled. 23 specs passing. |
 | 🟢 | [Compounds & Crafting](areas/compounds.md) | Core Economy | High | 31 | Done — driven through its own controls, 31 specs passing. |
@@ -56,7 +56,7 @@ One line per functional area, worst first. 49 green, 0 amber, 0 red, out of 49.
 | 🟢 | [Statistics](areas/statistics.md) | Simulation & Ambience | Low | 16 | Done — driven through its own controls, 16 specs passing. |
 | 🟢 | [Tech Tree](areas/technology.md) | Core Economy | High | 18 | Done — driven through its own controls, 18 specs passing. |
 | 🟢 | [UI Navigation](areas/ui-navigation.md) | Presentation & Shell | Medium | 24 | Done — driven through its own controls, 24 specs passing. |
-| 🟢 | [Weather](areas/weather.md) | Simulation & Ambience | Low | 34 | Done — every state reached through the game's own weighted draw and the solar penalty measured off the grid, 34 specs passing. Found and closed known-issues #31, #33 and #46. |
+| 🟢 | [Weather](areas/weather.md) | Simulation & Ambience | Low | 36 | Done — every state reached through the game's own weighted draw and the solar penalty measured off the grid, 36 specs passing. Found and closed known-issues #31, #33, #46 and #48. |
 
 ---
 
@@ -85,7 +85,7 @@ when an area is upgraded.
 | 🟢 Green — signed off | 49 | 100% |
 | **Total functional areas** | **49** | |
 
-836 individual test cases are identified across all areas. **1392 Playwright specs are implemented** across 48 areas, and all of them pass except where an area's note says otherwise — a spec that fails on a live defect is left failing on purpose, and the defect is written up in [known-issues.md](known-issues.md).
+839 individual test cases are identified across all areas. **1399 Playwright specs are implemented** across 48 areas, and all of them pass except where an area's note says otherwise — a spec that fails on a live defect is left failing on purpose, and the defect is written up in [known-issues.md](known-issues.md).
 
 Run them with `npm run test:e2e` (all areas) or `node tests/run-e2e.mjs <area>`. Each area writes its own HTML report to `test-reports/e2e/<area>/index.html`, with a summary index at `test-reports/e2e/index.html`.
 
@@ -171,7 +171,7 @@ Late systems reached by few players but heavily interlinked with everything befo
 
 | Status | Area | Risk | Planned | Specs | Existing coverage |
 |:--:|---|:--:|--:|--:|---|
-| 🟢 | [Black Hole Time Warp](areas/black-hole.md) | High | 7 | **19** | — |
+| 🟢 | [Black Hole Time Warp](areas/black-hole.md) | High | 9 | **24** | — |
 | 🟢 | [Megastructures](areas/megastructures.md) | Medium | 36 | **51** | captureMegaStructureTest.test.js |
 | 🟢 | [Cosmic Rip](areas/cosmic-rip.md) | Medium | 17 | **28** | — |
 
@@ -181,7 +181,7 @@ Background systems that modify the economy or the presentation without direct pl
 
 | Status | Area | Risk | Planned | Specs | Existing coverage |
 |:--:|---|:--:|--:|--:|---|
-| 🟢 | [Weather](areas/weather.md) | Low | 18 | **34** | — |
+| 🟢 | [Weather](areas/weather.md) | Low | 19 | **36** | — |
 | 🟢 | [Random Events](areas/random-events.md) | Medium | 13 | **52** | — |
 | 🟢 | [News Ticker](areas/news-ticker.md) | Low | 12 | **26** | — |
 | 🟢 | [Audio](areas/audio.md) | Low | 5 | **13** | — |

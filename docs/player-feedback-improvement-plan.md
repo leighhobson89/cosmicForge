@@ -984,20 +984,58 @@ Iron    [==== 10% $ ====|============ 40% compounds ============|======== 50% st
 
 ---
 
-## P11 — Progression clarity: black hole & misleading upgrade displays
+## ~~P11 — Progression clarity: black hole & misleading upgrade displays~~ ✅
 
-**Audit.** *(Numbers corrected by the audit.)* The black hole recharge upgrade multiplies charge time by **0.88 per level (−12%)**, not −10% (`drawTab7Content.js:2085`, `game.js:3967`), clamped at `getMinimumBlackHoleChargeTime()` with the purchase blocked once capped (`drawTab7Content.js:2088–2090`). A maxed **"Always Active"** state already exists and is communicated (`buttonBlackHoleRechargeMaxed` / `buttonBlackHoleDurationAlwaysActive` labels; `getBlackHoleAlwaysOn` auto-set at `game.js:3940–3943` and `3972–3975`) — so the real gap is communicating *progress toward* the threshold, not the maxed state itself. Display precision: the recharge button uses `toFixed(1)` seconds (`game.js:3981–3983`), so identical before/after can only render within <0.05 s of a step near the minimum; the **duration** upgrade uses `Math.round` seconds (`game.js:3952–3954`) and is the likelier "30 → 30" collision site. `blackHoleUIChecks` lives at `game.js:3641` (display logic 3934–3988). Existing specs: `tests/e2e/black-hole/black-hole.spec.js` and `black-hole-live.spec.js`.
+~~**Audit.** *(Numbers corrected by the audit.)* The black hole recharge upgrade multiplies charge time by **0.88 per level (−12%)**, not −10% (`drawTab7Content.js:2085`, `game.js:3967`), clamped at `getMinimumBlackHoleChargeTime()` with the purchase blocked once capped (`drawTab7Content.js:2088–2090`). A maxed **"Always Active"** state already exists and is communicated (`buttonBlackHoleRechargeMaxed` / `buttonBlackHoleDurationAlwaysActive` labels; `getBlackHoleAlwaysOn` auto-set at `game.js:3940–3943` and `3972–3975`) — so the real gap is communicating *progress toward* the threshold, not the maxed state itself. Display precision: the recharge button uses `toFixed(1)` seconds (`game.js:3981–3983`), so identical before/after can only render within <0.05 s of a step near the minimum; the **duration** upgrade uses `Math.round` seconds (`game.js:3952–3954`) and is the likelier "30 → 30" collision site. `blackHoleUIChecks` lives at `game.js:3641` (display logic 3934–3988). Existing specs: `tests/e2e/black-hole/black-hole.spec.js` and `black-hole-live.spec.js`.~~
 
-**Change.**
-- Recharge: show the underlying precise value (or a progress bar toward the minimum) alongside the rounded `current → next`, and state the ×0.88-per-level effect explicitly.
-- When the next upgrade reaches the Always-Active threshold, say so ("Next level: charging becomes effectively continuous").
-- Duration (and any other upgrade row): never render identical before/after values — show decimals or a qualitative note instead. Sweep all `current → next` displays for rounding-induced "no change" renderings (search `→`/`->` formatting in `drawTab*Content.js` and the `blackHoleUIChecks` display block).
-- Add black-hole value communication to the help/descriptions (`descriptions.js`) and a hint encouraging early pursuit.
+~~**Change.**~~
+- ~~When the next upgrade reaches the Always-Active threshold, say so ("Next level: charging becomes effectively continuous").~~
+- ~~Duration (and any other upgrade row): never render identical before/after values — show decimals or a qualitative note instead. Sweep all `current → next` displays for rounding-induced "no change" renderings (search `→`/`->` formatting in `drawTab*Content.js` and the `blackHoleUIChecks` display block).~~
+- ~~Add black-hole value communication to the help/descriptions (`descriptions.js`) and a hint encouraging early pursuit (localised).~~
 
-**Effort:** ~8–12 h (display fixes ~4 h; the audit sweep across all upgrade rows ~4–8 h).
-**Risk:** Low.
+~~**Effort:** ~8–12 h (display fixes ~4 h; the audit sweep across all upgrade rows ~4–8 h).~~
+~~**Risk:** Low.~~
 
-**Integration test.** `tests/e2e/black-hole/progression-clarity.spec.js` (extends the existing `black-hole/` suite): set recharge/duration levels such that rounded displays would collide; assert the UI never renders `X → X` (parse the label, assert before ≠ after OR a "continuous"/precise-value note is present). Snapshot the black hole panel before/after for the report.
+~~**Integration test.** `tests/e2e/black-hole/progression-clarity.spec.js` (extends the existing `black-hole/` suite): assert the UI never renders `X → X` ie 30 -> 30 the same each time (parse the label, assert before ≠ after OR a "continuous"/precise-value note is present). Snapshot the black hole panel before/after for the report.~~
+
+~~**As built.** Three changes, all inside the black hole panel — the sweep for `current -> next`~~
+~~renderings across the catalogue found that the *only* keys of that shape in the game are the three~~
+~~black hole upgrade buttons (`buttonBlackHolePowerUpgrade`, `buttonBlackHoleDurationUpgrade`,~~
+~~`buttonBlackHoleRechargeUpgrade`), so the audit was over as soon as it started.~~
+
+~~1. **A shared guard against `X -> X`.** `formatUpgradeStep()` in `precision.js` renders a pair at~~
+~~   the precision the display normally wants and adds decimals, one at a time, only until the two~~
+~~   halves differ — so no existing label gains noise and only a colliding pair pays for the extra~~
+~~   digit. It reports `distinct: false` when even the ceiling cannot separate them, deliberately~~
+~~   leaving the wording to the caller. All three buttons now go through it.~~
+
+~~2. **The rung that reaches the floor names its outcome.** The audit's guess was wrong about which~~
+~~   row collided: Duration steps by a constant 3s and can never collide, while Recharge collides on~~
+~~   exactly one rung. With the shipped 300s base and 30s floor the ladder is nineteen rungs, the~~
+~~   eighteenth sits at 30.048s, and the nineteenth clamps to 30s — so the last and most valuable~~
+~~   purchase in the panel read `30.0s -> 30.0s`. Reaching the floor is what sets~~
+~~   `blackHoleAlwaysOn`, so that rung now renders `buttonBlackHoleRechargeFinalUpgrade` —~~
+~~   `30.0s -> ALWAYS ACTIVE` — quoting where the player is and naming what the purchase does.~~
+
+~~3. **Value communication.** `headerDescBlackHole` now says what a warp does and what each of the~~
+~~   three upgrades is for, and stays on the pane for the run. A new `blackHoleValueHint` sits under~~
+~~   the Research button while the feature is unbought and disappears once it is owned. Both are in~~
+~~   all six languages; `validateLocalization.cjs` passes clean.~~
+
+~~**Test.** `tests/e2e/black-hole/progression-clarity.spec.js` (5 specs, green). It walks the whole~~
+~~nineteen-rung Recharge ladder through the button, parsing the label the frame loop paints before~~
+~~each purchase and asserting the two halves differ or that a qualitative note has replaced them —~~
+~~exactly one rung is allowed the note, and buying it must actually turn the warp permanently on. A~~
+~~second spec stages the collision deterministically through the variable debugger so the case does~~
+~~not depend on the ladder's length. Power is walked across the x50 half-step boundary, and the hint~~
+~~and header are checked against the catalogue in all six languages with a German boot proving the~~
+~~wiring. Panel screenshots are attached before and after, and each spec annotates a MEASURED GAIN.~~
+
+~~The three setup helpers the black hole specs shared were lifted into~~
+~~`tests/e2e/black-hole/_black-hole-helpers.mjs`. Doing that surfaced a pre-existing failure in~~
+~~`black-hole-live.spec.js` unrelated to P11: the achievement toasts earned by~~
+~~`prepareRunForStarshipLaunch()` cover the Research button, so a real click — `force: true`~~
+~~included — lands on the toast. It now dispatches, like the upgrade buttons already did.~~
 
 ---
 

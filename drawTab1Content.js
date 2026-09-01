@@ -4,11 +4,6 @@ import { getResourceDataObject, setResourceDataObject } from './resourceDataObje
 import { removeTabAttentionIfNoIndicators, createTextElement, createToggleSwitch, createOptionRow, createDropdown, createButton, disableStorageNotificationActionIfShowing } from './ui.js';
 import { localize } from './localization.js';
 
-// P14 (player-feedback plan): the per-resource "Gain 1" option row is gone. The
-// button it held now sits in the pane header, on the same line as the resource
-// name, so every resource pane is one row shorter and the manual gain is still a
-// single click away. The heading arrives here as the canonical English resource
-// name, which is also the key the resource data object is stored under.
 const TAB1_HEADING_RESOURCES = ['hydrogen', 'helium', 'carbon', 'neon', 'oxygen', 'sodium', 'silicon', 'iron'];
 
 function drawResourceGainHeaderButton(heading) {
@@ -17,9 +12,6 @@ function drawResourceGainHeaderButton(heading) {
         return;
     }
 
-    // Cleared unconditionally: switching from one resource pane to another has to
-    // drop the previous resource's button, and the intro pane has to end up with
-    // no button at all.
     headerActionsElement.innerHTML = '';
 
     const resource = String(heading).toLowerCase();
@@ -45,10 +37,6 @@ function drawResourceGainHeaderButton(heading) {
 }
 
 export function drawTab1Content(heading, optionContentElement) {
-    // The row's own marker is cleared by the click that opened this pane — see
-    // clearOptionRowAttentionIndicator in ui.js. Only the tab badge is recomputed
-    // here, because a redraw can also follow a language change or a state change
-    // rather than a click.
     removeTabAttentionIfNoIndicators('tab1');
 
     drawResourceGainHeaderButton(heading);

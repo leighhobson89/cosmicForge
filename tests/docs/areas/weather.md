@@ -30,10 +30,11 @@ The weather cycle, the solar penalty each state applies, the particle overlay an
 - [ ] The variable debugger's weather row survives a no-op edit
 - [ ] Three severe windows may run back to back; the fourth severe draw is turned into a cloudy window of a fixed one minute, and the streak restarts
 - [ ] The severe-weather streak is kept across a focus change and comes back with a saved game, and still grants the launch window it was owed
+- [ ] The run's collected-precipitation total moves only while it is raining, and by exactly what fell into the store
 
 ## Status meaning
 
-🟢 **GREEN** — Done — every state reached through the game's own weighted draw and the solar penalty measured off the grid, 34 specs passing. Found and closed known-issues #31, #33 and #46.
+🟢 **GREEN** — Done — every state reached through the game's own weighted draw and the solar penalty measured off the grid, 36 specs passing. Found and closed known-issues #31, #33, #46 and #48.
 
 ---
 

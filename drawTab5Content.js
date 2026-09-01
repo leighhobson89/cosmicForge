@@ -9,10 +9,6 @@ import { updateDiplomacySituation, calculateModifiedAttitude, increaseAttackAndD
 import { localize, localizeMaterialName } from './localization.js';
 import { getLanguage } from './constantsAndGlobalVars.js';
 
-// Star data holds these as English words, and the surrounding code branches on
-// them to pick a colour class, so the stored value stays canonical and only the
-// rendering of it is localized. Anything not in a map falls through unchanged,
-// which is what generated race names and trait names need.
 const CIVILIZATION_LEVEL_KEYS = {
     None: 'civilizationLevelNone',
     Unsentient: 'civilizationLevelUnsentient',
@@ -38,10 +34,6 @@ const ATTITUDE_KEYS = {
     Scared: 'attitudeScared'
 };
 
-// The fixed anomalies are authored as plain strings rather than objects: two on
-// the Miaplacidus system in `resourceDataObject.js`, and `Stalwart`, which
-// `generateAnomalies` returns for any hard-mode destination. Generated anomalies
-// are objects and take the branch below this map.
 const ANOMALY_KEYS = {
     'Broken Force Field': 'anomalyBrokenForceField',
     'AI Master Race': 'anomalyAiMasterRace',
@@ -53,15 +45,8 @@ const localizeCivilizationLevel = (value) => localizeFromMap(CIVILIZATION_LEVEL_
 const localizeThreatLevel = (value) => localizeFromMap(THREAT_LEVEL_KEYS, value);
 const localizeAttitude = (value) => localizeFromMap(ATTITUDE_KEYS, value);
 const localizeAnomalyName = (value) => localizeFromMap(ANOMALY_KEYS, value);
-
-// Generated anomalies and lifeform traits carry their catalogue key next to the
-// canonical English value, so the display resolves from the key and the stored
-// value stays the one the battle code branches on.
 const localizeKeyed = (key, fallback) => (key ? localize(key, getLanguage()) : fallback);
 
-// Traits held in a save written before the key slot existed only have two
-// entries, so the canonical English value has to resolve a key of its own or
-// those rows stay English forever.
 const TRAIT_NAME_KEYS = {
     Aggressive: 'traitNameAggressive',
     Diplomatic: 'traitNameDiplomatic',
@@ -78,12 +63,6 @@ const TRAIT_NAME_KEYS = {
 
 const localizeTraitName = (trait) => localizeKeyed(trait?.[2] ?? TRAIT_NAME_KEYS[trait?.[0]], trait?.[0]);
 
-// The same problem for generated anomalies: one rolled before the key slots
-// existed is stored with only its English `name` and `effect`. Both maps are
-// built from the generator's own catalogue so there is a single source of truth
-// for which English string belongs to which key. They are built on first use
-// rather than at module scope, because this module and `game.js` import each
-// other and the catalogue is still in its temporal dead zone at load time.
 let generatedAnomalyKeyMaps = null;
 const getGeneratedAnomalyKeyMaps = () => {
     if (!generatedAnomalyKeyMaps) {
@@ -99,10 +78,6 @@ const getGeneratedAnomalyKeyMaps = () => {
 const localizeGeneratedAnomalyName = (anomaly) => localizeKeyed(anomaly?.nameKey ?? getGeneratedAnomalyKeyMaps().names[anomaly?.name], anomaly?.name);
 const localizeGeneratedAnomalyEffect = (anomaly) => localizeKeyed(anomaly?.effectKey ?? getGeneratedAnomalyKeyMaps().effects[anomaly?.effect], anomaly?.effect);
 
-// Precipitation is a compound key plus the section it lives in.
-// Stars stubbed in for settled systems carry the literal 'Unknown' rather than a
-// compound key, so that value has to be caught before it reaches the catalogue —
-// `compoundUnknown` does not exist, and localize() would render the key itself.
 const localizePrecipitationType = (star) => {
     const type = star?.precipitationType;
     if (!type || type === 'Unknown') {
@@ -111,12 +86,9 @@ const localizePrecipitationType = (star) => {
     return localizeMaterialName(type, star.precipitationResourceCategory ?? 'compounds', getLanguage());
 };
 
-// Star ship modules and fleet ships are addressed by id everywhere else, so the
-// display name is looked up from the id rather than carried alongside it.
 const localizeStarShipModule = (id) => localize('starShipModule' + id.slice(2), getLanguage());
 const localizeFleetShip = (id) => localize('fleetShip' + id.slice('fleet'.length), getLanguage());
 
-// Space upgrade price tuples are [quantity, key, section].
 const spaceUpgradePriceName = (upgrade, slot) => {
     const price = getResourceDataObject('space', ['upgrades', upgrade, `resource${slot}Price`]);
     return localizeMaterialName(price[1], price[2], getLanguage());
@@ -145,13 +117,6 @@ function getWeatherDisplayData(weatherTendency, weather) {
     return ['?', 0, 'red-disabled-text'];
 }
 
-/**
- * The three ids one star can be drawn under on the map.
- *
- * `generateStarfield` names the element for the star itself, prefixes a settled
- * one and prefixes one that is only scenery, so every lookup by name has to try
- * all three before deciding the star is not on the map.
- */
 function findDrawnStarElement(starName) {
     const normalized = capitaliseWordsWithRomanNumerals(starName);
     return [
@@ -163,21 +128,9 @@ function findDrawnStarElement(starName) {
         .find(Boolean) || null;
 }
 
-// The ping is appended to `document.body`, not to the starfield, because it is
-// positioned in viewport coordinates. That means nothing tears it down when the
-// map goes away, so the mark and the timer that ends it are held here and can be
-// cancelled from outside.
 let activeSelectionPing = null;
 let activeSelectionPingTimer = null;
 
-/**
- * Take down the selection ping now.
- *
- * The animation repeats for four seconds to be findable, which is long enough
- * for a player to have left the pane before it ends. A mark pointing at a star
- * that is no longer on screen is worse than no mark, so leaving the star map, or
- * redrawing it in a mode that may not draw that star at all, cancels it.
- */
 export function clearStarMapSelectionPing() {
     if (activeSelectionPingTimer !== null) {
         window.clearTimeout(activeSelectionPingTimer);
@@ -185,20 +138,9 @@ export function clearStarMapSelectionPing() {
     }
 
     activeSelectionPing = null;
-
-    // Swept by class rather than by the reference alone: a ping from a previous
-    // draw whose reference was replaced would otherwise outlive everything.
     document.querySelectorAll('.star-map-search-selection-ping').forEach((element) => element.remove());
 }
 
-/**
- * Drop the selection ping over a star on the map.
- *
- * The ping is a fixed-position element placed over the star's current rectangle,
- * so it only means anything in the two modes that draw the star where the player
- * can see it. Any previous mark is taken down first, so repeated selections
- * replace one another rather than piling up.
- */
 function runSearchSelectionPing(starName) {
     const modeLower = String(getStarMapMode?.() || '').toLowerCase();
     if (modeLower !== 'normal' && modeLower !== 'distance') {
@@ -234,15 +176,6 @@ function runSearchSelectionPing(starName) {
     }, 4100);
 }
 
-/**
- * Select a star on the map by name, exactly as clicking it would.
- *
- * The click handler `generateStarfield` puts on each star is the only thing that
- * draws the connection line, builds the destination row and calls
- * `setDestinationStar` — and it is also where the travel guard lives. Dispatching
- * at the element rather than duplicating any of that is what keeps the search box
- * and the Star Data table agreeing with a plain click on the map.
- */
 function selectStarByName(starName) {
     const starContainer = document.querySelector('#optionContentTab5');
     if (!starContainer) {
@@ -259,24 +192,6 @@ function selectStarByName(starName) {
     }
 }
 
-/**
- * P4: take the player to the star map and ping one star there.
- *
- * This is the whole of what the globe button on a Star Data row does. It is
- * deliberately *showing*, not choosing: the destination is left exactly as the
- * player left it, and nothing here cares whether the star ship is in flight.
- * Picking a destination stays the map's own job, one click away once the player
- * can see where the star is.
- *
- * Two details are load-bearing. The mode is set *before* the pane is drawn,
- * because the map-mode buttons take their highlight from `getStarMapMode()` at
- * draw time, and the ping can only be placed in a mode that draws the star
- * somewhere visible. And the navigation goes through the side-menu row rather
- * than calling the draw directly, so the row highlight, the remembered screen and
- * the current option pane are all set by the listener that already owns them; the
- * Star Map branch of `drawTab5Content` contains no `await`, so the field is on
- * screen by the time the click returns.
- */
 function focusStarOnStarMap(starName) {
     if (!starName) {
         return false;
@@ -290,9 +205,6 @@ function focusStarOnStarMap(starName) {
     setStarMapMode('normal');
     starMapOption.dispatchEvent(new MouseEvent('click', { bubbles: true }));
 
-    // A star the table lists but the field never drew has nothing to ping. Say so,
-    // the same way the search box does with a name it cannot place, rather than
-    // leaving the player on a map wondering which speck flashed.
     if (!findDrawnStarElement(starName)) {
         const normalized = capitaliseWordsWithRomanNumerals(starName);
         showNotification(localize('notificationStarNotFoundOnMap', getLanguage()).replace('{star}', normalized), 'warning', 2500, 'starMap');
@@ -304,14 +216,6 @@ function focusStarOnStarMap(starName) {
     return true;
 }
 
-/**
- * P4: the globe button that sits at the head of a star's name in the Star Data
- * table.
- *
- * It carries no gate of its own. Showing a player where a star is cannot go
- * wrong — not while the ship is in flight, and not when the trip is unaffordable
- * — so the button is live on every row the table still considers a place to go.
- */
 function createStarShowOnMapButton(starName) {
     const button = document.createElement('span');
     button.id = `starShowOnMapButton_${starName}`;
@@ -341,8 +245,6 @@ function createStarShowOnMapButton(starName) {
 }
 
 export async function drawTab5Content(heading, optionContentElement, starDestinationInfoRedraw, diplomacyRedraw) {
-    // The row's own marker is cleared by the click that opened this pane — see
-    // clearOptionRowAttentionIndicator in ui.js.
     removeTabAttentionIfNoIndicators('tab5');
 
     const headerRow = document.getElementById('headerContentTab5');
@@ -446,9 +348,6 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                     setSearchEnabledForMode(button.mode);
 
                     removeStarConnectionTooltip();
-                    // The field is about to be thrown away and redrawn, and two of the
-                    // four modes do not draw every star at all, so a mark left over
-                    // from a search or a Star Data globe would point at nothing.
                     clearStarMapSelectionPing();
                     const destinationRow = document.getElementById('descriptionContentTab5');
                     if (destinationRow) {
@@ -494,12 +393,6 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                 resultsEl.innerHTML = '';
             }
         };
-
-        // P4: the ping is shared with the Star Data table's globe button, so it and
-        // the star lookup it needs live at module scope rather than in this closure.
-        // The click-through moved with it for the same reason, even though only the
-        // search box selects a star: the search chooses a destination, the globe only
-        // shows the player where one is.
 
         const renderResults = (matches) => {
             if (!resultsEl) {
@@ -793,9 +686,6 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             )
         );
 
-        // P4: the left-hand slot used to be a static "Sort By:" caption sitting over
-        // a column that is in fact the star's name. It is now the Name header, and it
-        // sorts like the six on its right.
         const starLegendRow = createOptionRow({
             labelId: `starLegendRow`,
             renderNameABs: null,
@@ -817,24 +707,12 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
             noDescriptionContainer: [true, '15%', '85%']
         });
 
-        // The header is the row's own label element rather than a seventh cell in
-        // `starLegendCells`, because the name it heads is drawn in the label column
-        // too. It is given the id here because `sortStarTable` finds every header by
-        // id when it moves the `sort-by` marker onto whichever column is active.
-        //
-        // The info icon carries the whole of what this column now does — that the
-        // header sorts, and that the globe on each row shows the star on the map —
-        // because neither is discoverable from a globe glyph alone. It is wired the
-        // same way as the Weather header's icon: `setupInfoTooltips` at the end of
-        // this branch binds every `.info-emoji` to its entry in
-        // `infoTooltipDescriptions`, keyed by id.
         const starLegendNameHeader = starLegendRow.querySelector('.label-container .label-text');
         if (starLegendNameHeader) {
             starLegendNameHeader.id = 'starLegendName';
             starLegendNameHeader.classList.add('sort-by', 'label-star', 'star-legend-name');
             starLegendNameHeader.innerHTML = `<span class="inline-icon-header">${localize('textStarName', getLanguage())} <p id="info_starLegendName" class="info-emoji">ℹ️</p></span>`;
             starLegendNameHeader.addEventListener('click', (event) => {
-                // Reading the tip is not a request to re-sort the table under it.
                 if (event.target.closest('.info-emoji')) {
                     return;
                 }
@@ -934,9 +812,6 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                             ? 'o-star-text'
                             : 'green-ready-text';
 
-            // P4: no trailing colon. Every other row in the game reads
-            // "<thing>: <control>", but this column is now a sortable header over a
-            // list of names rather than a label introducing the cells beside it.
             const starNameLabel = [
                 `${capitaliseWordsWithRomanNumerals(nameStar)}${megaStructureIconHtml}`,
                 starNameClass
@@ -969,17 +844,6 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
                 starDataRow.style.opacity = '0.5';
             }
 
-            // P4: a settled star is not a place to go any more — its distance,
-            // weather, precipitation and AP cells are already blanked — so it gets no
-            // globe. Every other row does, in the name column, because the button
-            // acts on the star rather than on any one of the six figures.
-            //
-            // It goes *before* the name rather than after it. The name column is a
-            // fixed fraction of the row and a long star name overflows it, so a
-            // trailing button ends up drawn underneath the value cells, which are
-            // later siblings and therefore paint over it. At the head of the column
-            // it is always inside its own box, and a megastructure star's icon still
-            // sits where it always did, at the end of the name.
             if (!isSettled) {
                 starDataRow.querySelector('.label-container')?.prepend(createStarShowOnMapButton(nameStar));
             }
@@ -1533,18 +1397,6 @@ export async function drawTab5Content(heading, optionContentElement, starDestina
 
         const starData = getStarSystemDataObject('stars', ['destinationStar']);
 
-        // The destination record is legitimately absent at points in the run —
-        // notably right after a battle resolves, when this pane is redrawn.
-        // Everything below is built from it: the opinion bar, the diplomacy
-        // rows, the enemy-fleet readout, and the click handlers that close over
-        // it. None of that is meaningful without the record, so bail rather than
-        // draw a pane full of undefined.
-        //
-        // This is the last branch in the function, so returning here skips
-        // nothing else. It was previously unguarded, and because
-        // drawTab5Content is async and called unawaited from the pane click
-        // handler, the throw surfaced as an unhandled promise rejection and
-        // left the pane half-drawn — four of them per battle fought.
         if (!starData) {
             return;
         }

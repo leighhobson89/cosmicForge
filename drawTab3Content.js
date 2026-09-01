@@ -5,9 +5,6 @@ import { getStarSystemDataObject, setResourceDataObject, getResourceDataObject, 
 import { createOptionRow, removeTabAttentionIfNoIndicators, createToggleSwitch, createSvgElement, createTextElement, sortTechRows, createButton, showNotification, updateDescriptionRow, appendAttentionIndicator, showHideModal, setupInfoTooltips, callPopupModal } from './ui.js';
 import { trackAnalyticsEvent } from './analytics.js';
 
-// Tech prerequisites are stored as English display names rather than tech keys,
-// so they need mapping back to a key before the cost line can show them
-// translated. The map is derived from the techName* family itself.
 const TECH_NAME_KEYS_BY_ENGLISH = {
     "Knowledge Sharing": "techNameKnowledgeSharing",
     "Fusion Theory": "techNameFusionTheory",
@@ -78,15 +75,11 @@ const localizeTechPrereqs = (prereqs) => (prereqs || [])
     .map(localizeTechName)
     .join(', ');
 
-// Megastructure rows are labelled "<structure> <stage>"; both halves already
-// have catalogue entries, so the label is composed rather than duplicated.
 const megaStructureRowLabel = (structureKey, stageKey) =>
     `${localize(structureKey, getLanguage())} ${localize(stageKey, getLanguage())}`;
 import { modalMegaStructureTechDysonSphere1Header, modalMegaStructureTechDysonSphere1Text, modalMegaStructureTechDysonSphere2Header, modalMegaStructureTechDysonSphere2Text, modalMegaStructureTechDysonSphere3Header, modalMegaStructureTechDysonSphere3Text, modalMegaStructureTechDysonSphere4Header, modalMegaStructureTechDysonSphere4Text, modalMegaStructureTechDysonSphere5Header, modalMegaStructureTechDysonSphere5Text, modalMegaStructureTechCelestialProcessingCore1Header, modalMegaStructureTechCelestialProcessingCore1Text, modalMegaStructureTechCelestialProcessingCore2Header, modalMegaStructureTechCelestialProcessingCore2Text, modalMegaStructureTechCelestialProcessingCore3Header, modalMegaStructureTechCelestialProcessingCore3Text, modalMegaStructureTechCelestialProcessingCore4Header, modalMegaStructureTechCelestialProcessingCore4Text, modalMegaStructureTechCelestialProcessingCore5Header, modalMegaStructureTechCelestialProcessingCore5Text, modalMegaStructureTechPlasmaForge1Header, modalMegaStructureTechPlasmaForge1Text, modalMegaStructureTechPlasmaForge2Header, modalMegaStructureTechPlasmaForge2Text, modalMegaStructureTechPlasmaForge3Header, modalMegaStructureTechPlasmaForge3Text, modalMegaStructureTechPlasmaForge4Header, modalMegaStructureTechPlasmaForge4Text, modalMegaStructureTechPlasmaForge5Header, modalMegaStructureTechPlasmaForge5Text, modalMegaStructureTechGalacticMemoryArchive1Header, modalMegaStructureTechGalacticMemoryArchive1Text, modalMegaStructureTechGalacticMemoryArchive2Header, modalMegaStructureTechGalacticMemoryArchive2Text, modalMegaStructureTechGalacticMemoryArchive3Header, modalMegaStructureTechGalacticMemoryArchive3Text, modalMegaStructureTechGalacticMemoryArchive4Header, modalMegaStructureTechGalacticMemoryArchive4Text, modalMegaStructureTechGalacticMemoryArchive5Header, modalMegaStructureTechGalacticMemoryArchive5Text, modalRocketCompositesTabUnlockHeader, modalRocketCompositesTabUnlockText, modalQuantumComputingTabUnlockHeader, modalQuantumComputingTabUnlockText, modalScienceLabsTabUnlockHeader, modalScienceLabsTabUnlockText, modalKnowledgeSharingTabUnlockHeader, modalKnowledgeSharingTabUnlockText, modalInterstellarTabUnlockHeader, modalInterstellarTabUnlockText, modalEnergyTabUnlockHeader, modalEnergyTabUnlockText, modalSpaceMiningTabUnlockText, modalSpaceMiningTabUnlockHeader, modalCompoundsTabUnlockHeader, modalCompoundsTabUnlockText, techNotificationMessages } from './descriptions.js';
 
 export function drawTab3Content(heading, optionContentElement) {
-    // The row's own marker is cleared by the click that opened this pane — see
-    // clearOptionRowAttentionIndicator in ui.js.
     removeTabAttentionIfNoIndicators('tab3');
 
     if (heading === 'Philosophy') {

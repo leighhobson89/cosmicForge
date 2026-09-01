@@ -3400,3 +3400,84 @@ the colour class on the tooltip's own basic-plant line — the last one being th
 symptom the player actually sees.
 
 ---
+
+## 48. The collect-100-precipitation achievements were granted on runs it had never rained on — ✅ FIXED
+
+**Area:** weather / achievements
+**Reported by:** Leigh, from play - the precipitation collection achievement was
+being awarded when it had not rained.
+
+### The symptom
+
+`collect100Precipitation` and `collect100TitaniumAsPrecipitation` are both granted
+on one number, `collectedPrecipitationQuantityThisRun` reaching 100:
+
+```js
+export function achievementCollect100Precipitation() {
+    const achievement = getAchievementDataObject('collect100Precipitation');
+    if (getCollectedPrecipitationQuantityThisRun() >= 100) {
+        grantAchievement(achievement);
+    }
+}
+```
+
+Those conditions are correct. The number they read was not.
+
+### The cause
+
+The run total was accrued in `updateCompoundAutoBuyerDelta()` in `game.js` - the
+compound autobuyer tick - in two places, and neither of them measured
+precipitation.
+
+Both added `autoBuyerExtractionRate * tickMultiplier * supplyChainMultiplier`.
+`autoBuyerExtractionRate` is the tier's **per-unit** extraction rate. It is not
+the precipitation rate, it is not multiplied by how many autobuyers are owned,
+and it is a constant that exists whether any are owned at all - so the figure
+credited was unrelated to precipitation and, at `owned: 0`, unrelated even to
+production.
+
+Three things then made it worse:
+
+1. **The unpowered path had no weather check.** The powered branch was gated on
+   `getCurrentStarSystemWeatherEfficiency()[2] === 'rain'`; the `else if (tier === 1)`
+   branch, which is the one that runs when the grid is down, was not. Tier 1
+   autobuyers need no power, so a player with the grid off and a tier 1 autobuyer
+   on the system's precipitation material accrued "precipitation" under a clear
+   sky, every tick. That is the reported symptom.
+2. **It ran once per tier.** A timer is registered per `(compound, tier)` pair, so
+   the powered branch's block ran four times a tick for a fully staged material -
+   counting the same phantom figure four times over.
+3. **The unpowered path had no storage check** either, so it kept counting after
+   the store was full and nothing more could land.
+
+### The fix - applied
+
+The total is now counted in `addPrecipitationResource()` in `game.js`, which is
+the only place precipitation is actually collected. That branch is already gated
+on it raining, on the material being revealed and on there being room to store
+it, and `precipitationGain` is the exact amount that just landed:
+
+```js
+setResourceDataObject(currentStarSystemPrecipitationTypeQuantity + precipitationGain, ...);
+addToResourceAllTimeStat(precipitationGain, currentStarSystemPrecipitationType);
+setCollectedPrecipitationQuantityThisRun(getCollectedPrecipitationQuantityThisRun() + precipitationGain);
+```
+
+Both blocks in `updateCompoundAutoBuyerDelta()` were removed. Counting it at the
+point of collection also fixes it for star systems whose
+`precipitationResourceCategory` is not `compounds` - the compound autobuyer tick
+could never have counted those at all.
+
+### Regression specs
+
+`tests/e2e/weather/weather-live.spec.js`:
+
+- *the collected-precipitation total does not move under a clear sky* - stages the
+  reported scenario exactly (grid down, tier 1 autobuyer running on the
+  precipitation material, sky forced sunny) and asserts the total stays at zero.
+- *the collected-precipitation total is exactly what fell into the store* - runs a
+  real shower with an active tier 1 autobuyer that owns nothing, so the store's
+  growth is precipitation alone, and asserts the run total and the store moved by
+  the same amount.
+
+---

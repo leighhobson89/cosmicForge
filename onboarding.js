@@ -9,7 +9,6 @@ import {
 
 import { localize } from './localization.js';
 
-// P7 (player-feedback plan): the game's one precision policy. See precision.js.
 import { toleranceFor, isAtLeast, isEffectivelyEqual } from './precision.js';
 
 import { setAchievementFlagArray } from './constantsAndGlobalVars.js';
@@ -665,8 +664,6 @@ function resolveOnboardingTargetElement(identifier) {
         }
     }
 
-    // Everything below matches on rendered text, so the authored English needle
-    // has to be translated into whatever the player is actually looking at.
     const needle = localizeOnboardingNeedle(asString).toLowerCase();
 
     const buttonCandidates = Array.from(document.querySelectorAll('button, a, [role="button"], input[type="button"], input[type="submit"]'));
@@ -936,8 +933,6 @@ function checkOnboardingCondition(conditionStep, calculateResearchRatePerTick) {
         return false;
     }
 
-    // P7: one tolerance for the whole game, rather than a local 1e-9 that stops
-    // being a tolerance at all once values reach the scale a late run works at.
     const epsilon = toleranceFor(target);
 
     switch (comparator) {

@@ -126,9 +126,6 @@ export function drawTab9Content(heading, optionContentElement) {
     }
 
     if (heading === 'Visual') {
-        // P14 (player-feedback plan): Theme leads the Visual pane. It is the setting
-        // players reach for most and the only one whose effect is immediately visible
-        // across the whole window, so it no longer sits below four toggles.
         const settingsThemeRow = createOptionRow({
             labelId: 'settingsThemeRow',
             renderNameABs: null,
@@ -201,11 +198,6 @@ export function drawTab9Content(heading, optionContentElement) {
         });
         optionContentElement.appendChild(settingsCurrencySymbolRow);
 
-        // P14 (player-feedback plan): plain notation is no longer offered to players —
-        // condensed is the only notation the game presents, and setNotationType()
-        // forces a save that predates that back onto it. The formatter still
-        // understands 'normal', so the row survives behind the debug flag for
-        // checking how a figure renders without the abbreviation ladder.
         if (getVariableDebuggerAndCheats()) {
             const settingsNotationRow = createOptionRow({
                 labelId: 'settingsNotationRow',
@@ -446,8 +438,6 @@ export function drawTab9Content(heading, optionContentElement) {
                     { value: 'it', text: 'Italiano' },
                     { value: 'fr', text: 'Français' },
                 ], getLanguage(), (value) => {
-                    // relocalizeAll redraws this very pane, so it must be the last
-                    // thing that touches the current DOM subtree.
                     relocalizeAll(value);
                 }),
             ],
@@ -686,9 +676,6 @@ export function drawTab9Content(heading, optionContentElement) {
                     text: localize('buttonImport', getLanguage()),
                     classNames: ['option-button', 'save-load-button', ...demoExtraClasses],
                     onClick: () => {
-                        // loadGame() notifies the player itself on every refusal
-                        // path, so this catch only stops the rejection surfacing
-                        // as an unhandled error in the console.
                         loadGame().catch(() => {});
                     },
                 }),

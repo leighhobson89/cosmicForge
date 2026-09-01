@@ -194,10 +194,6 @@ function createCircularReplacer() {
     };
 }
 
-//getGameActiveCountTime() returns [activeMs, offlineMs] and only the first is
-//"playing" - the same element achievementHave50HoursWithOnePioneer() measures -
-//formatted through the UI's own duration formatter so the column reads the way
-//the game reads: "14m 34s", "44h 12m 11s".
 function getActivePlayTimeForColumn() {
     const active = getGameActiveCountTime();
     return formatDurationMs(Array.isArray(active) ? active[0] : 0);

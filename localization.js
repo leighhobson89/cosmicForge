@@ -6,9 +6,6 @@ const LANGUAGE_STORAGE_KEY = 'cosmicForgeLanguage';
 
 let localizationData = {};
 
-// Reverse index of translated compound name -> internal compound key, built per
-// language on first use. `reverseLocalizeForCompounds` is reached from the frame
-// loop, so it must not walk the catalogue on every call.
 let compoundReverseIndex = new Map();
 let materialReverseIndex = new Map();
 
@@ -24,7 +21,6 @@ function normaliseLanguage(value) {
     if (typeof value !== 'string') return null;
     const trimmed = value.trim().toLowerCase();
     if (!trimmed) return null;
-    // Accept full locale tags ('fr-CA') by matching on the primary subtag.
     const primary = trimmed.split(/[-_]/)[0];
     return SUPPORTED_LANGUAGES.includes(primary) ? primary : null;
 }
@@ -44,8 +40,6 @@ export function persistLanguage(value) {
         localStorage.setItem(LANGUAGE_STORAGE_KEY, resolved);
         return true;
     } catch (error) {
-        // Private browsing or a locked-down Electron partition — a non-persisted
-        // language is a degraded experience, not a failure worth breaking boot for.
         return false;
     }
 }
@@ -63,9 +57,6 @@ function detectBrowserLanguage() {
     return null;
 }
 
-// Explicit request wins, then a previously saved choice, then the browser/OS
-// locale, then English. Every branch is validated against SUPPORTED_LANGUAGES so
-// an unknown tag can never reach the lookup tables.
 function resolveLanguage(requested) {
     return normaliseLanguage(requested)
         ?? readStoredLanguage()
@@ -75,8 +66,6 @@ function resolveLanguage(requested) {
 
 function setLocalization(data) {
     localizationData = data;
-    // The catalogue is re-fetched on every initLocalization call, so any index
-    // built from the previous copy is stale by definition.
     compoundReverseIndex = new Map();
     materialReverseIndex = new Map();
 }
@@ -100,9 +89,6 @@ export async function initLocalization(language) {
     setLocalization(localization);
 
     const resolved = resolveLanguage(language);
-
-    // Fall back to English if the catalogue somehow lacks the resolved language,
-    // so a malformed localization.json degrades instead of blanking the UI.
     const available = localization && localization[resolved]
         ? resolved
         : DEFAULT_LANGUAGE;
@@ -113,10 +99,6 @@ export async function initLocalization(language) {
     return available;
 }
 
-// The catalogue value exactly as authored, with real newlines left alone. Use
-// this wherever the result is written to `textContent` / `innerText` on an
-// element that wraps (`white-space: pre-wrap`); `localize()` would hand those
-// call sites a literal `<br>` to display.
 function localizeRaw(key, language) {
     const data = getLocalization();
     if (!data || !data[language]) {
@@ -135,9 +117,6 @@ function localize(key, language) {
     return localizedString.replace(/\n/g, '<br>');
 }
 
-// Build the translated-name -> internal-key map for one language, once. Cached
-// until the catalogue is replaced. Keyed by language rather than by "whatever is
-// active", because callers pass the language they want explicitly.
 function getCompoundReverseIndex(language) {
     const cached = compoundReverseIndex.get(language);
     if (cached) return cached;
@@ -150,8 +129,6 @@ function getCompoundReverseIndex(language) {
     for (const [key, value] of Object.entries(table)) {
         if (!key.startsWith('compound') || typeof value !== 'string') continue;
         const name = value.toLowerCase();
-        // First declaration wins, matching the linear scan this replaced, which
-        // returned on its first match in insertion order.
         if (!index.has(name)) {
             index.set(name, key.slice('compound'.length).toLowerCase());
         }
@@ -161,17 +138,6 @@ function getCompoundReverseIndex(language) {
     return index;
 }
 
-// `resourceShortIron` and friends are three-letter abbreviations for cramped
-// labels, not material identities, and they are never what a caller is holding:
-// the only consumer maps a *full* name out of the create preview, which is built
-// from `localizeMaterialName` and so only ever renders the full keys.
-//
-// They still have to be kept out of the index, because a translator is free to
-// abbreviate to the full word. French does exactly that — `resourceShortIron`
-// and `resourceIron` are both "Fer" — and since the short key is declared first
-// and first declaration wins, "Fer" resolved to `shortiron`. That is not a
-// material, so crafting titanium in French charged nothing and silently
-// abandoned the craft. See tests/docs/known-issues.md #45.
 const SHORT_NAME_KEY = /^(?:resource|compound)Short[A-Z]/;
 
 function getMaterialReverseIndex(language) {

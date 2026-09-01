@@ -20,14 +20,11 @@ import { trackAnalyticsEvent } from './analytics.js';
 import { localize, localizeMaterialName } from './localization.js';
 import { getLanguage } from './constantsAndGlobalVars.js';
 
-// Space upgrade price tuples are [quantity, key, section].
 const spaceUpgradePriceName = (upgrade, slot) => {
     const price = getResourceDataObject('space', ['upgrades', upgrade, `resource${slot}Price`]);
     return localizeMaterialName(price[1], price[2], getLanguage());
 };
 
-// Asteroid rarity is stored in the save as an English word and compared against
-// it in getRarityClass, so only the rendering of it is localized.
 const ASTEROID_RARITY_KEYS = {
     Common: 'asteroidRarityCommon',
     Uncommon: 'asteroidRarityUncommon',
@@ -43,8 +40,6 @@ const localizeAsteroidRarity = (rarity) => (ASTEROID_RARITY_KEYS[rarity]
 
 export function drawTab6Content(heading, optionContentElement) {
 
-    // The row's own marker is cleared by the click that opened this pane — see
-    // clearOptionRowAttentionIndicator in ui.js.
     removeTabAttentionIfNoIndicators('tab6');
 
 
@@ -121,14 +116,6 @@ export function drawTab6Content(heading, optionContentElement) {
 
                         showNotification(localize('notificationSpaceTelescopeBuilt', getLanguage()), 'info', 3000, 'special');
 
-                        // Redraw the whole pane rather than un-hiding the rows by hand. Two
-                        // things about this pane are decided at draw time and cannot be
-                        // patched up from here: the auto-telescope row is only *created* when
-                        // the telescope already exists, and a job already running - the
-                        // auto-telescope starts one on the frame after the build - is drawn as
-                        // a progress bar in place of its button, with its timer re-entered
-                        // through the deferred actions at the foot of this function. This is
-                        // the same clear-and-redraw ui.js uses when it re-enters this pane.
                         optionContentElement.innerHTML = '';
 
                         drawTab6Content('Space Telescope', optionContentElement);
@@ -1131,563 +1118,283 @@ export function drawTab6Content(heading, optionContentElement) {
 
     } 
 
-    
-
     if (heading === 'Mining') {
-
         const antimatterSvgRow = createOptionRow({
-
             labelId: 'antimatterSvgRow',
-
             renderNameABs: null,
-
             labelText: '',
-
             inputElements: [
-
                 createSvgElement('antimatterSvg', '100%', '700px', ['antimatter-svg']),
-
             ],
-
             descriptionText: '',
-
             resourcePriceObject: '',
-
             dataConditionCheck: 'antimatterRender',
-
             objectSectionArgument1: '',
-
             objectSectionArgument2: '',
-
             quantityArgument: '',
-
             autoBuyerTier: null,
-
             startInvisibleValue: false,
-
             resourceString: null,
-
             optionalIterationParam: null,
-
             rowCategory: 'antimatter',
-
             noDescriptionContainer: [true, 'invisible', '100%']
-
         });
-
         optionContentElement.appendChild(antimatterSvgRow);
-
     }
-
 }
 
-
-
 function setFuellingVisibility(rocket, params) {
-
-    // The Fuel row's own label. It used to be reachable as `#fuelDescription`,
-    // because createOptionRow derived the id from the row's visible label
-    // ("Fuel:"); the localisation work moved that derivation onto the row id, so
-    // the short name no longer exists on any element and every lookup of it came
-    // back null. This threw here, before the fuelled-up branch below could colour
-    // the Launch button.
     const fuelDescriptionElement = getRocketFuelDescriptionLabel(rocket);
-
     const [fuellingState, fuelledUpState, launchedState] = params;
 
     if (fuellingState || fuelledUpState) {
-
         const fuelUpButton = document.querySelector(`.${rocket}`);
-
         fuelUpButton.classList.add('invisible');
-
         document.getElementById(`${rocket}FuellingProgressBarContainer`).classList.remove('invisible');
-
         const launchButton = document.querySelector(`.${rocket}-launch-button`);
-
         launchButton.classList.remove('invisible');
-
         launchButton.textContent = localize('buttonLaunch', getLanguage());
-
         if (fuelDescriptionElement) {
             fuelDescriptionElement.textContent = localize('textFuelling', getLanguage());
             fuelDescriptionElement.classList.remove('red-disabled-text');
         }
-
     }
 
     if (fuelledUpState) {
-
         document.getElementById(`${rocket}FuellingProgressBar`).style.width = '100%';
-
         const launchButton = document.querySelector(`.${rocket}-launch-button`);
-
         if (getCurrentStarSystemWeatherEfficiency()[2] !== 'rain' && getCurrentStarSystemWeatherEfficiency()[2] !== 'volcano') {
-
             launchButton.classList.add('green-ready-text');
-
             launchButton.classList.remove('red-disabled-text');
-
             launchButton.textContent = localize('buttonLaunch', getLanguage());
-
             if (fuelDescriptionElement) {
                 fuelDescriptionElement.textContent = localize('textReadyForLaunch', getLanguage());
                 fuelDescriptionElement.classList.add('green-ready-text');
                 fuelDescriptionElement.classList.remove('red-disabled-text');
             }
-
         } else {
-
             launchButton.classList.remove('green-ready-text');
-
             launchButton.classList.add('red-disabled-text');
-
             launchButton.textContent = localize('buttonLaunch', getLanguage());
-
             if (fuelDescriptionElement) {
                 fuelDescriptionElement.textContent = localize('textBadWeather', getLanguage());
                 fuelDescriptionElement.classList.remove('green-ready-text');
                 fuelDescriptionElement.classList.add('red-disabled-text');
             }
-
         }
-
-
-
     }
-
     if (launchedState) {
-
         const autoBuyerRow = document.getElementById(`space${capitaliseString(rocket)}AutoBuyerRow`);
-
         if (autoBuyerRow) {
-
             autoBuyerRow.classList.add('invisible');
-
         }
-
     }
-
-
 
     if (!fuellingState && !fuelledUpState && !launchedState) {
-
         document.getElementById(`${rocket}FuellingProgressBar`).style.width = '0%';
-
         document.getElementById(`${rocket}FuellingProgressBarContainer`).classList.add('invisible');
-
     }
 
 }
 
-
-
 function createRocketUI(rocketId, optionContentElement, asteroids, asteroidsBeingMined) {
-
     const headerRow = document.getElementById('headerContentTab6');
-
     const originalRocketKey = getRocketUserName(rocketId).toLowerCase();
-
-    
-
     headerRow.innerHTML = `
-
         <div id="${rocketId}NameField" class="rocket-name-field" spellcheck="false" contenteditable="true">${getRocketUserName(rocketId)}</div>
-
         <div id="${rocketId}-rename-btn" class="header-button-container"></div>
-
     `;
 
-
-
     const maxLength = 12;
-
     const nameField = document.getElementById(`${rocketId}NameField`);
-
-
-
     nameField.addEventListener('input', (e) => {
-
         let text = nameField.innerText;
-
         if (text.length > maxLength) {
-
             nameField.innerText = text.slice(0, maxLength);
-
             const range = document.createRange();
-
             range.setStart(nameField.firstChild, maxLength);
-
             range.setEnd(nameField.firstChild, maxLength);
-
             window.getSelection().removeAllRanges();
-
             window.getSelection().addRange(range);
-
         }
-
     });
-
-
 
     nameField.addEventListener('keydown', (e) => {
-
         if (e.key === 'Enter') {
-
             e.preventDefault();
-
             renameRocket(rocketId, originalRocketKey);
-
         }
-
     });
-
-
 
     document.getElementById(`${rocketId}-rename-btn`).appendChild(
-
         createButton({
-
             text: localize('buttonRename', getLanguage()),
-
             classNames: ['option-button', 'rename-rocket'],
-
             onClick: () => { 
-
                 renameRocket(rocketId, originalRocketKey);
-
             },
-
             disableKeyboardForButton: true
-
         })
-
     );
 
-
-
     const autobuyerPrice = getResourceDataObject('space', ['upgrades', rocketId, 'autoBuyer', 'tier1', 'price']);
-
-    
-
     const fuellingState = getRocketsFuellerStartedArray().includes(rocketId);
-
     const fuelledUpState = getRocketsFuellerStartedArray().includes(`${rocketId}FuelledUp`);
-
     const launchedState = getLaunchedRockets().includes(rocketId);
-
-
-
     const destinationAsteroids = ['rocket1', 'rocket2', 'rocket3', 'rocket4']
-
     .filter(id => id !== rocketId)
-
     .map(id => getDestinationAsteroid(id))
-
     .filter(Boolean);
 
-
-
     let filteredAsteroids = asteroids.filter(obj => {
-
         const asteroidName = Object.keys(obj)[0];
-
         const asteroid = obj[asteroidName];
 
-
-
         const isBeingMined = Object.values(asteroidsBeingMined).includes(asteroidName);
-
         const isDestination = destinationAsteroids.includes(asteroidName);
-
         const hasQuantity = asteroid.quantity[0] > 0;
 
-
-
         return !isBeingMined && !isDestination && hasQuantity;
-
     });
-
-    
 
     const rocketAutoBuyerRow = createOptionRow({
-
         labelId: `space${capitaliseString(rocketId)}AutoBuyerRow`,
-
         renderNameABs: getResourceDataObject('space', ['upgrades', rocketId, 'autoBuyer', 'tier1', 'nameUpgrade']),
-
         labelText: localize('tab6FuelRowLabel', getLanguage()),
-
         inputElements: [
-
             createButton({
-
                 text: localize('buttonFuelRocket', getLanguage()),
-
                 classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', rocketId],
-
                 onClick: () => {
-
                     setRocketsFuellerStartedArray(rocketId, 'add');
-
                     sfxPlayer.playAudio('fuelRocket', false);
-
                     switchFuelGaugeWhenFuellerBought(rocketId, 'normal');
-
                 },
-
                 dataConditionCheck: 'upgradeCheck',
-
                 resourcePriceObject: '',
-
                 objectSectionArgument1: 'autoBuyer',
-
                 objectSectionArgument2: null,
-
                 quantityArgument: 'cash',
-
                 disableKeyboardForButton: true,
-
                 autoBuyerTier: 'tier1',
-
                 rowCategory: 'rocketFuel'
-
             }),
-
             createTextElement(`<div id="${rocketId}FuellingProgressBar">`, `${rocketId}FuellingProgressBarContainer`, ['progress-bar-container', 'invisible']),
-
             createButton({
-
                 text: localize('buttonPowerOffRocket', getLanguage()),
-
                 classNames: ['option-button', 'red-disabled-text', 'rocket-fuelled-check', `${rocketId}-launch-button`, 'invisible'],
-
                 onClick: () => {
-
                     launchRocket(rocketId);
-
                     sfxPlayer.playAudio('rocketLaunch', false);
-
                     addToResourceAllTimeStat(1, 'totalRocketsLaunched');
-
                 },
-
                 disableKeyboardForButton: true
-
             }),
-
         ],
-
         descriptionText: `${getCurrencySymbol()}${autobuyerPrice}`,
-
         resourcePriceObject: '',
-
         dataConditionCheck: 'upgradeCheck',
-
         objectSectionArgument1: 'autoBuyer',
-
         objectSectionArgument2: null,
-
         quantityArgument: 'cash',
-
         autoBuyerTier: 'tier1',
-
         startInvisibleValue: false,
-
         resourceString: null,
-
         optionalIterationParam: null,
-
         rowCategory: 'rocketFuel',
-
         noDescriptionContainer: false,
-
         specialInputContainerClasses: null,
-
         hideMainDescriptionRow: false
-
     });
-
     optionContentElement.appendChild(rocketAutoBuyerRow);
 
-
-
     const rocketTravelRow = createOptionRow({
-
         labelId: `space${capitaliseString(rocketId)}TravelRow`,
-
         renderNameABs: null,
-
         labelText: localize('tab6TravelToRowLabel', getLanguage()),
-
         inputElements: [
-
             createTextElement(`${getDestinationAsteroid(rocketId)}`, `${rocketId}DestinationAsteroid`, ['green-ready-text', 'invisible', 'destination-text']),
-
             createDropdown(`${rocketId}TravelDropdown`, filteredAsteroids
-
                 .flatMap(asteroidObj => Object.values(asteroidObj).map(asteroid => ({
-
                     value: asteroid.name,
-
                     text: `${asteroid.name}: ${localize('labelDistance', getLanguage())} <span class="dropDownDistanceValue ${getDistanceClass(asteroid.distance[0])}">${asteroid.distance[0]}</span>, ${localize('labelRarity', getLanguage())} <span class="dropDownRarityValue ${getRarityClass(asteroid.rarity[0])}">${localizeAsteroidRarity(asteroid.rarity[0])}</span>, ${localize('labelAntimatter', getLanguage())} <span class="dropDownQuantityValue ${getQuantityClass(asteroid.quantity[0])}">${asteroid.quantity[0]}</span>`,
-
                     distance: asteroid.distance[0]
-
                 })))
-
                 .sort((a, b) => a.distance - b.distance),
-
                 '', (value) => {
-
                     setDestinationAsteroid(rocketId, value);
-
                 }, ['travel-to']),
-
             createButton({
-
                 text: localize('buttonTravel', getLanguage()),
-
                 classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', `${rocketId}-travel-to-asteroid-button`],
-
                 onClick: () => {
-
                     startTravelToAndFromAsteroidTimer([0, 'buttonClick'], rocketId, false);
-
                     setRocketDirection(rocketId, false);
-
-                    // Clearing rather than storing the rendered default lets
-                    // getCurrentDestinationDropdownText() resolve it per read.
                     setCurrentDestinationDropdownText(null);
-
                 },
-
                 dataConditionCheck: 'upgradeCheck',
-
                 resourcePriceObject: '',
-
                 objectSectionArgument1: 'autoBuyer',
-
                 objectSectionArgument2: 'travelToAsteroid',
-
                 quantityArgument: 'time',
-
                 disableKeyboardForButton: true,
-
                 autoBuyerTier: null,
-
                 rowCategory: 'spaceMiningPurchase'
-
             }),
-
             createTextElement(`<div id="spaceTravelToAsteroidProgressBar${capitaliseString(rocketId)}">`, `spaceTravelToAsteroidProgressBar${capitaliseString(rocketId)}Container`, ['progress-bar-container', 'invisible']),
-
         ],
-
         descriptionText: localize('textTravelling', getLanguage()),
-
         resourcePriceObject: '',
-
         dataConditionCheck: null,
-
         objectSectionArgument1: null,
-
         objectSectionArgument2: null,
-
         quantityArgument: null,
-
         autoBuyerTier: null,
-
         startInvisibleValue: false,
-
         resourceString: null,
-
         optionalIterationParam: null,
-
         rowCategory: 'travel',
-
         noDescriptionContainer: false,
-
         specialInputContainerClasses: null,
-
         hideMainDescriptionRow: false
-
     });
-
     optionContentElement.appendChild(rocketTravelRow);
-
-
 
     setFuellingVisibility(rocketId, [fuellingState, fuelledUpState, launchedState]);
 
 }
 
-
-
 function getRarityClass(rarity) {
-
     if (rarity === 'Common') {
-
         return 'red-disabled-text';
-
     } else if (rarity === 'Uncommon') {
-
         return 'warning-orange-text';
-
     } else if (rarity === 'Legendary') {
-
         return 'green-ready-text';
-
     }
-
     return '';
-
 }
-
-
 
 function getDistanceClass(distance) {
-
     if (distance < 100000) {
-
         return 'green-ready-text';
-
     } else if (distance < 200000) {
-
         return '';
-
     } else if (distance < 300000) {
-
         return 'warning-orange-text';
-
     } else {
-
         return 'red-disabled-text';
-
     }
-
 }
 
-
-
 function getQuantityClass(quantity) {
-
     if (quantity <= 300) {
-
         return 'red-disabled-text';
-
     } else if (quantity <= 600) {
-
         return 'warning-orange-text';
-
     } else if (quantity <= 750) {
-
         return '';
-
     } else {
-
         return 'green-ready-text';
-
     }
-
 }

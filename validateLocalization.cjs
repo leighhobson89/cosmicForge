@@ -233,14 +233,11 @@ function auditKeyReferences(data = readCatalogue(), sources = readSources()) {
     const literals = literalKeys(sources);
     const { produced, families } = resolveConstructedKeys(sources);
 
-    // Direct `localize('key')` calls must all resolve — this is the direction
-    // that puts a raw key on the player's screen.
     const missingLiteral = [];
     for (const match of sources.__all.matchAll(/localize\(\s*['"]([A-Za-z0-9_]+)['"]\s*[,)]/g)) {
         if (!catalogueKeySet.has(match[1])) missingLiteral.push(match[1]);
     }
 
-    // So must every key a family can build.
     const missingConstructed = [];
     for (const [key, family] of produced) {
         if (!catalogueKeySet.has(key)) missingConstructed.push(`${key} (${family})`);
@@ -256,8 +253,6 @@ function auditKeyReferences(data = readCatalogue(), sources = readSources()) {
         else unreferenced.push(key);
     }
 
-    // A key shaped like a family member that the family cannot produce is dead
-    // even if some unrelated literal happens to match its name.
     const orphanedByFamily = [];
     for (const family of CONSTRUCTED_KEY_FAMILIES) {
         const producible = new Set(family.produce(sources));

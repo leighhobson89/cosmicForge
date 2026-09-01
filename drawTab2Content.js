@@ -5,8 +5,6 @@ import { setResourceDataObject, getResourceDataObject } from './resourceDataObje
 import { removeTabAttentionIfNoIndicators, switchBatteryStatBarWhenBatteryBought, createTextElement, createOptionRow, createButton } from './ui.js';
 import { sfxPlayer, playClickSfx } from './audioManager.js';
 
-// The resource a building costs, and the fuel it burns, are stored as internal
-// keys plus the section they live in. Both render as display names.
 const energyUpgradePriceName = (upgrade, slot) => {
     const price = getResourceDataObject('buildings', ['energy', 'upgrades', upgrade, `resource${slot}Price`]);
     return localizeMaterialName(price[1], price[2], getLanguage());
@@ -18,8 +16,6 @@ const energyUpgradeFuelName = (upgrade) => {
 };
 
 export function drawTab2Content(heading, optionContentElement) {
-    // The row's own marker is cleared by the click that opened this pane — see
-    // clearOptionRowAttentionIndicator in ui.js.
     removeTabAttentionIfNoIndicators('tab2');
     
     let toggleButtonText;

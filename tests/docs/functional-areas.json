@@ -1071,9 +1071,11 @@
         "Multiplier is forced to 1 when the window is hidden or unfocused",
         "Autosave is deferred during warp unless always-on",
         "Black hole power purchases scale correctly post-nerf-migration",
-        "No accumulator drift or double-counting across a long warp"
+        "No accumulator drift or double-counting across a long warp",
+        "No upgrade row ever renders an unchanged before/after pair — the rung that reaches the always-active floor names its outcome instead of quoting the same number twice",
+        "The unresearched pane states what the time warp is worth, in all six languages, and drops the pitch once the feature is owned"
       ],
-      "specCount": 19
+      "specCount": 24
     },
     {
       "id": "megastructures",
@@ -1181,10 +1183,11 @@
         "The overlay is emptied when the weather turns fair, and no ambience plays at all with background audio off",
         "The variable debugger's weather row survives a no-op edit",
         "Three severe windows may run back to back; the fourth severe draw is turned into a cloudy window of a fixed one minute, and the streak restarts",
-        "The severe-weather streak is kept across a focus change and comes back with a saved game, and still grants the launch window it was owed"
+        "The severe-weather streak is kept across a focus change and comes back with a saved game, and still grants the launch window it was owed",
+        "The run's collected-precipitation total moves only while it is raining, and by exactly what fell into the store"
       ],
-      "note": "Done — every state reached through the game's own weighted draw and the solar penalty measured off the grid, 34 specs passing. Found and closed known-issues #31, #33 and #46.",
-      "specCount": 34
+      "note": "Done — every state reached through the game's own weighted draw and the solar penalty measured off the grid, 36 specs passing. Found and closed known-issues #31, #33, #46 and #48.",
+      "specCount": 36
     },
     {
       "id": "random-events",

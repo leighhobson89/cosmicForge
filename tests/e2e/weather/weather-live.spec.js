@@ -371,6 +371,41 @@ async function buySolarPlants(game, count = 10) {
     m.rdo.getResourceDataObject('buildings', ['energy', 'upgrades', 'powerPlant2', 'quantity']));
 }
 
+/**
+ * The material this system rains, and the category it lives in.
+ *
+ * Both are properties of the star system rather than fixed materials, so they
+ * are read rather than assumed - a spec that hard-codes water is testing one
+ * system's roll.
+ */
+async function precipitationTarget(game) {
+  return game.withMods((m) => {
+    const system = m.cg.getCurrentStarSystem();
+    return {
+      type: m.rdo.getStarSystemDataObject('stars', [system, 'precipitationType']),
+      category: m.rdo.getStarSystemDataObject('stars', [system, 'precipitationResourceCategory'])
+    };
+  });
+}
+
+/**
+ * Run a tier 1 autobuyer on the material that falls as precipitation.
+ *
+ * This is the state the miscount needed: the tier 1 compound tick is the one
+ * that used to credit the run's precipitation total, and tier 1 runs whether or
+ * not the grid is up.
+ */
+async function stageTier1AutoBuyerOnPrecipitation(game, precipitation, { owned = 10 } = {}) {
+  await game.withMods((m, target) => {
+    m.rdo.setResourceDataObject(1e9, target.category, [target.type, 'storageCapacity']);
+    m.rdo.setResourceDataObject(0, target.category, [target.type, 'quantity']);
+    m.rdo.setResourceDataObject(true, target.category, [target.type, 'upgrades', 'autoBuyer', 'tier1', 'active']);
+    m.rdo.setResourceDataObject(5, target.category, [target.type, 'upgrades', 'autoBuyer', 'tier1', 'rate']);
+    m.rdo.setResourceDataObject(target.owned, target.category, [target.type, 'upgrades', 'autoBuyer', 'tier1', 'quantity']);
+  }, { ...precipitation, owned });
+  await game.page.waitForTimeout(400);
+}
+
 /** The grid's generation rate, once the energy tick has run at least once. */
 async function solarGeneration(game) {
   await game.advanceTimers(200);
@@ -897,6 +932,79 @@ test.describe('Weather — rain', () => {
     const after = await game.withMods((m, target) =>
       m.rdo.getResourceDataObject(target.category, [target.type, 'quantity']), precipitation);
     expect(after, 'and drops nothing').toBe(0);
+  });
+
+  // The run's collected-precipitation total is what the two
+  // collect-100-precipitation achievements are granted on, so these two cases
+  // pin it to the only thing it is allowed to mean: the amount of precipitation
+  // that has actually fallen into the store this run. See known-issues #48 —
+  // the total used to be accrued by the compound autobuyer tick from the tier's
+  // per-unit extraction rate, four times a tick when the grid was up, and with
+  // no weather check at all when it was down.
+
+  test('the collected-precipitation total does not move under a clear sky', async ({ game }) => {
+    const precipitation = await precipitationTarget(game);
+    await stageTier1AutoBuyerOnPrecipitation(game, precipitation);
+
+    // The grid down and a tier 1 autobuyer running is the exact reported
+    // scenario: tier 1 needs no power, so its tick keeps running while every
+    // other tier is idle.
+    await game.withMods((m) => m.cg.setPowerOnOff(false));
+    await forceWeather(game, 'sunny');
+    await game.withMods((m) => m.cg.setCollectedPrecipitationQuantityThisRun(0));
+
+    expect((await weatherState(game)).precipitationRate, 'a clear sky has no rate').toBe(0);
+
+    await game.page.waitForTimeout(3000);
+
+    const collected = await game.withMods((m) => m.cg.getCollectedPrecipitationQuantityThisRun());
+    expect(
+      collected,
+      'nothing has fallen, so nothing has been collected — this is what awarded the achievement on a dry run'
+    ).toBe(0);
+  });
+
+  test('the collected-precipitation total is exactly what fell into the store', async ({ game }) => {
+    const precipitation = await precipitationTarget(game);
+
+    // An *active* tier 1 autobuyer with none owned. Its production is
+    // `rate x quantity`, so it puts nothing in the store and the store's growth
+    // is precipitation and nothing else — but the miscount this guards against
+    // read the tier's per-unit `rate` without the quantity, so it credited the
+    // run total anyway. Staging it this way isolates the two.
+    await stageTier1AutoBuyerOnPrecipitation(game, precipitation, { owned: 0 });
+
+    await forceWeather(game, 'rain');
+    expect((await weatherState(game)).precipitationRate, 'the shower rolls a rate').toBeGreaterThan(0);
+
+    await game.withMods((m) => m.cg.setCollectedPrecipitationQuantityThisRun(0));
+    const before = await game.withMods((m, target) => ({
+      stored: m.rdo.getResourceDataObject(target.category, [target.type, 'quantity']),
+      counted: m.cg.getCollectedPrecipitationQuantityThisRun()
+    }), precipitation);
+
+    await game.page.waitForTimeout(4000);
+
+    const after = await game.withMods((m, target) => ({
+      stored: m.rdo.getResourceDataObject(target.category, [target.type, 'quantity']),
+      counted: m.cg.getCollectedPrecipitationQuantityThisRun()
+    }), precipitation);
+
+    const fell = after.stored - before.stored;
+    const counted = after.counted - before.counted;
+
+    expect(fell, 'the shower should have put something in the store').toBeGreaterThan(0);
+    expect(counted, 'and the run total should have moved with it').toBeGreaterThan(0);
+
+    // The two are written in the same place from the same figure, so they agree
+    // to floating-point noise rather than approximately. A tier 1 autobuyer is
+    // running on the same material throughout, and its production must not be
+    // counted as precipitation.
+    expect(
+      Math.abs(counted - fell),
+      `counted ${counted} against ${fell} actually collected — the run total must be precipitation only, `
+      + 'not autobuyer production'
+    ).toBeLessThan(Math.max(1e-6, fell * 1e-9));
   });
 
   test('rain grounds a fuelled rocket and says why', async ({ game }) => {

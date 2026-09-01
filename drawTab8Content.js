@@ -74,8 +74,6 @@ import { gain } from './game.js';
 import { localize, localizeMaterialName } from './localization.js';
 import { getLanguage } from './constantsAndGlobalVars.js';
 
-// Cosmic Rip tech prerequisites are stored as English display names rather than
-// as tech keys, so they need mapping back to a key before they can be localized.
 const COSMIC_RIP_TECH_NAME_KEYS = {
     'Stabilizer Array': 'cosmicRipTechNameStabilizerArray',
     'Quantum Containment Field': 'cosmicRipTechNameQuantumContainmentField',
@@ -89,18 +87,12 @@ const localizeCosmicRipPrereqs = (prereqs) => (prereqs || [])
     .map((prereq) => (COSMIC_RIP_TECH_NAME_KEYS[prereq] ? localize(COSMIC_RIP_TECH_NAME_KEYS[prereq], getLanguage()) : prereq))
     .join(', ');
 
-// The cosmicRip upgrade price tuples are [quantity, key, section], so the
-// material names in the cost lines resolve the same way as everywhere else.
 const cosmicRipUpgradePriceName = (upgrade, slot) => {
     const price = getResourceDataObject('cosmicRip', ['upgrades', upgrade, `resource${slot}Price`]);
     return localizeMaterialName(price[1], price[2], getLanguage());
 };
 
 export function drawTab8Content(heading, optionContentElement) {
-    // The row's own marker is cleared by the click that opened this pane — see
-    // clearOptionRowAttentionIndicator in ui.js. This tab was also the only one
-    // with no tab-badge sweep at all, so tab 8 kept its badge after every option
-    // had been visited.
     removeTabAttentionIfNoIndicators('tab8');
 
     if (heading === 'Situation') {
