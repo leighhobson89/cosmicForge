@@ -91,6 +91,30 @@ function eventState(game, eventId) {
 }
 
 /**
+ * Press the black hole's Research button.
+ *
+ * Dispatched rather than clicked. `prepareRunForStarshipLaunch()` earns a run of
+ * achievements, and their toasts stack over the black hole pane - a real click
+ * at the button's centre lands on `div.notification.show`, so the research is
+ * never bought and every assertion after it fails on a feature that was never
+ * unlocked. `force: true` does not help: force skips the actionability wait, not
+ * the hit test, and the mouse event still goes to whatever is topmost.
+ *
+ * The wait afterwards is for the frame loop, which is what swaps the pane over
+ * to its unlocked half once the research lands.
+ */
+async function clickResearchBlackHole(game) {
+  const fired = await game.page.evaluate(() => {
+    const el = document.getElementById('blackHoleResearchButton');
+    if (!el) return false;
+    el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    return true;
+  });
+  if (!fired) throw new Error('The black hole Research button was not in the DOM');
+  await game.page.waitForTimeout(900);
+}
+
+/**
  * Buy `count` of a power building through its own purchase button.
  *
  * Everything the row needs — cash, fuel and the `revealed` flag — is staged
@@ -761,8 +785,7 @@ test.describe('Random Events — timed effects, their penalties and their clocks
     });
     await game.openTab(7);
     await openOptionById(game, 'blackholeOption');
-    await game.page.locator('#blackHoleResearchButton').click({ force: true });
-    await game.page.waitForTimeout(900);
+    await clickResearchBlackHole(game);
 
     const researched = await game.withMods((m) => m.rdo.getBlackHoleResearchDone());
     expect(researched, 'the Research button should have unlocked the feature').toBe(true);

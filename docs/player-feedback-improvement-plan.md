@@ -35,7 +35,7 @@ The audit moved several items vs. the original review order: **P3** (power toggl
 | 10 | P8 | Resource tick unification (foundational refactor) | 2 — important, large | Very high | High (30–50 h) |
 | 11 | P9 | Autosell → production allocation redesign — ✅ **COMPLETED** | 2 — important, large | Very high | High (25–40 h) |
 | 12 | P14 | Gain button merge — ✅ **COMPLETED** | 3 — quick win | Medium | Low (4–8 h) |
-| 13 | P11 | Progression clarity (black hole & upgrade displays) | 3 — quick win | Medium | Low-Med (8–12 h) |
+| 13 | P11 | Progression clarity (black hole & upgrade displays) — ✅ **COMPLETED** | 3 — quick win | Medium | Low-Med (8–12 h) |
 | 14 | P12 | UI row/layout refactor (`createOptionRow` mini-tables) — ➡️ **superseded by [largeUIRefactor.md](largeUIRefactor.md)** | 4 — the rest | Medium | High (re-scoped) |
 | 15 | P13 | Spacing / visual hierarchy — ➡️ **superseded by [largeUIRefactor.md](largeUIRefactor.md)** | 4 — the rest | Medium | Medium (re-scoped) |
 
