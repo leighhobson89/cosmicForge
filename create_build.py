@@ -21,7 +21,7 @@ IGNORE_LIST = [
     "create_build.py", "bugs.txt", "node_modules",
     "temp_build", "html-report", "tools", "tests", 
     "test-results", "test-reports", "docs", 
-    "cosmicForgeTrailer.mp4", "playwright-report"
+    "cosmicForgeTrailer.mp4", "playwright-report", "backupScreenshots"
 ]
 
 # InfinityFree FTP Config
