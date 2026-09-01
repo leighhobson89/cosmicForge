@@ -921,7 +921,7 @@
       "status": "green",
       "risk": "high",
       "legacy": [],
-      "summary": "The AP economy and permanent perk purchases, played through the Ascendency Perks pane, plus how the perk list reads once perks start being finished. Errors here permanently corrupt cross-run progress.",
+      "summary": "The AP economy and permanent perk purchases, played through the Ascendency Perks pane, plus how the perk list reads once perks start being finished. Errors here permanently corrupt cross-run progress. The pane itself is the reference section of the large UI refactor (docs/largeUIRefactor.md, Phase 3): since that phase it is drawn by createRow on the newUI section grid rather than by createOptionRow, so its rows are .ui-row elements that also still carry the option-row class. Every id the frame loop writes into is unchanged, and tools/check-row-parity.mjs measures that nothing was dropped.",
       "tests": [
         "Every perk in the catalogue gets a row quoting its catalogue price, and a fresh save can afford none of them",
         "The pane lights up exactly the perks the balance can pay for, at every balance the run passes through",

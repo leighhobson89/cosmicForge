@@ -1,4 +1,4 @@
-import { createButton, createOptionRow, createTextElement, removeTabAttentionIfNoIndicators, setButtonState, showNotification, drawSharedSpaceBackdrop, callPopupModal, showHideModal, playWinCinematic2, setupInfoTooltips } from './ui.js';
+import { createButton, createRow, createSection, createPane, createPriceLabel, createTextElement, removeTabAttentionIfNoIndicators, setButtonState, showNotification, drawSharedSpaceBackdrop, callPopupModal, showHideModal, playWinCinematic2, setupInfoTooltips } from './ui.js';
 import {
     modalCosmicRipLocatedHeader,
     modalCosmicRipLocatedText,
@@ -69,9 +69,11 @@ import {
 } from './constantsAndGlobalVars.js';
 
 import { getResourceDataObject } from './resourceDataObject.js';
+import { getOptionDescription } from './descriptions.js';
 
 import { gain } from './game.js';
 import { localize, localizeMaterialName } from './localization.js';
+import { capitaliseString } from './utilityFunctions.js';
 import { getLanguage } from './constantsAndGlobalVars.js';
 
 // Cosmic Rip tech prerequisites are stored as English display names rather than
@@ -96,6 +98,29 @@ const cosmicRipUpgradePriceName = (upgrade, slot) => {
     return localizeMaterialName(price[1], price[2], getLanguage());
 };
 
+/**
+ * The prose descriptions.js holds for a row, as the row's `detail`.
+ *
+ * The legacy renderer did this for every row without being asked: it looked the
+ * row id up in descriptions.js and drew the sentence as a permanent band above
+ * the row (ui.js:4201). `createRow` deliberately does not — a layout primitive
+ * that reaches into a game data file is the coupling this refactor is removing —
+ * so the call site has to hand the prose over, and the first migration of this
+ * tab did not. Eight localised sentences (`optionDescCosmicRip…`) stopped being
+ * drawn at all, which is the one thing this refactor may not do.
+ *
+ * They come back behind a disclosure rather than as a band, the same treatment
+ * the Ascendency Perks pane established in Phase 3: the sentence explains a
+ * purchase the row already names, so it is an aside rather than the row's point,
+ * and the pane is dense enough that a fifth column would squeeze the progress
+ * bars and prices that carry the row's live data.
+ */
+function rowDetail(rowId) {
+    return getOptionDescription(rowId)?.content1 ?? null;
+}
+
+const DETAIL_LABEL = { key: 'uiRowDetailsLabel' };
+
 export function drawTab8Content(heading, optionContentElement) {
     // The row's own marker is cleared by the click that opened this pane — see
     // clearOptionRowAttentionIndicator in ui.js. This tab was also the only one
@@ -114,11 +139,23 @@ export function drawTab8Content(heading, optionContentElement) {
         const gp = Number(getCosmicRipGalacticPoints?.()) || 0;
         const restoreCost = Number(getNearSpaceScannerArrayRestoreCostGp?.()) || 10;
 
-        const restoreRow = createOptionRow({
-            labelId: 'cosmicRipRestoreNearSpaceScannerArrayRow',
-            renderNameABs: null,
-            labelText: localize('tab8NearSpaceScannerArrayRowLabel', getLanguage()),
-            inputElements: [
+        // Large UI refactor, Phase 4 — tab 8 (docs/largeUIRefactor.md).
+        //
+        // This pane is five heterogeneous rows: one purchase and four status
+        // readouts. It is drawn with NO column headings on purpose — a heading is
+        // written once per section and earns its line when every row means the
+        // same thing by that column, which is true of the perk list and false
+        // here. "Cost" over a column only one row fills is a caption for a single
+        // cell.
+        //
+        // Every id the frame loop reaches for is unchanged: cosmicRipSituationStatusRow
+        // and cosmicRipSituationObjectiveRow are toggled by id (game.js:1760),
+        // closeCosmicRipRow by id with its button found inside it, and the three
+        // status texts by their own ids.
+        const restoreRow = createRow({
+            id: 'cosmicRipRestoreNearSpaceScannerArrayRow',
+            title: localize('tab8NearSpaceScannerArrayRowLabel', getLanguage()),
+            actions: [
                 createButton({
                     text: localize('buttonRestore', getLanguage()),
                     classNames: ['option-button', 'red-disabled-text', 'cosmic-rip-restore-scanner-array-button'],
@@ -152,102 +189,47 @@ export function drawTab8Content(heading, optionContentElement) {
                     rowCategory: 'cosmicRipRestoreNearSpaceScannerArray'
                 }),
             ],
-            descriptionText: `${localize('labelCost', getLanguage())} <span class="warning-orange-text">${restoreCost}</span> GP`,
-            resourcePriceObject: '',
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: 'cosmicRipRestoreNearSpaceScannerArray',
-            noDescriptionContainer: false,
-            specialInputContainerClasses: null,
-            hideMainDescriptionRow: false
+            // No `dataConditionCheck`, so nothing in the frame loop reads this
+            // cell — it is a plain price, and it goes in the cost track as one.
+            cost: [createTextElement(
+                `${localize('labelCost', getLanguage())} <span class="warning-orange-text">${restoreCost}</span> GP`,
+                'cosmicRipRestoreNearSpaceScannerArrayCostText',
+                []
+            )],
+            dataset: { rowCategory: 'cosmicRipRestoreNearSpaceScannerArray' }
         });
 
         if (restored) {
             restoreRow.classList.add('invisible');
         }
 
-        const restoredRow = createOptionRow({
-            labelId: 'cosmicRipNearSpaceScannerArrayRestoredStatusRow',
-            renderNameABs: null,
-            labelText: localize('tab8NearSpaceScannerArrayRowLabel', getLanguage()),
-            inputElements: [
-                createTextElement(localize('textRequiresRestoration', getLanguage()), 'cosmicRipNearSpaceScannerArraySituationStatusText', ['red-disabled-text']),
-            ],
-            descriptionText: '',
-            resourcePriceObject: '',
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: null,
-            noDescriptionContainer: false,
-            specialInputContainerClasses: null,
-            hideMainDescriptionRow: false
+        const restoredRow = createRow({
+            id: 'cosmicRipNearSpaceScannerArrayRestoredStatusRow',
+            title: localize('tab8NearSpaceScannerArrayRowLabel', getLanguage()),
+            // The status readout is the row's one live field, rewritten by id on
+            // every tick (game.js:1676), so it is passed through as an element
+            // rather than rebuilt from text the row would then hold a stale copy of.
+            stat: createTextElement(localize('textRequiresRestoration', getLanguage()), 'cosmicRipNearSpaceScannerArraySituationStatusText', ['red-disabled-text'])
         });
 
-        const cosmicRipStatusRow = createOptionRow({
-            labelId: 'cosmicRipSituationStatusRow',
-            renderNameABs: null,
-            labelText: localize('tab8CosmicRipStatusRowLabel', getLanguage()),
-            inputElements: [
-                createTextElement(localize('textNotLocated', getLanguage()), 'cosmicRipSituationStatusText', ['red-disabled-text']),
-            ],
-            descriptionText: '',
-            resourcePriceObject: '',
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: null,
-            noDescriptionContainer: false,
-            specialInputContainerClasses: null,
-            hideMainDescriptionRow: false
+        const cosmicRipStatusRow = createRow({
+            id: 'cosmicRipSituationStatusRow',
+            title: localize('tab8CosmicRipStatusRowLabel', getLanguage()),
+            stat: createTextElement(localize('textNotLocated', getLanguage()), 'cosmicRipSituationStatusText', ['red-disabled-text']),
+            hidden: true
         });
-        cosmicRipStatusRow.classList.add('invisible');
 
-        const cosmicRipObjectiveRow = createOptionRow({
-            labelId: 'cosmicRipSituationObjectiveRow',
-            renderNameABs: null,
-            labelText: localize('tab8NextObjectiveRowLabel', getLanguage()),
-            inputElements: [
-                createTextElement(localize('textObjectiveScanLocalSectors', getLanguage()), 'cosmicRipSituationObjectiveText', ['green-ready-text']),
-            ],
-            descriptionText: '',
-            resourcePriceObject: '',
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: null,
-            noDescriptionContainer: false,
-            specialInputContainerClasses: null,
-            hideMainDescriptionRow: false
+        const cosmicRipObjectiveRow = createRow({
+            id: 'cosmicRipSituationObjectiveRow',
+            title: localize('tab8NextObjectiveRowLabel', getLanguage()),
+            stat: createTextElement(localize('textObjectiveScanLocalSectors', getLanguage()), 'cosmicRipSituationObjectiveText', ['green-ready-text']),
+            hidden: true
         });
-        cosmicRipObjectiveRow.classList.add('invisible');
 
-        const closeCosmicRipRow = createOptionRow({
-            labelId: 'closeCosmicRipRow',
-            renderNameABs: null,
-            labelText: localize('tab8CloseRipRowLabel', getLanguage()),
-            inputElements: [
+        const closeCosmicRipRow = createRow({
+            id: 'closeCosmicRipRow',
+            title: localize('tab8CloseRipRowLabel', getLanguage()),
+            actions: [
                 createButton({
                     text: localize('buttonCloseCosmicRip', getLanguage()),
                     classNames: ['option-button', 'cosmic-rip-close-rip-button'],
@@ -282,27 +264,27 @@ export function drawTab8Content(heading, optionContentElement) {
                     rowCategory: null
                 }),
             ],
-            descriptionText: '<span id="closeCosmicRipCostGP">1GP</span>',
-            resourcePriceObject: '',
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: true,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: null,
-            noDescriptionContainer: false,
-            specialInputContainerClasses: null,
-            hideMainDescriptionRow: false
+            // The frame loop colours this span green or red by id every tick to
+            // say whether the galactic point can be afforded (game.js:1776), so
+            // it is handed over as an element too.
+            cost: [createTextElement('<span id="closeCosmicRipCostGP">1GP</span>', 'closeCosmicRipCostContainer', [])]
         });
 
-        optionContentElement.appendChild(restoreRow);
-        optionContentElement.appendChild(restoredRow);
-        optionContentElement.appendChild(cosmicRipStatusRow);
-        optionContentElement.appendChild(cosmicRipObjectiveRow);
-        optionContentElement.appendChild(closeCosmicRipRow);
+        optionContentElement.appendChild(createPane({
+            id: 'cosmicRipSituationPane',
+            // Three of this pane's five rows are a label and a live status
+            // sentence, and the sentence is the row. At the default
+            // `minmax(6ch, 0.55fr)` — a track sized for a quantity — "Cosmic Rip
+            // Fully Stabilised and Secured" wrapped onto three lines beside 250px
+            // of empty cost track. The stat track is the widest thing on this
+            // pane, so the pane says so once for all five rows.
+            tracks: { title: 'minmax(11ch, 0.85fr)', stat: 'minmax(28ch, 2.4fr)' },
+            sections: [createSection({
+                id: 'cosmicRipSituationSection',
+                bare: true,
+                rows: [restoreRow, restoredRow, cosmicRipStatusRow, cosmicRipObjectiveRow, closeCosmicRipRow]
+            })]
+        }));
 
         const btn = optionContentElement.querySelector?.('.cosmic-rip-restore-scanner-array-button');
         if (btn) {
@@ -325,27 +307,37 @@ export function drawTab8Content(heading, optionContentElement) {
         const scanCost = Number(getCosmicRipSectorScanCostGp?.()) || 1;
         const sectorCount = Number(getCosmicRipSectorCount?.()) || 9;
 
-        const statusRow = createOptionRow({
-            labelId: 'cosmicRipNearSpaceScannerArrayStatusRow',
-            renderNameABs: null,
-            labelText: localize('tab8SectorsMapRowLabel', getLanguage()),
-            inputElements: null,
-            descriptionText: '',
-            resourcePriceObject: '',
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: null,
-            noDescriptionContainer: false,
-            specialInputContainerClasses: null,
-            hideMainDescriptionRow: false
-        });
-        optionContentElement.appendChild(statusRow);
+        // Large UI refactor, Phase 4 — tab 8.
+        //
+        // The map's caption is a title-only row, and it is a `full` variant
+        // because there is nothing on screen to line it up with: the sector
+        // canvas beneath it is not a row at all, and the two deploy rows below
+        // the canvas are their own group. Four tracks would put its label in a
+        // column no other row shares.
+        //
+        // The label carries its own id now. The frame loop used to find it with
+        // `document.querySelector('.option-row-main div label')` (game.js:1805) —
+        // the FIRST such element anywhere in the document, which merely happened
+        // to be this one. That selector could not survive a migration and was
+        // never safe; it is an id lookup now, with a real null check.
+        const statusRowLabel = createTextElement(
+            localize('tab8SectorsMapRowLabel', getLanguage()),
+            'cosmicRipNearSpaceScannerArrayStatusLabel',
+            []
+        );
+
+        optionContentElement.appendChild(createPane({
+            id: 'cosmicRipNearSpaceScannerArrayCaptionPane',
+            sections: [createSection({
+                id: 'cosmicRipNearSpaceScannerArrayCaptionSection',
+                bare: true,
+                rows: [createRow({
+                    id: 'cosmicRipNearSpaceScannerArrayStatusRow',
+                    variant: 'full',
+                    actions: [statusRowLabel]
+                })]
+            })]
+        }));
 
         const telescopeContainer = document.createElement('div');
         telescopeContainer.id = 'cosmicRipNearSpaceScannerArrayCanvasContainer';
@@ -563,11 +555,17 @@ export function drawTab8Content(heading, optionContentElement) {
         telescopeContainer.appendChild(zoomCanvas);
         optionContentElement.appendChild(telescopeContainer);
 
-        const deploySensorBuoyRow = createOptionRow({
-            labelId: 'cosmicRipNearSpaceScannerArrayDeploySensorBuoyRow',
-            renderNameABs: null,
-            labelText: localize('tab8SensorBuoyRowLabel', getLanguage()),
-            inputElements: [
+        // The two deploy rows share one pane so their Deploy buttons share one
+        // left edge. The canvas above them is not a row and is deliberately left
+        // outside it: the container sizes itself with `height: 100%` against the
+        // flex column, which is a real dependency on the shell and not something
+        // to change while migrating a row system.
+        const deploySensorBuoyRow = createRow({
+            id: 'cosmicRipNearSpaceScannerArrayDeploySensorBuoyRow',
+            title: localize('tab8SensorBuoyRowLabel', getLanguage()),
+            detail: rowDetail('cosmicRipNearSpaceScannerArrayDeploySensorBuoyRow'),
+            detailLabel: DETAIL_LABEL,
+            actions: [
                 createButton({
                     text: localize('buttonDeploy', getLanguage()),
                     classNames: ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check'],
@@ -583,33 +581,41 @@ export function drawTab8Content(heading, optionContentElement) {
                     disableKeyboardForButton: true,
                     rowCategory: 'cosmicRipPurchase'
                 }),
-                createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('cosmicRip', ['upgrades', 'sensorBuoy', 'quantity'])}`, 'sensorBuoyQuantity', ['science-building-quantity']),
             ],
-            descriptionText: `${getCurrencySymbol() + getResourceDataObject('cosmicRip', ['upgrades', 'sensorBuoy', 'price'])}, ` +
-                `${getResourceDataObject('cosmicRip', ['upgrades', 'sensorBuoy', 'resource1Price'])[0]} ${cosmicRipUpgradePriceName('sensorBuoy', 1)}, ` +
-                `${getResourceDataObject('cosmicRip', ['upgrades', 'sensorBuoy', 'resource2Price'])[0]} ${cosmicRipUpgradePriceName('sensorBuoy', 2)}`,
-            resourcePriceObject: '',
-            dataConditionCheck: 'upgradeCheck',
-            objectSectionArgument1: 'cosmicRip',
-            objectSectionArgument2: 'sensorBuoy',
-            quantityArgument: 'cash',
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: 'cosmicRipPurchase',
-            noDescriptionContainer: false,
-            specialInputContainerClasses: null,
-            hideMainDescriptionRow: false
+            // The owned count is its own field now, in the stat track. It used to
+            // be a fourth thing crammed into the 50% input container beside the
+            // Deploy button. The frame loop rewrites it every tick as
+            // "Quantity: N" (game.js:2159), so it labels itself.
+            stat: createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('cosmicRip', ['upgrades', 'sensorBuoy', 'quantity'])}`, 'sensorBuoyQuantity', ['science-building-quantity']),
+            // The price label is the element the frame loop finds by class, by id
+            // and by data-*, and it wears the `red-disabled-text` that IS this
+            // game's affordability gate. It is built by the same factory the
+            // legacy renderer uses and simply placed in the cost track.
+            cost: [createPriceLabel({
+                labelId: 'cosmicRipNearSpaceScannerArrayDeploySensorBuoyRow',
+                html: `${getCurrencySymbol() + getResourceDataObject('cosmicRip', ['upgrades', 'sensorBuoy', 'price'])}, ` +
+                    `${getResourceDataObject('cosmicRip', ['upgrades', 'sensorBuoy', 'resource1Price'])[0]} ${cosmicRipUpgradePriceName('sensorBuoy', 1)}, ` +
+                    `${getResourceDataObject('cosmicRip', ['upgrades', 'sensorBuoy', 'resource2Price'])[0]} ${cosmicRipUpgradePriceName('sensorBuoy', 2)}`,
+                rowCategory: 'cosmicRipPurchase',
+                dataConditionCheck: 'upgradeCheck',
+                objectSectionArgument1: 'cosmicRip',
+                objectSectionArgument2: 'sensorBuoy',
+                quantityArgument: 'cash'
+            })],
+            dataset: {
+                conditionCheck: 'upgradeCheck',
+                type: 'cosmicRip',
+                rowCategory: 'cosmicRipPurchase'
+            },
+            hidden: true
         });
-        deploySensorBuoyRow.classList.add('invisible');
-        optionContentElement.appendChild(deploySensorBuoyRow);
 
-        const deployRipResearchOrbiterRow = createOptionRow({
-            labelId: 'cosmicRipNearSpaceScannerArrayDeployRipResearchOrbiterRow',
-            renderNameABs: null,
-            labelText: localize('tab8RipResearchOrbiterRowLabel', getLanguage()),
-            inputElements: [
+        const deployRipResearchOrbiterRow = createRow({
+            id: 'cosmicRipNearSpaceScannerArrayDeployRipResearchOrbiterRow',
+            title: localize('tab8RipResearchOrbiterRowLabel', getLanguage()),
+            detail: rowDetail('cosmicRipNearSpaceScannerArrayDeployRipResearchOrbiterRow'),
+            detailLabel: DETAIL_LABEL,
+            actions: [
                 createButton({
                     text: localize('buttonDeploy', getLanguage()),
                     classNames: ['option-button', 'red-disabled-text', 'building-purchase-button', 'resource-cost-sell-check'],
@@ -625,28 +631,39 @@ export function drawTab8Content(heading, optionContentElement) {
                     disableKeyboardForButton: true,
                     rowCategory: 'cosmicRipPurchase'
                 }),
-                createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('cosmicRip', ['upgrades', 'ripResearchOrbiter', 'quantity'])}`, 'ripResearchOrbiterQuantity', ['science-building-quantity']),
             ],
-            descriptionText: `${getCurrencySymbol() + getResourceDataObject('cosmicRip', ['upgrades', 'ripResearchOrbiter', 'price'])}, ` +
-                `${getResourceDataObject('cosmicRip', ['upgrades', 'ripResearchOrbiter', 'resource1Price'])[0]} ${cosmicRipUpgradePriceName('ripResearchOrbiter', 1)}, ` +
-                `${getResourceDataObject('cosmicRip', ['upgrades', 'ripResearchOrbiter', 'resource2Price'])[0]} ${cosmicRipUpgradePriceName('ripResearchOrbiter', 2)}, ` +
-                `${getResourceDataObject('cosmicRip', ['upgrades', 'ripResearchOrbiter', 'resource3Price'])[0]} ${cosmicRipUpgradePriceName('ripResearchOrbiter', 3)}`,
-            resourcePriceObject: '',
-            dataConditionCheck: 'upgradeCheck',
-            objectSectionArgument1: 'cosmicRip',
-            objectSectionArgument2: 'ripResearchOrbiter',
-            quantityArgument: 'cash',
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: 'cosmicRipPurchase',
-            noDescriptionContainer: false,
-            specialInputContainerClasses: null,
-            hideMainDescriptionRow: false
+            stat: createTextElement(`${localize('textQuantity', getLanguage())}: ${getResourceDataObject('cosmicRip', ['upgrades', 'ripResearchOrbiter', 'quantity'])}`, 'ripResearchOrbiterQuantity', ['science-building-quantity']),
+            cost: [createPriceLabel({
+                labelId: 'cosmicRipNearSpaceScannerArrayDeployRipResearchOrbiterRow',
+                html: `${getCurrencySymbol() + getResourceDataObject('cosmicRip', ['upgrades', 'ripResearchOrbiter', 'price'])}, ` +
+                    `${getResourceDataObject('cosmicRip', ['upgrades', 'ripResearchOrbiter', 'resource1Price'])[0]} ${cosmicRipUpgradePriceName('ripResearchOrbiter', 1)}, ` +
+                    `${getResourceDataObject('cosmicRip', ['upgrades', 'ripResearchOrbiter', 'resource2Price'])[0]} ${cosmicRipUpgradePriceName('ripResearchOrbiter', 2)}, ` +
+                    `${getResourceDataObject('cosmicRip', ['upgrades', 'ripResearchOrbiter', 'resource3Price'])[0]} ${cosmicRipUpgradePriceName('ripResearchOrbiter', 3)}`,
+                rowCategory: 'cosmicRipPurchase',
+                dataConditionCheck: 'upgradeCheck',
+                objectSectionArgument1: 'cosmicRip',
+                objectSectionArgument2: 'ripResearchOrbiter',
+                quantityArgument: 'cash'
+            })],
+            dataset: {
+                conditionCheck: 'upgradeCheck',
+                type: 'cosmicRip',
+                rowCategory: 'cosmicRipPurchase'
+            },
+            hidden: true
         });
-        deployRipResearchOrbiterRow.classList.add('invisible');
-        optionContentElement.appendChild(deployRipResearchOrbiterRow);
+
+        optionContentElement.appendChild(createPane({
+            id: 'cosmicRipNearSpaceScannerArrayDeployPane',
+            sections: [createSection({
+                id: 'cosmicRipNearSpaceScannerArrayDeploySection',
+                bare: true,
+                // No column headings: the quantity field labels itself, and a
+                // "Cost" caption over a two-row section earns less than the line
+                // it costs.
+                rows: [deploySensorBuoyRow, deployRipResearchOrbiterRow]
+            })]
+        }));
 
         if (restored && found) {
             deploySensorBuoyRow.classList.remove('invisible');
@@ -857,12 +874,27 @@ export function drawTab8Content(heading, optionContentElement) {
         const restored = getCosmicRipNearSpaceScannerArrayRestored?.() === true;
         const found = getCosmicRipRipFound?.() === true;
 
-        const statusRow = createOptionRow({
-            labelId: 'cosmicRipCosmicRipStatusRow',
-            renderNameABs: null,
-            labelText: localize('tab8CosmicRipRowLabel', getLanguage()),
-            inputElements: [
-                createTextElement(`<div id="cosmicRipStabilityProgressBar">`, `cosmicRipStabilityProgressBarContainer`, ['progress-bar-container']),
+        // Large UI refactor, Phase 4 — tab 8 (docs/largeUIRefactor.md).
+        //
+        // The five tech rows were five copies of the same forty lines, differing
+        // only in a key and a display name. They are one template now, which is
+        // the duplication Phase 7 was scheduled to fold away and which the row
+        // spec makes cheap enough to do here instead.
+        //
+        // Every row places its progress bar in the `stat` track rather than
+        // beside the button. That is not cosmetic: `.progress-bar-container` is
+        // `width: 100%`, which resolves to nothing inside a content-sized action
+        // cell and resolves properly inside a real grid track. The section
+        // widens that track once, for all six rows, instead of each row
+        // declaring its own percentage — which is exactly the substitution this
+        // phase exists to make.
+        const stabilityRow = createRow({
+            id: 'cosmicRipCosmicRipStatusRow',
+            title: localize('tab8CosmicRipRowLabel', getLanguage()),
+            detail: rowDetail('cosmicRipCosmicRipStatusRow'),
+            detailLabel: DETAIL_LABEL,
+            stat: createTextElement(`<div id="cosmicRipStabilityProgressBar">`, `cosmicRipStabilityProgressBarContainer`, ['progress-bar-container']),
+            actions: [
                 createButton({
                     text: '0%',
                     classNames: ['no-interaction', 'option-button', 'cosmic-rip-progress-bar-button-margin', 'id_cosmicRipStabilityPercentageText'],
@@ -870,24 +902,8 @@ export function drawTab8Content(heading, optionContentElement) {
                     disableKeyboardForButton: true,
                     rowCategory: null
                 }),
-            ],
-            descriptionText: '',
-            resourcePriceObject: '',
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: null,
-            noDescriptionContainer: [true, '15%', '70%'],
-            specialInputContainerClasses: null,
-            hideMainDescriptionRow: false
+            ]
         });
-        statusRow.classList.remove('invisible');
-        optionContentElement.appendChild(statusRow);
 
         setTimeout(() => {
             const progressBar = document.getElementById('cosmicRipStabilityProgressBar');
@@ -904,215 +920,91 @@ export function drawTab8Content(heading, optionContentElement) {
             }
         }, 0);
 
-        const stabilizerArrayRow = createOptionRow({
-            labelId: 'cosmicRipStabilizerArrayRow',
-            renderNameABs: null,
-            labelText: `${localize('cosmicRipTechNameStabilizerArray', getLanguage())}:`,
-            inputElements: [
-                createTextElement(`<div id="cosmicRipTechProgressBar_stabilizerArray">`, `cosmicRipTechProgressBarContainer_stabilizerArray`, ['progress-bar-container', 'invisible']),
-                createButton({
-                    text: localize('buttonResearch', getLanguage()),
-                    classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'cosmic-rip-tech-unlock', 'cosmic-rip-build-stabilizer-array-button', 'id_cosmicRipTechResearchButton_stabilizerArray'],
-                    onClick: () => {
-                        gain(1, null, 'stabilizerArray', true, null, 'cosmicRipTech', 'tech');
-                        const btn = document.getElementById('cosmicRipTechResearchButton_stabilizerArray');
-                        const progressBarContainer = document.getElementById('cosmicRipTechProgressBarContainer_stabilizerArray');
-                        if (btn) btn.classList.add('invisible');
-                        if (progressBarContainer) progressBarContainer.classList.remove('invisible');
-                    },
-                    dataConditionCheck: 'cosmicRipTechUnlock',
-                    resourcePriceObject: '',
-                    objectSectionArgument1: 'stabilizerArray',
-                    quantityArgument: 'ripTelemetryData',
-                    disableKeyboardForButton: true,
-                    rowCategory: 'cosmicRipBuildStabilizerArray'
-                }),
-            ],
-            descriptionText: `<span id="cosmicRipTechDescription_stabilizerArray"><span id="stabilizerArrayTelemetry">${getResourceDataObject('cosmicRip', ['techs', 'stabilizerArray', 'price'])} ${localize('textTelemetryData', getLanguage())}<span id="stabilizerArrayComma1">, </span></span><span id="stabilizerArrayGP">1GP<span id="stabilizerArrayComma2">, </span></span>${getResourceDataObject('cosmicRip', ['techs', 'stabilizerArray', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? '' : ''}<span id="stabilizerArrayPrereq">${localizeCosmicRipPrereqs(getResourceDataObject('cosmicRip', ['techs', 'stabilizerArray', 'prereqs']))}</span></span>`,
-            resourcePriceObject: '',
-            dataConditionCheck: 'cosmicRipTechUnlock',
-            objectSectionArgument1: 'stabilizerArray',
-            objectSectionArgument2: null,
-            quantityArgument: 'ripTelemetryData',
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: 'tech',
-            noDescriptionContainer: false,
-            specialInputContainerClasses: null,
-            hideMainDescriptionRow: false
-        });
-        stabilizerArrayRow.classList.add('invisible');
-        optionContentElement.appendChild(stabilizerArrayRow);
+        /**
+         * One Cosmic Rip technology row.
+         *
+         * `techKey` is the catalogue key and is what every id, dataset value and
+         * reveal predicate is built from; `nameKey` is its localisation key. The
+         * row starts hidden and is revealed by the frame loop's own tech sweep
+         * (resourceAndCompoundMonitorRevealRowsChecks, game.js:7629), which finds
+         * it through the `option-row` class and the `conditionCheck` / `type`
+         * dataset pair — all three of which the migrated row still carries.
+         *
+         * The price label is built by `createPriceLabel`, the same factory the
+         * legacy renderer uses, so its class, its generated `…Description` id,
+         * its `data-*` attributes and its `red-disabled-text` affordability gate
+         * are identical to before. Its inner spans are the ones Phase 2 taught to
+         * carry their own raw amounts, so the notation formatter still rebuilds
+         * them without parsing any rendered text.
+         */
+        const createCosmicRipTechRow = (techKey, nameKey) => {
+            const prereqs = getResourceDataObject('cosmicRip', ['techs', techKey, 'prereqs']);
 
-        const quantumContainmentFieldRow = createOptionRow({
-            labelId: 'cosmicRipQuantumContainmentFieldRow',
-            renderNameABs: null,
-            labelText: `${localize('cosmicRipTechNameQuantumContainmentField', getLanguage())}:`,
-            inputElements: [
-                createTextElement(`<div id="cosmicRipTechProgressBar_quantumContainmentField">`, `cosmicRipTechProgressBarContainer_quantumContainmentField`, ['progress-bar-container', 'invisible']),
-                createButton({
-                    text: localize('buttonResearch', getLanguage()),
-                    classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'cosmic-rip-tech-unlock', 'cosmic-rip-build-stabilizer-array-button', 'id_cosmicRipTechResearchButton_quantumContainmentField'],
-                    onClick: () => {
-                        gain(1, null, 'quantumContainmentField', true, null, 'cosmicRipTech', 'tech');
-                        const btn = document.getElementById('cosmicRipTechResearchButton_quantumContainmentField');
-                        const progressBarContainer = document.getElementById('cosmicRipTechProgressBarContainer_quantumContainmentField');
-                        if (btn) btn.classList.add('invisible');
-                        if (progressBarContainer) progressBarContainer.classList.remove('invisible');
-                    },
-                    dataConditionCheck: 'cosmicRipTechUnlock',
-                    resourcePriceObject: '',
-                    objectSectionArgument1: 'quantumContainmentField',
-                    quantityArgument: 'ripTelemetryData',
-                    disableKeyboardForButton: true,
-                    rowCategory: 'cosmicRipBuildStabilizerArray'
-                }),
-            ],
-            descriptionText: `<span id="cosmicRipTechDescription_quantumContainmentField"><span id="quantumContainmentFieldTelemetry">${getResourceDataObject('cosmicRip', ['techs', 'quantumContainmentField', 'price'])} ${localize('textTelemetryData', getLanguage())}<span id="quantumContainmentFieldComma1">, </span></span><span id="quantumContainmentFieldGP">1GP<span id="quantumContainmentFieldComma2">, </span></span>${getResourceDataObject('cosmicRip', ['techs', 'quantumContainmentField', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? '' : ''}<span id="quantumContainmentFieldPrereq">${localizeCosmicRipPrereqs(getResourceDataObject('cosmicRip', ['techs', 'quantumContainmentField', 'prereqs']))}</span></span>`,
-            resourcePriceObject: '',
-            dataConditionCheck: 'cosmicRipTechUnlock',
-            objectSectionArgument1: 'quantumContainmentField',
-            objectSectionArgument2: null,
-            quantityArgument: 'ripTelemetryData',
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: 'tech',
-            noDescriptionContainer: false,
-            specialInputContainerClasses: null,
-            hideMainDescriptionRow: false
-        });
-        quantumContainmentFieldRow.classList.add('invisible');
-        optionContentElement.appendChild(quantumContainmentFieldRow);
+            const researchButton = createButton({
+                text: localize('buttonResearch', getLanguage()),
+                classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'cosmic-rip-tech-unlock', 'cosmic-rip-build-stabilizer-array-button', `id_cosmicRipTechResearchButton_${techKey}`],
+                onClick: () => {
+                    gain(1, null, techKey, true, null, 'cosmicRipTech', 'tech');
+                    const btn = document.getElementById(`cosmicRipTechResearchButton_${techKey}`);
+                    const progressBarContainer = document.getElementById(`cosmicRipTechProgressBarContainer_${techKey}`);
+                    if (btn) btn.classList.add('invisible');
+                    if (progressBarContainer) progressBarContainer.classList.remove('invisible');
+                },
+                dataConditionCheck: 'cosmicRipTechUnlock',
+                resourcePriceObject: '',
+                objectSectionArgument1: techKey,
+                quantityArgument: 'ripTelemetryData',
+                disableKeyboardForButton: true,
+                rowCategory: 'cosmicRipBuildStabilizerArray'
+            });
 
-        const dimensionalAnchorMatrixRow = createOptionRow({
-            labelId: 'cosmicRipDimensionalAnchorMatrixRow',
-            renderNameABs: null,
-            labelText: `${localize('cosmicRipTechNameDimensionalAnchorMatrix', getLanguage())}:`,
-            inputElements: [
-                createTextElement(`<div id="cosmicRipTechProgressBar_dimensionalAnchorMatrix">`, `cosmicRipTechProgressBarContainer_dimensionalAnchorMatrix`, ['progress-bar-container', 'invisible']),
-                createButton({
-                    text: localize('buttonResearch', getLanguage()),
-                    classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'cosmic-rip-tech-unlock', 'cosmic-rip-build-stabilizer-array-button', 'id_cosmicRipTechResearchButton_dimensionalAnchorMatrix'],
-                    onClick: () => {
-                        gain(1, null, 'dimensionalAnchorMatrix', true, null, 'cosmicRipTech', 'tech');
-                        const btn = document.getElementById('cosmicRipTechResearchButton_dimensionalAnchorMatrix');
-                        const progressBarContainer = document.getElementById('cosmicRipTechProgressBarContainer_dimensionalAnchorMatrix');
-                        if (btn) btn.classList.add('invisible');
-                        if (progressBarContainer) progressBarContainer.classList.remove('invisible');
-                    },
-                    dataConditionCheck: 'cosmicRipTechUnlock',
-                    resourcePriceObject: '',
-                    objectSectionArgument1: 'dimensionalAnchorMatrix',
-                    quantityArgument: 'ripTelemetryData',
-                    disableKeyboardForButton: true,
-                    rowCategory: 'cosmicRipBuildStabilizerArray'
-                }),
-            ],
-            descriptionText: `<span id="cosmicRipTechDescription_dimensionalAnchorMatrix"><span id="dimensionalAnchorMatrixTelemetry">${getResourceDataObject('cosmicRip', ['techs', 'dimensionalAnchorMatrix', 'price'])} ${localize('textTelemetryData', getLanguage())}<span id="dimensionalAnchorMatrixComma1">, </span></span><span id="dimensionalAnchorMatrixGP">1GP<span id="dimensionalAnchorMatrixComma2">, </span></span>${getResourceDataObject('cosmicRip', ['techs', 'dimensionalAnchorMatrix', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? '' : ''}<span id="dimensionalAnchorMatrixPrereq">${localizeCosmicRipPrereqs(getResourceDataObject('cosmicRip', ['techs', 'dimensionalAnchorMatrix', 'prereqs']))}</span></span>`,
-            resourcePriceObject: '',
-            dataConditionCheck: 'cosmicRipTechUnlock',
-            objectSectionArgument1: 'dimensionalAnchorMatrix',
-            objectSectionArgument2: null,
-            quantityArgument: 'ripTelemetryData',
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: 'tech',
-            noDescriptionContainer: false,
-            specialInputContainerClasses: null,
-            hideMainDescriptionRow: false
-        });
-        dimensionalAnchorMatrixRow.classList.add('invisible');
-        optionContentElement.appendChild(dimensionalAnchorMatrixRow);
+            const rowId = `cosmicRip${capitaliseString(techKey)}Row`;
 
-        const singularityStabilizerRow = createOptionRow({
-            labelId: 'cosmicRipSingularityStabilizerRow',
-            renderNameABs: null,
-            labelText: `${localize('cosmicRipTechNameSingularityStabilizer', getLanguage())}:`,
-            inputElements: [
-                createTextElement(`<div id="cosmicRipTechProgressBar_singularityStabilizer">`, `cosmicRipTechProgressBarContainer_singularityStabilizer`, ['progress-bar-container', 'invisible']),
-                createButton({
-                    text: localize('buttonResearch', getLanguage()),
-                    classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'cosmic-rip-tech-unlock', 'cosmic-rip-build-stabilizer-array-button', 'id_cosmicRipTechResearchButton_singularityStabilizer'],
-                    onClick: () => {
-                        gain(1, null, 'singularityStabilizer', true, null, 'cosmicRipTech', 'tech');
-                        const btn = document.getElementById('cosmicRipTechResearchButton_singularityStabilizer');
-                        const progressBarContainer = document.getElementById('cosmicRipTechProgressBarContainer_singularityStabilizer');
-                        if (btn) btn.classList.add('invisible');
-                        if (progressBarContainer) progressBarContainer.classList.remove('invisible');
-                    },
+            return createRow({
+                id: rowId,
+                title: localize(nameKey, getLanguage()),
+                detail: rowDetail(rowId),
+                detailLabel: DETAIL_LABEL,
+                stat: createTextElement(`<div id="cosmicRipTechProgressBar_${techKey}">`, `cosmicRipTechProgressBarContainer_${techKey}`, ['progress-bar-container', 'invisible']),
+                actions: [researchButton],
+                cost: [createPriceLabel({
+                    labelId: rowId,
+                    html: `<span id="cosmicRipTechDescription_${techKey}"><span id="${techKey}Telemetry">${getResourceDataObject('cosmicRip', ['techs', techKey, 'price'])} ${localize('textTelemetryData', getLanguage())}<span id="${techKey}Comma1">, </span></span><span id="${techKey}GP">1GP<span id="${techKey}Comma2">, </span></span><span id="${techKey}Prereq">${localizeCosmicRipPrereqs(prereqs)}</span></span>`,
+                    rowCategory: 'tech',
                     dataConditionCheck: 'cosmicRipTechUnlock',
-                    resourcePriceObject: '',
-                    objectSectionArgument1: 'singularityStabilizer',
-                    quantityArgument: 'ripTelemetryData',
-                    disableKeyboardForButton: true,
-                    rowCategory: 'cosmicRipBuildStabilizerArray'
-                }),
-            ],
-            descriptionText: `<span id="cosmicRipTechDescription_singularityStabilizer"><span id="singularityStabilizerTelemetry">${getResourceDataObject('cosmicRip', ['techs', 'singularityStabilizer', 'price'])} ${localize('textTelemetryData', getLanguage())}<span id="singularityStabilizerComma1">, </span></span><span id="singularityStabilizerGP">1GP<span id="singularityStabilizerComma2">, </span></span>${getResourceDataObject('cosmicRip', ['techs', 'singularityStabilizer', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? '' : ''}<span id="singularityStabilizerPrereq">${localizeCosmicRipPrereqs(getResourceDataObject('cosmicRip', ['techs', 'singularityStabilizer', 'prereqs']))}</span></span>`,
-            resourcePriceObject: '',
-            dataConditionCheck: 'cosmicRipTechUnlock',
-            objectSectionArgument1: 'singularityStabilizer',
-            objectSectionArgument2: null,
-            quantityArgument: 'ripTelemetryData',
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: 'tech',
-            noDescriptionContainer: false,
-            specialInputContainerClasses: null,
-            hideMainDescriptionRow: false
-        });
-        singularityStabilizerRow.classList.add('invisible');
-        optionContentElement.appendChild(singularityStabilizerRow);
+                    objectSectionArgument1: techKey,
+                    quantityArgument: 'ripTelemetryData'
+                })],
+                reveal: [{ kind: 'cosmicRipTechUnlock', tech: techKey }],
+                dataset: {
+                    conditionCheck: 'cosmicRipTechUnlock',
+                    type: techKey,
+                    rowCategory: 'tech'
+                },
+                hidden: true
+            });
+        };
 
-        const realityWeaveRegulatorRow = createOptionRow({
-            labelId: 'cosmicRipRealityWeaveRegulatorRow',
-            renderNameABs: null,
-            labelText: `${localize('cosmicRipTechNameRealityWeaveRegulator', getLanguage())}:`,
-            inputElements: [
-                createTextElement(`<div id="cosmicRipTechProgressBar_realityWeaveRegulator">`, `cosmicRipTechProgressBarContainer_realityWeaveRegulator`, ['progress-bar-container', 'invisible']),
-                createButton({
-                    text: localize('buttonResearch', getLanguage()),
-                    classNames: ['option-button', 'red-disabled-text', 'resource-cost-sell-check', 'cosmic-rip-tech-unlock', 'cosmic-rip-build-stabilizer-array-button', 'id_cosmicRipTechResearchButton_realityWeaveRegulator'],
-                    onClick: () => {
-                        gain(1, null, 'realityWeaveRegulator', true, null, 'cosmicRipTech', 'tech');
-                        const btn = document.getElementById('cosmicRipTechResearchButton_realityWeaveRegulator');
-                        const progressBarContainer = document.getElementById('cosmicRipTechProgressBarContainer_realityWeaveRegulator');
-                        if (btn) btn.classList.add('invisible');
-                        if (progressBarContainer) progressBarContainer.classList.remove('invisible');
-                    },
-                    dataConditionCheck: 'cosmicRipTechUnlock',
-                    resourcePriceObject: '',
-                    objectSectionArgument1: 'realityWeaveRegulator',
-                    quantityArgument: 'ripTelemetryData',
-                    disableKeyboardForButton: true,
-                    rowCategory: 'cosmicRipBuildStabilizerArray'
-                }),
-            ],
-            descriptionText: `<span id="cosmicRipTechDescription_realityWeaveRegulator"><span id="realityWeaveRegulatorTelemetry">${getResourceDataObject('cosmicRip', ['techs', 'realityWeaveRegulator', 'price'])} ${localize('textTelemetryData', getLanguage())}<span id="realityWeaveRegulatorComma1">, </span></span><span id="realityWeaveRegulatorGP">1GP<span id="realityWeaveRegulatorComma2">, </span></span>${getResourceDataObject('cosmicRip', ['techs', 'realityWeaveRegulator', 'prereqs']).filter(prereq => prereq !== null).length > 0 ? '' : ''}<span id="realityWeaveRegulatorPrereq">${localizeCosmicRipPrereqs(getResourceDataObject('cosmicRip', ['techs', 'realityWeaveRegulator', 'prereqs']))}</span></span>`,
-            resourcePriceObject: '',
-            dataConditionCheck: 'cosmicRipTechUnlock',
-            objectSectionArgument1: 'realityWeaveRegulator',
-            objectSectionArgument2: null,
-            quantityArgument: 'ripTelemetryData',
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: 'tech',
-            noDescriptionContainer: false,
-            specialInputContainerClasses: null,
-            hideMainDescriptionRow: false
-        });
-        realityWeaveRegulatorRow.classList.add('invisible');
-        optionContentElement.appendChild(realityWeaveRegulatorRow);
+        const techRows = [
+            ['stabilizerArray', 'cosmicRipTechNameStabilizerArray'],
+            ['quantumContainmentField', 'cosmicRipTechNameQuantumContainmentField'],
+            ['dimensionalAnchorMatrix', 'cosmicRipTechNameDimensionalAnchorMatrix'],
+            ['singularityStabilizer', 'cosmicRipTechNameSingularityStabilizer'],
+            ['realityWeaveRegulator', 'cosmicRipTechNameRealityWeaveRegulator']
+        ].map(([techKey, nameKey]) => createCosmicRipTechRow(techKey, nameKey));
+
+        optionContentElement.appendChild(createPane({
+            id: 'cosmicRipTechPane',
+            // The progress bars want a real column, so the pane widens the stat
+            // track once for every row on the screen. This is the replacement for
+            // the per-row `[true, '15%', '70%']` the status row used to carry.
+            tracks: { title: 'minmax(11ch, 1.4fr)', stat: 'minmax(16ch, 1.8fr)' },
+            sections: [createSection({
+                id: 'cosmicRipTechSection',
+                bare: true,
+                rows: [stabilityRow, ...techRows]
+            })]
+        }));
         return;
     }
 }

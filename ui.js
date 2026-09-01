@@ -411,6 +411,16 @@ import { timerManager } from './timerManager.js';
 import { timerManagerDelta } from './timerManagerDelta.js';
 
 
+// Large UI refactor, Phase 3 (docs/largeUIRefactor.md). `createOptionRow` below
+// is now an adapter: it maps the legacy 21-option bag onto a row spec and hands
+// it to the legacy renderer, so all 277 existing call sites are untouched while
+// one section at a time moves to `createRow`, which draws the same spec into the
+// Phase 1 section grid instead.
+import { createRow, createSection, createPane, appendUiRow, setUiLocaliser } from './newUI/createRow.js';
+import { createRowSpec } from './newUI/rowSpec.js';
+import { registerReveal, applyReveal } from './newUI/reveal.js';
+
+
 import { drawTab1Content } from './drawTab1Content.js';
 import { drawTab2Content } from './drawTab2Content.js';
 import { drawTab3Content } from './drawTab3Content.js';
@@ -3848,27 +3858,338 @@ function withBulkPurchaseButton(elements, rowOptions) {
 }
 
 
-export function createOptionRow(options = {}) {
+/* ==========================================================================
+   Large UI refactor, Phase 3 — wiring the new row system into the game
+
+   The `create*()` factories for the section grid are re-exported from here so a
+   draw file keeps importing its row builders from one place, beside
+   `createButton` and `createDropdown`, per the project's factory convention.
+
+   The localiser is installed once. Until it is, newUI renders a `{ key: '…' }`
+   text field as the key itself, so a missing wire-up is visible on screen rather
+   than silently falling back to English.
+   ========================================================================== */
+
+export { createRow, createSection, createPane, appendUiRow };
+
+setUiLocaliser((key) => localize(key, getLanguage()));
+
+
+/* ==========================================================================
+   Large UI refactor, Phase 3 — the reveal registry (docs/largeUIRefactor.md F1)
+
+   These five predicates are the visibility rules that used to live *inside*
+   `createOptionRow`. A layout function had to know the tech tree, the Cosmic Rip
+   telemetry counter and, by name, three panes — which meant it had to be edited
+   whenever a pane was added, and none of the logic could be looked at apart from
+   the markup it was tangled with.
+
+   They are registered here, in the file that already imports the tech and
+   research accessors. The two genuinely pane-specific ones — the launch pad's
+   rockets and the space telescope's actions — are registered by
+   drawTab6Content.js, which is the file that draws those panes.
+
+   A predicate returns `true` (show), `false` (hide) or `null` (no opinion, leave
+   the row alone). The third state matters: the two tech branches only ever
+   *hid* a row and never un-hid one, because the frame loop's
+   `resourceAndCompoundMonitorRevealRowsChecks` (game.js:7620) owns the
+   un-hiding. Returning `true` from them would take that away.
+   ========================================================================== */
+
+registerReveal('techUnlock', ({ tech }) => {
+    if (!tech) return null;
+
+    const appearsAt = getResourceDataObject('techs', [tech, 'appearsAt']);
+    const researchPointsToAppear = appearsAt?.[0];
+    const prerequisiteForTech = appearsAt?.[1];
+
+    const researchQty = getResourceDataObject('research', ['quantity']);
+    const alreadyRevealed = getRevealedTechArray().includes(tech);
+    const prereqUnlocked = getTechUnlockedArray().includes(prerequisiteForTech);
+
+    if (researchQty < researchPointsToAppear && !alreadyRevealed) return false;
+    if (!prereqUnlocked) return false;
+
+    // First sighting: record it, so the frame loop and the tech-tree sort agree
+    // that this row is now part of the visible set. The effect belongs with the
+    // rule, not with the markup.
+    if (researchQty >= researchPointsToAppear && !alreadyRevealed) setRevealedTechArray(tech);
+    return null;
+});
+
+registerReveal('cosmicRipTechUnlock', ({ tech }) => {
+    if (!tech) return null;
+
+    const appearsAt = getResourceDataObject('cosmicRip', ['techs', tech, 'appearsAt']);
+    const telemetryPointsToAppear = appearsAt?.[0];
+    const prerequisiteForTech = appearsAt?.[1];
+
+    const telemetryQty = getResourceDataObject('cosmicRip', ['ripTelemetryData']);
+    const alreadyRevealed = getRevealedCosmicRipTechArray().includes(tech);
+    const prereqUnlocked = getCosmicRipTechUnlockedArray().includes(prerequisiteForTech);
+
+    if (telemetryQty < telemetryPointsToAppear && !alreadyRevealed) return false;
+    if (!prereqUnlocked) return false;
+
+    if (telemetryQty >= telemetryPointsToAppear && !alreadyRevealed) setRevealedCosmicRipTechArray(tech);
+    return null;
+});
+
+/** Hidden until a tech is unlocked. Hide-only, as the legacy branch was. */
+registerReveal('tech', ({ requires }) => (
+    requires && !getTechUnlockedArray().includes(requires) ? false : null
+));
+
+/** Hidden *while* a debug entry is present — the sense is inverted, as it was. */
+registerReveal('debugHidden', ({ requires }) => (
+    requires && getDebugVisibilityArray().includes(requires) ? false : null
+));
+
+
+/* ==========================================================================
+   Large UI refactor, Phase 3 — the legacy adapter
+
+   `createOptionRow` is now two functions. `legacyOptionsToRowSpec` translates
+   the 21-option bag into the described row of newUI/rowSpec.js, and
+   `renderLegacyOptionRow` draws that spec as the `.option-row` mini-table the
+   game has today, exactly as before.
+
+   Nothing at the 277 call sites changes. What changes is that there is now a
+   single description of a row that BOTH renderers read: the legacy one here and
+   the grid one in newUI/createRow.js. That is what makes a migration a change of
+   renderer rather than a rewrite of the row, and what lets a section be moved
+   across one at a time with the rest of the game untouched.
+   ========================================================================== */
+
+/**
+ * Map the legacy option bag onto a row spec.
+ *
+ * The mapping is where the positional names finally get read out loud.
+ * `objectSectionArgument1` is the resource-or-tech key, `objectSectionArgument2`
+ * is the fuse-to target or the pane action, `quantityArgument` is the storage
+ * quantity to check. They keep their legacy names inside `spec.legacy`, because
+ * the legacy renderer's `data-*` attributes are read by the frame loop by those
+ * exact names and renaming them here would be a behaviour change dressed up as
+ * a tidy-up.
+ */
+export function legacyOptionsToRowSpec(options = {}) {
     const opts = options || {};
 
-    const labelId = opts.labelId;
-    const renderNameABs = Object.prototype.hasOwnProperty.call(opts, 'renderNameABs') ? opts.renderNameABs : null;
-    const labelText = opts.labelText;
-    const inputElements = Array.isArray(opts.inputElements) ? opts.inputElements : [];
-    const descriptionText = Object.prototype.hasOwnProperty.call(opts, 'descriptionText') ? opts.descriptionText : null;
-    const resourcePriceObject = Object.prototype.hasOwnProperty.call(opts, 'resourcePriceObject') ? opts.resourcePriceObject : null;
-    const dataConditionCheck = Object.prototype.hasOwnProperty.call(opts, 'dataConditionCheck') ? opts.dataConditionCheck : null;
-    const objectSectionArgument1 = Object.prototype.hasOwnProperty.call(opts, 'objectSectionArgument1') ? opts.objectSectionArgument1 : null;
-    const objectSectionArgument2 = Object.prototype.hasOwnProperty.call(opts, 'objectSectionArgument2') ? opts.objectSectionArgument2 : null;
-    const quantityArgument = Object.prototype.hasOwnProperty.call(opts, 'quantityArgument') ? opts.quantityArgument : null;
-    const autoBuyerTier = Object.prototype.hasOwnProperty.call(opts, 'autoBuyerTier') ? opts.autoBuyerTier : null;
-    const startInvisibleValue = Object.prototype.hasOwnProperty.call(opts, 'startInvisibleValue') ? opts.startInvisibleValue : null;
-    const resourceString = Object.prototype.hasOwnProperty.call(opts, 'resourceString') ? opts.resourceString : null;
-    const optionalIterationParam = Object.prototype.hasOwnProperty.call(opts, 'optionalIterationParam') ? opts.optionalIterationParam : null;
-    const rowCategory = Object.prototype.hasOwnProperty.call(opts, 'rowCategory') ? opts.rowCategory : null;
-    const noDescriptionContainer = Object.prototype.hasOwnProperty.call(opts, 'noDescriptionContainer') ? opts.noDescriptionContainer : null;
-    const specialInputContainerClasses = Object.prototype.hasOwnProperty.call(opts, 'specialInputContainerClasses') ? opts.specialInputContainerClasses : false;
-    const hideMainDescriptionRow = Object.prototype.hasOwnProperty.call(opts, 'hideMainDescriptionRow') ? opts.hideMainDescriptionRow : false;
+    const has = (k) => Object.prototype.hasOwnProperty.call(opts, k);
+    const pick = (k, fallback = null) => (has(k) ? opts[k] : fallback);
+
+    const legacy = {
+        labelId: opts.labelId,
+        renderNameABs: pick('renderNameABs'),
+        labelText: opts.labelText,
+        inputElements: Array.isArray(opts.inputElements) ? opts.inputElements : [],
+        descriptionText: pick('descriptionText'),
+        resourcePriceObject: pick('resourcePriceObject'),
+        dataConditionCheck: pick('dataConditionCheck'),
+        objectSectionArgument1: pick('objectSectionArgument1'),
+        objectSectionArgument2: pick('objectSectionArgument2'),
+        quantityArgument: pick('quantityArgument'),
+        autoBuyerTier: pick('autoBuyerTier'),
+        startInvisibleValue: pick('startInvisibleValue'),
+        resourceString: pick('resourceString'),
+        optionalIterationParam: pick('optionalIterationParam'),
+        rowCategory: pick('rowCategory'),
+        noDescriptionContainer: pick('noDescriptionContainer'),
+        specialInputContainerClasses: pick('specialInputContainerClasses', false),
+        hideMainDescriptionRow: pick('hideMainDescriptionRow', false)
+    };
+
+    // Order is load-bearing: reveals are applied in sequence and a later opinion
+    // overrides an earlier one, which is how the legacy chain of `if` blocks
+    // behaved. Launch pad and space telescope came after the tech checks and
+    // could un-hide a row those had hidden.
+    const reveal = [];
+
+    if (legacy.dataConditionCheck === 'techUnlock') {
+        reveal.push({ kind: 'techUnlock', tech: legacy.objectSectionArgument1 });
+    }
+    if (legacy.dataConditionCheck === 'cosmicRipTechUnlock') {
+        reveal.push({ kind: 'cosmicRipTechUnlock', tech: legacy.objectSectionArgument1 });
+    }
+
+    reveal.push({ kind: 'launchPadRocket', target: legacy.objectSectionArgument2 });
+    reveal.push({ kind: 'spaceTelescopeAction', action: legacy.objectSectionArgument2 });
+
+    // `['research', ...]` is deliberately excluded, as it always was: research
+    // rows are revealed by the research pane itself, not at build time.
+    if (legacy.startInvisibleValue && legacy.startInvisibleValue[0] !== 'research') {
+        if (legacy.startInvisibleValue[0] === 'tech') {
+            reveal.push({ kind: 'tech', requires: legacy.startInvisibleValue[1] });
+        }
+        if (legacy.startInvisibleValue[0] === 'debug') {
+            reveal.push({ kind: 'debugHidden', requires: legacy.startInvisibleValue[1] });
+        }
+    }
+
+    if (legacy.optionalIterationParam && legacy.optionalIterationParam[0] === 'tech') {
+        reveal.push({ kind: 'tech', requires: legacy.optionalIterationParam[1] });
+    }
+
+    return createRowSpec({
+        id: legacy.labelId,
+
+        // The legacy row shows the auto-buyer name INSTEAD of the label when
+        // `renderNameABs` is set — it builds and localises `labelText` and then
+        // throws it away. The spec keeps both, so the grid renderer can show the
+        // name as a subtitle beneath the label rather than in place of it.
+        title: legacy.renderNameABs !== null ? `${legacy.renderNameABs}:` : legacy.labelText,
+        subtitle: null,
+
+        // The cost is still one pre-built string at this point; Phase 4 splits
+        // it into components per tab as each one is converted. Recording it as a
+        // single unlabelled entry here would claim a structure that does not
+        // exist yet, so it stays in `legacy.descriptionText` where the legacy
+        // renderer reads it.
+        cost: [],
+        actions: legacy.inputElements,
+
+        detail: null,
+
+        gate: legacy.dataConditionCheck
+            ? { kind: 'affordability', category: legacy.rowCategory === 'compound' ? 'compound' : 'resource' }
+            : null,
+
+        reveal,
+
+        dataset: {
+            conditionCheck: legacy.dataConditionCheck,
+            type: legacy.objectSectionArgument1,
+            autoBuyerTier: legacy.autoBuyerTier,
+            rowCategory: legacy.rowCategory
+        },
+
+        legacy
+    });
+}
+
+
+export function createOptionRow(options = {}) {
+    return renderLegacyOptionRow(legacyOptionsToRowSpec(options));
+}
+
+
+/**
+ * The price label a purchase row shows, as one element.
+ *
+ * This is the single most load-bearing element in the whole row system and it is
+ * worth being explicit about why it exists as its own factory rather than being
+ * inlined in each renderer.
+ *
+ * The frame loop finds it three different ways, and every one of them has to
+ * keep working across a migration:
+ *
+ *   · by **class** — `.resource-cost-sell-check` / `.compound-cost-sell-check`
+ *     is what `buildElementsToCheck` collects ([game.js:2787](../game.js#L2787))
+ *     and what `refreshRowPurchaseState` re-runs after each bulk purchase;
+ *   · by **id** — the generated id ends in `Description`, which is the other
+ *     half of that same query;
+ *   · by **`data-*`** — `checkStatusAndSetTextClasses` reads `conditionCheck`,
+ *     `type`, `resourcePriceObject`, `argumentCheckQuantity` and the rest off it
+ *     to decide affordability.
+ *
+ * And it wears `red-disabled-text` — whose CSS is `pointer-events: none` — which
+ * IS this game's affordability gate, by design.
+ *
+ * So a migrated row does not rebuild the price as chips: it puts *this element*
+ * into the cost track. The layout changes, the contract does not. Phase 4 rows
+ * therefore pass `cost: [createPriceLabel({ … })]`, and the legacy renderer calls
+ * the same function, so the two can never drift.
+ */
+export function createPriceLabel({
+    labelId,
+    resourceString = null,
+    html = '',
+    rowCategory = null,
+    dataConditionCheck = null,
+    resourcePriceObject = '',
+    objectSectionArgument1 = null,
+    objectSectionArgument2 = null,
+    quantityArgument = null,
+    autoBuyerTier = null
+} = {}) {
+    const description = document.createElement('label');
+    description.classList.add('notation');
+
+    if (rowCategory === 'building' || rowCategory === 'spaceMiningPurchase' || rowCategory === 'starShipPurchase' || rowCategory === 'fleetPurchase' || rowCategory === 'cosmicRipPurchase') {
+        description.classList.add('building-purchase');
+    }
+
+    description.id = generateElementId(labelId, resourceString, null);
+    description.innerHTML = html;
+
+    if (dataConditionCheck) {
+        if (rowCategory === 'resource' || rowCategory === 'building' || rowCategory === 'spaceMiningPurchase' || rowCategory === 'starShipPurchase' || rowCategory === 'fleetPurchase'  || rowCategory === 'cosmicRipPurchase' || rowCategory === 'science' || rowCategory === 'tech') {
+            description.classList.add('red-disabled-text', 'resource-cost-sell-check');
+        } else if (rowCategory === 'compound') {
+            description.classList.add('red-disabled-text', 'compound-cost-sell-check');
+        }
+
+        if (dataConditionCheck === 'techUnlock') {
+            description.dataset.conditionCheck = dataConditionCheck;
+            description.dataset.argumentCheckQuantity = quantityArgument;
+            description.dataset.type = objectSectionArgument1;
+        } else {
+            // The secondary cost is parsed out of already-translated
+            // description text, so what comes back is a display name. Resolve it
+            // to its internal compound key here, once per row build, instead of
+            // reverse-mapping it inside compoundCostSellCreateChecks on every
+            // frame. The stored key is language-independent, so the row also
+            // stays correct if it outlives a language change.
+            const parsedSecondCompound = html && html.includes(',') && objectSectionArgument1 && objectSectionArgument1.includes('storage')
+                ? html.split(',').pop().trim().split(' ').pop().toLowerCase()
+                : '';
+            const quantityArgument2 = parsedSecondCompound
+                ? reverseLocalizeForCompounds(parsedSecondCompound, getLanguage())
+                : '';
+
+            description.dataset.conditionCheck = dataConditionCheck;
+            description.dataset.resourcePriceObject = resourcePriceObject;
+            description.dataset.type = objectSectionArgument1;
+            description.dataset.resourceToFuseTo = objectSectionArgument2;
+            description.dataset.argumentCheckQuantity = quantityArgument;
+            description.dataset.argumentCheckQuantity2 = quantityArgument2;
+            description.dataset.autoBuyerTier = autoBuyerTier;
+            description.dataset.rowCategory = rowCategory;
+        }
+    }
+
+    return description;
+}
+
+
+/**
+ * Draw a row spec as the legacy `.option-row` mini-table.
+ *
+ * This is the current markup, unchanged: the same classes, the same ids, the
+ * same `data-*` attributes and the same inline width overrides, because the
+ * frame loop reads all of them. It is retired at Phase 7 together with the
+ * overrides; until then it is what 277 call sites still render through.
+ */
+function renderLegacyOptionRow(spec) {
+    const legacy = spec.legacy;
+
+    const labelId = legacy.labelId;
+    const renderNameABs = legacy.renderNameABs;
+    const labelText = legacy.labelText;
+    const inputElements = legacy.inputElements;
+    const descriptionText = legacy.descriptionText;
+    const resourcePriceObject = legacy.resourcePriceObject;
+    const dataConditionCheck = legacy.dataConditionCheck;
+    const objectSectionArgument1 = legacy.objectSectionArgument1;
+    const objectSectionArgument2 = legacy.objectSectionArgument2;
+    const quantityArgument = legacy.quantityArgument;
+    const autoBuyerTier = legacy.autoBuyerTier;
+    const resourceString = legacy.resourceString;
+    const optionalIterationParam = legacy.optionalIterationParam;
+    const rowCategory = legacy.rowCategory;
+    const noDescriptionContainer = legacy.noDescriptionContainer;
+    const specialInputContainerClasses = legacy.specialInputContainerClasses;
+    const hideMainDescriptionRow = legacy.hideMainDescriptionRow;
 
     const wrapper = document.createElement('div');
     wrapper.classList.add('option-row', 'd-flex');
@@ -3889,87 +4210,9 @@ export function createOptionRow(options = {}) {
     wrapper.dataset.autoBuyerTier = autoBuyerTier;
     wrapper.dataset.rowCategory = rowCategory;
 
-    if (dataConditionCheck === 'techUnlock') {
-        const appearsAt = getResourceDataObject('techs', [objectSectionArgument1, 'appearsAt']);
-        const researchPointsToAppear = appearsAt?.[0];
-        const prerequisiteForTech = appearsAt?.[1];
-
-        const researchQty = getResourceDataObject('research', ['quantity']);
-        const alreadyRevealed = getRevealedTechArray().includes(objectSectionArgument1);
-        const prereqUnlocked = getTechUnlockedArray().includes(prerequisiteForTech);
-
-        if (researchQty < researchPointsToAppear && !alreadyRevealed) {
-            wrapper.classList.add('invisible');
-        } else if (!prereqUnlocked) {
-            wrapper.classList.add('invisible');
-        } else if (researchQty >= researchPointsToAppear && !alreadyRevealed) {
-            setRevealedTechArray(objectSectionArgument1);
-        }
-    }
-
-    if (dataConditionCheck === 'cosmicRipTechUnlock') {
-        const appearsAt = getResourceDataObject('cosmicRip', ['techs', objectSectionArgument1, 'appearsAt']);
-        const telemetryPointsToAppear = appearsAt?.[0];
-        const prerequisiteForTech = appearsAt?.[1];
-
-        const telemetryQty = getResourceDataObject('cosmicRip', ['ripTelemetryData']);
-        const alreadyRevealed = getRevealedCosmicRipTechArray().includes(objectSectionArgument1);
-        const prereqUnlocked = getCosmicRipTechUnlockedArray().includes(prerequisiteForTech);
-
-        if (telemetryQty < telemetryPointsToAppear && !alreadyRevealed) {
-            wrapper.classList.add('invisible');
-        } else if (!prereqUnlocked) {
-            wrapper.classList.add('invisible');
-        } else if (telemetryQty >= telemetryPointsToAppear && !alreadyRevealed) {
-            setRevealedCosmicRipTechArray(objectSectionArgument1);
-        }
-    }
-
-    if (getCurrentOptionPane() === 'launch pad') {
-        if (objectSectionArgument2?.startsWith('rocket') && !getResourceDataObject('space', ['upgrades', 'launchPad', 'launchPadBoughtYet'])) {
-            wrapper.classList.add('invisible');
-        } else if (objectSectionArgument2?.startsWith('rocket')) {
-            wrapper.classList.remove('invisible');
-        }
-    }
-
-    if (getCurrentOptionPane() === 'space telescope') {
-        if (['searchAsteroid', 'investigateStar', 'pillageVoid'].includes(objectSectionArgument2)) {
-            if (!getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'spaceTelescopeBoughtYet'])) {
-                wrapper.classList.add('invisible');
-            } else {
-                if (objectSectionArgument2 === 'pillageVoid') {
-                    const canPillageVoid = getPlayerPhilosophy() === 'voidborn' && getPhilosophyAbilityActive() && getStatRun() > 1;
-                    wrapper.classList.toggle('invisible', !canPillageVoid);
-                } else {
-                    wrapper.classList.remove('invisible');
-                }
-            }
-        }
-    }
-
-    if (startInvisibleValue && startInvisibleValue[0] !== 'research') {
-        const revealElementType = startInvisibleValue[0];
-        const revealElementCondition = startInvisibleValue[1];
-
-        if (revealElementType === 'tech') {
-            if (!getTechUnlockedArray().includes(revealElementCondition)) {
-                wrapper.classList.add('invisible');
-            }
-        }
-
-        if (revealElementType === 'debug') {
-            if (getDebugVisibilityArray().includes(revealElementCondition)) {
-                wrapper.classList.add('invisible');
-            }
-        }
-    }
-
-    if (optionalIterationParam && optionalIterationParam[0] === 'tech') {
-        if (!getTechUnlockedArray().includes(optionalIterationParam[1])) {
-            wrapper.classList.add('invisible');
-        }
-    }
+    // Every visibility rule this function used to contain is now a registered
+    // predicate. Applied in spec order, which reproduces the old branch order.
+    applyReveal(wrapper, spec.reveal);
 
     const labelContainer = document.createElement('div');
     labelContainer.classList.add('label-container');
@@ -4038,55 +4281,18 @@ export function createOptionRow(options = {}) {
     if (!noDescriptionContainer || forceShowDescription) {
         const descriptionContainer = document.createElement('div');
         descriptionContainer.classList.add('description-container');
-        const description = document.createElement('label');
-        description.classList.add('notation');
-
-        if (rowCategory === 'building' || rowCategory === 'spaceMiningPurchase' || rowCategory === 'starShipPurchase' || rowCategory === 'fleetPurchase' || rowCategory === 'cosmicRipPurchase') {
-            description.classList.add('building-purchase');
-        }
-
-        const currentTab = getCurrentTab()[0];
-        description.id = generateElementId(labelId, resourceString, null); 
-        description.innerHTML = descriptionText;
-
-        if (dataConditionCheck) {
-            if (rowCategory === 'resource' || rowCategory === 'building' || rowCategory === 'spaceMiningPurchase' || rowCategory === 'starShipPurchase' || rowCategory === 'fleetPurchase'  || rowCategory === 'cosmicRipPurchase' || rowCategory === 'science' || rowCategory === 'tech') {
-                description.classList.add('red-disabled-text', 'resource-cost-sell-check');
-            } else if (rowCategory === 'compound') {
-                description.classList.add('red-disabled-text', 'compound-cost-sell-check');
-            }
-
-            if (dataConditionCheck === 'techUnlock') {
-                description.dataset.conditionCheck = dataConditionCheck;
-                description.dataset.argumentCheckQuantity = quantityArgument;
-                description.dataset.type = objectSectionArgument1;
-            } else {
-                // The secondary cost is parsed out of already-translated
-                // description text, so what comes back is a display name.
-                // Resolve it to its internal compound key here, once per row
-                // build, instead of reverse-mapping it inside
-                // compoundCostSellCreateChecks on every frame. The stored key is
-                // language-independent, so the row also stays correct if it
-                // outlives a language change.
-                const parsedSecondCompound = descriptionText && descriptionText.includes(',') && objectSectionArgument1 && objectSectionArgument1.includes('storage')
-                    ? descriptionText.split(',').pop().trim().split(' ').pop().toLowerCase()
-                    : '';
-                const quantityArgument2 = parsedSecondCompound
-                    ? reverseLocalizeForCompounds(parsedSecondCompound, getLanguage())
-                    : '';
-
-                description.dataset.conditionCheck = dataConditionCheck;
-                description.dataset.resourcePriceObject = resourcePriceObject;
-                description.dataset.type = objectSectionArgument1;
-                description.dataset.resourceToFuseTo = objectSectionArgument2;
-                description.dataset.argumentCheckQuantity = quantityArgument;
-                description.dataset.argumentCheckQuantity2 = quantityArgument2;
-                description.dataset.autoBuyerTier = autoBuyerTier;
-                description.dataset.rowCategory = rowCategory;
-            }
-        }
-
-        descriptionContainer.appendChild(description);
+        descriptionContainer.appendChild(createPriceLabel({
+            labelId,
+            resourceString,
+            html: descriptionText,
+            rowCategory,
+            dataConditionCheck,
+            resourcePriceObject,
+            objectSectionArgument1,
+            objectSectionArgument2,
+            quantityArgument,
+            autoBuyerTier
+        }));
         mainRow.appendChild(descriptionContainer);
     }
 

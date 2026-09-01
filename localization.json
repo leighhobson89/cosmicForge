@@ -2032,7 +2032,6 @@
     "casinoAwardFinishedVoidPillage": "Finished Void Pillage",
     "casinoAwardFinishedStarshipJourney": "Finished Starship Journey ({star})",
     "casinoAwardFinishedRocketJourney": "Finished Rocket Journey{suffix}",
-    "labelRebuyable": "Rebuyable:",
     "textBoughtTimes": "Bought {count} times",
     "textPurchased": "Purchased",
     "textNotBought": "Not Bought",
@@ -2610,7 +2609,11 @@
     "textRestored": "Restored",
     "buttonOk": "OK",
     "textFeedbackPlaceholder": "Leave your thoughts here...",
-    "gameSaveNameLoadHint": "You can load a previous game by changing this name to a previous one."
+    "gameSaveNameLoadHint": "You can load a previous game by changing this name to a previous one.",
+    "uiRowDetailsLabel": "Details",
+    "uiColheadPerk": "Perk",
+    "uiColheadRebuyable": "Rebuyable",
+    "uiColheadCost": "Cost"
   },
   "es": {
     "newGame": "Nuevo Juego",
@@ -4645,7 +4648,6 @@
     "casinoAwardFinishedVoidPillage": "Saqueo del vacío terminado",
     "casinoAwardFinishedStarshipJourney": "Viaje de la nave estelar terminado ({star})",
     "casinoAwardFinishedRocketJourney": "Viaje del cohete terminado{suffix}",
-    "labelRebuyable": "Recomprable:",
     "textBoughtTimes": "Comprado {count} veces",
     "textPurchased": "Comprado",
     "textNotBought": "No comprado",
@@ -5223,7 +5225,11 @@
     "textRestored": "Restaurado",
     "buttonOk": "OK",
     "textFeedbackPlaceholder": "Deja aquí tus comentarios...",
-    "gameSaveNameLoadHint": "Puedes cargar una partida anterior cambiando este nombre por uno que ya hayas usado."
+    "gameSaveNameLoadHint": "Puedes cargar una partida anterior cambiando este nombre por uno que ya hayas usado.",
+    "uiRowDetailsLabel": "Detalles",
+    "uiColheadPerk": "Beneficio",
+    "uiColheadRebuyable": "Recomprable",
+    "uiColheadCost": "Coste"
   },
   "pt": {
     "newGame": "Novo Jogo",
@@ -7258,7 +7264,6 @@
     "casinoAwardFinishedVoidPillage": "Saque do vazio concluído",
     "casinoAwardFinishedStarshipJourney": "Viagem da nave estelar concluída ({star})",
     "casinoAwardFinishedRocketJourney": "Viagem do foguetão concluída{suffix}",
-    "labelRebuyable": "Recomprável:",
     "textBoughtTimes": "Comprado {count} vezes",
     "textPurchased": "Comprado",
     "textNotBought": "Não comprado",
@@ -7836,7 +7841,11 @@
     "textRestored": "Restaurado",
     "buttonOk": "OK",
     "textFeedbackPlaceholder": "Deixa aqui os teus comentários...",
-    "gameSaveNameLoadHint": "Podes carregar uma partida anterior alterando este nome para um que já tenhas usado."
+    "gameSaveNameLoadHint": "Podes carregar uma partida anterior alterando este nome para um que já tenhas usado.",
+    "uiRowDetailsLabel": "Detalhes",
+    "uiColheadPerk": "Benefício",
+    "uiColheadRebuyable": "Recomprável",
+    "uiColheadCost": "Custo"
   },
   "de": {
     "newGame": "Neues Spiel",
@@ -9871,7 +9880,6 @@
     "casinoAwardFinishedVoidPillage": "Plünderung der Leere abgeschlossen",
     "casinoAwardFinishedStarshipJourney": "Sternenschiffreise abgeschlossen ({star})",
     "casinoAwardFinishedRocketJourney": "Raketenreise abgeschlossen{suffix}",
-    "labelRebuyable": "Wiederkaufbar:",
     "textBoughtTimes": "{count}-mal gekauft",
     "textPurchased": "Gekauft",
     "textNotBought": "Nicht gekauft",
@@ -10449,7 +10457,11 @@
     "textRestored": "Wiederhergestellt",
     "buttonOk": "OK",
     "textFeedbackPlaceholder": "Hinterlasse hier deine Gedanken...",
-    "gameSaveNameLoadHint": "Du kannst ein früheres Spiel laden, indem du diesen Namen in einen bereits verwendeten änderst."
+    "gameSaveNameLoadHint": "Du kannst ein früheres Spiel laden, indem du diesen Namen in einen bereits verwendeten änderst.",
+    "uiRowDetailsLabel": "Details",
+    "uiColheadPerk": "Bonus",
+    "uiColheadRebuyable": "Wiederkaufbar",
+    "uiColheadCost": "Kosten"
   },
   "it": {
     "newGame": "Nuovo gioco",
@@ -12484,7 +12496,6 @@
     "casinoAwardFinishedVoidPillage": "Saccheggio del vuoto completato",
     "casinoAwardFinishedStarshipJourney": "Viaggio dell'astronave completato ({star})",
     "casinoAwardFinishedRocketJourney": "Viaggio del razzo completato{suffix}",
-    "labelRebuyable": "Riacquistabile:",
     "textBoughtTimes": "Acquistato {count} volte",
     "textPurchased": "Acquistato",
     "textNotBought": "Non acquistato",
@@ -13062,7 +13073,11 @@
     "textRestored": "Ripristinato",
     "buttonOk": "OK",
     "textFeedbackPlaceholder": "Lascia qui i tuoi pensieri...",
-    "gameSaveNameLoadHint": "Puoi caricare una partita precedente cambiando questo nome con uno già usato."
+    "gameSaveNameLoadHint": "Puoi caricare una partita precedente cambiando questo nome con uno già usato.",
+    "uiRowDetailsLabel": "Dettagli",
+    "uiColheadPerk": "Vantaggio",
+    "uiColheadRebuyable": "Riacquistabile",
+    "uiColheadCost": "Costo"
   },
   "fr": {
     "newGame": "Nouveau jeu",
@@ -15097,7 +15112,6 @@
     "casinoAwardFinishedVoidPillage": "Pillage du vide terminé",
     "casinoAwardFinishedStarshipJourney": "Voyage du vaisseau terminé ({star})",
     "casinoAwardFinishedRocketJourney": "Voyage de la fusée terminé{suffix}",
-    "labelRebuyable": "Rachetable:",
     "textBoughtTimes": "Acheté {count} fois",
     "textPurchased": "Acheté",
     "textNotBought": "Non acheté",
@@ -15675,6 +15689,10 @@
     "textRestored": "Restauré",
     "buttonOk": "OK",
     "textFeedbackPlaceholder": "Laissez vos impressions ici...",
-    "gameSaveNameLoadHint": "Vous pouvez charger une partie précédente en remplaçant ce nom par un nom déjà utilisé."
+    "gameSaveNameLoadHint": "Vous pouvez charger une partie précédente en remplaçant ce nom par un nom déjà utilisé.",
+    "uiRowDetailsLabel": "Détails",
+    "uiColheadPerk": "Avantage",
+    "uiColheadRebuyable": "Rachetable",
+    "uiColheadCost": "Coût"
   }
 }

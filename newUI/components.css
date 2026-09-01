@@ -46,6 +46,16 @@
 
 .ui-pane {
     display: grid;
+
+    /* The declaration below is a FALLBACK ONLY. `syncPaneTracks` (createSection.js)
+       rewrites `grid-template-columns` on this element from what the pane's rows
+       actually fill, and writes the matching `--ui-col-*` placements. It has to,
+       because an `fr` track costs its share of the pane whether or not anything
+       is in it: a settings screen fills `title` and `action` and nothing else,
+       and with all four tracks always present the control was thrown ~700px to
+       the right of its own label with two empty columns between them. That is
+       the defect this fallback must not reintroduce, so it lists the same four
+       tracks the JS starts from and no more. */
     grid-template-columns:
         [title]  var(--ui-track-title)
         [stat]   var(--ui-track-stat)
@@ -142,6 +152,8 @@
 
 /* --- The grid ------------------------------------------------------------ */
 
+/* As with `.ui-pane`, this template is the fallback `syncPaneTracks` starts
+   from and then rewrites for a section that is not inside a pane. */
 .ui-grid {
     display: grid;
     grid-template-columns:
@@ -152,6 +164,38 @@
     align-items: center;
     column-gap: var(--ui-sp-4);
     row-gap: var(--ui-sp-2);
+}
+
+
+/* --- Cell placement, and the tracks a pane does not use -------------------
+
+   Cells are placed BY NAME, not by DOM order, because a pane drops the tracks
+   none of its rows fill and auto-placement would then slide every cell one
+   column to the left. `syncPaneTracks` writes `--ui-col-*` and `data-ui-tracks`
+   on the pane (or on a lone section's grid) and both inherit down, so one
+   assignment moves a whole screen's worth of cells and no row carries a width or
+   a placement of its own — which is the property the whole refactor is for.
+
+   The 1/2/3/4 fallbacks are the four-track order, so a grid that has not been
+   synced still draws correctly rather than collapsing into one column.        */
+
+.ui-cell-title,  .ui-colhead-title  { grid-column: var(--ui-col-title, 1); }
+.ui-cell-stat,   .ui-colhead-stat   { grid-column: var(--ui-col-stat, 2); }
+.ui-cell-cost,   .ui-colhead-cost   { grid-column: var(--ui-col-cost, 3); }
+.ui-cell-action, .ui-colhead-action { grid-column: var(--ui-col-action, 4); }
+.ui-cell-detail                     { grid-column: var(--ui-col-detail, 5); }
+
+/* A track no row on the pane fills is absent from the template, so its (empty)
+   cells must not be drawn — an unplaced cell would otherwise take a grid row of
+   its own. `~=` matches one word of the space-separated track list. */
+[data-ui-tracks]:not([data-ui-tracks~="stat"])   .ui-cell-stat,
+[data-ui-tracks]:not([data-ui-tracks~="stat"])   .ui-colhead-stat,
+[data-ui-tracks]:not([data-ui-tracks~="cost"])   .ui-cell-cost,
+[data-ui-tracks]:not([data-ui-tracks~="cost"])   .ui-colhead-cost,
+[data-ui-tracks]:not([data-ui-tracks~="action"]) .ui-cell-action,
+[data-ui-tracks]:not([data-ui-tracks~="action"]) .ui-colhead-action,
+[data-ui-tracks]:not([data-ui-tracks~="detail"]) .ui-cell-detail {
+    display: none;
 }
 
 /* Column headings are written ONCE per section instead of being implied by
@@ -176,6 +220,22 @@
    the section grid. The element itself survives for id, dataset and state. */
 .ui-row {
     display: contents;
+}
+
+/* Phase 3 compatibility. A migrated row keeps the `option-row` class, because
+   the frame loop sweeps `document.querySelectorAll('.option-row')` once a frame
+   and that sweep is what un-hides a tech row when its research threshold is
+   crossed (game.js:2634 -> :7620). A row that dropped the class would stop being
+   revealed.
+
+   `.option-row { display: flex }` (styles.css:2215) and `.ui-row { display:
+   contents }` have equal specificity, so which one wins would otherwise come
+   down to file order alone. Stating the combination makes it explicit rather
+   than incidental. Both rules go at Phase 7, with the sweep. */
+.ui-row.option-row {
+    display: contents;
+    width: auto;
+    flex-direction: unset;
 }
 
 /* A full-width hairline between rows. A grid item rather than a border, so it
@@ -207,6 +267,37 @@
    band across the grid rather than four separate tinted boxes. */
 .ui-cell-title  { border-radius: var(--ui-row-radius) 0 0 var(--ui-row-radius); }
 .ui-cell-action { border-radius: 0 var(--ui-row-radius) var(--ui-row-radius) 0; }
+
+/* With an inline detail cell the row's last track is the prose, not the action,
+   so the rounded end moves with it. */
+.ui-row:has(> .ui-cell-detail) > .ui-cell-action { border-radius: 0; }
+.ui-cell-detail { border-radius: 0 var(--ui-row-radius) var(--ui-row-radius) 0; }
+
+
+/* --- The full-bleed row --------------------------------------------------
+
+   Phase 4. Several panes carry a single object that wants the whole width — the
+   achievements grid, the statistics table, the help prose, the events list.
+   Those are not rows with too many fields; forcing them through four tracks
+   would truncate them, and truncating information to fit a layout is the one
+   thing this refactor may not do.
+
+   The row still lives on the pane's grid, so a full-bleed block still shares its
+   left and right edges with the ordinary rows above and below it.            */
+
+.ui-cell-full {
+    grid-column: 1 / -1;
+    min-width: 0;
+}
+
+/* A block introduced by name sits tight against what it introduces. */
+.ui-cell-full-title {
+    padding-bottom: 0;
+}
+
+.ui-row-full > .ui-cell-full-title + .ui-cell-full {
+    padding-top: var(--ui-sp-1);
+}
 
 
 /* --- Cells --------------------------------------------------------------- */
@@ -266,13 +357,78 @@
     border-color: currentColor;
 }
 
+/* Controls align to the START of the action track, not its end.
+
+   The track is content-sized (`minmax(0, auto)`), so it is exactly as wide as
+   the widest control on the pane — which means right-aligning pushes every
+   NARROWER control away from the column edge the section exists to guarantee. A
+   settings pane shows it plainly: a 300px dropdown and a 52px toggle in the same
+   column read as two columns when they are flushed right, and as one when they
+   share a left edge. */
 .ui-cell-action {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: flex-start;
     flex-wrap: wrap;
     gap: var(--ui-sp-2);
 }
+
+
+/* --- The inline detail cell ----------------------------------------------
+
+   Prose that belongs BESIDE the control rather than beneath it. The legacy row
+   gave the description a 35% right-hand column, and a settings row read in one
+   line: label, control, sentence. Moving that sentence onto a full-width band
+   under the row cost a line of height per row AND left the right two-thirds of
+   the row empty, so the migration made the pane both taller and emptier. This
+   cell puts it back in a column. See `detailInline` in createSection.js.      */
+
+.ui-cell-detail {
+    font-size: var(--ui-fs-detail);
+    color: var(--ui-detail-color);
+    line-height: 1.45;
+    min-width: 0;
+}
+
+
+/* --- Legacy spacing hacks, neutralised inside the grid --------------------
+
+   Phases 3 and 4 move real controls into these cells, and a great many of them
+   carry horizontal margins that exist only to fake a column in the old flex row:
+   `.buff-value` has `margin-right: 30px`, the ascendency Buy button has
+   `margin-left: auto; margin-right: 100px` purely to shove the price to the
+   right-hand edge, `.save-load-button` and `.save-name-margin` have
+   `margin-left: 50px`, `.cosmic-rip-progress-bar-button-margin` has 30px, and so
+   on down a list that grows with every tab migrated.
+
+   Inside a grid every one of them is not merely unnecessary but harmful:
+   `margin-left: auto` on a flex item in a right-aligned action cell pushes
+   nothing, and a fixed `margin-right` shifts a control out of its own track and
+   breaks the single left edge the section exists to guarantee — the save pane's
+   Pioneer Name field ran off the right of the screen on the first build of this
+   migration for exactly that reason.
+
+   So rather than chase the list class by class, the cells zero the horizontal
+   margins of their own children. The grid's `gap` is what spaces them now, and
+   any margin still declared on a control is by definition a leftover from the
+   layout the grid replaces. The selector is deliberately two classes deep so it
+   beats a single-class rule in styles.css on specificity rather than on file
+   order, which is too fragile a thing to rest a layout on.
+
+   These are neutralised, not deleted, because the unmigrated tabs still need
+   them. The declarations themselves go at Phase 7, with the legacy row.      */
+
+.ui-row > .ui-cell-title > *,
+.ui-row > .ui-cell-stat > *,
+.ui-row > .ui-cell-cost > *,
+.ui-row > .ui-cell-action > *,
+.ui-row > .ui-cell-full > * {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+/* The maxed-perk spacer keeps its `visibility: hidden` and its inertness; all it
+   loses is the alignment duty the cost track now performs properly. */
 
 
 /* --- Affordability ------------------------------------------------------
@@ -345,6 +501,18 @@
     padding-bottom: var(--ui-sp-2);
 }
 
+/* Always-visible prose: no caret, no toggle. A settings pane's sentence under a
+   control explains what the control does, so collapsing it would buy vertical
+   space at the cost of the row's whole purpose. It is indented to the title
+   track so it reads as belonging to the row above it rather than as a new one. */
+.ui-detail-static {
+    padding-left: var(--ui-sp-1);
+}
+
+.ui-detail-static > .ui-detail-body {
+    padding-top: 0;
+}
+
 
 /* --- Responsive ----------------------------------------------------------
 
@@ -356,32 +524,34 @@
    The game shell around it is still fixed-proportion (styles.css:1902/1923) —
    that is F6, and it is not in this phase's scope.                         */
 
+/* One rule, and it stacks. The previous version re-declared a three- and then a
+   two-track template, which cannot work now that placement is by name and the
+   track list is decided at build time — the media query and the JS would each be
+   describing a different grid. Stacking needs neither to agree: every cell takes
+   the single column, in DOM order, and nothing is hidden or dropped.
+
+   `!important` is here because `syncPaneTracks` writes the template as an inline
+   style, which a stylesheet cannot otherwise beat. Phase 6 owns responsiveness
+   properly and will replace this with a container query. */
 @media (max-width: 900px) {
     .ui-pane,
     .ui-grid {
-        grid-template-columns: [title] 1fr [cost] auto [action] auto;
+        grid-template-columns: 1fr !important;
     }
 
-    .ui-colhead-stat,
-    .ui-cell-stat {
-        display: none;
-    }
-}
-
-@media (max-width: 620px) {
-    .ui-pane,
-    .ui-grid {
-        grid-template-columns: [title] 1fr [action] auto;
+    .ui-pane > .ui-section {
+        grid-template-columns: subgrid;
     }
 
-    .ui-colhead-cost {
-        display: none;
+    .ui-cell,
+    .ui-colhead,
+    .ui-detail,
+    .ui-row-rule {
+        grid-column: 1 / -1 !important;
     }
 
-    /* Cost drops beneath the title rather than being lost. */
-    .ui-cell-cost {
-        grid-column: 1 / -1;
-        padding-top: 0;
+    .ui-cell-action {
+        justify-content: flex-start;
     }
 }
 

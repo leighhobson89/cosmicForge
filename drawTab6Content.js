@@ -18,7 +18,60 @@ import { sfxPlayer } from './audioManager.js';
 
 import { trackAnalyticsEvent } from './analytics.js';
 import { localize, localizeMaterialName } from './localization.js';
-import { getLanguage } from './constantsAndGlobalVars.js';
+import { getLanguage, getCurrentOptionPane } from './constantsAndGlobalVars.js';
+
+import { registerReveal } from './newUI/reveal.js';
+
+
+/* ==========================================================================
+   Large UI refactor, Phase 3 — this tab's reveal predicates
+   (docs/largeUIRefactor.md F1, Phase 3)
+
+   These two rules used to sit inside `createOptionRow`, which named this tab's
+   panes out loud in the middle of a layout function:
+
+       if (getCurrentOptionPane() === 'launch pad')      { ... }
+       if (getCurrentOptionPane() === 'space telescope') { ...voidborn... }
+
+   A row primitive that has to be edited whenever a pane is added is not a
+   primitive. The rules now live in the file that draws those panes, and a row
+   only declares that it is subject to them:
+
+       reveal: [{ kind: 'launchPadRocket', target: 'rocket1' }]
+
+   The pane check stays inside the predicate rather than moving to the call site,
+   because it is part of the rule as written: these rows exist on other panes too
+   and are only governed here. Registering at module scope means the predicates
+   are in place before any pane is drawn, since ui.js imports this file.
+
+   A predicate returns true (show), false (hide) or null (no opinion — leave the
+   row as it is), so the "not one of my rows" case cannot accidentally reveal
+   something another rule has hidden.
+   ========================================================================== */
+
+registerReveal('launchPadRocket', ({ target }) => {
+    if (getCurrentOptionPane() !== 'launch pad') return null;
+    if (!target?.startsWith('rocket')) return null;
+
+    return Boolean(getResourceDataObject('space', ['upgrades', 'launchPad', 'launchPadBoughtYet']));
+});
+
+registerReveal('spaceTelescopeAction', ({ action }) => {
+    if (getCurrentOptionPane() !== 'space telescope') return null;
+    if (!['searchAsteroid', 'investigateStar', 'pillageVoid'].includes(action)) return null;
+
+    if (!getResourceDataObject('space', ['upgrades', 'spaceTelescope', 'spaceTelescopeBoughtYet'])) return false;
+
+    // Pillaging the void is a Voidborn ability, and only from the second run on
+    // - the philosophy has to have been chosen in a previous life for it to be
+    // active here.
+    if (action === 'pillageVoid') {
+        return getPlayerPhilosophy() === 'voidborn' && getPhilosophyAbilityActive() && getStatRun() > 1;
+    }
+
+    return true;
+});
+
 
 // Space upgrade price tuples are [quantity, key, section].
 const spaceUpgradePriceName = (upgrade, slot) => {

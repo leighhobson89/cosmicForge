@@ -1,4 +1,4 @@
-import { removeTabAttentionIfNoIndicators, createAscendencyMaxedSpacer, createOptionRow, createButton, createDropdown, createTextElement, createTextFieldArea, createSpinningDropdown, callPopupModal, showHideModal, createMegaStructureDiagram, createMegaStructureTable, createBlackHole, setButtonState, showNotification, updateDescriptionRow, setupInfoTooltips } from './ui.js';
+import { removeTabAttentionIfNoIndicators, createAscendencyMaxedSpacer, createOptionRow, createRow, createSection, createPane, createButton, createDropdown, createTextElement, createTextFieldArea, createSpinningDropdown, callPopupModal, showHideModal, createMegaStructureDiagram, createMegaStructureTable, createBlackHole, setButtonState, showNotification, updateDescriptionRow, setupInfoTooltips } from './ui.js';
 import {
     getCasinoGame4AlwaysWin,
     getCasinoGame5VoidSeerAlwaysMatch,
@@ -1773,7 +1773,38 @@ export function drawTab7Content(heading, optionContentElement) {
             .sort((a, b) => (a.group - b.group) || (a.cost - b.cost) || (a.index - b.index))
             .map((entry) => entry.buffKey);
 
-        sortedBuffKeys.forEach(buffKey => {
+        // Large UI refactor, Phase 3 (docs/largeUIRefactor.md): this is the
+        // reference section — the first one drawn with `createRow` on the Phase 1
+        // section grid instead of with `createOptionRow`.
+        //
+        // It was chosen because its misalignment is what motivated the work. Each
+        // legacy row was its own flex container declaring `30% / 70%` widths, so
+        // rows only lined up when their content happened to be the same length;
+        // and the Buy button carried `margin-left: auto; margin-right: 100px` to
+        // shove the price to the right-hand edge, which meant a finished perk —
+        // having no Buy button — needed an *invisible copy of the button* to hold
+        // the price at the same x as the row above. That spacer is a width hack
+        // standing in for a column.
+        //
+        // Here the pane owns four grid tracks and every row places cells into
+        // them, so the columns line up structurally: every action cell shares one
+        // `getBoundingClientRect().left`, whether or not the row has a button in
+        // it. The margins and the spacer's alignment duty are neutralised in
+        // newUI/components.css rather than removed, because the frame loop still
+        // creates a spacer when a perk is finished mid-session
+        // (checkAscendencyButtons, game.js:9587) and it still has to occupy the
+        // action cell so the row does not change height under the pointer.
+        //
+        // Everything the frame loop reaches for is unchanged: the row ids, the
+        // `buff{Key}BuyStatusText` and `{buffKey}CostText` elements it writes into
+        // each tick, `.ascendency-buff-button` and its `buff-class-*` slug, and
+        // the `option-row` class the reveal sweep selects on. What changed is
+        // where those elements sit.
+        //
+        // The one visible difference is the perk description. It used to be
+        // printed in full above every row, permanently; it is now behind a
+        // disclosure, which is the space win §3.3 describes.
+        const perkRows = sortedBuffKeys.map(buffKey => {
             const buff = ascendencyBuffsArray[buffKey];
             // The buff's display name comes from the catalogue, keyed by its
             // internal key; buff.name in the data file is the English fallback.
@@ -1804,10 +1835,12 @@ export function drawTab7Content(heading, optionContentElement) {
             // `red-disabled-text`, which is the same red the pane uses for "you
             // cannot afford this", so "finished" and "broke" were indistinguishable.
             // The button is replaced by a same-sized invisible box rather than
-            // simply dropped, because the button carries the `margin-left: auto`
-            // that pushes the cost slot to the right-hand edge; without it the
-            // badge on a maxed row would sit at a different x than the price on
-            // the row above it.
+            // simply dropped. On the legacy row that box was load-bearing: it
+            // carried the `margin-left: auto` that pushed the price slot to the
+            // right-hand edge. On the grid it is not - the cost track holds that
+            // position by itself - but it is kept so the action cell keeps its
+            // height, and so the frame loop, which swaps in a spacer of its own
+            // when a perk is finished mid-session, produces the same thing.
             const buyControl = maxed
                 ? createAscendencyMaxedSpacer(buffNameSlug)
                 : createButton({
@@ -1823,43 +1856,78 @@ export function drawTab7Content(heading, optionContentElement) {
                 buyControl.dataset.buffKey = buffKey;
             }
     
-            const buffRow = createOptionRow({
-                labelId: buffRowDescription,
-                renderNameABs: null,
-                labelText: `${buffName}:`,
-                inputElements: [
-                    createTextElement(
-                        `${localize('labelRebuyable', getLanguage())} <span class="green-ready-text">
-                        ${buff.rebuyable ? (buff.timesRebuyable === 100000 ? localize('textYes', getLanguage()) : buff.timesRebuyable) : localize('textNo', getLanguage())}
-                      </span>`,                  
-                        `buff${capitaliseString(buffKey)}RebuyableText`,
-                        ['buff-value']
-                    ),                
-                    createTextElement(buyStatus, `buff${capitaliseString(buffKey)}BuyStatusText`, ['buff-value']),
-                    buyControl,
-                    createTextElement(
-                        `<span id="${buffKey}CostText" class="green-ready-text${maxed ? ' ascendency-buff-maxed-badge' : ''}">${maxed ? localize('textMaxed', getLanguage()) : `${Math.round(cost)} AP`}</span>`,
-                        `buff${capitaliseString(buffKey)}CostContainer`,
-                        ['buff-value']
-                    ),
-                ],
-                descriptionText: ``,
-                resourcePriceObject: '',
-                dataConditionCheck: null,
-                objectSectionArgument1: null,
-                objectSectionArgument2: null,
-                quantityArgument: null,
-                autoBuyerTier: null,
-                startInvisibleValue: false,
-                resourceString: null,
-                optionalIterationParam: null,
-                rowCategory: 'ascendency',
-                noDescriptionContainer: [true, '30%', '70%']
+            // The rebuyable field is markup rather than a number because the
+            // count is highlighted, and 100000 is the catalogue's stand-in for
+            // "no limit" and reads as "Yes" rather than as a figure.
+            //
+            // The `Rebuyable:` prefix is gone: the section prints it once as the
+            // column heading. That is the mechanism behind the space win - a
+            // label repeated on sixteen rows becomes one heading - and it is only
+            // available because the column now exists as a track. Nothing reads
+            // this element's text, so dropping the prefix costs nothing; the id
+            // is kept so it stays addressable.
+            const rebuyableText = createTextElement(
+                `<span class="green-ready-text">${buff.rebuyable ? (buff.timesRebuyable === 100000 ? localize('textYes', getLanguage()) : buff.timesRebuyable) : localize('textNo', getLanguage())}</span>`,
+                `buff${capitaliseString(buffKey)}RebuyableText`,
+                ['buff-value']
+            );
+
+            // Both of these are written into by the frame loop every tick, by id
+            // (updateAscendencyRowTextFields, game.js:9618), so they are passed
+            // as elements and land in the grid intact rather than being rebuilt
+            // from text the row would then own a stale copy of.
+            const buyStatusText = createTextElement(
+                buyStatus,
+                `buff${capitaliseString(buffKey)}BuyStatusText`,
+                ['buff-value']
+            );
+
+            const costText = createTextElement(
+                `<span id="${buffKey}CostText" class="green-ready-text${maxed ? ' ascendency-buff-maxed-badge' : ''}">${maxed ? localize('textMaxed', getLanguage()) : `${Math.round(cost)} AP`}</span>`,
+                `buff${capitaliseString(buffKey)}CostContainer`,
+                ['buff-value']
+            );
+
+            return createRow({
+                id: buffRowDescription,
+                // The perk name is the title; whether it has been bought is the
+                // subtitle beneath it. On the legacy row those were two of four
+                // fields competing for one 70% input container.
+                //
+                // No trailing colon. It was there because the label had to
+                // announce itself as a label in a row that had no column
+                // headings; the section prints one now, so the colon is punctuation
+                // doing a job that typography does better (§3.3).
+                title: buffName,
+                subtitle: buyStatusText,
+                stat: rebuyableText,
+                cost: [costText],
+                actions: [buyControl],
+                // The prose that used to be printed above every row, permanently.
+                detail: getOptionDescription(buffRowDescription)?.content1 ?? null,
+                detailLabel: { key: 'uiRowDetailsLabel' },
+                dataset: { rowCategory: 'ascendency' }
             });
-    
-            optionContentElement.appendChild(buffRow);
         });
-    }  
+
+        optionContentElement.appendChild(createPane({
+            id: 'ascendencyPerksPane',
+            sections: [createSection({
+                id: 'ascendencyPerksSection',
+                bare: true,
+                // Written once for the section instead of being repeated as a
+                // prefix inside every row - which is where the space for the
+                // subtitle came from.
+                columns: {
+                    title: localize('uiColheadPerk', getLanguage()),
+                    stat: localize('uiColheadRebuyable', getLanguage()),
+                    cost: localize('uiColheadCost', getLanguage()),
+                    action: ''
+                },
+                rows: perkRows
+            })]
+        }));
+    }
     
     if (heading === 'Megastructures') {
         const megastructureDiagramRow = createOptionRow({

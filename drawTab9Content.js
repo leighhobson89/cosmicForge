@@ -1,10 +1,38 @@
 import { getCurrentOptionPane, getCurrentTheme, setAutoSaveToggle, getAutoSaveToggle, getAutoSaveFrequency, setAutoSaveFrequency, getSaveData, setSaveData, getCurrencySymbol, setCurrencySymbol, getNotationType, setNotationType, setNotificationsToggle, getNotificationsToggle, getSaveName, getWeatherEffectSetting, setWeatherEffectSetting, setNewsTickerSetting, getNewsTickerSetting, setSaveExportCloudFlag, getBackgroundAudio, setBackgroundAudio, getSfx, setSfx, setWasAutoSaveToggled, setMouseParticleTrailEnabled, getMouseParticleTrailEnabled, setCustomPointerEnabled, getCustomPointerEnabled, getOnboardingMode, getDemoBuild, getLanguage, getVariableDebuggerAndCheats } from './constantsAndGlobalVars.js';
-import { createButton, createTextFieldArea, createOptionRow, createDropdown, createToggleSwitch, createHtmlTableAchievementsGrid, createHtmlTableStatistics, createHtmlTextAreaProse, toggleGameFullScreen, selectTheme, callPopupModal, showHideModal, showNotification, applyCustomPointerSetting, setElementPointerEvents, fadeInStartupOverlay, setupAchievementTooltip, relocalizeAll } from './ui.js';
+import { createButton, createTextFieldArea, createRow, createSection, createPane, appendUiRow, createDropdown, createToggleSwitch, createHtmlTableAchievementsGrid, createHtmlTableStatistics, createHtmlTextAreaProse, toggleGameFullScreen, selectTheme, callPopupModal, showHideModal, showNotification, applyCustomPointerSetting, setElementPointerEvents, fadeInStartupOverlay, setupAchievementTooltip, relocalizeAll } from './ui.js';
 import { localize } from './localization.js';
 import { importSaveStringFileFromComputer, downloadSaveStringToComputer, initializeAutoSave, saveGame, saveGameToCloud, loadGameFromCloud, copySaveStringToClipBoard, loadGame, destroySaveGameOnCloud } from './saveLoadGame.js';
 import { hardResetWarningHeader, hardResetWarningText, getStatisticsContent, getHelpContent } from './descriptions.js';
 import { setAchievementIconImageUrls, getAchievementPositionData } from './resourceDataObject.js';
 import { trackAnalyticsEvent } from './analytics.js';
+
+/**
+ * Open one pane for a settings screen and hand back the section its rows go in.
+ *
+ * Large UI refactor, Phase 4 (docs/largeUIRefactor.md). One pane per screen is
+ * what makes the controls line up down the page: the pane owns the four grid
+ * tracks and every row places its cells into them, so the dropdowns and toggles
+ * share one left edge instead of each row resolving its own percentages against
+ * its own label. The nineteen `noDescriptionContainer` overrides this tab used
+ * to carry — '25%'/'80%', '17%'/'83%', 'invisible'/'100%' — are gone with it.
+ *
+ * Rows are appended into the returned section as they are built, rather than
+ * collected and appended at the end, because several screens read a control back
+ * out of the document by id between two row builds.
+ */
+function openPane(optionContentElement, id) {
+    const section = createSection({ id: `${id}Section`, bare: true });
+    optionContentElement.appendChild(createPane({
+        id: `${id}Pane`,
+        // A settings label is short and a settings row has three things in it —
+        // name, control, sentence — so the name does not want the 1.5fr the
+        // default gives it. At the default the control sat a third of the pane
+        // away from its own label with nothing in between.
+        tracks: { title: 'minmax(11ch, 0.65fr)' },
+        sections: [section]
+    }));
+    return section;
+}
 
 export function drawTab9Content(heading, optionContentElement) {
     if (heading === 'Contact') createHelpSectionRow('contactRow', ['discord-link', 'email-link']);
@@ -20,11 +48,12 @@ export function drawTab9Content(heading, optionContentElement) {
     if (heading === 'Events') createEventsSectionRow('eventsRow');
 
     if (heading === 'Exit Game') {
-        const exitGameRow = createOptionRow({
-            labelId: 'exitGameRow',
-            renderNameABs: null,
-            labelText: localize('tab9ExitGameRowLabel', getLanguage()),
-            inputElements: [
+        const section = openPane(optionContentElement, 'tab9ExitGame');
+
+        const exitGameRow = createRow({
+            id: 'exitGameRow',
+            title: localize('tab9ExitGameRowLabel', getLanguage()),
+            actions: [
                 createButton({
                     text: localize('headerMainExitGame', getLanguage()),
                     classNames: ['option-button', 'green-ready-text'],
@@ -106,34 +135,23 @@ export function drawTab9Content(heading, optionContentElement) {
                     },
                 }),
             ],
-            descriptionText: localize('headerDescExitGame', getLanguage()),
-            resourcePriceObject: null,
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: null,
-            noDescriptionContainer: [true, '25%', '80%'],
-            specialInputContainerClasses: null,
-            hideMainDescriptionRow: false
+            detail: localize('headerDescExitGame', getLanguage()),
+            detailInline: true
         });
 
-        optionContentElement.appendChild(exitGameRow);
+        appendUiRow(section, exitGameRow);
     }
 
     if (heading === 'Visual') {
+        const section = openPane(optionContentElement, 'tab9Visual');
+
         // P14 (player-feedback plan): Theme leads the Visual pane. It is the setting
         // players reach for most and the only one whose effect is immediately visible
         // across the whole window, so it no longer sits below four toggles.
-        const settingsThemeRow = createOptionRow({
-            labelId: 'settingsThemeRow',
-            renderNameABs: null,
-            labelText: localize('tab9ThemeRowLabel', getLanguage()),
-            inputElements: [
+        const settingsThemeRow = createRow({
+            id: 'settingsThemeRow',
+            title: localize('tab9ThemeRowLabel', getLanguage()),
+            actions: [
                 createDropdown('themeSelect', [
                     { value: 'terminal', text: localize('dropdownThemeTerminal', getLanguage()) },
                     { value: 'dark', text: localize('dropdownThemeDark', getLanguage()) },
@@ -149,28 +167,15 @@ export function drawTab9Content(heading, optionContentElement) {
                     setAchievementIconImageUrls();
                 }),
             ],
-            descriptionText: localize('tab9ThemeRowDescription', getLanguage()),
-            resourcePriceObject: null,
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: null,
-            noDescriptionContainer: false,
-            specialInputContainerClasses: null,
-            hideMainDescriptionRow: false
+            detail: localize('tab9ThemeRowDescription', getLanguage()),
+            detailInline: true
         });
-        optionContentElement.appendChild(settingsThemeRow);
+        appendUiRow(section, settingsThemeRow);
 
-        const settingsCurrencySymbolRow = createOptionRow({
-            labelId: 'settingsCurrencySymbolRow',
-            renderNameABs: null,
-            labelText: localize('tab9CurrencyRowLabel', getLanguage()),
-            inputElements: [
+        const settingsCurrencySymbolRow = createRow({
+            id: 'settingsCurrencySymbolRow',
+            title: localize('tab9CurrencyRowLabel', getLanguage()),
+            actions: [
                 createDropdown('currencySelect', [
                     { value: '$', text: localize('dropdownCurrencyDollar', getLanguage()) },
                     { value: '€', text: localize('dropdownCurrencyEuro', getLanguage()) },
@@ -184,22 +189,10 @@ export function drawTab9Content(heading, optionContentElement) {
                     setCurrencySymbol(value);
                 }),
             ],
-            descriptionText: localize('tab9CurrencyRowDescription', getLanguage()),
-            resourcePriceObject: null,
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: null,
-            noDescriptionContainer: false,
-            specialInputContainerClasses: null,
-            hideMainDescriptionRow: false
+            detail: localize('tab9CurrencyRowDescription', getLanguage()),
+            detailInline: true
         });
-        optionContentElement.appendChild(settingsCurrencySymbolRow);
+        appendUiRow(section, settingsCurrencySymbolRow);
 
         // P14 (player-feedback plan): plain notation is no longer offered to players —
         // condensed is the only notation the game presents, and setNotationType()
@@ -207,11 +200,10 @@ export function drawTab9Content(heading, optionContentElement) {
         // understands 'normal', so the row survives behind the debug flag for
         // checking how a figure renders without the abbreviation ladder.
         if (getVariableDebuggerAndCheats()) {
-            const settingsNotationRow = createOptionRow({
-                labelId: 'settingsNotationRow',
-                renderNameABs: null,
-                labelText: localize('tab9NotationRowLabel', getLanguage()),
-                inputElements: [
+            const settingsNotationRow = createRow({
+                id: 'settingsNotationRow',
+                title: localize('tab9NotationRowLabel', getLanguage()),
+                actions: [
                     createDropdown('notationSelect', [
                         { value: 'normalCondensed', text: localize('dropdownNotationNormalCondensed', getLanguage()) },
                         { value: 'normal', text: localize('dropdownNotationNormal', getLanguage()) },
@@ -219,55 +211,29 @@ export function drawTab9Content(heading, optionContentElement) {
                         setNotationType(value);
                     }),
                 ],
-                descriptionText: localize('tab9NotationRowDescription', getLanguage()),
-                resourcePriceObject: null,
-                dataConditionCheck: null,
-                objectSectionArgument1: null,
-                objectSectionArgument2: null,
-                quantityArgument: null,
-                autoBuyerTier: null,
-                startInvisibleValue: false,
-                resourceString: null,
-                optionalIterationParam: null,
-                rowCategory: null,
-                noDescriptionContainer: false,
-                specialInputContainerClasses: null,
-                hideMainDescriptionRow: false
+                detail: localize('tab9NotationRowDescription', getLanguage()),
+                detailInline: true
             });
-            optionContentElement.appendChild(settingsNotationRow);
+            appendUiRow(section, settingsNotationRow);
         }
 
-        const settingsToggleNotificationsRow = createOptionRow({
-            labelId: 'settingsToggleNotificationsRow',
-            renderNameABs: null,
-            labelText: localize('tab9ToggleNotificationsRowLabel', getLanguage()),
-            inputElements: [
+        const settingsToggleNotificationsRow = createRow({
+            id: 'settingsToggleNotificationsRow',
+            title: localize('tab9ToggleNotificationsRowLabel', getLanguage()),
+            actions: [
                 createToggleSwitch('notificationsToggle', true, (isEnabled) => {
                     setNotificationsToggle(isEnabled);
                 }, null),
             ],
-            descriptionText: localize('tab9ToggleNotificationsRowDescription', getLanguage()),
-            resourcePriceObject: null,
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: null,
-            noDescriptionContainer: false,
-            specialInputContainerClasses: null,
-            hideMainDescriptionRow: false
+            detail: localize('tab9ToggleNotificationsRowDescription', getLanguage()),
+            detailInline: true
         });
-        optionContentElement.appendChild(settingsToggleNotificationsRow);
+        appendUiRow(section, settingsToggleNotificationsRow);
 
-        const customPointerToggleRow = createOptionRow({
-            labelId: 'customPointerToggleRow',
-            renderNameABs: null,
-            labelText: localize('tab9CustomPointerRowLabel', getLanguage()),
-            inputElements: [
+        const customPointerToggleRow = createRow({
+            id: 'customPointerToggleRow',
+            title: localize('tab9CustomPointerRowLabel', getLanguage()),
+            actions: [
                 createToggleSwitch('customPointerToggle', false, (isEnabled) => {
                     setCustomPointerEnabled(isEnabled);
                     applyCustomPointerSetting();
@@ -284,28 +250,15 @@ export function drawTab9Content(heading, optionContentElement) {
                     }, { immediate: true, flushReason: 'settings' });
                 }, null),
             ],
-            descriptionText: localize('tab9CustomPointerRowDescription', getLanguage()),
-            resourcePriceObject: null,
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: null,
-            noDescriptionContainer: false,
-            specialInputContainerClasses: null,
-            hideMainDescriptionRow: false
+            detail: localize('tab9CustomPointerRowDescription', getLanguage()),
+            detailInline: true
         });
-        optionContentElement.appendChild(customPointerToggleRow);
+        appendUiRow(section, customPointerToggleRow);
 
-        const mouseTrailToggleRow = createOptionRow({
-            labelId: 'mouseTrailToggleRow',
-            renderNameABs: null,
-            labelText: localize('tab9MouseTrailRowLabel', getLanguage()),
-            inputElements: [
+        const mouseTrailToggleRow = createRow({
+            id: 'mouseTrailToggleRow',
+            title: localize('tab9MouseTrailRowLabel', getLanguage()),
+            actions: [
                 createToggleSwitch('mouseTrailToggle', true, (isEnabled) => {
                     setMouseParticleTrailEnabled(isEnabled);
                     trackAnalyticsEvent('settings_changed', {
@@ -321,49 +274,24 @@ export function drawTab9Content(heading, optionContentElement) {
                     }, { immediate: true, flushReason: 'settings' });
                 }, null),
             ],
-            descriptionText: localize('tab9MouseTrailRowDescription', getLanguage()),
-            resourcePriceObject: null,
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: null,
-            noDescriptionContainer: false,
-            specialInputContainerClasses: null,
-            hideMainDescriptionRow: false
+            detail: localize('tab9MouseTrailRowDescription', getLanguage()),
+            detailInline: true
         });
-        optionContentElement.appendChild(mouseTrailToggleRow);
+        appendUiRow(section, mouseTrailToggleRow);
 
 
-        const weatherEffectSettingsRow = createOptionRow({
-            labelId: 'weatherEffectSettingsRow',
-            renderNameABs: null,
-            labelText: localize('tab9WeatherEffectsRowLabel', getLanguage()),
-            inputElements: [
+        const weatherEffectSettingsRow = createRow({
+            id: 'weatherEffectSettingsRow',
+            title: localize('tab9WeatherEffectsRowLabel', getLanguage()),
+            actions: [
                 createToggleSwitch('weatherEffectSettingToggle', true, (isEnabled) => {
                     setWeatherEffectSetting(isEnabled);
                 }, null),
             ],
-            descriptionText: localize('tab9WeatherEffectsRowDescription', getLanguage()),
-            resourcePriceObject: null,
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: null,
-            noDescriptionContainer: false,
-            specialInputContainerClasses: null,
-            hideMainDescriptionRow: false
+            detail: localize('tab9WeatherEffectsRowDescription', getLanguage()),
+            detailInline: true
         });
-        optionContentElement.appendChild(weatherEffectSettingsRow);
+        appendUiRow(section, weatherEffectSettingsRow);
 
         const notificationsToggleElement = document.getElementById('notificationsToggle');
         if (notificationsToggleElement) {
@@ -402,12 +330,12 @@ export function drawTab9Content(heading, optionContentElement) {
     }
 
     if (heading === 'Game Options') {
+        const section = openPane(optionContentElement, 'tab9GameOptions');
 
-        const toggleGameFullScreenRow = createOptionRow({
-            labelId: 'toggleGameFullScreenRow',
-            renderNameABs: null,
-            labelText: localize('tab9ToggleFullScreenRowLabel', getLanguage()),
-            inputElements: [
+        const toggleGameFullScreenRow = createRow({
+            id: 'toggleGameFullScreenRow',
+            title: localize('tab9ToggleFullScreenRowLabel', getLanguage()),
+            actions: [
                 createButton({
                     text: localize('buttonToggle', getLanguage()),
                     classNames: ['option-button', 'full-screen-button'],
@@ -416,28 +344,15 @@ export function drawTab9Content(heading, optionContentElement) {
                     },
                 }),
             ],
-            descriptionText: localize('tab9ToggleFullScreenRowDescription', getLanguage()),
-            resourcePriceObject: null,
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: null,
-            noDescriptionContainer: false,
-            specialInputContainerClasses: null,
-            hideMainDescriptionRow: false
+            detail: localize('tab9ToggleFullScreenRowDescription', getLanguage()),
+            detailInline: true
         });
-        optionContentElement.appendChild(toggleGameFullScreenRow);
+        appendUiRow(section, toggleGameFullScreenRow);
 
-        const settingsLanguageRow = createOptionRow({
-            labelId: 'settingsLanguageRow',
-            renderNameABs: null,
-            labelText: localize('settingsLanguageRowLabel', getLanguage()),
-            inputElements: [
+        const settingsLanguageRow = createRow({
+            id: 'settingsLanguageRow',
+            title: localize('settingsLanguageRowLabel', getLanguage()),
+            actions: [
                 createDropdown('languageSelect', [
                     { value: 'en', text: 'English' },
                     { value: 'es', text: 'Español' },
@@ -451,59 +366,33 @@ export function drawTab9Content(heading, optionContentElement) {
                     relocalizeAll(value);
                 }),
             ],
-            descriptionText: localize('settingsLanguageRowDescription', getLanguage()),
-            resourcePriceObject: null,
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: null,
-            noDescriptionContainer: false,
-            specialInputContainerClasses: null,
-            hideMainDescriptionRow: false
+            detail: localize('settingsLanguageRowDescription', getLanguage()),
+            detailInline: true
         });
-        optionContentElement.appendChild(settingsLanguageRow);
+        appendUiRow(section, settingsLanguageRow);
 
-        const newsTickerToggleRow = createOptionRow({
-            labelId: 'newsTickerToggleRow',
-            renderNameABs: null,
-            labelText: localize('tab9NewsTickerRowLabel', getLanguage()),
-            inputElements: [
+        const newsTickerToggleRow = createRow({
+            id: 'newsTickerToggleRow',
+            title: localize('tab9NewsTickerRowLabel', getLanguage()),
+            actions: [
                 createToggleSwitch('newsTickerSettingToggle', true, (isEnabled) => {
                     setNewsTickerSetting(isEnabled);
                 }, null),
             ],
-            descriptionText: localize('tab9NewsTickerRowDescription', getLanguage()),
-            resourcePriceObject: null,
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: null,
-            noDescriptionContainer: false,
-            specialInputContainerClasses: null,
-            hideMainDescriptionRow: false
+            detail: localize('tab9NewsTickerRowDescription', getLanguage()),
+            detailInline: true
         });
-        optionContentElement.appendChild(newsTickerToggleRow);
+        appendUiRow(section, newsTickerToggleRow);
 
         const newsTickerSettingToggleElement = document.getElementById('newsTickerSettingToggle');
         if (newsTickerSettingToggleElement) {
             newsTickerSettingToggleElement.checked = getNewsTickerSetting();
         }
 
-        const backGroundAudioRow = createOptionRow({
-            labelId: 'backGroundAudioRow',
-            renderNameABs: null,
-            labelText: localize('tab9BackgroundAudioRowLabel', getLanguage()),
-            inputElements: [
+        const backGroundAudioRow = createRow({
+            id: 'backGroundAudioRow',
+            title: localize('tab9BackgroundAudioRowLabel', getLanguage()),
+            actions: [
                 createToggleSwitch('backGroundAudioToggle', false, (isEnabled) => {
                     setBackgroundAudio(isEnabled);
                     trackAnalyticsEvent('settings_changed', {
@@ -519,33 +408,20 @@ export function drawTab9Content(heading, optionContentElement) {
                     }, { immediate: true, flushReason: 'settings' });
                 }, null),
             ],
-            descriptionText: localize('tab9BackgroundAudioRowDescription', getLanguage()),
-            resourcePriceObject: null,
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: null,
-            noDescriptionContainer: false,
-            specialInputContainerClasses: null,
-            hideMainDescriptionRow: false
+            detail: localize('tab9BackgroundAudioRowDescription', getLanguage()),
+            detailInline: true
         });
-        optionContentElement.appendChild(backGroundAudioRow);
+        appendUiRow(section, backGroundAudioRow);
 
         const backGroundAudioToggleElement = document.getElementById('backGroundAudioToggle');
         if (backGroundAudioToggleElement) {
             backGroundAudioToggleElement.checked = getBackgroundAudio();
         }
 
-        const sfxAudioRow = createOptionRow({
-            labelId: 'sfxAudioRow',
-            renderNameABs: null,
-            labelText: localize('tab9SfxRowLabel', getLanguage()),
-            inputElements: [
+        const sfxAudioRow = createRow({
+            id: 'sfxAudioRow',
+            title: localize('tab9SfxRowLabel', getLanguage()),
+            actions: [
                 createToggleSwitch('sfxToggle', false, (isEnabled) => {
                     setSfx(isEnabled);
                     trackAnalyticsEvent('settings_changed', {
@@ -561,22 +437,10 @@ export function drawTab9Content(heading, optionContentElement) {
                     }, { immediate: true, flushReason: 'settings' });
                 }, null),
             ],
-            descriptionText: localize('tab9SfxRowDescription', getLanguage()),
-            resourcePriceObject: null,
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: null,
-            noDescriptionContainer: false,
-            specialInputContainerClasses: null,
-            hideMainDescriptionRow: false
+            detail: localize('tab9SfxRowDescription', getLanguage()),
+            detailInline: true
         });
-        optionContentElement.appendChild(sfxAudioRow);
+        appendUiRow(section, sfxAudioRow);
         
         const sfxToggleElement = document.getElementById('sfxToggle');
         if (sfxToggleElement) {
@@ -585,12 +449,12 @@ export function drawTab9Content(heading, optionContentElement) {
     }
 
     if (heading === 'Saving / Loading') {   
+        const section = openPane(optionContentElement, 'tab9SavingLoading');
         const demoExtraClasses = getDemoBuild() ? ['electron-purple-demo-button'] : [];
-        const autoSaveConfigRow = createOptionRow({
-            labelId: 'autoSaveConfigRow',
-            renderNameABs: null,
-            labelText: localize('tab9AutoSaveRowLabel', getLanguage()),
-            inputElements: [
+        const autoSaveConfigRow = createRow({
+            id: 'autoSaveConfigRow',
+            title: localize('tab9AutoSaveRowLabel', getLanguage()),
+            actions: [
                 createDropdown('autoSaveFrequency', [
                     { value: 120000, text: localize('dropdownAutoSave2Minutes', getLanguage()) },
                     { value: 180000, text: localize('dropdownAutoSave3Minutes', getLanguage()) },
@@ -608,23 +472,9 @@ export function drawTab9Content(heading, optionContentElement) {
                         showNotification(localize('notificationAutoSaveOff', getLanguage()), 'error', 5000, 'loadSave');
                     }
                 }, ['toggle-switch-spacing']),
-            ],
-            descriptionText: '',
-            resourcePriceObject: null,
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: null,
-            noDescriptionContainer: false,
-            specialInputContainerClasses: null,
-            hideMainDescriptionRow: false
+            ]
         });
-        optionContentElement.appendChild(autoSaveConfigRow);
+        appendUiRow(section, autoSaveConfigRow);
 
         if (getDemoBuild()) {
             const autoSaveToggleElement = document.getElementById('autoSaveToggle');
@@ -638,11 +488,10 @@ export function drawTab9Content(heading, optionContentElement) {
             }
         }
 
-        const exportSaveRow = createOptionRow({
-            labelId: 'exportSaveRow',
-            renderNameABs: null,
-            labelText: localize('tab9ExportSaveRowLabel', getLanguage()),
-            inputElements: [
+        const exportSaveRow = createRow({
+            id: 'exportSaveRow',
+            title: localize('tab9ExportSaveRowLabel', getLanguage()),
+            actions: [
                 createTextFieldArea('exportSaveArea', ['export-save'], localize('placeholderExportSaveArea', getLanguage()), null),
                 createButton({
                     text: localize('buttonExport', getLanguage()),
@@ -658,29 +507,14 @@ export function drawTab9Content(heading, optionContentElement) {
                         downloadSaveStringToComputer();
                     },
                 }),
-            ],
-            descriptionText: '',
-            resourcePriceObject: null,
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: null,
-            noDescriptionContainer: [true, '17%', '83%'],
-            specialInputContainerClasses: null,
-            hideMainDescriptionRow: false
+            ]
         });
-        optionContentElement.appendChild(exportSaveRow);
+        appendUiRow(section, exportSaveRow);
 
-        const importSaveRow = createOptionRow({
-            labelId: 'importSaveRow',
-            renderNameABs: null,
-            labelText: localize('tab9ImportSaveRowLabel', getLanguage()),
-            inputElements: [
+        const importSaveRow = createRow({
+            id: 'importSaveRow',
+            title: localize('tab9ImportSaveRowLabel', getLanguage()),
+            actions: [
                 createTextFieldArea('importSaveArea', ['import-save'], localize('placeholderImportSaveArea', getLanguage()), null),
                 createButton({
                     text: localize('buttonImport', getLanguage()),
@@ -699,29 +533,14 @@ export function drawTab9Content(heading, optionContentElement) {
                         importSaveStringFileFromComputer();
                     },
                 }),
-            ],
-            descriptionText: '',
-            resourcePriceObject: null,
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: null,
-            noDescriptionContainer: [true, '17%', '83%'],
-            specialInputContainerClasses: null,
-            hideMainDescriptionRow: false
+            ]
         });
-        optionContentElement.appendChild(importSaveRow);
+        appendUiRow(section, importSaveRow);
 
-        const exportCloudSaveRow = createOptionRow({
-            labelId: 'exportCloudSaveRow',
-            renderNameABs: null,
-            labelText: localize('tab9ExportCloudSaveRowLabel', getLanguage()),
-            inputElements: [
+        const exportCloudSaveRow = createRow({
+            id: 'exportCloudSaveRow',
+            title: localize('tab9ExportCloudSaveRowLabel', getLanguage()),
+            actions: [
                 createButton({
                     text: localize('buttonSaveToCloud', getLanguage()),
                     classNames: ['option-button', 'save-load-button', ...demoExtraClasses],
@@ -742,29 +561,14 @@ export function drawTab9Content(heading, optionContentElement) {
                 }),
                 Object.assign(document.createElement('span'), { innerHTML: localize('labelPioneerName', getLanguage()), className: 'save-name-margin' }),
                 createTextFieldArea('saveName', ['save-name', 'save-name-width', 'save-name-height', 'save-name-margin'], '', getSaveName()),
-            ],
-            descriptionText: '',
-            resourcePriceObject: null,
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: null,
-            noDescriptionContainer: [true, '25%', '80%'],
-            specialInputContainerClasses: null,
-            hideMainDescriptionRow: false
+            ]
         });
-        optionContentElement.appendChild(exportCloudSaveRow);
+        appendUiRow(section, exportCloudSaveRow);
 
-        const importCloudSaveRow = createOptionRow({
-            labelId: 'importCloudSaveRow',
-            renderNameABs: null,
-            labelText: localize('tab9ImportCloudSaveRowLabel', getLanguage()),
-            inputElements: [
+        const importCloudSaveRow = createRow({
+            id: 'importCloudSaveRow',
+            title: localize('tab9ImportCloudSaveRowLabel', getLanguage()),
+            actions: [
                 createButton({
                     text: localize('buttonLoadFromCloud', getLanguage()),
                     classNames: ['option-button', 'save-load-button', ...demoExtraClasses],
@@ -772,29 +576,14 @@ export function drawTab9Content(heading, optionContentElement) {
                         loadGameFromCloud();
                     },
                 }),
-            ],
-            descriptionText: '',
-            resourcePriceObject: null,
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: null,
-            noDescriptionContainer: [true, '25%', '80%'],
-            specialInputContainerClasses: null,
-            hideMainDescriptionRow: false
+            ]
         });
-        optionContentElement.appendChild(importCloudSaveRow);
+        appendUiRow(section, importCloudSaveRow);
 
-        const hardResetRow = createOptionRow({
-            labelId: 'hardResetRow',
-            renderNameABs: null,
-            labelText: localize('tab9HardResetRowLabel', getLanguage()),
-            inputElements: [
+        const hardResetRow = createRow({
+            id: 'hardResetRow',
+            title: localize('tab9HardResetRowLabel', getLanguage()),
+            actions: [
                 createButton({
                     text: localize('buttonHardResetAllProgress', getLanguage()),
                     classNames: ['option-button', 'hard-reset-button'],
@@ -831,22 +620,10 @@ export function drawTab9Content(heading, optionContentElement) {
                     },
                 }),
             ],
-            descriptionText: localize('tab9HardResetRowDescription', getLanguage()),
-            resourcePriceObject: null,
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: null,
-            noDescriptionContainer: [true, '25%', '80%'],
-            specialInputContainerClasses: null,
-            hideMainDescriptionRow: false
+            detail: localize('tab9HardResetRowDescription', getLanguage()),
+            detailInline: true
         });
-        optionContentElement.appendChild(hardResetRow);
+        appendUiRow(section, hardResetRow);
 
         const autoSaveToggleElement = document.getElementById('autoSaveToggle');
         if (autoSaveToggleElement) {
@@ -863,11 +640,10 @@ export function drawTab9Content(heading, optionContentElement) {
         const defaultClasses = ['help-container', 'help-container-margin'];
         const combinedClasses = defaultClasses.concat(classes || []);
         
-        const helpRow = createOptionRow({
-            labelId: rowId,
-            renderNameABs: null,
-            labelText: '',
-            inputElements: [
+        const helpRow = createRow({
+            id: rowId,
+            variant: 'full',
+            actions: [
                 createHtmlTextAreaProse(
                     `${rowId}TextArea`,
                     combinedClasses,
@@ -876,24 +652,10 @@ export function drawTab9Content(heading, optionContentElement) {
                     ['help-sub-header-text'],
                     ['help-sub-body-text']
                 ),
-            ],
-            descriptionText: '',
-            resourcePriceObject: '',
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: '',
-            noDescriptionContainer: [true, 'invisible', '100%'],
-            specialInputContainerClasses: ['no-left-margin'],
-            hideMainDescriptionRow: false
+            ]
         });
         
-        optionContentElement.appendChild(helpRow);
+        appendUiRow(openPane(optionContentElement, 'tab9Help'), helpRow);
 
         const contactRowTextArea = document.getElementById('contactRowTextArea');
 
@@ -931,43 +693,27 @@ export function drawTab9Content(heading, optionContentElement) {
     function createAchievementsSectionRow(rowId) {
         const achievementsData = Object.values(getAchievementPositionData());
     
-        const achievementsRow = createOptionRow({
-            labelId: rowId,
-            renderNameABs: null,
-            labelText: '',
-            inputElements: [
+        const achievementsRow = createRow({
+            id: rowId,
+            variant: 'full',
+            actions: [
                 createHtmlTableAchievementsGrid(
                     `${rowId}AchievementsGrid`,
                     ['achievement-container', 'achievement-container-margin'],
                     achievementsData
                 ),
-            ],
-            descriptionText: '',
-            resourcePriceObject: '',
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: '',
-            noDescriptionContainer: [true, '0%', '100%'],
-            specialInputContainerClasses: null,
-            hideMainDescriptionRow: false
+            ]
         });
     
-        optionContentElement.appendChild(achievementsRow);
+        appendUiRow(openPane(optionContentElement, 'tab9Achievements'), achievementsRow);
         setupAchievementTooltip();
     }      
     
     function createStatisticsSectionRow(rowId) {
-        const statisticsRow = createOptionRow({
-            labelId: rowId,
-            renderNameABs: null,
-            labelText: '',
-            inputElements: [
+        const statisticsRow = createRow({
+            id: rowId,
+            variant: 'full',
+            actions: [
                 createHtmlTableStatistics(
                     `${rowId}TextArea`,
                     ['help-container', 'help-container-margin', 'center-statistics'],
@@ -975,24 +721,10 @@ export function drawTab9Content(heading, optionContentElement) {
                     getStatisticsContent('subHeadings'),
                     getStatisticsContent('subBodys')
                 ),
-            ],
-            descriptionText: '',
-            resourcePriceObject: '',
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: '',
-            noDescriptionContainer: [true, '0%', '100%'],
-            specialInputContainerClasses: null,
-            hideMainDescriptionRow: false
+            ]
         });
         
-        optionContentElement.appendChild(statisticsRow);
+        appendUiRow(openPane(optionContentElement, 'tab9Statistics'), statisticsRow);
     }
 
     function createEventsSectionRow(rowId) {
@@ -1047,29 +779,14 @@ export function drawTab9Content(heading, optionContentElement) {
         `;
         container.appendChild(historyTable);
 
-        const eventsRow = createOptionRow({
-            labelId: rowId,
-            renderNameABs: null,
-            labelText: '',
-            inputElements: [
+        const eventsRow = createRow({
+            id: rowId,
+            variant: 'full',
+            actions: [
                 container,
-            ],
-            descriptionText: '',
-            resourcePriceObject: '',
-            dataConditionCheck: null,
-            objectSectionArgument1: null,
-            objectSectionArgument2: null,
-            quantityArgument: null,
-            autoBuyerTier: null,
-            startInvisibleValue: false,
-            resourceString: null,
-            optionalIterationParam: null,
-            rowCategory: '',
-            noDescriptionContainer: [true, 'invisible', '100%'],
-            specialInputContainerClasses: ['no-left-margin'],
-            hideMainDescriptionRow: false
+            ]
         });
 
-        optionContentElement.appendChild(eventsRow);
+        appendUiRow(openPane(optionContentElement, 'tab9Events'), eventsRow);
     }
 }

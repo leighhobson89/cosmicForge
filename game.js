@@ -1802,11 +1802,19 @@ function cosmicRipChecks() {
         }
     }
 
-    const statusRowLabel = document.querySelector('.option-row-main div label');
+    // The map's caption. This used to be found with
+    // `document.querySelector('.option-row-main div label')` — the FIRST label
+    // inside any option row anywhere in the document, which happened to be this
+    // one while this pane was open. That is a structural selector aimed at a
+    // specific element, it would silently retarget if any row above it ever
+    // gained a label, and it threw outright the moment the pane stopped using
+    // `.option-row-main` (large UI refactor, Phase 4). The label carries its own
+    // id now, and the null check is real rather than assumed.
     if (getCurrentOptionPane() === 'near space scanner array') {
+        const statusRowLabel = document.getElementById('cosmicRipNearSpaceScannerArrayStatusLabel');
         const isOneSectorState = getCosmicRipNearSpaceScannerArrayOneSectorState() === true;
         const desired = (isOneSectorState && ripFound) ? localize('tab8CosmicRipSectorRowLabel', getLanguage()) : localize('tab8SectorsMapRowLabel', getLanguage());
-        if (statusRowLabel.innerText !== desired) {
+        if (statusRowLabel && statusRowLabel.innerText !== desired) {
             statusRowLabel.innerText = desired;
         }
     }

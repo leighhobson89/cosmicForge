@@ -58,7 +58,19 @@
     --ui-track-title:  minmax(11ch, 1.5fr);
     --ui-track-stat:   minmax(6ch, 0.55fr);
     --ui-track-cost:   minmax(11ch, 1fr);
-    --ui-track-action: auto;
+    /* `minmax(0, auto)` rather than bare `auto`, so the action column can be
+       squeezed below its max-content width and let its controls wrap instead of
+       pushing the row off the right of the screen. Phase 4 found this the hard
+       way: the save pane's Pioneer Name field sits beside a button and a label,
+       and with a bare `auto` track the three together simply overflowed. The
+       cell already has `flex-wrap: wrap`; this is what lets it take effect. */
+    --ui-track-action: minmax(0, auto);
+    /* The inline explanatory sentence. A settings row's prose says what the
+       control beside it does, so it belongs in a column of its own rather than
+       on a band underneath — see `detailInline` in newUI/createSection.js and
+       the Phase 4 correction in docs/largeUIRefactor.md. It is only ever in the
+       template when a row on the pane actually asks for it. */
+    --ui-track-detail: minmax(14ch, 1.15fr);
 }
 
 
