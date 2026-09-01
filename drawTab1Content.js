@@ -1,10 +1,14 @@
 import { getLastSellResourceCompoundDropdownOption, setLastSellResourceCompoundDropdownOption, getResourceSalePreview, getTimerRateRatio, getLanguage } from './constantsAndGlobalVars.js';
 import { sellResource, fuseResource, gain, increaseResourceStorage, getBTypeAutoBuyerBoostForTier } from './game.js';
-import { getResourceDataObject, setResourceDataObject } from './resourceDataObject.js';
+import { getResourceDataObject, setResourceDataObject, getAutoSellUnlocked } from './resourceDataObject.js';
 import { removeTabAttentionIfNoIndicators, createTextElement, createToggleSwitch, createOptionRow, createDropdown, createButton, disableStorageNotificationActionIfShowing } from './ui.js';
 import { localize } from './localization.js';
 
 const TAB1_HEADING_RESOURCES = ['hydrogen', 'helium', 'carbon', 'neon', 'oxygen', 'sodium', 'silicon', 'iron'];
+
+function sellRowLabel(sellKey, allocateKey) {
+    return localize(getAutoSellUnlocked() ? allocateKey : sellKey, getLanguage());
+}
 
 function drawResourceGainHeaderButton(heading) {
     const headerActionsElement = document.getElementById('headerActionsTab1');
@@ -51,7 +55,7 @@ export function drawTab1Content(heading, optionContentElement) {
         const hydrogenSellRow = createOptionRow({
             labelId: 'hydrogenSellRow',
             renderNameABs: null,
-            labelText: localize('tab1HydrogenSellRowLabel', getLanguage()),
+            labelText: sellRowLabel('tab1HydrogenSellRowLabel', 'tab1HydrogenAllocateRowLabel'),
             inputElements: [
                 createDropdown('hydrogenSellSelectQuantity', [
                     { value: 'all', text: localize('dropdownOptionAllStock', getLanguage()) },
@@ -326,7 +330,7 @@ export function drawTab1Content(heading, optionContentElement) {
         const heliumSellRow = createOptionRow({
             labelId: 'heliumSellRow',
             renderNameABs: null,
-            labelText: localize('tab1HeliumSellRowLabel', getLanguage()),
+            labelText: sellRowLabel('tab1HeliumSellRowLabel', 'tab1HeliumAllocateRowLabel'),
             inputElements: [
                 createDropdown('heliumSellSelectQuantity', [
                     { value: 'all', text: localize('dropdownOptionAllStock', getLanguage()) },
@@ -602,7 +606,7 @@ export function drawTab1Content(heading, optionContentElement) {
         const carbonSellRow = createOptionRow({
             labelId: 'carbonSellRow',
             renderNameABs: null,
-            labelText: localize('tab1CarbonSellRowLabel', getLanguage()),
+            labelText: sellRowLabel('tab1CarbonSellRowLabel', 'tab1CarbonAllocateRowLabel'),
             inputElements: [
                 createDropdown('carbonSellSelectQuantity', [
                     { value: 'all', text: localize('dropdownOptionAllStock', getLanguage()) },
@@ -885,7 +889,7 @@ export function drawTab1Content(heading, optionContentElement) {
         const neonSellRow = createOptionRow({
             labelId: 'neonSellRow',
             renderNameABs: null,
-            labelText: localize('tab1NeonSellRowLabel', getLanguage()),
+            labelText: sellRowLabel('tab1NeonSellRowLabel', 'tab1NeonAllocateRowLabel'),
             inputElements: [
                 createDropdown('neonSellSelectQuantity', [
                     { value: 'all', text: localize('dropdownOptionAllStock', getLanguage()) },
@@ -1161,7 +1165,7 @@ export function drawTab1Content(heading, optionContentElement) {
         const oxygenSellRow = createOptionRow({
             labelId: 'oxygenSellRow',
             renderNameABs: null,
-            labelText: localize('tab1OxygenSellRowLabel', getLanguage()),
+            labelText: sellRowLabel('tab1OxygenSellRowLabel', 'tab1OxygenAllocateRowLabel'),
             inputElements: [
                 createDropdown('oxygenSellSelectQuantity', [
                     { value: 'all', text: localize('dropdownOptionAllStock', getLanguage()) },
@@ -1437,7 +1441,7 @@ export function drawTab1Content(heading, optionContentElement) {
         const sodiumSellRow = createOptionRow({
             labelId: 'sodiumSellRow',
             renderNameABs: null,
-            labelText: localize('tab1SodiumSellRowLabel', getLanguage()),
+            labelText: sellRowLabel('tab1SodiumSellRowLabel', 'tab1SodiumAllocateRowLabel'),
             inputElements: [
                 createDropdown('sodiumSellSelectQuantity', [
                     { value: 'all', text: localize('dropdownOptionAllStock', getLanguage()) },
@@ -1688,7 +1692,7 @@ export function drawTab1Content(heading, optionContentElement) {
         const siliconSellRow = createOptionRow({
             labelId: 'siliconSellRow',
             renderNameABs: null,
-            labelText: localize('tab1SiliconSellRowLabel', getLanguage()),
+            labelText: sellRowLabel('tab1SiliconSellRowLabel', 'tab1SiliconAllocateRowLabel'),
             inputElements: [
                 createDropdown('siliconSellSelectQuantity', [
                     { value: 'all', text: localize('dropdownOptionAllStock', getLanguage()) },
@@ -1964,7 +1968,7 @@ export function drawTab1Content(heading, optionContentElement) {
         const ironSellRow = createOptionRow({
             labelId: 'ironSellRow',
             renderNameABs: null,
-            labelText: localize('tab1IronSellRowLabel', getLanguage()),
+            labelText: sellRowLabel('tab1IronSellRowLabel', 'tab1IronAllocateRowLabel'),
             inputElements: [
                 createDropdown('ironSellSelectQuantity', [
                     { value: 'all', text: localize('dropdownOptionAllStock', getLanguage()) },
