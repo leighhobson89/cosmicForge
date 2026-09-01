@@ -4,7 +4,7 @@ _Generated from `functional-areas.json`. Re-run `node tests/docs/generate-report
 
 ## Coverage at a glance
 
-One line per functional area, worst first. 49 green, 0 amber, 0 red, out of 49.
+One line per functional area, worst first. 50 green, 0 amber, 0 red, out of 50.
 
 | | Area | Group | Risk | Specs | Where it stands |
 |:--:|---|---|:--:|--:|---|
@@ -32,6 +32,7 @@ One line per functional area, worst first. 49 green, 0 amber, 0 red, out of 49.
 | 🟢 | [Local Save & Load](areas/save-load-local.md) | Foundation | High | 10 | Done — driven through its own controls, 10 specs passing. |
 | 🟢 | [Localization](areas/localization.md) | Foundation | High | 114 | Done — driven through its own controls, 114 specs passing. |
 | 🟢 | [Megastructures](areas/megastructures.md) | Endgame | Medium | 51 | Done — the manuscripts are rolled by studying stars through the game's own tooling, the stages are bought through the real Technology rows, and every bonus is measured off the store, the grid or the rock rather than read back off a multiplier. The battle at a factory star is not re-fought here; that belongs to the Battle area, and this file drives the conquest handler every access point funnels into. |
+| 🟢 | [Migration](areas/migration.md) | Foundation | High | 14 | Done — driven through its own controls, 14 specs passing. |
 | 🟢 | [News Ticker](areas/news-ticker.md) | Simulation & Ambience | Low | 26 | Done — driven through its own controls, 26 specs passing. |
 | 🟢 | [Notifications](areas/notifications.md) | Presentation & Shell | Medium | 18 | Done — added by P6 of the player-feedback plan when the notification stack was turned from a horizontal spread into one bottom-right column. The geometry is measured off real bounding boxes rather than read back off inline styles, storage cards are produced by running real tier 1 autobuyers into a real cap, and the cheat and achievement rows come from real debug-menu presses. Two live defects fell out of writing it: Clear All emptied a classification's queue instead of deleting it, which silently muted that classification for the rest of the run, and the routine that spends a storage claim only ever looked at the first card in the row. |
 | 🟢 | [Number Notation](areas/notation.md) | Presentation & Shell | Medium | 22 | Upgraded to integration — the setting is driven through its own dropdown and every screen is swept in both modes. The 3 specs that were failing found known-issues #26 and #27, both now fixed at source. |
@@ -82,10 +83,10 @@ when an area is upgraded.
 |---|---:|---:|
 | 🔴 Red — no spec file | 0 | 0% |
 | 🟠 Amber — spec written, not yet upgraded | 0 | 0% |
-| 🟢 Green — signed off | 49 | 100% |
-| **Total functional areas** | **49** | |
+| 🟢 Green — signed off | 50 | 100% |
+| **Total functional areas** | **50** | |
 
-839 individual test cases are identified across all areas. **1399 Playwright specs are implemented** across 48 areas, and all of them pass except where an area's note says otherwise — a spec that fails on a live defect is left failing on purpose, and the defect is written up in [known-issues.md](known-issues.md).
+847 individual test cases are identified across all areas. **1413 Playwright specs are implemented** across 49 areas, and all of them pass except where an area's note says otherwise — a spec that fails on a live defect is left failing on purpose, and the defect is written up in [known-issues.md](known-issues.md).
 
 Run them with `npm run test:e2e` (all areas) or `node tests/run-e2e.mjs <area>`. Each area writes its own HTML report to `test-reports/e2e/<area>/index.html`, with a summary index at `test-reports/e2e/index.html`.
 
@@ -108,6 +109,7 @@ Boot, persistence and the machinery every other area depends on. A failure here 
 | 🟢 | [Local Save & Load](areas/save-load-local.md) | High | 8 | **10** | — |
 | 🟢 | [Cloud Save & Load](areas/save-load-cloud.md) | High | 8 | **8** | autobuyer.test.js, earlyLoop.test.js, energyMid.test.js, researchTech.test.js, spaceAntimatter.test.js |
 | 🟢 | [Save Migration](areas/save-migration.md) | High | 9 | **11** | — |
+| 🟢 | [Migration](areas/migration.md) | High | 8 | **14** | — |
 | 🟢 | [Offline Gains](areas/offline-gains.md) | High | 9 | **18** | — |
 | 🟢 | [Localization](areas/localization.md) | High | 32 | **114** | — |
 | 🟢 | [Settings & Preferences](areas/settings.md) | Medium | 20 | **20** | — |

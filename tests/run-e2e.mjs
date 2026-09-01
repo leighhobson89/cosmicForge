@@ -8,11 +8,19 @@
  *
  *   node tests/run-e2e.mjs                          run every area that has specs
  *   node tests/run-e2e.mjs audio app-boot           run only the named areas
+ *   node tests/run-e2e.mjs migration 0.97           migrate a 0.97-era save to current
+ *   node tests/run-e2e.mjs migration 0.93 0.99      several source versions in one run
+ *   node tests/run-e2e.mjs migration                every rung in the ladder
  *   node tests/run-e2e.mjs --headed                 run headed (visible browser)
  *   node tests/run-e2e.mjs energy --headed --slow   headed, 700ms before every step
  *   node tests/run-e2e.mjs audio -- -g "some title"  extra args after -- go straight to
  *                                                     `playwright test` for each area run
  *   node tests/run-e2e.mjs --list                   show which areas have specs
+ *
+ * A bare number is read as a save version for the `migration` area rather than as
+ * an area name: it ages a save the current build just wrote back to that version
+ * and proves it climbs to current and still plays. Passing one implies the
+ * `migration` area if no area was named. See tests/e2e/migration/README.md.
  *
  * --slow only applies together with --headed: it exists to make a run followable
  * by eye, and slowing a headless run just burns time. Passing it alone prints a
@@ -54,9 +62,16 @@ function discoverAreas() {
     .sort();
 }
 
-function runArea(area, { headed = false, slow = false, extraArgs = [] } = {}) {
+/** The area that reads a save version off the command line. */
+const MIGRATION_AREA = 'migration';
+
+function runArea(area, { headed = false, slow = false, extraArgs = [], migrationVersions = [] } = {}) {
   const started = Date.now();
-  const mode = [headed ? 'headed' : null, slow ? `slow ${SLOW_STEP_MS}ms/step` : null]
+  const mode = [
+    headed ? 'headed' : null,
+    slow ? `slow ${SLOW_STEP_MS}ms/step` : null,
+    migrationVersions.length ? `from ${migrationVersions.join(', ')}` : null
+  ]
     .filter(Boolean)
     .join(', ');
   process.stdout.write(`\n=== ${area}${mode ? ` (${mode})` : ''} ===\n`);
@@ -82,7 +97,11 @@ function runArea(area, { headed = false, slow = false, extraArgs = [] } = {}) {
       PLAYWRIGHT_HTML_OPEN: 'never',
       // Read by playwright.config.js (launchOptions.slowMo, and the raised
       // timeouts that make a paced run survivable) and by the game fixture.
-      ...(slow ? { E2E_SLOWMO: String(SLOW_STEP_MS) } : {})
+      ...(slow ? { E2E_SLOWMO: String(SLOW_STEP_MS) } : {}),
+      // Read by tests/e2e/migration/migration.spec.js at collection time, which
+      // is why it has to be an env var rather than a CLI flag: the spec builds
+      // one test per version before Playwright starts running anything.
+      ...(migrationVersions.length ? { E2E_MIGRATION_VERSIONS: migrationVersions.join(',') } : {})
     }
   });
 
@@ -231,6 +250,13 @@ const available = discoverAreas();
 
 if (args.includes('--list')) {
   console.log('Areas with specs:\n' + available.map((a) => '  ' + a).join('\n'));
+  if (available.includes(MIGRATION_AREA)) {
+    console.log(
+      `\n  ${MIGRATION_AREA} also takes a save version: ` +
+      `node tests/run-e2e.mjs ${MIGRATION_AREA} 0.97\n` +
+      '  (with no version it replays every rung in the patches.js ladder)'
+    );
+  }
   process.exit(0);
 }
 
@@ -251,7 +277,18 @@ if (slowRequested && !headed) {
   console.warn('  [warn] --slow only applies with --headed, so it has been ignored.');
   console.warn('         Re-run as: node tests/run-e2e.mjs <area> --headed --slow');
 }
-const requested = ownArgs.filter((a) => a !== '--headed' && a !== '--slow' && a !== '--list');
+const positional = ownArgs.filter((a) => a !== '--headed' && a !== '--slow' && a !== '--list');
+
+// A bare number is a save version for the migration area, not an area name. No
+// area folder could ever be called `0.97`, so there is nothing to disambiguate,
+// and it keeps the common case down to `run-e2e.mjs migration 0.97`.
+const migrationVersions = positional.filter((a) => /^\d+(\.\d+)?$/.test(a));
+const requested = positional.filter((a) => !migrationVersions.includes(a));
+
+// Asking for a version is asking for the migration area, so naming it as well is
+// optional.
+if (migrationVersions.length && !requested.length) requested.push(MIGRATION_AREA);
+
 const areas = requested.length ? requested : available;
 
 const unknown = areas.filter((a) => !available.includes(a));
@@ -261,7 +298,19 @@ if (unknown.length) {
   process.exit(1);
 }
 
-const results = areas.map((area) => runArea(area, { headed, slow, extraArgs }));
+if (migrationVersions.length && !areas.includes(MIGRATION_AREA)) {
+  console.warn(`  [warn] ${migrationVersions.join(', ')} looks like a save version, but the`);
+  console.warn(`         ${MIGRATION_AREA} area is not in this run, so it has been ignored.`);
+}
+
+const results = areas.map((area) =>
+  runArea(area, {
+    headed,
+    slow,
+    extraArgs,
+    migrationVersions: area === MIGRATION_AREA ? migrationVersions : []
+  })
+);
 writeIndex(results);
 
 const totalFailed = results.reduce((n, r) => n + r.failed, 0);

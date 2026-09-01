@@ -62,6 +62,32 @@ while actively writing a spec — call Playwright directly:
 npx playwright test tests/e2e/audio
 ```
 
+## Run a migration from a specific save version
+
+The `migration` area takes an argument the other areas don't: a save version.
+
+```bash
+node tests/run-e2e.mjs migration 0.97        # one version
+node tests/run-e2e.mjs migration 0.93 0.99   # several
+node tests/run-e2e.mjs migration             # every rung below current
+```
+
+A bare number is read as a version rather than an area name — no area folder could
+be called `0.97` — and passing one implies the `migration` area, so
+`node tests/run-e2e.mjs 0.97` is the same command.
+
+What it does: plays a run in the current build, exports the save the game writes,
+ages that save back to the version you asked for by undoing every `patches.js`
+rung above it, imports it through the real Import button, and then checks it
+climbed back to current, kept the run, and is still playable. Run it at release
+time, and add the new rung to `tests/e2e/migration/version-ladder.mjs` whenever the
+save version is bumped — the suite fails by name if that catalogue falls behind
+`patches.js`. See [`areas/migration.md`](areas/migration.md).
+
+Note this is a different area from `save-migration`, which covers the ladder's edge
+cases (below minimum, from the future, missing sections) rather than one nominated
+version.
+
 ## See what's available
 
 ```bash
