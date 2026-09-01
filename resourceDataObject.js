@@ -11,7 +11,7 @@ import { capitaliseString } from "./utilityFunctions.js";
 
 export let achievementImageUrls;
 export let resourceData = {
-    version: 0.99, //update this whenever changes are made to the structure
+    version: 0.991, //update this whenever changes are made to the structure
     resources: {
         solar: {
             autoSell: false,
@@ -144,7 +144,7 @@ export let resourceData = {
             compoundShare: 100,
             nameResource: 'Neon',
             screenName: 'neon',
-            saleValue: 0.40,
+            saleValue: 0.12,
             salePreviewElement: 'sellNeonDescription',
             quantity: 0,
             rate: 0,
@@ -355,8 +355,8 @@ export let resourceData = {
                     normalProgression: true,
                     tier1: { nameUpgrade: 'autoBuyerNameGlassWorkshop', screen: 'glass', place: 'glassAutoBuyer1Row', price: 70000, rate: 0.02, quantity: 0, setPrice: 'glassAB1Price', energyUse: 0, active: true },
                     tier2: { nameUpgrade: 'autoBuyerNameGlassSmall', screen: 'glass', place: 'glassAutoBuyer2Row', price: 600000, rate: 0.08, quantity: 0, setPrice: 'glassAB2Price', energyUse: 0.08, active: true },
-                    tier3: { nameUpgrade: 'autoBuyerNameGlassMedium', screen: 'glass', place: 'glassAutoBuyer3Row', price: 2500000, rate: 0.4, quantity: 0, setPrice: 'glassAB3Price', energyUse: 0.31, active: true },
-                    tier4: { nameUpgrade: 'autoBuyerNameGlassLarge', screen: 'glass', place: 'glassAutoBuyer4Row', price: 1250000, rate: 1.5, quantity: 0, setPrice: 'glassAB4Price', energyUse: 1.5, active: true }
+                    tier3: { nameUpgrade: 'autoBuyerNameGlassMedium', screen: 'glass', place: 'glassAutoBuyer3Row', price: 1250000, rate: 0.4, quantity: 0, setPrice: 'glassAB3Price', energyUse: 0.31, active: true },
+                    tier4: { nameUpgrade: 'autoBuyerNameGlassLarge', screen: 'glass', place: 'glassAutoBuyer4Row', price: 2500000, rate: 1.5, quantity: 0, setPrice: 'glassAB4Price', energyUse: 1.5, active: true }
                 },
             },
             revealedBy: 'glassManufacture',
@@ -431,8 +431,8 @@ export let resourceData = {
                     normalProgression: true,
                     tier1: { nameUpgrade: 'autoBuyerNameConcreteBackyard', screen: 'concrete', place: 'concreteAutoBuyer1Row', price: 95000, rate: 0.01, quantity: 0, setPrice: 'concreteAB1Price', energyUse: 0, active: true },
                     tier2: { nameUpgrade: 'autoBuyerNameConcreteSmall', screen: 'concrete', place: 'concreteAutoBuyer2Row', price: 800000, rate: 0.08, quantity: 0, setPrice: 'concreteAB2Price', energyUse: 0.2, active: true },
-                    tier3: { nameUpgrade: 'autoBuyerNameConcreteMedium', screen: 'concrete', place: 'concreteAutoBuyer3Row', price: 4200000, rate: 0.5, quantity: 0, setPrice: 'concreteAB3Price', energyUse: 0.7, active: true },
-                    tier4: { nameUpgrade: 'autoBuyerNameConcreteLarge', screen: 'concrete', place: 'concreteAutoBuyer4Row', price: 1800000, rate: 2, quantity: 0, setPrice: 'concreteAB4Price', energyUse: 3.6, active: true }
+                    tier3: { nameUpgrade: 'autoBuyerNameConcreteMedium', screen: 'concrete', place: 'concreteAutoBuyer3Row', price: 1800000, rate: 0.5, quantity: 0, setPrice: 'concreteAB3Price', energyUse: 0.7, active: true },
+                    tier4: { nameUpgrade: 'autoBuyerNameConcreteLarge', screen: 'concrete', place: 'concreteAutoBuyer4Row', price: 4200000, rate: 2, quantity: 0, setPrice: 'concreteAB4Price', energyUse: 3.6, active: true }
                 },
             },
             revealedBy: 'aggregateMixing',
@@ -469,8 +469,8 @@ export let resourceData = {
                     normalProgression: false,
                     tier1: { nameUpgrade: 'autoBuyerNameWaterBasic', screen: 'water', place: 'waterAutoBuyer1Row', price: 95000, rate: 0.02, quantity: 0, setPrice: 'waterAB1Price', energyUse: 0, active: true },
                     tier2: { nameUpgrade: 'autoBuyerNameWaterSmall', screen: 'water', place: 'waterAutoBuyer2Row', price: 800000, rate: 0.08, quantity: 0, setPrice: 'waterAB2Price', energyUse: 0.2, active: true },
-                    tier3: { nameUpgrade: 'autoBuyerNameWaterMedium', screen: 'water', place: 'waterAutoBuyer3Row', price: 4200000, rate: 0.5, quantity: 0, setPrice: 'waterAB3Price', energyUse: 0.7, active: true },
-                    tier4: { nameUpgrade: 'autoBuyerNameWaterLarge', screen: 'water', place: 'waterAutoBuyer4Row', price: 1800000, rate: 2, quantity: 0, setPrice: 'waterAB4Price', energyUse: 3.6, active: true }
+                    tier3: { nameUpgrade: 'autoBuyerNameWaterMedium', screen: 'water', place: 'waterAutoBuyer3Row', price: 1800000, rate: 0.5, quantity: 0, setPrice: 'waterAB3Price', energyUse: 0.7, active: true },
+                    tier4: { nameUpgrade: 'autoBuyerNameWaterLarge', screen: 'water', place: 'waterAutoBuyer4Row', price: 4200000, rate: 2, quantity: 0, setPrice: 'waterAB4Price', energyUse: 3.6, active: true }
                 },
             },
             revealedBy: 'neonFusion',
@@ -493,7 +493,7 @@ export let resourceData = {
             autoCreateThrottledBy: '',
             nameResource: 'Titanium',
             screenName: 'titanium',
-            saleValue: 6,
+            saleValue: 12.5,
             salePreviewElement: 'sellTitaniumDescription',
             createPreviewElement: 'createTitaniumDescription',
             quantity: 0,
@@ -507,8 +507,8 @@ export let resourceData = {
                     normalProgression: true,
                     tier1: { nameUpgrade: 'autoBuyerNameTitaniumBasic', screen: 'titanium', place: 'titaniumAutoBuyer1Row', price: 105000, rate: 0.01, quantity: 0, setPrice: 'titaniumAB1Price', energyUse: 0, active: true },
                     tier2: { nameUpgrade: 'autoBuyerNameTitaniumSmall', screen: 'titanium', place: 'titaniumAutoBuyer2Row', price: 850000, rate: 0.08, quantity: 0, setPrice: 'titaniumAB2Price', energyUse: 0.4, active: true },
-                    tier3: { nameUpgrade: 'autoBuyerNameTitaniumMedium', screen: 'titanium', place: 'titaniumAutoBuyer3Row', price: 4800000, rate: 0.5, quantity: 0, setPrice: 'titaniumAB3Price', energyUse: 1.3, active: true },
-                    tier4: { nameUpgrade: 'autoBuyerNameTitaniumLarge', screen: 'titanium', place: 'titaniumAutoBuyer4Row', price: 1880000, rate: 2, quantity: 0, setPrice: 'titaniumAB4Price', energyUse: 5.1, active: true }
+                    tier3: { nameUpgrade: 'autoBuyerNameTitaniumMedium', screen: 'titanium', place: 'titaniumAutoBuyer3Row', price: 1880000, rate: 0.5, quantity: 0, setPrice: 'titaniumAB3Price', energyUse: 1.3, active: true },
+                    tier4: { nameUpgrade: 'autoBuyerNameTitaniumLarge', screen: 'titanium', place: 'titaniumAutoBuyer4Row', price: 4800000, rate: 2, quantity: 0, setPrice: 'titaniumAB4Price', energyUse: 5.1, active: true }
                 },
             },
             revealedBy: 'neutronCapture',
@@ -1069,7 +1069,7 @@ export const miaplacidus = {
 
 
 export let starSystems = {
-    version: 0.99,
+    version: 0.991,
     stars: {
         spica: {
             mapSize: 5.504440179536064, //might need to add this to star object when added dynamically for after rebirth
@@ -1088,14 +1088,14 @@ export let starSystems = {
 };
 
 export let oTypePowerPlantBuffs = {
-    version: 0.99,
+    version: 0.991,
     basicPowerPlantStar: { starName: null, settled: false },
     solarPowerPlantStar: { starName: null, settled: false },
     advancedPowerPlantStar: { starName: null, settled: false }
 };
 
 export let galacticCasino = {
-    version: 0.99,
+    version: 0.991,
     settings: {
         baseProbabilityCasino: 0.4,
     },
@@ -1103,31 +1103,33 @@ export let galacticCasino = {
     casinoPoints: {
         quantity: 0,
         cpBaseCost: 100000,
+        //these must mirror each material's saleValue, so that one CP always costs the same
+        //100,000 of sale value whichever material the player pays with
         valueOfOneCP: {
             resources: {
                 hydrogen: 0.02,
-                helium: 0.01,
+                helium: 0.03,
                 carbon: 0.1,
-                neon: 0.06,
+                neon: 0.12,
                 oxygen: 0.05,
                 silicon: 0.08,
-                iron: 0.12,
+                iron: 0.17,
                 sodium: 0.1
             },
             compounds: {
-                water: 0.08,
-                diesel: 0.2,
+                water: 1.6,
+                diesel: 0.3,
                 glass: 0.8,
-                steel: 1.2,
+                steel: 1.8,
                 concrete: 0.8,
-                titanium: 6
+                titanium: 12.5
             }
         }
     }
 };
 
 export let galacticMarket = {
-    version: 0.99,
+    version: 0.991,
     resources: {
         hydrogen: { 
             name: "Hydrogen", 
@@ -1233,7 +1235,7 @@ export let galacticMarket = {
 };
 
 export let ascendencyBuffs = {
-    version: 0.99,
+    version: 0.991,
     "littleBagOfHydrogen": {
         name: "Little Bag Of Hydrogen",
         description: "buffLittleBagOfHydrogenRow",
@@ -1289,8 +1291,8 @@ export let ascendencyBuffs = {
         description: "buffOptimizedPowerGridsRow",
         rebuyable: true,
         rebuyableIncreaseMultiple: 2,
-        baseCostAp: 25,
-        effectCategoryMagnitude: 1.2,
+        baseCostAp: 15,
+        effectCategoryMagnitude: 1.35,
         boughtYet: 0,
         timesRebuyable: 100000
     },
@@ -1369,11 +1371,11 @@ export let ascendencyBuffs = {
         name: "Quantum Engines",
         description: "buffQuantumEnginesRow",
         rebuyable: true,
-        rebuyableIncreaseMultiple: 1.2,
+        rebuyableIncreaseMultiple: 2,
         baseCostAp: 15,
         effectCategoryMagnitude: 2,
         boughtYet: 0,
-        timesRebuyable: 10
+        timesRebuyable: 6
     },
     "autoSpaceTelescope": {
         name: "Auto Space Telescope",
@@ -3227,6 +3229,39 @@ export function copyStarDataToDestinationStarField(starName) {
     stars.destinationStar = JSON.parse(JSON.stringify(stars[starName]));
 }
 
+export function getLiveTechKeys() {
+    return Object.keys(resourceDataRebirthCopy?.techs ?? {});
+}
+
+export function isLiveTech(techKey) {
+    return Object.prototype.hasOwnProperty.call(resourceDataRebirthCopy?.techs ?? {}, techKey);
+}
+
+export function reconcileTechsAgainstTemplate(saveData) {
+    const template = resourceDataRebirthCopy?.techs;
+
+    if (!saveData || typeof saveData !== 'object' || !template) {
+        return;
+    }
+
+    if (!saveData.techs || typeof saveData.techs !== 'object') {
+        saveData.techs = structuredClone(template);
+        return;
+    }
+
+    for (const key of Object.keys(saveData.techs)) {
+        if (!Object.prototype.hasOwnProperty.call(template, key)) {
+            delete saveData.techs[key];
+        }
+    }
+
+    for (const key of Object.keys(template)) {
+        if (!Object.prototype.hasOwnProperty.call(saveData.techs, key)) {
+            saveData.techs[key] = structuredClone(template[key]);
+        }
+    }
+}
+
 export function restoreResourceDataObject(value) {
     if (value?.version && value.version < getMinimumVersion()) {
         showNotification(localize('notificationSaveTooOldForPhilosophies', getLanguage()), 'error', 20000000, 'special2');
@@ -3235,6 +3270,7 @@ export function restoreResourceDataObject(value) {
             getCurrentGameVersion,
             getMinimumVersion,
         });
+        reconcileTechsAgainstTemplate(value);
         resourceData = value;
 
         const restoredResearchQuantity = getResourceDataObject('research', ['quantity'], true);
@@ -3412,22 +3448,9 @@ export function restoreGalacticCasinoDataObject(value) {
         const templateVo = template?.casinoPoints?.valueOfOneCP && typeof template.casinoPoints.valueOfOneCP === 'object'
             ? template.casinoPoints.valueOfOneCP
             : {};
-        const savedVo = savedCasinoPoints?.valueOfOneCP && typeof savedCasinoPoints.valueOfOneCP === 'object'
-            ? savedCasinoPoints.valueOfOneCP
-            : {};
-
-        merged.casinoPoints.valueOfOneCP = {
-            ...templateVo,
-            ...savedVo,
-            resources: {
-                ...(templateVo.resources || {}),
-                ...(savedVo.resources && typeof savedVo.resources === 'object' ? savedVo.resources : {})
-            },
-            compounds: {
-                ...(templateVo.compounds || {}),
-                ...(savedVo.compounds && typeof savedVo.compounds === 'object' ? savedVo.compounds : {})
-            }
-        };
+        //the CP exchange rates are pure balance data and are never written to at runtime, so they
+        //always come from this build - a saved copy would pin an old save to a stale price table
+        merged.casinoPoints.valueOfOneCP = structuredClone(templateVo);
     }
 
     merged.version = template.version;
@@ -3454,9 +3477,11 @@ export function restoreAscendencyBuffsDataObject(value) {
             }
 
             if (savedBuff && typeof savedBuff === 'object') {
+                //only boughtYet is the player's; cost, cap and magnitude are balance data and must
+                //come from this build, or a rebalanced perk would never reach an existing save
                 merged[key] = {
                     ...template[key],
-                    ...savedBuff,
+                    boughtYet: typeof savedBuff.boughtYet === 'number' ? savedBuff.boughtYet : template[key].boughtYet,
                 };
             }
         }
@@ -3970,8 +3995,8 @@ function addPhilosophyRepeatablesBackInAfterRebirth() {
 
         switch (playerPhilosophy) {
             case 'constructor': //DONE
-                if (key === '1') return;
                 mappedRepeatableFunction = {
+                    '1': () => setStarshipPartPricesAfterRepeatables(),
                     '2': () => setResourceAutobuyerPricesAfterRepeatables(),
                     '3': () => setCompoundRecipePricesAfterRepeatables(),
                     '4': () => setEnergyAndResearchBuildingPricesAfterRepeatables()

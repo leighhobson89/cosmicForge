@@ -2772,6 +2772,7 @@ export function drawTab3Content(heading, optionContentElement) {
                                     repeatable_slot: 1,
                                     new_level: currentRepeatableTechMultiplier
                                 }, { immediate: true, flushReason: 'philosophy_repeatable' });
+                                setStarshipPartPricesAfterRepeatables();
                                 showNotification(localize('notificationPhilosophyEfficientAssembly', getLanguage()), 'info', 3000, 'tech');
                             },
                             dataConditionCheck: 'techUnlockPhilosophy',

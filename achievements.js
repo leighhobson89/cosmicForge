@@ -1,6 +1,6 @@
 import { getAchievementFlagArray, getActivatedWackyNewsEffectsArray, getAlreadySeenNewsTickerArray, getCollectedPrecipitationQuantityThisRun, getCompoundCreateDropdownRecipeText, getCurrentOptionPane, getCurrentStarSystem, getGameActiveCountTime, getGalacticPointsSpent, getInfinitePower, getMiningObject, getMultiplierPermanentResources, getStarVisionDistance, getStatRun, getTechUnlockedArray, getUnlockedResourcesArray, setAchievementFlagArray, setCompoundCreateDropdownRecipeText, setGalacticPointsSpent, setMultiplierPermanentCompounds, setMultiplierPermanentResources, getLanguage } from "./constantsAndGlobalVars.js";
 import { getAchievementNotification, newsTickerContent, refreshAchievementTooltipDescriptions } from "./descriptions.js";
-import { achievementsData, getAchievementDataObject, getGalacticCasinoDataObject, getResourceDataObject, getStarSystemDataObject, setAchievementDataObject, setResourceDataObject } from "./resourceDataObject.js";
+import { achievementsData, getAchievementDataObject, getCosmicRipGalacticPoints, getGalacticCasinoDataObject, getLiveTechKeys, getResourceDataObject, getStarSystemDataObject, setAchievementDataObject, setCosmicRipGalacticPoints, setResourceDataObject } from "./resourceDataObject.js";
 import { showNotification } from "./ui.js";
 import { trackAnalyticsEvent } from "./analytics.js";
 import { localize } from "./localization.js";
@@ -355,11 +355,21 @@ export function addAchievementBonus(achievement) {
     }
 }
 
+//both of these achievements are meant to hand a Galactic Point back. The spent counter is a
+//stats-page total, not the player's balance, so crediting the balance is what actually pays out.
+function refundGalacticPoint() {
+    const balance = Number(getCosmicRipGalacticPoints?.()) || 0;
+    setCosmicRipGalacticPoints(balance + 1);
+
+    const currentSpent = getGalacticPointsSpent?.() || 0;
+    setGalacticPointsSpent(Math.max(0, currentSpent - 1));
+}
+
 export function achievementResearchAllTechnologies() {
     const achievement = getAchievementDataObject('researchAllTechnologies');
-    const allTechs = getResourceDataObject('techs');
+    const liveTechs = getLiveTechKeys();
     const unlockedTechs = getTechUnlockedArray();
-    const allTechsUnlocked = Object.keys(allTechs).every(techKey => unlockedTechs.includes(techKey));
+    const allTechsUnlocked = liveTechs.length > 0 && liveTechs.every(techKey => unlockedTechs.includes(techKey));
 
     if (allTechsUnlocked) {
         grantAchievement(achievement);
@@ -678,8 +688,7 @@ export function achievementCompleteRunOnMiaplacidus() {
     const achievement = getAchievementDataObject('completeRunOnMiaplacidus');
     if (getAchievementFlagArray().includes('completeRunOnMiaplacidus')) {
         setAchievementFlagArray('completeRunOnMiaplacidus', 'remove');
-        const currentSpent = getGalacticPointsSpent?.() || 0;
-        setGalacticPointsSpent(Math.max(0, currentSpent - 1));
+        refundGalacticPoint();
         grantAchievement(achievement);
     }
 }
@@ -720,8 +729,7 @@ export function achievementWinAllCasinoGames() {
         const list = Array.isArray(won) ? won : [];
         const unique = new Set(list.map((x) => String(x || '').toLowerCase()).filter(Boolean));
         if (unique.size >= 4) {
-            const currentSpent = getGalacticPointsSpent?.() || 0;
-            setGalacticPointsSpent(Math.max(0, currentSpent - 1));
+            refundGalacticPoint();
             grantAchievement(achievement);
         }
     } catch {

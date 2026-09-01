@@ -455,7 +455,10 @@ const randomEventDefinitions = {
                     }
                 }
 
-                if (philosophy === 'expansionist') {
+                //constructor's Efficient Assembly and expansionist's Space Elevator both discount
+                //starship part prices from repeatable slot 1, and the reset above put those
+                //prices back to base
+                if (philosophy === 'expansionist' || philosophy === 'constructor') {
                     const times = Math.max(0, Number(repeatables['1'] || 1) - 1);
                     for (let i = 0; i < times; i++) {
                         setStarshipPartPricesAfterRepeatables();

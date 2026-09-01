@@ -416,6 +416,7 @@ import {
     getNonExhaustiveResources,
     setNonExhaustiveResources,
     getMinimumBlackHoleChargeTime,
+    getMinimumAsteroidSearchTime,
     getBlackHoleAlwaysOn,
     setBlackHoleAlwaysOn,
     getPriceCasinoGame3,
@@ -11030,7 +11031,10 @@ function getQuantumEngineTravelTimeModifier() {
     }
 
     const purchases = Math.max(0, Number(buffData.boughtYet) || 0);
-    return Math.pow(0.5, purchases);
+    //effectCategoryMagnitude is the divisor each level applies to travel time, so the strength of
+    //the perk lives in the data alongside its cost and cap rather than in a hard-coded 0.5 here
+    const divisorPerLevel = Math.max(1, Number(buffData.effectCategoryMagnitude) || 1);
+    return 1 / Math.pow(divisorPerLevel, purchases);
 }
 
 export function calculateStarTravelDurationWithModifiers(destination) {
@@ -11613,7 +11617,12 @@ export function startSearchAsteroidTimer(adjustment) {
     if (adjustment[0] === 0 || !totalDuration) {
         totalDuration = getAsteroidSearchDuration();
         if (fasterAsteroidScanBuffAdjustment > 0) {
-            totalDuration = totalDuration * (1 - (fasterAsteroidsScanBuffMultiplier * fasterAsteroidScanBuffAdjustment));
+            //each level takes the same fraction off what is left rather than off the base, so the
+            //duration approaches zero without ever reaching it - an additive cut hits exactly zero
+            //at four levels and turns the telescope into a per-frame asteroid generator
+            const perLevelRemainder = Math.min(1, Math.max(0, 1 - fasterAsteroidsScanBuffMultiplier));
+            totalDuration = totalDuration * Math.pow(perLevelRemainder, fasterAsteroidScanBuffAdjustment);
+            totalDuration = Math.max(getMinimumAsteroidSearchTime(), totalDuration);
         }
         setCurrentAsteroidSearchTimerDurationTotal(totalDuration);
     }
@@ -14158,8 +14167,10 @@ export function calculateAscendencyPoints(distance) {
         }
     }
 
-    modifiedAP = getAscendencyPointsWithRepeatableBonus(modifiedAP);
-
+    //the voidborn repeatable bonus is deliberately not added here - a star stores its unmodified
+    //worth, and the bonus is applied once on arrival. Adding it at generation time baked in
+    //whatever level the player held when the star was first drawn, and the arrival path then
+    //multiplied that stale figure by the conquest modifier before adding the bonus a second time
     return modifiedAP;
 }
 

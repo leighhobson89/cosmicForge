@@ -1,5 +1,6 @@
 import {
   migrateRetiredAutomationTechUnlock,
+  isLiveTech,
   restoreAchievementsDataObject, restoreAscendencyBuffsDataObject, restoreGalacticMarketDataObject, restoreGalacticCasinoDataObject, restoreRocketNamesObject, restoreResourceDataObject, restoreStarSystemsDataObject, resourceData, starSystems, getResourceDataObject, setResourceDataObject, galacticMarket, galacticCasino, ascendencyBuffs, achievementsData, getStarSystemDataObject, getBlackHoleResearchDone, getBlackHolePower, getBlackHoleDuration, getBlackHoleRechargeMultiplier, getBlackHoleResearchPrice, getBlackHolePowerPrice, getBlackHoleDurationPrice, getBlackHoleRechargePrice, setBlackHoleResearchDone, setBlackHolePower, setBlackHoleDuration, setBlackHoleRechargeMultiplier, setBlackHoleResearchPrice, setBlackHolePowerPrice, setBlackHoleDurationPrice, setBlackHoleRechargePrice, oTypePowerPlantBuffs, restoreOTypePowerPlantBuffsObject, getAchievementDataObject,
   getGalacticCasinoDataObject,
   setGalacticCasinoDataObject,
@@ -35,13 +36,14 @@ let saveData = null;
 //CONSTANTS
 export const HOMESTAR = 'miaplacidus';
 export const MINIMUM_GAME_VERSION_FOR_SAVES = 0.93;
-export const GAME_VERSION_FOR_SAVES = 0.99;
+export const GAME_VERSION_FOR_SAVES = 0.991;
 export const deferredActions = [];
 export const MAX_STACKS = 4;
 export const MAX_NOTIFICATION_COLUMNS = 4;
 export const MULTI_NOTIFICATION_CLASSIFICATIONS = ['storage', 'debug', 'achievement'];
 
 export const MINIMUM_BLACK_HOLE_CHARGE_TIME = 30000;
+export const MINIMUM_ASTEROID_SEARCH_TIME = 5000;
 export const INFINITE_POWER_RATE = 5000000000000000;
 export const MENU_STATE = 'menuState';
 export const GAME_VISIBLE_ACTIVE = 'gameVisibleActive';
@@ -2046,15 +2048,29 @@ export function restoreGameStatus(gameState, type) {
 
             if (Array.isArray(techUnlockedArray) && techUnlockedArray.includes('nanoBrokers')) {
                 migrateRetiredAutomationTechUnlock(true);
-                techUnlockedArray = techUnlockedArray.filter((techKey) => techKey !== 'nanoBrokers');
+            }
+
+            //a retired tech left in a save would otherwise sit in the tree as a ghost row and
+            //make researchAllTechnologies unwinnable, so drop anything this build no longer has.
+            //'apAwardedThisRun' is a run flag that rides along in this array and is not a tech.
+            const isRetiredTechKey = (techKey) => techKey !== 'apAwardedThisRun'
+                && techKey !== 'cosmicRip'
+                && techKey !== 'compoundMachining'
+                && !isLiveTech(techKey);
+
+            if (Array.isArray(techUnlockedArray)) {
+                techUnlockedArray = techUnlockedArray.filter((techKey) => !isRetiredTechKey(techKey));
             }
             revealedTechArray = gameState.revealedTechArray;
             if (Array.isArray(revealedTechArray)) {
-                revealedTechArray = revealedTechArray.filter((techKey) => techKey !== 'nanoBrokers');
+                revealedTechArray = revealedTechArray.filter((techKey) => !isRetiredTechKey(techKey));
             }
             cosmicRipTechUnlockedArray = gameState.cosmicRipTechUnlockedArray ?? [];
             revealedCosmicRipTechArray = gameState.revealedCosmicRipTechArray ?? [];
             upcomingTechArray = gameState.upcomingTechArray;
+            if (Array.isArray(upcomingTechArray)) {
+                upcomingTechArray = upcomingTechArray.filter((techKey) => !isRetiredTechKey(techKey));
+            }
             unlockedResourcesArray = gameState.unlockedResourcesArray;
             unlockedCompoundsArray = gameState.unlockedCompoundsArray;
             activatedFuelBurnObject = gameState.activatedFuelBurnObject;
@@ -6168,6 +6184,10 @@ export function setVariableDebuggerAndCheats(value) {
 
 export function getMinimumBlackHoleChargeTime() {
     return MINIMUM_BLACK_HOLE_CHARGE_TIME;
+}
+
+export function getMinimumAsteroidSearchTime() {
+    return MINIMUM_ASTEROID_SEARCH_TIME;
 }
 
 export function getWheelForceSpecial() {

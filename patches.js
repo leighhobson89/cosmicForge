@@ -558,6 +558,58 @@ export function migrateResourceData(saveData, objectType, options = {}) {
             }
             saveData.version = 0.99;
         }
+
+        if (saveData.version < 0.991) {
+            // Balance pass on sale values, compound auto-buyer tiers and the casino exchange rates.
+            //
+            // Every one of these fields is only ever changed by MULTIPLICATION at runtime -
+            // auto-buyer prices by the 1.13 purchase escalator, sale values by the gain*Cash
+            // achievements - so rescaling by the ratio between the old and new base carries the
+            // player's progress across untouched, where overwriting with the new base would wipe it.
+            //
+            // The ascendency perk and casino price tables need no rung: their restore paths now
+            // take balance fields from the template and keep only the player's own progress.
+            if (objectType === 'resourceData') {
+                const rescale = (holder, key, ratio) => {
+                    if (!holder || typeof holder !== 'object') {
+                        return;
+                    }
+                    const current = Number(holder[key]);
+                    if (Number.isFinite(current) && current > 0) {
+                        holder[key] = current * ratio;
+                    }
+                };
+
+                const tierPrice = (category, material, tier) => {
+                    const tiers = saveData?.[category]?.[material]?.upgrades?.autoBuyer;
+                    return tiers && typeof tiers === 'object' ? tiers[tier] : null;
+                };
+
+                // neon was the runaway cash resource at 0.40, roughly three times the next best
+                // per unit of auto-buyer cost; 0.12 puts it alongside iron
+                rescale(saveData?.resources?.neon, 'saleValue', 0.12 / 0.40);
+
+                // titanium's inputs cost more than titanium was worth, making the game's premium
+                // compound the worst thing to hold before liquidating
+                rescale(saveData?.compounds?.titanium, 'saleValue', 12.5 / 6);
+
+                // tier 3 and tier 4 prices were transposed on four compounds, leaving tier 3
+                // strictly dominated - the two prices swap, so each ratio is the other's inverse
+                const transposed = [
+                    ['glass', 2500000, 1250000],
+                    ['concrete', 4200000, 1800000],
+                    ['water', 4200000, 1800000],
+                    ['titanium', 4800000, 1880000]
+                ];
+
+                transposed.forEach(([material, oldTier3, oldTier4]) => {
+                    rescale(tierPrice('compounds', material, 'tier3'), 'price', oldTier4 / oldTier3);
+                    rescale(tierPrice('compounds', material, 'tier4'), 'price', oldTier3 / oldTier4);
+                });
+            }
+
+            saveData.version = 0.991;
+        }
     }
     return saveData;
 }
