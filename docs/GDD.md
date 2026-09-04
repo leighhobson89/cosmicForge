@@ -368,6 +368,7 @@ Rebirth:
 - Resets run progress.
 - Starts a new run in the conquered system.
 - Carries forward AP and other permanent progression.
+- Awards 1 Galactic Point (GP) for the system conquered, plus 1 for each extra system the Expansionist special ability settles. GP are spent in the Cosmic Rip chapter and are never reset by a later Rebirth.
 
 **Design goal:** convert “completion of a run” into long-term momentum.
 
@@ -494,6 +495,7 @@ Megastructure research provides powerful bonuses and reduces the Miaplacidus for
 
 ## Appendix A — Glossary
 - **AP (Ascendency Points):** permanent currency earned via travel/rebirth.
+- **GP (Galactic Points):** permanent Cosmic Rip currency, one per system conquered by rebirthing; spent on restoring the Near Space Scanner Array, sector scans, and Cosmic Rip tech research.
 - **Rebirth:** run reset + new system start + permanent progression.
 - **Auto Buyer:** automation building that generates resources.
 - **Time Warp:** black hole multiplier that accelerates multiple timers/systems.
